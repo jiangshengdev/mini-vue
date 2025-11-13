@@ -7,6 +7,9 @@
 - 入口：`index.html` 加载 `/src/main.ts`。构建产物输出到 `dist/`。
 - 资源：`public/` 下为静态文件（以根路径引用，如 `/vite.svg`）；`src/` 下的资源以模块方式导入，Vite 会返回 URL（如 `import typescriptLogo from './typescript.svg'`）。
 
+## 交流与注释约定
+- 所有代码注释、文档与 AI 回复需使用中文。
+
 ## 开发工作流
 - 安装依赖：`pnpm install`（使用 PNPM，锁文件为 `pnpm-lock.yaml`）。推荐 Node 18+ 以匹配 Vite 7。
 - 启动开发（HMR）：`pnpm dev`

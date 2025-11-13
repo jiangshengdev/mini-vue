@@ -1,18 +1,21 @@
-import {
-  popActiveEffect,
-  pushActiveEffect,
-  type ReactiveEffectRunner,
-  type Dep,
-} from './operations.ts'
+import { effectScope } from './effectScope.ts'
+import type { ReactiveEffectRunner, Dep } from './types.ts'
 
 /**
  * 清理 runner 与已收集依赖的关联，确保下次收集时不会重复保留旧依赖。
  */
 function cleanupEffect(effect: ReactiveEffectRunner) {
   for (const dep of effect.deps) {
-    dep.delete(effect)
+    detachEffectFrom(dep, effect)
   }
   effect.deps.length = 0
+}
+
+/**
+ * 移除依赖集合中指定的副作用函数。
+ */
+function detachEffectFrom(dep: Dep, effect: ReactiveEffectRunner) {
+  dep.delete(effect)
 }
 
 /**
@@ -23,11 +26,11 @@ export function effect<T>(fn: () => T): ReactiveEffectRunner<T> {
   const runner = Object.assign(
     function reactiveEffectRunner() {
       cleanupEffect(runner)
-      pushActiveEffect(runner)
+      effectScope.push(runner)
       try {
         return fn()
       } finally {
-        popActiveEffect()
+        effectScope.pop()
       }
     },
     { deps: [] as Dep[] },

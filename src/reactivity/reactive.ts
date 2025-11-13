@@ -45,12 +45,13 @@ export function reactive(target: unknown) {
   if (!isObject(target)) {
     return target
   }
-  if (reactiveToRawMap.has(target as object)) {
-    return target
-  }
+  // 暂不支持数组结构，保留显式错误提示
   if (Array.isArray(target)) {
     throw new TypeError('当前 reactive 仅支持普通对象，数组暂未实现')
   }
-  // 对象已通过类型守卫，安全交由专用创建函数处理
-  return createReactiveObject(target as Record<PropertyKey, unknown>)
+  if (reactiveToRawMap.has(target as object)) {
+    return target
+  }
+  const recordTarget = target as Record<PropertyKey, unknown>
+  return createReactiveObject(recordTarget)
 }

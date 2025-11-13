@@ -1,5 +1,5 @@
 import { effectScope } from './effectScope.ts'
-import type { Dep, ReactiveEffectRunner } from './types.ts'
+import type { Dep, ReactiveEffectRunner } from '../shared/types.ts'
 
 /**
  * Vue 官方实现通过 targetMap(WeakMap<object, Map<PropertyKey, Dep>>) 记录依赖。

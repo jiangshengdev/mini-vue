@@ -1,7 +1,7 @@
 /**
  * 将 effect 栈封装为对象，集中管理活跃副作用状态。
  */
-import type { ReactiveEffectRunner } from './types.ts'
+import type { ReactiveEffectRunner } from '../shared/types.ts'
 
 const effectStack: ReactiveEffectRunner[] = []
 let activeEffect: ReactiveEffectRunner | undefined

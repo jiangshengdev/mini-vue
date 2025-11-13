@@ -1,6 +1,6 @@
-import { reactive } from './reactive.ts'
+import { reactive } from '../reactive.ts'
 import { track, trigger } from './operations.ts'
-import { isObject } from './utils.ts'
+import { isObject } from '../shared/utils.ts'
 
 /**
  * 响应式读取逻辑：在取值时触发依赖收集，并对嵌套对象递归创建代理。

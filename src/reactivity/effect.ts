@@ -1,5 +1,5 @@
-import { effectScope } from './effectScope.ts'
-import type { ReactiveEffectRunner, Dep } from './types.ts'
+import { effectScope } from './internals/effectScope.ts'
+import type { ReactiveEffectRunner, Dep } from './shared/types.ts'
 
 /**
  * 清理 runner 与已收集依赖的关联，确保下次收集时不会重复保留旧依赖。

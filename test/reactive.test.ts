@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { reactive } from '../src/reactivity/reactive.ts'
+import { reactive } from '../src'
 
 describe('reactive', () => {
   it('重复调用返回同一代理实例', () => {

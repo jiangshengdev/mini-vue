@@ -43,11 +43,13 @@ export function track(target: object, key: PropertyKey) {
   if (!effect) {
     return
   }
+  // 为目标对象建立依赖映射，确保后续触发能找到对应 dep
   let depsMap = targetMap.get(target)
   if (!depsMap) {
     depsMap = new Map()
     targetMap.set(target, depsMap)
   }
+  // 为具体属性准备依赖集合，避免不同 key 相互污染
   let dep = depsMap.get(key)
   if (!dep) {
     dep = new Set()
@@ -56,6 +58,7 @@ export function track(target: object, key: PropertyKey) {
   if (dep.has(effect)) {
     return
   }
+  // 双向记录依赖关系，便于 cleanup 时精准删除
   dep.add(effect)
   effect.deps.push(dep)
 }
@@ -72,6 +75,7 @@ export function trigger(target: object, key: PropertyKey) {
   if (!dep) {
     return
   }
+  // 使用新集合捕获当前副作用，避免触发过程中集合被修改
   const effectsToRun = new Set(dep)
   effectsToRun.forEach((effect) => {
     if (effect !== activeEffect) {

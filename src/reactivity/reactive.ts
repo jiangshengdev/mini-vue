@@ -26,8 +26,10 @@ function createReactiveObject(target: Record<PropertyKey, unknown>): object {
     return target
   }
 
+  // 通过 Proxy 拦截读写，配合 mutableHandlers 完成响应式转换
   const proxy = new Proxy(target, mutableHandlers)
 
+  // 建立原始对象与代理的双向索引，避免重复创建代理实例
   rawToReactiveMap.set(target, proxy)
   reactiveToRawMap.set(proxy, target)
 
@@ -49,5 +51,6 @@ export function reactive(target: unknown) {
   if (Array.isArray(target)) {
     throw new TypeError('当前 reactive 仅支持普通对象，数组暂未实现')
   }
+  // 对象已通过类型守卫，安全交由专用创建函数处理
   return createReactiveObject(target as Record<PropertyKey, unknown>)
 }

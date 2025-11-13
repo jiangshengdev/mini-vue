@@ -11,8 +11,10 @@ const mutableGet: ProxyHandler<Record<PropertyKey, unknown>>['get'] = (
   receiver,
 ) => {
   const result = Reflect.get(target, key, receiver)
+  // 读取属性时记录当前活跃副作用，建立响应式依赖关系
   track(target, key)
   if (isObject(result)) {
+    // 懒加载子对象的代理，避免提前遍历整棵对象树
     return reactive(result as Record<PropertyKey, unknown>)
   }
   return result
@@ -30,6 +32,7 @@ const mutableSet: ProxyHandler<Record<PropertyKey, unknown>>['set'] = (
   const oldValue = Reflect.get(target, key, receiver)
   const didSet = Reflect.set(target, key, value, receiver)
   if (!Object.is(oldValue, value)) {
+    // 仅在值真正变化时触发依赖，避免无意义的重新执行
     trigger(target, key)
   }
   return didSet

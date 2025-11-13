@@ -2,6 +2,7 @@ import {
   popActiveEffect,
   pushActiveEffect,
   type ReactiveEffectRunner,
+  type Dep,
 } from './operations.ts'
 
 /**
@@ -18,17 +19,19 @@ function cleanupEffect(effect: ReactiveEffectRunner) {
  * 最小版 effect：立即执行副作用函数并返回 runner，可手动触发。
  */
 export function effect<T>(fn: () => T): ReactiveEffectRunner<T> {
-  const runner = function reactiveEffectRunner() {
-    cleanupEffect(runner)
-    pushActiveEffect(runner)
-    try {
-      return fn()
-    } finally {
-      popActiveEffect()
-    }
-  } as ReactiveEffectRunner<T>
+  const runner = Object.assign(
+    function reactiveEffectRunner() {
+      cleanupEffect(runner)
+      pushActiveEffect(runner)
+      try {
+        return fn()
+      } finally {
+        popActiveEffect()
+      }
+    },
+    { deps: [] as Dep[] },
+  ) satisfies ReactiveEffectRunner<T>
 
-  runner.deps = []
   runner()
   return runner
 }

@@ -38,7 +38,7 @@ const mutableSet: ProxyHandler<Record<PropertyKey, unknown>>['set'] = (
 /**
  * 导出与 Vue 中 mutableHandlers 对齐的基础处理器，仅面向普通对象。
  */
-export const mutableHandlers: ProxyHandler<Record<PropertyKey, unknown>> = {
+export const mutableHandlers = {
   get: mutableGet,
   set: mutableSet,
-}
+} satisfies ProxyHandler<Record<PropertyKey, unknown>>

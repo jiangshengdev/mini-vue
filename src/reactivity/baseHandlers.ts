@@ -3,7 +3,7 @@ import { track, trigger } from './operations.ts'
 import { isObject } from './utils.ts'
 
 /**
- * 基础可变处理器，模仿 Vue 官方的 mutableHandlers，仅针对普通对象。
+ * 响应式读取逻辑：在取值时触发依赖收集，并对嵌套对象递归创建代理。
  */
 const mutableGet: ProxyHandler<Record<PropertyKey, unknown>>['get'] = (
   target,
@@ -18,6 +18,9 @@ const mutableGet: ProxyHandler<Record<PropertyKey, unknown>>['get'] = (
   return result
 }
 
+/**
+ * 响应式写入逻辑：仅在值实际变更时触发依赖更新。
+ */
 const mutableSet: ProxyHandler<Record<PropertyKey, unknown>>['set'] = (
   target,
   key,
@@ -32,6 +35,9 @@ const mutableSet: ProxyHandler<Record<PropertyKey, unknown>>['set'] = (
   return didSet
 }
 
+/**
+ * 导出与 Vue 中 mutableHandlers 对齐的基础处理器，仅面向普通对象。
+ */
 export const mutableHandlers: ProxyHandler<Record<PropertyKey, unknown>> = {
   get: mutableGet,
   set: mutableSet,

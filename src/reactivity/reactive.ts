@@ -1,17 +1,20 @@
+/**
+ * 提供 reactive 工具函数，负责缓存并复用响应式 Proxy 实例。
+ */
 import { mutableHandlers } from './baseHandlers.ts'
 import { isObject } from './utils.ts'
 
 /**
- * 保存原始对象与其代理之间的映射，避免重复创建 Proxy
+ * 保存原始对象与其代理之间的映射，避免重复创建 Proxy。
  */
 const rawToReactiveMap = new WeakMap<object, object>()
 /**
- * 保存代理到原始对象的映射，保证对代理再调用 reactive 时原样返回
+ * 保存代理到原始对象的映射，保证对代理再调用 reactive 时原样返回。
  */
 const reactiveToRawMap = new WeakMap<object, object>()
 
 /**
- * 创建并缓存目标对象的响应式代理
+ * 创建并缓存目标对象的响应式代理。
  */
 function createReactiveObject(target: Record<PropertyKey, unknown>): object {
   const existingProxy = rawToReactiveMap.get(target)
@@ -32,7 +35,7 @@ function createReactiveObject(target: Record<PropertyKey, unknown>): object {
 }
 
 /**
- * 将普通对象转换为响应式 Proxy；当前仅支持纯对象
+ * 将普通对象转换为响应式 Proxy；当前仅支持纯对象。
  */
 export function reactive<T extends object>(target: T): T
 export function reactive<T>(target: T): T

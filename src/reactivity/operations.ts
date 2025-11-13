@@ -11,16 +11,25 @@ export interface ReactiveEffectRunner<T = unknown> {
   (): T
 }
 
+/**
+ * 维护原始对象到依赖映射表的核心数据结构。
+ */
 const targetMap = new WeakMap<object, KeyToDepMap>()
 
 let activeEffect: ReactiveEffectRunner | undefined
 const effectStack: ReactiveEffectRunner[] = []
 
+/**
+ * 将 effect 入栈并设置为当前活跃对象，供 track 收集依赖。
+ */
 export function pushActiveEffect(effect: ReactiveEffectRunner) {
   effectStack.push(effect)
   activeEffect = effect
 }
 
+/**
+ * 弹出当前 effect，恢复上一层活跃 effect，支持嵌套 effect。
+ */
 export function popActiveEffect() {
   effectStack.pop()
   activeEffect = effectStack[effectStack.length - 1]
@@ -52,7 +61,7 @@ export function track(target: object, key: PropertyKey) {
 }
 
 /**
- * 在数据变更时出发依赖的 effect 重新执行。
+ * 在数据变更时触发依赖的 effect 重新执行。
  */
 export function trigger(target: object, key: PropertyKey) {
   const depsMap = targetMap.get(target)

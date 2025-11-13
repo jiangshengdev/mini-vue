@@ -51,6 +51,7 @@ function existingDepFor(target: object, key: PropertyKey) {
  * 判断副作用是否需要执行，跳过当前活跃副作用以避免循环触发。
  */
 function shouldRunEffect(effect: ReactiveEffectRunner) {
+  // 跳过当前活跃 effect，并确保已 stop 的 runner 不会再次调度
   return effect !== effectScope.current && effect.active
 }
 

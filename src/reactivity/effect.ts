@@ -71,11 +71,15 @@ export function effect<T>(fn: () => T): ReactiveEffectRunner<T> {
   } as ReactiveEffectRunner<T>
 
   runner.deps = [] as Dep[]
+  // 维护一份清理回调队列，供下一次执行前停止旧嵌套副作用
   runner.cleanupFns = []
+  // 激活标记配合 stopEffect 控制重复触发
   runner.active = true
+  // 暴露最小化 stop 能力，供 cleanup 与外部场景复用
   runner.stop = () => stopEffect(runner)
 
   if (parent) {
+    // 在父级 effect 的清理阶段自动停止本次创建的子 effect
     parent.cleanupFns.push(() => stopEffect(runner))
   }
 

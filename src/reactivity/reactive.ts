@@ -14,20 +14,9 @@ const rawToReactiveMap = new WeakMap<object, object>()
 const reactiveToRawMap = new WeakMap<object, object>()
 
 /**
- * 创建并缓存目标对象的响应式代理。
+ * 创建目标对象的响应式代理，并将其登记进缓存。
  */
 function createReactiveObject(target: Record<PropertyKey, unknown>): object {
-  // 若已创建过代理则复用原实例，避免重复包装
-  const existingProxy = rawToReactiveMap.get(target)
-  if (existingProxy) {
-    return existingProxy
-  }
-
-  // 传入本就为代理时直接返回，保持幂等
-  if (reactiveToRawMap.has(target)) {
-    return target
-  }
-
   // 通过 Proxy 拦截读写，配合 mutableHandlers 完成响应式转换
   const proxy = new Proxy(target, mutableHandlers)
 
@@ -56,7 +45,13 @@ export function reactive(target: unknown) {
     // 避免对响应式对象再次包装
     return target
   }
+  // 显式收窄为可索引对象，便于统一走缓存逻辑
   const recordTarget = target as Record<PropertyKey, unknown>
-  // 由工厂函数处理缓存逻辑与 Proxy 创建细节
+  const cachedProxy = rawToReactiveMap.get(recordTarget)
+  if (cachedProxy) {
+    // 缓存命中时复用已有的响应式实例
+    return cachedProxy
+  }
+  // 缓存未命中时由工厂函数创建并登记新的响应式实例
   return createReactiveObject(recordTarget)
 }

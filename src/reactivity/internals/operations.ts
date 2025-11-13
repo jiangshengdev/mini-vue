@@ -18,6 +18,7 @@ const targetMap = new WeakMap<object, KeyToDepMap>()
 function depsMapFor(target: object) {
   let depsMap = targetMap.get(target)
   if (!depsMap) {
+    // 懒创建目标对象的依赖映射，避免无用的容器实例
     depsMap = new Map()
     targetMap.set(target, depsMap)
   }
@@ -31,6 +32,7 @@ function depFor(target: object, key: PropertyKey) {
   const depsMap = depsMapFor(target)
   let dep = depsMap.get(key)
   if (!dep) {
+    // 同一对象的不同 key 维护独立的依赖集合
     dep = new Set()
     depsMap.set(key, dep)
   }
@@ -56,6 +58,7 @@ function shouldRunEffect(effect: ReactiveEffectRunner) {
  * 对依赖集合创建快照后逐一执行副作用。
  */
 function runEffects(dep: Dep) {
+  // 复制依赖集合，防止触发过程中新增副作用污染当前遍历
   const effectsToRun = new Set(dep)
   effectsToRun.forEach(runEffect)
 }
@@ -75,11 +78,13 @@ function runEffect(effect: ReactiveEffectRunner) {
 export function track(target: object, key: PropertyKey) {
   const effect = effectScope.current
   if (!effect) {
+    // 无活跃副作用时跳过收集，说明当前读取仅为普通访问
     return
   }
   // 为具体属性准备依赖集合，避免不同 key 相互污染
   const dep = depFor(target, key)
   if (dep.has(effect)) {
+    // 已建立依赖时无需重复记录，保持集合纯净
     return
   }
   // 双向记录依赖关系，便于 cleanup 时精准删除

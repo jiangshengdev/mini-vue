@@ -17,11 +17,13 @@ const reactiveToRawMap = new WeakMap<object, object>()
  * 创建并缓存目标对象的响应式代理。
  */
 function createReactiveObject(target: Record<PropertyKey, unknown>): object {
+  // 若已创建过代理则复用原实例，避免重复包装
   const existingProxy = rawToReactiveMap.get(target)
   if (existingProxy) {
     return existingProxy
   }
 
+  // 传入本就为代理时直接返回，保持幂等
   if (reactiveToRawMap.has(target)) {
     return target
   }
@@ -43,6 +45,7 @@ export function reactive<T extends object>(target: T): T
 export function reactive<T>(target: T): T
 export function reactive(target: unknown) {
   if (!isObject(target)) {
+    // 非对象类型不具备响应式语义，按原值返回
     return target
   }
   // 暂不支持数组结构，保留显式错误提示
@@ -50,8 +53,10 @@ export function reactive(target: unknown) {
     throw new TypeError('当前 reactive 仅支持普通对象，数组暂未实现')
   }
   if (reactiveToRawMap.has(target as object)) {
+    // 避免对响应式对象再次包装
     return target
   }
   const recordTarget = target as Record<PropertyKey, unknown>
+  // 由工厂函数处理缓存逻辑与 Proxy 创建细节
   return createReactiveObject(recordTarget)
 }

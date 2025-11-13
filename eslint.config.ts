@@ -10,7 +10,34 @@ export default defineConfig([
     plugins: { js },
     extends: ['js/recommended'],
     languageOptions: { globals: { ...globals.browser, ...globals.node } },
+    rules: {
+      // JS 文件保持检测同时允许下划线前缀参数
+      'no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
+    },
   },
-  tseslint.configs.recommended,
+  ...tseslint.configs.recommended,
+  {
+    files: ['**/*.{ts,mts,cts}'],
+    rules: {
+      // TS 版本规则同样允许下划线前缀，保持与官方 effect 参数一致
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
+      // 避免 JS 规则与 TS 规则重复报错
+      'no-unused-vars': 'off',
+    },
+  },
   eslintConfigPrettier,
 ])

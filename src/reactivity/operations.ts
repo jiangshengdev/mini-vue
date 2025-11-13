@@ -32,7 +32,7 @@ export function pushActiveEffect(effect: ReactiveEffectRunner) {
  */
 export function popActiveEffect() {
   effectStack.pop()
-  activeEffect = effectStack[effectStack.length - 1]
+  activeEffect = effectStack.at(-1)
 }
 
 /**

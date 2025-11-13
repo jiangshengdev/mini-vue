@@ -5,27 +5,29 @@ import { mutableHandlers } from './internals/baseHandlers.ts'
 import { isObject } from './shared/utils.ts'
 
 /**
- * 保存原始对象与其代理之间的映射，避免重复创建 Proxy。
+ * 封装原对象与代理实例之间的双向缓存。
  */
-const rawToReactiveMap = new WeakMap<object, object>()
-/**
- * 保存代理到原始对象的映射，保证对代理再调用 reactive 时原样返回。
- */
-const reactiveToRawMap = new WeakMap<object, object>()
+class ReactiveCache {
+  private readonly rawToReactive = new WeakMap<object, object>()
+  private readonly reactiveToRaw = new WeakMap<object, object>()
 
-/**
- * 创建目标对象的响应式代理，并将其登记进缓存。
- */
-function createReactiveObject(target: Record<PropertyKey, unknown>): object {
-  // 通过 Proxy 拦截读写，配合 mutableHandlers 完成响应式转换
-  const proxy = new Proxy(target, mutableHandlers)
+  getExisting(target: object) {
+    if (this.reactiveToRaw.has(target)) {
+      return target
+    }
+    return this.rawToReactive.get(target)
+  }
 
-  // 建立原始对象与代理的双向索引，避免重复创建代理实例
-  rawToReactiveMap.set(target, proxy)
-  reactiveToRawMap.set(proxy, target)
-
-  return proxy
+  create(target: Record<PropertyKey, unknown>) {
+    const proxy = new Proxy(target, mutableHandlers)
+    this.rawToReactive.set(target, proxy)
+    this.reactiveToRaw.set(proxy, target)
+    return proxy
+  }
 }
+
+const reactiveCache = new ReactiveCache()
+const UNSUPPORTED_TYPE_MESSAGE = 'reactive 目前仅支持普通对象（不含数组）'
 
 /**
  * 将普通对象转换为响应式 Proxy；当前仅支持纯对象。
@@ -34,24 +36,17 @@ export function reactive<T extends object>(target: T): T
 export function reactive<T>(target: T): T
 export function reactive(target: unknown) {
   if (!isObject(target)) {
-    // 非对象类型不具备响应式语义，按原值返回
     return target
   }
-  // 暂不支持数组结构，保留显式错误提示
   if (Array.isArray(target)) {
-    throw new TypeError('当前 reactive 仅支持普通对象，数组暂未实现')
+    throw new TypeError(UNSUPPORTED_TYPE_MESSAGE)
   }
-  if (reactiveToRawMap.has(target as object)) {
-    // 避免对响应式对象再次包装
-    return target
+
+  const objectTarget = target as Record<PropertyKey, unknown>
+  const cached = reactiveCache.getExisting(objectTarget)
+  if (cached) {
+    return cached as typeof target
   }
-  // 显式收窄为可索引对象，便于统一走缓存逻辑
-  const recordTarget = target as Record<PropertyKey, unknown>
-  const cachedProxy = rawToReactiveMap.get(recordTarget)
-  if (cachedProxy) {
-    // 缓存命中时复用已有的响应式实例
-    return cachedProxy
-  }
-  // 缓存未命中时由工厂函数创建并登记新的响应式实例
-  return createReactiveObject(recordTarget)
+
+  return reactiveCache.create(objectTarget) as typeof target
 }

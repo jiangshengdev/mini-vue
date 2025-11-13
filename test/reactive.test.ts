@@ -45,4 +45,11 @@ describe('reactive', () => {
     const value = 1
     expect(reactive(value as unknown as object)).toBe(value)
   })
+
+  it('数组输入会给出明确错误提示', () => {
+    const array: unknown = []
+    expect(() => reactive(array as object)).toThrowError(
+      new TypeError('reactive 目前仅支持普通对象（不含数组）'),
+    )
+  })
 })

@@ -1,34 +1,39 @@
 /**
- * 定义响应式系统中使用的核心类型。
+ * 描述 effect 对应的外部可用接口。
  */
-export interface ReactiveEffectRunner<T = unknown> {
+export interface EffectHandle<T = unknown> {
   /**
-   * 记录该副作用目前订阅的依赖集合，便于清理。
+   * 当前副作用是否处于激活态，激活时才会参与依赖收集。
    */
-  deps: Dep[]
+  readonly active: boolean
 
   /**
-   * 记录下一次执行前需要调用的清理回调，用于停止旧的嵌套副作用。
+   * 手动重新执行副作用，返回执行结果。
    */
-  cleanupFns: Array<() => void>
+  run(): T
 
   /**
-   * 标记当前副作用是否仍处于激活状态。
+   * 停止副作用并清理依赖，下次触发时不会再执行。
    */
-  active: boolean
-
-  /**
-   * 允许外部停止该副作用的快捷方法。
-   */
-  stop?: () => void
-
-  /**
-   * 执行副作用逻辑并返回执行结果。
-   */
-  (): T
+  stop(): void
 }
 
 /**
- * 用于存放订阅同一响应式属性的副作用集合。
+ * 描述响应式系统内部维护的完整 effect 实例。
  */
-export type Dep = Set<ReactiveEffectRunner>
+export interface EffectInstance<T = unknown> extends EffectHandle<T> {
+  /**
+   * 记录一次依赖收集，便于后续清理时解除绑定。
+   */
+  recordDependency(dep: Dep): void
+
+  /**
+   * 注册清理回调，用于停止嵌套的副作用。
+   */
+  registerCleanup(cleanup: () => void): void
+}
+
+/**
+ * 定义触发同一属性时需要执行的副作用集合。
+ */
+export type Dep = Set<EffectInstance>

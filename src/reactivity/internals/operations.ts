@@ -1,106 +1,74 @@
 import { effectScope } from './effectScope.ts'
-import type { Dep, ReactiveEffectRunner } from '../shared/types.ts'
+import type { Dep, EffectInstance } from '../shared/types.ts'
 
 /**
- * Vue 官方实现通过 targetMap(WeakMap<object, Map<PropertyKey, Dep>>) 记录依赖。
- * 这里同样维护 target/key → dep 的映射，配合 effect 完成依赖收集与触发。
+ * 集中管理对象属性与副作用之间的依赖关系。
  */
-type KeyToDepMap = Map<PropertyKey, Dep>
+class DepRegistry {
+  private readonly targetMap = new WeakMap<object, Map<PropertyKey, Dep>>()
 
-/**
- * 维护原始对象到依赖映射表的核心数据结构。
- */
-const targetMap = new WeakMap<object, KeyToDepMap>()
+  track(target: object, key: PropertyKey) {
+    const currentEffect = effectScope.current
+    if (!currentEffect) {
+      return
+    }
 
-/**
- * 确保目标对象对应的依赖映射存在，并返回该映射。
- */
-function depsMapFor(target: object) {
-  let depsMap = targetMap.get(target)
-  if (!depsMap) {
-    // 懒创建目标对象的依赖映射，避免无用的容器实例
-    depsMap = new Map()
-    targetMap.set(target, depsMap)
+    const dep = this.ensureDep(target, key)
+    if (dep.has(currentEffect)) {
+      return
+    }
+
+    dep.add(currentEffect)
+    currentEffect.recordDependency(dep)
   }
-  return depsMap
-}
 
-/**
- * 确保指定 key 对应的依赖集合存在，并返回该集合。
- */
-function depFor(target: object, key: PropertyKey) {
-  const depsMap = depsMapFor(target)
-  let dep = depsMap.get(key)
-  if (!dep) {
-    // 同一对象的不同 key 维护独立的依赖集合
-    dep = new Set()
-    depsMap.set(key, dep)
+  trigger(target: object, key: PropertyKey) {
+    const dep = this.existingDep(target, key)
+    if (!dep) {
+      return
+    }
+
+    for (const effect of this.snapshot(dep)) {
+      if (this.shouldRun(effect)) {
+        effect.run()
+      }
+    }
   }
-  return dep
-}
 
-/**
- * 获取已存在的依赖集合；若尚未建立则返回 undefined。
- */
-function existingDepFor(target: object, key: PropertyKey) {
-  const depsMap = targetMap.get(target)
-  return depsMap?.get(key)
-}
+  private ensureDep(target: object, key: PropertyKey): Dep {
+    let depsMap = this.targetMap.get(target)
+    if (!depsMap) {
+      depsMap = new Map()
+      this.targetMap.set(target, depsMap)
+    }
 
-/**
- * 判断副作用是否需要执行，跳过当前活跃副作用以避免循环触发。
- */
-function shouldRunEffect(effect: ReactiveEffectRunner) {
-  // 跳过当前活跃 effect，并确保已 stop 的 runner 不会再次调度
-  return effect !== effectScope.current && effect.active
-}
+    let dep = depsMap.get(key)
+    if (!dep) {
+      dep = new Set()
+      depsMap.set(key, dep)
+    }
+    return dep
+  }
 
-/**
- * 对依赖集合创建快照后逐一执行副作用。
- */
-function runEffects(dep: Dep) {
-  // 复制依赖集合，防止触发过程中新增副作用污染当前遍历
-  const effectsToRun = new Set(dep)
-  effectsToRun.forEach(runEffect)
-}
+  private existingDep(target: object, key: PropertyKey) {
+    return this.targetMap.get(target)?.get(key)
+  }
 
-/**
- * 调用具体副作用函数，已确保不会执行当前活跃的 effect。
- */
-function runEffect(effect: ReactiveEffectRunner) {
-  if (shouldRunEffect(effect)) {
-    effect()
+  private snapshot(dep: Dep): Dep {
+    return new Set(dep)
+  }
+
+  private shouldRun(effect: EffectInstance) {
+    return effect !== effectScope.current && effect.active
   }
 }
 
-/**
- * 在依赖读取阶段记录当前激活的 effect。
- */
+const registry = new DepRegistry()
+
 export function track(target: object, key: PropertyKey) {
-  const effect = effectScope.current
-  if (!effect) {
-    // 无活跃副作用时跳过收集，说明当前读取仅为普通访问
-    return
-  }
-  // 为具体属性准备依赖集合，避免不同 key 相互污染
-  const dep = depFor(target, key)
-  if (dep.has(effect)) {
-    // 已建立依赖时无需重复记录，保持集合纯净
-    return
-  }
-  // 双向记录依赖关系，便于 cleanup 时精准删除
-  dep.add(effect)
-  effect.deps.push(dep)
+  registry.track(target, key)
 }
 
-/**
- * 在数据变更时触发依赖的 effect 重新执行。
- */
 export function trigger(target: object, key: PropertyKey) {
-  const dep = existingDepFor(target, key)
-  if (!dep) {
-    return
-  }
-  // 使用具名函数触发依赖，降低内部回调嵌套
-  runEffects(dep)
+  registry.trigger(target, key)
 }

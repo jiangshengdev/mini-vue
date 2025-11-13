@@ -16,11 +16,11 @@ describe('effect', () => {
     expect(observed).toBe(1)
   })
 
-  it('返回的 runner 可手动重新触发', () => {
+  it('返回的句柄可手动重新触发', () => {
     const state = reactive({ count: 0 })
     let dummy = -1
 
-    const runner = effect(() => {
+    const handle = effect(() => {
       dummy = state.count
       return dummy
     })
@@ -30,7 +30,7 @@ describe('effect', () => {
     state.count = 2
     expect(dummy).toBe(2)
 
-    const result = runner()
+    const result = handle.run()
     expect(result).toBe(2)
     expect(dummy).toBe(2)
   })

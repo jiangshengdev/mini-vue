@@ -56,24 +56,31 @@ describe('effect', () => {
   it('依赖切换后旧字段不会再触发 effect', () => {
     const state = reactive({ toggle: true, first: 1, second: 2 })
     let captured = 0
+    let runCount = 0
 
     effect(() => {
+      runCount += 1
       captured = state.toggle ? state.first : state.second
     })
 
     expect(captured).toBe(1)
+    expect(runCount).toBe(1)
 
     state.second = 5
     expect(captured).toBe(1)
+    expect(runCount).toBe(1)
 
     state.toggle = false
     expect(captured).toBe(5)
+    expect(runCount).toBe(2)
 
     state.first = 10
     expect(captured).toBe(5)
+    expect(runCount).toBe(2)
 
     state.second = 20
     expect(captured).toBe(20)
+    expect(runCount).toBe(3)
   })
 
   it('嵌套 effect 只响应各自依赖', () => {

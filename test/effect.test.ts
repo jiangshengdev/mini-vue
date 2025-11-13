@@ -102,7 +102,15 @@ describe('effect', () => {
     expect(innerRuns).toBe(1)
 
     state.inner = 1
-    expect(innerRuns).toBe(2)
     expect(outerRuns).toBe(1)
+    expect(innerRuns).toBe(2)
+
+    state.outer = 1
+    expect(outerRuns).toBe(2)
+    expect(innerRuns).toBe(3)
+
+    state.inner = 2
+    expect(outerRuns).toBe(2)
+    expect(innerRuns).toBe(4)
   })
 })

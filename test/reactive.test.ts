@@ -2,6 +2,17 @@ import { describe, expect, it } from 'vitest'
 import { reactive } from '../src'
 
 describe('reactive', () => {
+  it('创建后可读取和写入属性', () => {
+    const raw = { foo: 1 }
+    const proxy = reactive(raw)
+
+    expect(proxy).not.toBe(raw)
+    expect(proxy.foo).toBe(1)
+
+    proxy.foo = 2
+    expect(raw.foo).toBe(2)
+  })
+
   it('重复调用返回同一代理实例', () => {
     const raw = { foo: 1 }
     const proxy1 = reactive(raw)
@@ -15,11 +26,11 @@ describe('reactive', () => {
     expect(wrapped).toBe(proxy)
   })
 
-  it('读写会影响原始对象', () => {
+  it('原始对象修改会同步到代理', () => {
     const raw = { count: 1 }
     const proxy = reactive(raw)
-    proxy.count = 2
-    expect(raw.count).toBe(2)
+    raw.count = 3
+    expect(proxy.count).toBe(3)
   })
 
   it('嵌套对象会被懒惰代理', () => {

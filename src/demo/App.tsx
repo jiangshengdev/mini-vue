@@ -1,8 +1,9 @@
 import typescriptLogo from './typescript.svg'
 import viteLogo from '/vite.svg'
 import { Counter } from './counter.tsx'
+import type { ComponentType } from '@/index.ts'
 
-export function App() {
+export const App: ComponentType = () => {
   return (
     <div>
       <a href="https://vite.dev" target="_blank" rel="noreferrer">

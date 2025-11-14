@@ -1,14 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { render } from '@/jsx/renderer/index.ts'
 import { Fragment } from '@/jsx-runtime'
-
-function Button(props: { label: string; onClick: () => void }) {
-  return (
-    <button class="btn" onClick={props.onClick}>
-      {props.label}
-    </button>
-  )
-}
+import type { ComponentType } from '@/index.ts'
 
 describe('jsx runtime', () => {
   it('渲染基本元素与文本', () => {
@@ -27,6 +20,19 @@ describe('jsx runtime', () => {
   it('绑定事件并响应', () => {
     const container = document.createElement('div')
     const handleClick = vi.fn()
+    interface ButtonProps {
+      label: string
+      onClick: () => void
+    }
+
+    const Button: ComponentType<ButtonProps> = (props) => {
+      return (
+        <button class="btn" onClick={props.onClick}>
+          {props.label}
+        </button>
+      )
+    }
+
     render(<Button label="click" onClick={handleClick} />, container)
 
     container.querySelector('button')!.dispatchEvent(new MouseEvent('click'))
@@ -34,7 +40,12 @@ describe('jsx runtime', () => {
   })
 
   it('支持 Fragment 与嵌套组件', () => {
-    function Wrapper(props: { title: string; children?: unknown }) {
+    interface WrapperProps {
+      title: string
+      children?: unknown
+    }
+
+    const Wrapper: ComponentType<WrapperProps> = (props) => {
       return (
         <section>
           <h1>{props.title}</h1>

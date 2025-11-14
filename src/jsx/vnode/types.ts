@@ -19,9 +19,9 @@ type ComponentChildren = VNodeChild | VNodeChild[] | null
 type ComponentResult = ComponentChildren | undefined
 
 /**
- * 组件 props 的基础约束，默认为任意键值对。
+ * 组件 props 的基础约束：放宽为对象即可，避免要求字符串索引签名。
  */
-type ComponentPropsBase = Record<string, unknown>
+type ComponentPropsBase = object
 
 /**
  * Fragment 组件的 props，仅支持可选的 children。

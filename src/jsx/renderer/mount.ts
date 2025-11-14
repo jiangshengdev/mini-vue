@@ -1,4 +1,5 @@
 import type {
+  ComponentResult,
   ComponentType,
   ElementProps,
   VNode,
@@ -21,7 +22,7 @@ export type MountResult = Node | null
  * 将 JSX 子节点挂载到指定容器，根据不同类型采用不同渲染策略。
  */
 export function mountChild(
-  child: VNodeChild | VNodeChild[] | null | undefined,
+  child: ComponentResult,
   container: MountTarget,
 ): MountResult {
   /* 空值（null / undefined）视为不渲染任何内容，直接返回 */
@@ -94,10 +95,7 @@ function mountComponent<T extends ComponentType>(
   }
   /* 调用函数组件得到下一层 JSX 子树，再复用 mountChild 继续递归挂载 */
   const subtree = component(props)
-  return mountChild(
-    subtree as VNodeChild | VNodeChild[] | null | undefined,
-    container,
-  )
+  return mountChild(subtree, container)
 }
 
 /**

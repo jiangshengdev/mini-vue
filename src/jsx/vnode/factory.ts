@@ -1,5 +1,7 @@
 import { normalizeChildren } from './children.ts'
 import type {
+  ComponentChildren,
+  ComponentResult,
   ElementProps,
   ElementType,
   FragmentProps,
@@ -11,12 +13,8 @@ import { vnodeSymbol } from './types.ts'
 /**
  * JSX 片段组件，不创建额外节点，直接返回 children。
  */
-export function Fragment(
-  props: FragmentProps,
-): VNodeChild | VNodeChild[] | null {
-  return (
-    (props.children as VNodeChild | VNodeChild[] | null | undefined) ?? null
-  )
+export function Fragment(props: FragmentProps): ComponentChildren {
+  return (props.children as ComponentResult) ?? null
 }
 
 /**

@@ -11,12 +11,12 @@ export type VNodeChild = VNode | string | number
 /**
  * 组件接收到的 children，可以是单个、数组或空。
  */
-type ComponentChildren = VNodeChild | VNodeChild[] | null
+export type ComponentChildren = VNodeChild | VNodeChild[] | null
 
 /**
  * 组件渲染函数返回的结果类型。
  */
-type ComponentResult = ComponentChildren | undefined
+export type ComponentResult = ComponentChildren | undefined
 
 /**
  * 组件 props 的基础约束：放宽为对象即可，避免要求字符串索引签名。
@@ -52,9 +52,7 @@ export type ComponentType<P extends ComponentPropsBase = ComponentPropsBase> =
 /**
  * Fragment 类型定义，接收 FragmentProps 并返回一组子节点。
  */
-export type FragmentType = (
-  props: FragmentProps,
-) => VNodeChild | VNodeChild[] | null
+export type FragmentType = (props: FragmentProps) => ComponentChildren
 
 /**
  * JSX 中元素的类型：原生标签名、组件或 Fragment。

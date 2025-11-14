@@ -29,11 +29,9 @@ type ComponentPropsBase = object
 export type FragmentProps = { children?: ComponentChildren }
 
 /**
- * 用于约束组件类型的函数签名，保留双向协变行为。
+ * 用于约束组件类型的函数签名，供 ElementType 统一推导。
  */
-type ComponentConstraint = {
-  bivarianceHack(props: never): ComponentResult
-}['bivarianceHack']
+type ComponentConstraint = (props: never) => ComponentResult
 
 /**
  * 为任意 props 类型补充可选 children 字段。
@@ -41,17 +39,15 @@ type ComponentConstraint = {
 type PropsWithChildren<P> = P & { children?: ComponentChildren }
 
 /**
- * 通过 "bivariance hack" 定义的组件类型，兼顾调用与赋值灵活性。
+ * 标准组件函数签名，默认附带 children。
  */
-type BivarianceComponent<P> = {
-  bivarianceHack(props: PropsWithChildren<P>): ComponentResult
-}['bivarianceHack']
+type ComponentFunction<P> = (props: PropsWithChildren<P>) => ComponentResult
 
 /**
  * 对外暴露的组件类型，默认 props 为通用对象。
  */
 export type ComponentType<P extends ComponentPropsBase = ComponentPropsBase> =
-  BivarianceComponent<P>
+  ComponentFunction<P>
 
 /**
  * Fragment 类型定义，接收 FragmentProps 并返回一组子节点。

@@ -1,4 +1,5 @@
 /**
- * JSX runtime 对外暴露的基础 API：Fragment 与 h 函数。
+ * JSX runtime 的统一出口，对齐编译器期望的所有运行时签名。
  */
 export { Fragment, h } from './shared.ts'
+export { jsx, jsxs, jsxDEV } from './jsx-runtime.ts'

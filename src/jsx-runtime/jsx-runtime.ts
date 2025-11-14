@@ -1,4 +1,4 @@
-import { Fragment, createJSXNode, h } from './shared.ts'
+import { createJSXNode, Fragment, h } from './shared.ts'
 import type { ElementType, VNode } from '../jsx/vnode.ts'
 
 interface JSXRuntimeProps {

@@ -1,5 +1,5 @@
-import { Fragment, createVNode } from './jsx/vnode.ts'
 import type { ElementType, VNode } from './jsx/vnode.ts'
+import { createVNode, Fragment } from './jsx/vnode.ts'
 
 export { Fragment }
 

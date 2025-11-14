@@ -1,4 +1,4 @@
-import { reactive, effect } from '@/index.ts'
+import { effect, reactive } from '@/index.ts'
 
 export function setupCounter(element: HTMLButtonElement) {
   const state = reactive({ count: 0 })

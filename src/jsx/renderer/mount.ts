@@ -111,7 +111,8 @@ function mountElement(
   /* 根据标签名创建对应的原生 DOM 元素，例如 'div'、'span' 等 */
   const el = document.createElement(type)
   /* 将 VNode 上的属性映射到真实 DOM，包括事件、class、style 等 */
-  applyProps(el, vnode.props)
+  const props = vnode.props as Record<string, unknown> | null
+  applyProps(el, props)
   /* 递归挂载当前元素的所有子节点，保持 JSX 中声明的顺序 */
   mountChildren(vnode.children, el)
   container.appendChild(el)

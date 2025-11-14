@@ -1,6 +1,6 @@
 import typescriptLogo from './typescript.svg'
 import viteLogo from '/vite.svg'
-import { Counter } from './counter.tsx'
+import { Counter } from './Counter.tsx'
 import type { ComponentType } from '@/index.ts'
 
 export const App: ComponentType = () => {

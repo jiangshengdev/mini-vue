@@ -1,34 +1,73 @@
+/**
+ * 标记对象为由 mini-vue 创建的 VNode，用于运行时类型守卫。
+ */
 export const vnodeSymbol = Symbol('mini-vue-vnode')
 
+/**
+ * 单个子节点的联合类型：可以是 VNode 或原始文本。
+ */
 export type VNodeChild = VNode | string | number
 
+/**
+ * 组件接收到的 children，可以是单个、数组或空。
+ */
 type ComponentChildren = VNodeChild | VNodeChild[] | null
 
+/**
+ * 组件渲染函数返回的结果类型。
+ */
 type ComponentResult = ComponentChildren | undefined
 
+/**
+ * 组件 props 的基础约束，默认为任意键值对。
+ */
 type ComponentPropsBase = Record<string, unknown>
 
+/**
+ * Fragment 组件的 props，仅支持可选的 children。
+ */
 export type FragmentProps = { children?: ComponentChildren }
 
+/**
+ * 用于约束组件类型的函数签名，保留双向协变行为。
+ */
 type ComponentConstraint = {
   bivarianceHack(props: never): ComponentResult
 }['bivarianceHack']
 
+/**
+ * 为任意 props 类型补充可选 children 字段。
+ */
 type PropsWithChildren<P> = P & { children?: ComponentChildren }
 
+/**
+ * 通过 "bivariance hack" 定义的组件类型，兼顾调用与赋值灵活性。
+ */
 type BivarianceComponent<P> = {
   bivarianceHack(props: PropsWithChildren<P>): ComponentResult
 }['bivarianceHack']
 
+/**
+ * 对外暴露的组件类型，默认 props 为通用对象。
+ */
 export type ComponentType<P extends ComponentPropsBase = ComponentPropsBase> =
   BivarianceComponent<P>
 
+/**
+ * Fragment 类型定义，接收 FragmentProps 并返回一组子节点。
+ */
 export type FragmentType = (
   props: FragmentProps,
 ) => VNodeChild | VNodeChild[] | null
 
+/**
+ * JSX 中元素的类型：原生标签名、组件或 Fragment。
+ */
 export type ElementType = string | ComponentConstraint | FragmentType
 
+/**
+ * 推导给定元素类型对应的 props 形状。
+ */
 type ComponentTypeProps<T> =
   T extends ComponentType<infer P>
     ? PropsWithChildren<P>
@@ -36,6 +75,12 @@ type ComponentTypeProps<T> =
       ? P
       : ComponentPropsBase
 
+/**
+ * 统一描述不同元素类型的 props：
+ * - Fragment 使用 FragmentProps
+ * - 原生标签为任意属性对象
+ * - 组件则回退到其 props 类型推导
+ */
 export type ElementProps<T extends ElementType = ElementType> =
   T extends FragmentType
     ? FragmentProps
@@ -43,6 +88,9 @@ export type ElementProps<T extends ElementType = ElementType> =
       ? ComponentPropsBase
       : ComponentTypeProps<T>
 
+/**
+ * mini-vue 内部使用的虚拟节点结构，承载类型、属性与子节点信息。
+ */
 export interface VNode<T extends ElementType = ElementType> {
   readonly __v_isVNode: typeof vnodeSymbol
   readonly type: T

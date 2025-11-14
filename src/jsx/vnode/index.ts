@@ -1,3 +1,6 @@
+/**
+ * VNode 工厂与类型的聚合导出入口。
+ */
 export { createVNode, Fragment } from './factory.ts'
 export { isVNode } from './guards.ts'
 export type {

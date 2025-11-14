@@ -86,9 +86,14 @@ export type ElementProps<T extends ElementType = ElementType> =
  * mini-vue 内部使用的虚拟节点结构，承载类型、属性与子节点信息。
  */
 export interface VNode<T extends ElementType = ElementType> {
+  /** 通过唯一 symbol 标识当前对象为 mini-vue 生成的 VNode */
   readonly __v_isVNode: typeof vnodeSymbol
+  /** 当前虚拟节点的类型，可能是原生标签、组件或 Fragment */
   readonly type: T
+  /** 节点携带的属性对象，按元素类型推导，允许为空 */
   readonly props: ElementProps<T> | null
+  /** 归一化后的子节点列表，统一以数组承载 */
   readonly children: VNodeChild[]
+  /** 可选的 diff key，用于稳定节点身份 */
   readonly key?: PropertyKey
 }

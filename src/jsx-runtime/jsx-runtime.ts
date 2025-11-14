@@ -1,5 +1,5 @@
 import { createJSXNode, Fragment, h } from './shared.ts'
-import type { ElementProps, ElementType, VNode } from '../jsx/vnode.ts'
+import type { ElementProps, ElementType, VNode } from '@/jsx/vnode'
 
 export { Fragment, h }
 

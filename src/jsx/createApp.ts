@@ -1,5 +1,5 @@
-import type { ComponentType, VNodeChild } from './vnode.ts'
-import { render } from './renderer.ts'
+import type { ComponentType, VNodeChild } from '@/jsx/vnode'
+import { render } from '@/jsx/renderer'
 
 interface AppInstance {
   mount(target: string | Element): void

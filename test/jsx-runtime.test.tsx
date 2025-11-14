@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { render } from '@/jsx/renderer.ts'
+import { render } from '@/jsx/renderer/index.ts'
 import { Fragment } from '@/jsx-runtime'
 
 function Button(props: { label: string; onClick: () => void }) {

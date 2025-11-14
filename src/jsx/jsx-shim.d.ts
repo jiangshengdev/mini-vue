@@ -1,4 +1,4 @@
-import type { ElementType as MiniElementType, VNode } from './vnode.ts'
+import type { ElementType as MiniElementType, VNode } from './vnode/index.ts'
 
 declare global {
   namespace JSX {

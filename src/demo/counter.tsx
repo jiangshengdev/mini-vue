@@ -1,5 +1,5 @@
 import { effect, reactive } from '@/index.ts'
-import type { ComponentType } from '@/jsx/vnode.ts'
+import type { ComponentType } from '@/jsx/vnode/index.ts'
 
 export const Counter: ComponentType = () => {
   const state = reactive({ count: 0 })

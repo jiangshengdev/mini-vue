@@ -7,12 +7,12 @@ import { isObject } from '../shared/utils.ts'
  */
 const mutableGet: ProxyHandler<Record<PropertyKey, unknown>>['get'] =
   function getReactiveValue(target, key, receiver) {
-    // 使用 Reflect 读取原始值，确保 this 绑定与访问行为一致
+    /* 使用 Reflect 读取原始值，保持与原生访问一致的 this 绑定与行为 */
     const rawValue = Reflect.get(target, key, receiver)
-    // 读取属性时记录当前活跃副作用，建立响应式依赖关系
+    /* 读取属性同时收集依赖，连接目标字段与当前副作用 */
     track(target, key)
     if (isObject(rawValue)) {
-      // 懒加载子对象的代理，避免提前遍历整棵对象树
+      /* 对嵌套对象进行懒加载代理，避免初始化时递归遍历 */
       return reactive(rawValue as Record<PropertyKey, unknown>)
     }
     return rawValue
@@ -23,12 +23,12 @@ const mutableGet: ProxyHandler<Record<PropertyKey, unknown>>['get'] =
  */
 const mutableSet: ProxyHandler<Record<PropertyKey, unknown>>['set'] =
   function setReactiveValue(target, key, value, receiver) {
-    // 保留旧值以便判断是否需要触发更新
+    /* 读取旧值用于后续的同值判断 */
     const previousValue = Reflect.get(target, key, receiver)
-    // 让赋值逻辑仍由标准 Reflect 行为承担
+    /* 调用 Reflect 完成赋值，确保符合原生语义 */
     const applied = Reflect.set(target, key, value, receiver)
     if (!Object.is(previousValue, value)) {
-      // 仅在值真正变化时触发依赖，避免无意义的重新执行
+      /* 值发生实际变化时才通知依赖，规避无效触发 */
       trigger(target, key)
     }
     return applied

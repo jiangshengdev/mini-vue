@@ -12,8 +12,12 @@
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
+    "jsx": "react-jsx",
+    "jsxImportSource": "@/jsx-runtime",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@/jsx-runtime": ["./src/jsx-runtime/index.ts"],
+      "@/jsx-runtime/*": ["./src/jsx-runtime/*"]
     },
     "noEmit": true,
 

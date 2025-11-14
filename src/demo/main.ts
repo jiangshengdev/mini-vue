@@ -1,24 +1,19 @@
 import './style.css'
-import typescriptLogo from './typescript.svg'
-import viteLogo from '/vite.svg'
+import { createApp } from '@/jsx/createApp.ts'
+import { App } from './App.tsx'
 import { setupCounter } from './counter.ts'
 
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://www.typescriptlang.org/" target="_blank">
-      <img src="${typescriptLogo}" class="logo vanilla" alt="TypeScript logo" />
-    </a>
-    <h1>Vite + TypeScript</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite and TypeScript logos to learn more
-    </p>
-  </div>
-`
+const host = document.querySelector<HTMLDivElement>('#app')
+if (!host) {
+  throw new Error('demo: 未找到 #app 容器')
+}
 
-setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
+const app = createApp(App)
+app.mount(host)
+
+const counterButton = host.querySelector<HTMLButtonElement>('#counter')
+if (!counterButton) {
+  throw new Error('demo: 未找到 #counter 按钮')
+}
+
+setupCounter(counterButton)

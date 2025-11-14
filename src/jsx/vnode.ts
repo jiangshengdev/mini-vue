@@ -41,7 +41,9 @@ export interface VNode<T extends ElementType = ElementType> {
   readonly key?: PropertyKey
 }
 
-export function Fragment(props: FragmentProps): VNodeChild | VNodeChild[] | null {
+export function Fragment(
+  props: FragmentProps,
+): VNodeChild | VNodeChild[] | null {
   return (
     (props.children as VNodeChild | VNodeChild[] | null | undefined) ?? null
   )

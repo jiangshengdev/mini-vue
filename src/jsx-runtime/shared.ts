@@ -1,4 +1,9 @@
-import type { ElementProps, ElementType, VNode, VNodeChild } from '../jsx/vnode.ts'
+import type {
+  ElementProps,
+  ElementType,
+  VNode,
+  VNodeChild,
+} from '../jsx/vnode.ts'
 import { createVNode, Fragment } from '../jsx/vnode.ts'
 
 export { Fragment }

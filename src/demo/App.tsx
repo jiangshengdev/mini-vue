@@ -1,5 +1,6 @@
 import typescriptLogo from './typescript.svg'
 import viteLogo from '/vite.svg'
+import { Counter } from './counter.tsx'
 
 export function App() {
   return (
@@ -16,7 +17,7 @@ export function App() {
       </a>
       <h1>Vite + TypeScript + JSX</h1>
       <div class="card">
-        <button id="counter" type="button"></button>
+        <Counter />
       </div>
       <p class="read-the-docs">
         Click on the Vite and TypeScript logos to learn more

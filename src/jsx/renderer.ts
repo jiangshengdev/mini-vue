@@ -1,9 +1,4 @@
-import type {
-  ComponentType,
-  ElementProps,
-  VNode,
-  VNodeChild,
-} from './vnode.ts'
+import type { ComponentType, ElementProps, VNode, VNodeChild } from './vnode.ts'
 import { isVNode } from './vnode.ts'
 
 type MountResult = Node | null
@@ -56,7 +51,11 @@ function mountChild(
 function mountVNode(vnode: VNode, container: MountTarget): MountResult {
   if (typeof vnode.type === 'function') {
     const component = vnode.type as ComponentType
-    return mountComponent(component, vnode as VNode<typeof component>, container)
+    return mountComponent(
+      component,
+      vnode as VNode<typeof component>,
+      container,
+    )
   }
 
   return mountElement(vnode.type as string, vnode, container)
@@ -102,6 +101,11 @@ function applyProps(el: Element, props: Record<string, unknown> | null) {
   }
 
   for (const [key, value] of Object.entries(props)) {
+    if (key === 'ref' && typeof value === 'function') {
+      value(el)
+      continue
+    }
+
     if (key === 'class' || key === 'className') {
       el.className = value == null ? '' : String(value)
       continue

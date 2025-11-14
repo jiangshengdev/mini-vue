@@ -1,70 +1,48 @@
 # 本仓库的 Copilot 指南
 
-目的：让 AI 代理快速在本仓库高效产出，传达真实的架构、工作流与项目约定。
+目的：帮助 AI 快速掌握 mini-vue 的响应式实现与前端演示环境，缩短调研时间。
 
-## 大局观（Big Picture）
+## 大局观
 
-- 技术栈：Vite 7（通过 `rolldown-vite@7.2.2` 固定）+ TypeScript。注意：尽管仓库名含 “vue”，此项目不含 Vue 运行时，是纯 TS 演示。
-- 入口：`index.html` 加载 `/src/main.ts`。构建产物输出到 `dist/`。
-- 资源：`public/` 下为静态文件（以根路径引用，如 `/vite.svg`）；`src/` 下的资源以模块方式导入，Vite 会返回 URL（如 `import typescriptLogo from './typescript.svg'`）。
+- 技术栈：Vite 7（被 `pnpm overrides` 锁定为 `rolldown-vite@7.2.2`）+ TypeScript + Vitest。仓库名虽含 “vue”，当前聚焦自研响应式内核，无 Vue 运行时。
+- 浏览器演示入口：`index.html` 加载 `/src/demo/main.ts`，用于手动体验；实际对外 API 在 `src/index.ts`，仅导出 `reactive` 与 `effect`。
+- 静态资源放 `public/`（以 `/foo.svg` 绝对路径引用），模块私有资源放 `src/` 并通过 import 获得 URL；`src/demo/main.ts` 演示了两种引用方式。
 
-## 交流与注释约定
+## 核心模块速览
 
-- 所有代码注释、文档与 AI 回复需使用中文。
+- `src/reactivity/reactive.ts`：`ReactiveCache` 复用 Proxy，拒绝数组、非对象输入；若传已代理对象直接返回。扩展时务必复用缓存逻辑。
+- `src/reactivity/internals/baseHandlers.ts`：`mutableHandlers` 拆分 get/set；get 内部懒代理嵌套对象并调用 `track`，set 通过 `Object.is` 判等后触发 `trigger`。
+- `src/reactivity/effect.ts`：`ReactiveEffect` 负责依赖清理、嵌套 effect 生命周期（通过 `effectScope`）。`effect(fn)` 立即执行并返回可 `run/stop` 的句柄。
+- `src/reactivity/internals/operations.ts`：`DepRegistry` 用 `WeakMap<object, Map<key, Dep>>` 建立依赖图；`track`/`trigger` 依赖 `effectScope.current` 判定当前活跃副作用。
+- `test/*.test.ts`：以 Vitest 验证缓存、懒代理、依赖切换与嵌套 effect，不要改动行为导致测试失效；新增能力请补测试说明预期。
 
-## 开发工作流
+## 开发与调试
 
-- 安装依赖：`pnpm install`（使用 PNPM，锁文件为 `pnpm-lock.yaml`）。推荐 Node 18+ 以匹配 Vite 7。
-- 启动开发（HMR）：`pnpm dev`
-- 生产构建：`pnpm build`（先跑 `tsc` 类型检查，再 `vite build`）
-- 本地预览：`pnpm preview`
+- 安装：`pnpm install`（Node 18+）。
+- HMR：`pnpm dev` 启动示例页面，可在 `src/demo/` 调试交互。
+- 构建：`pnpm build` 会先跑 `tsc` 严格检查，再执行 `vite build` 输出到 `dist/`。
+- 测试：`pnpm test` 运行 Vitest（jsdom 环境）；定位单例可用 `pnpm test -- effect.test.ts`。
+- 预览：`pnpm preview` 查看生产包。
 
-## 源码布局
+## 代码约定
 
-- `src/main.ts`：应用引导。导入全局样式、图片与 `setupCounter`，向 `#app` 写入模板并绑定事件。
-- `src/counter.ts`：导出 `setupCounter(element: HTMLButtonElement)`，内部维护点击计数与事件处理。
-- `src/style.css`：全局样式。
-- `public/vite.svg`：示例静态资源，使用绝对路径 `/vite.svg` 引用。
+- 中文输出：代码注释、文档、机器人回复一律中文，示例沿用现有语调。
+- TS 严格 ESM：`allowImportingTsExtensions` 要求本地导入包含 `.ts`，`verbatimModuleSyntax` 禁止写 `import foo from './x.js'` 这类合成默认；保持命名导入。
+- 禁止副作用导入：`noUncheckedSideEffectImports` 强制显式引用 export；新增模块若只执行初始化逻辑，请暴露函数并在入口调用。
+- DOM 访问：使用 `document.querySelector<HTMLElement>()`，对必然存在的节点才加 `!`。示例请贴合 `src/demo/main.ts` 风格。
+- ESLint 允许 `_` 前缀参数表示“有意未用”；复现 Vue API 时可借此规避 lint。
+- Vite `alias: {'@': './src'}` 已启用，需用别名时保持 `import { reactive } from '@/reactivity/reactive.ts'` 的 `.ts` 后缀。
 
-## TypeScript 约定（见 `tsconfig.json`）
+## 常见坑
 
-- 现代严格 ESM：`module: ESNext`、`target: ES2022`、`verbatimModuleSyntax: true`（保持原生 ESM 语义）。
-- 打包器解析：`moduleResolution: bundler`，`types: ['vite/client']`。
-- 导入风格：`allowImportingTsExtensions: true` —— 本地导入需包含 `.ts` 扩展（例如 `import { x } from './foo.ts'`）。
-- 代码整洁：`noUnusedLocals`、`noUnusedParameters`、`noUncheckedSideEffectImports` —— 禁止仅副作用导入，保持导入被使用。
-- 不产出 JS：`noEmit: true` —— 仅类型检查，构建由 Vite 负责。
+- Reactive 缓存：跳过 `ReactiveCache` 会导致同一原对象生成多个 Proxy，引发依赖错乱。
+- 嵌套 effect：记得在父级 `effect` 内注册子级，当前实现自动清理，若手动管理需调用 `registerCleanup`。
+- 依赖切换：`effect` 每次 `run()` 前会 `resetState`，新增响应字段时不要忘记通过读取建立依赖，否则不会被触发。
+- 数组尚未支持：`reactive([])` 会抛异常，若实现数组请同步更新错误消息与测试。
 
-## 约定与模式
+## 贡献建议
 
-- DOM 类型：优先使用 `document.querySelector<HTMLElement>('#id')`，当前代码对必然存在的节点使用非空断言 `!`；如节点可能缺失，请自行加守卫。
-- “函数即组件”：倾向小而专注的函数，接收宿主元素并挂载行为。
-  - 示例：新增 `src/hello.ts`
-    ```ts
-    export function mountHello(el: HTMLElement) {
-      el.textContent = 'Hello'
-    }
-    ```
-    在 `src/main.ts` 中使用：
-    ```ts
-    import { mountHello } from './hello.ts'
-    mountHello(document.querySelector('#app')!)
-    ```
-- 资源放置：
-  - 全局/静态资源放在 `public/`，以绝对路径（如 `/logo.svg`）引用。
-  - 模块私有资源放在 `src/`，用 `import img from './img.svg'` 获得 URL 字符串。
-- 导入路径：未配置 TS 路径别名；在 `src/` 内使用相对路径导入。
+- 先读 `test/`，理解每个场景；新增行为请用 Vitest 描述复现方式。
+- 变更 `reactivity/` 需兼顾 demo：`src/demo/main.ts` 可引用 `reactive`/`effect` 做可视化反馈，便于人工验证。
 
-## 集成细节
-
-- 通过 `package.json` 与 `pnpm.overrides` 将 Vite 固定为 `rolldown-vite@7.2.2`；CLI 用法与标准 Vite 一致。
-- `pnpm dev` 提供 HMR 与 Source Map；生产构建面向现代浏览器（ES2022）。
-
-## 易踩坑（Gotchas）
-
-- 仅副作用导入会被 TS 拒绝（`noUncheckedSideEffectImports`）；确保导入均被使用或改为显式调用。
-- 开启 `verbatimModuleSyntax` 后请避免“合成默认导入”，保持原生 ESM 语义。
-- 若新增测试或 Lint，请与严格 TS 与打包器 ESM 设置保持一致。
-
-## 关键文件
-
-- `index.html`, `src/main.ts`, `src/counter.ts`, `src/style.css`, `public/vite.svg`, `tsconfig.json`, `package.json`。
+若某部分仍不清晰，请告知具体段落，我会继续补充。

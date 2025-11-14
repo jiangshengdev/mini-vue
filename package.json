@@ -8,7 +8,8 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "format": "pnpm exec prettier src test --write"
+    "format": "pnpm exec prettier src test --write",
+    "lint": "pnpm exec eslint src test"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

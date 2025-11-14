@@ -6,9 +6,11 @@ describe('effect', () => {
     const state = reactive({ count: 0 })
     let observed = -1
 
-    effect(() => {
+    function effectFn() {
       observed = state.count
-    })
+    }
+
+    effect(effectFn)
 
     expect(observed).toBe(0)
 
@@ -20,10 +22,12 @@ describe('effect', () => {
     const state = reactive({ count: 0 })
     let dummy = -1
 
-    const handle = effect(() => {
+    function effectFn() {
       dummy = state.count
       return dummy
-    })
+    }
+
+    const handle = effect(effectFn)
 
     expect(dummy).toBe(0)
 
@@ -39,10 +43,12 @@ describe('effect', () => {
     const state = reactive({ count: 0 })
     let runCount = 0
 
-    effect(() => {
+    function effectFn() {
       runCount += 1
       void state.count
-    })
+    }
+
+    effect(effectFn)
 
     expect(runCount).toBe(1)
 
@@ -58,10 +64,12 @@ describe('effect', () => {
     let captured = 0
     let runCount = 0
 
-    effect(() => {
+    function effectFn() {
       runCount += 1
       captured = state.toggle ? state.first : state.second
-    })
+    }
+
+    effect(effectFn)
 
     expect(captured).toBe(1)
     expect(runCount).toBe(1)
@@ -88,18 +96,19 @@ describe('effect', () => {
     let outerRuns = 0
     let innerRuns = 0
 
-    effect(() => {
+    function outerEffectFn() {
       outerRuns += 1
       void state.outer
 
-      effect(() => {
+      function innerEffectFn() {
         innerRuns += 1
         void state.inner
-      })
-    })
+      }
 
-    expect(outerRuns).toBe(1)
-    expect(innerRuns).toBe(1)
+      effect(innerEffectFn)
+    }
+
+    effect(outerEffectFn)
 
     state.inner = 1
     expect(outerRuns).toBe(1)

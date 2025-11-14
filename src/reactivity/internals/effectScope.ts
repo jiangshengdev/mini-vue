@@ -38,13 +38,6 @@ class EffectScope {
     this.stack.pop()
     this.activeEffect = this.stack.at(-1)
   }
-
-  /**
-   * 仅窥视栈顶元素，不改变栈结构，便于调试或断言。
-   */
-  peek(): EffectInstance | undefined {
-    return this.stack.at(-1)
-  }
 }
 
 export const effectScope = new EffectScope()

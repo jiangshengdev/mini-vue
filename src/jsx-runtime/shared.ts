@@ -1,26 +1,24 @@
-import type { ElementType, VNode } from '../jsx/vnode.ts'
+import type { ElementProps, ElementType, VNode, VNodeChild } from '../jsx/vnode.ts'
 import { createVNode, Fragment } from '../jsx/vnode.ts'
-
-interface JSXRuntimeProps {
-  children?: unknown
-  [key: string]: unknown
-}
 
 export { Fragment }
 
-export function createJSXNode(
-  type: ElementType,
-  props: JSXRuntimeProps = {},
+export function createJSXNode<T extends ElementType>(
+  type: T,
+  props?: ElementProps<T>,
   key?: PropertyKey,
-): VNode {
-  return createVNode({ type, rawProps: props, key })
+): VNode<T> {
+  return createVNode({ type, rawProps: props ?? null, key })
 }
 
-export function h(
-  type: ElementType,
-  props: JSXRuntimeProps = {},
-  ...children: unknown[]
+export function h<T extends ElementType>(
+  type: T,
+  props?: ElementProps<T>,
+  ...children: VNodeChild[]
 ) {
-  const normalizedProps = { ...props, children }
+  const normalizedProps = {
+    ...(props ?? ({} as ElementProps<T>)),
+    children,
+  } as ElementProps<T>
   return createJSXNode(type, normalizedProps)
 }

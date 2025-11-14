@@ -1,27 +1,22 @@
 import { createJSXNode, Fragment, h } from './shared.ts'
-import type { ElementType, VNode } from '../jsx/vnode.ts'
-
-interface JSXRuntimeProps {
-  children?: unknown
-  [key: string]: unknown
-}
+import type { ElementProps, ElementType, VNode } from '../jsx/vnode.ts'
 
 export { Fragment, h }
 
-export function jsx(
-  type: ElementType,
-  props: JSXRuntimeProps = {},
+export function jsx<T extends ElementType>(
+  type: T,
+  props?: ElementProps<T>,
   key?: PropertyKey,
-): VNode {
+): VNode<T> {
   return createJSXNode(type, props, key)
 }
 
 export const jsxs = jsx
 
-export function jsxDEV(
-  type: ElementType,
-  props: JSXRuntimeProps = {},
+export function jsxDEV<T extends ElementType>(
+  type: T,
+  props?: ElementProps<T>,
   key?: PropertyKey,
-): VNode {
+): VNode<T> {
   return createJSXNode(type, props, key)
 }

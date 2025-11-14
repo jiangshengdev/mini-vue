@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { createApp } from '@/index.ts'
 import type { ComponentType } from '@/index.ts'
+import { createApp } from '@/index.ts'
 
 const App: ComponentType = () => {
   return <div class="hello">Hello</div>

@@ -14,16 +14,19 @@ class DepRegistry {
    * 把当前活跃副作用加入目标字段的依赖集合。
    */
   track(target: object, key: PropertyKey) {
+    /* 仅在存在活跃副作用时才执行依赖收集 */
     const currentEffect = effectScope.current
     if (!currentEffect) {
       return
     }
 
+    /* 获取或创建目标字段对应的依赖集合 */
     const dep = this.ensureDep(target, key)
     if (dep.has(currentEffect)) {
       return
     }
 
+    /* 建立依赖关系，并登记到副作用的反向依赖列表 */
     dep.add(currentEffect)
     currentEffect.recordDependency(dep)
   }
@@ -32,6 +35,7 @@ class DepRegistry {
    * 触发指定字段的依赖集合，逐个执行对应副作用。
    */
   trigger(target: object, key: PropertyKey) {
+    /* 若当前字段未建立依赖集合，则无需继续 */
     const dep = this.existingDep(target, key)
     if (!dep) {
       return
@@ -39,6 +43,7 @@ class DepRegistry {
 
     /* 通过快照避免执行期间对同一集合的结构性修改 */
     for (const effect of this.snapshot(dep)) {
+      /* 跳过当前正在运行或已失效的副作用 */
       if (this.shouldRun(effect)) {
         effect.run()
       }
@@ -49,12 +54,14 @@ class DepRegistry {
    * 确保目标字段具备依赖集合，不存在时创建新集合。
    */
   private ensureDep(target: object, key: PropertyKey): Dep {
+    /* 读取或初始化目标对象的依赖映射表 */
     let depsMap = this.targetMap.get(target)
     if (!depsMap) {
       depsMap = new Map()
       this.targetMap.set(target, depsMap)
     }
 
+    /* 读取或初始化目标字段的副作用集合 */
     let dep = depsMap.get(key)
     if (!dep) {
       dep = new Set()

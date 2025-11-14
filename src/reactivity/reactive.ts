@@ -51,10 +51,12 @@ export function reactive(target: unknown) {
   if (!isObject(target)) {
     return target
   }
+  /* 当前实现尚未覆盖数组代理，直接抛出友好错误 */
   if (Array.isArray(target)) {
     throw new TypeError(UNSUPPORTED_TYPE_MESSAGE)
   }
 
+  /* 强制转换为记录类型，方便后续代理操作 */
   const objectTarget = target as Record<PropertyKey, unknown>
   const cached = reactiveCache.getExisting(objectTarget)
   if (cached) {

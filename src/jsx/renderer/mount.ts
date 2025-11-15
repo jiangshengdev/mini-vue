@@ -76,7 +76,7 @@ function mountVNode(vnode: VNode, container: MountTarget): MountResult {
   }
 
   /* 非函数 type 视为原生标签名，走元素挂载逻辑 */
-  return mountElement(vnode.type as string, vnode, container)
+  return mountElement(vnode.type, vnode, container)
 }
 
 /**

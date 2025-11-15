@@ -13,7 +13,7 @@ const mutableGet: ProxyHandler<Record<PropertyKey, unknown>>['get'] =
     track(target, key)
     if (isObject(rawValue)) {
       /* 对嵌套对象进行懒加载代理，避免初始化时递归遍历 */
-      return reactive(rawValue as Record<PropertyKey, unknown>)
+      return reactive(rawValue)
     }
     return rawValue
   }

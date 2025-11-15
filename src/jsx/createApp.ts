@@ -1,4 +1,4 @@
-import type { ComponentResult, ComponentType } from '@/jsx/vnode'
+import type { ComponentType } from '@/jsx/vnode'
 import { render } from '@/jsx/renderer'
 
 /**
@@ -35,7 +35,7 @@ export function createApp(
     }
 
     /* 根组件以函数形式调用，生成要挂载的 VNode 子树 */
-    const subtree = rootComponent({ ...(rootProps ?? {}) }) as ComponentResult
+    const subtree = rootComponent({ ...(rootProps ?? {}) })
     render(subtree, container)
     isMounted = true
   }

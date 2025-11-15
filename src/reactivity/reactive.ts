@@ -56,14 +56,12 @@ export function reactive(target: unknown) {
     throw new TypeError(UNSUPPORTED_TYPE_MESSAGE)
   }
 
-  /* 强制转换为记录类型，方便后续代理操作 */
-  const objectTarget = target as Record<PropertyKey, unknown>
-  const cached = reactiveCache.getExisting(objectTarget)
+  const cached = reactiveCache.getExisting(target)
   if (cached) {
     /* 复用已有代理，确保同一原对象始终返回同一 Proxy */
     return cached as typeof target
   }
 
   /* 未命中缓存时创建新代理并登记映射 */
-  return reactiveCache.create(objectTarget) as typeof target
+  return reactiveCache.create(target) as typeof target
 }

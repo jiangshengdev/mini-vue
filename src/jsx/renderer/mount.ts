@@ -89,8 +89,11 @@ function mountComponent<T extends ComponentType>(
 ): MountResult {
   /* 浅拷贝一份 props，避免组件内部直接修改原始 VNode 的 props 对象 */
   const props = (vnode.props ? { ...vnode.props } : {}) as ElementProps<T>
-  /* 若 VNode 挂载了 children，将其通过 props.children 传递给组件 */
-  if (vnode.children.length > 0) {
+  /* 若 VNode 挂载了 children，将其按照数量转换后传递给组件 */
+  const childCount = vnode.children.length
+  if (childCount === 1) {
+    props.children = vnode.children[0]
+  } else if (childCount > 1) {
     props.children = vnode.children
   }
   /* 调用函数组件得到下一层 JSX 子树，再复用 mountChild 继续递归挂载 */

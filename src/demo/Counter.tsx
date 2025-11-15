@@ -14,15 +14,15 @@ export const Counter: ComponentType = () => {
 
   const bindRef = (el: Element | null) => {
     buttonEl = (el as HTMLButtonElement | null) ?? null
-    if (buttonEl) {
-      buttonEl.type = 'button'
-      buttonEl.textContent = `count is ${state.count}`
-    }
   }
 
   const increment = () => {
     state.count += 1
   }
 
-  return <button ref={bindRef} onClick={increment}></button>
+  return (
+    <button type="button" ref={bindRef} onClick={increment}>
+      count is {state.count}
+    </button>
+  )
 }

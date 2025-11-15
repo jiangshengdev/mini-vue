@@ -1,4 +1,4 @@
-import type { ComponentType, VNodeChild } from '@/jsx/vnode'
+import type { ComponentResult, ComponentType } from '@/jsx/vnode'
 import { render } from '@/jsx/renderer'
 
 /**
@@ -35,11 +35,7 @@ export function createApp(
     }
 
     /* 根组件以函数形式调用，生成要挂载的 VNode 子树 */
-    const subtree = rootComponent({ ...(rootProps ?? {}) }) as
-      | VNodeChild
-      | VNodeChild[]
-      | null
-      | undefined
+    const subtree = rootComponent({ ...(rootProps ?? {}) }) as ComponentResult
     render(subtree, container)
     isMounted = true
   }

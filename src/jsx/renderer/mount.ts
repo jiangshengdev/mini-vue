@@ -25,8 +25,8 @@ export function mountChild(
   child: ComponentResult,
   container: MountTarget,
 ): MountResult {
-  /* 空值（null / undefined）视为不渲染任何内容，直接返回 */
-  if (child == null) {
+  /* 空值（null / undefined）或布尔值都视为不渲染任何内容 */
+  if (child == null || typeof child === 'boolean') {
     return null
   }
 

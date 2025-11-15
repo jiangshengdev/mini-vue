@@ -114,4 +114,12 @@ describe('jsx runtime', () => {
       '<div><span>first</span><span>second</span></div>',
     )
   })
+
+  it('直接 render(false, container) 不应生成文本 false', () => {
+    const container = document.createElement('div')
+
+    render(false, container)
+
+    expect(container.innerHTML).toBe('')
+  })
 })

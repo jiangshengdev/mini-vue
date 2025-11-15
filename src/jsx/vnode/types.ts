@@ -9,9 +9,10 @@ export const vnodeSymbol = Symbol('mini-vue-vnode')
 export type VNodeChild = VNode | string | number
 
 /**
- * 组件接收到的 children，可以是单个、数组或空。
+ * 组件接收到的 children，可以是单个、数组、布尔值或空。
+ * 布尔值会在 normalizeChildren/mountChild 中被当作空节点忽略。
  */
-export type ComponentChildren = VNodeChild | VNodeChild[] | null
+export type ComponentChildren = VNodeChild | VNodeChild[] | boolean | null
 
 /**
  * 组件渲染函数返回的结果类型。

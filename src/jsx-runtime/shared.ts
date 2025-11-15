@@ -23,7 +23,7 @@ export function h<T extends ElementType>(
 ) {
   /* 将剩余参数收集到 children 字段中，再交给 createJSXNode 统一处理 */
   const normalizedProps = {
-    ...(props ?? ({} as ElementProps<T>)),
+    ...(props ?? {}),
     children,
   } as ElementProps<T>
   return createJSXNode(type, normalizedProps)

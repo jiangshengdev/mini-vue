@@ -33,9 +33,7 @@ export function createVNode<T extends ElementType>(
 ): VNode<T> {
   const { type, rawProps = null, key } = options
   /* 复制一份 props，避免外部对象在后续流程中被意外修改 */
-  let props: Record<string, unknown> | null = rawProps
-    ? { ...(rawProps as object) }
-    : null
+  let props: Record<string, unknown> | null = rawProps ? { ...rawProps } : null
   let children: VNodeChild[] = []
 
   if (props && 'children' in props) {

@@ -1,7 +1,5 @@
 import type { ElementProps, ElementType, VNode, VNodeChild } from '@/jsx/vnode'
-import { createVNode, Fragment } from '@/jsx/vnode'
-
-export { Fragment }
+import { createVNode } from '@/jsx/vnode'
 
 /**
  * 低阶的 JSX 创建函数，直接封装到 createVNode 调用。

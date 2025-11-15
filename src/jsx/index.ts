@@ -3,4 +3,5 @@
  */
 export { createApp } from './createApp.ts'
 export { render } from './renderer/index.ts'
+export { Fragment } from './vnode/index.ts'
 export type { ComponentType } from './vnode/index.ts'

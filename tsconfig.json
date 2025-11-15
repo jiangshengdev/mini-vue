@@ -13,11 +13,9 @@
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
     "jsx": "react-jsx",
-    "jsxImportSource": "@/jsx-runtime",
+    "jsxImportSource": "@",
     "paths": {
-      "@/*": ["./src/*"],
-      "@/jsx-runtime": ["./src/jsx-runtime/index.ts"],
-      "@/jsx-runtime/*": ["./src/jsx-runtime/*"]
+      "@/*": ["./src/*"]
     },
     "noEmit": true,
 

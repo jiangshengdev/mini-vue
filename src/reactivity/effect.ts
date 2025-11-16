@@ -9,10 +9,12 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
    * 保存用户传入的副作用函数作为核心执行单元。
    */
   private readonly fn: () => T
+
   /**
    * 记录当前副作用绑定的依赖集合，方便统一清理。
    */
   private deps: Dep[] = []
+
   /**
    * 存储由外部注册的清理回调，管理嵌套副作用的生命周期。
    */

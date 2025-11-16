@@ -12,6 +12,7 @@ class ReactiveCache {
    * 缓存原始对象到代理对象的映射，便于复用同一 Proxy。
    */
   private readonly rawToReactive = new WeakMap<object, object>()
+
   /**
    * 缓存代理对象到原始对象的映射，支持反查判定。
    */

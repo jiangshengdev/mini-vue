@@ -11,6 +11,7 @@ class EffectScope {
    * 保存所有入栈的副作用实例，维护调用栈结构。
    */
   private readonly stack: EffectInstance[] = []
+
   /**
    * 指向当前正在执行的副作用，便于依赖收集阶段引用。
    */

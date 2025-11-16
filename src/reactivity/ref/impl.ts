@@ -10,7 +10,9 @@ import type { Dep } from '../shared/types.ts'
  */
 export class RefImpl<T> implements Ref<T>, DepTarget {
   readonly dep: Dep = new Set()
+
   readonly [REF_FLAG] = true as const
+
   private _rawValue: T
 
   /**
@@ -59,7 +61,9 @@ export class ObjectRefImpl<
   implements Ref<T[K]>, RefMarker
 {
   readonly [REF_FLAG] = true as const
+
   private readonly target: T
+
   private readonly key: K
 
   /**

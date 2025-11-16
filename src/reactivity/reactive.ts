@@ -49,11 +49,13 @@ const UNSUPPORTED_TYPE_MESSAGE = 'reactive 目前仅支持普通对象（不含�
  */
 export function reactive<T extends object>(target: T): T
 export function reactive<T>(target: T): T
+
 export function reactive(target: unknown) {
   /* 非对象值无法建立响应式代理，直接返回原值 */
   if (!isObject(target)) {
     return target
   }
+
   /* 当前实现尚未覆盖数组代理，直接抛出友好错误 */
   if (Array.isArray(target)) {
     throw new TypeError(UNSUPPORTED_TYPE_MESSAGE)

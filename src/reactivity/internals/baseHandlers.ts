@@ -12,6 +12,7 @@ const mutableGet: ProxyHandler<Record<PropertyKey, unknown>>['get'] =
 
     /* 读取属性同时收集依赖，连接目标字段与当前副作用 */
     track(target, key)
+
     if (isObject(rawValue)) {
       /* 对嵌套对象进行懒加载代理，避免初始化时递归遍历 */
       return reactive(rawValue)

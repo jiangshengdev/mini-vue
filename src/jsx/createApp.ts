@@ -30,6 +30,7 @@ export function createApp(
     }
 
     container = resolveContainer(target)
+
     if (!container) {
       throw new Error('createApp: 未找到可用的挂载容器')
     }
@@ -48,6 +49,7 @@ export function createApp(
     if (!container) {
       return
     }
+
     container.textContent = ''
     isMounted = false
     container = null

@@ -36,6 +36,7 @@ export function h<T extends ElementType>(
       key = propsCopy.key as PropertyKey
       delete propsCopy.key
     }
+
     normalizedProps = Object.keys(propsCopy).length
       ? (propsCopy as ElementProps<T>)
       : undefined

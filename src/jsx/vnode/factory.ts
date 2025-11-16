@@ -43,6 +43,7 @@ export function createVNode<T extends ElementType>(
     /* children 从 props 中移除，避免与 children 数组重复保存 */
     delete props.children
     children = normalized
+
     if (Object.keys(props).length === 0) {
       props = null
     }

@@ -44,6 +44,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
     this.resetState()
     /* 将当前实例压入 effect 栈，允许 track 捕获它 */
     effectScope.push(this)
+
     try {
       return this.fn()
     } finally {
@@ -59,6 +60,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
     if (!this._active) {
       return
     }
+
     this._active = false
     /* 停止后立即清理依赖关系与清理回调，释放资源 */
     this.resetState()
@@ -87,6 +89,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
       for (const dep of this.deps) {
         dep.delete(this)
       }
+
       this.deps = []
     }
 
@@ -95,6 +98,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
       const cleanupFns = this.cleanupFns.slice()
 
       this.cleanupFns = []
+
       for (const cleanup of cleanupFns) {
         cleanup()
       }

@@ -41,6 +41,7 @@ export function mountChild(
         fragment.appendChild(node)
       }
     }
+
     container.appendChild(fragment)
 
     return fragment
@@ -105,6 +106,7 @@ function mountComponent<T extends ComponentType>(
   } else if (childCount > 1) {
     props.children = vnode.children
   }
+
   /* 调用函数组件得到下一层 JSX 子树，再复用 mountChild 继续递归挂载 */
   const subtree = component(props)
 

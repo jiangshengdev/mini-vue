@@ -24,6 +24,7 @@ describe('effect', () => {
 
     function effectFn() {
       dummy = state.count
+
       return dummy
     }
 

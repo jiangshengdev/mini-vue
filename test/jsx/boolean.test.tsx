@@ -38,7 +38,7 @@ describe('jsx boolean children', () => {
 
     const view = within(container)
     expect(view.getByText('keep')).toBeDefined()
-    expect(container.querySelectorAll('span')).toHaveLength(1)
+    expect(view.queryByText('true')).toBeNull()
   })
 
   it('数组 children 中的布尔值会被移除', () => {
@@ -54,7 +54,8 @@ describe('jsx boolean children', () => {
     const view = within(container)
     expect(view.getByText('first')).toHaveTextContent('first')
     expect(view.getByText('second')).toHaveTextContent('second')
-    expect(container.querySelectorAll('span')).toHaveLength(2)
+    expect(view.queryByText('true')).toBeNull()
+    expect(view.queryByText('false')).toBeNull()
   })
 
   it('直接 render(false, container) 不应生成文本 false', () => {

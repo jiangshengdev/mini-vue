@@ -6,6 +6,7 @@ import eslintConfigPrettier from 'eslint-config-prettier/flat'
 import stylistic from '@stylistic/eslint-plugin'
 
 export default defineConfig([
+  stylistic.configs.recommended,
   {
     files: ['**/*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}'],
     plugins: { js },
@@ -53,6 +54,5 @@ export default defineConfig([
       'no-unused-vars': 'off',
     },
   },
-  stylistic.configs.recommended,
   eslintConfigPrettier,
 ])

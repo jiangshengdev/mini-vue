@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { Fragment } from '@/jsx-runtime'
-import { type ComponentType, render } from '@/index.ts'
+import type { ComponentType } from '@/index.ts'
+import { render } from '@/index.ts'
 
 describe('jsx basic rendering', () => {
   it('渲染基本元素与文本', () => {

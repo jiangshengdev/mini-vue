@@ -21,6 +21,11 @@ export function h<T extends ElementType>(
   props?: ElementProps<T>,
   ...children: VNodeChild[]
 ) {
+  if (children.length === 0) {
+    /* 没有通过可变参数传入 children 时保留原 props.children */
+    return createJSXNode(type, props)
+  }
+
   /* 将剩余参数收集到 children 字段中，再交给 createJSXNode 统一处理 */
   const normalizedProps = {
     ...(props ?? {}),

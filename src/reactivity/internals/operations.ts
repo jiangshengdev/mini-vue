@@ -1,5 +1,5 @@
-import { effectScope } from './effectScope.ts'
-import type { Dep, EffectInstance } from '../shared/types.ts'
+import { collectEffect, dispatchEffects } from './depUtils.ts'
+import type { Dep } from '../shared/types.ts'
 
 /**
  * 集中管理对象属性与副作用之间的依赖关系。
@@ -14,23 +14,10 @@ class DepRegistry {
    * 把当前活跃副作用加入目标字段的依赖集合。
    */
   track(target: object, key: PropertyKey) {
-    /* 仅在存在活跃副作用时才执行依赖收集 */
-    const currentEffect = effectScope.current
-
-    if (!currentEffect) {
-      return
-    }
-
     /* 获取或创建目标字段对应的依赖集合 */
     const dep = this.ensureDep(target, key)
 
-    if (dep.has(currentEffect)) {
-      return
-    }
-
-    /* 建立依赖关系，并登记到副作用的反向依赖列表 */
-    dep.add(currentEffect)
-    currentEffect.recordDependency(dep)
+    collectEffect(dep)
   }
 
   /**
@@ -44,13 +31,7 @@ class DepRegistry {
       return
     }
 
-    /* 通过快照避免执行期间对同一集合的结构性修改 */
-    for (const effect of this.snapshot(dep)) {
-      /* 跳过当前正在运行或已失效的副作用 */
-      if (this.shouldRun(effect)) {
-        effect.run()
-      }
-    }
+    dispatchEffects(dep)
   }
 
   /**
@@ -81,20 +62,6 @@ class DepRegistry {
    */
   private existingDep(target: object, key: PropertyKey) {
     return this.targetMap.get(target)?.get(key)
-  }
-
-  /**
-   * 返回依赖集合的快照，确保触发期间的迭代稳定。
-   */
-  private snapshot(dep: Dep): Dep {
-    return new Set(dep)
-  }
-
-  /**
-   * 避免当前正在运行的副作用以及已停止的副作用被重复触发。
-   */
-  private shouldRun(effect: EffectInstance) {
-    return effect !== effectScope.current && effect.active
   }
 }
 

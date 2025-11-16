@@ -2,7 +2,7 @@ import { reactive } from '../reactive.ts'
 import { isObject } from '@/shared/utils.ts'
 import type { Ref } from './types.ts'
 import { type DepTarget, REF_FLAG, type RefMarker } from './internals/types.ts'
-import { trackRefValue, triggerRefValue } from './internals/dep.ts'
+import { collectEffect, dispatchEffects } from '../internals/depUtils.ts'
 import type { Dep } from '../shared/types.ts'
 
 export class RefImpl<T> implements Ref<T>, DepTarget {
@@ -18,7 +18,7 @@ export class RefImpl<T> implements Ref<T>, DepTarget {
   private _value: T
 
   get value(): T {
-    trackRefValue(this)
+    collectEffect(this.dep)
 
     return this._value
   }
@@ -30,7 +30,7 @@ export class RefImpl<T> implements Ref<T>, DepTarget {
 
     this._rawValue = newValue
     this._value = convert(newValue)
-    triggerRefValue(this)
+    dispatchEffects(this.dep)
   }
 }
 

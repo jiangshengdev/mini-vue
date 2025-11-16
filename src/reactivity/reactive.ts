@@ -2,7 +2,7 @@
  * 提供 reactive 工具函数，负责缓存并复用响应式 Proxy 实例。
  */
 import { mutableHandlers } from './internals/baseHandlers.ts'
-import { isObject } from '../shared/utils.ts'
+import { isObject } from '@/shared/utils.ts'
 
 /**
  * 封装原对象与代理实例之间的双向缓存。

@@ -1,4 +1,4 @@
-import type { ComponentResult } from '@/jsx/vnode'
+import type { ComponentResult } from '../vnode'
 import type { MountTarget } from './mount.ts'
 import { mountChild } from './mount.ts'
 

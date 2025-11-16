@@ -4,8 +4,8 @@ import type {
   ElementProps,
   VNode,
   VNodeChild,
-} from '@/jsx/vnode'
-import { isVNode } from '@/jsx/vnode'
+} from '../vnode'
+import { isVNode } from '../vnode'
 import { applyProps } from './props.ts'
 
 /**

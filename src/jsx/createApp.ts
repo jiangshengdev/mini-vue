@@ -1,5 +1,5 @@
-import type { ComponentType } from '@/jsx/vnode'
-import { render } from '@/jsx/renderer'
+import type { ComponentType } from './vnode'
+import { render } from './renderer'
 
 /**
  * createApp 返回的应用实例接口，提供挂载与卸载能力。

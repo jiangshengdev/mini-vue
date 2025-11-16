@@ -21,6 +21,10 @@ export default defineConfig([
           caughtErrorsIgnorePattern: '^_',
         },
       ],
+      '@stylistic/padding-line-between-statements': [
+        'error',
+        { blankLine: 'always', prev: '*', next: 'return' },
+      ],
     },
   },
   ...tseslint.configs.recommended,

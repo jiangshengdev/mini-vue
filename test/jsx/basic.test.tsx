@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
-import { fireEvent, within } from '@testing-library/dom'
+import { within } from '@testing-library/dom'
+import userEvent from '@testing-library/user-event'
 import { Fragment } from '@/jsx-runtime'
 import type { ComponentType } from '@/index.ts'
 import { render } from '@/index.ts'
@@ -23,7 +24,7 @@ describe('jsx basic rendering', () => {
     container.remove()
   })
 
-  it('绑定事件并响应', () => {
+  it('绑定事件并响应', async () => {
     const container = document.createElement('div')
     const handleClick = vi.fn()
     interface ButtonProps {
@@ -42,7 +43,8 @@ describe('jsx basic rendering', () => {
     render(<Button label="click" onClick={handleClick} />, container)
 
     const button = within(container).getByRole('button', { name: 'click' })
-    fireEvent.click(button)
+    const user = userEvent.setup()
+    await user.click(button)
     expect(handleClick).toHaveBeenCalledTimes(1)
   })
 

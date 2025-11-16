@@ -31,6 +31,7 @@ export default defineConfig([
           next: ['const', 'let', 'var'],
         },
       ],
+      '@stylistic/lines-between-class-members': ['error', 'always'],
     },
   },
   ...tseslint.configs.recommended,

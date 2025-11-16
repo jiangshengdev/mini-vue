@@ -28,4 +28,11 @@ describe('jsx-runtime h helper', () => {
     expect(vnode.children[0]).toBe('text-child')
     expect(vnode.props).toEqual({ id: 'foo' })
   })
+
+  it('将 props.key 提升为 vnode.key', () => {
+    const vnode = h('li', { key: 'row-1', children: 'row' })
+
+    expect(vnode.key).toBe('row-1')
+    expect(vnode.props).toBeNull()
+  })
 })

@@ -26,15 +26,29 @@ export function h<T extends ElementType>(
   props?: ElementProps<T>,
   ...children: ComponentChildren[]
 ) {
+  let key: PropertyKey | undefined
+  let normalizedProps: ElementProps<T> | undefined
+
+  if (props) {
+    const propsCopy = { ...props } as Record<string, unknown>
+    if ('key' in propsCopy) {
+      key = propsCopy.key as PropertyKey
+      delete propsCopy.key
+    }
+    normalizedProps = Object.keys(propsCopy).length
+      ? (propsCopy as ElementProps<T>)
+      : undefined
+  }
+
   if (children.length === 0) {
     /* 没有通过可变参数传入 children 时保留原 props.children */
-    return createJSXNode(type, props)
+    return createJSXNode(type, normalizedProps, key)
   }
 
   /* 将剩余参数收集到 children 字段中，再交给 createJSXNode 统一处理 */
-  const normalizedProps = {
-    ...(props ?? {}),
+  const propsWithChildren = {
+    ...(normalizedProps ?? {}),
     children,
   } as ElementProps<T>
-  return createJSXNode(type, normalizedProps)
+  return createJSXNode(type, propsWithChildren, key)
 }

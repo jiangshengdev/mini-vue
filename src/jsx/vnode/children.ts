@@ -6,6 +6,7 @@ import { isVNode } from './guards.ts'
  */
 export function normalizeChildren(input: unknown): VNodeChild[] {
   const result: VNodeChild[] = []
+
   collectChildren(input, result)
 
   return result

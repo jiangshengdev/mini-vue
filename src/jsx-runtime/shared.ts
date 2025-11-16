@@ -31,6 +31,7 @@ export function h<T extends ElementType>(
 
   if (props) {
     const propsCopy = { ...props } as Record<string, unknown>
+
     if ('key' in propsCopy) {
       key = propsCopy.key as PropertyKey
       delete propsCopy.key

@@ -39,6 +39,7 @@ export function createVNode<T extends ElementType>(
   if (props && 'children' in props) {
     /* 将 props.children 归一化为内部统一使用的 children 数组 */
     const normalized = normalizeChildren(props.children)
+
     /* children 从 props 中移除，避免与 children 数组重复保存 */
     delete props.children
     children = normalized

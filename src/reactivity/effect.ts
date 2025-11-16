@@ -93,6 +93,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
     if (this.cleanupFns.length > 0) {
       /* 拷贝清理函数，避免执行过程中追加新清理导致循环紊乱 */
       const cleanupFns = this.cleanupFns.slice()
+
       this.cleanupFns = []
       for (const cleanup of cleanupFns) {
         cleanup()

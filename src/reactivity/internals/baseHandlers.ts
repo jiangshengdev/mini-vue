@@ -9,6 +9,7 @@ const mutableGet: ProxyHandler<Record<PropertyKey, unknown>>['get'] =
   function getReactiveValue(target, key, receiver) {
     /* 使用 Reflect 读取原始值，保持与原生访问一致的 this 绑定与行为 */
     const rawValue = Reflect.get(target, key, receiver)
+
     /* 读取属性同时收集依赖，连接目标字段与当前副作用 */
     track(target, key)
     if (isObject(rawValue)) {
@@ -28,6 +29,7 @@ const mutableSet: ProxyHandler<Record<PropertyKey, unknown>>['set'] =
     const previousValue = Reflect.get(target, key, receiver)
     /* 调用 Reflect 完成赋值，确保符合原生语义 */
     const applied = Reflect.set(target, key, value, receiver)
+
     if (!Object.is(previousValue, value)) {
       /* 值发生实际变化时才通知依赖，规避无效触发 */
       trigger(target, key)

@@ -33,6 +33,7 @@ class ReactiveCache {
    */
   create(target: Record<PropertyKey, unknown>) {
     const proxy = new Proxy(target, mutableHandlers)
+
     this.rawToReactive.set(target, proxy)
     this.reactiveToRaw.set(proxy, target)
 
@@ -59,6 +60,7 @@ export function reactive(target: unknown) {
   }
 
   const cached = reactiveCache.getExisting(target)
+
   if (cached) {
     /* 复用已有代理，确保同一原对象始终返回同一 Proxy */
     return cached as typeof target

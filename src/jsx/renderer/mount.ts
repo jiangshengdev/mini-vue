@@ -33,8 +33,10 @@ export function mountChild(
   /* 数组 children 表示一组兄弟节点，使用 fragment 承载后整体插入 */
   if (Array.isArray(child)) {
     const fragment = document.createDocumentFragment()
+
     for (const item of child) {
       const node = mountChild(item, fragment)
+
       if (node) {
         fragment.appendChild(node)
       }
@@ -47,6 +49,7 @@ export function mountChild(
   /* 原始字符串与数字通过 Text 节点渲染到容器中 */
   if (typeof child === 'string' || typeof child === 'number') {
     const text = document.createTextNode(String(child))
+
     container.appendChild(text)
 
     return text
@@ -59,6 +62,7 @@ export function mountChild(
 
   /* 其余非常规类型统一转为字符串文本，作为调试友好的兜底行为 */
   const text = document.createTextNode(String(child))
+
   container.appendChild(text)
 
   return text
@@ -95,6 +99,7 @@ function mountComponent<T extends ComponentType>(
   const props = (vnode.props ? { ...vnode.props } : {}) as ElementProps<T>
   /* 若 VNode 挂载了 children，将其按照数量转换后传递给组件 */
   const childCount = vnode.children.length
+
   if (childCount === 1) {
     props.children = vnode.children[0]
   } else if (childCount > 1) {
@@ -118,6 +123,7 @@ function mountElement(
   const el = document.createElement(type)
   /* 将 VNode 上的属性映射到真实 DOM，包括事件、class、style 等 */
   const props = vnode.props as Record<string, unknown> | null
+
   applyProps(el, props)
   /* 递归挂载当前元素的所有子节点，保持 JSX 中声明的顺序 */
   mountChildren(vnode.children, el)

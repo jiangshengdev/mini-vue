@@ -34,6 +34,7 @@ export function applyProps(el: Element, props: Record<string, unknown> | null) {
     /* onXxx 形式的 props 解析为原生事件监听 */
     if (isEventProp(key) && typeof value === 'function') {
       const eventName = key.slice(2).toLowerCase()
+
       el.addEventListener(eventName, value as EventListener)
       continue
     }
@@ -68,6 +69,7 @@ function applyStyle(el: HTMLElement, value: unknown) {
     )) {
       /* 将 null / undefined 等空值转为空字符串 */
       const resolved = styleValue ?? ''
+
       if (name in el.style) {
         /* 命中内联样式字段，允许 camelCase 名称 */
         ;(el.style as WritableStyle)[name] = String(resolved)

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { effect, reactive } from '../src'
+import { effect, reactive } from '@/index.ts'
 
 describe('effect', () => {
   it('注册后会立刻执行一次副作用', () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { reactive } from '../src'
+import { reactive } from '@/index.ts'
 
 describe('reactive', () => {
   it('创建后可读取和写入属性', () => {

@@ -1,6 +1,6 @@
 import { ObjectRefImpl, RefImpl } from './impl.ts'
-import { REF_FLAG, type RefMarker } from './internals/types.ts'
 import type { Ref } from './types.ts'
+import { REF_FLAG, type RefMarker } from './types.ts'
 
 export function ref<T>(value: T): Ref<T> {
   if (isRef(value)) {

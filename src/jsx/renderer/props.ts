@@ -1,3 +1,5 @@
+type WritableStyle = CSSStyleDeclaration & Record<string, string | null>
+
 function isEventProp(key: string) {
   return key.startsWith('on') && key.length > 2
 }
@@ -64,7 +66,13 @@ function applyStyle(el: HTMLElement, value: unknown) {
     )) {
       /* 将 null / undefined 等空值转为空字符串 */
       const resolved = styleValue ?? ''
-      el.style.setProperty(name, String(resolved))
+      if (name in el.style) {
+        /* 命中内联样式字段，允许 camelCase 名称 */
+        ;(el.style as WritableStyle)[name] = String(resolved)
+      } else {
+        /* 兜底写入，例如 CSS 变量或未识别字段 */
+        el.style.setProperty(name, String(resolved))
+      }
     }
   }
 }

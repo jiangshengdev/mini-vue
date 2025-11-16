@@ -1,4 +1,9 @@
-import type { ElementProps, ElementType, VNode, VNodeChild } from '@/jsx/vnode'
+import type {
+  ComponentChildren,
+  ElementProps,
+  ElementType,
+  VNode,
+} from '@/jsx/vnode'
 import { createVNode } from '@/jsx/vnode'
 
 /**
@@ -19,7 +24,7 @@ export function createJSXNode<T extends ElementType>(
 export function h<T extends ElementType>(
   type: T,
   props?: ElementProps<T>,
-  ...children: VNodeChild[]
+  ...children: ComponentChildren[]
 ) {
   if (children.length === 0) {
     /* 没有通过可变参数传入 children 时保留原 props.children */

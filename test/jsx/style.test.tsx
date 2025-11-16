@@ -6,17 +6,21 @@ import { createTestContainer } from '../setup.ts'
 describe('jsx style props', () => {
   it('字符串 style 可以直接写入', () => {
     const container = createTestContainer()
+
     render(<div style="color: blue;">text</div>, container)
 
     const el = within(container).getByText('text')
+
     expect(el).toHaveAttribute('style', expect.stringContaining('color: blue'))
   })
 
   it('对象 style 支持 camelCase 键名', () => {
     const container = createTestContainer()
+
     render(<div style={{ backgroundColor: 'red' }}>text</div>, container)
 
     const el = within(container).getByText('text')
+
     expect(el).toHaveAttribute(
       'style',
       expect.stringContaining('background-color: red'),
@@ -25,9 +29,11 @@ describe('jsx style props', () => {
 
   it('对象 style 支持 CSS 变量兜底', () => {
     const container = createTestContainer()
+
     render(<div style={{ '--main-color': 'pink' }}>text</div>, container)
 
     const el = within(container).getByText('text') as HTMLElement
+
     expect(el).toHaveStyle('--main-color: pink')
   })
 })

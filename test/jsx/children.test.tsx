@@ -10,10 +10,12 @@ describe('jsx children shape', () => {
 
     const Capture: ComponentType = (props) => {
       received.push(props.children)
+
       return <section>{props.children}</section>
     }
 
     const container = createTestContainer()
+
     render(<Capture />, container)
 
     expect(received).toHaveLength(1)
@@ -26,10 +28,12 @@ describe('jsx children shape', () => {
 
     const Capture: ComponentType = (props) => {
       received.push(props.children)
+
       return <section>{props.children}</section>
     }
 
     const container = createTestContainer()
+
     render(
       <Capture>
         <span>only</span>
@@ -39,10 +43,12 @@ describe('jsx children shape', () => {
 
     expect(received).toHaveLength(1)
     const child = received[0]
+
     expect(child).toBeDefined()
     expect(Array.isArray(child)).toBe(false)
 
     const view = within(container.querySelector('section')!)
+
     expect(view.getByText('only')).toHaveTextContent('only')
   })
 
@@ -51,10 +57,12 @@ describe('jsx children shape', () => {
 
     const Capture: ComponentType = (props) => {
       received.push(props.children)
+
       return <section>{props.children}</section>
     }
 
     const container = createTestContainer()
+
     render(
       <Capture>
         <span>first</span>
@@ -68,6 +76,7 @@ describe('jsx children shape', () => {
     expect(received[0]).toHaveLength(2)
 
     const view = within(container.querySelector('section')!)
+
     expect(view.getByText('first')).toBeDefined()
     expect(view.getByText('second')).toBeDefined()
   })

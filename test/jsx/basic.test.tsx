@@ -18,6 +18,7 @@ describe('jsx basic rendering', () => {
     )
 
     const card = within(container).getByText('hello')
+
     expect(card).toBeInTheDocument()
     expect(card).toHaveTextContent('hello')
   })
@@ -25,6 +26,7 @@ describe('jsx basic rendering', () => {
   it('绑定事件并响应', async () => {
     const container = createTestContainer()
     const handleClick = vi.fn()
+
     interface ButtonProps {
       label: string
       onClick: () => void
@@ -42,6 +44,7 @@ describe('jsx basic rendering', () => {
 
     const button = within(container).getByRole('button', { name: 'click' })
     const user = userEvent.setup()
+
     await user.click(button)
     expect(handleClick).toHaveBeenCalledTimes(1)
   })
@@ -62,6 +65,7 @@ describe('jsx basic rendering', () => {
     }
 
     const container = createTestContainer()
+
     render(
       <Wrapper title="Hi">
         <Fragment>
@@ -73,6 +77,7 @@ describe('jsx basic rendering', () => {
     )
 
     const view = within(container)
+
     expect(view.getByRole('heading', { name: 'Hi' })).toBeInTheDocument()
     expect(view.getByText('first')).toBeInTheDocument()
     expect(view.getByText('second')).toBeInTheDocument()

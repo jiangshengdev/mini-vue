@@ -18,6 +18,7 @@ describe('jsx boolean children', () => {
 
     render(<FlagView flag={false} />, container)
     const view = within(container)
+
     expect(view.queryByText('ok')).toBeNull()
     expect(container.firstElementChild).toBeEmptyDOMElement()
 
@@ -37,6 +38,7 @@ describe('jsx boolean children', () => {
     )
 
     const view = within(container)
+
     expect(view.getByText('keep')).toBeDefined()
     expect(view.queryByText('true')).toBeNull()
   })
@@ -52,6 +54,7 @@ describe('jsx boolean children', () => {
     )
 
     const view = within(container)
+
     expect(view.getByText('first')).toHaveTextContent('first')
     expect(view.getByText('second')).toHaveTextContent('second')
     expect(view.queryByText('true')).toBeNull()

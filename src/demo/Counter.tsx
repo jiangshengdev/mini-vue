@@ -7,6 +7,7 @@ export const Counter: ComponentType = () => {
 
   effect(() => {
     const label = `count is ${state.count}`
+
     if (buttonEl) {
       buttonEl.textContent = label
     }

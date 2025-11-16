@@ -36,6 +36,7 @@ describe('effect', () => {
     expect(dummy).toBe(2)
 
     const result = handle.run()
+
     expect(result).toBe(2)
     expect(dummy).toBe(2)
   })

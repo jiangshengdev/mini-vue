@@ -5,6 +5,7 @@ const mountedContainers = new Set<HTMLElement>()
 
 export function createTestContainer(): HTMLDivElement {
   const el = document.createElement('div')
+
   document.body.appendChild(el)
   mountedContainers.add(el)
 

@@ -7,7 +7,7 @@ import stylistic from '@stylistic/eslint-plugin'
 
 export default defineConfig([
   {
-    files: ['**/*.{js,mjs,cjs,ts,mts,cts}'],
+    files: ['**/*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}'],
     plugins: { js },
     extends: ['js/recommended'],
     languageOptions: { globals: { ...globals.browser, ...globals.node } },
@@ -38,7 +38,7 @@ export default defineConfig([
   },
   ...tseslint.configs.recommended,
   {
-    files: ['**/*.{ts,mts,cts}'],
+    files: ['**/*.{ts,tsx,mts,cts}'],
     rules: {
       // TS 版本规则同样允许下划线前缀，保持与官方 effect 参数一致
       '@typescript-eslint/no-unused-vars': [

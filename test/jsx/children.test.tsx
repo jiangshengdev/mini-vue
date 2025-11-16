@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { within } from '@testing-library/dom'
 import type { ComponentType } from '@/index.ts'
 import { render } from '@/index.ts'
 
@@ -8,7 +9,7 @@ describe('jsx children shape', () => {
 
     const Capture: ComponentType = (props) => {
       received.push(props.children)
-      return null
+      return <section>{props.children}</section>
     }
 
     const container = document.createElement('div')
@@ -16,6 +17,7 @@ describe('jsx children shape', () => {
 
     expect(received).toHaveLength(1)
     expect(received[0]).toBeUndefined()
+    expect(container.querySelector('section')).toBeEmptyDOMElement()
   })
 
   it('单个 children 时 props.children 为该节点', () => {
@@ -23,7 +25,7 @@ describe('jsx children shape', () => {
 
     const Capture: ComponentType = (props) => {
       received.push(props.children)
-      return null
+      return <section>{props.children}</section>
     }
 
     const container = document.createElement('div')
@@ -38,6 +40,9 @@ describe('jsx children shape', () => {
     const child = received[0]
     expect(child).toBeDefined()
     expect(Array.isArray(child)).toBe(false)
+
+    const view = within(container.querySelector('section')!)
+    expect(view.getByText('only')).toHaveTextContent('only')
   })
 
   it('多个 children 时 props.children 为数组', () => {
@@ -45,7 +50,7 @@ describe('jsx children shape', () => {
 
     const Capture: ComponentType = (props) => {
       received.push(props.children)
-      return null
+      return <section>{props.children}</section>
     }
 
     const container = document.createElement('div')
@@ -60,5 +65,9 @@ describe('jsx children shape', () => {
     expect(received).toHaveLength(1)
     expect(Array.isArray(received[0])).toBe(true)
     expect(received[0]).toHaveLength(2)
+
+    const view = within(container.querySelector('section')!)
+    expect(view.getByText('first')).toBeDefined()
+    expect(view.getByText('second')).toBeDefined()
   })
 })

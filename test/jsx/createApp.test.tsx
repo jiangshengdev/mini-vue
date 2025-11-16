@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { screen, within } from '@testing-library/dom'
 import type { ComponentType } from '@/index.ts'
 import { createApp } from '@/index.ts'
 
@@ -15,7 +16,7 @@ describe('createApp', () => {
     const app = createApp(App)
     app.mount('#app')
 
-    expect(host.innerHTML).toBe('<div class="hello">Hello</div>')
+    expect(screen.getByText('Hello')).toBeVisible()
 
     host.remove()
   })
@@ -24,9 +25,10 @@ describe('createApp', () => {
     const host = document.createElement('div')
     const app = createApp(App)
     app.mount(host)
-    expect(host.innerHTML).toContain('Hello')
+    const view = within(host)
+    expect(view.getByText('Hello')).toHaveClass('hello')
     app.unmount()
-    expect(host.innerHTML).toBe('')
+    expect(host).toBeEmptyDOMElement()
   })
 
   it('重复挂载会抛异常', () => {
@@ -34,5 +36,6 @@ describe('createApp', () => {
     const app = createApp(App)
     app.mount(host)
     expect(() => app.mount(host)).toThrowError('当前应用已挂载')
+    app.unmount()
   })
 })

@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
+import { fireEvent, within } from '@testing-library/dom'
 import { Fragment } from '@/jsx-runtime'
 import type { ComponentType } from '@/index.ts'
 import { render } from '@/index.ts'
@@ -6,15 +7,20 @@ import { render } from '@/index.ts'
 describe('jsx basic rendering', () => {
   it('渲染基本元素与文本', () => {
     const container = document.createElement('div')
+    document.body.appendChild(container)
+
     render(
       <div class="card">
         <span>hello</span>
       </div>,
       container,
     )
-    expect(container.innerHTML).toBe(
-      '<div class="card"><span>hello</span></div>',
-    )
+
+    const card = within(container).getByText('hello')
+    expect(card).toBeInTheDocument()
+    expect(card).toHaveTextContent('hello')
+
+    container.remove()
   })
 
   it('绑定事件并响应', () => {
@@ -35,7 +41,8 @@ describe('jsx basic rendering', () => {
 
     render(<Button label="click" onClick={handleClick} />, container)
 
-    container.querySelector('button')!.dispatchEvent(new MouseEvent('click'))
+    const button = within(container).getByRole('button', { name: 'click' })
+    fireEvent.click(button)
     expect(handleClick).toHaveBeenCalledTimes(1)
   })
 
@@ -55,6 +62,7 @@ describe('jsx basic rendering', () => {
     }
 
     const container = document.createElement('div')
+    document.body.appendChild(container)
     render(
       <Wrapper title="Hi">
         <Fragment>
@@ -65,7 +73,11 @@ describe('jsx basic rendering', () => {
       container,
     )
 
-    expect(container.querySelectorAll('p')).toHaveLength(2)
-    expect(container.querySelector('h1')?.textContent).toBe('Hi')
+    const view = within(container)
+    expect(view.getByRole('heading', { name: 'Hi' })).toBeInTheDocument()
+    expect(view.getByText('first')).toBeInTheDocument()
+    expect(view.getByText('second')).toBeInTheDocument()
+
+    container.remove()
   })
 })

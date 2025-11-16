@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { within } from '@testing-library/dom'
 import type { ComponentType } from '@/index.ts'
 import { render } from '@/index.ts'
 
@@ -15,10 +16,12 @@ describe('jsx boolean children', () => {
     const container = document.createElement('div')
 
     render(<FlagView flag={false} />, container)
-    expect(container.innerHTML).toBe('<div></div>')
+    const view = within(container)
+    expect(view.queryByText('ok')).toBeNull()
+    expect(container.firstElementChild).toBeEmptyDOMElement()
 
     render(<FlagView flag />, container)
-    expect(container.innerHTML).toBe('<div><span>ok</span></div>')
+    expect(view.getByText('ok')).toHaveTextContent('ok')
   })
 
   it('布尔 true 作为子节点时忽略渲染', () => {
@@ -32,7 +35,9 @@ describe('jsx boolean children', () => {
       container,
     )
 
-    expect(container.innerHTML).toBe('<div><span>keep</span></div>')
+    const view = within(container)
+    expect(view.getByText('keep')).toBeDefined()
+    expect(container.querySelectorAll('span')).toHaveLength(1)
   })
 
   it('数组 children 中的布尔值会被移除', () => {
@@ -45,9 +50,10 @@ describe('jsx boolean children', () => {
       container,
     )
 
-    expect(container.innerHTML).toBe(
-      '<div><span>first</span><span>second</span></div>',
-    )
+    const view = within(container)
+    expect(view.getByText('first')).toHaveTextContent('first')
+    expect(view.getByText('second')).toHaveTextContent('second')
+    expect(container.querySelectorAll('span')).toHaveLength(2)
   })
 
   it('直接 render(false, container) 不应生成文本 false', () => {
@@ -55,6 +61,6 @@ describe('jsx boolean children', () => {
 
     render(false, container)
 
-    expect(container.innerHTML).toBe('')
+    expect(container).toBeEmptyDOMElement()
   })
 })

@@ -65,5 +65,6 @@ function resolveContainer(target: string | Element): Element | null {
   if (typeof target === 'string') {
     return document.querySelector(target)
   }
+
   return target
 }

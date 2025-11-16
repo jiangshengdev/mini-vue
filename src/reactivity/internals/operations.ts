@@ -67,6 +67,7 @@ class DepRegistry {
       dep = new Set()
       depsMap.set(key, dep)
     }
+
     return dep
   }
 

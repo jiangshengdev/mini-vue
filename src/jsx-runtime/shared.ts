@@ -50,5 +50,6 @@ export function h<T extends ElementType>(
     ...(normalizedProps ?? {}),
     children,
   } as ElementProps<T>
+
   return createJSXNode(type, propsWithChildren, key)
 }

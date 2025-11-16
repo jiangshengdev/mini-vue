@@ -24,6 +24,7 @@ class ReactiveCache {
     if (this.reactiveToRaw.has(target)) {
       return target
     }
+
     return this.rawToReactive.get(target)
   }
 
@@ -34,6 +35,7 @@ class ReactiveCache {
     const proxy = new Proxy(target, mutableHandlers)
     this.rawToReactive.set(target, proxy)
     this.reactiveToRaw.set(proxy, target)
+
     return proxy
   }
 }

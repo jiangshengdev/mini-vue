@@ -40,6 +40,7 @@ export function mountChild(
       }
     }
     container.appendChild(fragment)
+
     return fragment
   }
 
@@ -47,6 +48,7 @@ export function mountChild(
   if (typeof child === 'string' || typeof child === 'number') {
     const text = document.createTextNode(String(child))
     container.appendChild(text)
+
     return text
   }
 
@@ -58,6 +60,7 @@ export function mountChild(
   /* 其余非常规类型统一转为字符串文本，作为调试友好的兜底行为 */
   const text = document.createTextNode(String(child))
   container.appendChild(text)
+
   return text
 }
 
@@ -68,6 +71,7 @@ function mountVNode(vnode: VNode, container: MountTarget): MountResult {
   /* 函数组件通过执行组件函数拿到子树，再递归挂载 */
   if (typeof vnode.type === 'function') {
     const component = vnode.type as ComponentType
+
     return mountComponent(
       component,
       vnode as VNode<typeof component>,
@@ -98,6 +102,7 @@ function mountComponent<T extends ComponentType>(
   }
   /* 调用函数组件得到下一层 JSX 子树，再复用 mountChild 继续递归挂载 */
   const subtree = component(props)
+
   return mountChild(subtree, container)
 }
 
@@ -117,6 +122,7 @@ function mountElement(
   /* 递归挂载当前元素的所有子节点，保持 JSX 中声明的顺序 */
   mountChildren(vnode.children, el)
   container.appendChild(el)
+
   return el
 }
 

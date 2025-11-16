@@ -117,5 +117,6 @@ export function effect<T>(fn: () => T): EffectHandle<T> {
 
   /* 立即执行副作用，完成首次依赖收集 */
   instance.run()
+
   return instance
 }

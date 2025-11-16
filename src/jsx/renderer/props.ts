@@ -50,12 +50,14 @@ function applyStyle(el: HTMLElement, value: unknown) {
   /* null / undefined / false 统一视为移除行内样式 */
   if (value == null || value === false) {
     el.removeAttribute('style')
+
     return
   }
 
   /* 字符串形式直接作为完整 style 文本设置 */
   if (typeof value === 'string') {
     el.setAttribute('style', value)
+
     return
   }
 
@@ -84,12 +86,14 @@ function applyDomProp(el: Element, key: string, value: unknown) {
   /* null / undefined / false 代表移除该属性 */
   if (value == null || value === false) {
     el.removeAttribute(key)
+
     return
   }
 
   /* true 代表布尔属性存在即可，值为空字符串 */
   if (value === true) {
     el.setAttribute(key, '')
+
     return
   }
 

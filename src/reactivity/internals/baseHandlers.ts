@@ -15,6 +15,7 @@ const mutableGet: ProxyHandler<Record<PropertyKey, unknown>>['get'] =
       /* 对嵌套对象进行懒加载代理，避免初始化时递归遍历 */
       return reactive(rawValue)
     }
+
     return rawValue
   }
 
@@ -31,6 +32,7 @@ const mutableSet: ProxyHandler<Record<PropertyKey, unknown>>['set'] =
       /* 值发生实际变化时才通知依赖，规避无效触发 */
       trigger(target, key)
     }
+
     return applied
   }
 

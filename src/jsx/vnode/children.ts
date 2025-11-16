@@ -7,6 +7,7 @@ import { isVNode } from './guards.ts'
 export function normalizeChildren(input: unknown): VNodeChild[] {
   const result: VNodeChild[] = []
   collectChildren(input, result)
+
   return result
 }
 
@@ -24,18 +25,21 @@ function collectChildren(source: unknown, target: VNodeChild[]) {
     for (const child of source) {
       collectChildren(child, target)
     }
+
     return
   }
 
   /* 已经是 VNode 的值直接保留，不做包装 */
   if (isVNode(source)) {
     target.push(source)
+
     return
   }
 
   /* 字符串与数字作为文本节点内容直接入队 */
   if (typeof source === 'string' || typeof source === 'number') {
     target.push(source)
+
     return
   }
 

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { within } from '@testing-library/dom'
 import type { ComponentType } from '@/index.ts'
 import { render } from '@/index.ts'
+import { createTestContainer } from '../setup.ts'
 
 describe('jsx children shape', () => {
   it('无 children 时 props.children 为 undefined', () => {
@@ -12,7 +13,7 @@ describe('jsx children shape', () => {
       return <section>{props.children}</section>
     }
 
-    const container = document.createElement('div')
+    const container = createTestContainer()
     render(<Capture />, container)
 
     expect(received).toHaveLength(1)
@@ -28,7 +29,7 @@ describe('jsx children shape', () => {
       return <section>{props.children}</section>
     }
 
-    const container = document.createElement('div')
+    const container = createTestContainer()
     render(
       <Capture>
         <span>only</span>
@@ -53,7 +54,7 @@ describe('jsx children shape', () => {
       return <section>{props.children}</section>
     }
 
-    const container = document.createElement('div')
+    const container = createTestContainer()
     render(
       <Capture>
         <span>first</span>

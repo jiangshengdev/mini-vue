@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { within } from '@testing-library/dom'
 import type { ComponentType } from '@/index.ts'
 import { render } from '@/index.ts'
+import { createTestContainer } from '../setup.ts'
 
 describe('jsx boolean children', () => {
   it('布尔子节点在 false 时不会渲染文本', () => {
@@ -13,7 +14,7 @@ describe('jsx boolean children', () => {
       return <div>{props.flag && <span>ok</span>}</div>
     }
 
-    const container = document.createElement('div')
+    const container = createTestContainer()
 
     render(<FlagView flag={false} />, container)
     const view = within(container)
@@ -25,7 +26,7 @@ describe('jsx boolean children', () => {
   })
 
   it('布尔 true 作为子节点时忽略渲染', () => {
-    const container = document.createElement('div')
+    const container = createTestContainer()
 
     render(
       <div>
@@ -41,7 +42,7 @@ describe('jsx boolean children', () => {
   })
 
   it('数组 children 中的布尔值会被移除', () => {
-    const container = document.createElement('div')
+    const container = createTestContainer()
 
     render(
       <div>
@@ -57,7 +58,7 @@ describe('jsx boolean children', () => {
   })
 
   it('直接 render(false, container) 不应生成文本 false', () => {
-    const container = document.createElement('div')
+    const container = createTestContainer()
 
     render(false, container)
 

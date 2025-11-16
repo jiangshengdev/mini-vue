@@ -4,11 +4,11 @@ import userEvent from '@testing-library/user-event'
 import { Fragment } from '@/jsx-runtime'
 import type { ComponentType } from '@/index.ts'
 import { render } from '@/index.ts'
+import { createTestContainer } from '../setup.ts'
 
 describe('jsx basic rendering', () => {
   it('渲染基本元素与文本', () => {
-    const container = document.createElement('div')
-    document.body.appendChild(container)
+    const container = createTestContainer()
 
     render(
       <div class="card">
@@ -20,12 +20,10 @@ describe('jsx basic rendering', () => {
     const card = within(container).getByText('hello')
     expect(card).toBeInTheDocument()
     expect(card).toHaveTextContent('hello')
-
-    container.remove()
   })
 
   it('绑定事件并响应', async () => {
-    const container = document.createElement('div')
+    const container = createTestContainer()
     const handleClick = vi.fn()
     interface ButtonProps {
       label: string
@@ -63,8 +61,7 @@ describe('jsx basic rendering', () => {
       )
     }
 
-    const container = document.createElement('div')
-    document.body.appendChild(container)
+    const container = createTestContainer()
     render(
       <Wrapper title="Hi">
         <Fragment>
@@ -79,7 +76,5 @@ describe('jsx basic rendering', () => {
     expect(view.getByRole('heading', { name: 'Hi' })).toBeInTheDocument()
     expect(view.getByText('first')).toBeInTheDocument()
     expect(view.getByText('second')).toBeInTheDocument()
-
-    container.remove()
   })
 })

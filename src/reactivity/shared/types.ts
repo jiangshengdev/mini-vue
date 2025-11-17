@@ -22,6 +22,9 @@ export interface EffectHandle<T = unknown> {
  * 描述响应式系统内部维护的完整 effect 实例。
  */
 export interface EffectInstance<T = unknown> extends EffectHandle<T> {
+  /**
+   * 可选调度函数，触发时决定任务何时执行。
+   */
   readonly scheduler?: EffectScheduler
   /**
    * 记录一次依赖收集，便于后续清理时解除绑定。
@@ -39,8 +42,14 @@ export interface EffectInstance<T = unknown> extends EffectHandle<T> {
  */
 export type Dep = Set<EffectInstance>
 
+/**
+ * effect 调度器接收一个可延迟执行的任务。
+ */
 export type EffectScheduler = (job: () => void) => void
 
+/**
+ * effect 的可选配置，目前仅支持自定义调度器。
+ */
 export interface EffectOptions {
   scheduler?: EffectScheduler
 }

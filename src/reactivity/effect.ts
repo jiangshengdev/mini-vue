@@ -11,6 +11,9 @@ import type {
  * 将副作用封装为类，集中管理依赖收集与生命周期操作。
  */
 export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
+  /**
+   * 自定义调度函数，用于延迟或批量执行副作用。
+   */
   readonly scheduler?: EffectScheduler
 
   /**
@@ -29,6 +32,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
   private cleanupFns: Array<() => void> = []
 
   constructor(fn: () => T, scheduler?: EffectScheduler) {
+    /* 构造时记录调度器，使后续 trigger 能根据配置选择执行策略 */
     this.fn = fn
     this.scheduler = scheduler
   }
@@ -118,7 +122,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
 }
 
 /**
- * 最小版 effect：立即执行副作用并返回可控的句柄。
+ * 最小版 effect：立即执行副作用并返回可控的句柄，亦支持传入调度选项。
  */
 export function effect<T>(fn: () => T): EffectHandle<T>
 export function effect<T>(fn: () => T, options: EffectOptions): EffectHandle<T>

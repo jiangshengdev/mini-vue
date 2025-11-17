@@ -34,6 +34,7 @@
 - 类型导入：类型和值必须拆成独立语句，统一使用 `import type { Foo } from './bar.ts'`；禁止在同一条导入中混合 `type` 与运行时代码。
 - DOM 选择统一 `document.querySelector<T>()`；只有明确存在的节点才使用 `!` 断言（参考 `src/demo/main.ts`）。
 - ESLint/TSLint 均允许 `_` 前缀形参表示刻意未用；新增与 Vue API 对齐的钩子时可利用该规则。
+- `index.ts` 文件仅负责 re-export：所有实现代码必须放在同目录的其他文件中，避免在入口文件内编写业务逻辑。
 
 ## 常见坑
 

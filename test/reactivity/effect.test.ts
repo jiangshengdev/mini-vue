@@ -124,4 +124,73 @@ describe('effect', () => {
     expect(outerRuns).toBe(2)
     expect(innerRuns).toBe(4)
   })
+
+  it('支持 scheduler 自定义调度时延迟执行', () => {
+    const state = reactive({ count: 0 })
+    let runCount = 0
+    const jobs: Array<() => void> = []
+
+    effect(
+      () => {
+        runCount += 1
+        void state.count
+      },
+      {
+        scheduler(job) {
+          jobs.push(job)
+        },
+      },
+    )
+
+    expect(runCount).toBe(1)
+    expect(jobs.length).toBe(0)
+
+    state.count = 1
+    expect(runCount).toBe(1)
+    expect(jobs.length).toBe(1)
+
+    jobs.shift()?.()
+    expect(runCount).toBe(2)
+    expect(jobs.length).toBe(0)
+
+    state.count = 2
+    expect(runCount).toBe(2)
+    expect(jobs.length).toBe(1)
+  })
+
+  it('scheduler 在 stop 后不会继续触发副作用', () => {
+    const state = reactive({ count: 0 })
+    let runCount = 0
+    const jobs: Array<() => void> = []
+
+    const handle = effect(
+      () => {
+        runCount += 1
+        void state.count
+      },
+      {
+        scheduler(job) {
+          jobs.push(job)
+        },
+      },
+    )
+
+    expect(runCount).toBe(1)
+
+    state.count = 1
+    expect(runCount).toBe(1)
+    expect(jobs.length).toBe(1)
+
+    const job = jobs.shift()
+
+    handle.stop()
+
+    job?.()
+    expect(runCount).toBe(1)
+    expect(jobs.length).toBe(0)
+
+    state.count = 2
+    expect(runCount).toBe(1)
+    expect(jobs.length).toBe(0)
+  })
 })

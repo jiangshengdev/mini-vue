@@ -1,7 +1,16 @@
 /**
- * JSX 对外入口，逐步聚合运行时 API 与类型（仅向上导出）。
+ * JSX 对外入口，仅聚合虚拟节点工厂与相关类型。
  */
-export { createApp } from './createApp.ts'
-export { render } from './renderer/index.ts'
-export { Fragment } from './vnode/index.ts'
-export type { ComponentType } from './vnode/index.ts'
+export { createVNode, Fragment, isVNode } from './vnode/index.ts'
+export type {
+  ComponentChildren,
+  ComponentResult,
+  ComponentType,
+  ElementProps,
+  ElementType,
+  FragmentProps,
+  FragmentType,
+  VNode,
+  VNodeChild,
+} from './vnode/index.ts'
+export { vnodeSymbol } from './vnode/index.ts'

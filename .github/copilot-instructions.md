@@ -17,11 +17,9 @@
 
 ## JSX 渲染栈
 
-- `tsconfig` 设置 `jsx: react-jsx` 且 `jsxImportSource: '@'`，编译后的 `jsx/jsxs/jsxDEV` 调用来自 `src/jsx-runtime/`，记得保持文件导出一致。
-- `jsx/vnode`：`createVNode` 会把 `props.children` 归一化到 `children` 数组并移除原字段；`normalizeChildren` 会跳过 `null/boolean` 并将未知类型转字符串。
-- `renderer/render.ts` 每次渲染前直接 `container.textContent = ''` 后全量 `mountChild`，当前没有 diff/patch 流程；若新增增量更新需同步测试。
-- `renderer/mount.ts`：组件 `type` 为函数时执行组件本身，`props.children` 会重新塞回 props；原生元素走 `applyProps`，数组 children 先写入 `DocumentFragment`。
-- `renderer/props.ts`：支持 `ref` 回调、`class/className`、字符串或对象 `style`、`onXxx` 事件（会转为小写事件名），以及布尔属性（`true` 写空串、空值移除）。
+- `runtime-core/renderer.ts` 注入宿主原语后负责整棵子树的全量挂载，仍然采用“清空容器再重建”的策略，暂不支持 diff/patch。
+- `runtime-core/createApp.ts` 生成平台无关的应用实例，持有根容器状态并调用注入的 `render`/`clear`。
+- `runtime-dom/rendererOptions.ts` + `runtime-dom/patchProps.ts` 提供 DOM 侧的元素创建、属性打补丁与事件绑定，数组 children 仍通过 `DocumentFragment` 承载后整体插入。
 
 ## Demo 与测试
 

@@ -12,6 +12,10 @@
 - 对外导出结构与 Vue 保持一致：`index.ts` 聚合响应式、runtime-core、runtime-dom 能力，避免命名混乱。
 - 在拆分过程中不新增功能，仅移动与调整现有实现；保证现有测试全部通过。
 
+## 当前进度
+
+- 2025-11-17：完成首轮拆分，`createApp`/`render` 迁移至 `runtime-core`，并通过 DOM 适配层在 `runtime-dom` 暴露平台能力；原 `src/jsx/renderer/` 目录已移除，`pnpm test` 全部通过。
+
 ## 迭代路线
 
 1. **目录初始化与入口调整**

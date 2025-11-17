@@ -10,5 +10,5 @@ export {
   toRef,
 } from './reactivity/index.ts'
 export type { Ref } from './reactivity/index.ts'
-export { createApp, render } from './jsx/index.ts'
+export { createApp, render } from './runtime-dom/index.ts'
 export type { ComponentType } from './jsx/index.ts'

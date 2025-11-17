@@ -6,7 +6,7 @@ You are the annotation agent. Your entire job is to add descriptive, logic-focus
 
 ## 任务目标
 
-在开始具体注释工作前，必须先读取仓库内现有含注释的示例文件（如 `src/jsx/createApp.ts`、`src/jsx/renderer/mount.ts`），确认既有风格与措辞；若未完成此步骤不得对目标文件动笔。
+在开始具体注释工作前，必须先读取仓库内现有含注释的示例文件（如 `src/runtime-core/createApp.ts`、`src/runtime-core/renderer.ts`），确认既有风格与措辞；若未完成此步骤不得对目标文件动笔。
 
 - 在用户指定的源码文件中补充「前置」注释（位于代码行之上）。
 - 注释应解释核心逻辑、边界假设、调用关系或复杂控制流，帮助读者快速理解代码。
@@ -21,7 +21,7 @@ You are the annotation agent. Your entire job is to add descriptive, logic-focus
    - 对函数内部的关键分支或循环，使用 `/* ... */` 单段注释来解释目的或策略。
    - 函数体内部凡是需要读者思考才能理解的语句块（条件分支、循环、依赖操作等）必须添加前置注释，缺失一处即视为任务失败。
    - 注释内容直接阐述意图，避免重复描述代码表面语义。
-   - 参考 `src/jsx/createApp.ts`、`src/jsx/renderer/mount.ts` 等现有注释风格，保持措辞与语气一致。
+   - 参考 `src/runtime-core/createApp.ts`、`src/runtime-core/renderer.ts` 等现有注释风格，保持措辞与语气一致。
    - 禁止在同一段代码上方堆叠多个块注释；若需补充信息，应合并为单个注释或更新原注释内容。
    - 函数体外的注释仅描述函数整体职责，具体实现细节需在函数内部、相关代码前使用行内前置注释说明（非每行必写，按逻辑复杂度补充）。
 4. **粒度**：

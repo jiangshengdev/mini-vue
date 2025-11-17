@@ -13,13 +13,13 @@ export default defineConfig([
     extends: ['js/recommended'],
     languageOptions: { globals: { ...globals.browser, ...globals.node } },
     rules: {
-      // JS 文件保持检测同时允许下划线前缀参数
       'no-unused-vars': [
         'error',
         {
           argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
           caughtErrorsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
         },
       ],
       '@stylistic/padding-line-between-statements': [
@@ -41,17 +41,17 @@ export default defineConfig([
   {
     files: ['**/*.{ts,tsx,mts,cts}'],
     rules: {
-      // TS 版本规则同样允许下划线前缀，保持与官方 effect 参数一致
+      // Note: you must disable the base rule as it can report incorrect errors
+      'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': [
         'error',
         {
           argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
           caughtErrorsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
         },
       ],
-      // 避免 JS 规则与 TS 规则重复报错
-      'no-unused-vars': 'off',
     },
   },
   eslintConfigPrettier,

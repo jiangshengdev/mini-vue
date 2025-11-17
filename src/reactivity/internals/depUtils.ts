@@ -64,9 +64,8 @@ function schedule(effect: EffectInstance) {
   if (scheduler) {
     /* 将副作用封装成可重复执行的任务，交给调度器延迟处理 */
     const job = () => {
-      if (effect.active) {
-        effect.run()
-      }
+      /* 即便 effect 已停止也要执行一次原函数，与 Vue 行为保持一致 */
+      effect.run()
     }
 
     scheduler(job)

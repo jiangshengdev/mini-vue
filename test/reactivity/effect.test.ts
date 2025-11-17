@@ -158,7 +158,7 @@ describe('effect', () => {
     expect(jobs.length).toBe(1)
   })
 
-  it('scheduler 在 stop 后不会继续触发副作用', () => {
+  it('scheduler 在 stop 后仍会执行已排队的任务', () => {
     const state = reactive({ count: 0 })
     let runCount = 0
     const jobs: Array<() => void> = []
@@ -186,11 +186,47 @@ describe('effect', () => {
     handle.stop()
 
     job?.()
-    expect(runCount).toBe(1)
+    expect(runCount).toBe(2)
     expect(jobs.length).toBe(0)
 
     state.count = 2
+    expect(runCount).toBe(2)
+    expect(jobs.length).toBe(0)
+  })
+
+  it('scheduler 在 stop 后执行的任务不会重新收集依赖', () => {
+    const state = reactive({ count: 0 })
+    let runCount = 0
+    const jobs: Array<() => void> = []
+
+    const handle = effect(
+      () => {
+        runCount += 1
+        void state.count
+      },
+      {
+        scheduler(job) {
+          jobs.push(job)
+        },
+      },
+    )
+
     expect(runCount).toBe(1)
+
+    state.count = 1
+    const job = jobs.shift()
+
+    handle.stop()
+
+    job?.()
+    expect(runCount).toBe(2)
+
+    state.count = 2
+    expect(runCount).toBe(2)
+    expect(jobs.length).toBe(0)
+
+    state.count = 3
+    expect(runCount).toBe(2)
     expect(jobs.length).toBe(0)
   })
 })

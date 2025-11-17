@@ -61,6 +61,32 @@ describe('effect', () => {
     expect(runCount).toBe(2)
   })
 
+  it('调用 stop 后不会再响应依赖变更', () => {
+    const state = reactive({ count: 0 })
+    let runCount = 0
+
+    const handle = effect(() => {
+      runCount += 1
+      void state.count
+    })
+
+    expect(runCount).toBe(1)
+
+    state.count = 1
+    expect(runCount).toBe(2)
+
+    handle.stop()
+
+    state.count = 2
+    expect(runCount).toBe(2)
+
+    handle.run()
+    expect(runCount).toBe(3)
+
+    state.count = 3
+    expect(runCount).toBe(3)
+  })
+
   it('依赖切换后旧字段不会再触发 effect', () => {
     const state = reactive({ toggle: true, first: 1, second: 2 })
     let captured = 0

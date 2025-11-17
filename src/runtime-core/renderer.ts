@@ -55,6 +55,7 @@ export function createRenderer<
 ): Renderer<HostNode, HostElement> {
   const { clear } = options
 
+  /* 根渲染函数会先清空容器，再挂载整棵子树。 */
   function render(vnode: ComponentResult, container: HostElement): void {
     clear(container)
     mountChild(options, vnode, container)

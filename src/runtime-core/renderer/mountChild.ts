@@ -3,6 +3,9 @@ import { isVNode } from '@/jsx/vnode'
 import type { RendererOptions } from '../renderer.ts'
 import { mountVNode } from './mountVNode.ts'
 
+/**
+ * 根据子节点类型生成宿主节点，统一处理数组、VNode 与原始值。
+ */
 export function mountChild<
   HostNode,
   HostElement extends HostNode,
@@ -14,13 +17,16 @@ export function mountChild<
 ): HostNode | null {
   const { createFragment, appendChild, createText } = options
 
+  /* null、undefined、布尔值不产生实际节点。 */
   if (child == null || typeof child === 'boolean') {
     return null
   }
 
+  /* 数组子节点需要借助片段统一插入。 */
   if (Array.isArray(child)) {
     const fragment = createFragment()
 
+    /* 递归挂载数组项并收集到片段中。 */
     for (const item of child) {
       const node = mountChild(options, item, fragment)
 
@@ -34,6 +40,7 @@ export function mountChild<
     return fragment
   }
 
+  /* 原始文本类型直接创建文本节点。 */
   if (typeof child === 'string' || typeof child === 'number') {
     const text = createText(String(child))
 
@@ -42,10 +49,12 @@ export function mountChild<
     return text
   }
 
+  /* 标准 VNode 交给 mountVNode 处理组件或元素。 */
   if (isVNode(child)) {
     return mountVNode(options, child, container)
   }
 
+  /* 其他值（如对象）兜底转成字符串输出。 */
   const text = createText(String(child))
 
   appendChild(container, text)

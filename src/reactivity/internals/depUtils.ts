@@ -35,7 +35,7 @@ export function dispatchEffects(dep: Dep) {
   for (const effect of snapshot(dep)) {
     /* 仅执行仍处于活跃状态的副作用，跳过当前 effect */
     if (shouldRun(effect)) {
-      effect.run()
+      schedule(effect)
     }
   }
 }
@@ -53,4 +53,22 @@ function snapshot(dep: Dep): Dep {
 function shouldRun(effect: EffectInstance) {
   /* 避免重复执行当前 effect，并确保目标 effect 尚未停止 */
   return effect !== effectScope.current && effect.active
+}
+
+function schedule(effect: EffectInstance) {
+  const scheduler = effect.scheduler
+
+  if (scheduler) {
+    const job = () => {
+      if (effect.active) {
+        effect.run()
+      }
+    }
+
+    scheduler(job)
+
+    return
+  }
+
+  effect.run()
 }

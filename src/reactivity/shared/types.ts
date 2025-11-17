@@ -22,6 +22,7 @@ export interface EffectHandle<T = unknown> {
  * 描述响应式系统内部维护的完整 effect 实例。
  */
 export interface EffectInstance<T = unknown> extends EffectHandle<T> {
+  readonly scheduler?: EffectScheduler
   /**
    * 记录一次依赖收集，便于后续清理时解除绑定。
    */
@@ -37,3 +38,9 @@ export interface EffectInstance<T = unknown> extends EffectHandle<T> {
  * 定义触发同一属性时需要执行的副作用集合。
  */
 export type Dep = Set<EffectInstance>
+
+export type EffectScheduler = (job: () => void) => void
+
+export interface EffectOptions {
+  scheduler?: EffectScheduler
+}

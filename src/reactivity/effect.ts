@@ -1,10 +1,18 @@
 import { effectScope } from './internals/effectScope.ts'
-import type { Dep, EffectHandle, EffectInstance } from './shared/types.ts'
+import type {
+  Dep,
+  EffectHandle,
+  EffectInstance,
+  EffectOptions,
+  EffectScheduler,
+} from './shared/types.ts'
 
 /**
  * 将副作用封装为类，集中管理依赖收集与生命周期操作。
  */
 export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
+  readonly scheduler?: EffectScheduler
+
   /**
    * 保存用户传入的副作用函数作为核心执行单元。
    */
@@ -20,8 +28,9 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
    */
   private cleanupFns: Array<() => void> = []
 
-  constructor(fn: () => T) {
+  constructor(fn: () => T, scheduler?: EffectScheduler) {
     this.fn = fn
+    this.scheduler = scheduler
   }
 
   /**
@@ -111,11 +120,17 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
 /**
  * 最小版 effect：立即执行副作用并返回可控的句柄。
  */
-export function effect<T>(fn: () => T): EffectHandle<T> {
+export function effect<T>(fn: () => T): EffectHandle<T>
+export function effect<T>(fn: () => T, options: EffectOptions): EffectHandle<T>
+
+export function effect<T>(
+  fn: () => T,
+  options: EffectOptions = {},
+): EffectHandle<T> {
   /* 读取父级副作用，便于建立嵌套清理关系 */
   const parent = effectScope.current
   /* 每次调用都创建新的 ReactiveEffect 实例 */
-  const instance = new ReactiveEffect(fn)
+  const instance = new ReactiveEffect(fn, options.scheduler)
 
   if (parent) {
     /* 父级停止时同步停止子级，防止泄漏 */

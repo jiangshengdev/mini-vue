@@ -44,7 +44,7 @@ export function createVNode<T extends ElementType>(
     delete props.children
     children = normalized
 
-    if (Object.keys(props).length === 0) {
+    if (Reflect.ownKeys(props).length === 0) {
       props = null
     }
   }

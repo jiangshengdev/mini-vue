@@ -37,7 +37,7 @@ export function h<T extends ElementType>(
       delete propsCopy.key
     }
 
-    normalizedProps = Object.keys(propsCopy).length
+    normalizedProps = Reflect.ownKeys(propsCopy).length
       ? (propsCopy as ElementProps<T>)
       : undefined
   }

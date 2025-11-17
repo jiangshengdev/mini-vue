@@ -14,14 +14,14 @@
 
 ## 3. renderer `ref` 回调与清理路径没有测试（待补充）
 
-- 位置：`test/jsx` 目录（所有用例）
+- 位置：`test/runtime-dom` 目录（所有用例）
 - 问题：`src/runtime-dom/patchProps.ts` 支持函数式 `ref`，包括挂载时拿到 DOM、卸载时回调 `null`。然而测试完全未覆盖 `ref` 绑定，连最基本的“渲染后 ref 收到元素”都没有，更遑论在 `render` 二次调用或 `createApp.unmount()` 时重新触发清理。
 - 影响：`Counter.tsx` demo 就依赖 `ref` 保存按钮元素，如今没有测试兜底，renderer 中任何 ref 相关改动都可能导致 Demo 直接崩溃或内存泄漏而无人察觉。
 - 建议：新增 `render`/`createApp` 层面的 ref 场景：校验回调首次得到 DOM，`render(null, container)` 或 `app.unmount()` 时会再次以 `null` 调用，且多次渲染不会重复绑定旧节点。
 
 ## 4. createApp 挂载周期只测“重复挂载报错”，未验证可重新挂载（待补充）
 
-- 位置：`test/jsx/createApp.test.tsx`
+- 位置：`test/runtime-dom/createApp.test.tsx`
 - 问题：文件第 3 个用例断言重复调用 `app.mount` 会抛错，但没有任何测试保证在 `app.unmount()` 之后能够再次成功挂载，或者确保 `unmount` 会把容器内容与内部状态都重置。若 `unmount` 忘记清理 `isMounted` 或容器引用，当前测试照样通过。
 - 影响：真实应用需要在 HMR、微前端或测试环境中多次挂载/卸载根组件。缺少这类覆盖会让“只能挂一次”的回归悄然出现，阻碍 demo 与集成用例。
 - 建议：新增用例：`app.mount(container)` → `app.unmount()` → 再次 `app.mount(container)` 应恢复工作；同时断言二次挂载前容器已被清空，避免遗留节点干扰。

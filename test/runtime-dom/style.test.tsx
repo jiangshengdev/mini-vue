@@ -3,7 +3,7 @@ import { within } from '@testing-library/dom'
 import { render } from '@/index.ts'
 import { createTestContainer } from '../setup.ts'
 
-describe('jsx style props', () => {
+describe('runtime-dom style props', () => {
   it('字符串 style 可以直接写入', () => {
     const container = createTestContainer()
 

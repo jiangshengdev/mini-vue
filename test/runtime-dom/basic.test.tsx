@@ -6,7 +6,7 @@ import type { ComponentType } from '@/index.ts'
 import { render } from '@/index.ts'
 import { createTestContainer } from '../setup.ts'
 
-describe('jsx basic rendering', () => {
+describe('runtime-dom basic rendering', () => {
   it('渲染基本元素与文本', () => {
     const container = createTestContainer()
 

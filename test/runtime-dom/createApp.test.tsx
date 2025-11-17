@@ -8,7 +8,7 @@ const App: ComponentType = () => {
   return <div class="hello">Hello</div>
 }
 
-describe('createApp', () => {
+describe('runtime-dom createApp', () => {
   it('支持通过选择器挂载', () => {
     const host = createTestContainer()
 

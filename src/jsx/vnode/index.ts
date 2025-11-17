@@ -5,8 +5,8 @@ export { createVNode, Fragment } from './factory.ts'
 export { isVNode } from './guards.ts'
 export type {
   ComponentChildren,
-  ComponentType,
   ComponentResult,
+  ComponentType,
   ElementProps,
   ElementType,
   FragmentProps,

@@ -1,59 +1,73 @@
-/**
- * 平台无关的 createApp 工厂，仅处理组件渲染与生命周期状态。
- */
 import type { ComponentType } from '@/jsx/vnode'
 import type { RootRenderFunction } from './renderer.ts'
 
-/**
- * createApp 返回的应用实例接口，提供挂载与卸载能力。
- */
+export interface AppRuntimeConfig<HostElement> {
+  render: RootRenderFunction<HostElement>
+  clear: (container: HostElement) => void
+}
+
 export interface AppInstance<HostElement> {
-  /** 将根组件渲染到指定容器中。 */
   mount(target: HostElement): void
-  /** 卸载当前应用并执行容器清理。 */
   unmount(): void
 }
 
-/**
- * 生成平台通用的 createApp 实现，依赖外部注入的 render 与清理逻辑。
- */
-export function createAppAPI<HostElement>(
-  render: RootRenderFunction<HostElement>,
-  clear: (container: HostElement) => void,
-) {
-  return function createApp(
-    rootComponent: ComponentType,
-    rootProps?: Record<string, unknown>,
-  ): AppInstance<HostElement> {
-    let isMounted = false
-    let container: HostElement | null = null
+interface AppState<HostElement> {
+  status: 'idle' | 'mounted'
+  container: HostElement | null
+  config: AppRuntimeConfig<HostElement>
+  rootComponent: ComponentType
+  rootProps?: Record<string, unknown>
+}
 
-    function mount(target: HostElement): void {
-      if (isMounted) {
-        throw new Error('createApp: 当前应用已挂载，不能重复执行 mount')
-      }
+function mountApp<HostElement>(
+  state: AppState<HostElement>,
+  target: HostElement,
+): void {
+  if (state.status === 'mounted') {
+    throw new Error('createApp: 当前应用已挂载，不能重复执行 mount')
+  }
 
-      container = target
+  state.container = target
 
-      const subtree = rootComponent({ ...(rootProps ?? {}) })
+  const subtree = state.rootComponent({ ...(state.rootProps ?? {}) })
 
-      render(subtree, container)
-      isMounted = true
-    }
+  state.config.render(subtree, target)
+  state.status = 'mounted'
+}
 
-    function unmount(): void {
-      if (!container) {
-        return
-      }
+function unmountApp<HostElement>(state: AppState<HostElement>): void {
+  if (!state.container) {
+    return
+  }
 
-      clear(container)
-      isMounted = false
-      container = null
-    }
+  state.config.clear(state.container)
+  state.status = 'idle'
+  state.container = null
+}
 
-    return {
-      mount,
-      unmount,
-    }
+export function createAppInstance<HostElement>(
+  config: AppRuntimeConfig<HostElement>,
+  rootComponent: ComponentType,
+  rootProps?: Record<string, unknown>,
+): AppInstance<HostElement> {
+  const state: AppState<HostElement> = {
+    status: 'idle',
+    container: null,
+    config,
+    rootComponent,
+    rootProps,
+  }
+
+  function mount(target: HostElement): void {
+    mountApp(state, target)
+  }
+
+  function unmount(): void {
+    unmountApp(state)
+  }
+
+  return {
+    mount,
+    unmount,
   }
 }

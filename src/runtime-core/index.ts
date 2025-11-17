@@ -7,5 +7,5 @@ export type {
   RendererOptions,
   RootRenderFunction,
 } from './renderer.ts'
-export { createAppAPI } from './createApp.ts'
-export type { AppInstance } from './createApp.ts'
+export { createAppInstance } from './createApp.ts'
+export type { AppInstance, AppRuntimeConfig } from './createApp.ts'

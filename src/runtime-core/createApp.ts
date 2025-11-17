@@ -1,21 +1,39 @@
 import type { ComponentType } from '@/jsx/vnode'
 import type { RootRenderFunction } from './renderer.ts'
 
+/**
+ * 宿主平台注入的渲染配置，提供渲染与清理能力。
+ */
 export interface AppRuntimeConfig<HostElement> {
+  /** 将根子树挂载到目标容器的渲染函数。 */
   render: RootRenderFunction<HostElement>
+  /** 清空宿主容器的能力，供 unmount 或重渲染使用。 */
   clear: (container: HostElement) => void
 }
 
+/**
+ * createApp 返回的实例 API，封装 mount/unmount 生命周期。
+ */
 export interface AppInstance<HostElement> {
+  /** 指定宿主容器并触发首次渲染。 */
   mount(target: HostElement): void
+  /** 停止渲染并释放容器内容。 */
   unmount(): void
 }
 
+/**
+ * 应用内部状态记录，追踪当前容器与根组件信息。
+ */
 interface AppState<HostElement> {
+  /** 标识应用当前是否已挂载。 */
   status: 'idle' | 'mounted'
+  /** 最近一次挂载的宿主容器引用。 */
   container: HostElement | null
+  /** 宿主注入的渲染配置。 */
   config: AppRuntimeConfig<HostElement>
+  /** 根组件定义，用于生成顶层子树。 */
   rootComponent: ComponentType
+  /** 传入根组件的初始 props。 */
   rootProps?: Record<string, unknown>
 }
 

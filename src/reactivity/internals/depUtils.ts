@@ -1,11 +1,11 @@
-import { effectScope } from './effectScope.ts'
+import { effectStack } from './effectStack.ts'
 import type { Dep, EffectInstance } from '../shared/types.ts'
 
 /**
  * 收集当前活跃的副作用到依赖集合，确保后续触发时能够回调。
  */
 export function trackEffect(dep: Dep): void {
-  const currentEffect = effectScope.current
+  const currentEffect = effectStack.current
 
   /* 没有当前副作用入栈时直接返回，避免空收集开销 */
   if (!currentEffect) {
@@ -57,7 +57,7 @@ function depSnapshot(dep: Dep): Dep {
  */
 function shouldRun(effect: EffectInstance): boolean {
   /* 避免重复执行当前 effect，并确保目标 effect 尚未停止 */
-  return effect !== effectScope.current && effect.active
+  return effect !== effectStack.current && effect.active
 }
 
 /**

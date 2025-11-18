@@ -1,4 +1,4 @@
-import { effectScope } from './internals/effectScope.ts'
+import { effectStack } from './internals/effectStack.ts'
 import type {
   Dep,
   EffectHandle,
@@ -58,13 +58,13 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
     /* 运行前重置上一轮留下的依赖，确保收集结果保持最新 */
     this.resetState()
     /* 将当前实例压入 effect 栈，允许 track 捕获它 */
-    effectScope.push(this)
+    effectStack.push(this)
 
     try {
       return this.fn()
     } finally {
       /* 无论执行成功与否都需弹出自身，避免污染外层作用域 */
-      effectScope.pop()
+      effectStack.pop()
     }
   }
 
@@ -132,7 +132,7 @@ export function effect<T>(
   options: EffectOptions = {},
 ): EffectHandle<T> {
   /* 读取父级副作用，便于建立嵌套清理关系 */
-  const parent = effectScope.current
+  const parent = effectStack.current
   /* 每次调用都创建新的 ReactiveEffect 实例 */
   const instance = new ReactiveEffect(fn, options.scheduler)
 

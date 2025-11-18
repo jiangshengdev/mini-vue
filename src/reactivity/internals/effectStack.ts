@@ -6,7 +6,7 @@ import type { EffectInstance } from '../shared/types.ts'
 /**
  * 提供 effect 嵌套时的栈式管理能力，保证当前活跃副作用可被精确追踪。
  */
-class EffectScope {
+class EffectStack {
   /**
    * 保存所有入栈的副作用实例，维护调用栈结构。
    */
@@ -41,4 +41,4 @@ class EffectScope {
   }
 }
 
-export const effectScope = new EffectScope()
+export const effectStack = new EffectStack()

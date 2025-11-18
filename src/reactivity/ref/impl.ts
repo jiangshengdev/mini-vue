@@ -2,7 +2,7 @@ import { reactive } from '../reactive.ts'
 import { isObject } from '@/shared/utils.ts'
 import type { DepTarget, Ref, RefMarker } from './types.ts'
 import { REF_FLAG } from './types.ts'
-import { collectEffect, dispatchEffects } from '../internals/depUtils.ts'
+import { trackEffect, triggerEffects } from '../internals/depUtils.ts'
 import type { Dep } from '../shared/types.ts'
 
 /**
@@ -30,7 +30,7 @@ export class RefImpl<T> implements Ref<T>, DepTarget {
    */
   get value(): T {
     /* 读取时登记当前副作用，保持追踪关系。 */
-    collectEffect(this.dep)
+    trackEffect(this.dep)
 
     return this._value
   }
@@ -47,7 +47,7 @@ export class RefImpl<T> implements Ref<T>, DepTarget {
     /* 更新原始值与响应式引用后，触发依赖的副作用重新执行。 */
     this._rawValue = newValue
     this._value = convert(newValue)
-    dispatchEffects(this.dep)
+    triggerEffects(this.dep)
   }
 }
 

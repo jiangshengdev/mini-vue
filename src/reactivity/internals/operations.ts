@@ -1,4 +1,4 @@
-import { collectEffect, dispatchEffects } from './depUtils.ts'
+import { trackEffect, triggerEffects } from './depUtils.ts'
 import type { Dep } from '../shared/types.ts'
 
 /**
@@ -17,7 +17,7 @@ class DepRegistry {
     /* 获取或创建目标字段对应的依赖集合 */
     const dep = this.ensureDep(target, key)
 
-    collectEffect(dep)
+    trackEffect(dep)
   }
 
   /**
@@ -31,7 +31,7 @@ class DepRegistry {
       return
     }
 
-    dispatchEffects(dep)
+    triggerEffects(dep)
   }
 
   /**

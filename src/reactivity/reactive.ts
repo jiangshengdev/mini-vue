@@ -2,7 +2,7 @@
  * 提供 reactive 工具函数，负责缓存并复用响应式 Proxy 实例。
  */
 import { mutableHandlers } from './internals/baseHandlers.ts'
-import { isObject } from '@/shared/utils.ts'
+import { isObject, isPlainObject } from '@/shared/utils.ts'
 
 /**
  * 封装原对象与代理实例之间的双向缓存。
@@ -64,8 +64,8 @@ export function reactive(target: unknown): unknown {
     return target
   }
 
-  /* 当前实现尚未覆盖数组代理，直接抛出友好错误 */
-  if (Array.isArray(target)) {
+  /* 当前实现仅支持普通对象，数组与其它原生对象均直接报错 */
+  if (Array.isArray(target) || !isPlainObject(target)) {
     throw new TypeError(UNSUPPORTED_TYPE_MESSAGE)
   }
 

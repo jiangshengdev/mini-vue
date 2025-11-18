@@ -58,4 +58,20 @@ describe('reactive', () => {
       new TypeError('reactive 目前仅支持普通对象（不含数组）'),
     )
   })
+
+  it('非普通内建对象会报错', () => {
+    const factories = [
+      ['Map', () => new Map()],
+      ['Set', () => new Set()],
+      ['Date', () => new Date()],
+    ] as const
+
+    for (const [, factory] of factories) {
+      const value: unknown = factory()
+
+      expect(() => reactive(value as object)).toThrowError(
+        new TypeError('reactive 目前仅支持普通对象（不含数组）'),
+      )
+    }
+  })
 })

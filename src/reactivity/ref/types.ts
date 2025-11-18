@@ -20,8 +20,8 @@ export interface RefMarker {
 }
 
 /**
- * DepTarget 表示可被依赖收集器追踪的目标，需提供依赖集合。
+ * RefDepCarrier 表示可被依赖收集器追踪的目标，需提供依赖集合。
  */
-export interface DepTarget extends RefMarker {
+export interface RefDepCarrier extends RefMarker {
   readonly dep: Dep
 }

@@ -1,6 +1,6 @@
 import { reactive } from '../reactive.ts'
 import { isObject } from '@/shared/utils.ts'
-import type { DepTarget, Ref, RefMarker } from './types.ts'
+import type { RefDepCarrier, Ref, RefMarker } from './types.ts'
 import { REF_FLAG } from './types.ts'
 import { trackEffect, triggerEffects } from '../internals/depUtils.ts'
 import type { Dep } from '../shared/types.ts'
@@ -8,7 +8,7 @@ import type { Dep } from '../shared/types.ts'
 /**
  * RefImpl 负责封装普通值的响应式访问器，实现依赖收集与触发。
  */
-export class RefImpl<T> implements Ref<T>, DepTarget {
+export class RefImpl<T> implements Ref<T>, RefDepCarrier {
   readonly dep: Dep = new Set()
 
   readonly [REF_FLAG] = true as const
@@ -20,7 +20,7 @@ export class RefImpl<T> implements Ref<T>, DepTarget {
    */
   constructor(value: T) {
     this._rawValue = value
-    this._value = convert(value)
+    this._value = maybeReactiveValue(value)
   }
 
   private _value: T
@@ -46,7 +46,7 @@ export class RefImpl<T> implements Ref<T>, DepTarget {
 
     /* 更新原始值与响应式引用后，触发依赖的副作用重新执行。 */
     this._rawValue = newValue
-    this._value = convert(newValue)
+    this._value = maybeReactiveValue(newValue)
     triggerEffects(this.dep)
   }
 }
@@ -71,11 +71,11 @@ export class ObjectRefImpl<
   /**
    * 构造时记录目标对象与属性键，后续读写将直接代理到该属性。
    */
-  constructor(target: T, key: K, shouldTrack = false) {
+  constructor(target: T, key: K, needsLocalDep = false) {
     this.target = target
     this.key = key
 
-    if (shouldTrack) {
+    if (needsLocalDep) {
       this.dep = new Set()
     }
   }
@@ -120,9 +120,9 @@ export class ObjectRefImpl<
 }
 
 /**
- * convert 根据值类型决定是否递归包裹成响应式对象。
+ * maybeReactiveValue 根据值类型决定是否递归包裹成响应式对象。
  */
-function convert<T>(value: T): T {
+function maybeReactiveValue<T>(value: T): T {
   /* 对象类型交由 reactive 处理，其余原样返回。 */
   if (isObject(value)) {
     return reactive(value) as T

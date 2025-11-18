@@ -3,13 +3,13 @@ import { isObject } from '@/shared/utils.ts'
 import type { RefDepCarrier, Ref, RefMarker } from './types.ts'
 import { REF_FLAG } from './types.ts'
 import { trackEffect, triggerEffects } from '../internals/depUtils.ts'
-import type { Dep } from '../shared/types.ts'
+import type { DependencyBucket } from '../shared/types.ts'
 
 /**
  * RefImpl 负责封装普通值的响应式访问器，实现依赖收集与触发。
  */
 export class RefImpl<T> implements Ref<T>, RefDepCarrier {
-  readonly dep: Dep = new Set()
+  readonly dep: DependencyBucket = new Set()
 
   readonly [REF_FLAG] = true as const
 
@@ -66,7 +66,7 @@ export class ObjectRefImpl<
 
   private readonly key: K
 
-  private readonly dep?: Dep
+  private readonly dep?: DependencyBucket
 
   /**
    * 构造时记录目标对象与属性键，后续读写将直接代理到该属性。

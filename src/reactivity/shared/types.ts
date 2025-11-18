@@ -29,7 +29,7 @@ export interface EffectInstance<T = unknown> extends EffectHandle<T> {
   /**
    * 记录一次依赖收集，便于后续清理时解除绑定。
    */
-  recordDependency(dep: Dep): void
+  recordDependency(dep: DependencyBucket): void
 
   /**
    * 注册清理回调，用于停止嵌套的副作用。
@@ -40,7 +40,7 @@ export interface EffectInstance<T = unknown> extends EffectHandle<T> {
 /**
  * 定义触发同一属性时需要执行的副作用集合。
  */
-export type Dep = Set<EffectInstance>
+export type DependencyBucket = Set<EffectInstance>
 
 /**
  * effect 调度器接收一个可延迟执行的任务。

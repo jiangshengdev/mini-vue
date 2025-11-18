@@ -1,4 +1,4 @@
-import type { Dep } from '../shared/types.ts'
+import type { DependencyBucket } from '../shared/types.ts'
 
 /**
  * 标记对象具备 Ref 能力的内部符号，避免与用户属性冲突。
@@ -23,5 +23,5 @@ export interface RefMarker {
  * RefDepCarrier 表示可被依赖收集器追踪的目标，需提供依赖集合。
  */
 export interface RefDepCarrier extends RefMarker {
-  readonly dep: Dep
+  readonly dep: DependencyBucket
 }

@@ -1,6 +1,6 @@
 import { effectStack } from './internals/effectStack.ts'
 import type {
-  Dep,
+  DependencyBucket,
   EffectHandle,
   EffectInstance,
   EffectOptions,
@@ -24,7 +24,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
   /**
    * 记录当前副作用绑定的依赖集合，方便统一清理。
    */
-  private deps: Dep[] = []
+  private deps: DependencyBucket[] = []
 
   /**
    * 存储由外部注册的清理回调，管理嵌套副作用的生命周期。
@@ -84,7 +84,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
   /**
    * 记录当前副作用与依赖集合的关联，便于后续批量清理。
    */
-  recordDependency(dep: Dep): void {
+  recordDependency(dep: DependencyBucket): void {
     this.deps.push(dep)
   }
 

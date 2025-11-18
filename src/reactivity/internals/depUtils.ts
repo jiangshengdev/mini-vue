@@ -1,10 +1,10 @@
 import { effectStack } from './effectStack.ts'
-import type { Dep, EffectInstance } from '../shared/types.ts'
+import type { DependencyBucket, EffectInstance } from '../shared/types.ts'
 
 /**
  * 收集当前活跃的副作用到依赖集合，确保后续触发时能够回调。
  */
-export function trackEffect(dep: Dep): void {
+export function trackEffect(dep: DependencyBucket): void {
   const currentEffect = effectStack.current
 
   /* 没有当前副作用入栈时直接返回，避免空收集开销 */
@@ -30,7 +30,7 @@ export function trackEffect(dep: Dep): void {
 /**
  * 触发依赖集合中的副作用，按照快照顺序执行 run。
  */
-export function triggerEffects(dep: Dep): void {
+export function triggerEffects(dep: DependencyBucket): void {
   /* 空集合无需触发，快速退出 */
   if (dep.size === 0) {
     return
@@ -48,7 +48,7 @@ export function triggerEffects(dep: Dep): void {
 /**
  * 拷贝一份依赖集合，保证触发期间的稳定遍历。
  */
-function depSnapshot(dep: Dep): Dep {
+function depSnapshot(dep: DependencyBucket): DependencyBucket {
   return new Set(dep)
 }
 

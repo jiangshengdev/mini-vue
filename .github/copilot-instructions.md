@@ -13,7 +13,7 @@
 - `reactive.ts` 通过 `ReactiveCache` 复用 Proxy，并显式拒绝数组；必须通过缓存 API 生成代理以维持依赖一致性。
 - `internals/baseHandlers.ts`：`get` 读值时 `track` 并对嵌套对象懒代理，`set` 用 `Object.is` 判等后 `trigger`；扩展新 handler 时不要跳过这套判等策略。
 - `effect.ts`：`ReactiveEffect` 负责依赖清理与嵌套生命周期，`effect()` 会立刻 `run()` 并将子 effect 注册到父级 `registerCleanup` 中，避免手动 stop 遗漏。
-- `internals/operations.ts`：`DepRegistry` 以 `WeakMap<object, Map<key, Dep>>` 维护依赖，并通过快照触发副作用；切换依赖前务必读取新字段以重建追踪。
+- `internals/operations.ts`：`DepRegistry` 以 `WeakMap<object, Map<key, DependencyBucket>>` 维护依赖，并通过快照触发副作用；切换依赖前务必读取新字段以重建追踪。
 
 ## JSX 渲染栈
 

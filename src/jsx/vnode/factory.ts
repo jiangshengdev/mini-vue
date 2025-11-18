@@ -19,7 +19,7 @@ export function Fragment(props: FragmentProps): ComponentChildren {
 /**
  * createVNode 所需的参数结构，描述 type、原始 props 与 key。
  */
-interface CreateVNodeOptions<T extends ElementType> {
+interface VNodeInitOptions<T extends ElementType> {
   type: T
   rawProps?: ElementProps<T> | null
   key?: PropertyKey
@@ -29,7 +29,7 @@ interface CreateVNodeOptions<T extends ElementType> {
  * 根据传入的类型与 props 创建标准化的 VNode 节点。
  */
 export function createVNode<T extends ElementType>(
-  options: CreateVNodeOptions<T>,
+  options: VNodeInitOptions<T>,
 ): VNode<T> {
   const { type, rawProps = null, key } = options
   /* 复制一份 props，避免外部对象在后续流程中被意外修改 */
@@ -38,11 +38,11 @@ export function createVNode<T extends ElementType>(
 
   if (props && 'children' in props) {
     /* 将 props.children 归一化为内部统一使用的 children 数组 */
-    const normalized = normalizeChildren(props.children)
+    const normalizedChildren = normalizeChildren(props.children)
 
     /* children 从 props 中移除，避免与 children 数组重复保存 */
     delete props.children
-    children = normalized
+    children = normalizedChildren
 
     if (Reflect.ownKeys(props).length === 0) {
       props = null

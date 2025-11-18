@@ -27,7 +27,7 @@ class EffectScope {
   /**
    * 将副作用压入栈顶并标记为当前活跃对象。
    */
-  push(effect: EffectInstance) {
+  push(effect: EffectInstance): void {
     this.stack.push(effect)
     this._current = effect
   }
@@ -35,7 +35,7 @@ class EffectScope {
   /**
    * 弹出最近入栈的副作用，同时恢复上层上下文。
    */
-  pop() {
+  pop(): void {
     this.stack.pop()
     this._current = this.stack.at(-1)
   }

@@ -21,7 +21,7 @@ class ReactiveCache {
   /**
    * 查找目标是否已被代理，避免重复创建 Proxy 实例。
    */
-  getExisting(target: object) {
+  getExisting(target: object): object | undefined {
     if (this.reactiveToRaw.has(target)) {
       return target
     }
@@ -32,7 +32,7 @@ class ReactiveCache {
   /**
    * 为给定对象创建新的响应式代理，并记录双向映射。
    */
-  create(target: Record<PropertyKey, unknown>) {
+  create(target: Record<PropertyKey, unknown>): Record<PropertyKey, unknown> {
     const proxy = new Proxy(target, mutableHandlers)
 
     this.rawToReactive.set(target, proxy)
@@ -51,7 +51,7 @@ const UNSUPPORTED_TYPE_MESSAGE = 'reactive 目前仅支持普通对象（不含�
 export function reactive<T extends object>(target: T): T
 export function reactive<T>(target: T): T
 
-export function reactive(target: unknown) {
+export function reactive(target: unknown): unknown {
   /* 非对象值无法建立响应式代理，直接返回原值 */
   if (!isObject(target)) {
     return target

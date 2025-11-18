@@ -13,7 +13,7 @@ class DepRegistry {
   /**
    * 把当前活跃副作用加入目标字段的依赖集合。
    */
-  track(target: object, key: PropertyKey) {
+  track(target: object, key: PropertyKey): void {
     /* 获取或创建目标字段对应的依赖集合 */
     const dep = this.ensureDep(target, key)
 
@@ -23,7 +23,7 @@ class DepRegistry {
   /**
    * 触发指定字段的依赖集合，逐个执行对应副作用。
    */
-  trigger(target: object, key: PropertyKey) {
+  trigger(target: object, key: PropertyKey): void {
     /* 若当前字段未建立依赖集合，则无需继续 */
     const dep = this.existingDep(target, key)
 
@@ -60,17 +60,17 @@ class DepRegistry {
   /**
    * 读取已存在的依赖集合，不创建新条目。
    */
-  private existingDep(target: object, key: PropertyKey) {
+  private existingDep(target: object, key: PropertyKey): Dep | undefined {
     return this.targetMap.get(target)?.get(key)
   }
 }
 
 const registry = new DepRegistry()
 
-export function track(target: object, key: PropertyKey) {
+export function track(target: object, key: PropertyKey): void {
   registry.track(target, key)
 }
 
-export function trigger(target: object, key: PropertyKey) {
+export function trigger(target: object, key: PropertyKey): void {
   registry.trigger(target, key)
 }

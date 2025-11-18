@@ -8,7 +8,7 @@ type WritableStyle = CSSStyleDeclaration & Record<string, string | null>
 /**
  * 检测 props key 是否表示事件绑定（如 onClick/oninput）。
  */
-function isEventProp(key: string) {
+function isEventProp(key: string): boolean {
   return key.startsWith('on') && key.length > 2
 }
 
@@ -58,7 +58,7 @@ export function patchProps(
 /**
  * 处理 style 属性，支持字符串和对象两种写法。
  */
-function applyStyle(el: HTMLElement, value: unknown) {
+function applyStyle(el: HTMLElement, value: unknown): void {
   /* 空值表示完全移除 style，避免残留样式。 */
   if (value == null || value === false) {
     el.removeAttribute('style')
@@ -94,7 +94,7 @@ function applyStyle(el: HTMLElement, value: unknown) {
 /**
  * 处理普通 DOM 属性，包括布尔属性的存在性表达。
  */
-function patchDomAttr(el: Element, key: string, value: unknown) {
+function patchDomAttr(el: Element, key: string, value: unknown): void {
   /* null/false 都表示属性应被移除。 */
   if (value == null || value === false) {
     el.removeAttribute(key)

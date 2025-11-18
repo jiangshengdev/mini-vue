@@ -15,13 +15,13 @@ class EffectScope {
   /**
    * 指向当前正在执行的副作用，便于依赖收集阶段引用。
    */
-  private activeEffect: EffectInstance | undefined
+  private _current: EffectInstance | undefined
 
   /**
    * 暴露栈顶副作用，供依赖收集阶段读取。
    */
   get current(): EffectInstance | undefined {
-    return this.activeEffect
+    return this._current
   }
 
   /**
@@ -29,7 +29,7 @@ class EffectScope {
    */
   push(effect: EffectInstance) {
     this.stack.push(effect)
-    this.activeEffect = effect
+    this._current = effect
   }
 
   /**
@@ -37,7 +37,7 @@ class EffectScope {
    */
   pop() {
     this.stack.pop()
-    this.activeEffect = this.stack.at(-1)
+    this._current = this.stack.at(-1)
   }
 }
 

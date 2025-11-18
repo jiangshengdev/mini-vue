@@ -4,10 +4,10 @@ import { isVNode } from './guards.ts'
 /**
  * 将任意形式的 children 归一化为扁平的 VNodeChild 数组。
  */
-export function normalizeChildren(input: unknown): VNodeChild[] {
+export function normalizeChildren(rawChildren: unknown): VNodeChild[] {
   const result: VNodeChild[] = []
 
-  collectChildren(input, result)
+  flattenChild(rawChildren, result)
 
   return result
 }
@@ -15,35 +15,35 @@ export function normalizeChildren(input: unknown): VNodeChild[] {
 /**
  * 内部递归助手，根据不同输入类型填充归一化后的 children 列表。
  */
-function collectChildren(source: unknown, target: VNodeChild[]) {
+function flattenChild(rawChild: unknown, accumulator: VNodeChild[]) {
   /* null、undefined、boolean 等空值在渲染层会被忽略 */
-  if (source == null || typeof source === 'boolean') {
+  if (rawChild == null || typeof rawChild === 'boolean') {
     return
   }
 
   /* 数组 children 需要递归展开，保持原有顺序 */
-  if (Array.isArray(source)) {
-    for (const child of source) {
-      collectChildren(child, target)
+  if (Array.isArray(rawChild)) {
+    for (const nestedChild of rawChild) {
+      flattenChild(nestedChild, accumulator)
     }
 
     return
   }
 
   /* 已经是 VNode 的值直接保留，不做包装 */
-  if (isVNode(source)) {
-    target.push(source)
+  if (isVNode(rawChild)) {
+    accumulator.push(rawChild)
 
     return
   }
 
   /* 字符串与数字作为文本节点内容直接入队 */
-  if (typeof source === 'string' || typeof source === 'number') {
-    target.push(source)
+  if (typeof rawChild === 'string' || typeof rawChild === 'number') {
+    accumulator.push(rawChild)
 
     return
   }
 
   /* 其余类型统一转为字符串，方便调试输出 */
-  target.push(String(source))
+  accumulator.push(String(rawChild))
 }

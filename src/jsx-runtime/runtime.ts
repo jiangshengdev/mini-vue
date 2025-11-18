@@ -1,4 +1,4 @@
-import { createJSXNode } from './shared.ts'
+import { createVNodeFromJSX } from './shared.ts'
 import type { ElementProps, ElementType, VNode } from '@/jsx'
 
 /**
@@ -9,7 +9,7 @@ export function jsx<T extends ElementType>(
   props?: ElementProps<T>,
   key?: PropertyKey,
 ): VNode<T> {
-  return createJSXNode(type, props, key)
+  return createVNodeFromJSX(type, props, key)
 }
 
 /**
@@ -26,5 +26,5 @@ export function jsxDEV<T extends ElementType>(
   props?: ElementProps<T>,
   key?: PropertyKey,
 ): VNode<T> {
-  return createJSXNode(type, props, key)
+  return createVNodeFromJSX(type, props, key)
 }

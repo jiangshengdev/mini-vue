@@ -1,22 +1,6 @@
 # src/reactivity/ref 代码审核
 
-## 1. ref(refValue) 触发类型错误与运行时崩溃（已修复）
-
-- 位置：`src/reactivity/ref/api.ts:9-24`
-- 问题：`ref<T>(value: T): Ref<T>` 直接推导传入值的类型。当参数本身就是 `Ref` 时，`T` 会被推导成 `Ref<U>`，返回类型因此变成 `Ref<Ref<U>>`。实现却在命中 `isRef` 后直接返回原始 `Ref<U>`，类型与真实值不符。例如：
-
-  ```ts
-  const base = ref(1)
-  const alias = ref(base)
-
-  // TS 认为 alias.value 是 Ref<number>，可安全访问 .value
-  alias.value.value // 运行时 alias === base，alias.value 是 number，直接抛出 TypeError
-  ```
-
-- 影响：在 TS 环境下隐藏式制造了“写对代码反而崩溃”的陷阱，任何调用 `ref(existingRef)` 的场景都会得到错误的静态提示，极难排查。
-- 修复方案：`src/reactivity/ref/api.ts` 改为“已有 Ref”优先级更高的函数重载，做到 `ref(existingRef)` 直接返回 `Ref<T>`，同时 `test/reactivity/ref.test.ts` 新增 `expectTypeOf(alias.value).toEqualTypeOf<number>()` 断言，类型与运行时已一致。
-
-## 2. ref([]) 被 convert 误用 reactive 导致初始化失败（待修复）
+## 1. ref([]) 被 convert 误用 reactive 导致初始化失败（待修复）
 
 - 位置：`src/reactivity/ref/impl.ts:70-82`
 - 问题：`convert` 对所有对象统一调用 `reactive`。但当前 `reactive` 明确抛出 `TypeError('reactive 目前仅支持普通对象（不含数组）')`，因此 `ref([])`、`ref(new Date())` 等场景会在构造阶段直接失败。

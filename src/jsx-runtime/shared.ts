@@ -20,7 +20,7 @@ export function h<T extends ElementType>(
   type: T,
   props?: ElementProps<T>,
   ...children: ComponentChildren[]
-) {
+): VNode<T> {
   let key: PropertyKey | undefined
   let normalizedProps: ElementProps<T> | undefined
 

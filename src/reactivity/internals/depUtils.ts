@@ -4,7 +4,7 @@ import type { Dep, EffectInstance } from '../shared/types.ts'
 /**
  * 收集当前活跃的副作用到依赖集合，确保后续触发时能够回调。
  */
-export function collectEffect(dep: Dep) {
+export function collectEffect(dep: Dep): void {
   const currentEffect = effectScope.current
 
   /* 没有当前副作用入栈时直接返回，避免空收集开销 */
@@ -25,7 +25,7 @@ export function collectEffect(dep: Dep) {
 /**
  * 触发依赖集合中的副作用，按照快照顺序执行 run。
  */
-export function dispatchEffects(dep: Dep) {
+export function dispatchEffects(dep: Dep): void {
   /* 空集合无需触发，快速退出 */
   if (dep.size === 0) {
     return
@@ -50,7 +50,7 @@ function snapshot(dep: Dep): Dep {
 /**
  * 判断副作用是否应在当前调度周期内运行。
  */
-function shouldRun(effect: EffectInstance) {
+function shouldRun(effect: EffectInstance): boolean {
   /* 避免重复执行当前 effect，并确保目标 effect 尚未停止 */
   return effect !== effectScope.current && effect.active
 }
@@ -58,7 +58,7 @@ function shouldRun(effect: EffectInstance) {
 /**
  * 根据 effect 是否配置调度器来决定执行策略。
  */
-function schedule(effect: EffectInstance) {
+function schedule(effect: EffectInstance): void {
   const scheduler = effect.scheduler
 
   if (scheduler) {

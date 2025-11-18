@@ -15,7 +15,7 @@ export function normalizeChildren(rawChildren: unknown): VNodeChild[] {
 /**
  * 内部递归助手，根据不同输入类型填充归一化后的 children 列表。
  */
-function flattenChild(rawChild: unknown, accumulator: VNodeChild[]) {
+function flattenChild(rawChild: unknown, accumulator: VNodeChild[]): void {
   /* null、undefined、boolean 等空值在渲染层会被忽略 */
   if (rawChild == null || typeof rawChild === 'boolean') {
     return

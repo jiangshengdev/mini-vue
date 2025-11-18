@@ -21,7 +21,7 @@ class ReactiveCache {
   /**
    * 查找目标是否已被代理，避免重复创建 Proxy 实例。
    */
-  getExisting(target: object): object | undefined {
+  lookupProxy(target: object): object | undefined {
     if (this.reactiveToRaw.has(target)) {
       return target
     }
@@ -69,7 +69,7 @@ export function reactive(target: unknown): unknown {
     throw new TypeError(UNSUPPORTED_TYPE_MESSAGE)
   }
 
-  const cached = reactiveCache.getExisting(target)
+  const cached = reactiveCache.lookupProxy(target)
 
   if (cached) {
     /* 复用已有代理，确保同一原对象始终返回同一 Proxy */

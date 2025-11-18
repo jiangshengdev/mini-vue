@@ -29,7 +29,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
   /**
    * 存储由外部注册的清理回调，管理嵌套副作用的生命周期。
    */
-  private cleanupFns: Array<() => void> = []
+  private cleanupTasks: Array<() => void> = []
 
   constructor(fn: () => T, scheduler?: EffectScheduler) {
     /* 构造时记录调度器，使后续 trigger 能根据配置选择执行策略 */
@@ -56,7 +56,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
     }
 
     /* 运行前重置上一轮留下的依赖，确保收集结果保持最新 */
-    this.resetState()
+    this.flushDependencies()
     /* 将当前实例压入 effect 栈，允许 track 捕获它 */
     effectStack.push(this)
 
@@ -78,7 +78,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
 
     this._active = false
     /* 停止后立即清理依赖关系与清理回调，释放资源 */
-    this.resetState()
+    this.flushDependencies()
   }
 
   /**
@@ -92,13 +92,13 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
    * 收集清理函数，通常用于管理嵌套 effect 的生命周期。
    */
   registerCleanup(cleanup: () => void): void {
-    this.cleanupFns.push(cleanup)
+    this.cleanupTasks.push(cleanup)
   }
 
   /**
    * 解除所有已登记的依赖，并逐一调用清理回调。
    */
-  private resetState(): void {
+  private flushDependencies(): void {
     if (this.deps.length > 0) {
       /* 逐个从依赖集合中移除自己，确保后续触发不再执行 */
       for (const dep of this.deps) {
@@ -108,13 +108,13 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
       this.deps = []
     }
 
-    if (this.cleanupFns.length > 0) {
+    if (this.cleanupTasks.length > 0) {
       /* 拷贝清理函数，避免执行过程中追加新清理导致循环紊乱 */
-      const cleanupFns = this.cleanupFns.slice()
+      const cleanupTasks = this.cleanupTasks.slice()
 
-      this.cleanupFns = []
+      this.cleanupTasks = []
 
-      for (const cleanup of cleanupFns) {
+      for (const cleanup of cleanupTasks) {
         cleanup()
       }
     }

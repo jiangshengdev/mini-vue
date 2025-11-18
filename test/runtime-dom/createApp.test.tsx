@@ -41,4 +41,21 @@ describe('runtime-dom createApp', () => {
     expect(() => app.mount(host)).toThrowError('当前应用已挂载')
     app.unmount()
   })
+
+  it('卸载后可以重新挂载', () => {
+    const host = document.createElement('div')
+    const app = createApp(App)
+
+    app.mount(host)
+    expect(within(host).getByText('Hello')).toHaveClass('hello')
+
+    app.unmount()
+    expect(host).toBeEmptyDOMElement()
+
+    app.mount(host)
+    expect(within(host).getByText('Hello')).toHaveClass('hello')
+
+    app.unmount()
+    expect(host).toBeEmptyDOMElement()
+  })
 })

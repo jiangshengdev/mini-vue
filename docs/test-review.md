@@ -19,9 +19,8 @@
 - 影响：`Counter.tsx` demo 就依赖 `ref` 保存按钮元素，如今没有测试兜底，renderer 中任何 ref 相关改动都可能导致 Demo 直接崩溃或内存泄漏而无人察觉。
 - 建议：新增 `render`/`createApp` 层面的 ref 场景：校验回调首次得到 DOM，`render(null, container)` 或 `app.unmount()` 时会再次以 `null` 调用，且多次渲染不会重复绑定旧节点。
 
-## 4. createApp 挂载周期只测“重复挂载报错”，未验证可重新挂载（待补充）
+## 4. createApp 挂载周期只测“重复挂载报错”，未验证可重新挂载（已解决）
 
 - 位置：`test/runtime-dom/createApp.test.tsx`
-- 问题：文件第 3 个用例断言重复调用 `app.mount` 会抛错，但没有任何测试保证在 `app.unmount()` 之后能够再次成功挂载，或者确保 `unmount` 会把容器内容与内部状态都重置。若 `unmount` 忘记清理 `isMounted` 或容器引用，当前测试照样通过。
-- 影响：真实应用需要在 HMR、微前端或测试环境中多次挂载/卸载根组件。缺少这类覆盖会让“只能挂一次”的回归悄然出现，阻碍 demo 与集成用例。
-- 建议：新增用例：`app.mount(container)` → `app.unmount()` → 再次 `app.mount(container)` 应恢复工作；同时断言二次挂载前容器已被清空，避免遗留节点干扰。
+- 变更：新增“卸载后可以重新挂载”用例，覆盖 `app.mount()` → `app.unmount()` → `app.mount()` 的循环路径，并断言每次卸载都会清空容器避免遗留节点。
+- 状态说明：Vitest `runtime-dom/createApp.test.tsx` 套件新增用例已通过，能够阻止“只能挂一次”类回归。

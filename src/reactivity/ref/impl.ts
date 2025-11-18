@@ -66,26 +66,54 @@ export class ObjectRefImpl<
 
   private readonly key: K
 
+  private readonly dep?: Dep
+
   /**
    * 构造时记录目标对象与属性键，后续读写将直接代理到该属性。
    */
-  constructor(target: T, key: K) {
+  constructor(target: T, key: K, shouldTrack = false) {
     this.target = target
     this.key = key
+
+    if (shouldTrack) {
+      this.dep = new Set()
+    }
   }
 
   /**
    * 读取属性 Ref 时实时返回对象上的当前值。
    */
   get value(): T[K] {
+    const value = this.target[this.key]
+
+    if (this.dep) {
+      /* 普通对象属性通过自身 dep 追踪依赖。 */
+      trackEffect(this.dep)
+    }
+
     /* 不额外缓存值，直接透传原对象，确保和原始 getter 一致。 */
-    return this.target[this.key]
+    return value
   }
 
   /**
    * 写入属性 Ref 时同步赋值到原对象属性上。
    */
   set value(newValue: T[K]) {
+    if (this.dep) {
+      const previousValue = this.target[this.key]
+
+      if (Object.is(previousValue, newValue)) {
+        return
+      }
+
+      this.target[this.key] = newValue
+
+      /* 普通对象属性依赖由自身 dep 驱动。 */
+      triggerEffects(this.dep)
+
+      return
+    }
+
     /* 通过直接赋值驱动外部响应式系统感知变更。 */
     this.target[this.key] = newValue
   }

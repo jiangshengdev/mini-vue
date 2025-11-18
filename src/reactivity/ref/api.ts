@@ -1,3 +1,4 @@
+import { isReactive } from '../reactive.ts'
 import { ObjectRefImpl, RefImpl } from './impl.ts'
 import type { Ref, RefMarker } from './types.ts'
 import { REF_FLAG } from './types.ts'
@@ -46,6 +47,8 @@ export function toRef<
     return existing as Ref<T[K]>
   }
 
+  const reactiveTarget = isReactive(target)
+
   /* 否则创建新的 ObjectRefImpl，将读写直接代理到原对象属性上。 */
-  return new ObjectRefImpl(target, key)
+  return new ObjectRefImpl(target, key, !reactiveTarget)
 }

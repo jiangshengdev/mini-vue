@@ -62,6 +62,31 @@ describe('ref', () => {
     expect(observed).toBe(10)
   })
 
+  it('toRef 在普通对象属性上维持自身依赖', () => {
+    const state = { count: 1 }
+    const countRef = toRef(state, 'count')
+    let observed = -1
+    let runs = 0
+
+    effect(() => {
+      runs += 1
+      observed = countRef.value
+    })
+
+    expect(observed).toBe(1)
+    expect(runs).toBe(1)
+
+    countRef.value = 2
+    expect(state.count).toBe(2)
+    expect(observed).toBe(2)
+    expect(runs).toBe(2)
+
+    /* 直接修改原始对象不会触发 ref 的依赖。 */
+    state.count = 3
+    expect(observed).toBe(2)
+    expect(runs).toBe(2)
+  })
+
   it('toRef 在属性本身已为 ref 时直接复用', () => {
     const count = ref(0)
     const holder = { count }

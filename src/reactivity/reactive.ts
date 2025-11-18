@@ -40,6 +40,13 @@ class ReactiveCache {
 
     return proxy
   }
+
+  /**
+   * 判断传入对象是否为缓存中的响应式 Proxy。
+   */
+  isReactive(target: object): boolean {
+    return this.reactiveToRaw.has(target)
+  }
 }
 
 const reactiveCache = new ReactiveCache()
@@ -71,4 +78,15 @@ export function reactive(target: unknown): unknown {
 
   /* 未命中缓存时创建新代理并登记映射 */
   return reactiveCache.create(target) as typeof target
+}
+
+/**
+ * 判断给定值是否为 reactive 生成的 Proxy。
+ */
+export function isReactive(target: unknown): target is object {
+  if (!isObject(target)) {
+    return false
+  }
+
+  return reactiveCache.isReactive(target)
 }

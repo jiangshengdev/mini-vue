@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, expectTypeOf, it } from 'vitest'
 import { effect, isRef, reactive, ref, toRef, unref } from '@/index.ts'
 
 describe('ref', () => {
@@ -92,5 +92,14 @@ describe('ref', () => {
     const holder = { count }
 
     expect(toRef(holder, 'count')).toBe(count)
+  })
+
+  it('ref(refValue) 暴露出错误的嵌套类型提示', () => {
+    const base = ref(1)
+    const alias = ref(base)
+
+    expect(alias).toBe(base)
+
+    expectTypeOf(alias.value).toEqualTypeOf<number>()
   })
 })

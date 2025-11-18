@@ -31,7 +31,7 @@ const mutableSet: ProxyHandler<Record<PropertyKey, unknown>>['set'] =
     /* 调用 Reflect 完成赋值，确保符合原生语义 */
     const applied = Reflect.set(target, key, value, receiver)
 
-    if (!Object.is(previousValue, value)) {
+    if (applied && !Object.is(previousValue, value)) {
       /* 值发生实际变化时才通知依赖，规避无效触发 */
       trigger(target, key)
     }

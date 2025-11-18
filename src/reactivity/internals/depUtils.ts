@@ -12,6 +12,11 @@ export function collectEffect(dep: Dep): void {
     return
   }
 
+  /* 已停止的副作用不应重新进入依赖集合，防止死效果并阻断 stop 清理 */
+  if (!currentEffect.active) {
+    return
+  }
+
   /* 已存在于集合中的副作用无需重复登记，防止死循环 */
   if (dep.has(currentEffect)) {
     return

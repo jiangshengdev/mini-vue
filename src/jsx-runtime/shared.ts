@@ -1,10 +1,5 @@
-import type {
-  ComponentChildren,
-  ElementProps,
-  ElementType,
-  VNode,
-} from '@/jsx/vnode'
-import { createVNode } from '@/jsx/vnode'
+import type { ComponentChildren, ElementProps, ElementType, VNode } from '@/jsx'
+import { createVNode } from '@/jsx'
 
 /**
  * 低阶的 JSX 创建函数，直接封装到 createVNode 调用。

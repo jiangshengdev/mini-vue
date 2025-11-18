@@ -1,4 +1,4 @@
-import type { ComponentType } from '@/jsx/vnode'
+import type { ComponentType } from '@/jsx'
 import type { RootRenderFunction } from './renderer.ts'
 
 /**

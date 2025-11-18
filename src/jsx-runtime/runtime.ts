@@ -1,5 +1,5 @@
 import { createJSXNode } from './shared.ts'
-import type { ElementProps, ElementType, VNode } from '@/jsx/vnode'
+import type { ElementProps, ElementType, VNode } from '@/jsx'
 
 /**
  * 标准 JSX 运行时入口，对应生产环境编译产物中的 jsx 调用。

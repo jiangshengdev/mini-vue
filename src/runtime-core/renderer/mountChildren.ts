@@ -1,4 +1,4 @@
-import type { VNodeChild } from '@/jsx/vnode'
+import type { VNodeChild } from '@/jsx'
 import type { RendererOptions } from '../renderer.ts'
 import { mountChild } from './mountChild.ts'
 

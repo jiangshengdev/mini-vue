@@ -1,4 +1,4 @@
-import type { ComponentType, ElementProps, VNode } from '@/jsx/vnode'
+import type { ComponentType, ElementProps, VNode } from '@/jsx'
 import type { RendererOptions } from '../renderer.ts'
 import { mountChild } from './mountChild.ts'
 

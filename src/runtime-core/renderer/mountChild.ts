@@ -1,5 +1,5 @@
-import type { ComponentResult } from '@/jsx/vnode'
-import { isVNode } from '@/jsx/vnode'
+import type { ComponentResult } from '@/jsx'
+import { isVNode } from '@/jsx'
 import type { RendererOptions } from '../renderer.ts'
 import { mountVNode } from './mountVNode.ts'
 

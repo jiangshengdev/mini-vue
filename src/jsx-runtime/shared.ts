@@ -29,9 +29,11 @@ export function h<T extends ElementType>(
   let key: PropertyKey | undefined
   let normalizedProps: ElementProps<T> | undefined
 
+  /* 存在 props 时需要摘取 key 并规整剩余字段，保证与 JSX 规范对齐。 */
   if (props) {
     const propsCopy = { ...props } as Record<string, unknown>
 
+    /* key 属于 VNode 的标识信息，提取后从 props 中剔除避免下游重复。 */
     if ('key' in propsCopy) {
       key = propsCopy.key as PropertyKey
       delete propsCopy.key
@@ -42,12 +44,12 @@ export function h<T extends ElementType>(
       : undefined
   }
 
+  /* 没有额外 children 时直接透传 props，保留编译器注入的 children。 */
   if (children.length === 0) {
-    /* 没有通过可变参数传入 children 时保留原 props.children */
     return createJSXNode(type, normalizedProps, key)
   }
 
-  /* 将剩余参数收集到 children 字段中，再交给 createJSXNode 统一处理 */
+  /* 需要人为传入 children 时重新组装 props 并交给底层创建函数。 */
   const propsWithChildren = {
     ...(normalizedProps ?? {}),
     children,

@@ -7,7 +7,7 @@ import type { Dep, EffectInstance } from '../shared/types.ts'
 export function collectEffect(dep: Dep) {
   const currentEffect = effectScope.current
 
-  /* 没有激活的副作用时直接返回，避免空收集开销 */
+  /* 没有当前副作用入栈时直接返回，避免空收集开销 */
   if (!currentEffect) {
     return
   }

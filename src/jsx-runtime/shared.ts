@@ -3,8 +3,8 @@ import type {
   ElementProps,
   ElementType,
   VirtualNode,
-} from '@/jsx'
-import { createVirtualNode } from '@/jsx'
+} from '@/jsx/index.ts'
+import { createVirtualNode } from '@/jsx/index.ts'
 
 /**
  * 低阶的 JSX 创建函数，直接封装到 createVirtualNode 调用。

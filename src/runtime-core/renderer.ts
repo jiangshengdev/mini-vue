@@ -1,7 +1,7 @@
 /**
  * 平台无关的渲染核心定义，通过注入宿主环境能力完成挂载流程。
  */
-import type { ComponentResult } from '@/jsx'
+import type { ComponentResult } from '@/jsx/index.ts'
 import { mountChild } from './renderer/mount-child.ts'
 
 /**

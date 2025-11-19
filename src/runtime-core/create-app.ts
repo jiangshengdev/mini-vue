@@ -1,4 +1,4 @@
-import type { ComponentType } from '@/jsx'
+import type { ComponentType } from '@/jsx/index.ts'
 import type { RootRenderFunction } from './renderer.ts'
 
 /**

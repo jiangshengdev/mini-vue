@@ -1,5 +1,5 @@
 import { createVirtualNodeFromJSX } from './shared.ts'
-import type { ElementProps, ElementType, VirtualNode } from '@/jsx'
+import type { ElementProps, ElementType, VirtualNode } from '@/jsx/index.ts'
 
 /**
  * 标准 JSX 运行时入口，对应生产环境编译产物中的 jsx 调用。

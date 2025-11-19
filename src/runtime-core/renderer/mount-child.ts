@@ -1,5 +1,5 @@
-import type { ComponentResult } from '@/jsx'
-import { isVirtualNode } from '@/jsx'
+import type { ComponentResult } from '@/jsx/index.ts'
+import { isVirtualNode } from '@/jsx/index.ts'
 import type { RendererOptions } from '../renderer.ts'
 import { mountVirtualNode } from './mount-virtual-node.ts'
 

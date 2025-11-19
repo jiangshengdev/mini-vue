@@ -1,4 +1,4 @@
-import { h } from '@/jsx-runtime'
+import { h } from '@/jsx-runtime.ts'
 
 const flag: boolean = Math.random() > 0.5
 

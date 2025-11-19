@@ -54,24 +54,39 @@ describe('reactive', () => {
   it('数组输入会给出明确错误提示', () => {
     const array: unknown = []
 
-    expect(() => reactive(array)).toThrowError(
-      new TypeError('reactive 目前仅支持普通对象（不含数组）'),
-    )
+    expect(() => {
+      return reactive(array)
+    }).toThrowError(new TypeError('reactive 目前仅支持普通对象（不含数组）'))
   })
 
   it('非普通内建对象会报错', () => {
     const factories = [
-      ['Map', () => new Map()],
-      ['Set', () => new Set()],
-      ['Date', () => new Date()],
+      [
+        'Map',
+        () => {
+          return new Map()
+        },
+      ],
+      [
+        'Set',
+        () => {
+          return new Set()
+        },
+      ],
+      [
+        'Date',
+        () => {
+          return new Date()
+        },
+      ],
     ] as const
 
     for (const [, factory] of factories) {
       const value: unknown = factory()
 
-      expect(() => reactive(value)).toThrowError(
-        new TypeError('reactive 目前仅支持普通对象（不含数组）'),
-      )
+      expect(() => {
+        return reactive(value)
+      }).toThrowError(new TypeError('reactive 目前仅支持普通对象（不含数组）'))
     }
   })
 })

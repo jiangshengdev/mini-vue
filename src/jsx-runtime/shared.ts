@@ -54,7 +54,7 @@ export function h<T extends ElementType>(
   }
 
   /* 需要人为传入 children 时重新组装 props 并交给底层创建函数。 */
-  const propsWithChildren = {
+  const propsWithChildren: ElementProps<T> = {
     ...normalizedProps,
     children,
   } as ElementProps<T>

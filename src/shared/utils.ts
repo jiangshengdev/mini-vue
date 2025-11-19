@@ -14,7 +14,7 @@ export function isPlainObject(
     return false
   }
 
-  const prototype = Object.getPrototypeOf(value)
+  const prototype: unknown = Object.getPrototypeOf(value)
 
   return prototype === null || prototype === Object.prototype
 }

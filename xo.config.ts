@@ -17,6 +17,7 @@ const xoConfig: FlatXoConfig = [
         },
       ],
       'import-x/no-duplicates': ['error', { 'prefer-inline': false }],
+      'arrow-body-style': ['error', 'always'],
     },
   },
 ]

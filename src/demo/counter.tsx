@@ -13,8 +13,8 @@ export const Counter: ComponentType = () => {
     }
   })
 
-  const bindRef = (element?: Element) => {
-    buttonElement = (element as HTMLButtonElement | undefined) ?? undefined
+  const bindRef = (element: Element) => {
+    buttonElement = element as HTMLButtonElement
   }
 
   const increment = () => {

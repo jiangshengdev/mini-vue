@@ -48,13 +48,13 @@ describe('reactive', () => {
   it('非对象值保持原样', () => {
     const value = 1
 
-    expect(reactive(value as unknown as object)).toBe(value)
+    expect(reactive(value)).toBe(value)
   })
 
   it('数组输入会给出明确错误提示', () => {
     const array: unknown = []
 
-    expect(() => reactive(array as object)).toThrowError(
+    expect(() => reactive(array)).toThrowError(
       new TypeError('reactive 目前仅支持普通对象（不含数组）'),
     )
   })
@@ -69,7 +69,7 @@ describe('reactive', () => {
     for (const [, factory] of factories) {
       const value: unknown = factory()
 
-      expect(() => reactive(value as object)).toThrowError(
+      expect(() => reactive(value)).toThrowError(
         new TypeError('reactive 目前仅支持普通对象（不含数组）'),
       )
     }

@@ -24,13 +24,13 @@ export function patchProps(
   }
 
   for (const [key, value] of Object.entries(props)) {
-    /* ref 需要拿到真实元素，因此直接执行用户回调。 */
+    /* `ref` 需要拿到真实元素，因此直接执行用户回调。 */
     if (key === 'ref' && typeof value === 'function') {
       value(element)
       continue
     }
 
-    /* class/className 统一走 className，确保字符串化处理。 */
+    /* `class`/`className` 统一走 `className`，确保字符串化处理。 */
     if (key === 'class' || key === 'className') {
       element.className = value == null ? '' : String(value)
       continue

@@ -12,7 +12,7 @@ export interface AppRuntimeConfig<HostElement> {
 }
 
 /**
- * createApp 返回的实例 API，封装 mount/unmount 生命周期。
+ * `createApp` 返回的实例 API，封装 `mount`/`unmount` 生命周期。
  */
 export interface AppInstance<HostElement> {
   /** 指定宿主容器并触发首次渲染。 */
@@ -96,7 +96,7 @@ export function createAppInstance<HostElement>(
     mountApp(state, target)
   }
 
-  /* unmount 暴露为实例方法，便于控制生命周期。 */
+  /* `unmount` 暴露为实例方法，便于控制生命周期。 */
   function unmount(): void {
     unmountApp(state)
   }

@@ -17,7 +17,7 @@ export function mountChild<
 ): HostNode | undefined {
   const { createFragment, appendChild, createText } = options
 
-  /* null、undefined、布尔值不产生实际节点。 */
+  /* `null`、`undefined`、布尔值不产生实际节点。 */
   if (child == null || typeof child === 'boolean') {
     return undefined
   }

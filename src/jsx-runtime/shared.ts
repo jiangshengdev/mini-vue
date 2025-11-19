@@ -38,7 +38,7 @@ export function h<T extends ElementType>(
       key?: PropertyKey
     }
 
-    /* key 属于 virtualNode 的标识信息，提取后从 props 中剔除避免下游重复。 */
+    /* `key` 属于 `virtualNode` 的标识信息，提取后从 `props` 中剔除避免下游重复。 */
     if (Object.hasOwn(props, 'key')) {
       key = extractedKey
     }

@@ -120,7 +120,7 @@ export class ObjectRefImpl<
 }
 
 /**
- * maybeReactiveValue 根据值类型决定是否递归包裹成响应式对象。
+ * `maybeReactiveValue` 根据值类型决定是否递归包裹成响应式对象。
  */
 function maybeReactiveValue<T>(value: T): T {
   /* 对象类型交由 reactive 处理，其余原样返回。 */

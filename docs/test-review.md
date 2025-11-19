@@ -10,6 +10,6 @@
 ## 2. renderer `ref` 回调与清理路径没有测试（待补充）
 
 - 位置：`test/runtime-dom` 目录（所有用例）
-- 问题：`src/runtime-dom/patchProps.ts` 支持函数式 `ref`，包括挂载时拿到 DOM、卸载时回调 `null`。然而测试完全未覆盖 `ref` 绑定，连最基本的“渲染后 ref 收到元素”都没有，更遑论在 `render` 二次调用或 `createApp.unmount()` 时重新触发清理。
+- 问题：`src/runtime-dom/patch-props.ts` 支持函数式 `ref`，包括挂载时拿到 DOM、卸载时回调 `null`。然而测试完全未覆盖 `ref` 绑定，连最基本的“渲染后 ref 收到元素”都没有，更遑论在 `render` 二次调用或 `createApp.unmount()` 时重新触发清理。
 - 影响：`Counter.tsx` demo 就依赖 `ref` 保存按钮元素，如今没有测试兜底，renderer 中任何 ref 相关改动都可能导致 Demo 直接崩溃或内存泄漏而无人察觉。
 - 建议：新增 `render`/`createApp` 层面的 ref 场景：校验回调首次得到 DOM，`render(null, container)` 或 `app.unmount()` 时会再次以 `null` 调用，且多次渲染不会重复绑定旧节点。

@@ -2,7 +2,7 @@
  * DOM 宿主环境的渲染原语实现。
  */
 import type { RendererOptions } from '@/runtime-core'
-import { patchProps } from './patchProps.ts'
+import { patchProps } from './patch-props.ts'
 
 /**
  * DOM 宿主环境完整的渲染原语集合，供 renderer 复用。

@@ -2,8 +2,8 @@
  * runtime-dom 负责整合 DOM 宿主的渲染器与应用创建逻辑。
  */
 import type { ComponentType } from '@/jsx/index.ts'
-import type { AppInstance } from '@/runtime-core'
-import { createAppInstance, createRenderer } from '@/runtime-core'
+import type { AppInstance } from '@/runtime-core/index.ts'
+import { createAppInstance, createRenderer } from '@/runtime-core/index.ts'
 import { domRendererOptions } from './renderer-options.ts'
 
 const { render, clear } = createRenderer(domRendererOptions)

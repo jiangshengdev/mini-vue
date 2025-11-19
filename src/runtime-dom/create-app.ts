@@ -21,10 +21,10 @@ interface DomAppState {
 /**
  * 根据字符串选择器或直接传入的节点解析出真实容器。
  */
-function resolveContainer(target: string | Element): Element | null {
+function resolveContainer(target: string | Element): Element | undefined {
   /* 字符串容器走 querySelector，以支持常见挂载写法。 */
   if (typeof target === 'string') {
-    return document.querySelector(target)
+    return document.querySelector(target) ?? undefined
   }
 
   return target

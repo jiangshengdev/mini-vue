@@ -16,12 +16,12 @@ export type ComponentChildren =
   | VirtualNodeChild
   | VirtualNodeChild[]
   | boolean
-  | null
+  | undefined
 
 /**
  * 组件渲染函数返回的结果类型。
  */
-export type ComponentResult = ComponentChildren | undefined
+export type ComponentResult = ComponentChildren
 
 /**
  * 组件 props 的基础约束：放宽为对象即可，避免要求字符串索引签名。

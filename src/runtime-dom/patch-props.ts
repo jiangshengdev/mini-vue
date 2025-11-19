@@ -3,7 +3,7 @@
  */
 
 /** 扩展原生 style 声明，允许对任意属性键执行写入。 */
-type WritableStyle = CSSStyleDeclaration & Record<string, string | null>
+type WritableStyle = CSSStyleDeclaration & Record<string, string | undefined>
 
 /**
  * 检测 props key 是否表示事件绑定（如 onClick/oninput）。

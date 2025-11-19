@@ -51,7 +51,7 @@ export function createVNode<T extends ElementType>(
 
   return {
     /* 使用唯一标记区分普通对象与内部 VNode 结构 */
-    __v_isVNode: vnodeSymbol,
+    [vnodeSymbol]: true as const,
     type,
     props: (props as ElementProps<T> | null) ?? null,
     children,

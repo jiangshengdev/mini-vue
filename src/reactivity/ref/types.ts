@@ -3,7 +3,7 @@ import type { DependencyBucket } from '../shared/types.ts'
 /**
  * 标记对象具备 Ref 能力的内部符号，避免与用户属性冲突。
  */
-export const REF_FLAG = Symbol('isRef')
+export const refFlag = Symbol('isRef')
 
 /**
  * Ref 接口暴露响应式值的访问器。
@@ -16,7 +16,7 @@ export interface Ref<T = unknown> {
  * RefMarker 用于补充类型信息，表示对象携带 REF_FLAG。
  */
 export interface RefMarker {
-  readonly [REF_FLAG]: true
+  readonly [refFlag]: true
 }
 
 /**

@@ -1,7 +1,8 @@
 import { isReactive } from '../reactive.ts'
 import { ObjectRefImpl, RefImpl } from './impl.ts'
-import type { Ref, RefMarker } from './types.ts'
-import { REF_FLAG } from './types.ts'
+import type { Ref } from './types.ts'
+import { refFlag } from './types.ts'
+import { isObject } from '@/shared/utils.ts'
 
 /**
  * 将任意值转换为 Ref，若已经是 Ref 则原样返回。
@@ -23,9 +24,11 @@ export function ref<T>(value: T | Ref<T>): Ref<T> {
  */
 export function isRef<T>(value: unknown): value is Ref<T> {
   /* 通过 REF_FLAG 符号位识别 Ref，其他结构一律返回 false。 */
-  return Boolean(
-    value && typeof value === 'object' && (value as RefMarker)[REF_FLAG],
-  )
+  if (!isObject(value)) {
+    return false
+  }
+
+  return Object.hasOwn(value, refFlag)
 }
 
 /**

@@ -1,7 +1,7 @@
 import { reactive } from '../reactive.ts'
 import { isObject } from '@/shared/utils.ts'
 import type { Ref, RefDepCarrier, RefMarker } from './types.ts'
-import { REF_FLAG } from './types.ts'
+import { refFlag } from './types.ts'
 import { trackEffect, triggerEffects } from '../internals/depUtils.ts'
 import type { DependencyBucket } from '../shared/types.ts'
 
@@ -11,7 +11,7 @@ import type { DependencyBucket } from '../shared/types.ts'
 export class RefImpl<T> implements Ref<T>, RefDepCarrier {
   readonly dep: DependencyBucket = new Set()
 
-  readonly [REF_FLAG] = true as const
+  readonly [refFlag] = true as const
 
   private _rawValue: T
 
@@ -60,7 +60,7 @@ export class ObjectRefImpl<
   >
   implements Ref<T[K]>, RefMarker
 {
-  readonly [REF_FLAG] = true as const
+  readonly [refFlag] = true as const
 
   private readonly target: T
 

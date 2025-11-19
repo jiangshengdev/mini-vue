@@ -1,4 +1,4 @@
-import { effectStack } from './effectStack.ts'
+import { effectStack } from './effect-stack.ts'
 import type { DependencyBucket, EffectInstance } from '../shared/types.ts'
 
 /**

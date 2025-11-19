@@ -2,7 +2,7 @@ import { reactive } from '../reactive.ts'
 import { isObject } from '@/shared/utils.ts'
 import type { Ref, RefDepCarrier, RefMarker } from './types.ts'
 import { refFlag } from './types.ts'
-import { trackEffect, triggerEffects } from '../internals/depUtils.ts'
+import { trackEffect, triggerEffects } from '../internals/dep-utils.ts'
 import type { DependencyBucket } from '../shared/types.ts'
 
 /**

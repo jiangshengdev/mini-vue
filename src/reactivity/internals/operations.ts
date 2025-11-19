@@ -1,4 +1,4 @@
-import { trackEffect, triggerEffects } from './depUtils.ts'
+import { trackEffect, triggerEffects } from './dep-utils.ts'
 import type { DependencyBucket } from '../shared/types.ts'
 
 /**

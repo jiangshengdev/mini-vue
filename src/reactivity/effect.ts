@@ -1,4 +1,4 @@
-import { effectStack } from './internals/effectStack.ts'
+import { effectStack } from './internals/effect-stack.ts'
 import type {
   DependencyBucket,
   EffectHandle,

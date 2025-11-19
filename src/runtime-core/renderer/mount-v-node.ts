@@ -1,7 +1,7 @@
 import type { ComponentType, VNode } from '@/jsx'
 import type { RendererOptions } from '../renderer.ts'
-import { mountComponent } from './mountComponent.ts'
-import { mountElement } from './mountElement.ts'
+import { mountComponent } from './mount-component.ts'
+import { mountElement } from './mount-element.ts'
 
 /**
  * 将通用 VNode 分派给组件或元素挂载路径。

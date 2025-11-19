@@ -1,7 +1,7 @@
 import type { ComponentResult } from '@/jsx'
 import { isVNode } from '@/jsx'
 import type { RendererOptions } from '../renderer.ts'
-import { mountVNode } from './mountVNode.ts'
+import { mountVNode } from './mount-v-node.ts'
 
 /**
  * 根据子节点类型生成宿主节点，统一处理数组、VNode 与原始值。

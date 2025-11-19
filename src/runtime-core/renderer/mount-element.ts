@@ -1,6 +1,6 @@
 import type { VNode } from '@/jsx'
 import type { RendererOptions } from '../renderer.ts'
-import { mountChildren } from './mountChildren.ts'
+import { mountChildren } from './mount-children.ts'
 
 /**
  * 创建宿主元素并同步 props 与 children。

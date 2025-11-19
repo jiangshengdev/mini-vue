@@ -1,6 +1,6 @@
 import type { ComponentType, ElementProps, VNode } from '@/jsx'
 import type { RendererOptions } from '../renderer.ts'
-import { mountChild } from './mountChild.ts'
+import { mountChild } from './mount-child.ts'
 
 /**
  * 执行函数组件并将返回的子树继续挂载到容器。

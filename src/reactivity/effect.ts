@@ -40,7 +40,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
   /**
    * 代表副作用是否仍处于激活态，决定是否参与依赖收集。
    */
-  private _active: boolean = true
+  private _active = true
 
   get active(): boolean {
     return this._active

@@ -5,6 +5,8 @@ import type { Ref, RefDepCarrier, RefMarker } from './types.ts'
 import { refFlag } from './types.ts'
 import { isObject } from '@/shared/utils.ts'
 
+type PlainObject = Record<PropertyKey, unknown>
+
 /**
  * RefImpl 负责封装普通值的响应式访问器，实现依赖收集与触发。
  */
@@ -54,10 +56,7 @@ export class RefImpl<T> implements Ref<T>, RefDepCarrier {
 /**
  * ObjectRefImpl 将对象属性包装成 Ref，与原始对象读写保持同步。
  */
-export class ObjectRefImpl<
-    T extends Record<PropertyKey, unknown>,
-    K extends keyof T,
-  >
+export class ObjectRefImpl<T extends PlainObject, K extends keyof T>
   implements Ref<T[K]>, RefMarker
 {
   readonly [refFlag] = true as const

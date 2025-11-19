@@ -13,7 +13,7 @@ export interface Ref<T = unknown> {
 }
 
 /**
- * RefMarker 用于补充类型信息，表示对象携带 REF_FLAG。
+ * RefMarker 用于补充类型信息，表示对象携带 refFlag。
  */
 export interface RefMarker {
   readonly [refFlag]: true

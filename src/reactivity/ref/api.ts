@@ -20,7 +20,7 @@ export function ref<T>(value: T | Ref<T>): Ref<T> {
  * 判断传入的对象是否拥有 Ref 标记。
  */
 export function isRef<T>(value: unknown): value is Ref<T> {
-  /* 通过 REF_FLAG 符号位识别 Ref，其他结构一律返回 false。 */
+  /* 通过 refFlag 符号位识别 Ref，其他结构一律返回 false。 */
   if (!isObject(value)) {
     return false
   }

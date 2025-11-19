@@ -110,7 +110,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
 
     if (this.cleanupTasks.length > 0) {
       /* 拷贝清理函数，避免执行过程中追加新清理导致循环紊乱 */
-      const cleanupTasks = this.cleanupTasks.slice()
+      const cleanupTasks = [...this.cleanupTasks]
 
       this.cleanupTasks = []
 

@@ -1,4 +1,4 @@
-import type { VNodeChild } from '@/jsx'
+import type { VirtualNodeChild } from '@/jsx'
 import type { RendererOptions } from '../renderer.ts'
 import { mountChild } from './mount-child.ts'
 
@@ -11,7 +11,7 @@ export function mountChildren<
   HostFragment extends HostNode,
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
-  children: VNodeChild[],
+  children: VirtualNodeChild[],
   container: HostElement,
 ): void {
   /* 顺序遍历子节点，统一交由 mountChild 处理细分类型。 */

@@ -1,4 +1,4 @@
-import type { ComponentType, ElementProps, VNode } from '@/jsx'
+import type { ComponentType, ElementProps, VirtualNode } from '@/jsx'
 import type { RendererOptions } from '../renderer.ts'
 import { mountChild } from './mount-child.ts'
 
@@ -13,18 +13,20 @@ export function mountComponent<
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   component: T,
-  vnode: VNode<T>,
+  virtualNode: VirtualNode<T>,
   container: HostElement | HostFragment,
 ): HostNode | null {
-  const props = (vnode.props ? { ...vnode.props } : {}) as ElementProps<T>
-  const childCount = vnode.children.length
+  const props = (
+    virtualNode.props ? { ...virtualNode.props } : {}
+  ) as ElementProps<T>
+  const childCount = virtualNode.children.length
 
   /* 单个子节点直接展开为 children，模拟 React JSX 行为。 */
   if (childCount === 1) {
-    props.children = vnode.children[0]
+    props.children = virtualNode.children[0]
   } else if (childCount > 1) {
     /* 多个子节点打包成数组，方便组件内部批量消费。 */
-    props.children = vnode.children
+    props.children = virtualNode.children
   }
 
   /* 执行组件函数拿到新的子树，再交由 mountChild 递归处理。 */

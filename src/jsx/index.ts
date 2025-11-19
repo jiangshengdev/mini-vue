@@ -1,7 +1,11 @@
 /**
  * JSX 对外入口，仅聚合虚拟节点工厂与相关类型。
  */
-export { createVNode, Fragment, isVNode } from './vnode/index.ts'
+export {
+  createVirtualNode,
+  Fragment,
+  isVirtualNode,
+} from '@/jsx/virtual-node/index.ts'
 export type {
   ComponentChildren,
   ComponentResult,
@@ -10,7 +14,7 @@ export type {
   ElementType,
   FragmentProps,
   FragmentType,
-  VNode,
-  VNodeChild,
-} from './vnode/index.ts'
-export { vnodeFlag } from './vnode/index.ts'
+  VirtualNode,
+  VirtualNodeChild,
+} from '@/jsx/virtual-node/index.ts'
+export { virtualNodeFlag } from '@/jsx/virtual-node/index.ts'

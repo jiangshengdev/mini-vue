@@ -1,5 +1,5 @@
 /**
- * DOM 专用的属性打补丁逻辑，负责将 VNode props 应用到真实元素上。
+ * DOM 专用的属性打补丁逻辑，负责将 virtualNode props 应用到真实元素上。
  */
 
 /** 扩展原生 style 声明，允许对任意属性键执行写入。 */
@@ -13,7 +13,7 @@ function isEventProp(key: string): boolean {
 }
 
 /**
- * 将 VNode 上的 props 映射到真实 DOM 元素上。
+ * 将 virtualNode 上的 props 映射到真实 DOM 元素上。
  */
 export function patchProps(
   element: Element,

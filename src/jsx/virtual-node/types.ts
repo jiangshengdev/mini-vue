@@ -1,18 +1,22 @@
 /**
- * 标记对象为由 mini-vue 创建的 VNode，用于运行时类型守卫。
+ * 标记对象为由 mini-vue 创建的 virtualNode，用于运行时类型守卫。
  */
-export const vnodeFlag = Symbol('isVNode')
+export const virtualNodeFlag = Symbol('isVirtualNode')
 
 /**
- * 单个子节点的联合类型：可以是 VNode 或原始文本。
+ * 单个子节点的联合类型：可以是 virtualNode 或原始文本。
  */
-export type VNodeChild = VNode | string | number
+export type VirtualNodeChild = VirtualNode | string | number
 
 /**
  * 组件接收到的 children，可以是单个、数组、布尔值或空。
  * 布尔值会在 normalizeChildren/mountChild 中被当作空节点忽略。
  */
-export type ComponentChildren = VNodeChild | VNodeChild[] | boolean | null
+export type ComponentChildren =
+  | VirtualNodeChild
+  | VirtualNodeChild[]
+  | boolean
+  | null
 
 /**
  * 组件渲染函数返回的结果类型。
@@ -85,15 +89,15 @@ export type ElementProps<T extends ElementType = ElementType> =
 /**
  * mini-vue 内部使用的虚拟节点结构，承载类型、属性与子节点信息。
  */
-export interface VNode<T extends ElementType = ElementType> {
-  /** 通过唯一 symbol 标识当前对象为 mini-vue 生成的 VNode */
-  readonly [vnodeFlag]: true
+export interface VirtualNode<T extends ElementType = ElementType> {
+  /** 通过唯一 symbol 标识当前对象为 mini-vue 生成的 virtualNode */
+  readonly [virtualNodeFlag]: true
   /** 当前虚拟节点的类型，可能是原生标签、组件或 Fragment */
   readonly type: T
   /** 节点携带的属性对象，按元素类型推导，允许为空 */
   readonly props: ElementProps<T> | null
   /** 归一化后的子节点列表，统一以数组承载 */
-  readonly children: VNodeChild[]
+  readonly children: VirtualNodeChild[]
   /** 可选的 diff key，用于稳定节点身份 */
   readonly key?: PropertyKey
 }

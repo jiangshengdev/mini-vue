@@ -1,16 +1,21 @@
-import type { ComponentChildren, ElementProps, ElementType, VNode } from '@/jsx'
-import { createVNode } from '@/jsx'
+import type {
+  ComponentChildren,
+  ElementProps,
+  ElementType,
+  VirtualNode,
+} from '@/jsx'
+import { createVirtualNode } from '@/jsx'
 
 /**
- * 低阶的 JSX 创建函数，直接封装到 createVNode 调用。
+ * 低阶的 JSX 创建函数，直接封装到 createVirtualNode 调用。
  */
-export function createVNodeFromJSX<T extends ElementType>(
+export function createVirtualNodeFromJSX<T extends ElementType>(
   type: T,
   props?: ElementProps<T>,
   key?: PropertyKey,
-): VNode<T> {
-  /* 将传入的 props 封装为 createVNode 所需的参数结构 */
-  return createVNode({ type, rawProps: props ?? null, key })
+): VirtualNode<T> {
+  /* 将传入的 props 封装为 createVirtualNode 所需的参数结构 */
+  return createVirtualNode({ type, rawProps: props ?? null, key })
 }
 
 /**
@@ -20,7 +25,7 @@ export function h<T extends ElementType>(
   type: T,
   props?: ElementProps<T>,
   ...children: ComponentChildren[]
-): VNode<T> {
+): VirtualNode<T> {
   let key: PropertyKey | undefined
   let normalizedProps: ElementProps<T> | undefined
 
@@ -33,7 +38,7 @@ export function h<T extends ElementType>(
       key?: PropertyKey
     }
 
-    /* key 属于 VNode 的标识信息，提取后从 props 中剔除避免下游重复。 */
+    /* key 属于 virtualNode 的标识信息，提取后从 props 中剔除避免下游重复。 */
     if (Object.hasOwn(props, 'key')) {
       key = extractedKey
     }
@@ -45,7 +50,7 @@ export function h<T extends ElementType>(
 
   /* 没有额外 children 时直接透传 props，保留编译器注入的 children。 */
   if (children.length === 0) {
-    return createVNodeFromJSX(type, normalizedProps, key)
+    return createVirtualNodeFromJSX(type, normalizedProps, key)
   }
 
   /* 需要人为传入 children 时重新组装 props 并交给底层创建函数。 */
@@ -54,5 +59,5 @@ export function h<T extends ElementType>(
     children,
   } as ElementProps<T>
 
-  return createVNodeFromJSX(type, propsWithChildren, key)
+  return createVirtualNodeFromJSX(type, propsWithChildren, key)
 }

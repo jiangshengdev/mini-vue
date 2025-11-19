@@ -1,11 +1,11 @@
-import type { VNodeChild } from './types.ts'
-import { isVNode } from './guards.ts'
+import type { VirtualNodeChild } from './types.ts'
+import { isVirtualNode } from './guards.ts'
 
 /**
- * 将任意形式的 children 归一化为扁平的 VNodeChild 数组。
+ * 将任意形式的 children 归一化为扁平的 VirtualNodeChild 数组。
  */
-export function normalizeChildren(rawChildren: unknown): VNodeChild[] {
-  const result: VNodeChild[] = []
+export function normalizeChildren(rawChildren: unknown): VirtualNodeChild[] {
+  const result: VirtualNodeChild[] = []
 
   flattenChild(rawChildren, result)
 
@@ -15,7 +15,10 @@ export function normalizeChildren(rawChildren: unknown): VNodeChild[] {
 /**
  * 内部递归助手，根据不同输入类型填充归一化后的 children 列表。
  */
-function flattenChild(rawChild: unknown, accumulator: VNodeChild[]): void {
+function flattenChild(
+  rawChild: unknown,
+  accumulator: VirtualNodeChild[],
+): void {
   /* null、undefined、boolean 等空值在渲染层会被忽略 */
   if (rawChild == null || typeof rawChild === 'boolean') {
     return
@@ -30,8 +33,8 @@ function flattenChild(rawChild: unknown, accumulator: VNodeChild[]): void {
     return
   }
 
-  /* 已经是 VNode 的值直接保留，不做包装 */
-  if (isVNode(rawChild)) {
+  /* 已经是 virtualNode 的值直接保留，不做包装 */
+  if (isVirtualNode(rawChild)) {
     accumulator.push(rawChild)
 
     return

@@ -1,4 +1,7 @@
-import type { ElementType as MiniElementType, VNode } from './vnode/index.ts'
+import type {
+  ElementType as MiniElementType,
+  VirtualNode,
+} from '@/jsx/virtual-node/index.ts'
 
 /**
  * 为 TypeScript 提供 mini-vue JSX 环境下的类型声明。
@@ -6,7 +9,7 @@ import type { ElementType as MiniElementType, VNode } from './vnode/index.ts'
 declare global {
   namespace JSX {
     /** 单个 JSX 表达式最终对应的虚拟节点类型。 */
-    type Element = VNode
+    type Element = VirtualNode
 
     /** JSX 标签名可以是原生标签、组件或 Fragment。 */
     type ElementType = MiniElementType

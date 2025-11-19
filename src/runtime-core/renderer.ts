@@ -23,7 +23,7 @@ export interface RendererOptions<
   /** 清空容器内容，在新一轮渲染前使用。 */
   clear(container: HostElement): void
   /**
-   * 将 VNode props 映射到真实元素节点。
+   * 将 virtualNode props 映射到真实元素节点。
    * 传入 null 时代表没有任何 props 需要处理。
    */
   patchProps(element: HostElement, props: Record<string, unknown> | null): void
@@ -31,13 +31,13 @@ export interface RendererOptions<
 
 /** 根级渲染函数签名，负责将顶层子树挂载到容器。 */
 export type RootRenderFunction<HostElement> = (
-  vnode: ComponentResult,
+  virtualNode: ComponentResult,
   container: HostElement,
 ) => void
 
 /** 渲染器工厂返回值，包含渲染与清理能力。 */
 export interface Renderer<HostNode, HostElement extends HostNode> {
-  /** 将 VNode 子树渲染到指定容器中。 */
+  /** 将 virtualNode 子树渲染到指定容器中。 */
   render: RootRenderFunction<HostElement>
   /** 清空容器内容并触发宿主层清理。 */
   clear: (container: HostElement) => void
@@ -56,9 +56,9 @@ export function createRenderer<
   const { clear } = options
 
   /* 根渲染函数会先清空容器，再挂载整棵子树。 */
-  function render(vnode: ComponentResult, container: HostElement): void {
+  function render(virtualNode: ComponentResult, container: HostElement): void {
     clear(container)
-    mountChild(options, vnode, container)
+    mountChild(options, virtualNode, container)
   }
 
   return {

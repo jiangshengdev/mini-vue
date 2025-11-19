@@ -3,36 +3,36 @@ import { h } from '@/jsx-runtime'
 
 describe('jsx-runtime h helper', () => {
   it('保留 props.children 当可变 children 为空', () => {
-    const vnode = h('div', { children: 'slot-text' })
+    const virtualNode = h('div', { children: 'slot-text' })
 
-    expect(vnode.children).toEqual(['slot-text'])
-    expect(vnode.props).toBeNull()
+    expect(virtualNode.children).toEqual(['slot-text'])
+    expect(virtualNode.props).toBeNull()
   })
 
   it('变参 children 覆盖 props.children', () => {
-    const vnode = h('div', { children: 'slot-text' }, 'override')
+    const virtualNode = h('div', { children: 'slot-text' }, 'override')
 
-    expect(vnode.children).toEqual(['override'])
-    expect(vnode.props).toBeNull()
+    expect(virtualNode.children).toEqual(['override'])
+    expect(virtualNode.props).toBeNull()
   })
 
   it('保留其他 props 并正确归一化 children', () => {
-    const vnode = h(
+    const virtualNode = h(
       'section',
       { id: 'foo', children: 'stale-child' },
       'text-child',
       h('span', {}, 'nested'),
     )
 
-    expect(vnode.children).toHaveLength(2)
-    expect(vnode.children[0]).toBe('text-child')
-    expect(vnode.props).toEqual({ id: 'foo' })
+    expect(virtualNode.children).toHaveLength(2)
+    expect(virtualNode.children[0]).toBe('text-child')
+    expect(virtualNode.props).toEqual({ id: 'foo' })
   })
 
-  it('将 props.key 提升为 vnode.key', () => {
-    const vnode = h('li', { key: 'row-1', children: 'row' })
+  it('将 props.key 提升为 virtual-node.key', () => {
+    const virtualNode = h('li', { key: 'row-1', children: 'row' })
 
-    expect(vnode.key).toBe('row-1')
-    expect(vnode.props).toBeNull()
+    expect(virtualNode.key).toBe('row-1')
+    expect(virtualNode.props).toBeNull()
   })
 })

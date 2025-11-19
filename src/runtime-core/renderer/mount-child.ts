@@ -1,10 +1,10 @@
 import type { ComponentResult } from '@/jsx'
-import { isVNode } from '@/jsx'
+import { isVirtualNode } from '@/jsx'
 import type { RendererOptions } from '../renderer.ts'
-import { mountVNode } from './mount-v-node.ts'
+import { mountVirtualNode } from './mount-virtual-node.ts'
 
 /**
- * 根据子节点类型生成宿主节点，统一处理数组、VNode 与原始值。
+ * 根据子节点类型生成宿主节点，统一处理数组、virtualNode 与原始值。
  */
 export function mountChild<
   HostNode,
@@ -49,9 +49,9 @@ export function mountChild<
     return text
   }
 
-  /* 标准 VNode 交给 mountVNode 处理组件或元素。 */
-  if (isVNode(child)) {
-    return mountVNode(options, child, container)
+  /* 标准 virtualNode 交给 mountVirtualNode 处理组件或元素。 */
+  if (isVirtualNode(child)) {
+    return mountVirtualNode(options, child, container)
   }
 
   /* 其他值（如对象）兜底转成字符串输出。 */

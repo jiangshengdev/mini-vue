@@ -4,10 +4,10 @@ import type {
   ElementProps,
   ElementType,
   FragmentProps,
-  VNode,
-  VNodeChild,
+  VirtualNode,
+  VirtualNodeChild,
 } from './types.ts'
-import { vnodeFlag } from './types.ts'
+import { virtualNodeFlag } from './types.ts'
 
 /**
  * JSX 片段组件，不创建额外节点，直接返回 children。
@@ -17,24 +17,24 @@ export function Fragment(props: FragmentProps): ComponentChildren {
 }
 
 /**
- * createVNode 所需的参数结构，描述 type、原始 props 与 key。
+ * createVirtualNode 所需的参数结构，描述 type、原始 props 与 key。
  */
-interface VNodeInitOptions<T extends ElementType> {
+interface VirtualNodeInitOptions<T extends ElementType> {
   type: T
   rawProps?: ElementProps<T> | null
   key?: PropertyKey
 }
 
 /**
- * 根据传入的类型与 props 创建标准化的 VNode 节点。
+ * 根据传入的类型与 props 创建标准化的 virtualNode 节点。
  */
-export function createVNode<T extends ElementType>(
-  options: VNodeInitOptions<T>,
-): VNode<T> {
+export function createVirtualNode<T extends ElementType>(
+  options: VirtualNodeInitOptions<T>,
+): VirtualNode<T> {
   const { type, rawProps = null, key } = options
   /* 通过解构复制 props，避免外部对象在后续流程中被意外修改 */
   let props: Record<string, unknown> | null = null
-  let children: VNodeChild[] = []
+  let children: VirtualNodeChild[] = []
 
   if (rawProps) {
     const hasChildren = Object.hasOwn(rawProps, 'children')
@@ -54,8 +54,8 @@ export function createVNode<T extends ElementType>(
   }
 
   return {
-    /* 使用唯一标记区分普通对象与内部 VNode 结构 */
-    [vnodeFlag]: true as const,
+    /* 使用唯一标记区分普通对象与内部 virtualNode 结构 */
+    [virtualNodeFlag]: true as const,
     type,
     props: (props as ElementProps<T> | null) ?? null,
     children,

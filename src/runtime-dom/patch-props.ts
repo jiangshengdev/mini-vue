@@ -3,6 +3,8 @@
  */
 import { isNil } from '@/shared/utils.ts'
 
+type ElementRef = (element: Element) => void
+
 /** 扩展原生 style 声明，允许对任意属性键执行写入。 */
 type WritableStyle = CSSStyleDeclaration & Record<string, string | undefined>
 
@@ -26,7 +28,7 @@ export function patchProps(
 
   for (const [key, value] of Object.entries(props)) {
     /* `ref` 需要拿到真实元素，因此直接执行用户回调。 */
-    if (key === 'ref' && typeof value === 'function') {
+    if (key === 'ref' && isElementRef(value)) {
       value(element)
       continue
     }
@@ -112,4 +114,8 @@ function patchDomAttr(element: Element, key: string, value: unknown): void {
 
   /* 其他值一律字符串化后写入。 */
   element.setAttribute(key, String(value))
+}
+
+function isElementRef(value: unknown): value is ElementRef {
+  return typeof value === 'function'
 }

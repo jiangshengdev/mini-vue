@@ -13,7 +13,10 @@ export function createTestContainer(): HTMLDivElement {
 }
 
 afterEach(() => {
-  mountedContainers.forEach((element) => element.remove())
+  for (const element of mountedContainers) {
+    element.remove()
+  }
+
   mountedContainers.clear()
   document.body.innerHTML = ''
 })

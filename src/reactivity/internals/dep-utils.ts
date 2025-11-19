@@ -64,7 +64,7 @@ function shouldRun(effect: EffectInstance): boolean {
  * 根据 effect 是否配置调度器来决定执行策略。
  */
 function schedule(effect: EffectInstance): void {
-  const scheduler = effect.scheduler
+  const { scheduler } = effect
 
   if (scheduler) {
     /* 将副作用封装成可重复执行的任务，交给调度器延迟处理 */

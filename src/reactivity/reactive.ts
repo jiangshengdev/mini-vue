@@ -81,11 +81,11 @@ export function reactive(target: unknown): unknown {
 
   if (cached) {
     /* 复用已有代理，确保同一原对象始终返回同一 Proxy */
-    return cached as typeof target
+    return cached
   }
 
   /* 未命中缓存时创建新代理并登记映射 */
-  return reactiveCache.create(target) as typeof target
+  return reactiveCache.create(target)
 }
 
 /**

@@ -38,7 +38,9 @@ describe('runtime-dom createApp', () => {
     const app = createApp(App)
 
     app.mount(host)
-    expect(() => app.mount(host)).toThrowError('当前应用已挂载')
+    expect(() => {
+      app.mount(host)
+    }).toThrowError('当前应用已挂载')
     app.unmount()
   })
 

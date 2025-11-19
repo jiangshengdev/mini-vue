@@ -26,7 +26,7 @@ export const domRendererOptions: RendererOptions<
   },
   /** 按顺序把子节点挂到父节点末尾。 */
   appendChild(parent, child): void {
-    parent.appendChild(child)
+    parent.append(child)
   },
   /** 重置容器文本内容，相当于全量清空。 */
   clear(container): void {

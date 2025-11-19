@@ -1,5 +1,5 @@
 /**
- * runtime-core 对外入口，聚合平台无关的运行时能力。
+ * `runtime-core` 对外入口，聚合平台无关的运行时能力。
  */
 export { createRenderer } from './renderer.ts'
 export type {

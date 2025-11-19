@@ -43,12 +43,12 @@ export interface EffectInstance<T = unknown> extends EffectHandle<T> {
 export type DependencyBucket = Set<EffectInstance>
 
 /**
- * effect 调度器接收一个可延迟执行的任务。
+ * `effect` 调度器接收一个可延迟执行的任务。
  */
 export type EffectScheduler = (job: () => void) => void
 
 /**
- * effect 的可选配置，目前仅支持自定义调度器。
+ * `effect` 的可选配置，目前仅支持自定义调度器。
  */
 export interface EffectOptions {
   scheduler?: EffectScheduler

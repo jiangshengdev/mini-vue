@@ -1,5 +1,5 @@
 /**
- * runtime-dom 负责整合 DOM 宿主的渲染器与应用创建逻辑。
+ * `runtime-dom` 负责整合 DOM 宿主的渲染器与应用创建逻辑。
  */
 import { domRendererOptions } from './renderer-options.ts'
 import type { ComponentType } from '@/jsx/index.ts'
@@ -14,7 +14,7 @@ export { render }
  * DOM 宿主应用内部状态，保存 runtime-core 返回的基础实例。
  */
 interface DomAppState {
-  /** runtime-core 的通用应用实例，用来执行真正的渲染逻辑。 */
+  /** `runtime-core` 的通用应用实例，用来执行真正的渲染逻辑。 */
   baseApp: AppInstance<Element>
 }
 

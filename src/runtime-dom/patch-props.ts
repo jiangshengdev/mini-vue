@@ -36,7 +36,7 @@ export function patchProps(
       continue
     }
 
-    /* style 允许字符串与对象写法，交给专门逻辑处理。 */
+    /* `style` 允许字符串与对象写法，交给专门逻辑处理。 */
     if (key === 'style') {
       applyStyle(element as HTMLElement, value)
       continue
@@ -95,7 +95,7 @@ function applyStyle(element: HTMLElement, value: unknown): void {
  * 处理普通 DOM 属性，包括布尔属性的存在性表达。
  */
 function patchDomAttr(element: Element, key: string, value: unknown): void {
-  /* null/false 都表示属性应被移除。 */
+  /* `null`/`false` 都表示属性应被移除。 */
   if (value == null || value === false) {
     element.removeAttribute(key)
 

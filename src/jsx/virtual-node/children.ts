@@ -19,7 +19,7 @@ function flattenChild(
   rawChild: unknown,
   accumulator: VirtualNodeChild[],
 ): void {
-  /* null、undefined、boolean 等空值在渲染层会被忽略 */
+  /* `null`、`undefined`、`boolean` 等空值在渲染层会被忽略 */
   if (rawChild == null || typeof rawChild === 'boolean') {
     return
   }

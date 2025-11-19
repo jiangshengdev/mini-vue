@@ -17,7 +17,7 @@ export function Fragment(props: FragmentProps): ComponentChildren {
 }
 
 /**
- * createVirtualNode 所需的参数结构，描述 type、原始 props 与 key。
+ * `createVirtualNode` 所需的参数结构，描述 type、原始 props 与 key。
  */
 interface VirtualNodeInitOptions<T extends ElementType> {
   type: T

@@ -87,7 +87,7 @@ export type ElementProps<T extends ElementType = ElementType> =
       : ComponentTypeProps<T>
 
 /**
- * mini-vue 内部使用的虚拟节点结构，承载类型、属性与子节点信息。
+ * `mini-vue` 内部使用的虚拟节点结构，承载类型、属性与子节点信息。
  */
 export interface VirtualNode<T extends ElementType = ElementType> {
   /** 通过唯一 symbol 标识当前对象为 mini-vue 生成的 virtualNode */

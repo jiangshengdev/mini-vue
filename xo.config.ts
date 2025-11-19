@@ -16,6 +16,7 @@ const xoConfig: FlatXoConfig = [
           prefer: 'type-imports',
         },
       ],
+      'import-x/no-duplicates': ['error', { 'prefer-inline': false }],
     },
   },
 ]

@@ -1,4 +1,4 @@
-import type { ComponentType } from '@/index.ts'
+import type { ComponentType, ElementRef } from '@/index.ts'
 import { effect, reactive } from '@/index.ts'
 
 export const Counter: ComponentType = () => {
@@ -13,7 +13,7 @@ export const Counter: ComponentType = () => {
     }
   })
 
-  const bindRef = (element: Element) => {
+  const bindRef: ElementRef = (element) => {
     buttonElement = element as HTMLButtonElement
   }
 

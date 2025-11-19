@@ -1,6 +1,7 @@
 /**
  * 暴露核心响应式与 JSX 运行时能力，供外部统一引入。
  */
+export type { ElementRef } from '@/runtime-dom/index.ts'
 export {
   reactive,
   effect,

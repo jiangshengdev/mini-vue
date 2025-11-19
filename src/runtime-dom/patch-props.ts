@@ -3,7 +3,7 @@
  */
 import { isNil } from '@/shared/utils.ts'
 
-type ElementRef = (element: Element) => void
+export type ElementRef = (element: Element) => void
 
 /** 扩展原生 style 声明，允许对任意属性键执行写入。 */
 type WritableStyle = CSSStyleDeclaration & Record<string, string | undefined>

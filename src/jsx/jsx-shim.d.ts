@@ -2,6 +2,7 @@ import type {
   ElementType as MiniElementType,
   VirtualNode,
 } from '@/jsx/virtual-node/index.ts'
+import type { ElementRef } from '@/runtime-dom/index.ts'
 
 /**
  * 为 TypeScript 提供 mini-vue JSX 环境下的类型声明。
@@ -22,6 +23,7 @@ declare global {
     /** JSX 内置属性，当前仅支持 key。 */
     interface IntrinsicAttributes {
       key?: string | number
+      ref?: ElementRef
     }
 
     /**

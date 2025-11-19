@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { within } from '@testing-library/dom'
-import { render } from '@/index.ts'
 import { createTestContainer } from '../setup.ts'
+import { render } from '@/index.ts'
 
 describe('runtime-dom style props', () => {
   it('字符串 style 可以直接写入', () => {

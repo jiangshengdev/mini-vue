@@ -1,6 +1,6 @@
-import type { VirtualNodeChild } from '@/jsx/index.ts'
 import type { RendererOptions } from '../renderer.ts'
 import { mountChild } from './mount-child.ts'
+import type { VirtualNodeChild } from '@/jsx/index.ts'
 
 /**
  * 依次挂载元素的 children，保持声明顺序插入。

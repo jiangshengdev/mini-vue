@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { screen, within } from '@testing-library/dom'
+import { createTestContainer } from '../setup.ts'
 import type { ComponentType } from '@/index.ts'
 import { createApp } from '@/index.ts'
-import { createTestContainer } from '../setup.ts'
 
 const App: ComponentType = () => {
   return <div class="hello">Hello</div>

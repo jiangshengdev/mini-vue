@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { within } from '@testing-library/dom'
+import { createTestContainer } from '../setup.ts'
 import type { ComponentType } from '@/index.ts'
 import { render } from '@/index.ts'
-import { createTestContainer } from '../setup.ts'
 
 describe('runtime-dom children shape', () => {
   it('无 children 时 props.children 为 undefined', () => {

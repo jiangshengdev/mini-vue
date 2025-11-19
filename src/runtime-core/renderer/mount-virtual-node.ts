@@ -1,7 +1,7 @@
-import type { ComponentType, VirtualNode } from '@/jsx/index.ts'
 import type { RendererOptions } from '../renderer.ts'
 import { mountComponent } from './mount-component.ts'
 import { mountElement } from './mount-element.ts'
+import type { ComponentType, VirtualNode } from '@/jsx/index.ts'
 
 /**
  * 将通用 virtualNode 分派给组件或元素挂载路径。

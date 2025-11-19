@@ -1,5 +1,5 @@
-import type { ComponentType } from '@/jsx/index.ts'
 import type { RootRenderFunction } from './renderer.ts'
+import type { ComponentType } from '@/jsx/index.ts'
 
 /**
  * 宿主平台注入的渲染配置，提供渲染与清理能力。

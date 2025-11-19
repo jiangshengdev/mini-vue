@@ -1,6 +1,6 @@
-import type { VirtualNode } from '@/jsx/index.ts'
 import type { RendererOptions } from '../renderer.ts'
 import { mountChildren } from './mount-children.ts'
+import type { VirtualNode } from '@/jsx/index.ts'
 
 /**
  * 创建宿主元素并同步 props 与 children。

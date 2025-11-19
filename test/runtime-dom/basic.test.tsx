@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from 'vitest'
 import { within } from '@testing-library/dom'
 import userEvent from '@testing-library/user-event'
+import { createTestContainer } from '../setup.ts'
 import { Fragment } from '@/jsx-runtime.ts'
 import type { ComponentType } from '@/index.ts'
 import { render } from '@/index.ts'
-import { createTestContainer } from '../setup.ts'
 
 describe('runtime-dom basic rendering', () => {
   it('渲染基本元素与文本', () => {

@@ -1,8 +1,8 @@
 /**
  * DOM 宿主环境的渲染原语实现。
  */
-import type { RendererOptions } from '@/runtime-core/index.ts'
 import { patchProps } from './patch-props.ts'
+import type { RendererOptions } from '@/runtime-core/index.ts'
 
 /**
  * DOM 宿主环境完整的渲染原语集合，供 renderer 复用。

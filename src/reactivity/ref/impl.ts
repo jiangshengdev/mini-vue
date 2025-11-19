@@ -1,9 +1,9 @@
 import { reactive } from '../reactive.ts'
-import { isObject } from '@/shared/utils.ts'
-import type { Ref, RefDepCarrier, RefMarker } from './types.ts'
-import { refFlag } from './types.ts'
 import { trackEffect, triggerEffects } from '../internals/dep-utils.ts'
 import type { DependencyBucket } from '../shared/types.ts'
+import type { Ref, RefDepCarrier, RefMarker } from './types.ts'
+import { refFlag } from './types.ts'
+import { isObject } from '@/shared/utils.ts'
 
 /**
  * RefImpl 负责封装普通值的响应式访问器，实现依赖收集与触发。

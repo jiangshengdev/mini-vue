@@ -1,5 +1,5 @@
-import { trackEffect, triggerEffects } from './dep-utils.ts'
 import type { DependencyBucket } from '../shared/types.ts'
+import { trackEffect, triggerEffects } from './dep-utils.ts'
 
 /**
  * 集中管理对象属性与副作用之间的依赖关系。

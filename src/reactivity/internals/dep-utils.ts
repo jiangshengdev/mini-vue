@@ -1,5 +1,5 @@
-import { effectStack } from './effect-stack.ts'
 import type { DependencyBucket, EffectInstance } from '../shared/types.ts'
+import { effectStack } from './effect-stack.ts'
 
 /**
  * 收集当前活跃的副作用到依赖集合，确保后续触发时能够回调。

@@ -1,1 +1,1 @@
-export { render, createApp } from './createApp.ts'
+export { render, createApp } from './create-app.ts'

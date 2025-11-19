@@ -18,7 +18,7 @@
 ## JSX 渲染栈
 
 - `runtime-core/renderer.ts` 注入宿主原语后负责整棵子树的全量挂载，仍然采用“清空容器再重建”的策略，暂不支持 diff/patch。
-- `runtime-core/createApp.ts` 生成平台无关的应用实例，持有根容器状态并调用注入的 `render`/`clear`。
+- `runtime-core/create-app.ts` 生成平台无关的应用实例，持有根容器状态并调用注入的 `render`/`clear`。
 - `runtime-dom/rendererOptions.ts` + `runtime-dom/patch-props.ts` 提供 DOM 侧的元素创建、属性打补丁与事件绑定，数组 children 仍通过 `DocumentFragment` 承载后整体插入。
 
 ## Demo 与测试

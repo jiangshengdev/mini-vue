@@ -16,15 +16,15 @@ export function mountElement<
   container: HostElement | HostFragment,
 ): HostNode {
   const { createElement, patchProps, appendChild } = options
-  const el = createElement(type)
+  const element = createElement(type)
   const props = (vnode.props as Record<string, unknown> | null) ?? null
 
   /* 在挂载前先写入属性与事件。 */
-  patchProps(el, props)
+  patchProps(element, props)
   /* 子节点交给 mountChildren，保持与 VNode 定义一致。 */
-  mountChildren(options, vnode.children, el)
+  mountChildren(options, vnode.children, element)
   /* 最终把元素插入到父容器中完成挂载。 */
-  appendChild(container, el)
+  appendChild(container, element)
 
-  return el
+  return element
 }

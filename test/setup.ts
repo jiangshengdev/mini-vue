@@ -4,16 +4,16 @@ import { afterEach } from 'vitest'
 const mountedContainers = new Set<HTMLElement>()
 
 export function createTestContainer(): HTMLDivElement {
-  const el = document.createElement('div')
+  const element = document.createElement('div')
 
-  document.body.appendChild(el)
-  mountedContainers.add(el)
+  document.body.appendChild(element)
+  mountedContainers.add(element)
 
-  return el
+  return element
 }
 
 afterEach(() => {
-  mountedContainers.forEach((el) => el.remove())
+  mountedContainers.forEach((element) => element.remove())
   mountedContainers.clear()
   document.body.innerHTML = ''
 })

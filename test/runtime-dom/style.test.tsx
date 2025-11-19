@@ -9,9 +9,9 @@ describe('runtime-dom style props', () => {
 
     render(<div style="color: blue;">text</div>, container)
 
-    const el = within(container).getByText('text')
+    const element = within(container).getByText('text')
 
-    expect(el).toHaveAttribute('style', expect.stringContaining('color: blue'))
+    expect(element).toHaveAttribute('style', expect.stringContaining('color: blue'))
   })
 
   it('对象 style 支持 camelCase 键名', () => {
@@ -19,9 +19,9 @@ describe('runtime-dom style props', () => {
 
     render(<div style={{ backgroundColor: 'red' }}>text</div>, container)
 
-    const el = within(container).getByText('text')
+    const element = within(container).getByText('text')
 
-    expect(el).toHaveAttribute(
+    expect(element).toHaveAttribute(
       'style',
       expect.stringContaining('background-color: red'),
     )
@@ -32,8 +32,8 @@ describe('runtime-dom style props', () => {
 
     render(<div style={{ '--main-color': 'pink' }}>text</div>, container)
 
-    const el = within(container).getByText('text') as HTMLElement
+    const element = within(container).getByText('text') as HTMLElement
 
-    expect(el).toHaveStyle('--main-color: pink')
+    expect(element).toHaveStyle('--main-color: pink')
   })
 })

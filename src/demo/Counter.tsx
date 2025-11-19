@@ -3,18 +3,18 @@ import { effect, reactive } from '@/index.ts'
 
 export const Counter: ComponentType = () => {
   const state = reactive({ count: 0 })
-  let buttonEl: HTMLButtonElement | null = null
+  let buttonElement: HTMLButtonElement | null = null
 
   effect(() => {
     const label = `count is ${state.count}`
 
-    if (buttonEl) {
-      buttonEl.textContent = label
+    if (buttonElement) {
+      buttonElement.textContent = label
     }
   })
 
   const bindRef = (element: Element | null) => {
-    buttonEl = (element as HTMLButtonElement | null) ?? null
+    buttonElement = (element as HTMLButtonElement | null) ?? null
   }
 
   const increment = () => {

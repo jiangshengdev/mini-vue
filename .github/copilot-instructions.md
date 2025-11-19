@@ -5,8 +5,8 @@
 ## 全局速览
 
 - 技术栈：Vite 7（`pnpm overrides` 锁定 `rolldown-vite@7.2.2`）+ TypeScript + Vitest；`src/index.ts` 统一导出 `reactive`/`effect` 与 JSX API。
-- Demo：`index.html` 注入 `src/demo/main.ts`，示例组件位于 `src/demo/App.tsx`、`Counter.tsx`，用于人工体验响应式 + JSX。
-- 资源：公共文件放 `public/` 通过绝对路径引用，组件私有资源放 `src/` 内直接 import（见 `App.tsx` 同时引入 `/vite.svg` 与本地 svg）。
+- Demo：`index.html` 注入 `src/demo/main.ts`，示例组件位于 `src/demo/app.tsx`、`counter.tsx`，用于人工体验响应式 + JSX。
+- 资源：公共文件放 `public/` 通过绝对路径引用，组件私有资源放 `src/` 内直接 import（见 `app.tsx` 同时引入 `/vite.svg` 与本地 svg）。
 
 ## 响应式内核
 
@@ -23,7 +23,7 @@
 
 ## Demo 与测试
 
-- Demo 的 `Counter.tsx` 展示了 `ref` 捕获真实 DOM + `reactive`/`effect` 协同的推荐范式，可作为绑定事件或直接写 DOM 的参考。
+- Demo 的 `counter.tsx` 展示了 `ref` 捕获真实 DOM + `reactive`/`effect` 协同的推荐范式，可作为绑定事件或直接写 DOM 的参考。
 - Vitest：`vitest.config.ts` 复用 Vite 配置并设置 jsdom；`test/*.test.ts(x)` 覆盖 reactive 缓存、effect 嵌套、createApp 挂载、JSX 渲染等场景，新增功能时优先仿照现有断言风格。
 - 常用命令：`pnpm dev`（demo HMR）、`pnpm test`（一次性 run，可用 `pnpm test effect.test.ts` 精准调试）、`pnpm build`（先 `tsc` 再 `vite build`）、`pnpm preview`、`pnpm lint`、`pnpm format`。
 

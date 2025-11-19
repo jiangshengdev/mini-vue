@@ -1,5 +1,5 @@
 import './style.css'
-import { App } from './App.tsx'
+import { App } from './app.tsx'
 import { createApp } from '@/index.ts'
 
 const host = document.querySelector<HTMLDivElement>('#app')

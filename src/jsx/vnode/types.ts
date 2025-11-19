@@ -24,10 +24,9 @@ export type ComponentResult = ComponentChildren | undefined
  */
 type ComponentPropsBase = object
 
-/**
- * Fragment 组件的 props，仅支持可选的 children。
- */
-export type FragmentProps = { children?: ComponentChildren }
+export interface FragmentProps {
+  children?: ComponentChildren
+}
 
 /**
  * 用于约束组件类型的函数签名，供 ElementType 统一推导。

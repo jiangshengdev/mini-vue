@@ -4,7 +4,7 @@
 import type { ComponentType } from '@/jsx'
 import type { AppInstance } from '@/runtime-core'
 import { createAppInstance, createRenderer } from '@/runtime-core'
-import { domRendererOptions } from './rendererOptions.ts'
+import { domRendererOptions } from './renderer-options.ts'
 
 const { render, clear } = createRenderer(domRendererOptions)
 

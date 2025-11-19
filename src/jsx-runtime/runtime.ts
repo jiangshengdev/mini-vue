@@ -1,4 +1,4 @@
-import { createVirtualNodeFromJSX } from './shared.ts'
+import { buildVirtualNode } from './shared.ts'
 import type { ElementProps, ElementType, VirtualNode } from '@/jsx/index.ts'
 
 /**
@@ -9,7 +9,7 @@ export function jsx<T extends ElementType>(
   props?: ElementProps<T>,
   key?: PropertyKey,
 ): VirtualNode<T> {
-  return createVirtualNodeFromJSX(type, props, key)
+  return buildVirtualNode(type, props, key)
 }
 
 /**
@@ -26,5 +26,5 @@ export function jsxDEV<T extends ElementType>(
   props?: ElementProps<T>,
   key?: PropertyKey,
 ): VirtualNode<T> {
-  return createVirtualNodeFromJSX(type, props, key)
+  return buildVirtualNode(type, props, key)
 }

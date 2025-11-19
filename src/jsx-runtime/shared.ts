@@ -9,7 +9,7 @@ import { createVirtualNode } from '@/jsx/index.ts'
 /**
  * 低阶的 JSX 创建函数，直接封装到 createVirtualNode 调用。
  */
-export function createVirtualNodeFromJSX<T extends ElementType>(
+export function buildVirtualNode<T extends ElementType>(
   type: T,
   props?: ElementProps<T>,
   key?: PropertyKey,
@@ -50,7 +50,7 @@ export function h<T extends ElementType>(
 
   /* 没有额外 children 时直接透传 props，保留编译器注入的 children。 */
   if (children.length === 0) {
-    return createVirtualNodeFromJSX(type, normalizedProps, key)
+    return buildVirtualNode(type, normalizedProps, key)
   }
 
   /* 需要人为传入 children 时重新组装 props 并交给底层创建函数。 */
@@ -59,5 +59,5 @@ export function h<T extends ElementType>(
     children,
   } as ElementProps<T>
 
-  return createVirtualNodeFromJSX(type, propsWithChildren, key)
+  return buildVirtualNode(type, propsWithChildren, key)
 }

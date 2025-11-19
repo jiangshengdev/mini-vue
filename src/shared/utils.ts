@@ -18,3 +18,10 @@ export function isPlainObject(
 
   return prototype === null || prototype === Object.prototype
 }
+
+/**
+ * 判断传入值是否为 null 或 undefined。
+ */
+export function isNil(value: unknown): value is null | undefined {
+  return value === null || value === undefined
+}

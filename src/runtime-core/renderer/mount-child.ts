@@ -2,6 +2,7 @@ import type { RendererOptions } from '../renderer.ts'
 import { mountVirtualNode } from './mount-virtual-node.ts'
 import type { ComponentResult } from '@/jsx/index.ts'
 import { isVirtualNode } from '@/jsx/index.ts'
+import { isNil } from '@/shared/utils.ts'
 
 /**
  * 根据子节点类型生成宿主节点，统一处理数组、virtualNode 与原始值。
@@ -18,7 +19,7 @@ export function mountChild<
   const { createFragment, appendChild, createText } = options
 
   /* `null`、`undefined`、布尔值不产生实际节点。 */
-  if (child == null || typeof child === 'boolean') {
+  if (isNil(child) || typeof child === 'boolean') {
     return undefined
   }
 

@@ -1,5 +1,6 @@
 import type { VirtualNodeChild } from './types.ts'
 import { isVirtualNode } from './guards.ts'
+import { isNil } from '@/shared/utils.ts'
 
 /**
  * 将任意形式的 children 归一化为扁平的 VirtualNodeChild 数组。
@@ -20,7 +21,7 @@ function flattenChild(
   accumulator: VirtualNodeChild[],
 ): void {
   /* `null`、`undefined`、`boolean` 等空值在渲染层会被忽略 */
-  if (rawChild == null || typeof rawChild === 'boolean') {
+  if (isNil(rawChild) || typeof rawChild === 'boolean') {
     return
   }
 

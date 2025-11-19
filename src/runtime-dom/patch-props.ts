@@ -1,6 +1,7 @@
 /**
  * DOM 专用的属性打补丁逻辑，负责将 virtualNode props 应用到真实元素上。
  */
+import { isNil } from '@/shared/utils.ts'
 
 /** 扩展原生 style 声明，允许对任意属性键执行写入。 */
 type WritableStyle = CSSStyleDeclaration & Record<string, string | undefined>
@@ -32,7 +33,7 @@ export function patchProps(
 
     /* `class`/`className` 统一走 `className`，确保字符串化处理。 */
     if (key === 'class' || key === 'className') {
-      element.className = value == null ? '' : String(value)
+      element.className = isNil(value) ? '' : String(value)
       continue
     }
 
@@ -60,7 +61,7 @@ export function patchProps(
  */
 function applyStyle(element: HTMLElement, value: unknown): void {
   /* 空值表示完全移除 style，避免残留样式。 */
-  if (value == null || value === false) {
+  if (isNil(value) || value === false) {
     element.removeAttribute('style')
 
     return
@@ -96,7 +97,7 @@ function applyStyle(element: HTMLElement, value: unknown): void {
  */
 function patchDomAttr(element: Element, key: string, value: unknown): void {
   /* `null`/`false` 都表示属性应被移除。 */
-  if (value == null || value === false) {
+  if (isNil(value) || value === false) {
     element.removeAttribute(key)
 
     return

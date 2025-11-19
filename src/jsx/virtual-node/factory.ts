@@ -59,7 +59,7 @@ export function createVirtualNode<T extends ElementType>(
     /* 使用唯一标记区分普通对象与内部 virtualNode 结构 */
     [virtualNodeFlag]: true as const,
     type,
-    props: props as ElementProps<T>,
+    props: props as ElementProps<T> | undefined,
     children,
     key,
   }

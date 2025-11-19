@@ -31,19 +31,19 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
    */
   private cleanupTasks: Array<() => void> = []
 
+  /**
+   * 代表副作用是否仍处于激活态，决定是否参与依赖收集。
+   */
+  private innerActive = true
+
   constructor(fn: () => T, scheduler?: EffectScheduler) {
     /* 构造时记录调度器，使后续 trigger 能根据配置选择执行策略 */
     this.fn = fn
     this.scheduler = scheduler
   }
 
-  /**
-   * 代表副作用是否仍处于激活态，决定是否参与依赖收集。
-   */
-  private _active = true
-
   get active(): boolean {
-    return this._active
+    return this.innerActive
   }
 
   /**
@@ -51,7 +51,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
    */
   run(): T {
     /* 已停止的副作用只执行原始函数，跳过依赖收集成本 */
-    if (!this._active) {
+    if (!this.innerActive) {
       return this.fn()
     }
 
@@ -72,11 +72,11 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
    * 手动终止副作用，使其不再响应后续的触发。
    */
   stop(): void {
-    if (!this._active) {
+    if (!this.innerActive) {
       return
     }
 
-    this._active = false
+    this.innerActive = false
     /* 停止后立即清理依赖关系与清理回调，释放资源 */
     this.flushDependencies()
   }

@@ -15,13 +15,13 @@ class EffectStack {
   /**
    * 指向当前正在执行的副作用，便于依赖收集阶段引用。
    */
-  private _current: EffectInstance | undefined
+  private innerCurrent: EffectInstance | undefined
 
   /**
    * 暴露栈顶副作用，供依赖收集阶段读取。
    */
   get current(): EffectInstance | undefined {
-    return this._current
+    return this.innerCurrent
   }
 
   /**
@@ -29,7 +29,7 @@ class EffectStack {
    */
   push(effect: EffectInstance): void {
     this.stack.push(effect)
-    this._current = effect
+    this.innerCurrent = effect
   }
 
   /**
@@ -37,7 +37,7 @@ class EffectStack {
    */
   pop(): void {
     this.stack.pop()
-    this._current = this.stack.at(-1)
+    this.innerCurrent = this.stack.at(-1)
   }
 }
 

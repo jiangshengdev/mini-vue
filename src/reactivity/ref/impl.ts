@@ -15,17 +15,17 @@ export class RefImpl<T> implements Ref<T>, RefDepCarrier {
 
   readonly [refFlag] = true as const
 
-  private _rawValue: T
+  private rawValue: T
+
+  private innerValue: T
 
   /**
    * 构造函数缓存原始值，并在必要时将其转换为响应式对象。
    */
   constructor(value: T) {
-    this._rawValue = value
-    this._value = maybeReactiveValue(value)
+    this.rawValue = value
+    this.innerValue = maybeReactiveValue(value)
   }
-
-  private _value: T
 
   /**
    * 访问 Ref 的值时进行依赖收集，并返回最新缓存的副本。
@@ -34,7 +34,7 @@ export class RefImpl<T> implements Ref<T>, RefDepCarrier {
     /* 读取时登记当前副作用，保持追踪关系。 */
     trackEffect(this.dep)
 
-    return this._value
+    return this.innerValue
   }
 
   /**
@@ -42,13 +42,13 @@ export class RefImpl<T> implements Ref<T>, RefDepCarrier {
    */
   set value(newValue: T) {
     /* 使用 Object.is 判等，避免无意义的触发。 */
-    if (Object.is(newValue, this._rawValue)) {
+    if (Object.is(newValue, this.rawValue)) {
       return
     }
 
     /* 更新原始值与响应式引用后，触发依赖的副作用重新执行。 */
-    this._rawValue = newValue
-    this._value = maybeReactiveValue(newValue)
+    this.rawValue = newValue
+    this.innerValue = maybeReactiveValue(newValue)
     triggerEffects(this.dep)
   }
 }

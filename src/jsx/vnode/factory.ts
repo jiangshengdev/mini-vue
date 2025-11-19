@@ -7,7 +7,7 @@ import type {
   VNode,
   VNodeChild,
 } from './types.ts'
-import { vnodeSymbol } from './types.ts'
+import { vnodeFlag } from './types.ts'
 
 /**
  * JSX 片段组件，不创建额外节点，直接返回 children。
@@ -51,7 +51,7 @@ export function createVNode<T extends ElementType>(
 
   return {
     /* 使用唯一标记区分普通对象与内部 VNode 结构 */
-    [vnodeSymbol]: true as const,
+    [vnodeFlag]: true as const,
     type,
     props: (props as ElementProps<T> | null) ?? null,
     children,

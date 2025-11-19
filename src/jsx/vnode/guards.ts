@@ -1,5 +1,5 @@
 import type { VNode } from './types.ts'
-import { vnodeSymbol } from './types.ts'
+import { vnodeFlag } from './types.ts'
 import { isObject } from '@/shared/utils.ts'
 
 /**
@@ -10,5 +10,5 @@ export function isVNode(value: unknown): value is VNode {
     return false
   }
 
-  return Object.hasOwn(value, vnodeSymbol)
+  return Object.hasOwn(value, vnodeFlag)
 }

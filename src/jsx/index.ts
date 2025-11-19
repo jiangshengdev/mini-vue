@@ -13,4 +13,4 @@ export type {
   VNode,
   VNodeChild,
 } from './vnode/index.ts'
-export { vnodeSymbol } from './vnode/index.ts'
+export { vnodeFlag } from './vnode/index.ts'

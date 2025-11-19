@@ -1,7 +1,7 @@
 /**
  * 标记对象为由 mini-vue 创建的 VNode，用于运行时类型守卫。
  */
-export const vnodeSymbol = Symbol('mini-vue-vnode')
+export const vnodeFlag = Symbol('isVNode')
 
 /**
  * 单个子节点的联合类型：可以是 VNode 或原始文本。
@@ -88,7 +88,7 @@ export type ElementProps<T extends ElementType = ElementType> =
  */
 export interface VNode<T extends ElementType = ElementType> {
   /** 通过唯一 symbol 标识当前对象为 mini-vue 生成的 VNode */
-  readonly [vnodeSymbol]: true
+  readonly [vnodeFlag]: true
   /** 当前虚拟节点的类型，可能是原生标签、组件或 Fragment */
   readonly type: T
   /** 节点携带的属性对象，按元素类型推导，允许为空 */

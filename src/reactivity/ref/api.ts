@@ -7,9 +7,6 @@ import { isObject } from '@/shared/utils.ts'
 /**
  * 将任意值转换为 Ref，若已经是 Ref 则原样返回。
  */
-export function ref<T>(value: Ref<T>): Ref<T>
-export function ref<T>(value: T): Ref<T>
-
 export function ref<T>(value: T | Ref<T>): Ref<T> {
   /* 避免对现有 Ref 重新包装，保持引用稳定。 */
   if (isRef(value)) {

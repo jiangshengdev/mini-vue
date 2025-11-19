@@ -26,16 +26,20 @@ export function h<T extends ElementType>(
 
   /* 存在 props 时需要摘取 key 并规整剩余字段，保证与 JSX 规范对齐。 */
   if (props) {
-    const propsCopy = { ...props } as Record<string, unknown>
-
-    /* key 属于 VNode 的标识信息，提取后从 props 中剔除避免下游重复。 */
-    if (Object.hasOwn(propsCopy, 'key')) {
-      key = propsCopy.key as PropertyKey
-      delete propsCopy.key
+    const { key: extractedKey, ...restProps } = props as Record<
+      string,
+      unknown
+    > & {
+      key?: PropertyKey
     }
 
-    normalizedProps = Reflect.ownKeys(propsCopy).length
-      ? (propsCopy as ElementProps<T>)
+    /* key 属于 VNode 的标识信息，提取后从 props 中剔除避免下游重复。 */
+    if (Object.hasOwn(props, 'key')) {
+      key = extractedKey
+    }
+
+    normalizedProps = Reflect.ownKeys(restProps).length
+      ? (restProps as ElementProps<T>)
       : undefined
   }
 

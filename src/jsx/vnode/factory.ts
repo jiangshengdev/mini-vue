@@ -32,21 +32,25 @@ export function createVNode<T extends ElementType>(
   options: VNodeInitOptions<T>,
 ): VNode<T> {
   const { type, rawProps = null, key } = options
-  /* 复制一份 props，避免外部对象在后续流程中被意外修改 */
-  let props: Record<string, unknown> | null = rawProps ? { ...rawProps } : null
+  /* 通过解构复制 props，避免外部对象在后续流程中被意外修改 */
+  let props: Record<string, unknown> | null = null
   let children: VNodeChild[] = []
 
-  if (props && Object.hasOwn(props, 'children')) {
-    /* 将 props.children 归一化为内部统一使用的 children 数组 */
-    const normalizedChildren = normalizeChildren(props.children)
-
-    /* children 从 props 中移除，避免与 children 数组重复保存 */
-    delete props.children
-    children = normalizedChildren
-
-    if (Reflect.ownKeys(props).length === 0) {
-      props = null
+  if (rawProps) {
+    const hasChildren = Object.hasOwn(rawProps, 'children')
+    const { children: rawChildren, ...restProps } = rawProps as Record<
+      string,
+      unknown
+    > & {
+      children?: unknown
     }
+
+    if (hasChildren) {
+      /* 将 props.children 归一化为内部统一使用的 children 数组 */
+      children = normalizeChildren(rawChildren)
+    }
+
+    props = Reflect.ownKeys(restProps).length > 0 ? restProps : null
   }
 
   return {

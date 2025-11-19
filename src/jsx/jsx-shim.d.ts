@@ -28,9 +28,7 @@ declare global {
      * 内置标签（如 div、span）的属性约束，
      * 这里统一允许任意键值对，具体由运行时处理。
      */
-    interface IntrinsicElements {
-      [name: string]: Record<string, unknown>
-    }
+    type IntrinsicElements = Record<string, Record<string, unknown>>
   }
 }
 

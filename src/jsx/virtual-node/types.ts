@@ -26,9 +26,9 @@ export type ComponentResult = ComponentChildren
 /**
  * 组件 props 的基础约束：放宽为对象即可，避免要求字符串索引签名。
  */
-type ComponentPropsBase = object
+type ComponentPropsBase = Record<string, unknown>
 
-export interface FragmentProps {
+export interface FragmentProps extends ComponentPropsBase {
   children?: ComponentChildren
 }
 
@@ -50,8 +50,7 @@ type ComponentFunction<P> = (props: PropsWithChildren<P>) => ComponentResult
 /**
  * 对外暴露的组件类型，默认 props 为通用对象。
  */
-export type ComponentType<P extends ComponentPropsBase = ComponentPropsBase> =
-  ComponentFunction<P>
+export type ComponentType<P = ComponentPropsBase> = ComponentFunction<P>
 
 /**
  * Fragment 类型定义，接收 FragmentProps 并返回一组子节点。

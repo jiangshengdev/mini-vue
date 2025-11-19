@@ -35,7 +35,7 @@ describe('runtime-dom style props', () => {
 
     render(<div style={{ '--main-color': 'pink' }}>text</div>, container)
 
-    const element = within(container).getByText('text') as HTMLElement
+    const element = within(container).getByText('text')
 
     expect(element).toHaveStyle('--main-color: pink')
   })

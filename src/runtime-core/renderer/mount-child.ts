@@ -14,12 +14,12 @@ export function mountChild<
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   child: ComponentResult,
   container: HostElement | HostFragment,
-): HostNode | null {
+): HostNode | undefined {
   const { createFragment, appendChild, createText } = options
 
   /* null、undefined、布尔值不产生实际节点。 */
   if (child == null || typeof child === 'boolean') {
-    return null
+    return undefined
   }
 
   /* 数组子节点需要借助片段统一插入。 */

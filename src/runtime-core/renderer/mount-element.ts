@@ -17,7 +17,7 @@ export function mountElement<
 ): HostNode {
   const { createElement, patchProps, appendChild } = options
   const element = createElement(type)
-  const props = (virtualNode.props as Record<string, unknown> | null) ?? null
+  const props = (virtualNode.props as Record<string, unknown>) ?? undefined
 
   /* 在挂载前先写入属性与事件。 */
   patchProps(element, props)

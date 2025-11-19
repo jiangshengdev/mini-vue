@@ -15,7 +15,7 @@ export function mountComponent<
   component: T,
   virtualNode: VirtualNode<T>,
   container: HostElement | HostFragment,
-): HostNode | null {
+): HostNode | undefined {
   const props = (
     virtualNode.props ? { ...virtualNode.props } : {}
   ) as ElementProps<T>

@@ -15,7 +15,7 @@ export function createVirtualNodeFromJSX<T extends ElementType>(
   key?: PropertyKey,
 ): VirtualNode<T> {
   /* 将传入的 props 封装为 createVirtualNode 所需的参数结构 */
-  return createVirtualNode({ type, rawProps: props ?? null, key })
+  return createVirtualNode({ type, rawProps: props, key })
 }
 
 /**

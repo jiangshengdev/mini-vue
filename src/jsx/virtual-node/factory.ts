@@ -21,7 +21,7 @@ export function Fragment(props: FragmentProps): ComponentChildren {
  */
 interface VirtualNodeInitOptions<T extends ElementType> {
   type: T
-  rawProps?: ElementProps<T> | null
+  rawProps?: ElementProps<T>
   key?: PropertyKey
 }
 
@@ -33,7 +33,7 @@ export function createVirtualNode<T extends ElementType>(
 ): VirtualNode<T> {
   const { type, rawProps = null, key } = options
   /* 通过解构复制 props，避免外部对象在后续流程中被意外修改 */
-  let props: Record<string, unknown> | null = null
+  let props: Record<string, unknown> | undefined
   let children: VirtualNodeChild[] = []
 
   if (rawProps) {
@@ -50,14 +50,16 @@ export function createVirtualNode<T extends ElementType>(
       children = normalizeChildren(rawChildren)
     }
 
-    props = Reflect.ownKeys(restProps).length > 0 ? restProps : null
+    if (Reflect.ownKeys(restProps).length > 0) {
+      props = restProps
+    }
   }
 
   return {
     /* 使用唯一标记区分普通对象与内部 virtualNode 结构 */
     [virtualNodeFlag]: true as const,
     type,
-    props: (props as ElementProps<T> | null) ?? null,
+    props: props as ElementProps<T>,
     children,
     key,
   }

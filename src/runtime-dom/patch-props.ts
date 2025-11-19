@@ -17,7 +17,7 @@ function isEventProp(key: string): boolean {
  */
 export function patchProps(
   element: Element,
-  props: Record<string, unknown> | null,
+  props?: Record<string, unknown>,
 ): void {
   if (!props) {
     return

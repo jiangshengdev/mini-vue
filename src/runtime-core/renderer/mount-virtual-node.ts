@@ -14,7 +14,7 @@ export function mountVirtualNode<
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   virtualNode: VirtualNode,
   container: HostElement | HostFragment,
-): HostNode | null {
+): HostNode | undefined {
   /* 函数组件通过 mountComponent 执行并挂载其返回值。 */
   if (typeof virtualNode.type === 'function') {
     const component = virtualNode.type as ComponentType

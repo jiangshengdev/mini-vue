@@ -95,7 +95,7 @@ export interface VirtualNode<T extends ElementType = ElementType> {
   /** 当前虚拟节点的类型，可能是原生标签、组件或 Fragment */
   readonly type: T
   /** 节点携带的属性对象，按元素类型推导，允许为空 */
-  readonly props: ElementProps<T> | null
+  readonly props?: ElementProps<T>
   /** 归一化后的子节点列表，统一以数组承载 */
   readonly children: VirtualNodeChild[]
   /** 可选的 diff key，用于稳定节点身份 */

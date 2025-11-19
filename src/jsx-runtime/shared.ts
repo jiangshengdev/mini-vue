@@ -43,9 +43,9 @@ export function h<T extends ElementType>(
       key = extractedKey
     }
 
-    normalizedProps = Reflect.ownKeys(restProps).length
-      ? (restProps as ElementProps<T>)
-      : undefined
+    if (Reflect.ownKeys(restProps).length > 0) {
+      normalizedProps = restProps as ElementProps<T>
+    }
   }
 
   /* 没有额外 children 时直接透传 props，保留编译器注入的 children。 */
@@ -55,7 +55,7 @@ export function h<T extends ElementType>(
 
   /* 需要人为传入 children 时重新组装 props 并交给底层创建函数。 */
   const propsWithChildren = {
-    ...(normalizedProps ?? {}),
+    ...normalizedProps,
     children,
   } as ElementProps<T>
 

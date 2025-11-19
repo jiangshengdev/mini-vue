@@ -53,7 +53,7 @@ function mountApp<HostElement>(
   state.container = target
 
   /* 运行根组件获取最新子树，确保 props 变更生效。 */
-  const subtree = state.rootComponent({ ...(state.rootProps ?? {}) })
+  const subtree = state.rootComponent({ ...state.rootProps })
 
   /* 交由渲染器负责真正的 DOM 挂载。 */
   state.config.render(subtree, target)

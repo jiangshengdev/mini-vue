@@ -29,7 +29,7 @@ export function h<T extends ElementType>(
     const propsCopy = { ...props } as Record<string, unknown>
 
     /* key 属于 VNode 的标识信息，提取后从 props 中剔除避免下游重复。 */
-    if ('key' in propsCopy) {
+    if (Object.hasOwn(propsCopy, 'key')) {
       key = propsCopy.key as PropertyKey
       delete propsCopy.key
     }

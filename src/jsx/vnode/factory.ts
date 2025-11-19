@@ -36,7 +36,7 @@ export function createVNode<T extends ElementType>(
   let props: Record<string, unknown> | null = rawProps ? { ...rawProps } : null
   let children: VNodeChild[] = []
 
-  if (props && 'children' in props) {
+  if (props && Object.hasOwn(props, 'children')) {
     /* 将 props.children 归一化为内部统一使用的 children 数组 */
     const normalizedChildren = normalizeChildren(props.children)
 

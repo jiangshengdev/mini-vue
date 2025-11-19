@@ -28,7 +28,7 @@ interface AppState<HostElement> {
   /** 标识应用当前是否已挂载。 */
   status: 'idle' | 'mounted'
   /** 最近一次挂载的宿主容器引用。 */
-  container: HostElement | null
+  container: HostElement | undefined
   /** 宿主注入的渲染配置。 */
   config: AppRuntimeConfig<HostElement>
   /** 根组件定义，用于生成顶层子树。 */
@@ -72,7 +72,7 @@ function unmountApp<HostElement>(state: AppState<HostElement>): void {
   /* 调用宿主清理逻辑并重置状态，便于后续重新挂载。 */
   state.config.clear(state.container)
   state.status = 'idle'
-  state.container = null
+  state.container = undefined
 }
 
 /**
@@ -85,7 +85,7 @@ export function createAppInstance<HostElement>(
 ): AppInstance<HostElement> {
   const state: AppState<HostElement> = {
     status: 'idle',
-    container: null,
+    container: undefined,
     config,
     rootComponent,
     rootProps,

@@ -3,7 +3,7 @@ import { effect, reactive } from '@/index.ts'
 
 export const Counter: ComponentType = () => {
   const state = reactive({ count: 0 })
-  let buttonElement: HTMLButtonElement | null = null
+  let buttonElement: HTMLButtonElement | undefined
 
   effect(() => {
     const label = `count is ${state.count}`
@@ -13,8 +13,8 @@ export const Counter: ComponentType = () => {
     }
   })
 
-  const bindRef = (element: Element | null) => {
-    buttonElement = (element as HTMLButtonElement | null) ?? null
+  const bindRef = (element?: Element) => {
+    buttonElement = (element as HTMLButtonElement | undefined) ?? undefined
   }
 
   const increment = () => {

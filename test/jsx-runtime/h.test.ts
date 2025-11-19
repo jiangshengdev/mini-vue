@@ -6,14 +6,14 @@ describe('jsx-runtime h helper', () => {
     const virtualNode = h('div', { children: 'slot-text' })
 
     expect(virtualNode.children).toEqual(['slot-text'])
-    expect(virtualNode.props).toBeNull()
+    expect(virtualNode.props).toBeUndefined()
   })
 
   it('变参 children 覆盖 props.children', () => {
     const virtualNode = h('div', { children: 'slot-text' }, 'override')
 
     expect(virtualNode.children).toEqual(['override'])
-    expect(virtualNode.props).toBeNull()
+    expect(virtualNode.props).toBeUndefined()
   })
 
   it('保留其他 props 并正确归一化 children', () => {
@@ -33,6 +33,6 @@ describe('jsx-runtime h helper', () => {
     const virtualNode = h('li', { key: 'row-1', children: 'row' })
 
     expect(virtualNode.key).toBe('row-1')
-    expect(virtualNode.props).toBeNull()
+    expect(virtualNode.props).toBeUndefined()
   })
 })

@@ -11,17 +11,25 @@ class ReactiveCache {
   /**
    * 缓存原始对象到代理对象的映射，便于复用同一 Proxy。
    */
-  private readonly rawToReactive = new WeakMap<object, object>()
+  private readonly rawToReactive = new WeakMap<
+    Record<PropertyKey, unknown>,
+    Record<PropertyKey, unknown>
+  >()
 
   /**
    * 缓存代理对象到原始对象的映射，支持反查判定。
    */
-  private readonly reactiveToRaw = new WeakMap<object, object>()
+  private readonly reactiveToRaw = new WeakMap<
+    Record<PropertyKey, unknown>,
+    Record<PropertyKey, unknown>
+  >()
 
   /**
    * 查找目标是否已被代理，避免重复创建 Proxy 实例。
    */
-  lookupProxy(target: object): object | undefined {
+  lookupProxy(
+    target: Record<PropertyKey, unknown>,
+  ): Record<PropertyKey, unknown> | undefined {
     if (this.reactiveToRaw.has(target)) {
       return target
     }
@@ -44,7 +52,7 @@ class ReactiveCache {
   /**
    * 判断传入对象是否为缓存中的响应式 Proxy。
    */
-  isReactive(target: object): boolean {
+  isReactive(target: Record<PropertyKey, unknown>): boolean {
     return this.reactiveToRaw.has(target)
   }
 }
@@ -55,7 +63,7 @@ const unsupportedTypeMessage = 'reactive 目前仅支持普通对象（不含数
 /**
  * 将普通对象转换为响应式 Proxy；当前仅支持纯对象。
  */
-export function reactive<T extends object>(target: T): T
+export function reactive<T extends Record<PropertyKey, unknown>>(target: T): T
 export function reactive<T>(target: T): T
 
 export function reactive(target: unknown): unknown {
@@ -83,7 +91,9 @@ export function reactive(target: unknown): unknown {
 /**
  * 判断给定值是否为 reactive 生成的 Proxy。
  */
-export function isReactive(target: unknown): target is object {
+export function isReactive(
+  target: unknown,
+): target is Record<PropertyKey, unknown> {
   if (!isObject(target)) {
     return false
   }

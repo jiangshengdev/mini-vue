@@ -66,7 +66,7 @@ export function reactive(target: unknown): unknown {
 
   /* 当前实现仅支持普通对象，数组与其它原生对象均直接报错 */
   if (Array.isArray(target) || !isPlainObject(target)) {
-    throw new TypeError(unsupportedTypeMessage)
+    throw new TypeError(unsupportedTypeMessage, { cause: target })
   }
 
   const cached = reactiveCache.lookupProxy(target)

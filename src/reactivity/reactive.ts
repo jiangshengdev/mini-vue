@@ -50,7 +50,7 @@ class ReactiveCache {
 }
 
 const reactiveCache = new ReactiveCache()
-const UNSUPPORTED_TYPE_MESSAGE = 'reactive 目前仅支持普通对象（不含数组）'
+const unsupportedTypeMessage = 'reactive 目前仅支持普通对象（不含数组）'
 
 /**
  * 将普通对象转换为响应式 Proxy；当前仅支持纯对象。
@@ -66,7 +66,7 @@ export function reactive(target: unknown): unknown {
 
   /* 当前实现仅支持普通对象，数组与其它原生对象均直接报错 */
   if (Array.isArray(target) || !isPlainObject(target)) {
-    throw new TypeError(UNSUPPORTED_TYPE_MESSAGE)
+    throw new TypeError(unsupportedTypeMessage)
   }
 
   const cached = reactiveCache.lookupProxy(target)

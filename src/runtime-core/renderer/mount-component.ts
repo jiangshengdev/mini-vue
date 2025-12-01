@@ -1,5 +1,6 @@
 import type { RendererOptions } from '../renderer.ts'
 import { mountChild } from './mount-child.ts'
+import type { MountedChild } from './mounted-child.ts'
 import type {
   ComponentResult,
   ComponentType,
@@ -19,8 +20,7 @@ interface ComponentInstance<
   readonly props: ElementProps<T>
   readonly effect: ReactiveEffect<ComponentResult>
   subTree?: ComponentResult
-  mountedNode?: HostNode
-  pendingJob?: () => void
+  mountedNodes: HostNode[]
   cleanup: Array<() => void>
 }
 
@@ -37,9 +37,10 @@ export function mountComponent<
   component: T,
   virtualNode: VirtualNode<T>,
   container: HostElement | HostFragment,
-): HostNode | undefined {
+): MountedChild<HostNode> | undefined {
   const props = resolveComponentProps(virtualNode)
   const instance = createComponentInstance(
+    options,
     component,
     props,
     container,
@@ -47,13 +48,7 @@ export function mountComponent<
 
   attachInstanceToVirtualNode(virtualNode, instance)
 
-  /* 首次渲染立即执行 effect，建立依赖并拿到最新子树。 */
-  const subtree = instance.effect.run()
-
-  instance.subTree = subtree
-  instance.mountedNode = mountChild(options, subtree, container)
-
-  return instance.mountedNode
+  return performInitialRender(instance, options)
 }
 
 function resolveComponentProps<T extends ComponentType>(
@@ -79,40 +74,113 @@ function createComponentInstance<
   HostFragment extends HostNode,
   T extends ComponentType,
 >(
+  options: RendererOptions<HostNode, HostElement, HostFragment>,
   component: T,
   props: ElementProps<T>,
   container: HostElement | HostFragment,
 ): ComponentInstance<HostNode, HostElement, HostFragment, T> {
-  let instance!: ComponentInstance<
-    HostNode,
-    HostElement,
-    HostFragment,
-    T
-  >
+  let instance:
+    | ComponentInstance<HostNode, HostElement, HostFragment, T>
+    | undefined = undefined
 
   const effect = new ReactiveEffect<ComponentResult>(
     () => {
       const subtree = component(props)
 
-      instance.subTree = subtree
+      instance!.subTree = subtree
 
       return subtree
     },
     (job) => {
-      /* 暂存调度任务，后续阶段将用来触发组件级重新渲染。 */
-      instance.pendingJob = job
+      rerenderComponent(instance!, options, job)
     },
   )
 
-  instance = {
+  const createdInstance: ComponentInstance<
+    HostNode,
+    HostElement,
+    HostFragment,
+    T
+  > = {
     type: component,
     container,
     props,
     effect,
+    mountedNodes: [],
     cleanup: [],
   }
 
-  return instance
+  instance = createdInstance
+
+  return createdInstance
+}
+
+function performInitialRender<
+  HostNode,
+  HostElement extends HostNode,
+  HostFragment extends HostNode,
+  T extends ComponentType,
+>(
+  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
+  options: RendererOptions<HostNode, HostElement, HostFragment>,
+): MountedChild<HostNode> | undefined {
+  const subtree = instance.effect.run()
+  const mounted = mountChild(options, subtree, instance.container)
+
+  instance.mountedNodes = mounted?.nodes ?? []
+
+  return mounted
+}
+
+function rerenderComponent<
+  HostNode,
+  HostElement extends HostNode,
+  HostFragment extends HostNode,
+  T extends ComponentType,
+>(
+  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
+  options: RendererOptions<HostNode, HostElement, HostFragment>,
+  job: () => void,
+): void {
+  unmountComponentSubtree(instance, options)
+  job()
+  mountLatestSubtree(instance, options)
+}
+
+function unmountComponentSubtree<
+  HostNode,
+  HostElement extends HostNode,
+  HostFragment extends HostNode,
+  T extends ComponentType,
+>(
+  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
+  options: RendererOptions<HostNode, HostElement, HostFragment>,
+): void {
+  if (instance.mountedNodes.length === 0) {
+    return
+  }
+
+  const { remove } = options
+
+  for (const node of instance.mountedNodes) {
+    remove(node)
+  }
+
+  instance.mountedNodes = []
+}
+
+function mountLatestSubtree<
+  HostNode,
+  HostElement extends HostNode,
+  HostFragment extends HostNode,
+  T extends ComponentType,
+>(
+  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
+  options: RendererOptions<HostNode, HostElement, HostFragment>,
+): void {
+  const mounted = mountChild(options, instance.subTree, instance.container)
+
+  instance.mountedNodes = mounted?.nodes ?? []
 }
 
 function attachInstanceToVirtualNode<

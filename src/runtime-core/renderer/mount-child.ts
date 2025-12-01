@@ -1,5 +1,6 @@
 import type { RendererOptions } from '../renderer.ts'
 import { mountVirtualNode } from './mount-virtual-node.ts'
+import type { MountedChild } from './mounted-child.ts'
 import type { ComponentResult } from '@/jsx/index.ts'
 import { isVirtualNode } from '@/jsx/index.ts'
 import { isNil } from '@/shared/utils.ts'
@@ -13,9 +14,9 @@ export function mountChild<
   HostFragment extends HostNode,
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
-  child: ComponentResult,
+  child: ComponentResult | undefined,
   container: HostElement | HostFragment,
-): HostNode | undefined {
+): MountedChild<HostNode> | undefined {
   const { createFragment, appendChild, createText } = options
 
   /* `null`、`undefined`、布尔值不产生实际节点。 */
@@ -26,19 +27,26 @@ export function mountChild<
   /* 数组子节点需要借助片段统一插入。 */
   if (Array.isArray(child)) {
     const fragment = createFragment()
+    const nodes: HostNode[] = []
 
     /* 递归挂载数组项并收集到片段中。 */
     for (const item of child) {
-      const node = mountChild(options, item, fragment)
+      const mounted = mountChild(options, item, fragment)
 
-      if (node) {
-        appendChild(fragment, node)
+      if (mounted) {
+        nodes.push(...mounted.nodes)
       }
     }
 
     appendChild(container, fragment)
 
-    return fragment
+    if (nodes.length === 0) {
+      return undefined
+    }
+
+    return {
+      nodes,
+    }
   }
 
   /* 原始文本类型直接创建文本节点。 */
@@ -47,7 +55,9 @@ export function mountChild<
 
     appendChild(container, text)
 
-    return text
+    return {
+      nodes: [text],
+    }
   }
 
   /* 标准 virtualNode 交给 mountVirtualNode 处理组件或元素。 */
@@ -60,5 +70,7 @@ export function mountChild<
 
   appendChild(container, text)
 
-  return text
+  return {
+    nodes: [text],
+  }
 }

@@ -1,6 +1,7 @@
 import type { RendererOptions } from '../renderer.ts'
 import { mountComponent } from './mount-component.ts'
 import { mountElement } from './mount-element.ts'
+import type { MountedChild } from './mounted-child.ts'
 import type { ComponentType, VirtualNode } from '@/jsx/index.ts'
 
 /**
@@ -14,7 +15,7 @@ export function mountVirtualNode<
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   virtualNode: VirtualNode,
   container: HostElement | HostFragment,
-): HostNode | undefined {
+): MountedChild<HostNode> | undefined {
   /* 函数组件通过 mountComponent 执行并挂载其返回值。 */
   if (typeof virtualNode.type === 'function') {
     const component = virtualNode.type as ComponentType

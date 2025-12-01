@@ -22,6 +22,8 @@ export interface RendererOptions<
   appendChild(parent: HostElement | HostFragment, child: HostNode): void
   /** 清空容器内容，在新一轮渲染前使用。 */
   clear(container: HostElement): void
+  /** 将宿主节点从其父容器中移除。 */
+  remove(node: HostNode): void
   /**
    * 将 virtualNode props 映射到真实元素节点。
    * 传入 null 时代表没有任何 props 需要处理。

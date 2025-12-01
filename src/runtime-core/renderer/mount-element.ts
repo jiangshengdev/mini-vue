@@ -1,5 +1,6 @@
 import type { RendererOptions } from '../renderer.ts'
 import { mountChildren } from './mount-children.ts'
+import type { MountedChild } from './mounted-child.ts'
 import type { VirtualNode } from '@/jsx/index.ts'
 
 /**
@@ -14,7 +15,7 @@ export function mountElement<
   type: string,
   virtualNode: VirtualNode,
   container: HostElement | HostFragment,
-): HostNode {
+): MountedChild<HostNode> {
   const { createElement, patchProps, appendChild } = options
   const element = createElement(type)
   const props: Record<string, unknown> | undefined = virtualNode.props as
@@ -28,5 +29,7 @@ export function mountElement<
   /* 最终把元素插入到父容器中完成挂载。 */
   appendChild(container, element)
 
-  return element
+  return {
+    nodes: [element],
+  }
 }

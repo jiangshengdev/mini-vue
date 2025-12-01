@@ -1,5 +1,6 @@
 import type { RootRenderFunction } from './renderer.ts'
-import type { ComponentType } from '@/jsx/index.ts'
+import { createVirtualNode } from '@/jsx/index.ts'
+import type { ComponentType, ElementProps } from '@/jsx/index.ts'
 
 /**
  * 宿主平台注入的渲染配置，提供渲染与清理能力。
@@ -53,10 +54,10 @@ function mountApp<HostElement>(
   state.container = target
 
   /* 运行根组件获取最新子树，确保 props 变更生效。 */
-  const subtree = state.rootComponent({ ...state.rootProps })
+  const rootNode = createRootVirtualNode(state)
 
-  /* 交由渲染器负责真正的 DOM 挂载。 */
-  state.config.render(subtree, target)
+  /* 交由渲染器负责真正的 DOM 挂载，并让组件 effect 托管更新。 */
+  state.config.render(rootNode, target)
   state.status = 'mounted'
 }
 
@@ -73,6 +74,19 @@ function unmountApp<HostElement>(state: AppState<HostElement>): void {
   state.config.unmount(state.container)
   state.status = 'idle'
   state.container = undefined
+}
+
+function createRootVirtualNode<HostElement>(
+  state: AppState<HostElement>,
+) {
+  const rawProps = state.rootProps
+    ? ({ ...state.rootProps } as ElementProps<ComponentType>)
+    : undefined
+
+  return createVirtualNode({
+    type: state.rootComponent,
+    rawProps,
+  })
 }
 
 /**

@@ -1,8 +1,8 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { screen, within } from '@testing-library/dom'
 import { createTestContainer } from '../setup.ts'
 import type { ComponentType } from '@/index.ts'
-import { createApp } from '@/index.ts'
+import { createApp, reactive } from '@/index.ts'
 
 const App: ComponentType = () => {
   return <div class="hello">Hello</div>
@@ -22,7 +22,7 @@ describe('runtime-dom createApp', () => {
   })
 
   it('支持直接传入容器', () => {
-    const host = document.createElement('div')
+    const host = createTestContainer()
     const app = createApp(App)
 
     app.mount(host)
@@ -34,7 +34,7 @@ describe('runtime-dom createApp', () => {
   })
 
   it('重复挂载会抛异常', () => {
-    const host = document.createElement('div')
+    const host = createTestContainer()
     const app = createApp(App)
 
     app.mount(host)
@@ -45,7 +45,7 @@ describe('runtime-dom createApp', () => {
   })
 
   it('卸载后可以重新挂载', () => {
-    const host = document.createElement('div')
+    const host = createTestContainer()
     const app = createApp(App)
 
     app.mount(host)
@@ -59,5 +59,57 @@ describe('runtime-dom createApp', () => {
 
     app.unmount()
     expect(host).toBeEmptyDOMElement()
+  })
+
+  it('根组件可以直接消费 reactive 并刷新视图', () => {
+    const state = reactive({ count: 0 })
+
+    const Root: ComponentType = () => {
+      return <p>count: {state.count}</p>
+    }
+
+    const host = createTestContainer()
+    const app = createApp(Root)
+
+    app.mount(host)
+
+    const view = within(host)
+
+    expect(view.getByText('count: 0')).toBeInTheDocument()
+
+    state.count = 1
+    expect(view.getByText('count: 1')).toBeInTheDocument()
+
+    app.unmount()
+    expect(host).toBeEmptyDOMElement()
+  })
+
+  it('根组件卸载后会停止响应式 effect', () => {
+    const renderSpy = vi.fn()
+    const state = reactive({ on: false })
+
+    const Root: ComponentType = () => {
+      renderSpy()
+
+      return <span>{state.on ? 'ON' : 'OFF'}</span>
+    }
+
+    const host = createTestContainer()
+    const app = createApp(Root)
+
+    app.mount(host)
+
+    expect(renderSpy).toHaveBeenCalledTimes(1)
+    expect(screen.getByText('OFF')).toBeInTheDocument()
+
+    state.on = true
+    expect(renderSpy).toHaveBeenCalledTimes(2)
+    expect(screen.getByText('ON')).toBeInTheDocument()
+
+    app.unmount()
+    expect(host).toBeEmptyDOMElement()
+
+    state.on = false
+    expect(renderSpy).toHaveBeenCalledTimes(2)
   })
 })

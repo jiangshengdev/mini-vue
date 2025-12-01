@@ -25,7 +25,7 @@
    - 扩展 `mountComponent` 创建的实例，暴露 `unmount` 能力。
    - `render`/`createApp` 在卸载或替换节点时，主动调用组件实例的清理逻辑，停止 effect 并断开 DOM 引用。
 
-4. **测试补充**
+4. **测试补充（已完成）**
    - 在 `test/runtime-dom` 增加用例：组件仅依赖响应式数据且无手写 `effect`，多次 state 更新应正确渲染。
    - 验证卸载后响应式依赖已释放。
 

@@ -59,7 +59,7 @@ export function watch<T>(
    * 在依赖变更时执行的调度任务，负责比较、清理与派发。
    */
   function runWatchJob(): void {
-    /* effect 已失活时直接跳出，避免多余触发。 */
+    /* `effect` 已失活时直接跳出，避免多余触发。 */
     if (!runner.active) {
       return
     }

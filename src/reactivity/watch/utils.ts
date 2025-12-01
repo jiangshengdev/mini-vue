@@ -1,7 +1,7 @@
-import { isObject } from '@/shared/utils.ts'
 import { isReactive } from '../reactive.ts'
 import { isRef } from '../ref/api.ts'
 import type { WatchSource } from './core.ts'
+import { isObject } from '@/shared/utils.ts'
 import type { PlainObject } from '@/shared/types.ts'
 
 /**
@@ -16,7 +16,7 @@ export function resolveDeepOption(
     return explicit
   }
 
-  /* getter 与 ref 默认只追踪自身引用，无需深度遍历。 */
+  /* `getter` 与 ref 默认只追踪自身引用，无需深度遍历。 */
   if (typeof source === 'function' || isRef(source)) {
     return false
   }
@@ -41,7 +41,7 @@ export function createGetter<T>(
     return source
   }
 
-  /* ref 源返回 value 读取，触发其依赖收集。 */
+  /* `ref` 源返回 value 读取，触发其依赖收集。 */
   if (isRef(source)) {
     return () => {
       return source.value

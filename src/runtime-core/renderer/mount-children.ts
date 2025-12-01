@@ -14,8 +14,8 @@ export function mountChildren<
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   children: VirtualNodeChild[],
   container: HostElement,
-): MountedChild<HostNode>[] {
-  const mountedChildren: MountedChild<HostNode>[] = []
+): Array<MountedChild<HostNode>> {
+  const mountedChildren: Array<MountedChild<HostNode>> = []
 
   /* 顺序遍历子节点，统一交由 mountChild 处理细分类型。 */
   for (const child of children) {

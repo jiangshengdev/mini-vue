@@ -39,12 +39,7 @@ export function mountComponent<
   container: HostElement | HostFragment,
 ): MountedChild<HostNode> | undefined {
   const props = resolveComponentProps(virtualNode)
-  const instance = createComponentInstance(
-    options,
-    component,
-    props,
-    container,
-  ) as ComponentInstance<HostNode, HostElement, HostFragment, T>
+  const instance = createComponentInstance(options, component, props, container)
 
   attachInstanceToVirtualNode(virtualNode, instance)
 

@@ -10,7 +10,7 @@ import type {
 import { ReactiveEffect } from '@/reactivity/effect.ts'
 
 interface ComponentInstance<
-  HostNode,
+  HostNode extends object,
   HostElement extends HostNode,
   HostFragment extends HostNode,
   T extends ComponentType,
@@ -20,7 +20,7 @@ interface ComponentInstance<
   readonly props: ElementProps<T>
   readonly effect: ReactiveEffect<ComponentResult>
   subTree?: ComponentResult
-  mountedNodes: HostNode[]
+  mountedChild?: MountedChild<HostNode>
   cleanup: Array<() => void>
 }
 
@@ -28,7 +28,7 @@ interface ComponentInstance<
  * 执行函数组件并将返回的子树继续挂载到容器。
  */
 export function mountComponent<
-  HostNode,
+  HostNode extends object,
   HostElement extends HostNode,
   HostFragment extends HostNode,
   T extends ComponentType,
@@ -48,7 +48,18 @@ export function mountComponent<
 
   attachInstanceToVirtualNode(virtualNode, instance)
 
-  return performInitialRender(instance, options)
+  const mounted = performInitialRender(instance, options)
+
+  if (!mounted) {
+    return undefined
+  }
+
+  return {
+    nodes: mounted.nodes,
+    teardown(): void {
+      teardownComponentInstance(instance)
+    },
+  }
 }
 
 function resolveComponentProps<T extends ComponentType>(
@@ -69,7 +80,7 @@ function resolveComponentProps<T extends ComponentType>(
 }
 
 function createComponentInstance<
-  HostNode,
+  HostNode extends object,
   HostElement extends HostNode,
   HostFragment extends HostNode,
   T extends ComponentType,
@@ -106,7 +117,6 @@ function createComponentInstance<
     container,
     props,
     effect,
-    mountedNodes: [],
     cleanup: [],
   }
 
@@ -116,7 +126,7 @@ function createComponentInstance<
 }
 
 function performInitialRender<
-  HostNode,
+  HostNode extends object,
   HostElement extends HostNode,
   HostFragment extends HostNode,
   T extends ComponentType,
@@ -127,13 +137,13 @@ function performInitialRender<
   const subtree = instance.effect.run()
   const mounted = mountChild(options, subtree, instance.container)
 
-  instance.mountedNodes = mounted?.nodes ?? []
+  instance.mountedChild = mounted
 
   return mounted
 }
 
 function rerenderComponent<
-  HostNode,
+  HostNode extends object,
   HostElement extends HostNode,
   HostFragment extends HostNode,
   T extends ComponentType,
@@ -142,35 +152,29 @@ function rerenderComponent<
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   job: () => void,
 ): void {
-  unmountComponentSubtree(instance, options)
+  teardownMountedSubtree(instance)
   job()
   mountLatestSubtree(instance, options)
 }
 
-function unmountComponentSubtree<
-  HostNode,
+function teardownMountedSubtree<
+  HostNode extends object,
   HostElement extends HostNode,
   HostFragment extends HostNode,
   T extends ComponentType,
 >(
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
-  options: RendererOptions<HostNode, HostElement, HostFragment>,
 ): void {
-  if (instance.mountedNodes.length === 0) {
+  if (!instance.mountedChild) {
     return
   }
 
-  const { remove } = options
-
-  for (const node of instance.mountedNodes) {
-    remove(node)
-  }
-
-  instance.mountedNodes = []
+  instance.mountedChild.teardown()
+  instance.mountedChild = undefined
 }
 
 function mountLatestSubtree<
-  HostNode,
+  HostNode extends object,
   HostElement extends HostNode,
   HostFragment extends HostNode,
   T extends ComponentType,
@@ -180,11 +184,33 @@ function mountLatestSubtree<
 ): void {
   const mounted = mountChild(options, instance.subTree, instance.container)
 
-  instance.mountedNodes = mounted?.nodes ?? []
+  instance.mountedChild = mounted
+}
+
+function teardownComponentInstance<
+  HostNode extends object,
+  HostElement extends HostNode,
+  HostFragment extends HostNode,
+  T extends ComponentType,
+>(
+  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
+): void {
+  teardownMountedSubtree(instance)
+  instance.effect.stop()
+
+  if (instance.cleanup.length > 0) {
+    const tasks = [...instance.cleanup]
+
+    instance.cleanup = []
+
+    for (const task of tasks) {
+      task()
+    }
+  }
 }
 
 function attachInstanceToVirtualNode<
-  HostNode,
+  HostNode extends object,
   HostElement extends HostNode,
   HostFragment extends HostNode,
   T extends ComponentType,

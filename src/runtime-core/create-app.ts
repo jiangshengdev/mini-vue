@@ -7,8 +7,8 @@ import type { ComponentType } from '@/jsx/index.ts'
 export interface AppRuntimeConfig<HostElement> {
   /** 将根子树挂载到目标容器的渲染函数。 */
   render: RootRenderFunction<HostElement>
-  /** 清空宿主容器的能力，供 unmount 或重渲染使用。 */
-  clear: (container: HostElement) => void
+  /** 卸载宿主容器中的子树，释放响应式副作用。 */
+  unmount: (container: HostElement) => void
 }
 
 /**
@@ -70,7 +70,7 @@ function unmountApp<HostElement>(state: AppState<HostElement>): void {
   }
 
   /* 调用宿主清理逻辑并重置状态，便于后续重新挂载。 */
-  state.config.clear(state.container)
+  state.config.unmount(state.container)
   state.status = 'idle'
   state.container = undefined
 }

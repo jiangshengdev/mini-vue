@@ -8,7 +8,7 @@ import type { ComponentType, VirtualNode } from '@/jsx/index.ts'
  * 将通用 virtualNode 分派给组件或元素挂载路径。
  */
 export function mountVirtualNode<
-  HostNode,
+  HostNode extends object,
   HostElement extends HostNode,
   HostFragment extends HostNode,
 >(

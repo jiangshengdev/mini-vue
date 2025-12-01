@@ -4,4 +4,6 @@
 export interface MountedChild<HostNode> {
   /** 按插入顺序记录的宿主节点列表。 */
   readonly nodes: HostNode[]
+  /** 清理当前节点及其内部子树的能力。 */
+  teardown(): void
 }

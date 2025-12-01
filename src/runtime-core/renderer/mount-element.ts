@@ -7,7 +7,7 @@ import type { VirtualNode } from '@/jsx/index.ts'
  * 创建宿主元素并同步 props 与 children。
  */
 export function mountElement<
-  HostNode,
+  HostNode extends object,
   HostElement extends HostNode,
   HostFragment extends HostNode,
 >(
@@ -16,7 +16,7 @@ export function mountElement<
   virtualNode: VirtualNode,
   container: HostElement | HostFragment,
 ): MountedChild<HostNode> {
-  const { createElement, patchProps, appendChild } = options
+  const { createElement, patchProps, appendChild, remove } = options
   const element = createElement(type)
   const props: Record<string, unknown> | undefined = virtualNode.props as
     | Record<string, unknown>
@@ -25,11 +25,19 @@ export function mountElement<
   /* 在挂载前先写入属性与事件。 */
   patchProps(element, props)
   /* 子节点交给 mountChildren，保持与 virtualNode 定义一致。 */
-  mountChildren(options, virtualNode.children, element)
+  const mountedChildren = mountChildren(options, virtualNode.children, element)
   /* 最终把元素插入到父容器中完成挂载。 */
+
   appendChild(container, element)
 
   return {
     nodes: [element],
+    teardown(): void {
+      for (const child of mountedChildren) {
+        child.teardown()
+      }
+
+      remove(element)
+    },
   }
 }

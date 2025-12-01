@@ -9,7 +9,7 @@ import { isNil } from '@/shared/utils.ts'
  * 根据子节点类型生成宿主节点，统一处理数组、virtualNode 与原始值。
  */
 export function mountChild<
-  HostNode,
+  HostNode extends object,
   HostElement extends HostNode,
   HostFragment extends HostNode,
 >(
@@ -17,7 +17,7 @@ export function mountChild<
   child: ComponentResult | undefined,
   container: HostElement | HostFragment,
 ): MountedChild<HostNode> | undefined {
-  const { createFragment, appendChild, createText } = options
+  const { createFragment, appendChild, createText, remove } = options
 
   /* `null`、`undefined`、布尔值不产生实际节点。 */
   if (isNil(child) || typeof child === 'boolean') {
@@ -28,6 +28,7 @@ export function mountChild<
   if (Array.isArray(child)) {
     const fragment = createFragment()
     const nodes: HostNode[] = []
+    const teardowns: Array<() => void> = []
 
     /* 递归挂载数组项并收集到片段中。 */
     for (const item of child) {
@@ -35,6 +36,7 @@ export function mountChild<
 
       if (mounted) {
         nodes.push(...mounted.nodes)
+        teardowns.push(mounted.teardown)
       }
     }
 
@@ -46,6 +48,11 @@ export function mountChild<
 
     return {
       nodes,
+      teardown(): void {
+        for (const teardown of teardowns) {
+          teardown()
+        }
+      },
     }
   }
 
@@ -57,6 +64,9 @@ export function mountChild<
 
     return {
       nodes: [text],
+      teardown(): void {
+        remove(text)
+      },
     }
   }
 
@@ -72,5 +82,8 @@ export function mountChild<
 
   return {
     nodes: [text],
+    teardown(): void {
+      remove(text)
+    },
   }
 }

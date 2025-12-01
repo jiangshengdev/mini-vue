@@ -2,13 +2,14 @@
  * 平台无关的渲染核心定义，通过注入宿主环境能力完成挂载流程。
  */
 import { mountChild } from './renderer/mount-child.ts'
+import type { MountedChild } from './renderer/mounted-child.ts'
 import type { ComponentResult } from '@/jsx/index.ts'
 
 /**
  * 宿主环境需要提供的渲染原语集合。
  */
 export interface RendererOptions<
-  HostNode,
+  HostNode extends object,
   HostElement extends HostNode,
   HostFragment extends HostNode,
 > {
@@ -38,33 +39,62 @@ export type RootRenderFunction<HostElement> = (
 ) => void
 
 /** 渲染器工厂返回值，包含渲染与清理能力。 */
-export interface Renderer<HostNode, HostElement extends HostNode> {
+export interface Renderer<HostNode extends object, HostElement extends HostNode> {
   /** 将 virtualNode 子树渲染到指定容器中。 */
   render: RootRenderFunction<HostElement>
   /** 清空容器内容并触发宿主层清理。 */
   clear: (container: HostElement) => void
+  /** 卸载指定容器内的渲染树并释放副作用。 */
+  unmount: (container: HostElement) => void
 }
 
 /**
  * 创建通用渲染器，通过宿主环境提供的原语完成组件与元素挂载。
  */
 export function createRenderer<
-  HostNode,
+  HostNode extends object,
   HostElement extends HostNode,
   HostFragment extends HostNode,
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
 ): Renderer<HostNode, HostElement> {
   const { clear } = options
+  const mountedContainers = new WeakMap<object, MountedChild<HostNode>>()
+
+  function toContainerKey(container: HostElement): object {
+    return container as unknown as object
+  }
+
+  function teardownContainer(container: HostElement): void {
+    const mounted = mountedContainers.get(toContainerKey(container))
+
+    if (!mounted) {
+      return
+    }
+
+    mounted.teardown()
+    mountedContainers.delete(toContainerKey(container))
+  }
 
   /* 根渲染函数会先清空容器，再挂载整棵子树。 */
   function render(virtualNode: ComponentResult, container: HostElement): void {
+    teardownContainer(container)
     clear(container)
-    mountChild(options, virtualNode, container)
+    const mounted = mountChild(options, virtualNode, container)
+
+    if (mounted) {
+      mountedContainers.set(toContainerKey(container), mounted)
+    }
+  }
+
+  function unmount(container: HostElement): void {
+    teardownContainer(container)
+    clear(container)
   }
 
   return {
     render,
     clear,
+    unmount,
   }
 }

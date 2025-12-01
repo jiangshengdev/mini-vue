@@ -6,7 +6,7 @@ import type { ComponentType } from '@/jsx/index.ts'
 import type { AppInstance } from '@/runtime-core/index.ts'
 import { createAppInstance, createRenderer } from '@/runtime-core/index.ts'
 
-const { render, clear } = createRenderer(domRendererOptions)
+const { render, unmount: unmountContainer } = createRenderer(domRendererOptions)
 
 export { render }
 
@@ -70,7 +70,11 @@ export function createApp(
 ): DomAppInstance {
   /* 先创建 runtime-core 层的基础应用实例，统一托管渲染。 */
   const state: DomAppState = {
-    baseApp: createAppInstance({ render, clear }, rootComponent, rootProps),
+    baseApp: createAppInstance(
+      { render, unmount: unmountContainer },
+      rootComponent,
+      rootProps,
+    ),
   }
 
   /* 封装 DOM 版本 mount，让用户可以传入不同类型的容器。 */

@@ -76,6 +76,9 @@ function unmountApp<HostElement>(state: AppState<HostElement>): void {
   state.container = undefined
 }
 
+/**
+ * 通过最新状态生成根级 virtualNode，确保 props 是独立副本。
+ */
 function createRootVirtualNode<HostElement>(state: AppState<HostElement>) {
   const rawProps = state.rootProps
     ? ({ ...state.rootProps } as ElementProps<ComponentType>)

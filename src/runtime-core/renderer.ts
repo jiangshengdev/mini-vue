@@ -62,10 +62,16 @@ export function createRenderer<
   const { clear } = options
   const mountedContainers = new WeakMap<PlainObject, MountedChild<HostNode>>()
 
+  /**
+   * 将宿主容器断言为对象键，便于复用 WeakMap 存储。
+   */
   function toContainerKey(container: HostElement): PlainObject {
     return container as unknown as PlainObject
   }
 
+  /**
+   * 若容器曾挂载过子树，则执行 teardown 并移除缓存。
+   */
   function teardownContainer(container: HostElement): void {
     const mounted = mountedContainers.get(toContainerKey(container))
 
@@ -77,7 +83,9 @@ export function createRenderer<
     mountedContainers.delete(toContainerKey(container))
   }
 
-  /* 根渲染函数会先清空容器，再挂载整棵子树。 */
+  /**
+   * 根渲染函数会先清空容器，再挂载整棵子树。
+   */
   function render(virtualNode: ComponentResult, container: HostElement): void {
     teardownContainer(container)
     clear(container)
@@ -88,6 +96,9 @@ export function createRenderer<
     }
   }
 
+  /**
+   * 卸载操作只负责清理缓存并复用宿主 clear 逻辑。
+   */
   function unmount(container: HostElement): void {
     teardownContainer(container)
     clear(container)

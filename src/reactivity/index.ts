@@ -3,6 +3,7 @@
  */
 export { effect } from './effect.ts'
 export { reactive } from './reactive.ts'
+export { watch } from './watch.ts'
 export { computed, ref, isRef, unref, toRef } from './ref/index.ts'
 export type { Ref } from './ref/index.ts'
 export type {

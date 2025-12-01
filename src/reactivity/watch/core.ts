@@ -49,15 +49,15 @@ export function watch<T>(
     cleanup = fn
   }
 
-  /* 构建底层 effect，调度回调统一走 `job` 以便复用逻辑。 */
+  /* 构建底层 effect，调度回调统一走 `runWatchJob` 以便复用逻辑。 */
   const runner = new ReactiveEffect(getter as () => T, () => {
-    job()
+    runWatchJob()
   })
 
   /**
    * 在依赖变更时执行的调度任务，负责比较、清理与派发。
    */
-  function job(): void {
+  function runWatchJob(): void {
     /* effect 已失活时直接跳出，避免多余触发。 */
     if (!runner.active) {
       return
@@ -104,7 +104,7 @@ export function watch<T>(
 
   /* 根据 immediate 选择立即执行还是先懒获取一次旧值。 */
   if (immediate) {
-    job()
+    runWatchJob()
   } else {
     oldValue = runner.run()
     hasOldValue = true

@@ -36,10 +36,10 @@ class ComputedRefImpl<T> implements Ref<T> {
   private readonly setter: ComputedSetter<T>
 
   /** 标记当前缓存是否过期，true 时需要重新执行 getter。 */
-  private innerDirty = true
+  private needsRecompute = true
 
   /** 缓存最近一次执行 getter 的结果，供下次同步返回。 */
-  private innerValue!: T
+  private cachedValue!: T
 
   /**
    * 将 getter 封装为 ReactiveEffect，并注入专用调度器以刷新脏标记。
@@ -60,12 +60,12 @@ class ComputedRefImpl<T> implements Ref<T> {
     trackEffect(this.dep)
 
     /* 首次访问或依赖脏时重新运行 getter，并缓存结果。 */
-    if (this.innerDirty) {
-      this.innerDirty = false
-      this.innerValue = this.effect.run()
+    if (this.needsRecompute) {
+      this.needsRecompute = false
+      this.cachedValue = this.effect.run()
     }
 
-    return this.innerValue
+    return this.cachedValue
   }
 
   /**
@@ -80,11 +80,11 @@ class ComputedRefImpl<T> implements Ref<T> {
    */
   private markDirty(): void {
     /* 已经是脏状态时无需重复触发，避免额外调度。 */
-    if (this.innerDirty) {
+    if (this.needsRecompute) {
       return
     }
 
-    this.innerDirty = true
+    this.needsRecompute = true
     triggerEffects(this.dep)
   }
 }

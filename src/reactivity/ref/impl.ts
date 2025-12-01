@@ -4,8 +4,7 @@ import type { DependencyBucket } from '../shared/types.ts'
 import type { Ref, RefDepCarrier, RefMarker } from './types.ts'
 import { refFlag } from './types.ts'
 import { isObject } from '@/shared/utils.ts'
-
-type PlainObject = Record<PropertyKey, unknown>
+import type { PlainObject } from '@/shared/types.ts'
 
 /**
  * RefImpl 负责封装普通值的响应式访问器，实现依赖收集与触发。

@@ -2,9 +2,10 @@ import { ReactiveEffect } from '../effect.ts'
 import { effectStack } from '../internals/effect-stack.ts'
 import type { Ref } from '../ref/types.ts'
 import { createGetter, resolveDeepOption } from './utils.ts'
+import type { PlainObject } from '@/shared/types.ts'
 
 /** `watch` 可接受的追踪源类型，覆盖 ref、getter 与普通对象。 */
-export type WatchSource<T> = Ref<T> | (() => T) | Record<PropertyKey, unknown>
+export type WatchSource<T> = Ref<T> | (() => T) | PlainObject
 /** 外部可调用的停止函数类型。 */
 export type WatchStopHandle = () => void
 /** 供用户注册的清理回调类型。 */

@@ -7,7 +7,7 @@ import type { VirtualNodeChild } from '@/jsx/index.ts'
  * 依次挂载元素的 children，保持声明顺序插入。
  */
 export function mountChildren<
-  HostNode extends object,
+  HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
 >(

@@ -2,6 +2,7 @@ import { isObject } from '@/shared/utils.ts'
 import { isReactive } from '../reactive.ts'
 import { isRef } from '../ref/api.ts'
 import type { WatchSource } from './core.ts'
+import type { PlainObject } from '@/shared/types.ts'
 
 /**
  * 根据显式传参与源类型推导是否需要深度监听。
@@ -91,7 +92,7 @@ function traverse<T>(value: T, seen = new Set<unknown>()): T {
 
   /* 普通对象逐个字段递归，确保嵌套属性建立依赖。 */
   for (const key of Object.keys(value)) {
-    traverse((value as Record<PropertyKey, unknown>)[key], seen)
+    traverse((value as PlainObject)[key], seen)
   }
 
   return value

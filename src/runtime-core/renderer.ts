@@ -4,12 +4,13 @@
 import { mountChild } from './renderer/mount-child.ts'
 import type { MountedChild } from './renderer/mounted-child.ts'
 import type { ComponentResult } from '@/jsx/index.ts'
+import type { PlainObject } from '@/shared/types.ts'
 
 /**
  * 宿主环境需要提供的渲染原语集合。
  */
 export interface RendererOptions<
-  HostNode extends object,
+  HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
 > {
@@ -39,10 +40,7 @@ export type RootRenderFunction<HostElement> = (
 ) => void
 
 /** 渲染器工厂返回值，包含渲染与清理能力。 */
-export interface Renderer<
-  HostNode extends object,
-  HostElement extends HostNode,
-> {
+export interface Renderer<HostNode, HostElement extends HostNode> {
   /** 将 virtualNode 子树渲染到指定容器中。 */
   render: RootRenderFunction<HostElement>
   /** 清空容器内容并触发宿主层清理。 */
@@ -55,17 +53,17 @@ export interface Renderer<
  * 创建通用渲染器，通过宿主环境提供的原语完成组件与元素挂载。
  */
 export function createRenderer<
-  HostNode extends object,
+  HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
 ): Renderer<HostNode, HostElement> {
   const { clear } = options
-  const mountedContainers = new WeakMap<object, MountedChild<HostNode>>()
+  const mountedContainers = new WeakMap<PlainObject, MountedChild<HostNode>>()
 
-  function toContainerKey(container: HostElement): object {
-    return container as unknown as object
+  function toContainerKey(container: HostElement): PlainObject {
+    return container as unknown as PlainObject
   }
 
   function teardownContainer(container: HostElement): void {

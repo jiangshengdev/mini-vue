@@ -10,7 +10,7 @@ import type {
 import { ReactiveEffect } from '@/reactivity/effect.ts'
 
 interface ComponentInstance<
-  HostNode extends object,
+  HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
   T extends ComponentType,
@@ -28,7 +28,7 @@ interface ComponentInstance<
  * 执行函数组件并将返回的子树继续挂载到容器。
  */
 export function mountComponent<
-  HostNode extends object,
+  HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
   T extends ComponentType,
@@ -80,7 +80,7 @@ function resolveComponentProps<T extends ComponentType>(
 }
 
 function createComponentInstance<
-  HostNode extends object,
+  HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
   T extends ComponentType,
@@ -126,7 +126,7 @@ function createComponentInstance<
 }
 
 function performInitialRender<
-  HostNode extends object,
+  HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
   T extends ComponentType,
@@ -143,7 +143,7 @@ function performInitialRender<
 }
 
 function rerenderComponent<
-  HostNode extends object,
+  HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
   T extends ComponentType,
@@ -158,7 +158,7 @@ function rerenderComponent<
 }
 
 function teardownMountedSubtree<
-  HostNode extends object,
+  HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
   T extends ComponentType,
@@ -172,7 +172,7 @@ function teardownMountedSubtree<
 }
 
 function mountLatestSubtree<
-  HostNode extends object,
+  HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
   T extends ComponentType,
@@ -186,7 +186,7 @@ function mountLatestSubtree<
 }
 
 function teardownComponentInstance<
-  HostNode extends object,
+  HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
   T extends ComponentType,
@@ -206,7 +206,7 @@ function teardownComponentInstance<
 }
 
 function attachInstanceToVirtualNode<
-  HostNode extends object,
+  HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
   T extends ComponentType,

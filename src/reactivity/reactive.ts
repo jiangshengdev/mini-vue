@@ -3,6 +3,7 @@
  */
 import { mutableHandlers } from './internals/base-handlers.ts'
 import { isObject, isPlainObject } from '@/shared/utils.ts'
+import type { PlainObject } from '@/shared/types.ts'
 
 /**
  * 封装原对象与代理实例之间的双向缓存。
@@ -11,25 +12,17 @@ class ReactiveCache {
   /**
    * 缓存原始对象到代理对象的映射，便于复用同一 Proxy。
    */
-  private readonly rawToReactive = new WeakMap<
-    Record<PropertyKey, unknown>,
-    Record<PropertyKey, unknown>
-  >()
+  private readonly rawToReactive = new WeakMap<PlainObject, PlainObject>()
 
   /**
    * 缓存代理对象到原始对象的映射，支持反查判定。
    */
-  private readonly reactiveToRaw = new WeakMap<
-    Record<PropertyKey, unknown>,
-    Record<PropertyKey, unknown>
-  >()
+  private readonly reactiveToRaw = new WeakMap<PlainObject, PlainObject>()
 
   /**
    * 查找目标是否已被代理，避免重复创建 Proxy 实例。
    */
-  lookupProxy(
-    target: Record<PropertyKey, unknown>,
-  ): Record<PropertyKey, unknown> | undefined {
+  lookupProxy(target: PlainObject): PlainObject | undefined {
     if (this.reactiveToRaw.has(target)) {
       return target
     }
@@ -40,7 +33,7 @@ class ReactiveCache {
   /**
    * 为给定对象创建新的响应式代理，并记录双向映射。
    */
-  create(target: Record<PropertyKey, unknown>): Record<PropertyKey, unknown> {
+  create(target: PlainObject): PlainObject {
     const proxy = new Proxy(target, mutableHandlers)
 
     this.rawToReactive.set(target, proxy)
@@ -52,7 +45,7 @@ class ReactiveCache {
   /**
    * 判断传入对象是否为缓存中的响应式 Proxy。
    */
-  isReactive(target: Record<PropertyKey, unknown>): boolean {
+  isReactive(target: PlainObject): boolean {
     return this.reactiveToRaw.has(target)
   }
 }
@@ -91,9 +84,7 @@ export function reactive(target: unknown): unknown {
 /**
  * 判断给定值是否为 reactive 生成的 Proxy。
  */
-export function isReactive(
-  target: unknown,
-): target is Record<PropertyKey, unknown> {
+export function isReactive(target: unknown): target is PlainObject {
   if (!isObject(target)) {
     return false
   }

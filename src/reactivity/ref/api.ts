@@ -3,6 +3,7 @@ import { ObjectRefImpl, RefImpl } from './impl.ts'
 import type { Ref } from './types.ts'
 import { refFlag } from './types.ts'
 import { isObject } from '@/shared/utils.ts'
+import type { PlainObject } from '@/shared/types.ts'
 
 /**
  * 将任意值转换为 Ref，若已经是 Ref 则原样返回。
@@ -39,10 +40,10 @@ export function unref<T>(value: T | Ref<T>): T {
 /**
  * 针对对象的指定属性创建 Ref，复用已有 Ref 或包装成 getter/setter。
  */
-export function toRef<
-  T extends Record<PropertyKey, unknown>,
-  K extends keyof T,
->(target: T, key: K): Ref<T[K]> {
+export function toRef<T extends PlainObject, K extends keyof T>(
+  target: T,
+  key: K,
+): Ref<T[K]> {
   const existing = target[key]
 
   /* 属性已是 Ref 时直接复用，避免丢失响应式关系。 */

@@ -7,7 +7,7 @@ import type { VirtualNode } from '@/jsx/index.ts'
  * 创建宿主元素并同步 props 与 children。
  */
 export function mountElement<
-  HostNode extends object,
+  HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
 >(

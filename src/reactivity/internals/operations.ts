@@ -1,5 +1,6 @@
 import type { DependencyBucket } from '../shared/types.ts'
 import { trackEffect, triggerEffects } from './dep-utils.ts'
+import type { PlainObject } from '@/shared/types.ts'
 
 /**
  * 集中管理对象属性与副作用之间的依赖关系。
@@ -9,14 +10,14 @@ class DepRegistry {
    * 使用 WeakMap 建立目标对象到属性依赖集合的索引结构。
    */
   private readonly targetMap = new WeakMap<
-    Record<PropertyKey, unknown>,
+    PlainObject,
     Map<PropertyKey, DependencyBucket>
   >()
 
   /**
    * 把当前活跃副作用加入目标字段的依赖集合。
    */
-  track(target: Record<PropertyKey, unknown>, key: PropertyKey): void {
+  track(target: PlainObject, key: PropertyKey): void {
     /* 获取或创建目标字段对应的依赖集合 */
     const dep = this.getOrCreateDep(target, key)
 
@@ -26,7 +27,7 @@ class DepRegistry {
   /**
    * 触发指定字段的依赖集合，逐个执行对应副作用。
    */
-  trigger(target: Record<PropertyKey, unknown>, key: PropertyKey): void {
+  trigger(target: PlainObject, key: PropertyKey): void {
     /* 若当前字段未建立依赖集合，则无需继续 */
     const dep = this.findDep(target, key)
 
@@ -41,7 +42,7 @@ class DepRegistry {
    * 确保目标字段具备依赖集合，不存在时创建新集合。
    */
   private getOrCreateDep(
-    target: Record<PropertyKey, unknown>,
+    target: PlainObject,
     key: PropertyKey,
   ): DependencyBucket {
     /* 读取或初始化目标对象的依赖映射表 */
@@ -67,7 +68,7 @@ class DepRegistry {
    * 读取已存在的依赖集合，不创建新条目。
    */
   private findDep(
-    target: Record<PropertyKey, unknown>,
+    target: PlainObject,
     key: PropertyKey,
   ): DependencyBucket | undefined {
     return this.targetMap.get(target)?.get(key)
@@ -76,16 +77,10 @@ class DepRegistry {
 
 const registry = new DepRegistry()
 
-export function track(
-  target: Record<PropertyKey, unknown>,
-  key: PropertyKey,
-): void {
+export function track(target: PlainObject, key: PropertyKey): void {
   registry.track(target, key)
 }
 
-export function trigger(
-  target: Record<PropertyKey, unknown>,
-  key: PropertyKey,
-): void {
+export function trigger(target: PlainObject, key: PropertyKey): void {
   registry.trigger(target, key)
 }

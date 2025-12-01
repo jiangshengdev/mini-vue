@@ -4,9 +4,9 @@ import type { DependencyBucket } from '../shared/types.ts'
 import type { Ref } from './types.ts'
 import { refFlag } from './types.ts'
 
-/** computed getter 负责在依赖图中派生出最终结果。 */
+/** `computed` getter 负责在依赖图中派生出最终结果。 */
 export type ComputedGetter<T> = () => T
-/** computed setter 在可写场景下接收外部写入值。 */
+/** `computed` setter 在可写场景下接收外部写入值。 */
 export type ComputedSetter<T> = (value: T) => void
 
 /**
@@ -24,7 +24,7 @@ const readonlyComputedError =
   '当前 computed 为只读，若需要写入请传入 { get, set } 形式的配置'
 
 /**
- * computed 的底层实现，通过惰性求值与脏标记保持派生状态最新。
+ * `computed` 的底层实现，通过惰性求值与脏标记保持派生状态最新。
  */
 class ComputedRefImpl<T> implements Ref<T> {
   readonly dep: DependencyBucket = new Set()

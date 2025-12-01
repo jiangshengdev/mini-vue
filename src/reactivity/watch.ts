@@ -109,15 +109,21 @@ function createGetter<T>(source: WatchSource<T>, deep: boolean): () => T {
   }
 
   if (isRef(source)) {
-    return () => source.value
+    return () => {
+      return source.value
+    }
   }
 
   if (isReactive(source)) {
     if (deep) {
-      return () => traverse(source) as T
+      return () => {
+        return traverse(source) as T
+      }
     }
 
-    return () => source as T
+    return () => {
+      return source as T
+    }
   }
 
   return () => {

@@ -5,11 +5,17 @@ export type { ElementRef } from '@/runtime-dom/index.ts'
 export {
   reactive,
   effect,
+  computed,
   ref,
   isRef,
   unref,
   toRef,
 } from './reactivity/index.ts'
 export type { Ref } from './reactivity/index.ts'
+export type {
+  ComputedGetter,
+  ComputedSetter,
+  WritableComputedOptions,
+} from './reactivity/index.ts'
 export { createApp, render } from './runtime-dom/index.ts'
 export type { ComponentType } from './jsx/index.ts'

@@ -3,5 +3,10 @@
  */
 export { effect } from './effect.ts'
 export { reactive } from './reactive.ts'
-export { ref, isRef, unref, toRef } from './ref/index.ts'
+export { computed, ref, isRef, unref, toRef } from './ref/index.ts'
 export type { Ref } from './ref/index.ts'
+export type {
+  ComputedGetter,
+  ComputedSetter,
+  WritableComputedOptions,
+} from './ref/index.ts'

@@ -162,9 +162,7 @@ function teardownMountedSubtree<
   HostElement extends HostNode,
   HostFragment extends HostNode,
   T extends ComponentType,
->(
-  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
-): void {
+>(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): void {
   if (!instance.mountedChild) {
     return
   }
@@ -192,9 +190,7 @@ function teardownComponentInstance<
   HostElement extends HostNode,
   HostFragment extends HostNode,
   T extends ComponentType,
->(
-  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
-): void {
+>(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): void {
   teardownMountedSubtree(instance)
   instance.effect.stop()
 

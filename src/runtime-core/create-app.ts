@@ -1,6 +1,6 @@
 import type { RootRenderFunction } from './renderer.ts'
-import { createVirtualNode } from '@/jsx/index.ts'
 import type { ComponentType, ElementProps } from '@/jsx/index.ts'
+import { createVirtualNode } from '@/jsx/index.ts'
 
 /**
  * 宿主平台注入的渲染配置，提供渲染与清理能力。
@@ -76,9 +76,7 @@ function unmountApp<HostElement>(state: AppState<HostElement>): void {
   state.container = undefined
 }
 
-function createRootVirtualNode<HostElement>(
-  state: AppState<HostElement>,
-) {
+function createRootVirtualNode<HostElement>(state: AppState<HostElement>) {
   const rawProps = state.rootProps
     ? ({ ...state.rootProps } as ElementProps<ComponentType>)
     : undefined

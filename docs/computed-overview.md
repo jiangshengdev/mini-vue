@@ -6,7 +6,7 @@
 
 1. **依赖容器 (`DependencyRegistry`)**：`src/reactivity/internals/operations.ts` 通过 `WeakMap<object, Map<key, Set<effect>>>` 记录对象属性到副作用集合的映射，`track()` 与 `trigger()` 是所有依赖收集/触发的入口。
 2. **副作用栈 (`effectStack`)**：`internals/effect-stack.ts` 维护当前激活的 `ReactiveEffect`，嵌套调用时始终以栈顶元素作为依赖收集的目标。
-3. **依赖算法 (`dep-utils.ts`)**：`trackEffect()` 将当前 effect 放入 `DependencyBucket`，并让 effect 反向记录该 bucket，`triggerEffects()` 则复制快照后按顺序调度，确保触发过程中集合稳定且可挂调度器。
+3. **依赖算法 (`dependency-utils.ts`)**：`trackEffect()` 将当前 effect 放入 `DependencyBucket`，并让 effect 反向记录该 bucket，`triggerEffects()` 则复制快照后按顺序调度，确保触发过程中集合稳定且可挂调度器。
 
 ## 2. `reactive()` 如何承上
 

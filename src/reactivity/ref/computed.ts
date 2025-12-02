@@ -1,5 +1,5 @@
 import { ReactiveEffect } from '../effect.ts'
-import { trackEffect, triggerEffects } from '../internals/dep-utils.ts'
+import { trackEffect, triggerEffects } from '../internals/dependency-utils.ts'
 import type { DependencyBucket } from '../shared/types.ts'
 import type { Ref } from './types.ts'
 import { refFlag } from './types.ts'

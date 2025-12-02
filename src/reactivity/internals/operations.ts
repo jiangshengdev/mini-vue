@@ -4,7 +4,7 @@ import {
   type TriggerOpType,
   triggerOpTypes,
 } from '../shared/constants.ts'
-import { trackEffect, triggerEffects } from './dep-utils.ts'
+import { trackEffect, triggerEffects } from './dependency-utils.ts'
 import { isArrayIndex } from '@/shared/utils.ts'
 
 /**

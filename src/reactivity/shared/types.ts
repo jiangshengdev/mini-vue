@@ -1,3 +1,5 @@
+import type { PlainObject } from '@/shared/types.ts'
+
 /**
  * 描述 effect 对应的外部可用接口。
  */
@@ -53,3 +55,5 @@ export type EffectScheduler = (job: () => void) => void
 export interface EffectOptions {
   scheduler?: EffectScheduler
 }
+
+export type ReactiveTarget = PlainObject | unknown[]

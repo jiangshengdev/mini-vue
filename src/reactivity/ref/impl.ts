@@ -121,7 +121,11 @@ export class ObjectRefImpl<T extends PlainObject, K extends keyof T>
  * `maybeReactiveValue` 根据值类型决定是否递归包裹成响应式对象。
  */
 function maybeReactiveValue<T>(value: T): T {
-  /* 仅针对普通对象递归创建响应式代理，其他对象原样返回。 */
+  /* 仅针对普通对象或数组递归创建响应式代理，其他对象原样返回。 */
+  if (Array.isArray(value)) {
+    return reactive(value) as T
+  }
+
   if (isPlainObject(value)) {
     return reactive(value as PlainObject) as T
   }

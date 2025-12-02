@@ -51,12 +51,25 @@ describe('reactive', () => {
     expect(reactive(value)).toBe(value)
   })
 
-  it('数组输入会给出明确错误提示', () => {
-    const array: unknown = []
+  it('数组输入会被成功代理', () => {
+    const raw: number[] = [0, 1]
+    const proxy = reactive(raw)
 
-    expect(() => {
-      return reactive(array)
-    }).toThrowError(new TypeError('reactive 目前仅支持普通对象（不含数组）'))
+    expect(proxy).not.toBe(raw)
+    expect(proxy[0]).toBe(0)
+
+    proxy[1] = 5
+    expect(raw[1]).toBe(5)
+  })
+
+  it('嵌套数组元素会懒加载代理', () => {
+    const raw = [{ count: 1 }]
+    const proxy = reactive(raw) as Array<{ count: number }>
+
+    expect(proxy[0].count).toBe(1)
+
+    proxy[0].count = 2
+    expect(raw[0].count).toBe(2)
   })
 
   it('非普通内建对象会报错', () => {
@@ -86,7 +99,7 @@ describe('reactive', () => {
 
       expect(() => {
         return reactive(value)
-      }).toThrowError(new TypeError('reactive 目前仅支持普通对象（不含数组）'))
+      }).toThrowError(new TypeError('reactive 目前仅支持普通对象或数组'))
     }
   })
 })

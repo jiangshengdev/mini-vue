@@ -255,4 +255,88 @@ describe('effect', () => {
     expect(runCount).toBe(2)
     expect(jobs.length).toBe(0)
   })
+
+  it('删除属性会触发相关 effect', () => {
+    const state = reactive<Partial<Record<string, number>>>({ foo: 1 })
+    let runCount = 0
+
+    effect(() => {
+      runCount += 1
+      void state.foo
+    })
+
+    expect(runCount).toBe(1)
+
+    delete state.foo
+    expect(runCount).toBe(2)
+  })
+
+  it('Object.keys 会追踪对象结构变化', () => {
+    const state = reactive<Partial<Record<string, number>>>({ foo: 1 })
+    let keys: string[] = []
+
+    effect(() => {
+      keys = Object.keys(state)
+    })
+
+    expect(keys).toEqual(['foo'])
+
+    state.bar = 2
+    expect(keys).toEqual(['foo', 'bar'])
+
+    delete state.foo
+    expect(keys).toEqual(['bar'])
+  })
+
+  it('in 操作符同样可建立依赖', () => {
+    const state = reactive<Partial<Record<string, number>>>({})
+    let hasFoo = false
+
+    effect(() => {
+      hasFoo = 'foo' in state
+    })
+
+    expect(hasFoo).toBe(false)
+
+    state.foo = 1
+    expect(hasFoo).toBe(true)
+
+    delete state.foo
+    expect(hasFoo).toBe(false)
+  })
+
+  it('数组索引与长度变化都会触发 effect', () => {
+    const list: number[] = reactive([])
+    let length = -1
+    let first = -1
+
+    effect(() => {
+      length = list.length
+    })
+
+    effect(() => {
+      first = list[0] ?? -1
+    })
+
+    expect(length).toBe(0)
+    expect(first).toBe(-1)
+
+    list.push(10)
+    expect(length).toBe(1)
+    expect(first).toBe(10)
+  })
+
+  it('缩短数组长度会触发被截断索引的依赖', () => {
+    const list: number[] = reactive([1, 2, 3])
+    let third = 0
+
+    effect(() => {
+      third = list[2] ?? -1
+    })
+
+    expect(third).toBe(3)
+
+    list.length = 2
+    expect(third).toBe(-1)
+  })
 })

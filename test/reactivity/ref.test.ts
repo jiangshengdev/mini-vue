@@ -33,6 +33,20 @@ describe('ref', () => {
     expect(dummy).toBe(2)
   })
 
+  it('数组值在 ref 中同样保持响应式', () => {
+    const list = ref<number[]>([])
+    let length = -1
+
+    effect(() => {
+      length = list.value.length
+    })
+
+    expect(length).toBe(0)
+
+    list.value.push(1)
+    expect(length).toBe(1)
+  })
+
   it('isRef/unref 辅助函数', () => {
     const numberRef = ref(1)
 

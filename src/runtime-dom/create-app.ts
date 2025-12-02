@@ -146,7 +146,7 @@ export function createApp(
  */
 function ensureDomHmrLifecycle(state: DomAppState): void {
   /* 仅在 Vite Dev 环境下存在 `import.meta.hot`。 */
-  const hot = import.meta.hot
+  const { hot } = import.meta
 
   if (!hot) {
     return

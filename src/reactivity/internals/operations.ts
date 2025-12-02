@@ -1,6 +1,11 @@
-import type { DependencyBucket } from '../shared/types.ts'
+import type { DependencyBucket, ReactiveTarget } from '../shared/types.ts'
+import {
+  iterateKey,
+  type TriggerOpType,
+  triggerOpTypes,
+} from '../shared/constants.ts'
 import { trackEffect, triggerEffects } from './dep-utils.ts'
-import type { PlainObject } from '@/shared/types.ts'
+import { isIntegerKey } from '@/shared/utils.ts'
 
 /**
  * 集中管理对象属性与副作用之间的依赖关系。
@@ -10,14 +15,14 @@ class DepRegistry {
    * 使用 WeakMap 建立目标对象到属性依赖集合的索引结构。
    */
   private readonly targetMap = new WeakMap<
-    PlainObject,
+    ReactiveTarget,
     Map<PropertyKey, DependencyBucket>
   >()
 
   /**
    * 把当前活跃副作用加入目标字段的依赖集合。
    */
-  track(target: PlainObject, key: PropertyKey): void {
+  track(target: ReactiveTarget, key: PropertyKey): void {
     /* 获取或创建目标字段对应的依赖集合 */
     const dep = this.getOrCreateDep(target, key)
 
@@ -27,22 +32,74 @@ class DepRegistry {
   /**
    * 触发指定字段的依赖集合，逐个执行对应副作用。
    */
-  trigger(target: PlainObject, key: PropertyKey): void {
-    /* 若当前字段未建立依赖集合，则无需继续 */
-    const dep = this.findDep(target, key)
+  trigger(
+    target: ReactiveTarget,
+    key: PropertyKey,
+    type: TriggerOpType,
+    newValue?: unknown,
+  ): void {
+    const depsMap = this.targetMap.get(target)
 
-    if (!dep) {
+    if (!depsMap) {
       return
     }
 
-    triggerEffects(dep)
+    const depsToRun = new Set<DependencyBucket>()
+
+    const addDep = (dep?: DependencyBucket) => {
+      if (!dep) {
+        return
+      }
+
+      depsToRun.add(dep)
+    }
+
+    addDep(depsMap.get(key))
+
+    if (type === triggerOpTypes.add || type === triggerOpTypes.delete) {
+      addDep(depsMap.get(iterateKey))
+    }
+
+    if (Array.isArray(target)) {
+      if (type === triggerOpTypes.add && isIntegerKey(key)) {
+        addDep(depsMap.get('length'))
+      }
+
+      if (key === 'length') {
+        for (const [depKey, dep] of depsMap.entries()) {
+          if (depKey === 'length') {
+            addDep(dep)
+
+            continue
+          }
+
+          if (
+            isIntegerKey(depKey) &&
+            typeof newValue === 'number' &&
+            Number(depKey) >= newValue
+          ) {
+            addDep(dep)
+          }
+        }
+
+        addDep(depsMap.get(iterateKey))
+      }
+    }
+
+    if (depsToRun.size === 0) {
+      return
+    }
+
+    for (const dep of depsToRun) {
+      triggerEffects(dep)
+    }
   }
 
   /**
    * 确保目标字段具备依赖集合，不存在时创建新集合。
    */
   private getOrCreateDep(
-    target: PlainObject,
+    target: ReactiveTarget,
     key: PropertyKey,
   ): DependencyBucket {
     /* 读取或初始化目标对象的依赖映射表 */
@@ -63,24 +120,19 @@ class DepRegistry {
 
     return dep
   }
-
-  /**
-   * 读取已存在的依赖集合，不创建新条目。
-   */
-  private findDep(
-    target: PlainObject,
-    key: PropertyKey,
-  ): DependencyBucket | undefined {
-    return this.targetMap.get(target)?.get(key)
-  }
 }
 
 const registry = new DepRegistry()
 
-export function track(target: PlainObject, key: PropertyKey): void {
+export function track(target: ReactiveTarget, key: PropertyKey): void {
   registry.track(target, key)
 }
 
-export function trigger(target: PlainObject, key: PropertyKey): void {
-  registry.trigger(target, key)
+export function trigger(
+  target: ReactiveTarget,
+  key: PropertyKey,
+  type: TriggerOpType,
+  newValue?: unknown,
+): void {
+  registry.trigger(target, key, type, newValue)
 }

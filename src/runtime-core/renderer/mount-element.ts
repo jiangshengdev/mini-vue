@@ -59,7 +59,7 @@ function resolveElementRefBinding<HostElement>(
   }
 
   if (isRef<HostElement | undefined>(candidate)) {
-    return candidate as Ref<HostElement | undefined>
+    return candidate
   }
 
   return undefined

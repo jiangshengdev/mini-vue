@@ -1,12 +1,11 @@
 # src/reactivity/ref 代码审核
 
-## 1. ref([]) 被 convert 误用 reactive 导致初始化失败（待修复）
+## 1. ref([]) 现已依赖 reactive 的数组支持（已修复）
 
-- 位置：`src/reactivity/ref/impl.ts:70-82`
-- 问题：`convert` 对所有对象统一调用 `reactive`。但当前 `reactive` 明确抛出 `TypeError('reactive 目前仅支持普通对象（不含数组）')`，因此 `ref([])`、`ref(new Date())` 等场景会在构造阶段直接失败。
-- 影响：常见的“列表状态用 ref([])”场景完全不可用，即便我们只想替换整个数组也会被阻止，阻碍实际 Demo 与测试编写。
-- 建议：在 `convert` 里跳过数组（例如 `Array.isArray` 分支直接返回原值），或扩展 `reactive` 新增数组支持后再统一处理。短期可先行兜底，确保 `ref([])` 至少能工作。
-- 测试建议：补上 `ref([])` 的回归测试，覆盖初始化、整体替换与 `isRef` 断言，锁定后续改动不会再次触发 `reactive` 的数组限制。
+- 位置：`src/reactivity/reactive.ts`、`src/reactivity/internals/base-handlers.ts`
+- 更新：`reactive` 现可代理普通对象与数组，并在 handler 中补齐 `deleteProperty`/`ownKeys`/`has` 与数组专用触发逻辑，`ref([])` 不再抛错。
+- 影响：常见的列表场景可以直接通过 `ref([])` 或 `reactive([])` 建立响应式，`convert` 无需额外分支即可复用统一实现。
+- 测试：`test/reactivity/ref.test.ts` 新增 “数组值在 ref 中同样保持响应式” 用例，覆盖长度追踪与 push 行为，确保回归风险被锁定。
 
 ## 2. computed 默认只读，支持通过 setter 扩展写入
 

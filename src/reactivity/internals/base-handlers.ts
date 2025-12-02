@@ -35,6 +35,7 @@ const mutableSet: ProxyHandler<ReactiveTarget>['set'] = (
   value,
   receiver,
 ) => {
+  /* 数组的新增与修改需要依赖索引判断，普通对象则通过 hasOwn 区分逻辑分支。 */
   const targetIsArray = Array.isArray(target)
   const keyIsArrayIndex = isArrayIndex(key)
   const hadKey =
@@ -47,10 +48,12 @@ const mutableSet: ProxyHandler<ReactiveTarget>['set'] = (
   /* 调用 Reflect 完成赋值，确保符合原生语义 */
   const wasApplied = Reflect.set(target, key, value, receiver)
 
+  /* 赋值可能因为只读属性或代理限制而失败，此时无需触发依赖。 */
   if (!wasApplied) {
     return false
   }
 
+  /* 除首写场景外保持 set 逻辑，新增字段统一触发 add 依赖。 */
   if (!hadKey) {
     trigger(target, key, triggerOpTypes.add, value)
 
@@ -101,6 +104,7 @@ const mutableOwnKeys: ProxyHandler<ReactiveTarget>['ownKeys'] = (target) => {
   /* 数组结构依赖 length，普通对象使用 iterateDependencyKey 作为统一标识。 */
   const key = Array.isArray(target) ? 'length' : iterateDependencyKey
 
+  /* 遍历行为会关注集合结构是否变化，需要记录相应依赖。 */
   track(target, key)
 
   return Reflect.ownKeys(target)

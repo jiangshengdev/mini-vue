@@ -1,57 +1,39 @@
-# mini-vue 响应式与 computed 速览
+# Computed 专用概览
 
-> mini-vue 为教学用途的伪 Vue 实现，以下内容基于 `src/reactivity/*` 与 `src/reactivity/ref/computed.ts` 的源码梳理。
+> 仅聚焦 `src/reactivity/ref/computed.ts` 中 `ComputedRefImpl` 的行为，说明 computed 自身如何维护派生状态。
 
-## 1. 响应式骨架
+## 设计目标
 
-1. **依赖容器 (`DependencyRegistry`)**：`src/reactivity/internals/operations.ts` 通过 `WeakMap<object, Map<key, Set<effect>>>` 记录对象属性到副作用集合的映射，`track()` 与 `trigger()` 是所有依赖收集/触发的入口。
-2. **副作用栈 (`effectStack`)**：`internals/effect-stack.ts` 维护当前激活的 `ReactiveEffect`，嵌套调用时始终以栈顶元素作为依赖收集的目标。
-3. **依赖算法 (`dependency-utils.ts`)**：`trackEffect()` 将当前 effect 放入 `DependencyBucket`，并让 effect 反向记录该 bucket，`triggerEffects()` 则复制快照后按顺序调度，确保触发过程中集合稳定且可挂调度器。
+- **惰性求值**：只有访问 `.value` 时才运行 getter，避免无谓计算。
+- **脏标记刷新**：依赖变动后不会立刻执行 getter，而是把 computed 标记为脏，等下次读取时再重新求值。
+- **Ref 语义**：computed 本质上是携带 `dependencyBucket` 的 Ref，对外暴露统一的 `.value` 接口供 effect 或组件追踪。
 
-## 2. `reactive()` 如何承上
+## 核心结构
 
-- `reactive.ts` 仅接受普通对象，借助 `ReactiveCache` 保证“同一原对象 -> 同一 Proxy”，从而维持依赖一致性。
-- `mutableHandlers.get()` 在每次取值时 `track(target, key)`，并对嵌套对象进行惰性 `reactive()` 包装，避免初始化时深层遍历。
-- `mutableHandlers.set()` 借助 `Object.is` 判断新旧值，只在真实变更时 `trigger(target, key)`，将触发压力控制在必要场景。
+- `dependencyBucket`：收集所有读取 `.value` 的外层 effect，脏标记触发时通过 `triggerEffects()` 通知这些订阅者。
+- `effect`：内部 `ReactiveEffect` 只负责执行 getter，但不会自动收集下游依赖；它的调度器只做一件事——调用 `markDirty()`。
+- `needsRecompute` 与 `cachedValue`：组成最小缓存系统，当标记为脏时才清空缓存，下一次读取才会重新赋值。
 
-## 3. `ReactiveEffect` 如何启下
+## 惰性读取流程
 
-- `effect.ts` 将副作用函数包装进类，负责：
-  - `run()`：入栈、清空旧依赖、执行用户函数、出栈。
-  - `stop()`：标记失活并清理所有 `DependencyBucket` 以及已注册的清理任务。
-  - `registerCleanup()`：父 effect 在调用 `effect()` 时会把子 effect 的 `stop()` 注册进自己的清理序列，实现嵌套生命周期传递。
-- `effect()` API 会立即执行一次 `run()`，完成首轮依赖收集；若用户传入 `scheduler`，触发时将生成 `job` 交给调度器延迟或批处理执行。
+1. 访问 `.value` 时先执行 `trackEffect(dependencyBucket)`，让调用者与当前 computed 建立依赖。
+2. 如果 `needsRecompute` 为真，运行内部 effect、缓存结果并把脏标记重置为假。
+3. 返回 `cachedValue`，确保多次读取仍是同一个引用，方便依赖比较。
 
-## 4. `computed` 的“承上启下”机制
+## 只读与可写两种形态
 
-源码：`src/reactivity/ref/computed.ts`
+- 直接传入 getter 时会创建只读 computed，setter 由 `createReadonlySetter()` 抛出清晰的 `TypeError`。
+- 通过 `{ get, set }` 形式传入时，可写 computed 会把 `.value = x` 委托给自定义 setter，自主决定如何同步派生状态。
+- 两种形态共享同一套脏标记逻辑，因此即便是可写 computed，只要 getter 依赖的值变化仍会置脏并唤起订阅者。
 
-- `ComputedRefImpl` 继承 Ref 语义，核心成员：
-  - `innerValue`：缓存最近一次 getter 结果。
-  - `innerDirty`：脏标记，依赖变化时由调度器置为 `true`。
-  - `dependencyBucket`：作为 Ref 的依赖集合，供下游 effect 追踪。
-- 构造函数把 getter 封装成 `ReactiveEffect`，并注入调度器：
-  - 依赖字段变动 → 调度器执行 `markDirty()`。
-  - `markDirty()` 若已脏则跳过，否则置脏并 `triggerEffects(dependencyBucket)`，通知下游。
-- 读取 `.value`：
-  1. 调用 `trackEffect(this.dependencyBucket)`，让外层 effect 与 computed 建立依赖关系。
-  2. 若 `innerDirty` 为真，执行 `effect.run()`、缓存结果并清空脏标记。
-- 写入 `.value`：
-  - 只读场景使用 `createReadonlySetter()` 抛出 `TypeError`。
-  - 可写场景直接调用用户自定义的 `set()`，由外部决定如何同步状态。
+## 依赖传播方式
 
-## 5. 心智模型与特性
+- 上游依赖：getter 内部访问的任何响应式字段都会由内部 effect 自动追踪；变动后调度器调用 `markDirty()`。
+- 下游依赖：`markDirty()` 只负责把 `needsRecompute` 置为真，并 `triggerEffects(dependencyBucket)`，让所有读取过 `.value` 的 effect 在下次调度时重新读取。
+- 由于脏标记具备短路判断，连续多次触发在下一次读取前只会触发一次下游通知。
 
-- `reactive()` 提供“读时收集、写时触发”的最小能力，任何衍生 API（`computed`、JSX 渲染）都通过 `track/trigger` 与它连接。
-- `ReactiveEffect` 是副作用执行单元，既可直接通过 `effect()` 暴露给用户，也可作为 `computed` 内部的惰性求值引擎。
-- `computed` 既是上游依赖的消费者（内部 effect 读取原始字段），又是下游 effect 的生产者（本身携带 `dependencyBucket` 并可 `trigger`），因此可以被理解为“承上启下”的桥梁。
-- 当前实现未包含调度批次、组件级缓存等高级特性，重点在于演示响应式系统最核心的链路：**原始对象 → Proxy handler → DependencyRegistry → ReactiveEffect → Ref/Computed → 下游副作用**。
+## 使用与排错提示
 
-## 6. 与 Vue 正式版的差异提示
-
-1. 仅支持普通对象与数组，Map/Set 等仍需扩展 handler 才能使用。
-2. 缺少异步批量调度（如 Vue 的 `nextTick` 与 job 队列），默认每次触发直接进入调度器。
-3. `computed` 不区分 `value` 是否追踪于 `effect.run()` 外部，只要 `.value` 被访问就会建立依赖；实际 Vue 中还会避免嵌套追踪导致的额外依赖。
-4. JSX 渲染层采取“全量重建”策略，未实现 diff；但这与本文聚焦的响应式内核无直接冲突。
-
-> 通过以上链路，可以快速定位 mini-vue 中 computed 相关行为：上游依赖变化 → `ReactiveEffect` 调度 → 脏标记 → 下游 effect 触发，实现一个教学友好的响应式闭环。
+- 若发现 computed 永远不更新，优先确认 getter 中是否实际访问了响应式字段；只有被 track 到的依赖才会触发脏标记。
+- 在模板或 effect 中频繁读取 `.value` 不会重复计算，只要依赖未变，始终复用 `cachedValue`。
+- 可写 computed 的 setter 需要显式更新其依赖源，否则只会触发外部逻辑但不会自动刷新 getter 结果。

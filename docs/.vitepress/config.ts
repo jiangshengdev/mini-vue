@@ -13,7 +13,9 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: '首页', link: '/' },
-      { text: '响应式规划', link: '/component-reactivity-plan' },
+      { text: 'Reactive', link: '/reactive-overview' },
+      { text: 'Effect', link: '/effect-overview' },
+      { text: 'Computed', link: '/computed-overview' },
     ],
 
     sidebar: buildSidebar(),

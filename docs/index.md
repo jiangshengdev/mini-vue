@@ -8,8 +8,14 @@ hero:
   tagline: '用几十个文件复刻 Vue 3 核心，学习真实的运行机制'
   actions:
     - theme: brand
-      text: 阅读响应式规划
-      link: /component-reactivity-plan
+      text: Reactive
+      link: /reactive-overview
+    - theme: alt
+      text: Effect
+      link: /effect-overview
+    - theme: alt
+      text: Computed
+      link: /computed-overview
 
 features:
   - title: 响应式内核

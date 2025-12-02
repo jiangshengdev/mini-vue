@@ -6,6 +6,8 @@ export { isVirtualNode } from './guards.ts'
 export type {
   ComponentChildren,
   ComponentResult,
+  ComponentRenderFunction,
+  ComponentSetupResult,
   ComponentType,
   ElementProps,
   ElementType,

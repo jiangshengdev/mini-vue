@@ -25,14 +25,11 @@
    - 扩展 `mountComponent` 创建的实例，暴露 `unmount` 能力。
    - `render`/`createApp` 在卸载或替换节点时，主动调用组件实例的清理逻辑，停止 effect 并断开 DOM 引用。
 
-4. **组件本地状态托管（待实现）**
-   - 参考 Vue `setup()` 流程，为组件实例增加 `setupState`/`ctx`，保证函数体内创建的 `reactive`/`ref` 只初始化一次并与实例绑定。
-   - 把组件执行拆分为“初始化（setup）”与“渲染”两段，effect 重跑时仅调用渲染闭包，复用已建立的状态。
-   - 约定实例私有 API（对外不可见），用于在渲染期间读取 `setupState` 或注册生命周期钩子，为后续组合式能力打基础。
-   - 预计代码量：核心实现（组件实例重构 + rerender 流程）约 150~200 行，实例上下文与工具 40~80 行，demo/测试 60~80 行，总体 250~350 行；可拆分为以下子任务：
-     1. 重构 `mountComponent`，新增 `setupState`、渲染闭包与上下文管理。
-     2. 提供实例级私有 API（如 `currentInstance`），并实现 `setup` 阶段与 effect 的衔接。
-     3. 更新 demo 与 runtime-dom 测试，覆盖组件内部创建 `reactive` 的交互流程。
+4. **组件本地状态托管（已完成）**
+   - 新增 `component-instance` 模块，统一记录实例的 `setupState`/`ctx` 并暴露 `setCurrentInstance`/`getCurrentInstance` 私有 API，为后续生命周期与组合式扩展打地基。
+   - `mountComponent` 仅在 setup 阶段执行一次组件函数，若返回渲染函数则直接缓存闭包；若返回节点结果则保存到 `setupState` 并用 fallback 渲染器复用响应式读值。
+   - `ReactiveEffect` 现在只负责驱动渲染闭包，组件内部声明的 `reactive`/`ref` 会在 setup 内初始化一次并在每次 rerender 时复用。
+   - Demo 与 `runtime-dom` 组件响应式测试已改写为在组件内创建本地 state，并断言卸载后 effect 停止，覆盖 setup 托管的完整路径。
 
 5. **测试补充（已完成）**
    - 在 `test/runtime-dom` 增加用例：组件仅依赖响应式数据且无手写 `effect`，多次 state 更新应正确渲染。
@@ -41,6 +38,11 @@
 6. **（可选）细粒度优化**
    - 将“卸载-重建”替换为最小化的 `patch` 流程，减少 DOM 抖动。
    - 引入简单的更新调度（批量、微任务刷新）。
+
+## 后续考虑
+
+- 提供面向开发者的文档或调试提示：若组件在 setup 内创建本地响应式状态，应返回渲染函数以保证 effect 能复用同一份 state，可选地在 dev 环境给出 warning，降低迁移成本。
+- 借助 `currentInstance` 扩展基础生命周期/组合式 API（如 `onMounted`、实例级依赖注入），并让 `setupState` 真正被这些 API 读取与注册，打通完整的组合式体验。
 
 ## 阶段验收标准
 

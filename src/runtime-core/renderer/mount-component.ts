@@ -2,37 +2,20 @@ import type { RendererOptions } from '../renderer.ts'
 import { mountChild } from './mount-child.ts'
 import type { MountedHandle } from './mounted-handle.ts'
 import type {
+  ComponentRenderFunction,
   ComponentResult,
   ComponentType,
   ElementProps,
   VirtualNode,
 } from '@/jsx/index.ts'
+import { isVirtualNode } from '@/jsx/index.ts'
+import type { ComponentInstance } from '@/runtime-core/component-instance.ts'
+import {
+  setCurrentInstance,
+  unsetCurrentInstance,
+} from '@/runtime-core/component-instance.ts'
 import { ReactiveEffect } from '@/reactivity/effect.ts'
-
-/**
- * 组件运行期实例，封装当前 props、子树与副作用句柄。
- */
-interface ComponentInstance<
-  HostNode,
-  HostElement extends HostNode,
-  HostFragment extends HostNode,
-  T extends ComponentType,
-> {
-  /** 组件定义本身，主要用于调试或重复渲染。 */
-  readonly type: T
-  /** 当前组件挂载的宿主容器，子树会插入到此处。 */
-  readonly container: HostElement | HostFragment
-  /** Latest props 快照，供组件执行阶段读取。 */
-  readonly props: ElementProps<T>
-  /** 承载组件副作用的响应式 effect。 */
-  readonly effect: ReactiveEffect<ComponentResult>
-  /** 最近一次 render 的虚拟子树，用于二次挂载。 */
-  subTree?: ComponentResult
-  /** 子树挂载后返回的宿主节点集合。 */
-  mountedHandle?: MountedHandle<HostNode>
-  /** 附加清理任务列表（如自定义副作用）。 */
-  cleanupCallbacks: Array<() => void>
-}
+import { isPlainObject } from '@/shared/utils.ts'
 
 /**
  * 执行函数组件并将返回的子树继续挂载到容器。
@@ -49,9 +32,10 @@ export function mountComponent<
   container: HostElement | HostFragment,
 ): MountedHandle<HostNode> | undefined {
   const props = resolveComponentProps(virtualNode)
-  const instance = createComponentInstance(options, component, props, container)
+  const instance = createComponentInstance(component, props, container)
 
   attachInstanceToVirtualNode(virtualNode, instance)
+  setupComponent(instance)
 
   const mounted = performInitialRender(instance, options)
 
@@ -93,47 +77,101 @@ function createComponentInstance<
   HostFragment extends HostNode,
   T extends ComponentType,
 >(
-  options: RendererOptions<HostNode, HostElement, HostFragment>,
   component: T,
   props: ElementProps<T>,
   container: HostElement | HostFragment,
 ): ComponentInstance<HostNode, HostElement, HostFragment, T> {
-  let instance:
-    | ComponentInstance<HostNode, HostElement, HostFragment, T>
-    | undefined = undefined
-
-  /* 组件 effect 会收集依赖并在响应式变更时触发 renderJob。 */
-  const effect = new ReactiveEffect<ComponentResult>(
-    () => {
-      /* 执行组件获取最新子树并缓存，供后续重新挂载使用。 */
-      const subtree = component(props)
-
-      instance!.subTree = subtree
-
-      return subtree
-    },
-    (renderJob) => {
-      /* 调度回调负责清空旧子树并重新执行 renderJob。 */
-      rerenderComponent(instance!, options, renderJob)
-    },
-  )
-
-  const createdInstance: ComponentInstance<
-    HostNode,
-    HostElement,
-    HostFragment,
-    T
-  > = {
+  return {
     type: component,
     container,
     props,
-    effect,
+    render: () => undefined,
     cleanupCallbacks: [],
+    ctx: {},
+  }
+}
+
+/**
+ * 初始化组件，创建 setup 阶段与渲染闭包。
+ */
+function setupComponent<
+  HostNode,
+  HostElement extends HostNode,
+  HostFragment extends HostNode,
+  T extends ComponentType,
+>(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): void {
+  instance.render = createSetupRenderInvoker(instance)
+}
+
+function createSetupRenderInvoker<
+  HostNode,
+  HostElement extends HostNode,
+  HostFragment extends HostNode,
+  T extends ComponentType,
+>(
+  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
+): ComponentRenderFunction {
+  let initialized = false
+  let finalizedRender: ComponentRenderFunction | undefined
+
+  const legacyRender: ComponentRenderFunction = () =>
+    instance.type(instance.props)
+
+  return function renderWithSetup(): ComponentResult {
+    if (initialized) {
+      return finalizedRender ? finalizedRender() : legacyRender()
+    }
+
+    initialized = true
+
+    setCurrentInstance(instance)
+    const setupResult = instance.type(instance.props)
+
+    unsetCurrentInstance()
+
+    if (isRenderFunction(setupResult)) {
+      instance.render = setupResult
+      finalizedRender = setupResult
+
+      return setupResult()
+    }
+
+    recordSetupState(instance, setupResult)
+    instance.render = legacyRender
+    finalizedRender = legacyRender
+
+    return setupResult
+  }
+}
+
+function isRenderFunction(
+  value: ComponentResult | ComponentRenderFunction,
+): value is ComponentRenderFunction {
+  return typeof value === 'function'
+}
+
+function recordSetupState<
+  HostNode,
+  HostElement extends HostNode,
+  HostFragment extends HostNode,
+  T extends ComponentType,
+>(
+  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
+  setupResult: ComponentResult,
+): void {
+  if (instance.setupState) {
+    return
   }
 
-  instance = createdInstance
+  if (shouldPersistSetupState(setupResult)) {
+    instance.setupState = setupResult
+  }
+}
 
-  return createdInstance
+function shouldPersistSetupState(
+  value: unknown,
+): value is Record<string, unknown> {
+  return isPlainObject(value) && !isVirtualNode(value)
 }
 
 /**
@@ -148,12 +186,36 @@ function performInitialRender<
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
   options: RendererOptions<HostNode, HostElement, HostFragment>,
 ): MountedHandle<HostNode> | undefined {
+  instance.effect = createRenderEffect(instance, options)
   const subtree = instance.effect.run()
   const mounted = mountChild(options, subtree, instance.container)
 
   instance.mountedHandle = mounted
 
   return mounted
+}
+
+function createRenderEffect<
+  HostNode,
+  HostElement extends HostNode,
+  HostFragment extends HostNode,
+  T extends ComponentType,
+>(
+  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
+  options: RendererOptions<HostNode, HostElement, HostFragment>,
+): ReactiveEffect<ComponentResult> {
+  return new ReactiveEffect<ComponentResult>(
+    () => {
+      const subtree = instance.render()
+
+      instance.subTree = subtree
+
+      return subtree
+    },
+    (renderJob) => {
+      rerenderComponent(instance, options, renderJob)
+    },
+  )
 }
 
 /**
@@ -219,7 +281,8 @@ function teardownComponentInstance<
   T extends ComponentType,
 >(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): void {
   teardownMountedSubtree(instance)
-  instance.effect.stop()
+  instance.effect?.stop()
+  instance.effect = undefined
 
   if (instance.cleanupCallbacks.length > 0) {
     const tasks = [...instance.cleanupCallbacks]

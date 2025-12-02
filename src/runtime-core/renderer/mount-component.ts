@@ -29,12 +29,15 @@ export function mountComponent<
   virtualNode: VirtualNode<T>,
   container: HostElement | HostFragment,
 ): MountedHandle<HostNode> | undefined {
+  /* 准备实例前先规整 props，以免 setup 阶段读到旧引用。 */
   const props = resolveComponentProps(virtualNode)
   const instance = createComponentInstance(component, props, container)
 
+  /* 让 virtualNode 拥有实例引用，方便调试或测试检索。 */
   attachInstanceToVirtualNode(virtualNode, instance)
   setupComponent(instance)
 
+  /* 执行首次渲染并将子树挂载到宿主容器。 */
   const mounted = performInitialRender(instance, options)
 
   return {
@@ -51,6 +54,7 @@ export function mountComponent<
 function resolveComponentProps<T extends SetupFunctionComponent>(
   virtualNode: VirtualNode<T>,
 ): ElementProps<T> {
+  /* 克隆 props，防止函数组件在运行期写回 virtualNode。 */
   const props = (
     virtualNode.props ? { ...virtualNode.props } : {}
   ) as ElementProps<T>
@@ -79,6 +83,7 @@ function createComponentInstance<
   props: ElementProps<T>,
   container: HostElement | HostFragment,
 ): ComponentInstance<HostNode, HostElement, HostFragment, T> {
+  /* render/effect 初始为空，由 setup 与 performInitialRender 回填。 */
   return {
     type: component,
     container,
@@ -100,6 +105,7 @@ function setupComponent<
   HostFragment extends HostNode,
   T extends SetupFunctionComponent,
 >(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): void {
+  /* setup 返回的渲染闭包会成为 effect 调度的核心逻辑。 */
   instance.render = invokeSetup(instance)
 }
 
@@ -111,6 +117,7 @@ function invokeSetup<
 >(
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
 ): ComponentRenderFunction {
+  /* 替换全局 currentInstance 以便 setup 内部通过 API 访问自身。 */
   setCurrentInstance(instance)
   const render = instance.type(instance.props)
 
@@ -120,6 +127,7 @@ function invokeSetup<
     throw new TypeError('组件必须返回渲染函数以托管本地状态')
   }
 
+  /* 始终返回函数，供 effect 每次执行时拿到最新子树。 */
   return render
 }
 
@@ -135,8 +143,11 @@ function performInitialRender<
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
   options: RendererOptions<HostNode, HostElement, HostFragment>,
 ): MountedHandle<HostNode> | undefined {
+  /* 每个组件实例持有独立 effect，负责跟踪依赖并调度重渲染。 */
   instance.effect = createRenderEffect(instance, options)
+  /* 首次 run() 会同步生成子树结果。 */
   const subtree = instance.effect.run()
+  /* 子树由通用 mountChild 继续挂载到宿主容器。 */
   const mounted = mountChild(options, subtree, instance.container)
 
   instance.mountedHandle = mounted
@@ -155,6 +166,7 @@ function createRenderEffect<
 ): ReactiveEffect<ComponentResult> {
   return new ReactiveEffect<ComponentResult>(
     () => {
+      /* 每次渲染时记录最新子树，供后续挂载或复用。 */
       const subtree = instance.render()
 
       instance.subTree = subtree
@@ -162,6 +174,7 @@ function createRenderEffect<
       return subtree
     },
     (renderSchedulerJob) => {
+      /* 调度阶段需要先卸载旧子树，再执行 render 并挂载。 */
       rerenderComponent(instance, options, renderSchedulerJob)
     },
   )
@@ -199,6 +212,7 @@ function teardownMountedSubtree<
     return
   }
 
+  /* 释放宿主节点引用，旧 DOM 会被宿主实现回收。 */
   instance.mountedHandle.teardown()
   instance.mountedHandle = undefined
 }
@@ -215,6 +229,7 @@ function mountLatestSubtree<
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
   options: RendererOptions<HostNode, HostElement, HostFragment>,
 ): void {
+  /* 使用缓存的子树结果重新交给宿主挂载。 */
   const mounted = mountChild(options, instance.subTree, instance.container)
 
   instance.mountedHandle = mounted
@@ -230,10 +245,12 @@ function teardownComponentInstance<
   T extends SetupFunctionComponent,
 >(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): void {
   teardownMountedSubtree(instance)
+  /* 停止响应式副作用，阻断后续追踪与回调。 */
   instance.effect?.stop()
   instance.effect = undefined
 
   if (instance.cleanupTasks.length > 0) {
+    /* 复制任务队列，避免执行过程中新增清理项造成死循环。 */
     const tasks = [...instance.cleanupTasks]
 
     instance.cleanupTasks = []
@@ -267,5 +284,6 @@ function attachInstanceToVirtualNode<
     >
   }
 
+  /* 扩展 virtualNode 类型后写入实例引用，供外部消费。 */
   ;(virtualNode as VirtualNodeWithInstance).componentInstance = instance
 }

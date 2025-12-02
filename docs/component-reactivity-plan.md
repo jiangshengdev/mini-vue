@@ -26,7 +26,7 @@
    - `render`/`createApp` 在卸载或替换节点时，主动调用组件实例的清理逻辑，停止 effect 并断开 DOM 引用。
 
 4. **组件本地状态托管（已完成）**
-   - 新增 `component-instance` 模块，统一记录实例的 `setupState`/`ctx` 并暴露 `setCurrentInstance`/`getCurrentInstance` 私有 API，为后续生命周期与组合式扩展打地基。
+   - 新增 `component-instance` 模块，统一记录实例的 `setupState`/`setupContext` 并暴露 `setCurrentInstance`/`getCurrentInstance` 私有 API，为后续生命周期与组合式扩展打地基。
    - JSX 类型系统强制 `SetupFunctionComponent` 返回渲染闭包；运行时在 setup 阶段仅执行一次组件函数并校验结果，若未返回闭包会抛出“组件必须返回渲染函数以托管本地状态”。
    - `ReactiveEffect` 现在只负责驱动渲染闭包，组件内部声明的 `reactive`/`ref` 会在 setup 内初始化一次并在每次 rerender 时复用。
    - Demo 与 `runtime-dom` 组件响应式测试已改写为在组件内创建本地 state，并断言卸载后 effect 停止，覆盖 setup 托管的完整路径。

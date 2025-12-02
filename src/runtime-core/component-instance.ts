@@ -27,9 +27,9 @@ export interface ComponentInstance<
   effect?: ReactiveEffect<ComponentResult>
   subTree?: ComponentResult
   mountedHandle?: MountedHandle<HostNode>
-  cleanupCallbacks: Array<() => void>
+  cleanupTasks: Array<() => void>
   setupState?: PlainObject
-  ctx: PlainObject
+  setupContext: PlainObject
 }
 
 type AnyComponentInstance = ComponentInstance<

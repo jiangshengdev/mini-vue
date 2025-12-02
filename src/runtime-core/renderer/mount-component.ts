@@ -86,8 +86,8 @@ function createComponentInstance<
     render() {
       return undefined
     },
-    cleanupCallbacks: [],
-    ctx: {},
+    cleanupTasks: [],
+    setupContext: {},
   }
 }
 
@@ -161,8 +161,8 @@ function createRenderEffect<
 
       return subtree
     },
-    (renderJob) => {
-      rerenderComponent(instance, options, renderJob)
+    (renderSchedulerJob) => {
+      rerenderComponent(instance, options, renderSchedulerJob)
     },
   )
 }
@@ -178,11 +178,11 @@ function rerenderComponent<
 >(
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
   options: RendererOptions<HostNode, HostElement, HostFragment>,
-  renderJob: () => void,
+  renderSchedulerJob: () => void,
 ): void {
-  /* 依次保证 teardown → renderJob → remount 的同步顺序。 */
+  /* 依次保证 teardown → renderSchedulerJob → remount 的同步顺序。 */
   teardownMountedSubtree(instance)
-  renderJob()
+  renderSchedulerJob()
   mountLatestSubtree(instance, options)
 }
 
@@ -233,10 +233,10 @@ function teardownComponentInstance<
   instance.effect?.stop()
   instance.effect = undefined
 
-  if (instance.cleanupCallbacks.length > 0) {
-    const tasks = [...instance.cleanupCallbacks]
+  if (instance.cleanupTasks.length > 0) {
+    const tasks = [...instance.cleanupTasks]
 
-    instance.cleanupCallbacks = []
+    instance.cleanupTasks = []
 
     /* 逐一运行外部注册的清理逻辑，避免引用泄漏。 */
     for (const task of tasks) {

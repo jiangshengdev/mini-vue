@@ -13,6 +13,7 @@
 - `dependencyBucket`：收集所有读取 `.value` 的外层 effect，脏标记触发时通过 `triggerEffects()` 通知这些订阅者。
 - `effect`：内部 `ReactiveEffect` 只负责执行 getter，但不会自动收集下游依赖；它的调度器只做一件事——调用 `markDirty()`。
 - `needsRecompute` 与 `cachedValue`：组成最小缓存系统，当标记为脏时才清空缓存，下一次读取才会重新赋值。
+- `refFlag`：实现 `Ref` 接口所需的标记位，`isRef()` 可以据此识别 `ComputedRefImpl`。
 
 ## 惰性读取流程
 
@@ -23,7 +24,7 @@
 ## 只读与可写两种形态
 
 - 直接传入 getter 时会创建只读 computed，setter 由 `createReadonlySetter()` 抛出清晰的 `TypeError`。
-- 通过 `{ get, set }` 形式传入时，可写 computed 会把 `.value = x` 委托给自定义 setter，自主决定如何同步派生状态。
+- 通过 `WritableComputedOptions<T>`（`{ get, set }`）传入时，可写 computed 会把 `.value = x` 委托给自定义 setter，自主决定如何同步派生状态。
 - 两种形态共享同一套脏标记逻辑，因此即便是可写 computed，只要 getter 依赖的值变化仍会置脏并唤起订阅者。
 
 ## 依赖传播方式

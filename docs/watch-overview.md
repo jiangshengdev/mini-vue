@@ -11,21 +11,21 @@
 
 ## 核心组成
 
-- `ReactiveEffect getter`：封装底层依赖收集，并将调度交给 `runWatchJob()`，保证每次触发都能重新读取最新值。
-- `resolveDeepOption()`：推导 `deep` 最终值。getter/ref 默认浅监听，响应式对象推断为深度，普通对象遵循显式布尔值。
-- `createGetter()`：根据源类型生成真正执行的 getter；深度模式下会调用 `traverse()` 递归访问所有字段以触发依赖。
+- `runner = new ReactiveEffect(getter, scheduler)`：封装底层依赖收集，并把调度交给 `runWatchJob()`，保证依赖变动时统一走一套比较与清理流程。
+- `resolveDeepOption()`：推导 `WatchOptions.deep` 最终值。getter/ref 默认浅监听，响应式对象推断为深度，普通对象遵循显式布尔值。
+- `createGetter()`：根据 `WatchSource` 类型生成真正执行的 getter；深度模式下会调用 `traverse()` 递归访问所有字段以触发依赖。
 - `traverse()`：使用 `Set` 记录已访问节点，防止循环引用；遇到 ref 会继续向内读取其 `value`。
 
 ## 调度流程
 
 1. 创建 `ReactiveEffect`，调度器只负责调用 `runWatchJob()`，避免在依赖触发时直接执行回调。
-2. 首次进入根据 `immediate` 决定：立即执行则直接跑一轮 `runWatchJob()`；否则先 `runner.run()` 把旧值缓存起来。
+2. 首次进入根据 `immediate` 决定：立即执行则直接跑一轮 `runWatchJob()`；否则先调用 `runner.run()` 把 `oldValue` 与 `hasOldValue` 初始化。
 3. 依赖变动时，`runWatchJob()` 会：
    - 检查 effect 是否仍活跃，失活直接跳出。
    - 通过 `runner.run()` 拿到新值并重建依赖。
    - 在浅监听里使用 `Object.is` 比较，防止相同引用触发回调。
-   - 先执行上一个清理函数，再调用用户回调并传入 `onCleanup()`。
-   - 把当前值缓存到 `oldValue`，供下次比较与回调使用。
+   - 如存在 `cleanup` 先执行，再调用用户回调并传入 `onCleanup()` 注册新清理逻辑。
+   - 更新 `oldValue` 与 `hasOldValue`，供下一次比较与回调使用。
 
 ## 清理与生命周期
 

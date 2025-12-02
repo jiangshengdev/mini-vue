@@ -7,6 +7,7 @@
 - **执行载体**：`ReactiveEffect` 持有用户传入的副作用函数 `fn`，统一通过 `run()` 调度，确保所有依赖收集都发生在受控上下文中。
 - **调度入口**：构造函数允许注入 `scheduler`，当依赖触发时会优先交给调度器，便于实现批处理、节流或自定义优先级。
 - **状态记录**：内部维护 `innerActive` 与 `dependencyBuckets`，分别表示当前 effect 是否仍需追踪，以及它隶属的依赖集合，方便停用时一次性清理。
+- **清理托管**：`registerCleanup()` 将子 effect 的 `stop()` 等函数推入 `cleanupTasks`，`flushDependencies()` 执行这些任务以保持作用域一致。
 
 ## 依赖收集生命周期
 
@@ -35,7 +36,7 @@
 
 ## 与 effectStack 的协同
 
-- `effectStack` 记录当前执行链，栈顶元素即 `track()` 的目标；嵌套 effect 会形成父子关系并通过 `registerCleanup()` 自动串联生命周期。
+- `effectStack` 记录当前执行链，`effectStack.current` 始终指向 `track()` 需要的副作用；嵌套 effect 会通过 `registerCleanup()` 自动串联生命周期。
 - 由于 `ReactiveEffect.run()` 会在进入栈前清空旧依赖，因此即使 effect 内部条件分支发生变化，也能确保只保留最新一次执行时访问到的字段。
 
 ## 使用要点与风险提示

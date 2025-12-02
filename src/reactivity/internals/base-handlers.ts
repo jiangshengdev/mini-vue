@@ -36,9 +36,9 @@ const mutableSet: ProxyHandler<ReactiveTarget>['set'] = (
   receiver,
 ) => {
   const targetIsArray = Array.isArray(target)
-  const keyIsInteger = isArrayIndex(key)
+  const keyIsArrayIndex = isArrayIndex(key)
   const hadKey =
-    targetIsArray && keyIsInteger
+    targetIsArray && keyIsArrayIndex
       ? Number(key) < target.length
       : hasOwn(target, key)
 

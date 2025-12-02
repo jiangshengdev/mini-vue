@@ -1,14 +1,14 @@
 import { describe, expect, it, vi } from 'vitest'
 import { within } from '@testing-library/dom'
 import { createTestContainer } from '../setup.ts'
-import type { ComponentType } from '@/index.ts'
+import type { SetupFunctionComponent } from '@/index.ts'
 import { reactive, render } from '@/index.ts'
 
 describe('runtime-dom component reactivity', () => {
   it('组件体读取 reactive 数据时会自动重渲染', () => {
     let capturedState: { count: number } | undefined
 
-    const Counter: ComponentType = () => {
+    const Counter: SetupFunctionComponent = () => {
       const state = reactive({ count: 0 })
 
       capturedState = state
@@ -37,7 +37,7 @@ describe('runtime-dom component reactivity', () => {
     const renderSpy = vi.fn()
     let capturedState: { on: boolean } | undefined
 
-    const Toggle: ComponentType = () => {
+    const Toggle: SetupFunctionComponent = () => {
       const state = reactive({ on: false })
 
       capturedState = state
@@ -73,7 +73,7 @@ describe('runtime-dom component reactivity', () => {
     const renderSpy = vi.fn()
     let capturedState: { visible: boolean } | undefined
 
-    const Ghost: ComponentType = () => {
+    const Ghost: SetupFunctionComponent = () => {
       const state = reactive({ visible: false })
 
       capturedState = state

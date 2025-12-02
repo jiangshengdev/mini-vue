@@ -55,9 +55,10 @@ type ComponentFunction<P> = (
 ) => ComponentRenderFunction
 
 /**
- * 对外暴露的组件类型，默认 props 为通用对象。
+ * setup + render 语义的函数组件类型，默认 props 为通用对象。
  */
-export type ComponentType<P = ComponentPropsBase> = ComponentFunction<P>
+export type SetupFunctionComponent<P = ComponentPropsBase> =
+  ComponentFunction<P>
 
 /**
  * Fragment 类型定义，接收 FragmentProps 并返回一组子节点。
@@ -72,8 +73,8 @@ export type ElementType = string | ComponentConstraint | FragmentType
 /**
  * 推导给定元素类型对应的 props 形状。
  */
-type ComponentTypeProps<T> =
-  T extends ComponentType<infer P>
+type InferComponentProps<T> =
+  T extends SetupFunctionComponent<infer P>
     ? PropsWithChildren<P>
     : T extends (props: infer P) => ComponentRenderFunction
       ? P
@@ -90,7 +91,7 @@ export type ElementProps<T extends ElementType = ElementType> =
     ? FragmentProps
     : T extends string
       ? ComponentPropsBase
-      : ComponentTypeProps<T>
+      : InferComponentProps<T>
 
 /**
  * `mini-vue` 内部使用的虚拟节点结构，承载类型、属性与子节点信息。

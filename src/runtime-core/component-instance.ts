@@ -5,8 +5,8 @@ import type { MountedHandle } from './renderer/mounted-handle.ts'
 import type {
   ComponentRenderFunction,
   ComponentResult,
-  ComponentType,
   ElementProps,
+  SetupFunctionComponent,
 } from '@/jsx/index.ts'
 import type { ReactiveEffect } from '@/reactivity/effect.ts'
 import type { PlainObject } from '@/shared/types.ts'
@@ -18,7 +18,7 @@ export interface ComponentInstance<
   HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
-  T extends ComponentType,
+  T extends SetupFunctionComponent,
 > {
   readonly type: T
   readonly container: HostElement | HostFragment
@@ -36,7 +36,7 @@ type AnyComponentInstance = ComponentInstance<
   unknown,
   unknown,
   unknown,
-  ComponentType
+  SetupFunctionComponent
 >
 
 let currentInstance: AnyComponentInstance | undefined
@@ -48,7 +48,7 @@ export function setCurrentInstance<
   HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
-  T extends ComponentType,
+  T extends SetupFunctionComponent,
 >(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): void {
   currentInstance = instance as AnyComponentInstance
 }

@@ -1,28 +1,34 @@
 import typescriptLogo from './typescript.svg'
 import viteLogo from '/vite.svg'
 import { Counter } from './counter.tsx'
-import type { ComponentType } from '@/index.ts'
+import type { SetupFunctionComponent } from '@/index.ts'
 
-export const App: ComponentType = () => {
-  return () => (
-    <div>
-      <a href="https://vite.dev" target="_blank" rel="noreferrer">
-        <img src={viteLogo} class="logo" alt="Vite logo" />
-      </a>
-      <a
-        href="https://www.typescriptlang.org/"
-        target="_blank"
-        rel="noreferrer"
-      >
-        <img src={typescriptLogo} class="logo vanilla" alt="TypeScript logo" />
-      </a>
-      <h1>Vite + TypeScript + JSX</h1>
-      <div class="card">
-        <Counter />
+export const App: SetupFunctionComponent = () => {
+  return () => {
+    return (
+      <div>
+        <a href="https://vite.dev" target="_blank" rel="noreferrer">
+          <img src={viteLogo} class="logo" alt="Vite logo" />
+        </a>
+        <a
+          href="https://www.typescriptlang.org/"
+          target="_blank"
+          rel="noreferrer"
+        >
+          <img
+            src={typescriptLogo}
+            class="logo vanilla"
+            alt="TypeScript logo"
+          />
+        </a>
+        <h1>Vite + TypeScript + JSX</h1>
+        <div class="card">
+          <Counter />
+        </div>
+        <p class="read-the-docs">
+          Click on the Vite and TypeScript logos to learn more
+        </p>
       </div>
-      <p class="read-the-docs">
-        Click on the Vite and TypeScript logos to learn more
-      </p>
-    </div>
-  )
+    )
+  }
 }

@@ -19,4 +19,4 @@ export type {
   WritableComputedOptions,
 } from './reactivity/index.ts'
 export { createApp, render } from './runtime-dom/index.ts'
-export type { ComponentType } from './jsx/index.ts'
+export type { SetupFunctionComponent } from './jsx/index.ts'

@@ -1,7 +1,7 @@
-import type { ComponentType } from '@/index.ts'
+import type { SetupFunctionComponent } from '@/index.ts'
 import { reactive } from '@/index.ts'
 
-export const Counter: ComponentType = () => {
+export const Counter: SetupFunctionComponent = () => {
   const state = reactive({ count: 0 })
 
   const increment = () => {

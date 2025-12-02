@@ -10,7 +10,7 @@ export type {
   ComponentChildren,
   ComponentResult,
   ComponentRenderFunction,
-  ComponentType,
+  SetupFunctionComponent,
   ElementProps,
   ElementType,
   FragmentProps,

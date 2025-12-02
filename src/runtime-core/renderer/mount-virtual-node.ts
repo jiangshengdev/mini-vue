@@ -3,7 +3,7 @@ import { mountComponent } from './mount-component.ts'
 import { mountElement } from './mount-element.ts'
 import { mountChild } from './mount-child.ts'
 import type { MountedHandle } from './mounted-handle.ts'
-import type { ComponentType, VirtualNode } from '@/jsx/index.ts'
+import type { SetupFunctionComponent, VirtualNode } from '@/jsx/index.ts'
 import { Fragment } from '@/jsx/index.ts'
 
 /**
@@ -25,12 +25,12 @@ export function mountVirtualNode<
 
   /* 函数组件通过 mountComponent 执行并挂载其返回值。 */
   if (typeof virtualNode.type === 'function') {
-    const component = virtualNode.type as ComponentType
+    const component = virtualNode.type as SetupFunctionComponent
 
     return mountComponent(
       options,
       component,
-      virtualNode as VirtualNode<ComponentType>,
+      virtualNode as VirtualNode<SetupFunctionComponent>,
       container,
     )
   }

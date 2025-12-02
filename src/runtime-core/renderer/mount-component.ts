@@ -4,8 +4,8 @@ import type { MountedHandle } from './mounted-handle.ts'
 import type {
   ComponentRenderFunction,
   ComponentResult,
-  ComponentType,
   ElementProps,
+  SetupFunctionComponent,
   VirtualNode,
 } from '@/jsx/index.ts'
 import type { ComponentInstance } from '@/runtime-core/component-instance.ts'
@@ -22,7 +22,7 @@ export function mountComponent<
   HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
-  T extends ComponentType,
+  T extends SetupFunctionComponent,
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   component: T,
@@ -48,7 +48,7 @@ export function mountComponent<
 /**
  * 规整组件 props，并根据 children 数量注入合适的 children 形态。
  */
-function resolveComponentProps<T extends ComponentType>(
+function resolveComponentProps<T extends SetupFunctionComponent>(
   virtualNode: VirtualNode<T>,
 ): ElementProps<T> {
   const props = (
@@ -73,7 +73,7 @@ function createComponentInstance<
   HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
-  T extends ComponentType,
+  T extends SetupFunctionComponent,
 >(
   component: T,
   props: ElementProps<T>,
@@ -98,7 +98,7 @@ function setupComponent<
   HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
-  T extends ComponentType,
+  T extends SetupFunctionComponent,
 >(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): void {
   instance.render = invokeSetup(instance)
 }
@@ -107,7 +107,7 @@ function invokeSetup<
   HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
-  T extends ComponentType,
+  T extends SetupFunctionComponent,
 >(
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
 ): ComponentRenderFunction {
@@ -130,7 +130,7 @@ function performInitialRender<
   HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
-  T extends ComponentType,
+  T extends SetupFunctionComponent,
 >(
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
   options: RendererOptions<HostNode, HostElement, HostFragment>,
@@ -148,7 +148,7 @@ function createRenderEffect<
   HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
-  T extends ComponentType,
+  T extends SetupFunctionComponent,
 >(
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
   options: RendererOptions<HostNode, HostElement, HostFragment>,
@@ -174,7 +174,7 @@ function rerenderComponent<
   HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
-  T extends ComponentType,
+  T extends SetupFunctionComponent,
 >(
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
   options: RendererOptions<HostNode, HostElement, HostFragment>,
@@ -193,7 +193,7 @@ function teardownMountedSubtree<
   HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
-  T extends ComponentType,
+  T extends SetupFunctionComponent,
 >(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): void {
   if (!instance.mountedHandle) {
     return
@@ -210,7 +210,7 @@ function mountLatestSubtree<
   HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
-  T extends ComponentType,
+  T extends SetupFunctionComponent,
 >(
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
   options: RendererOptions<HostNode, HostElement, HostFragment>,
@@ -227,7 +227,7 @@ function teardownComponentInstance<
   HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
-  T extends ComponentType,
+  T extends SetupFunctionComponent,
 >(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): void {
   teardownMountedSubtree(instance)
   instance.effect?.stop()
@@ -252,7 +252,7 @@ function attachInstanceToVirtualNode<
   HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
-  T extends ComponentType,
+  T extends SetupFunctionComponent,
 >(
   virtualNode: VirtualNode<T>,
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,

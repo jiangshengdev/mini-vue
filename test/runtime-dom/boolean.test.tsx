@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { within } from '@testing-library/dom'
 import { createTestContainer } from '../setup.ts'
-import type { ComponentType } from '@/index.ts'
+import type { SetupFunctionComponent } from '@/index.ts'
 import { render } from '@/index.ts'
 
 describe('runtime-dom boolean children', () => {
@@ -10,7 +10,7 @@ describe('runtime-dom boolean children', () => {
       flag: boolean
     }
 
-    const FlagView: ComponentType<FlagProps> = (props) => {
+    const FlagView: SetupFunctionComponent<FlagProps> = (props) => {
       return () => {
         return <div>{props.flag && <span>ok</span>}</div>
       }

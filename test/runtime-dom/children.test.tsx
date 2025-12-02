@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import { within } from '@testing-library/dom'
 import { createTestContainer } from '../setup.ts'
-import type { ComponentType } from '@/index.ts'
+import type { SetupFunctionComponent } from '@/index.ts'
 import { render } from '@/index.ts'
 
 describe('runtime-dom children shape', () => {
   it('无 children 时 props.children 为 undefined', () => {
     const received: unknown[] = []
 
-    const Capture: ComponentType = (props) => {
+    const Capture: SetupFunctionComponent = (props) => {
       received.push(props.children)
 
       return () => {
@@ -28,7 +28,7 @@ describe('runtime-dom children shape', () => {
   it('单个 children 时 props.children 为该节点', () => {
     const received: unknown[] = []
 
-    const Capture: ComponentType = (props) => {
+    const Capture: SetupFunctionComponent = (props) => {
       received.push(props.children)
 
       return () => {
@@ -59,7 +59,7 @@ describe('runtime-dom children shape', () => {
   it('多个 children 时 props.children 为数组', () => {
     const received: unknown[] = []
 
-    const Capture: ComponentType = (props) => {
+    const Capture: SetupFunctionComponent = (props) => {
       received.push(props.children)
 
       return () => {

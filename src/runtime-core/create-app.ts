@@ -1,5 +1,5 @@
 import type { RootRenderFunction } from './renderer.ts'
-import type { ComponentType, ElementProps } from '@/jsx/index.ts'
+import type { ElementProps, SetupFunctionComponent } from '@/jsx/index.ts'
 import { createVirtualNode } from '@/jsx/index.ts'
 
 /**
@@ -33,7 +33,7 @@ interface AppState<HostElement> {
   /** 宿主注入的渲染配置。 */
   config: AppRuntimeConfig<HostElement>
   /** 根组件定义，用于生成顶层子树。 */
-  rootComponent: ComponentType
+  rootComponent: SetupFunctionComponent
   /** 传入根组件的初始 props。 */
   initialRootProps?: Record<string, unknown>
 }
@@ -81,7 +81,7 @@ function unmountApp<HostElement>(state: AppState<HostElement>): void {
  */
 function createRootVirtualNode<HostElement>(state: AppState<HostElement>) {
   const rawProps = state.initialRootProps
-    ? ({ ...state.initialRootProps } as ElementProps<ComponentType>)
+    ? ({ ...state.initialRootProps } as ElementProps<SetupFunctionComponent>)
     : undefined
 
   return createVirtualNode({
@@ -95,7 +95,7 @@ function createRootVirtualNode<HostElement>(state: AppState<HostElement>) {
  */
 export function createAppInstance<HostElement>(
   config: AppRuntimeConfig<HostElement>,
-  rootComponent: ComponentType,
+  rootComponent: SetupFunctionComponent,
   initialRootProps?: Record<string, unknown>,
 ): AppInstance<HostElement> {
   const state: AppState<HostElement> = {

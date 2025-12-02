@@ -24,7 +24,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
   /**
    * 记录当前副作用绑定的依赖集合，方便统一清理。
    */
-  private deps: DependencyBucket[] = []
+  private dependencyBuckets: DependencyBucket[] = []
 
   /**
    * 存储由外部注册的清理回调，管理嵌套副作用的生命周期。
@@ -85,7 +85,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
    * 记录当前副作用与依赖集合的关联，便于后续批量清理。
    */
   recordDependency(dependencyBucket: DependencyBucket): void {
-    this.deps.push(dependencyBucket)
+    this.dependencyBuckets.push(dependencyBucket)
   }
 
   /**
@@ -99,13 +99,13 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
    * 解除所有已登记的依赖，并逐一调用清理回调。
    */
   private flushDependencies(): void {
-    if (this.deps.length > 0) {
+    if (this.dependencyBuckets.length > 0) {
       /* 逐个从依赖集合中移除自己，确保后续触发不再执行 */
-      for (const dependencyBucket of this.deps) {
+      for (const dependencyBucket of this.dependencyBuckets) {
         dependencyBucket.delete(this)
       }
 
-      this.deps = []
+      this.dependencyBuckets = []
     }
 
     if (this.cleanupTasks.length > 0) {

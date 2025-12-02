@@ -26,7 +26,7 @@ export interface ComponentInstance<
   readonly container: HostElement | HostFragment
   /** 组件接收到的 props 副本。 */
   readonly props: ElementProps<T>
-  /** setup 返回的渲染闭包，每次 effect 执行都会调用。 */
+  /** `setup` 返回的渲染闭包，每次 effect 执行都会调用。 */
   render: ComponentRenderFunction
   /** 组件独立的响应式副作用，驱动更新调度。 */
   effect?: ReactiveEffect<ComponentResult>
@@ -36,7 +36,7 @@ export interface ComponentInstance<
   mountedHandle?: MountedHandle<HostNode>
   /** 注册的外部清理任务，在卸载时逐一执行。 */
   cleanupTasks: Array<() => void>
-  /** setup 暴露的状态对象，供模板或渲染函数读取。 */
+  /** `setup` 暴露的状态对象，供模板或渲染函数读取。 */
   setupState?: PlainObject
   /** 组合式 API 使用的上下文容器。 */
   setupContext: PlainObject

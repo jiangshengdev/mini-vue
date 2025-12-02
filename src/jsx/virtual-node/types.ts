@@ -55,7 +55,7 @@ type ComponentFunction<P> = (
 ) => ComponentRenderFunction
 
 /**
- * setup + render 语义的函数组件类型，默认 props 为通用对象。
+ * `setup` + `render` 语义的函数组件类型，默认 props 为通用对象。
  */
 export type SetupFunctionComponent<P = ComponentPropsBase> =
   ComponentFunction<P>

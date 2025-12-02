@@ -83,7 +83,7 @@ function createComponentInstance<
   props: ElementProps<T>,
   container: HostElement | HostFragment,
 ): ComponentInstance<HostNode, HostElement, HostFragment, T> {
-  /* render/effect 初始为空，由 setup 与 performInitialRender 回填。 */
+  /* `render`/`effect` 初始为空，由 setup 与 performInitialRender 回填。 */
   return {
     type: component,
     container,
@@ -105,7 +105,7 @@ function setupComponent<
   HostFragment extends HostNode,
   T extends SetupFunctionComponent,
 >(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): void {
-  /* setup 返回的渲染闭包会成为 effect 调度的核心逻辑。 */
+  /* `setup` 返回的渲染闭包会成为 effect 调度的核心逻辑。 */
   instance.render = invokeSetup(instance)
 }
 

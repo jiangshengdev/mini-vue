@@ -32,11 +32,13 @@ describe('runtime-dom ref 回调', () => {
     const state = reactive({ label: 'first' })
 
     const CounterButton: SetupFunctionComponent = () => {
-      return () => (
-        <button type="button" ref={refSpy}>
-          {state.label}
-        </button>
-      )
+      return () => {
+        return (
+          <button type="button" ref={refSpy}>
+            {state.label}
+          </button>
+        )
+      }
     }
 
     const container = createTestContainer()
@@ -89,11 +91,13 @@ describe('runtime-dom ref 回调', () => {
     const state = reactive({ label: 'first' })
 
     const CounterButton: SetupFunctionComponent = () => {
-      return () => (
-        <button type="button" ref={elementRef}>
-          {state.label}
-        </button>
-      )
+      return () => {
+        return (
+          <button type="button" ref={elementRef}>
+            {state.label}
+          </button>
+        )
+      }
     }
 
     const container = createTestContainer()

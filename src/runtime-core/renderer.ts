@@ -2,7 +2,7 @@
  * 平台无关的渲染核心定义，通过注入宿主环境能力完成挂载流程。
  */
 import { mountChild } from './renderer/mount-child.ts'
-import type { MountedChild } from './renderer/mounted-child.ts'
+import type { MountedHandle } from './renderer/mounted-handle.ts'
 import type { ComponentResult } from '@/jsx/index.ts'
 import type { PlainObject } from '@/shared/types.ts'
 
@@ -60,12 +60,15 @@ export function createRenderer<
   options: RendererOptions<HostNode, HostElement, HostFragment>,
 ): Renderer<HostNode, HostElement> {
   const { clear } = options
-  const mountedContainers = new WeakMap<PlainObject, MountedChild<HostNode>>()
+  const mountedHandlesByContainer = new WeakMap<
+    PlainObject,
+    MountedHandle<HostNode>
+  >()
 
   /**
    * 将宿主容器断言为对象键，便于复用 WeakMap 存储。
    */
-  function toContainerKey(container: HostElement): PlainObject {
+  function asContainerKey(container: HostElement): PlainObject {
     return container as unknown as PlainObject
   }
 
@@ -73,14 +76,14 @@ export function createRenderer<
    * 若容器曾挂载过子树，则执行 teardown 并移除缓存。
    */
   function teardownContainer(container: HostElement): void {
-    const mounted = mountedContainers.get(toContainerKey(container))
+    const mounted = mountedHandlesByContainer.get(asContainerKey(container))
 
     if (!mounted) {
       return
     }
 
     mounted.teardown()
-    mountedContainers.delete(toContainerKey(container))
+    mountedHandlesByContainer.delete(asContainerKey(container))
   }
 
   /**
@@ -92,7 +95,7 @@ export function createRenderer<
     const mounted = mountChild(options, virtualNode, container)
 
     if (mounted) {
-      mountedContainers.set(toContainerKey(container), mounted)
+      mountedHandlesByContainer.set(asContainerKey(container), mounted)
     }
   }
 

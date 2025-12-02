@@ -1,6 +1,6 @@
 import type { RendererOptions } from '../renderer.ts'
 import { mountChild } from './mount-child.ts'
-import type { MountedChild } from './mounted-child.ts'
+import type { MountedHandle } from './mounted-handle.ts'
 import type {
   ComponentResult,
   ComponentType,
@@ -29,9 +29,9 @@ interface ComponentInstance<
   /** 最近一次 render 的虚拟子树，用于二次挂载。 */
   subTree?: ComponentResult
   /** 子树挂载后返回的宿主节点集合。 */
-  mountedChild?: MountedChild<HostNode>
+  mountedHandle?: MountedHandle<HostNode>
   /** 附加清理任务列表（如自定义副作用）。 */
-  cleanup: Array<() => void>
+  cleanupCallbacks: Array<() => void>
 }
 
 /**
@@ -47,7 +47,7 @@ export function mountComponent<
   component: T,
   virtualNode: VirtualNode<T>,
   container: HostElement | HostFragment,
-): MountedChild<HostNode> | undefined {
+): MountedHandle<HostNode> | undefined {
   const props = resolveComponentProps(virtualNode)
   const instance = createComponentInstance(options, component, props, container)
 
@@ -106,7 +106,7 @@ function createComponentInstance<
     | ComponentInstance<HostNode, HostElement, HostFragment, T>
     | undefined = undefined
 
-  /* 组件 effect 会收集依赖并在响应式变更时触发 job。 */
+  /* 组件 effect 会收集依赖并在响应式变更时触发 renderJob。 */
   const effect = new ReactiveEffect<ComponentResult>(
     () => {
       /* 执行组件获取最新子树并缓存，供后续重新挂载使用。 */
@@ -116,9 +116,9 @@ function createComponentInstance<
 
       return subtree
     },
-    (job) => {
-      /* 调度回调负责清空旧子树并重新执行 job。 */
-      rerenderComponent(instance!, options, job)
+    (renderJob) => {
+      /* 调度回调负责清空旧子树并重新执行 renderJob。 */
+      rerenderComponent(instance!, options, renderJob)
     },
   )
 
@@ -132,7 +132,7 @@ function createComponentInstance<
     container,
     props,
     effect,
-    cleanup: [],
+    cleanupCallbacks: [],
   }
 
   instance = createdInstance
@@ -151,11 +151,11 @@ function performInitialRender<
 >(
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
   options: RendererOptions<HostNode, HostElement, HostFragment>,
-): MountedChild<HostNode> | undefined {
+): MountedHandle<HostNode> | undefined {
   const subtree = instance.effect.run()
   const mounted = mountChild(options, subtree, instance.container)
 
-  instance.mountedChild = mounted
+  instance.mountedHandle = mounted
 
   return mounted
 }
@@ -171,11 +171,11 @@ function rerenderComponent<
 >(
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
   options: RendererOptions<HostNode, HostElement, HostFragment>,
-  job: () => void,
+  renderJob: () => void,
 ): void {
-  /* 依次保证 teardown → job → remount 的同步顺序。 */
+  /* 依次保证 teardown → renderJob → remount 的同步顺序。 */
   teardownMountedSubtree(instance)
-  job()
+  renderJob()
   mountLatestSubtree(instance, options)
 }
 
@@ -188,12 +188,12 @@ function teardownMountedSubtree<
   HostFragment extends HostNode,
   T extends ComponentType,
 >(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): void {
-  if (!instance.mountedChild) {
+  if (!instance.mountedHandle) {
     return
   }
 
-  instance.mountedChild.teardown()
-  instance.mountedChild = undefined
+  instance.mountedHandle.teardown()
+  instance.mountedHandle = undefined
 }
 
 /**
@@ -210,7 +210,7 @@ function mountLatestSubtree<
 ): void {
   const mounted = mountChild(options, instance.subTree, instance.container)
 
-  instance.mountedChild = mounted
+  instance.mountedHandle = mounted
 }
 
 /**
@@ -225,10 +225,10 @@ function teardownComponentInstance<
   teardownMountedSubtree(instance)
   instance.effect.stop()
 
-  if (instance.cleanup.length > 0) {
-    const tasks = [...instance.cleanup]
+  if (instance.cleanupCallbacks.length > 0) {
+    const tasks = [...instance.cleanupCallbacks]
 
-    instance.cleanup = []
+    instance.cleanupCallbacks = []
 
     /* 逐一运行外部注册的清理逻辑，避免引用泄漏。 */
     for (const task of tasks) {

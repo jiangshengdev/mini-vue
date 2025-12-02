@@ -1,6 +1,6 @@
 import type { RendererOptions } from '../renderer.ts'
 import { mountVirtualNode } from './mount-virtual-node.ts'
-import type { MountedChild } from './mounted-child.ts'
+import type { MountedHandle } from './mounted-handle.ts'
 import type { ComponentResult } from '@/jsx/index.ts'
 import { isVirtualNode } from '@/jsx/index.ts'
 import { isNil } from '@/shared/utils.ts'
@@ -16,7 +16,7 @@ export function mountChild<
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   child: ComponentResult | undefined,
   container: HostElement | HostFragment,
-): MountedChild<HostNode> | undefined {
+): MountedHandle<HostNode> | undefined {
   const { createFragment, appendChild, createText, remove } = options
 
   /* `null`、`undefined`、布尔值不产生实际节点。 */

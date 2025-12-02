@@ -35,7 +35,7 @@ interface AppState<HostElement> {
   /** 根组件定义，用于生成顶层子树。 */
   rootComponent: ComponentType
   /** 传入根组件的初始 props。 */
-  rootProps?: Record<string, unknown>
+  initialRootProps?: Record<string, unknown>
 }
 
 /**
@@ -80,8 +80,8 @@ function unmountApp<HostElement>(state: AppState<HostElement>): void {
  * 通过最新状态生成根级 virtualNode，确保 props 是独立副本。
  */
 function createRootVirtualNode<HostElement>(state: AppState<HostElement>) {
-  const rawProps = state.rootProps
-    ? ({ ...state.rootProps } as ElementProps<ComponentType>)
+  const rawProps = state.initialRootProps
+    ? ({ ...state.initialRootProps } as ElementProps<ComponentType>)
     : undefined
 
   return createVirtualNode({
@@ -96,14 +96,14 @@ function createRootVirtualNode<HostElement>(state: AppState<HostElement>) {
 export function createAppInstance<HostElement>(
   config: AppRuntimeConfig<HostElement>,
   rootComponent: ComponentType,
-  rootProps?: Record<string, unknown>,
+  initialRootProps?: Record<string, unknown>,
 ): AppInstance<HostElement> {
   const state: AppState<HostElement> = {
     status: 'idle',
     container: undefined,
     config,
     rootComponent,
-    rootProps,
+    initialRootProps: initialRootProps,
   }
 
   /* 用户态 mount 会透传容器给核心挂载逻辑。 */

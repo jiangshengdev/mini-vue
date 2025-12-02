@@ -4,7 +4,7 @@ layout: home
 
 hero:
   name: 'Mini Vue'
-  text: '响应式 + JSX 的教学实现'
+  text: '响应式 + JSX 的自学实现'
   tagline: '用几十个文件复刻 Vue 3 核心，学习真实的运行机制'
   actions:
     - theme: brand

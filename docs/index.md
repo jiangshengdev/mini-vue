@@ -10,9 +10,6 @@ hero:
     - theme: brand
       text: 阅读响应式规划
       link: /component-reactivity-plan
-    - theme: alt
-      text: 查看运行时议题
-      link: /runtime-core-issues
 
 features:
   - title: 响应式内核

@@ -14,7 +14,6 @@ export default defineConfig({
     nav: [
       { text: '首页', link: '/' },
       { text: '响应式规划', link: '/component-reactivity-plan' },
-      { text: '运行时议题', link: '/runtime-core-issues' },
     ],
 
     sidebar: buildSidebar(),

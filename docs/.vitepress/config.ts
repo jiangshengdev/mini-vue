@@ -12,8 +12,9 @@ export default defineConfig({
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
-      { text: 'Home', link: '/' },
-      { text: 'Examples', link: '/markdown-examples' },
+      { text: '首页', link: '/' },
+      { text: '响应式规划', link: '/component-reactivity-plan' },
+      { text: '运行时议题', link: '/runtime-core-issues' },
     ],
 
     sidebar: buildSidebar(),

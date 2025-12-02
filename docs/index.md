@@ -16,6 +16,9 @@ hero:
     - theme: alt
       text: Computed
       link: /computed-overview
+    - theme: alt
+      text: Watch
+      link: /watch-overview
 
 features:
   - title: 响应式内核

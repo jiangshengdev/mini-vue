@@ -77,7 +77,7 @@ export function reactive(target: unknown): unknown {
   const cached = reactiveCache.lookupProxy(reactiveTarget)
 
   if (cached) {
-    /* 复用已有代理，确保同一原对象始终返回同一 Proxy */
+    /* 命中缓存即复用已有代理，保持依赖与副作用的一致性。 */
     return cached
   }
 
@@ -90,6 +90,7 @@ export function reactive(target: unknown): unknown {
  */
 export function isReactive(target: unknown): target is ReactiveTarget {
   if (!isObject(target)) {
+    /* 原始值或 null 直接排除，避免错误判定。 */
     return false
   }
 
@@ -97,6 +98,7 @@ export function isReactive(target: unknown): target is ReactiveTarget {
   const targetIsPlainObject = isPlainObject(target)
 
   if (!targetIsArray && !targetIsPlainObject) {
+    /* Map/Set 等未支持的结构不可视为 reactive。 */
     return false
   }
 

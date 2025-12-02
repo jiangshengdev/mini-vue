@@ -65,29 +65,40 @@ const mutableSet: ProxyHandler<ReactiveTarget>['set'] = (
   return true
 }
 
+/**
+ * 拦截 delete 操作，确保删除成功后触发对应依赖。
+ */
 const mutableDeleteProperty: ProxyHandler<ReactiveTarget>['deleteProperty'] = (
   target,
   key,
 ) => {
+  /* 删除前记录字段是否存在，后续只对真实变更触发更新。 */
   const hadKey = hasOwn(target, key)
+  /* 通过 Reflect 删除属性以保持原生行为一致。 */
   const applied = Reflect.deleteProperty(target, key)
 
   if (applied && hadKey) {
+    /* 仅在确实移除既有字段时通知依赖，避免重复触发。 */
     trigger(target, key, triggerOpTypes.delete)
   }
 
   return applied
 }
 
+/** 拦截 in 操作，确保查询同样建立依赖。 */
 const mutableHas: ProxyHandler<ReactiveTarget>['has'] = (target, key) => {
+  /* 复用 Reflect.has 获取布尔结果，与原生语义一致。 */
   const result = Reflect.has(target, key)
 
+  /* `in` 查询也会读取属性，因此需要收集依赖。 */
   track(target, key)
 
   return result
 }
 
+/** `ownKeys` 捕获 for...in/Object.keys 等场景以追踪结构性更改。 */
 const mutableOwnKeys: ProxyHandler<ReactiveTarget>['ownKeys'] = (target) => {
+  /* 数组结构依赖 length，普通对象使用 iterateKey 作为统一标识。 */
   const key = Array.isArray(target) ? 'length' : iterateKey
 
   track(target, key)

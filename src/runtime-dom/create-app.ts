@@ -26,8 +26,13 @@ interface DomAppState {
   hmr?: DomAppHmrState
 }
 
+/**
+ * 记录 Vite HMR 生命周期的订阅状态，避免重复注册。
+ */
 interface DomAppHmrState {
+  /** 标识当前应用是否已经向 HMR 注册回调。 */
   registered: boolean
+  /** HMR 更新完成后是否需要重新挂载 DOM 树。 */
   pendingRemount: boolean
 }
 
@@ -75,6 +80,7 @@ function unmountDomApp(state: DomAppState): void {
  * 在 HMR 场景下复用最近一次容器数据重新挂载。
  */
 function remountDomApp(state: DomAppState): void {
+  /* 优先复用上次解析出的真实容器，确保 remount 快速执行。 */
   let target: string | Element | undefined = state.lastResolvedContainer
 
   /* 断开连接后重新根据字符串选择器解析，保证挂载位置可恢复。 */
@@ -86,14 +92,17 @@ function remountDomApp(state: DomAppState): void {
     target = state.lastMountTarget
   }
 
+  /* 若清理过程中丢失真实节点，退回到原始 mount target。 */
   if (!target && state.lastMountTarget) {
     target = state.lastMountTarget
   }
 
+  /* 两种来源都不存在时代表无法确定容器，直接跳过。 */
   if (!target) {
     return
   }
 
+  /* 使用最新推断出的容器重新拉起整棵 DOM 子树。 */
   mountDomApp(state, target)
 }
 
@@ -156,6 +165,7 @@ function ensureDomHmrLifecycle(state: DomAppState): void {
     return
   }
 
+  /* 每次注入时都创建独立状态，追踪是否需要二次挂载。 */
   const hmrState: DomAppHmrState = {
     registered: true,
     pendingRemount: false,
@@ -163,6 +173,7 @@ function ensureDomHmrLifecycle(state: DomAppState): void {
 
   state.hmr = hmrState
 
+  /* HMR 即将替换模块时先记录当前容器并卸载，释放副作用。 */
   const prepareRemount = () => {
     if (!state.isMounted) {
       return
@@ -172,6 +183,7 @@ function ensureDomHmrLifecycle(state: DomAppState): void {
     unmountDomApp(state)
   }
 
+  /* 模块热更新完成后若需要，重新挂载到同一容器。 */
   const remountIfNeeded = () => {
     if (!hmrState.pendingRemount) {
       return
@@ -181,10 +193,12 @@ function ensureDomHmrLifecycle(state: DomAppState): void {
     remountDomApp(state)
   }
 
+  /* 针对 Vite 的 before/after 钩子注册挂载/卸载逻辑。 */
   hot.on('vite:beforeUpdate', prepareRemount)
   hot.on('vite:beforeFullReload', prepareRemount)
   hot.on('vite:afterUpdate', remountIfNeeded)
 
+  /* Vite 触发 dispose 时若仍挂载，需要显式卸载容器。 */
   hot.dispose(() => {
     if (!state.isMounted) {
       return

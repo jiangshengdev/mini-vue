@@ -53,7 +53,11 @@ export type EffectScheduler = (job: () => void) => void
  * `effect` 的可选配置，目前仅支持自定义调度器。
  */
 export interface EffectOptions {
+  /** 自定义调度行为，允许延迟或合并 effect 执行。 */
   scheduler?: EffectScheduler
 }
 
+/**
+ * 支持响应式代理的原生目标类型，目前覆盖普通对象与数组。
+ */
 export type ReactiveTarget = PlainObject | unknown[]

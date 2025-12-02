@@ -44,8 +44,10 @@ class DepRegistry {
       return
     }
 
+    /* 通过 Set 去重同一次触发中出现的重复依赖。 */
     const depsToRun = new Set<DependencyBucket>()
 
+    /* 工具函数：跳过空集合并统一去重逻辑。 */
     const addDep = (dep?: DependencyBucket) => {
       if (!dep) {
         return
@@ -54,14 +56,17 @@ class DepRegistry {
       depsToRun.add(dep)
     }
 
+    /* 首先加入当前字段的直接依赖。 */
     addDep(depsMap.get(key))
 
     if (type === triggerOpTypes.add || type === triggerOpTypes.delete) {
+      /* 结构性变化会影响 for...in/Object.keys，因此额外触发 iterate 依赖。 */
       addDep(depsMap.get(iterateKey))
     }
 
     if (Array.isArray(target)) {
       if (type === triggerOpTypes.add && isIntegerKey(key)) {
+        /* 数组新增索引意味着 length 变化，需要同步触发 length 依赖。 */
         addDep(depsMap.get('length'))
       }
 
@@ -78,15 +83,18 @@ class DepRegistry {
             typeof newValue === 'number' &&
             Number(depKey) >= newValue
           ) {
+            /* 截断 length 会影响被裁剪索引的副作用。 */
             addDep(dep)
           }
         }
 
+        /* `length` 变化也会影响遍历结果。 */
         addDep(depsMap.get(iterateKey))
       }
     }
 
     if (depsToRun.size === 0) {
+      /* 没有任何依赖被收集时直接返回，避免多余遍历。 */
       return
     }
 
@@ -124,10 +132,14 @@ class DepRegistry {
 
 const registry = new DepRegistry()
 
+/** 响应式系统对外暴露的依赖收集入口。 */
 export function track(target: ReactiveTarget, key: PropertyKey): void {
   registry.track(target, key)
 }
 
+/**
+ * 响应式系统对外暴露的触发入口，参数与 DepRegistry.trigger 对齐。
+ */
 export function trigger(
   target: ReactiveTarget,
   key: PropertyKey,

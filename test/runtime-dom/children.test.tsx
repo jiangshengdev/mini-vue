@@ -11,7 +11,9 @@ describe('runtime-dom children shape', () => {
     const Capture: ComponentType = (props) => {
       received.push(props.children)
 
-      return <section>{props.children}</section>
+      return () => {
+        return <section>{props.children}</section>
+      }
     }
 
     const container = createTestContainer()
@@ -29,7 +31,9 @@ describe('runtime-dom children shape', () => {
     const Capture: ComponentType = (props) => {
       received.push(props.children)
 
-      return <section>{props.children}</section>
+      return () => {
+        return <section>{props.children}</section>
+      }
     }
 
     const container = createTestContainer()
@@ -58,7 +62,9 @@ describe('runtime-dom children shape', () => {
     const Capture: ComponentType = (props) => {
       received.push(props.children)
 
-      return <section>{props.children}</section>
+      return () => {
+        return <section>{props.children}</section>
+      }
     }
 
     const container = createTestContainer()

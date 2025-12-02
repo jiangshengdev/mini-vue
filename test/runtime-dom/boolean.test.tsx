@@ -11,7 +11,9 @@ describe('runtime-dom boolean children', () => {
     }
 
     const FlagView: ComponentType<FlagProps> = (props) => {
-      return <div>{props.flag && <span>ok</span>}</div>
+      return () => {
+        return <div>{props.flag && <span>ok</span>}</div>
+      }
     }
 
     const container = createTestContainer()

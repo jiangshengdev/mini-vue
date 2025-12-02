@@ -13,7 +13,9 @@ describe('runtime-dom component reactivity', () => {
 
       capturedState = state
 
-      return () => <p>count: {state.count}</p>
+      return () => {
+        return <p>count: {state.count}</p>
+      }
     }
 
     const container = createTestContainer()

@@ -29,11 +29,6 @@ export type ComponentResult = ComponentChildren
 export type ComponentRenderFunction = () => ComponentResult
 
 /**
- * 组件 setup 函数允许返回渲染结果或渲染函数。
- */
-export type ComponentSetupResult = ComponentResult | ComponentRenderFunction
-
-/**
  * 组件 props 的基础约束：放宽为对象即可，避免要求字符串索引签名。
  */
 type ComponentPropsBase = Record<string, unknown>
@@ -45,7 +40,7 @@ export interface FragmentProps extends ComponentPropsBase {
 /**
  * 用于约束组件类型的函数签名，供 ElementType 统一推导。
  */
-type ComponentConstraint = (props: never) => ComponentSetupResult
+type ComponentConstraint = (props: never) => ComponentRenderFunction
 
 /**
  * 为任意 props 类型补充可选 children 字段。
@@ -57,7 +52,7 @@ type PropsWithChildren<P> = P & { children?: ComponentChildren }
  */
 type ComponentFunction<P> = (
   props: PropsWithChildren<P>,
-) => ComponentSetupResult
+) => ComponentRenderFunction
 
 /**
  * 对外暴露的组件类型，默认 props 为通用对象。
@@ -80,7 +75,7 @@ export type ElementType = string | ComponentConstraint | FragmentType
 type ComponentTypeProps<T> =
   T extends ComponentType<infer P>
     ? PropsWithChildren<P>
-    : T extends (props: infer P) => ComponentSetupResult
+    : T extends (props: infer P) => ComponentRenderFunction
       ? P
       : ComponentPropsBase
 

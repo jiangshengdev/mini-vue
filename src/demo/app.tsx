@@ -4,7 +4,7 @@ import { Counter } from './counter.tsx'
 import type { ComponentType } from '@/index.ts'
 
 export const App: ComponentType = () => {
-  return (
+  return () => (
     <div>
       <a href="https://vite.dev" target="_blank" rel="noreferrer">
         <img src={viteLogo} class="logo" alt="Vite logo" />

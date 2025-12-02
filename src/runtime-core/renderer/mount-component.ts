@@ -8,14 +8,12 @@ import type {
   ElementProps,
   VirtualNode,
 } from '@/jsx/index.ts'
-import { isVirtualNode } from '@/jsx/index.ts'
 import type { ComponentInstance } from '@/runtime-core/component-instance.ts'
 import {
   setCurrentInstance,
   unsetCurrentInstance,
 } from '@/runtime-core/component-instance.ts'
 import { ReactiveEffect } from '@/reactivity/effect.ts'
-import { isPlainObject } from '@/shared/utils.ts'
 
 /**
  * 执行函数组件并将返回的子树继续挂载到容器。
@@ -40,7 +38,7 @@ export function mountComponent<
   const mounted = performInitialRender(instance, options)
 
   return {
-    nodes: mounted?.nodes ?? [],
+    nodes: (mounted?.nodes ?? []) as HostNode[],
     teardown(): void {
       teardownComponentInstance(instance)
     },
@@ -85,7 +83,9 @@ function createComponentInstance<
     type: component,
     container,
     props,
-    render: () => undefined,
+    render() {
+      return undefined
+    },
     cleanupCallbacks: [],
     ctx: {},
   }
@@ -100,10 +100,10 @@ function setupComponent<
   HostFragment extends HostNode,
   T extends ComponentType,
 >(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): void {
-  instance.render = createSetupRenderInvoker(instance)
+  instance.render = invokeSetup(instance)
 }
 
-function createSetupRenderInvoker<
+function invokeSetup<
   HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
@@ -111,67 +111,16 @@ function createSetupRenderInvoker<
 >(
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
 ): ComponentRenderFunction {
-  let initialized = false
-  let finalizedRender: ComponentRenderFunction | undefined
+  setCurrentInstance(instance)
+  const render = instance.type(instance.props)
 
-  const legacyRender: ComponentRenderFunction = () =>
-    instance.type(instance.props)
+  unsetCurrentInstance()
 
-  return function renderWithSetup(): ComponentResult {
-    if (initialized) {
-      return finalizedRender ? finalizedRender() : legacyRender()
-    }
-
-    initialized = true
-
-    setCurrentInstance(instance)
-    const setupResult = instance.type(instance.props)
-
-    unsetCurrentInstance()
-
-    if (isRenderFunction(setupResult)) {
-      instance.render = setupResult
-      finalizedRender = setupResult
-
-      return setupResult()
-    }
-
-    recordSetupState(instance, setupResult)
-    instance.render = legacyRender
-    finalizedRender = legacyRender
-
-    return setupResult
-  }
-}
-
-function isRenderFunction(
-  value: ComponentResult | ComponentRenderFunction,
-): value is ComponentRenderFunction {
-  return typeof value === 'function'
-}
-
-function recordSetupState<
-  HostNode,
-  HostElement extends HostNode,
-  HostFragment extends HostNode,
-  T extends ComponentType,
->(
-  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
-  setupResult: ComponentResult,
-): void {
-  if (instance.setupState) {
-    return
+  if (typeof render !== 'function') {
+    throw new TypeError('组件必须返回渲染函数以托管本地状态')
   }
 
-  if (shouldPersistSetupState(setupResult)) {
-    instance.setupState = setupResult
-  }
-}
-
-function shouldPersistSetupState(
-  value: unknown,
-): value is Record<string, unknown> {
-  return isPlainObject(value) && !isVirtualNode(value)
+  return render
 }
 
 /**
@@ -219,7 +168,7 @@ function createRenderEffect<
 }
 
 /**
- * rerender 时先卸载旧子树，再运行调度任务并重新挂载新子树。
+ * Rerender 时先卸载旧子树，再运行调度任务并重新挂载新子树。
  */
 function rerenderComponent<
   HostNode,

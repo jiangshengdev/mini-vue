@@ -33,11 +33,13 @@ describe('runtime-dom basic rendering', () => {
     }
 
     const Button: ComponentType<ButtonProps> = (props) => {
-      return (
-        <button class="btn" onClick={props.onClick}>
-          {props.label}
-        </button>
-      )
+      return () => {
+        return (
+          <button class="btn" onClick={props.onClick}>
+            {props.label}
+          </button>
+        )
+      }
     }
 
     render(<Button label="click" onClick={handleClick} />, container)
@@ -56,12 +58,14 @@ describe('runtime-dom basic rendering', () => {
     }
 
     const Wrapper: ComponentType<WrapperProps> = (props) => {
-      return (
-        <section>
-          <h1>{props.title}</h1>
-          {props.children}
-        </section>
-      )
+      return () => {
+        return (
+          <section>
+            <h1>{props.title}</h1>
+            {props.children}
+          </section>
+        )
+      }
     }
 
     const container = createTestContainer()

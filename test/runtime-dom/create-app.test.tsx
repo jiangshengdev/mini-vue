@@ -5,7 +5,9 @@ import type { ComponentType } from '@/index.ts'
 import { createApp, reactive } from '@/index.ts'
 
 const App: ComponentType = () => {
-  return <div class="hello">Hello</div>
+  return () => {
+    return <div class="hello">Hello</div>
+  }
 }
 
 describe('runtime-dom createApp', () => {
@@ -65,7 +67,9 @@ describe('runtime-dom createApp', () => {
     const state = reactive({ count: 0 })
 
     const Root: ComponentType = () => {
-      return <p>count: {state.count}</p>
+      return () => {
+        return <p>count: {state.count}</p>
+      }
     }
 
     const host = createTestContainer()
@@ -89,9 +93,11 @@ describe('runtime-dom createApp', () => {
     const state = reactive({ on: false })
 
     const Root: ComponentType = () => {
-      renderSpy()
+      return () => {
+        renderSpy()
 
-      return <span>{state.on ? 'ON' : 'OFF'}</span>
+        return <span>{state.on ? 'ON' : 'OFF'}</span>
+      }
     }
 
     const host = createTestContainer()

@@ -4,7 +4,7 @@
 
 ## 1. 响应式骨架
 
-1. **依赖容器 (`DepRegistry`)**：`src/reactivity/internals/operations.ts` 通过 `WeakMap<object, Map<key, Set<effect>>>` 记录对象属性到副作用集合的映射，`track()` 与 `trigger()` 是所有依赖收集/触发的入口。
+1. **依赖容器 (`DependencyRegistry`)**：`src/reactivity/internals/operations.ts` 通过 `WeakMap<object, Map<key, Set<effect>>>` 记录对象属性到副作用集合的映射，`track()` 与 `trigger()` 是所有依赖收集/触发的入口。
 2. **副作用栈 (`effectStack`)**：`internals/effect-stack.ts` 维护当前激活的 `ReactiveEffect`，嵌套调用时始终以栈顶元素作为依赖收集的目标。
 3. **依赖算法 (`dep-utils.ts`)**：`trackEffect()` 将当前 effect 放入 `DependencyBucket`，并让 effect 反向记录该 bucket，`triggerEffects()` 则复制快照后按顺序调度，确保触发过程中集合稳定且可挂调度器。
 
@@ -29,12 +29,12 @@
 - `ComputedRefImpl` 继承 Ref 语义，核心成员：
   - `innerValue`：缓存最近一次 getter 结果。
   - `innerDirty`：脏标记，依赖变化时由调度器置为 `true`。
-  - `dep`：作为 Ref 的依赖集合，供下游 effect 追踪。
+  - `dependencyBucket`：作为 Ref 的依赖集合，供下游 effect 追踪。
 - 构造函数把 getter 封装成 `ReactiveEffect`，并注入调度器：
   - 依赖字段变动 → 调度器执行 `markDirty()`。
-  - `markDirty()` 若已脏则跳过，否则置脏并 `triggerEffects(dep)`，通知下游。
+  - `markDirty()` 若已脏则跳过，否则置脏并 `triggerEffects(dependencyBucket)`，通知下游。
 - 读取 `.value`：
-  1. 调用 `trackEffect(this.dep)`，让外层 effect 与 computed 建立依赖关系。
+  1. 调用 `trackEffect(this.dependencyBucket)`，让外层 effect 与 computed 建立依赖关系。
   2. 若 `innerDirty` 为真，执行 `effect.run()`、缓存结果并清空脏标记。
 - 写入 `.value`：
   - 只读场景使用 `createReadonlySetter()` 抛出 `TypeError`。
@@ -44,8 +44,8 @@
 
 - `reactive()` 提供“读时收集、写时触发”的最小能力，任何衍生 API（`computed`、JSX 渲染）都通过 `track/trigger` 与它连接。
 - `ReactiveEffect` 是副作用执行单元，既可直接通过 `effect()` 暴露给用户，也可作为 `computed` 内部的惰性求值引擎。
-- `computed` 既是上游依赖的消费者（内部 effect 读取原始字段），又是下游 effect 的生产者（本身携带 `dep` 并可 `trigger`），因此可以被理解为“承上启下”的桥梁。
-- 当前实现未包含调度批次、组件级缓存等高级特性，重点在于演示响应式系统最核心的链路：**原始对象 → Proxy handler → DepRegistry → ReactiveEffect → Ref/Computed → 下游副作用**。
+- `computed` 既是上游依赖的消费者（内部 effect 读取原始字段），又是下游 effect 的生产者（本身携带 `dependencyBucket` 并可 `trigger`），因此可以被理解为“承上启下”的桥梁。
+- 当前实现未包含调度批次、组件级缓存等高级特性，重点在于演示响应式系统最核心的链路：**原始对象 → Proxy handler → DependencyRegistry → ReactiveEffect → Ref/Computed → 下游副作用**。
 
 ## 6. 与 Vue 正式版的差异提示
 

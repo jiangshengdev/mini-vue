@@ -22,7 +22,7 @@ class ReactiveCache {
   /**
    * 查找目标是否已被代理，避免重复创建 Proxy 实例。
    */
-  lookupProxy(target: ReactiveTarget): ReactiveTarget | undefined {
+  getCachedProxy(target: ReactiveTarget): ReactiveTarget | undefined {
     if (this.reactiveToRaw.has(target)) {
       return target
     }
@@ -74,7 +74,7 @@ export function reactive(target: unknown): unknown {
   }
 
   const reactiveTarget = target as ReactiveTarget
-  const cached = reactiveCache.lookupProxy(reactiveTarget)
+  const cached = reactiveCache.getCachedProxy(reactiveTarget)
 
   if (cached) {
     /* 命中缓存即复用已有代理，保持依赖与副作用的一致性。 */

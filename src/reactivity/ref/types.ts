@@ -23,5 +23,5 @@ export interface RefMarker {
  * RefDepCarrier 表示可被依赖收集器追踪的目标，需提供依赖集合。
  */
 export interface RefDepCarrier extends RefMarker {
-  readonly dep: DependencyBucket
+  readonly dependencyBucket: DependencyBucket
 }

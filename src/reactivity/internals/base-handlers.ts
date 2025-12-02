@@ -1,8 +1,8 @@
 import { reactive } from '../reactive.ts'
-import { iterateKey, triggerOpTypes } from '../shared/constants.ts'
+import { iterateDependencyKey, triggerOpTypes } from '../shared/constants.ts'
 import type { ReactiveTarget } from '../shared/types.ts'
 import { track, trigger } from './operations.ts'
-import { hasOwn, isIntegerKey, isObject } from '@/shared/utils.ts'
+import { hasOwn, isArrayIndex, isObject } from '@/shared/utils.ts'
 
 /**
  * 响应式读取逻辑：在取值时触发依赖收集，并对嵌套对象递归创建代理。
@@ -36,7 +36,7 @@ const mutableSet: ProxyHandler<ReactiveTarget>['set'] = (
   receiver,
 ) => {
   const targetIsArray = Array.isArray(target)
-  const keyIsInteger = isIntegerKey(key)
+  const keyIsInteger = isArrayIndex(key)
   const hadKey =
     targetIsArray && keyIsInteger
       ? Number(key) < target.length
@@ -45,9 +45,9 @@ const mutableSet: ProxyHandler<ReactiveTarget>['set'] = (
   /* 读取旧值用于后续的同值判断 */
   const previousValue = Reflect.get(target, key, receiver) as unknown
   /* 调用 Reflect 完成赋值，确保符合原生语义 */
-  const applied = Reflect.set(target, key, value, receiver)
+  const wasApplied = Reflect.set(target, key, value, receiver)
 
-  if (!applied) {
+  if (!wasApplied) {
     return false
   }
 
@@ -75,14 +75,14 @@ const mutableDeleteProperty: ProxyHandler<ReactiveTarget>['deleteProperty'] = (
   /* 删除前记录字段是否存在，后续只对真实变更触发更新。 */
   const hadKey = hasOwn(target, key)
   /* 通过 Reflect 删除属性以保持原生行为一致。 */
-  const applied = Reflect.deleteProperty(target, key)
+  const wasApplied = Reflect.deleteProperty(target, key)
 
-  if (applied && hadKey) {
+  if (wasApplied && hadKey) {
     /* 仅在确实移除既有字段时通知依赖，避免重复触发。 */
     trigger(target, key, triggerOpTypes.delete)
   }
 
-  return applied
+  return wasApplied
 }
 
 /** 拦截 in 操作，确保查询同样建立依赖。 */
@@ -98,8 +98,8 @@ const mutableHas: ProxyHandler<ReactiveTarget>['has'] = (target, key) => {
 
 /** `ownKeys` 捕获 for...in/Object.keys 等场景以追踪结构性更改。 */
 const mutableOwnKeys: ProxyHandler<ReactiveTarget>['ownKeys'] = (target) => {
-  /* 数组结构依赖 length，普通对象使用 iterateKey 作为统一标识。 */
-  const key = Array.isArray(target) ? 'length' : iterateKey
+  /* 数组结构依赖 length，普通对象使用 iterateDependencyKey 作为统一标识。 */
+  const key = Array.isArray(target) ? 'length' : iterateDependencyKey
 
   track(target, key)
 

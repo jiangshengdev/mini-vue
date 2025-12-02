@@ -38,7 +38,7 @@ export function hasOwn(target: ReactiveTarget, key: PropertyKey): boolean {
 /**
  * 判断属性键是否为非负整数索引，兼容 string/number 形式。
  */
-export function isIntegerKey(key: PropertyKey): boolean {
+export function isArrayIndex(key: PropertyKey): boolean {
   if (typeof key === 'symbol') {
     return false
   }

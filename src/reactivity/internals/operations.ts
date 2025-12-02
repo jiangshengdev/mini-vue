@@ -1,16 +1,16 @@
 import type { DependencyBucket, ReactiveTarget } from '../shared/types.ts'
 import {
-  iterateKey,
+  iterateDependencyKey,
   type TriggerOpType,
   triggerOpTypes,
 } from '../shared/constants.ts'
 import { trackEffect, triggerEffects } from './dep-utils.ts'
-import { isIntegerKey } from '@/shared/utils.ts'
+import { isArrayIndex } from '@/shared/utils.ts'
 
 /**
  * 集中管理对象属性与副作用之间的依赖关系。
  */
-class DepRegistry {
+class DependencyRegistry {
   /**
    * 使用 WeakMap 建立目标对象到属性依赖集合的索引结构。
    */
@@ -24,9 +24,9 @@ class DepRegistry {
    */
   track(target: ReactiveTarget, key: PropertyKey): void {
     /* 获取或创建目标字段对应的依赖集合 */
-    const dep = this.getOrCreateDep(target, key)
+    const dependencyBucket = this.getOrCreateDep(target, key)
 
-    trackEffect(dep)
+    trackEffect(dependencyBucket)
   }
 
   /**
@@ -48,12 +48,12 @@ class DepRegistry {
     const depsToRun = new Set<DependencyBucket>()
 
     /* 工具函数：跳过空集合并统一去重逻辑。 */
-    const addDep = (dep?: DependencyBucket) => {
-      if (!dep) {
+    const addDep = (dependencyBucket?: DependencyBucket) => {
+      if (!dependencyBucket) {
         return
       }
 
-      depsToRun.add(dep)
+      depsToRun.add(dependencyBucket)
     }
 
     /* 首先加入当前字段的直接依赖。 */
@@ -61,35 +61,35 @@ class DepRegistry {
 
     if (type === triggerOpTypes.add || type === triggerOpTypes.delete) {
       /* 结构性变化会影响 for...in/Object.keys，因此额外触发 iterate 依赖。 */
-      addDep(depsMap.get(iterateKey))
+      addDep(depsMap.get(iterateDependencyKey))
     }
 
     if (Array.isArray(target)) {
-      if (type === triggerOpTypes.add && isIntegerKey(key)) {
+      if (type === triggerOpTypes.add && isArrayIndex(key)) {
         /* 数组新增索引意味着 length 变化，需要同步触发 length 依赖。 */
         addDep(depsMap.get('length'))
       }
 
       if (key === 'length') {
-        for (const [depKey, dep] of depsMap.entries()) {
+        for (const [depKey, dependencyBucket] of depsMap.entries()) {
           if (depKey === 'length') {
-            addDep(dep)
+            addDep(dependencyBucket)
 
             continue
           }
 
           if (
-            isIntegerKey(depKey) &&
+            isArrayIndex(depKey) &&
             typeof newValue === 'number' &&
             Number(depKey) >= newValue
           ) {
             /* 截断 length 会影响被裁剪索引的副作用。 */
-            addDep(dep)
+            addDep(dependencyBucket)
           }
         }
 
         /* `length` 变化也会影响遍历结果。 */
-        addDep(depsMap.get(iterateKey))
+        addDep(depsMap.get(iterateDependencyKey))
       }
     }
 
@@ -98,8 +98,8 @@ class DepRegistry {
       return
     }
 
-    for (const dep of depsToRun) {
-      triggerEffects(dep)
+    for (const dependencyBucket of depsToRun) {
+      triggerEffects(dependencyBucket)
     }
   }
 
@@ -119,18 +119,18 @@ class DepRegistry {
     }
 
     /* 读取或初始化目标字段的副作用集合 */
-    let dep = depsMap.get(key)
+    let dependencyBucket = depsMap.get(key)
 
-    if (!dep) {
-      dep = new Set()
-      depsMap.set(key, dep)
+    if (!dependencyBucket) {
+      dependencyBucket = new Set()
+      depsMap.set(key, dependencyBucket)
     }
 
-    return dep
+    return dependencyBucket
   }
 }
 
-const registry = new DepRegistry()
+const registry = new DependencyRegistry()
 
 /** 响应式系统对外暴露的依赖收集入口。 */
 export function track(target: ReactiveTarget, key: PropertyKey): void {
@@ -138,7 +138,7 @@ export function track(target: ReactiveTarget, key: PropertyKey): void {
 }
 
 /**
- * 响应式系统对外暴露的触发入口，参数与 DepRegistry.trigger 对齐。
+ * 响应式系统对外暴露的触发入口，参数与 DependencyRegistry.trigger 对齐。
  */
 export function trigger(
   target: ReactiveTarget,

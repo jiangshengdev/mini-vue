@@ -27,7 +27,7 @@ const readonlyComputedError =
  * `computed` 的底层实现，通过惰性求值与脏标记保持派生状态最新。
  */
 class ComputedRefImpl<T> implements Ref<T> {
-  readonly dep: DependencyBucket = new Set()
+  readonly dependencyBucket: DependencyBucket = new Set()
 
   readonly [refFlag] = true as const
 
@@ -57,7 +57,7 @@ class ComputedRefImpl<T> implements Ref<T> {
    */
   get value(): T {
     /* 外层 effect 访问 computed 时记录依赖，便于后续触发。 */
-    trackEffect(this.dep)
+    trackEffect(this.dependencyBucket)
 
     /* 首次访问或依赖脏时重新运行 getter，并缓存结果。 */
     if (this.needsRecompute) {
@@ -85,7 +85,7 @@ class ComputedRefImpl<T> implements Ref<T> {
     }
 
     this.needsRecompute = true
-    triggerEffects(this.dep)
+    triggerEffects(this.dependencyBucket)
   }
 }
 

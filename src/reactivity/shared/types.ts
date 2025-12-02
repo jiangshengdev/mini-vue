@@ -31,7 +31,7 @@ export interface EffectInstance<T = unknown> extends EffectHandle<T> {
   /**
    * 记录一次依赖收集，便于后续清理时解除绑定。
    */
-  recordDependency(dep: DependencyBucket): void
+  recordDependency(dependencyBucket: DependencyBucket): void
 
   /**
    * 注册清理回调，用于停止嵌套的副作用。

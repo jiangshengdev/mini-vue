@@ -84,8 +84,8 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
   /**
    * 记录当前副作用与依赖集合的关联，便于后续批量清理。
    */
-  recordDependency(dep: DependencyBucket): void {
-    this.deps.push(dep)
+  recordDependency(dependencyBucket: DependencyBucket): void {
+    this.deps.push(dependencyBucket)
   }
 
   /**
@@ -101,8 +101,8 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
   private flushDependencies(): void {
     if (this.deps.length > 0) {
       /* 逐个从依赖集合中移除自己，确保后续触发不再执行 */
-      for (const dep of this.deps) {
-        dep.delete(this)
+      for (const dependencyBucket of this.deps) {
+        dependencyBucket.delete(this)
       }
 
       this.deps = []

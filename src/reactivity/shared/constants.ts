@@ -1,7 +1,7 @@
 /**
  * `for...in`/`Object.keys` 依赖的统一标识，用于追踪结构性变更。
  */
-export const iterateKey = Symbol('iterate')
+export const iterateDependencyKey = Symbol('iterate')
 
 /**
  * 触发操作类型常量，与依赖注册时的行为保持一致。

@@ -10,7 +10,7 @@ import type { PlainObject } from '@/shared/types.ts'
  * RefImpl 负责封装普通值的响应式访问器，实现依赖收集与触发。
  */
 export class RefImpl<T> implements Ref<T>, RefDepCarrier {
-  readonly dep: DependencyBucket = new Set()
+  readonly dependencyBucket: DependencyBucket = new Set()
 
   readonly [refFlag] = true as const
 
@@ -31,7 +31,7 @@ export class RefImpl<T> implements Ref<T>, RefDepCarrier {
    */
   get value(): T {
     /* 读取时登记当前副作用，保持追踪关系。 */
-    trackEffect(this.dep)
+    trackEffect(this.dependencyBucket)
 
     return this.innerValue
   }
@@ -48,7 +48,7 @@ export class RefImpl<T> implements Ref<T>, RefDepCarrier {
     /* 更新原始值与响应式引用后，触发依赖的副作用重新执行。 */
     this.rawValue = newValue
     this.innerValue = maybeReactiveValue(newValue)
-    triggerEffects(this.dep)
+    triggerEffects(this.dependencyBucket)
   }
 }
 
@@ -64,7 +64,7 @@ export class ObjectRefImpl<T extends PlainObject, K extends keyof T>
 
   private readonly key: K
 
-  private readonly dep?: DependencyBucket
+  private readonly dependencyBucket?: DependencyBucket
 
   /**
    * 构造时记录目标对象与属性键，后续读写将直接代理到该属性。
@@ -74,7 +74,7 @@ export class ObjectRefImpl<T extends PlainObject, K extends keyof T>
     this.key = key
 
     if (needsLocalDep) {
-      this.dep = new Set()
+      this.dependencyBucket = new Set()
     }
   }
 
@@ -84,9 +84,9 @@ export class ObjectRefImpl<T extends PlainObject, K extends keyof T>
   get value(): T[K] {
     const value = this.target[this.key]
 
-    if (this.dep) {
-      /* 普通对象属性通过自身 dep 追踪依赖。 */
-      trackEffect(this.dep)
+    if (this.dependencyBucket) {
+      /* 普通对象属性通过自身 dependencyBucket 追踪依赖。 */
+      trackEffect(this.dependencyBucket)
     }
 
     /* 不额外缓存值，直接透传原对象，确保和原始 getter 一致。 */
@@ -97,7 +97,7 @@ export class ObjectRefImpl<T extends PlainObject, K extends keyof T>
    * 写入属性 Ref 时同步赋值到原对象属性上。
    */
   set value(newValue: T[K]) {
-    if (this.dep) {
+    if (this.dependencyBucket) {
       const previousValue = this.target[this.key]
 
       if (Object.is(previousValue, newValue)) {
@@ -106,8 +106,8 @@ export class ObjectRefImpl<T extends PlainObject, K extends keyof T>
 
       this.target[this.key] = newValue
 
-      /* 普通对象属性依赖由自身 dep 驱动。 */
-      triggerEffects(this.dep)
+      /* 普通对象属性依赖由自身 dependencyBucket 驱动。 */
+      triggerEffects(this.dependencyBucket)
 
       return
     }

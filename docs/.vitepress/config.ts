@@ -30,7 +30,12 @@ function buildSidebar() {
   const sections = []
 
   const rootItems = entries
-    .filter((entry) => entry.isFile() && entry.name.endsWith('.md') && entry.name !== 'index.md')
+    .filter(
+      (entry) =>
+        entry.isFile() &&
+        entry.name.endsWith('.md') &&
+        entry.name !== 'index.md',
+    )
     .sort((a, b) => a.name.localeCompare(b.name))
     .map((entry) => createSidebarItem(join(DOCS_ROOT, entry.name)))
 

@@ -16,6 +16,19 @@ export { render }
 interface DomAppState {
   /** `runtime-core` 的通用应用实例，用来执行真正的渲染逻辑。 */
   baseApp: AppInstance<Element>
+  /** 最近一次 mount 调用时的原始目标，字符串或节点。 */
+  lastMountTarget?: string | Element
+  /** 最近一次解析得到的真实容器节点。 */
+  lastResolvedContainer?: Element
+  /** 标识当前 DOM 宿主是否已经处于挂载状态。 */
+  isMounted: boolean
+  /** 保存 HMR 生命周期注册信息，避免重复监听。 */
+  hmr?: DomAppHmrState
+}
+
+interface DomAppHmrState {
+  registered: boolean
+  pendingRemount: boolean
 }
 
 /**
@@ -42,8 +55,12 @@ function mountDomApp(state: DomAppState, target: string | Element): void {
     throw new Error('createApp: 未找到可用的挂载容器')
   }
 
+  state.lastMountTarget = target
+  state.lastResolvedContainer = container
+
   /* 将解析好的容器传递给 runtime-core 实例执行挂载。 */
   state.baseApp.mount(container)
+  state.isMounted = true
 }
 
 /**
@@ -51,6 +68,33 @@ function mountDomApp(state: DomAppState, target: string | Element): void {
  */
 function unmountDomApp(state: DomAppState): void {
   state.baseApp.unmount()
+  state.isMounted = false
+}
+
+/**
+ * 在 HMR 场景下复用最近一次容器数据重新挂载。
+ */
+function remountDomApp(state: DomAppState): void {
+  let target: string | Element | undefined = state.lastResolvedContainer
+
+  /* 断开连接后重新根据字符串选择器解析，保证挂载位置可恢复。 */
+  if (
+    target instanceof Element &&
+    !target.isConnected &&
+    typeof state.lastMountTarget === 'string'
+  ) {
+    target = state.lastMountTarget
+  }
+
+  if (!target && state.lastMountTarget) {
+    target = state.lastMountTarget
+  }
+
+  if (!target) {
+    return
+  }
+
+  mountDomApp(state, target)
 }
 
 /**
@@ -75,7 +119,10 @@ export function createApp(
       rootComponent,
       rootProps,
     ),
+    isMounted: false,
   }
+
+  ensureDomHmrLifecycle(state)
 
   /* 封装 DOM 版本 mount，让用户可以传入不同类型的容器。 */
   function mount(target: string | Element): void {
@@ -92,4 +139,57 @@ export function createApp(
     mount,
     unmount,
   }
+}
+
+/**
+ * 注入针对 Vite 的 HMR 生命周期，确保热更新前后正确卸载/重建。
+ */
+function ensureDomHmrLifecycle(state: DomAppState): void {
+  /* 仅在 Vite Dev 环境下存在 `import.meta.hot`。 */
+  const hot = import.meta.hot
+
+  if (!hot) {
+    return
+  }
+
+  if (state.hmr?.registered) {
+    return
+  }
+
+  const hmrState: DomAppHmrState = {
+    registered: true,
+    pendingRemount: false,
+  }
+
+  state.hmr = hmrState
+
+  const prepareRemount = () => {
+    if (!state.isMounted) {
+      return
+    }
+
+    hmrState.pendingRemount = Boolean(state.lastMountTarget)
+    unmountDomApp(state)
+  }
+
+  const remountIfNeeded = () => {
+    if (!hmrState.pendingRemount) {
+      return
+    }
+
+    hmrState.pendingRemount = false
+    remountDomApp(state)
+  }
+
+  hot.on('vite:beforeUpdate', prepareRemount)
+  hot.on('vite:beforeFullReload', prepareRemount)
+  hot.on('vite:afterUpdate', remountIfNeeded)
+
+  hot.dispose(() => {
+    if (!state.isMounted) {
+      return
+    }
+
+    unmountDomApp(state)
+  })
 }

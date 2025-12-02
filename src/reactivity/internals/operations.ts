@@ -71,6 +71,7 @@ class DependencyRegistry {
       }
 
       if (key === 'length') {
+        /* 主动遍历所有已追踪的索引依赖，以判断哪些受 length 截断影响。 */
         for (const [depKey, dependencyBucket] of depsMap.entries()) {
           if (depKey === 'length') {
             addDep(dependencyBucket)
@@ -88,7 +89,7 @@ class DependencyRegistry {
           }
         }
 
-        /* `length` 变化也会影响遍历结果。 */
+        /* `length` 的结构变化同样会破坏遍历顺序，需要同步刷新迭代依赖。 */
         addDep(depsMap.get(iterateDependencyKey))
       }
     }

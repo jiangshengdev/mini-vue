@@ -103,7 +103,7 @@ export function createAppInstance<HostElement>(
     container: undefined,
     config,
     rootComponent,
-    initialRootProps: initialRootProps,
+    initialRootProps,
   }
 
   /* 用户态 mount 会透传容器给核心挂载逻辑。 */

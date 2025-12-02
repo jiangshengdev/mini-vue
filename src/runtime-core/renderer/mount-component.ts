@@ -22,7 +22,7 @@ interface ComponentInstance<
   readonly type: T
   /** 当前组件挂载的宿主容器，子树会插入到此处。 */
   readonly container: HostElement | HostFragment
-  /** latest props 快照，供组件执行阶段读取。 */
+  /** Latest props 快照，供组件执行阶段读取。 */
   readonly props: ElementProps<T>
   /** 承载组件副作用的响应式 effect。 */
   readonly effect: ReactiveEffect<ComponentResult>

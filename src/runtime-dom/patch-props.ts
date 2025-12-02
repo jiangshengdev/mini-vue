@@ -2,8 +2,12 @@
  * DOM 专用的属性打补丁逻辑，负责将 virtualNode props 应用到真实元素上。
  */
 import { isNil } from '@/shared/utils.ts'
+import { isRef } from '@/reactivity/index.ts'
+import type { Ref } from '@/reactivity/index.ts'
 
-export type ElementRef = (element: Element) => void
+export type ElementRef =
+  | ((element: Element | undefined) => void)
+  | Ref<Element | undefined>
 
 /** 扩展原生 style 声明，允许对任意属性键执行写入。 */
 type WritableStyle = CSSStyleDeclaration & Record<string, string | undefined>
@@ -27,9 +31,9 @@ export function patchProps(
   }
 
   for (const [key, value] of Object.entries(props)) {
-    /* `ref` 需要拿到真实元素，因此直接执行用户回调。 */
+    /* `ref` 需要拿到真实元素或响应式 Ref，因此直接赋值。 */
     if (key === 'ref' && isElementRef(value)) {
-      value(element)
+      assignElementRef(value, element)
       continue
     }
 
@@ -117,5 +121,18 @@ function patchDomAttr(element: Element, key: string, value: unknown): void {
 }
 
 function isElementRef(value: unknown): value is ElementRef {
-  return typeof value === 'function'
+  return typeof value === 'function' || isRef<Element | undefined>(value)
+}
+
+function assignElementRef(
+  target: ElementRef,
+  element: Element | undefined,
+): void {
+  if (typeof target === 'function') {
+    target(element)
+
+    return
+  }
+
+  target.value = element
 }

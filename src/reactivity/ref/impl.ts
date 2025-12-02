@@ -3,7 +3,7 @@ import { trackEffect, triggerEffects } from '../internals/dep-utils.ts'
 import type { DependencyBucket } from '../shared/types.ts'
 import type { Ref, RefDepCarrier, RefMarker } from './types.ts'
 import { refFlag } from './types.ts'
-import { isObject } from '@/shared/utils.ts'
+import { isPlainObject } from '@/shared/utils.ts'
 import type { PlainObject } from '@/shared/types.ts'
 
 /**
@@ -121,9 +121,9 @@ export class ObjectRefImpl<T extends PlainObject, K extends keyof T>
  * `maybeReactiveValue` 根据值类型决定是否递归包裹成响应式对象。
  */
 function maybeReactiveValue<T>(value: T): T {
-  /* 对象类型交由 reactive 处理，其余原样返回。 */
-  if (isObject(value)) {
-    return reactive(value) as T
+  /* 仅针对普通对象递归创建响应式代理，其他对象原样返回。 */
+  if (isPlainObject(value)) {
+    return reactive(value as PlainObject) as T
   }
 
   return value

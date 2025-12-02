@@ -55,12 +55,8 @@ export function mountComponent<
 
   const mounted = performInitialRender(instance, options)
 
-  if (!mounted) {
-    return undefined
-  }
-
   return {
-    nodes: mounted.nodes,
+    nodes: mounted?.nodes ?? [],
     teardown(): void {
       teardownComponentInstance(instance)
     },

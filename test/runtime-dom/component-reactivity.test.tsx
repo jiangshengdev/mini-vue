@@ -56,4 +56,36 @@ describe('runtime-dom component reactivity', () => {
     state.on = false
     expect(renderSpy).toHaveBeenCalledTimes(2)
   })
+
+  it('返回空子树的组件也会在卸载时停止 effect', () => {
+    const renderSpy = vi.fn()
+    const state = reactive({ visible: false })
+
+    const Ghost: ComponentType = () => {
+      renderSpy()
+
+      if (!state.visible) {
+        return undefined
+      }
+
+      return <span>ghost</span>
+    }
+
+    const container = createTestContainer()
+
+    render(<Ghost />, container)
+
+    expect(renderSpy).toHaveBeenCalledTimes(1)
+    expect(container).toBeEmptyDOMElement()
+
+    state.visible = true
+    expect(renderSpy).toHaveBeenCalledTimes(2)
+    expect(container.textContent).toBe('ghost')
+
+    render(undefined, container)
+    expect(container).toBeEmptyDOMElement()
+
+    state.visible = false
+    expect(renderSpy).toHaveBeenCalledTimes(2)
+  })
 })

@@ -2,8 +2,8 @@ import type { RendererOptions } from '../renderer.ts'
 import { mountChildren } from './mount-children.ts'
 import type { MountedHandle } from './mounted-handle.ts'
 import type { VirtualNode } from '@/jsx/index.ts'
-import { isRef } from '@/reactivity/index.ts'
 import type { Ref } from '@/reactivity/index.ts'
+import { isRef } from '@/reactivity/index.ts'
 
 /**
  * 创建宿主元素并同步 props 与 children。

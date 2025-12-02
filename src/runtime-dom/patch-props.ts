@@ -2,8 +2,8 @@
  * DOM 专用的属性打补丁逻辑，负责将 virtualNode props 应用到真实元素上。
  */
 import { isNil } from '@/shared/utils.ts'
-import { isRef } from '@/reactivity/index.ts'
 import type { Ref } from '@/reactivity/index.ts'
+import { isRef } from '@/reactivity/index.ts'
 
 export type ElementRef =
   | ((element: Element | undefined) => void)

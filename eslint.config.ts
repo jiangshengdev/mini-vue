@@ -1,7 +1,8 @@
+import { defineConfig, globalIgnores } from 'eslint/config'
 import js from '@eslint/js'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
-import { defineConfig } from 'eslint/config'
+import pluginOxlint from 'eslint-plugin-oxlint'
 import eslintConfigPrettier from 'eslint-config-prettier/flat'
 import stylistic from '@stylistic/eslint-plugin'
 
@@ -45,6 +46,9 @@ export default defineConfig([
       '@stylistic/lines-between-class-members': ['error', 'always'],
     },
   },
+
+  globalIgnores(['**/dist/**', '**/dist-ssr/**', '**/coverage/**', '**/.vitepress/cache/**']),
+
   ...tseslint.configs.recommended,
   {
     files: ['**/*.{ts,tsx,mts,cts}'],
@@ -62,5 +66,6 @@ export default defineConfig([
       ],
     },
   },
+  ...pluginOxlint.configs['flat/recommended'],
   eslintConfigPrettier,
 ])

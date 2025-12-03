@@ -22,3 +22,10 @@
   - 可写 `computed` 在 `set value()` 中包裹 `try...catch`，若自定义 setter 抛错，会先通过 `handleMiniError(..., 'computed-setter')` 上报，再将原始异常同步抛出，便于调用方处理。
 - 影响：`watch` cleanup 抛错不再阻断后续回调或 stop 清理，`computed` setter 的异常也能被统一上报并保留原有同步抛错语义。
 - 提示：框架使用者可通过 `setMiniErrorHandler` 监听 cleanup/setter 的异常，进行日志或自定义修复。
+
+## 4. effect 内部 cleanup 抛错会中断 flush（已修复）
+
+- 位置：`src/reactivity/effect.ts`
+- 现状：2025-12-03 起 `ReactiveEffect.flushDependencies()` 会在遍历 `registerCleanup()` 注册的回调时使用 `try...catch` 包裹，并通过 `handleMiniError(..., 'effect-cleanup')` 上报异常后继续执行剩余清理任务。
+- 影响：当 `watch`、嵌套 effect 等注册的清理逻辑抛错时，不会再阻断后续 cleanup 或 effect 重跑，整条触发链得以保持完整。
+- 提示：如需跟踪此类错误，可依旧调用 `setMiniErrorHandler` 并关注 `'effect-cleanup'` 上下文。

@@ -9,6 +9,7 @@ import {
 } from '@/index.ts'
 import type { MiniErrorHandler } from '@/index.ts'
 import * as dependencyUtils from '@/reactivity/internals/dependency-utils.ts'
+import { effectStack } from '@/reactivity/internals/effect-stack.ts'
 
 describe('effect', () => {
   afterEach(() => {
@@ -267,6 +268,36 @@ describe('effect', () => {
     state.count = 3
     expect(runCount).toBe(2)
     expect(jobs.length).toBe(0)
+  })
+
+  it('effect cleanup 抛错会通知错误处理器并继续执行剩余清理', () => {
+    const state = reactive({ count: 0 })
+    const handler = vi.fn<MiniErrorHandler>()
+    const cleanupOrder: string[] = []
+
+    setMiniErrorHandler(handler)
+
+    effect(() => {
+      void state.count
+
+      effectStack.current?.registerCleanup(() => {
+        cleanupOrder.push('first')
+        throw new Error('effect cleanup failed')
+      })
+
+      effectStack.current?.registerCleanup(() => {
+        cleanupOrder.push('second')
+      })
+    })
+
+    state.count = 1
+
+    expect(cleanupOrder).toEqual(['first', 'second'])
+    expect(handler).toHaveBeenCalledTimes(1)
+    const [error, context] = handler.mock.calls[0]
+
+    expect((error as Error).message).toBe('effect cleanup failed')
+    expect(context).toBe('effect-cleanup')
   })
 
   it('effect 抛错会通知错误处理器并保持原有抛出行为', () => {

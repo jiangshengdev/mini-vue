@@ -34,6 +34,7 @@
     "xo": "xo",
     "format": "prettier docs playground src test --write",
     "typecheck": "tsc --noEmit",
+    "release": "bumpp && pnpm publish",
     "prepublishOnly": "pnpm run build",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",

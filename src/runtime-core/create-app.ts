@@ -1,6 +1,7 @@
 import type { RootRenderFunction } from './renderer.ts'
 import type { ElementProps, SetupFunctionComponent } from '@/jsx/index.ts'
 import { createVirtualNode } from '@/jsx/index.ts'
+import type { ComponentPropsShape } from '@/shared/types.ts'
 
 /**
  * 宿主平台注入的渲染配置，提供渲染与清理能力。
@@ -35,7 +36,7 @@ interface AppState<HostElement> {
   /** 根组件定义，用于生成顶层子树。 */
   rootComponent: SetupFunctionComponent
   /** 传入根组件的初始 props。 */
-  initialRootProps?: Record<string, unknown>
+  initialRootProps?: ComponentPropsShape
 }
 
 /**
@@ -96,7 +97,7 @@ function createRootVirtualNode<HostElement>(state: AppState<HostElement>) {
 export function createAppInstance<HostElement>(
   config: AppRuntimeConfig<HostElement>,
   rootComponent: SetupFunctionComponent,
-  initialRootProps?: Record<string, unknown>,
+  initialRootProps?: ComponentPropsShape,
 ): AppInstance<HostElement> {
   const state: AppState<HostElement> = {
     status: 'idle',

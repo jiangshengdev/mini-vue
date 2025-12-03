@@ -4,6 +4,7 @@ import type { MountedHandle } from './mounted-handle.ts'
 import type { VirtualNode } from '@/jsx/index.ts'
 import type { Ref } from '@/reactivity/index.ts'
 import { isRef } from '@/reactivity/index.ts'
+import type { ComponentPropsShape } from '@/shared/types.ts'
 
 /**
  * 创建宿主元素并同步 props 与 children。
@@ -20,8 +21,8 @@ export function mountElement<
 ): MountedHandle<HostNode> {
   const { createElement, patchProps, appendChild, remove } = options
   const element = createElement(type)
-  const props: Record<string, unknown> | undefined = virtualNode.props as
-    | Record<string, unknown>
+  const props: ComponentPropsShape | undefined = virtualNode.props as
+    | ComponentPropsShape
     | undefined
   const refBinding = resolveElementRefBinding<HostElement>(props?.ref)
 

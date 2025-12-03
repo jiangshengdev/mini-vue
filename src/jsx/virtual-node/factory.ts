@@ -8,6 +8,7 @@ import type {
   VirtualNodeChild,
 } from './types.ts'
 import { virtualNodeFlag } from './types.ts'
+import type { ComponentPropsShape } from '@/shared/types.ts'
 
 /**
  * JSX 片段组件，不创建额外节点，直接返回 children。
@@ -33,7 +34,7 @@ export function createVirtualNode<T extends ElementType>(
 ): VirtualNode<T> {
   const { type, rawProps, key } = options
   /* 通过解构复制 props，避免外部对象在后续流程中被意外修改 */
-  let props: Record<string, unknown> | undefined
+  let props: ComponentPropsShape | undefined
   let children: VirtualNodeChild[] = []
 
   if (rawProps) {

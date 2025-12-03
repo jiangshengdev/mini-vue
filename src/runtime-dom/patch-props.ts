@@ -4,6 +4,7 @@
 import { isNil } from '@/shared/utils.ts'
 import type { Ref } from '@/reactivity/index.ts'
 import { isRef } from '@/reactivity/index.ts'
+import type { ComponentPropsShape } from '@/shared/types.ts'
 
 export type ElementRef =
   | ((element: Element | undefined) => void)
@@ -24,7 +25,7 @@ function isEventProp(key: string): boolean {
  */
 export function patchProps(
   element: Element,
-  props?: Record<string, unknown>,
+  props?: ComponentPropsShape,
 ): void {
   if (!props) {
     return

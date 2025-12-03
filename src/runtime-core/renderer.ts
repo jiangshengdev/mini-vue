@@ -4,7 +4,7 @@
 import { mountChild } from './renderer/mount-child.ts'
 import type { MountedHandle } from './renderer/mounted-handle.ts'
 import type { ComponentResult } from '@/jsx/index.ts'
-import type { PlainObject } from '@/shared/types.ts'
+import type { ComponentPropsShape, PlainObject } from '@/shared/types.ts'
 
 /**
  * 宿主环境需要提供的渲染原语集合。
@@ -30,7 +30,7 @@ export interface RendererOptions<
    * 将 virtualNode props 映射到真实元素节点。
    * 传入 null 时代表没有任何 props 需要处理。
    */
-  patchProps(element: HostElement, props?: Record<string, unknown>): void
+  patchProps(element: HostElement, props?: ComponentPropsShape): void
 }
 
 /** 根级渲染函数签名，负责将顶层子树挂载到容器。 */

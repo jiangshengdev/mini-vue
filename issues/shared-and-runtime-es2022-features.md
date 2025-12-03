@@ -29,11 +29,11 @@
 - 建议：虽然当前实现已经很清晰，但从语义角度，检查负数索引的场景可以考虑未来扩展时使用 `Array.prototype.at()` 的模式思维
 - 评价：**当前实现已足够优秀**，此建议仅作为知识点记录，实际场景中 `startsWith('-')` 更直接高效
 
-## 4. `src/shared/error-handling.ts` - 可考虑使用 `using` 声明（TS 5.2+）优化资源管理
+## 4. `src/shared/error-handling.ts` - 可考虑使用 `using` 声明优化资源管理
 
 - 位置：`src/shared/error-handling.ts:27-36`
 - 现状：使用手动的状态管理 `currentMiniErrorHandler` 变量
-- 潜在优化：对于需要临时覆盖错误处理器并确保恢复的场景，可引入 Symbol.dispose 模式
+- 潜在优化：对于需要临时覆盖错误处理器并确保恢复的场景，可引入 Symbol.dispose 模式（TypeScript 5.2+ 特性）
 - 建议：
   ```typescript
   // 未来如需支持作用域级错误处理器临时替换，可创建：
@@ -96,7 +96,7 @@
     throw new Error(String(error), { cause: error })
   })
   ```
-- 评价：`queueMicrotask` 是标准的 HTML Living Standard API，在现代浏览器和 Node.js 环境中广泛支持，相比 `Promise.resolve().then()` 更直接且语义明确。虽然不是 ES2022 新增特性，但作为现代异步编程最佳实践值得认可。
+- 评价：`queueMicrotask` 是 WHATWG HTML 规范的标准 API，在现代浏览器和 Node.js 等多种 JavaScript 运行时环境中广泛支持，相比 `Promise.resolve().then()` 更直接且语义明确。虽然不是 ES2022 新增特性，但作为现代异步编程最佳实践值得认可。
 
 ## 9. `src/shared/utils.ts` - 可考虑使用 satisfies 操作符优化类型注解（TS 4.9+）
 

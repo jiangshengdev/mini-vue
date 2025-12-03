@@ -5,7 +5,9 @@ export type ReactivityErrorContext =
   | 'scheduler'
   | 'effect-runner'
   | 'effect-scope-run'
+  | 'effect-scope-cleanup'
   | 'watch-callback'
+  | 'component-cleanup'
 
 /**
  * 标准化的错误处理函数签名，统一传入原始异常与上下文标签。

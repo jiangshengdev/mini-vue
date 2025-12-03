@@ -1,5 +1,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { computed, effect, effectScope, reactive, setReactivityErrorHandler } from '@/index.ts'
+import {
+  computed,
+  effect,
+  effectScope,
+  onScopeDispose,
+  reactive,
+  setReactivityErrorHandler,
+} from '@/index.ts'
 import * as dependencyUtils from '@/reactivity/internals/dependency-utils.ts'
 
 describe('effect', () => {
@@ -446,6 +453,34 @@ describe('effect', () => {
 
     state.count = 2
     expect(observed).toEqual([0, 2])
+  })
+
+  it('effectScope 停止时 cleanup 抛错不会阻断剩余任务', () => {
+    const scope = effectScope()
+    const handler = vi.fn()
+    const cleanupOrder: string[] = []
+
+    setReactivityErrorHandler(handler)
+
+    scope.run(() => {
+      onScopeDispose(() => {
+        cleanupOrder.push('first')
+        throw new Error('scope cleanup failed')
+      })
+
+      onScopeDispose(() => {
+        cleanupOrder.push('second')
+      })
+    })
+
+    scope.stop()
+
+    expect(cleanupOrder).toEqual(['first', 'second'])
+    expect(handler).toHaveBeenCalledTimes(1)
+    const [error, context] = handler.mock.calls[0] ?? []
+
+    expect((error as Error).message).toBe('scope cleanup failed')
+    expect(context).toBe('effect-scope-cleanup')
   })
 
   it('effectScope.run 抛错会触发错误处理器', () => {

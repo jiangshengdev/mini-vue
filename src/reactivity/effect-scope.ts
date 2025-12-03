@@ -98,18 +98,38 @@ export class EffectScope {
 
     /* 逐个停止 scope 内缓存的副作用，释放依赖关系。 */
     for (const effect of this.effects) {
-      effect.stop()
+      try {
+        effect.stop()
+      } catch (error) {
+        handleReactivityError(error, 'effect-scope-cleanup')
+      }
     }
 
+    this.effects.length = 0
+
     /* 执行用户注册的清理任务，用于销毁副作用外部资源。 */
-    for (const cleanup of this.cleanups) {
-      cleanup()
+    if (this.cleanups.length > 0) {
+      const registeredCleanups = [...this.cleanups]
+
+      this.cleanups.length = 0
+
+      for (const cleanup of registeredCleanups) {
+        try {
+          cleanup()
+        } catch (error) {
+          handleReactivityError(error, 'effect-scope-cleanup')
+        }
+      }
     }
 
     if (this.childScopes) {
       /* 通知所有子 scope 级联 stop，并告知它们来源于父级。 */
       for (const scope of this.childScopes) {
-        scope.stop(true)
+        try {
+          scope.stop(true)
+        } catch (error) {
+          handleReactivityError(error, 'effect-scope-cleanup')
+        }
       }
 
       this.childScopes = undefined

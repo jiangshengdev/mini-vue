@@ -7,12 +7,12 @@
 - 影响：调度阶段的单个 job 抛错只会被统一错误处理器捕获，不再影响同批次的其他副作用。
 - 提示：如需进一步定制上报行为，可通过 `setReactivityErrorHandler` 统一处理。
 
-## 2. Scope 与组件清理任务缺少容错（待修复）
+## 2. Scope 与组件清理任务缺少容错（已修复）
 
 - 位置：`src/reactivity/effect-scope.ts`、`src/runtime-core/renderer/mount-component.ts`
-- 现状：无论是 `EffectScope.stop()` 遍历的 `cleanups`/子 scope，还是 `teardownComponentInstance()` 中逐一执行的组件级 `cleanupTasks`，都直接调用用户注册方法；若其中任意一个抛错，后续清理将不会执行，进而留下活动的副作用或 DOM 引用。
-- 影响：使用 `onScopeDispose`/组件清理钩子管理外部资源（如事件监听、定时器）时，只要某个 cleanup 失败，其余资源可能永久泄漏，和“Scope 能保证全部清理”的预期不符。
-- 提示：遍历执行 cleanup 时需加上 `try...catch`（或 `try...finally`），确保单个清理失败不会阻断剩余清理，同时可以收集/上报错误信息以便开发者处理。
+- 现状：2025-12-03 起 `EffectScope.stop()` 在停止内部 effect、执行 `onScopeDispose` 回调以及级联子 scope 时，都会捕获异常并通过 `handleReactivityError(..., 'effect-scope-cleanup')` 上报，随后继续处理剩余任务；组件卸载阶段则在 `teardownComponentInstance()` 内对 `cleanupTasks` 逐一包裹 `try...catch` 并使用 `'component-cleanup'` 上下文。
+- 影响：单个 cleanup 抛错只会进入统一处理器，其他副作用、子 scope 或组件级清理动作仍会执行完成，避免资源泄漏。
+- 提示：如需侦听这些错误，可通过 `setReactivityErrorHandler` 统一收集与上报。
 
 ## 3. 用户注册的 cleanup/setter 未加保护（部分已修复）
 

@@ -1,4 +1,4 @@
-# shared 与 JSX 运行时模块 ES2022+TS5.9 特性检查
+# shared 与 JSX 运行时模块 ES2022+ 与 TS 5.9 特性检查
 
 ## 1. `src/shared/error-handling.ts` - Error cause 特性已正确使用 ✅
 
@@ -96,7 +96,7 @@
     throw new Error(String(error), { cause: error })
   })
   ```
-- 评价：`queueMicrotask` 是现代浏览器和 Node.js 支持的标准 API（ES2018+），相比 `Promise.resolve().then()` 更直接且语义明确。
+- 评价：`queueMicrotask` 是现代浏览器和 Node.js 支持的标准 API（HTML Living Standard，广泛支持于 ES2018+ 环境），相比 `Promise.resolve().then()` 更直接且语义明确。虽然不是 ES2022 新增特性，但作为现代异步编程最佳实践值得认可。
 
 ## 9. `src/shared/utils.ts` - 可考虑使用 satisfies 操作符优化类型注解（TS 4.9+）
 
@@ -107,7 +107,7 @@
 
 ## 总结
 
-本次检查的 4 个文件（`src/shared/error-handling.ts`、`src/shared/types.ts`、`src/shared/utils.ts` 以及 3 个 JSX 运行时入口文件）整体已充分利用 ES2022 和 TypeScript 5.9 的现代特性：
+本次检查的 6 个文件（`src/shared/` 目录下的 3 个文件：`error-handling.ts`、`types.ts`、`utils.ts`，以及 3 个 JSX 运行时入口文件：`index.ts`、`jsx-dev-runtime.ts`、`jsx-runtime.ts`）整体已充分利用 ES2022 和 TypeScript 5.9 的现代特性：
 
 **已正确使用的现代特性：**
 - ✅ ES2022 Error cause（error-handling.ts）

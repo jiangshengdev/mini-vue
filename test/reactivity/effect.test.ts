@@ -7,6 +7,7 @@ import {
   reactive,
   setMiniErrorHandler,
 } from '@/index.ts'
+import type { MiniErrorHandler } from '@/index.ts'
 import * as dependencyUtils from '@/reactivity/internals/dependency-utils.ts'
 
 describe('effect', () => {
@@ -269,7 +270,7 @@ describe('effect', () => {
   })
 
   it('effect 抛错会通知错误处理器并保持原有抛出行为', () => {
-    const handler = vi.fn()
+    const handler = vi.fn<MiniErrorHandler>()
     const boom = new Error('effect failed')
 
     setMiniErrorHandler(handler)
@@ -281,7 +282,7 @@ describe('effect', () => {
     }).toThrow(boom)
 
     expect(handler).toHaveBeenCalledTimes(1)
-    const [error, context] = handler.mock.calls[0] ?? []
+    const [error, context] = handler.mock.calls[0]
 
     expect(error).toBe(boom)
     expect(context).toBe('effect-runner')
@@ -289,7 +290,7 @@ describe('effect', () => {
 
   it('scheduler 抛错时不会阻断其余 effect 并触发统一错误处理', () => {
     const state = reactive({ count: 0 })
-    const handler = vi.fn()
+    const handler = vi.fn<MiniErrorHandler>()
 
     setMiniErrorHandler(handler)
 
@@ -317,7 +318,7 @@ describe('effect', () => {
 
     expect(fallbackRuns).toBe(2)
     expect(handler).toHaveBeenCalledTimes(1)
-    const [error, context] = handler.mock.calls[0] ?? []
+    const [error, context] = handler.mock.calls[0]
 
     expect((error as Error).message).toBe('scheduler failed')
     expect(context).toBe('scheduler')
@@ -457,7 +458,7 @@ describe('effect', () => {
 
   it('effectScope 停止时 cleanup 抛错不会阻断剩余任务', () => {
     const scope = effectScope()
-    const handler = vi.fn()
+    const handler = vi.fn<MiniErrorHandler>()
     const cleanupOrder: string[] = []
 
     setMiniErrorHandler(handler)
@@ -477,7 +478,7 @@ describe('effect', () => {
 
     expect(cleanupOrder).toEqual(['first', 'second'])
     expect(handler).toHaveBeenCalledTimes(1)
-    const [error, context] = handler.mock.calls[0] ?? []
+    const [error, context] = handler.mock.calls[0]
 
     expect((error as Error).message).toBe('scope cleanup failed')
     expect(context).toBe('effect-scope-cleanup')
@@ -485,7 +486,7 @@ describe('effect', () => {
 
   it('effectScope.run 抛错会触发错误处理器', () => {
     const scope = effectScope()
-    const handler = vi.fn()
+    const handler = vi.fn<MiniErrorHandler>()
     const boom = new Error('scope failed')
 
     setMiniErrorHandler(handler)
@@ -497,7 +498,7 @@ describe('effect', () => {
     }).toThrow(boom)
 
     expect(handler).toHaveBeenCalledTimes(1)
-    const [error, context] = handler.mock.calls[0] ?? []
+    const [error, context] = handler.mock.calls[0]
 
     expect(error).toBe(boom)
     expect(context).toBe('effect-scope-run')

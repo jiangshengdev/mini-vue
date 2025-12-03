@@ -1,9 +1,9 @@
 import { ReactiveEffect } from '../effect.ts'
 import { recordEffectScope, recordScopeCleanup } from '../effect-scope.ts'
 import { effectStack } from '../internals/effect-stack.ts'
-import { handleMiniError } from '@/shared/error-handling.ts'
 import type { Ref } from '../ref/types.ts'
 import { createGetter, resolveDeepOption } from './utils.ts'
+import { handleMiniError } from '@/shared/error-handling.ts'
 import type { PlainObject } from '@/shared/types.ts'
 
 /** `watch` 可接受的追踪源类型，覆盖 ref、getter 与普通对象。 */

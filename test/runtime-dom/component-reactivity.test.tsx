@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { within } from '@testing-library/dom'
 import { createTestContainer } from '../setup.ts'
-import type { SetupFunctionComponent } from '@/index.ts'
+import type { SetupFunctionComponent, MiniErrorHandler } from '@/index.ts'
 import { reactive, render, setMiniErrorHandler, watch } from '@/index.ts'
 import { getCurrentInstance } from '@/runtime-core/component-instance.ts'
 
@@ -155,7 +155,7 @@ describe('runtime-dom component reactivity', () => {
 
   it('组件 cleanupTasks 抛错时不会阻塞后续清理', () => {
     const container = createTestContainer()
-    const handler = vi.fn()
+    const handler = vi.fn<MiniErrorHandler>()
     const cleanupOrder: string[] = []
 
     setMiniErrorHandler(handler)
@@ -185,7 +185,7 @@ describe('runtime-dom component reactivity', () => {
 
     expect(cleanupOrder).toEqual(['first', 'second'])
     expect(handler).toHaveBeenCalledTimes(1)
-    const [error, context] = handler.mock.calls[0] ?? []
+    const [error, context] = handler.mock.calls[0]
 
     expect((error as Error).message).toBe('component cleanup failed')
     expect(context).toBe('component-cleanup')

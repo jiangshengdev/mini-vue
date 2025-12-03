@@ -1,10 +1,10 @@
 import { ReactiveEffect } from '../effect.ts'
 import { recordEffectScope } from '../effect-scope.ts'
 import { trackEffect, triggerEffects } from '../internals/dependency-utils.ts'
-import { handleMiniError } from '@/shared/error-handling.ts'
 import type { DependencyBucket } from '../shared/types.ts'
 import type { Ref } from './types.ts'
 import { refFlag } from './types.ts'
+import { handleMiniError } from '@/shared/error-handling.ts'
 
 /** `computed` getter 负责在依赖图中派生出最终结果。 */
 export type ComputedGetter<T> = () => T

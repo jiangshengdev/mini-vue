@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { computed, effect, ref, setMiniErrorHandler } from '@/index.ts'
+import type { MiniErrorHandler } from '@/index.ts'
 
 describe('computed', () => {
   afterEach(() => {
@@ -91,7 +92,7 @@ describe('computed', () => {
   })
 
   it('setter 抛错时会同步抛出并通知错误处理器', () => {
-    const handler = vi.fn()
+    const handler = vi.fn<MiniErrorHandler>()
     const base = ref(0)
     const boom = new Error('setter failed')
 
@@ -111,7 +112,7 @@ describe('computed', () => {
     }).toThrow(boom)
 
     expect(handler).toHaveBeenCalledTimes(1)
-    const [error, context] = handler.mock.calls[0] ?? []
+    const [error, context] = handler.mock.calls[0]
 
     expect(error).toBe(boom)
     expect(context).toBe('computed-setter')

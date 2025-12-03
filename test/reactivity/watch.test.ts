@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { reactive, ref, setMiniErrorHandler, watch } from '@/index.ts'
+import type { MiniErrorHandler } from '@/index.ts'
 
 describe('watch', () => {
   afterEach(() => {
@@ -137,7 +138,7 @@ describe('watch', () => {
     const spy = vi.fn()
     const cleanupSpy = vi.fn()
     const boom = new Error('boom')
-    const handler = vi.fn()
+    const handler = vi.fn<MiniErrorHandler>()
 
     setMiniErrorHandler(handler)
 
@@ -170,7 +171,7 @@ describe('watch', () => {
 
   it('回调抛错时会通知错误处理器', () => {
     const state = reactive({ count: 0 })
-    const handler = vi.fn()
+    const handler = vi.fn<MiniErrorHandler>()
     const boom = new Error('callback failed')
 
     setMiniErrorHandler(handler)
@@ -186,7 +187,7 @@ describe('watch', () => {
 
     state.count = 1
     expect(handler).toHaveBeenCalledTimes(1)
-    const [error, context] = handler.mock.calls[0] ?? []
+    const [error, context] = handler.mock.calls[0]
 
     expect(error).toBe(boom)
     expect(context).toBe('watch-callback')
@@ -194,7 +195,7 @@ describe('watch', () => {
 
   it('cleanup 抛错会被错误处理器捕获且不影响后续流程', () => {
     const state = reactive({ count: 0 })
-    const handler = vi.fn()
+    const handler = vi.fn<MiniErrorHandler>()
     const cleanupOrder: number[] = []
     const stopSpy = vi.fn()
 
@@ -220,7 +221,7 @@ describe('watch', () => {
     expect(stopSpy).toHaveBeenCalledTimes(2)
     expect(cleanupOrder).toEqual([0])
     expect(handler).toHaveBeenCalledTimes(1)
-    let [error, context] = handler.mock.calls[0] ?? []
+    let [error, context] = handler.mock.calls[0]
 
     expect((error as Error).message).toBe('cleanup failed: 0')
     expect(context).toBe('watch-cleanup')
@@ -229,7 +230,7 @@ describe('watch', () => {
     expect(stopSpy).toHaveBeenCalledTimes(3)
     expect(cleanupOrder).toEqual([0, 1])
     expect(handler).toHaveBeenCalledTimes(2)
-    ;[error, context] = handler.mock.calls[1] ?? []
+    ;[error, context] = handler.mock.calls[1]
     expect((error as Error).message).toBe('cleanup failed: 1')
     expect(context).toBe('watch-cleanup')
 
@@ -237,7 +238,7 @@ describe('watch', () => {
     expect(stopSpy).toHaveBeenCalledTimes(3)
     expect(cleanupOrder).toEqual([0, 1, 2])
     expect(handler).toHaveBeenCalledTimes(3)
-    ;[error, context] = handler.mock.calls[2] ?? []
+    ;[error, context] = handler.mock.calls[2]
     expect((error as Error).message).toBe('cleanup failed: 2')
     expect(context).toBe('watch-cleanup')
   })

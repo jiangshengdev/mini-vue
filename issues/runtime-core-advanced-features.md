@@ -41,7 +41,7 @@
 - **现状**：对象字面量直接赋值给 `AppState<HostElement>` 类型变量，缺少字面量级别的类型检查
 - **建议**：使用 TypeScript 4.9+ 的 `satisfies` 运算符，在保持类型推断的同时确保对象符合接口约束
   - **收益**：既能获得精确的字面量类型推断（如 `status: 'idle'` 推断为字面量而非 `string`），又能确保符合接口定义，避免遗漏或错误属性
-  - **兼容性**：TypeScript 5.9 完全支持
+  - **兼容性**：TypeScript 4.9 引入，5.9 完全支持
   - **示例**：
     ```typescript
     // 当前写法
@@ -74,7 +74,7 @@
   - **潜在场景**：若未来引入需要严格类型匹配的工厂函数或配置生成器，可考虑使用
     ```typescript
     // 示例（非当前代码）
-    function createConfig<const T>(config: T): T {
+    function createConfig<const T extends Record<string, unknown>>(config: T): T {
       return config
     }
     
@@ -106,7 +106,9 @@
     }
     
     // 使用 using 声明
-    function invokeSetup(...) {
+    function invokeSetup(
+      instance: ComponentInstance<HostNode, HostElement, HostFragment, T>
+    ): ComponentRenderFunction {
       return instance.scope.run(() => {
         using _instance = withCurrentInstance(instance)
         return instance.type(instance.props)

@@ -4,7 +4,7 @@
 import { isNil } from '@/shared/utils.ts'
 import type { Ref } from '@/reactivity/index.ts'
 import { isRef } from '@/reactivity/index.ts'
-import type { ComponentPropsShape } from '@/shared/types.ts'
+import type { PropsShape } from '@/shared/types.ts'
 
 export type ElementRef =
   | ((element: Element | undefined) => void)
@@ -23,10 +23,7 @@ function isEventProp(key: string): boolean {
 /**
  * 将 virtualNode 上的 props 映射到真实 DOM 元素上。
  */
-export function patchProps(
-  element: Element,
-  props?: ComponentPropsShape,
-): void {
+export function patchProps(element: Element, props?: PropsShape): void {
   if (!props) {
     return
   }

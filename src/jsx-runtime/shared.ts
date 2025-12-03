@@ -5,7 +5,7 @@ import type {
   VirtualNode,
 } from '@/jsx/index.ts'
 import { createVirtualNode } from '@/jsx/index.ts'
-import type { ComponentPropsShape } from '@/shared/types.ts'
+import type { PropsShape } from '@/shared/types.ts'
 
 /**
  * 记录剥离 key 后的 props 副本与归一化的 key 值。
@@ -29,7 +29,7 @@ function extractKeyedProps<T extends ElementType>(
     return { key: fallbackKey }
   }
 
-  const { key: extractedKey, ...restProps } = props as ComponentPropsShape & {
+  const { key: extractedKey, ...restProps } = props as PropsShape & {
     key?: PropertyKey
   }
 

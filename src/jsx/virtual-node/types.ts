@@ -1,4 +1,4 @@
-import type { ComponentPropsShape } from '@/shared/types.ts'
+import type { PropsShape } from '@/shared/types.ts'
 
 /**
  * 标记对象为由 mini-vue 创建的 virtualNode，用于运行时类型守卫。
@@ -35,7 +35,7 @@ export type ComponentRenderFunction = () => ComponentResult
 /**
  * 组件 props 的基础约束：放宽为对象即可，避免要求字符串索引签名。
  */
-type ComponentPropsBase = ComponentPropsShape
+type ComponentPropsBase = PropsShape
 
 export interface FragmentProps extends ComponentPropsBase {
   children?: ComponentChildren

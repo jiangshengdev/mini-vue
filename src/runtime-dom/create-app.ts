@@ -5,7 +5,7 @@ import { domRendererOptions } from './renderer-options.ts'
 import type { SetupFunctionComponent } from '@/jsx/index.ts'
 import type { AppInstance } from '@/runtime-core/index.ts'
 import { createAppInstance, createRenderer } from '@/runtime-core/index.ts'
-import type { ComponentPropsShape } from '@/shared/types.ts'
+import type { PropsShape } from '@/shared/types.ts'
 
 const { render, unmount: unmountContainer } = createRenderer(domRendererOptions)
 
@@ -120,7 +120,7 @@ export interface DomAppInstance extends AppInstance<Element> {
  */
 export function createApp(
   rootComponent: SetupFunctionComponent,
-  rootProps?: ComponentPropsShape,
+  rootProps?: PropsShape,
 ): DomAppInstance {
   /* 先创建 runtime-core 层的基础应用实例，统一托管渲染。 */
   const state: DomAppState = {

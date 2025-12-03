@@ -525,24 +525,39 @@ describe('effect', () => {
     const handler = vi.fn<MiniErrorHandler>()
     const state = reactive({ count: 0 })
     const cleanupOrder: string[] = []
+    let child1Stopped = false
+    let child2Stopped = false
 
     setMiniErrorHandler(handler)
 
     const parentEffect = effect(() => {
       void state.count
 
-      effect(() => {
+      const child1 = effect(() => {
         cleanupOrder.push('child1-run')
-      }).registerCleanup(() => {
-        cleanupOrder.push('child1-cleanup')
-        throw new Error('child1 cleanup failed')
       })
 
-      effect(() => {
+      /* 手动覆盖 child1 的 stop 方法以模拟清理时抛错 */
+      const originalChild1Stop = child1.stop.bind(child1)
+
+      child1.stop = () => {
+        cleanupOrder.push('child1-cleanup')
+        child1Stopped = true
+        originalChild1Stop()
+        throw new Error('child1 cleanup failed')
+      }
+
+      const child2 = effect(() => {
         cleanupOrder.push('child2-run')
-      }).registerCleanup(() => {
-        cleanupOrder.push('child2-cleanup')
       })
+
+      const originalChild2Stop = child2.stop.bind(child2)
+
+      child2.stop = () => {
+        cleanupOrder.push('child2-cleanup')
+        child2Stopped = true
+        originalChild2Stop()
+      }
     })
 
     expect(cleanupOrder).toEqual(['child1-run', 'child2-run'])
@@ -554,6 +569,8 @@ describe('effect', () => {
 
     /* 所有清理任务都应执行，即使某些抛错 */
     expect(cleanupOrder).toEqual(['child1-cleanup', 'child2-cleanup', 'child1-run', 'child2-run'])
+    expect(child1Stopped).toBe(true)
+    expect(child2Stopped).toBe(true)
 
     expect(handler).toHaveBeenCalledTimes(1)
     const [error, context] = handler.mock.calls[0]

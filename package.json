@@ -4,9 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
+    "play": "vite",
+    "play:build": "tsc && vite build",
+    "play:preview": "vite preview",
     "test": "vitest run",
     "lint": "eslint src test",
     "xo": "xo",

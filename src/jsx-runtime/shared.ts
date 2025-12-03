@@ -18,24 +18,24 @@ interface NormalizedPropsResult<T extends ElementType> {
 }
 
 /**
- * 将 props.key 提升为独立字段，并返回剩余的 props。
+ * 优先使用显式传入的 key，再回退到 props.key，并返回剩余 props。
  */
 function extractKeyedProps<T extends ElementType>(
   props?: ElementProps<T>,
-  fallbackKey?: PropertyKey,
+  explicitKey?: PropertyKey,
 ): NormalizedPropsResult<T> {
   /* 未提供 props 时保持 key 的原始语义即可。 */
   if (!props) {
-    return { key: fallbackKey }
+    return { key: explicitKey }
   }
 
   const { key: extractedKey, ...restProps } = props as PropsShape & {
     key?: PropertyKey
   }
 
-  /* `props` 上声明 key 时优先透出，否则改用显式 fallback。 */
+  /* 显式 key（jsx 第三个参数）优先，其次再尝试 props.key。 */
   const normalizedKey =
-    fallbackKey ?? (Object.hasOwn(props, 'key') ? extractedKey : undefined)
+    explicitKey ?? (Object.hasOwn(props, 'key') ? extractedKey : undefined)
   const hasRestProps = Reflect.ownKeys(restProps).length > 0
 
   return {

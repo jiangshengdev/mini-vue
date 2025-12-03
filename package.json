@@ -1,18 +1,18 @@
 {
-  "name": "mini-vue",
+  "name": "@jiangshengdev/mini-vue",
   "private": false,
   "version": "0.0.0",
   "type": "module",
   "license": "MIT",
-  "homepage": "https://github.com/author/library#readme",
+  "homepage": "https://github.com/jiangshengdev/mini-vue#readme",
   "bugs": {
-    "url": "https://github.com/author/library/issues"
+    "url": "https://github.com/jiangshengdev/mini-vue/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/author/library.git"
+    "url": "git+https://github.com/jiangshengdev/mini-vue.git"
   },
-  "author": "Author Name <author.name@mail.com>",
+  "author": "Jiang Sheng <jiangshengdev@outlook.com>",
   "files": [
     "dist"
   ],

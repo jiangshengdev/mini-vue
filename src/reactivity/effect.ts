@@ -1,6 +1,6 @@
 import { recordEffectScope } from './effect-scope.ts'
 import { effectStack } from './internals/effect-stack.ts'
-import { handleReactivityError } from './internals/error-handling.ts'
+import { handleMiniError } from '../shared/error-handling.ts'
 import type {
   DependencyBucket,
   EffectHandle,
@@ -67,7 +67,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
     try {
       return this.fn()
     } catch (error) {
-      handleReactivityError(error, 'effect-runner')
+      handleMiniError(error, 'effect-runner')
       throw error
     } finally {
       /* 无论执行成功与否都需弹出自身，避免污染外层作用域 */

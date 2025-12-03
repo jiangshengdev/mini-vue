@@ -1,5 +1,5 @@
 import type { EffectInstance } from './shared/types.ts'
-import { handleReactivityError } from './internals/error-handling.ts'
+import { handleMiniError } from '../shared/error-handling.ts'
 
 /** 当前正在运行的 effect scope，用于关联副作用与清理。 */
 let activeEffectScope: EffectScope | undefined
@@ -60,7 +60,7 @@ export class EffectScope {
     try {
       return fn()
     } catch (error) {
-      handleReactivityError(error, 'effect-scope-run')
+      handleMiniError(error, 'effect-scope-run')
       throw error
     } finally {
       /* 无论回调如何结束，都要恢复先前 scope，保持栈式嵌套关系。 */
@@ -101,7 +101,7 @@ export class EffectScope {
       try {
         effect.stop()
       } catch (error) {
-        handleReactivityError(error, 'effect-scope-cleanup')
+        handleMiniError(error, 'effect-scope-cleanup')
       }
     }
 
@@ -117,7 +117,7 @@ export class EffectScope {
         try {
           cleanup()
         } catch (error) {
-          handleReactivityError(error, 'effect-scope-cleanup')
+          handleMiniError(error, 'effect-scope-cleanup')
         }
       }
     }
@@ -128,7 +128,7 @@ export class EffectScope {
         try {
           scope.stop(true)
         } catch (error) {
-          handleReactivityError(error, 'effect-scope-cleanup')
+          handleMiniError(error, 'effect-scope-cleanup')
         }
       }
 

@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { reactive, ref, watch, setReactivityErrorHandler } from '@/index.ts'
+import { reactive, ref, watch, setMiniErrorHandler } from '@/index.ts'
 
 describe('watch', () => {
   afterEach(() => {
-    setReactivityErrorHandler(undefined)
+    setMiniErrorHandler(undefined)
   })
 
   it('默认懒执行并在源变化后触发回调', () => {
@@ -139,7 +139,7 @@ describe('watch', () => {
     const boom = new Error('boom')
     const handler = vi.fn()
 
-    setReactivityErrorHandler(handler)
+    setMiniErrorHandler(handler)
 
     watch(
       () => {
@@ -173,7 +173,7 @@ describe('watch', () => {
     const handler = vi.fn()
     const boom = new Error('callback failed')
 
-    setReactivityErrorHandler(handler)
+    setMiniErrorHandler(handler)
 
     watch(
       () => {

@@ -1,7 +1,7 @@
 /**
  * 管理响应式系统的统一错误处理流程，并描述错误上报时的上下文来源。
  */
-export type ReactivityErrorContext =
+export type MiniErrorContext =
   | 'scheduler'
   | 'effect-runner'
   | 'effect-scope-run'
@@ -12,30 +12,30 @@ export type ReactivityErrorContext =
 /**
  * 标准化的错误处理函数签名，统一传入原始异常与上下文标签。
  */
-export type ReactivityErrorHandler = (error: unknown, context: ReactivityErrorContext) => void
+export type MiniErrorHandler = (error: unknown, context: MiniErrorContext) => void
 
 /**
  * 缓存当前生效的错误处理器，未设置时保持 undefined 以便回退默认行为。
  */
-let currentReactivityErrorHandler: ReactivityErrorHandler | undefined
+let currentMiniErrorHandler: MiniErrorHandler | undefined
 
 /**
  * 允许外部重写默认的错误处理逻辑，便于集成框架级兜底。
  *
  * @remarks 注册后的处理器会在 effect、effectScope.run、watch 回调以及调度器等入口发生异常时被调用；个别入口（如 effect）会在回调完成后继续抛出原始错误。
  */
-export function setReactivityErrorHandler(handler?: ReactivityErrorHandler): void {
-  currentReactivityErrorHandler = handler
+export function setMiniErrorHandler(handler?: MiniErrorHandler): void {
+  currentMiniErrorHandler = handler
 }
 
 /**
  * 在内部捕获异常时调用，统一调度至用户提供的处理器或兜底方案。
  */
-export function handleReactivityError(error: unknown, context: ReactivityErrorContext): void {
+export function handleMiniError(error: unknown, context: MiniErrorContext): void {
   /* 优先通过用户注册的处理器上报，以便框架层做统一告警。 */
-  if (currentReactivityErrorHandler) {
+  if (currentMiniErrorHandler) {
     try {
-      currentReactivityErrorHandler(error, context)
+      currentMiniErrorHandler(error, context)
     } catch (handlerError) {
       /* 处理器自身抛错时仍需异步抛出，但不能阻断当前触发链。 */
       rethrowAsync(handlerError)

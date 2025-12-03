@@ -5,13 +5,13 @@ import {
   effectScope,
   onScopeDispose,
   reactive,
-  setReactivityErrorHandler,
+  setMiniErrorHandler,
 } from '@/index.ts'
 import * as dependencyUtils from '@/reactivity/internals/dependency-utils.ts'
 
 describe('effect', () => {
   afterEach(() => {
-    setReactivityErrorHandler(undefined)
+    setMiniErrorHandler(undefined)
   })
 
   it('注册后会立刻执行一次副作用', () => {
@@ -272,7 +272,7 @@ describe('effect', () => {
     const handler = vi.fn()
     const boom = new Error('effect failed')
 
-    setReactivityErrorHandler(handler)
+    setMiniErrorHandler(handler)
 
     expect(() => {
       effect(() => {
@@ -291,7 +291,7 @@ describe('effect', () => {
     const state = reactive({ count: 0 })
     const handler = vi.fn()
 
-    setReactivityErrorHandler(handler)
+    setMiniErrorHandler(handler)
 
     effect(
       () => {
@@ -460,7 +460,7 @@ describe('effect', () => {
     const handler = vi.fn()
     const cleanupOrder: string[] = []
 
-    setReactivityErrorHandler(handler)
+    setMiniErrorHandler(handler)
 
     scope.run(() => {
       onScopeDispose(() => {
@@ -488,7 +488,7 @@ describe('effect', () => {
     const handler = vi.fn()
     const boom = new Error('scope failed')
 
-    setReactivityErrorHandler(handler)
+    setMiniErrorHandler(handler)
 
     expect(() => {
       scope.run(() => {

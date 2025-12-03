@@ -12,7 +12,7 @@ import type { ComponentInstance } from '@/runtime-core/component-instance.ts'
 import { setCurrentInstance, unsetCurrentInstance } from '@/runtime-core/component-instance.ts'
 import { ReactiveEffect } from '@/reactivity/effect.ts'
 import { effectScope, recordEffectScope } from '@/reactivity/effect-scope.ts'
-import { handleReactivityError } from '@/reactivity/internals/error-handling.ts'
+import { handleMiniError } from '@/shared/error-handling.ts'
 
 /**
  * 执行函数组件并将返回的子树继续挂载到容器。
@@ -269,7 +269,7 @@ function teardownComponentInstance<
       try {
         task()
       } catch (error) {
-        handleReactivityError(error, 'component-cleanup')
+        handleMiniError(error, 'component-cleanup')
       }
     }
   }

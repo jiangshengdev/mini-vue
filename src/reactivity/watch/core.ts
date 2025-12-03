@@ -1,7 +1,7 @@
 import { ReactiveEffect } from '../effect.ts'
 import { recordEffectScope, recordScopeCleanup } from '../effect-scope.ts'
 import { effectStack } from '../internals/effect-stack.ts'
-import { handleReactivityError } from '../internals/error-handling.ts'
+import { handleMiniError } from '../../shared/error-handling.ts'
 import type { Ref } from '../ref/types.ts'
 import { createGetter, resolveDeepOption } from './utils.ts'
 import type { PlainObject } from '@/shared/types.ts'
@@ -90,7 +90,7 @@ export function watch<T>(
     try {
       callback(newValue, previousValue, onCleanup)
     } catch (error) {
-      handleReactivityError(error, 'watch-callback')
+      handleMiniError(error, 'watch-callback')
     } finally {
       oldValue = newValue
       hasOldValue = true

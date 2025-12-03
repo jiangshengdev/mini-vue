@@ -2,12 +2,12 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { within } from '@testing-library/dom'
 import { createTestContainer } from '../setup.ts'
 import type { SetupFunctionComponent } from '@/index.ts'
-import { reactive, render, setReactivityErrorHandler, watch } from '@/index.ts'
+import { reactive, render, setMiniErrorHandler, watch } from '@/index.ts'
 import { getCurrentInstance } from '@/runtime-core/component-instance.ts'
 
 describe('runtime-dom component reactivity', () => {
   afterEach(() => {
-    setReactivityErrorHandler(undefined)
+    setMiniErrorHandler(undefined)
   })
 
   it('组件体读取 reactive 数据时会自动重渲染', () => {
@@ -158,7 +158,7 @@ describe('runtime-dom component reactivity', () => {
     const handler = vi.fn()
     const cleanupOrder: string[] = []
 
-    setReactivityErrorHandler(handler)
+    setMiniErrorHandler(handler)
 
     const WithCleanup: SetupFunctionComponent = () => {
       const instance = getCurrentInstance()

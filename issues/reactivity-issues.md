@@ -25,23 +25,20 @@
 - 修复：新增 `EffectScope` 实现并在 `effect`/`computed`/`watch`/组件渲染 effect 中统一调用 `recordEffectScope` 与 `recordScopeCleanup`，组件实例在创建时拥有独立 scope，`setup` 通过 `scope.run()` 包裹执行，卸载阶段 `scope.stop()` 即可级联停止所有副作用。
 - 覆盖：`test/reactivity/effect.test.ts` 增补 scope 级联停止与 computed 清理用例，`test/runtime-dom/component-reactivity.test.tsx` 新增组件卸载自动清理 watch 的回归测试。
 
-## 5. `watch(ref, cb, { deep: true })` 无法追踪嵌套字段（待修复）
+## 5. `watch(ref, cb, { deep: true })` 无法追踪嵌套字段（已修复）
 
 - 位置：`src/reactivity/watch/utils.ts`
-- 现状：`createGetter()` 在 `isRef(source)` 分支始终返回 `() => source.value`，完全忽略 `deep` 选项，导致 `deep: true` 时不会进入 `traverse()`。
-- 影响：对 `Ref<PlainObject>` 或数组 Ref 的深度监听永远不会订阅内部字段，只有整个 `ref.value` 被替换时才触发回调，与文档宣称不符。
-- 提示：应在 `deep` 模式下递归读取 `value`，对齐响应式对象的遍历策略。
+- 修复：`createGetter()` 在 `ref` 源的深度模式下会调用 `traverse(source.value)`，递归读取 `value` 内部字段，确保嵌套属性被依赖收集。
+- 覆盖：`test/reactivity/watch.test.ts` 新增 “对 ref 启用深度模式可追踪内部字段” 用例，验证 `ref` 深层数据变动会触发回调。
 
-## 6. `watch` 回调抛错会留下错误的 `oldValue` 与未清理的副作用（待修复）
+## 6. `watch` 回调抛错会留下错误的 `oldValue` 与未清理的副作用（已修复）
 
 - 位置：`src/reactivity/watch/core.ts`
-- 现状：`runWatchJob()` 先执行用户回调，再更新 `oldValue`/`hasOldValue` 并清空 `cleanup`。回调异常会中断后续逻辑，下一次触发仍会拿到更早的旧值，上一轮注册的清理函数也不会释放。
-- 影响：当回调出错时，`oldValue` 不再可信，清理函数可能重复触发甚至泄漏资源，与 Vue 3 行为不一致。
-- 提示：需要在调用回调前缓存旧值，并用 `try...finally` 确保状态与清理更新。
+- 修复：`runWatchJob()` 在调用回调前缓存旧值，并通过 `try...finally` 更新 `oldValue`/`hasOldValue` 与清理函数，确保即使回调抛错也不会遗留错误状态或跳过 cleanup。
+- 覆盖：`test/reactivity/watch.test.ts` 新增 “回调抛错后仍会更新旧值并执行 cleanup” 用例，确保异常场景下行为正确。
 
-## 7. 无活跃 effect 读取时仍创建空依赖桶导致内存浪费（待修复）
+## 7. 无活跃 effect 读取时仍创建空依赖桶导致内存浪费（已修复）
 
 - 位置：`src/reactivity/internals/operations.ts`
-- 现状：`track()` 总是先 `getOrCreateDep()`，即便随后 `trackEffect()` 因没有活跃 effect 直接返回，空的 `Set` 也会留在 `targetMap` 中。
-- 影响：任意非响应式读取（例如调试时 `console.log(state.foo)`）都会让依赖表持续膨胀，属性越多越明显，产生不必要的内存占用与查找开销。
-- 提示：应在确认存在活跃 effect 后再创建依赖桶，或延迟到 `trackEffect()` 内初始化。
+- 修复：`track()` 先检查 `effectStack.current`，只有存在活跃 effect 时才创建依赖桶，避免无意义的 `Set` 占用内存。
+- 覆盖：`test/reactivity/effect.test.ts` 增加 “无活跃 effect 读取不会创建空依赖桶” 用例，通过监视 `triggerEffects` 确认未收集依赖时不会触发调度。

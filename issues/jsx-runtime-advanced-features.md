@@ -8,7 +8,7 @@
 
 - 位置：`src/jsx-runtime/shared.ts:32`
 - 现状：已正确使用 `Object.hasOwn(props, 'key')` 替代 `Object.prototype.hasOwnProperty.call()`，这是 ES2022 新增的更安全、更简洁的 API。
-- 收益：避免原型链污染问题，代码更清晰。
+- 收益：避免原型链污染问题，对于 null 原型对象或重写了 `hasOwnProperty` 方法的对象更加安全可靠，代码更清晰。
 
 ### 2. 空值合并操作符 (`??`)
 
@@ -45,7 +45,7 @@ const propsWithChildren = {
 } satisfies Partial<ElementProps<T>>
 ```
 
-但需评估是否与现有类型定义兼容。若 `ElementProps<T>` 定义足够精确且不包含 `children` 字段的索引签名，可能需要调整类型定义，因此暂不强制推荐。
+但需评估是否与现有类型定义兼容。若类型不匹配，可能需要调整类型定义，因此暂不强制推荐。
 
 ### 2. 使用 `Array.prototype.at()` 简化数组访问（ES2022）
 
@@ -76,7 +76,7 @@ export function jsx<const T extends ElementType>(
 ): VirtualNode<T>
 ```
 
-- 评估：需确认 `ElementType` 和 `VirtualNode<T>` 的定义是否受益于更精确的字面量类型。若当前类型推断已满足需求，可保持现状。仅当需要区分不同字符串字面量类型（如 `"div"` vs `"span"`）用于类型级别的静态检查时才有实际价值。
+- 评估：需确认 `ElementType` 和 `VirtualNode<T>` 的定义是否受益于更精确的字面量类型。若当前类型推断已满足需求，可保持现状。仅当需要区分不同字符串字面量类型（如 `"div"` vs `"span"`）进行类型级别静态检查时才有实际价值。
 
 ### 4. 使用 `using` 声明自动资源管理（TypeScript 5.2+，需 ES2022+ Symbol.dispose）
 
@@ -117,7 +117,7 @@ export function h<T extends ElementType>(
 
 - 位置：`src/jsx-runtime/runtime.ts:18`、`src/jsx-runtime/shared.ts:44, 63`
 - 现状：导出的函数 `jsx`、`jsxs`、`jsxDEV`、`h`、`buildVirtualNode` 均为纯函数，但未添加 `/* @__PURE__ */` 注释。
-- 建议：虽然现代打包工具（如 Rollup、Vite）通常能自动识别纯函数，显式标注 `/* @__PURE__ */` 可确保在复杂场景下被正确 tree-shake：
+- 建议：虽然现代打包工具（如 Rollup、Vite）通常能自动识别纯函数，显式标注 `/* @__PURE__ */` 可确保在复杂场景下被正确摇树优化（tree-shaking）：
 
 ```typescript
 export const jsxs = /* @__PURE__ */ jsx

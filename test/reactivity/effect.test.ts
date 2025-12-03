@@ -520,4 +520,64 @@ describe('effect', () => {
       triggerSpy.mockRestore()
     }
   })
+
+  it('嵌套 effect 清理时抛错会通过错误处理器捕获并继续执行', () => {
+    const handler = vi.fn<MiniErrorHandler>()
+    const state = reactive({ count: 0 })
+    const cleanupOrder: string[] = []
+    let child1Stopped = false
+    let child2Stopped = false
+
+    setMiniErrorHandler(handler)
+
+    const parentEffect = effect(() => {
+      void state.count
+
+      const child1 = effect(() => {
+        cleanupOrder.push('child1-run')
+      })
+
+      /* 手动覆盖 child1 的 stop 方法以模拟清理时抛错 */
+      const originalChild1Stop = child1.stop.bind(child1)
+
+      child1.stop = () => {
+        cleanupOrder.push('child1-cleanup')
+        child1Stopped = true
+        originalChild1Stop()
+        throw new Error('child1 cleanup failed')
+      }
+
+      const child2 = effect(() => {
+        cleanupOrder.push('child2-run')
+      })
+
+      const originalChild2Stop = child2.stop.bind(child2)
+
+      child2.stop = () => {
+        cleanupOrder.push('child2-cleanup')
+        child2Stopped = true
+        originalChild2Stop()
+      }
+    })
+
+    expect(cleanupOrder).toEqual(['child1-run', 'child2-run'])
+
+    cleanupOrder.length = 0
+
+    /* 触发父 effect 重新运行时，会先清理上一轮的子 effect */
+    state.count = 1
+
+    /* 所有清理任务都应执行，即使某些抛错 */
+    expect(cleanupOrder).toEqual(['child1-cleanup', 'child2-cleanup', 'child1-run', 'child2-run'])
+    expect(child1Stopped).toBe(true)
+    expect(child2Stopped).toBe(true)
+
+    expect(handler).toHaveBeenCalledTimes(1)
+    const [error, context] = handler.mock.calls[0]
+
+    expect((error as Error).message).toBe('child1 cleanup failed')
+    expect(context).toBe('effect-cleanup')
+
+    parentEffect.stop()
+  })
 })

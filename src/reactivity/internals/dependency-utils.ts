@@ -1,5 +1,6 @@
 import type { DependencyBucket, EffectInstance } from '../shared/types.ts'
 import { effectStack } from './effect-stack.ts'
+import { handleReactivityError } from './error-handling.ts'
 
 /**
  * 收集当前活跃的副作用到依赖集合，确保后续触发时能够回调。
@@ -73,7 +74,11 @@ function schedule(effect: EffectInstance): void {
       effect.run()
     }
 
-    scheduler(job)
+    try {
+      scheduler(job)
+    } catch (error) {
+      handleReactivityError(error, 'scheduler')
+    }
 
     return
   }

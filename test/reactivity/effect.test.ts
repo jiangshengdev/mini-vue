@@ -1,8 +1,12 @@
-import { describe, expect, it, vi } from 'vitest'
-import { computed, effect, effectScope, reactive } from '@/index.ts'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { computed, effect, effectScope, reactive, setReactivityErrorHandler } from '@/index.ts'
 import * as dependencyUtils from '@/reactivity/internals/dependency-utils.ts'
 
 describe('effect', () => {
+  afterEach(() => {
+    setReactivityErrorHandler(undefined)
+  })
+
   it('注册后会立刻执行一次副作用', () => {
     const state = reactive({ count: 0 })
     let observed = -1
@@ -257,6 +261,61 @@ describe('effect', () => {
     expect(jobs.length).toBe(0)
   })
 
+  it('effect 抛错会通知错误处理器并保持原有抛出行为', () => {
+    const handler = vi.fn()
+    const boom = new Error('effect failed')
+
+    setReactivityErrorHandler(handler)
+
+    expect(() => {
+      effect(() => {
+        throw boom
+      })
+    }).toThrow(boom)
+
+    expect(handler).toHaveBeenCalledTimes(1)
+    const [error, context] = handler.mock.calls[0] ?? []
+
+    expect(error).toBe(boom)
+    expect(context).toBe('effect-runner')
+  })
+
+  it('scheduler 抛错时不会阻断其余 effect 并触发统一错误处理', () => {
+    const state = reactive({ count: 0 })
+    const handler = vi.fn()
+
+    setReactivityErrorHandler(handler)
+
+    effect(
+      () => {
+        void state.count
+      },
+      {
+        scheduler() {
+          throw new Error('scheduler failed')
+        },
+      },
+    )
+
+    let fallbackRuns = 0
+
+    effect(() => {
+      fallbackRuns += 1
+      void state.count
+    })
+
+    expect(fallbackRuns).toBe(1)
+
+    state.count = 1
+
+    expect(fallbackRuns).toBe(2)
+    expect(handler).toHaveBeenCalledTimes(1)
+    const [error, context] = handler.mock.calls[0] ?? []
+
+    expect((error as Error).message).toBe('scheduler failed')
+    expect(context).toBe('scheduler')
+  })
+
   it('删除属性会触发相关 effect', () => {
     const state = reactive<Partial<Record<string, number>>>({ foo: 1 })
     let runCount = 0
@@ -387,6 +446,26 @@ describe('effect', () => {
 
     state.count = 2
     expect(observed).toEqual([0, 2])
+  })
+
+  it('effectScope.run 抛错会触发错误处理器', () => {
+    const scope = effectScope()
+    const handler = vi.fn()
+    const boom = new Error('scope failed')
+
+    setReactivityErrorHandler(handler)
+
+    expect(() => {
+      scope.run(() => {
+        throw boom
+      })
+    }).toThrow(boom)
+
+    expect(handler).toHaveBeenCalledTimes(1)
+    const [error, context] = handler.mock.calls[0] ?? []
+
+    expect(error).toBe(boom)
+    expect(context).toBe('effect-scope-run')
   })
 
   it('无活跃 effect 读取不会创建空依赖桶', () => {

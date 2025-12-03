@@ -1,6 +1,7 @@
 import { ReactiveEffect } from '../effect.ts'
 import { recordEffectScope, recordScopeCleanup } from '../effect-scope.ts'
 import { effectStack } from '../internals/effect-stack.ts'
+import { handleReactivityError } from '../internals/error-handling.ts'
 import type { Ref } from '../ref/types.ts'
 import { createGetter, resolveDeepOption } from './utils.ts'
 import type { PlainObject } from '@/shared/types.ts'
@@ -30,6 +31,8 @@ export interface WatchOptions {
  * 建立响应式副作用并在数据变化时派发回调。
  * - 支持深度遍历与懒执行策略。
  * - 允许注册清理逻辑并与父 effect 生命周期同步。
+ *
+ * @remarks 回调内部抛出的异常不会向外冒泡，而是仅通过 setReactivityErrorHandler 汇报，确保同一触发链的其余副作用可继续执行。
  */
 export function watch<T>(
   source: WatchSource<T>,
@@ -86,6 +89,8 @@ export function watch<T>(
     /* 调用用户回调并提供本轮注册清理的机会，异常也要更新旧值。 */
     try {
       callback(newValue, previousValue, onCleanup)
+    } catch (error) {
+      handleReactivityError(error, 'watch-callback')
     } finally {
       oldValue = newValue
       hasOldValue = true

@@ -1,5 +1,6 @@
 import { recordEffectScope } from './effect-scope.ts'
 import { effectStack } from './internals/effect-stack.ts'
+import { handleReactivityError } from './internals/error-handling.ts'
 import type {
   DependencyBucket,
   EffectHandle,
@@ -49,6 +50,8 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
 
   /**
    * 执行副作用函数并围绕 effect 栈管理依赖收集流程。
+   *
+   * @throws {unknown} 原样抛出副作用函数内部的异常，同时会通过 setReactivityErrorHandler 暴露给统一错误处理器。
    */
   run(): T {
     /* 已停止的副作用只执行原始函数，跳过依赖收集成本 */
@@ -63,6 +66,9 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
 
     try {
       return this.fn()
+    } catch (error) {
+      handleReactivityError(error, 'effect-runner')
+      throw error
     } finally {
       /* 无论执行成功与否都需弹出自身，避免污染外层作用域 */
       effectStack.pop()
@@ -124,6 +130,8 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
 
 /**
  * 最小版 effect：立即执行副作用并返回可控的句柄，亦支持传入调度选项。
+ *
+ * @throws {unknown} 用户副作用执行时抛出的异常会同步传播，并在传播前经过 setReactivityErrorHandler。
  */
 export function effect<T>(fn: () => T, options: EffectOptions = {}): EffectHandle<T> {
   /* 读取父级副作用，便于建立嵌套清理关系 */

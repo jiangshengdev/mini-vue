@@ -1,7 +1,11 @@
-import { describe, expect, it, vi } from 'vitest'
-import { reactive, ref, watch } from '@/index.ts'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { reactive, ref, watch, setReactivityErrorHandler } from '@/index.ts'
 
 describe('watch', () => {
+  afterEach(() => {
+    setReactivityErrorHandler(undefined)
+  })
+
   it('默认懒执行并在源变化后触发回调', () => {
     const state = reactive({ count: 0 })
     const spy = vi.fn()
@@ -133,6 +137,9 @@ describe('watch', () => {
     const spy = vi.fn()
     const cleanupSpy = vi.fn()
     const boom = new Error('boom')
+    const handler = vi.fn()
+
+    setReactivityErrorHandler(handler)
 
     watch(
       () => {
@@ -151,14 +158,37 @@ describe('watch', () => {
       },
     )
 
-    expect(() => {
-      state.count = 1
-    }).toThrow(boom)
+    state.count = 1
+    expect(handler).toHaveBeenCalledTimes(1)
 
     state.count = 2
     expect(spy).toHaveBeenCalledTimes(1)
     expect(spy).toHaveBeenLastCalledWith({ newValue: 2, oldValue: 1 })
     expect(cleanupSpy).toHaveBeenCalledTimes(1)
     expect(cleanupSpy).toHaveBeenLastCalledWith(0)
+  })
+
+  it('回调抛错时会通知错误处理器', () => {
+    const state = reactive({ count: 0 })
+    const handler = vi.fn()
+    const boom = new Error('callback failed')
+
+    setReactivityErrorHandler(handler)
+
+    watch(
+      () => {
+        return state.count
+      },
+      () => {
+        throw boom
+      },
+    )
+
+    state.count = 1
+    expect(handler).toHaveBeenCalledTimes(1)
+    const [error, context] = handler.mock.calls[0] ?? []
+
+    expect(error).toBe(boom)
+    expect(context).toBe('watch-callback')
   })
 })

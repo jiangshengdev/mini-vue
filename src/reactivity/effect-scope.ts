@@ -1,4 +1,5 @@
 import type { EffectInstance } from './shared/types.ts'
+import { handleReactivityError } from './internals/error-handling.ts'
 
 /** 当前正在运行的 effect scope，用于关联副作用与清理。 */
 let activeEffectScope: EffectScope | undefined
@@ -42,6 +43,8 @@ export class EffectScope {
 
   /**
    * 在当前 scope 上下文中执行回调，使其创建的副作用被自动托管。
+   *
+   * @throws {unknown} 回调内部抛出的异常会同步向上传播，并在传播前交给 setReactivityErrorHandler 处理。
    */
   run<T>(fn: () => T): T | undefined {
     /* `scope` 已停用时直接返回，避免在无效上下文中继续注册副作用。 */
@@ -56,6 +59,9 @@ export class EffectScope {
 
     try {
       return fn()
+    } catch (error) {
+      handleReactivityError(error, 'effect-scope-run')
+      throw error
     } finally {
       /* 无论回调如何结束，都要恢复先前 scope，保持栈式嵌套关系。 */
       setActiveEffectScope(previousScope)

@@ -14,6 +14,7 @@ export {
   effectScope,
   getCurrentScope,
   onScopeDispose,
+  setReactivityErrorHandler,
 } from './reactivity/index.ts'
 export type { Ref } from './reactivity/index.ts'
 export type {
@@ -21,6 +22,8 @@ export type {
   ComputedSetter,
   WritableComputedOptions,
   EffectScope,
+  ReactivityErrorContext,
+  ReactivityErrorHandler,
 } from './reactivity/index.ts'
 export { createApp, render } from './runtime-dom/index.ts'
 export type { SetupFunctionComponent } from './jsx/index.ts'

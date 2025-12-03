@@ -41,9 +41,13 @@ export function createGetter<T>(
     return source
   }
 
-  /* `ref` 源返回 value 读取，触发其依赖收集。 */
+  /* `ref` 源在深度模式下递归读取 value，确保嵌套字段被追踪。 */
   if (isRef(source)) {
     return () => {
+      if (deep) {
+        return traverse(source.value) as T
+      }
+
       return source.value
     }
   }

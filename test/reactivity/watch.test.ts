@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { reactive, watch } from '@/index.ts'
+import { reactive, ref, watch } from '@/index.ts'
 
 describe('watch', () => {
   it('默认懒执行并在源变化后触发回调', () => {
@@ -109,5 +109,22 @@ describe('watch', () => {
 
     state.count = 2
     expect(cleanups).toEqual([1])
+  })
+
+  it('对 ref 启用深度模式可追踪内部字段', () => {
+    const state = ref({ nested: { value: 0 } })
+    const spy = vi.fn()
+
+    watch(
+      state,
+      () => {
+        spy(state.value.nested.value)
+      },
+      { deep: true },
+    )
+
+    state.value.nested.value = 1
+    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy).toHaveBeenLastCalledWith(1)
   })
 })

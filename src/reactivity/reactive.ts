@@ -4,6 +4,7 @@
 import { mutableHandlers } from './internals/base-handlers.ts'
 import type { ReactiveTarget } from './shared/types.ts'
 import { isObject, isPlainObject } from '@/shared/utils.ts'
+import type { PlainObject } from '@/shared/types.ts'
 
 /**
  * 封装原对象与代理实例之间的双向缓存。
@@ -56,7 +57,7 @@ const unsupportedTypeMessage = 'reactive 目前仅支持普通对象或数组'
 /**
  * 将普通对象或数组转换为响应式 Proxy。
  */
-export function reactive<T extends Record<PropertyKey, unknown>>(target: T): T
+export function reactive<T extends PlainObject>(target: T): T
 export function reactive<T>(target: T[]): T[]
 export function reactive<T>(target: T): T
 

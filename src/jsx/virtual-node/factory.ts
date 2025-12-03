@@ -39,12 +39,10 @@ export function createVirtualNode<T extends ElementType>(
 
   if (rawProps) {
     const hasChildren = Object.hasOwn(rawProps, 'children')
-    const { children: rawChildren, ...restProps } = rawProps as Record<
-      string,
-      unknown
-    > & {
-      children?: unknown
-    }
+    const { children: rawChildren, ...restProps } =
+      rawProps as ComponentPropsShape & {
+        children?: unknown
+      }
 
     if (hasChildren) {
       /* 将 props.children 归一化为内部统一使用的 children 数组 */

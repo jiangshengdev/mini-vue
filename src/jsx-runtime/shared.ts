@@ -5,6 +5,7 @@ import type {
   VirtualNode,
 } from '@/jsx/index.ts'
 import { createVirtualNode } from '@/jsx/index.ts'
+import type { ComponentPropsShape } from '@/shared/types.ts'
 
 /**
  * 低阶的 JSX 创建函数，直接封装到 createVirtualNode 调用。
@@ -31,10 +32,7 @@ export function h<T extends ElementType>(
 
   /* 存在 props 时需要摘取 key 并规整剩余字段，保证与 JSX 规范对齐。 */
   if (props) {
-    const { key: extractedKey, ...restProps } = props as Record<
-      string,
-      unknown
-    > & {
+    const { key: extractedKey, ...restProps } = props as ComponentPropsShape & {
       key?: PropertyKey
     }
 

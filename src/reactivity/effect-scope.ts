@@ -17,10 +17,10 @@ export class EffectScope {
   private parent?: EffectScope
 
   /** 子 scope 列表，stop 时需要级联销毁。 */
-  private scopes?: EffectScope[]
+  private childScopes?: EffectScope[]
 
   /** 当前 scope 在父 scope 中的索引，便于 O(1) 移除。 */
-  private index?: number
+  private positionInParent?: number
 
   /** 记录属于该 scope 的副作用实例。 */
   private readonly effects: EffectInstance[] = []
@@ -58,7 +58,7 @@ export class EffectScope {
   /**
    * 记录一个副作用，等待 scope stop 时统一停止。
    */
-  record(effect: EffectInstance): void {
+  recordEffect(effect: EffectInstance): void {
     if (this.active) {
       this.effects.push(effect)
     }
@@ -89,12 +89,12 @@ export class EffectScope {
       cleanup()
     }
 
-    if (this.scopes) {
-      for (const scope of this.scopes) {
+    if (this.childScopes) {
+      for (const scope of this.childScopes) {
         scope.stop(true)
       }
 
-      this.scopes = undefined
+      this.childScopes = undefined
     }
 
     if (!this.detached && this.parent && !fromParent) {
@@ -107,30 +107,30 @@ export class EffectScope {
 
   private trackChildScope(scope: EffectScope): void {
     scope.parent = this
-    scope.index = this.scopes?.length ?? 0
+    scope.positionInParent = this.childScopes?.length ?? 0
 
-    if (this.scopes) {
-      this.scopes.push(scope)
+    if (this.childScopes) {
+      this.childScopes.push(scope)
     } else {
-      this.scopes = [scope]
+      this.childScopes = [scope]
     }
   }
 
   private removeChildScope(scope: EffectScope): void {
-    const { scopes } = this
+    const { childScopes } = this
 
-    if (!scopes || scope.index === undefined) {
+    if (!childScopes || scope.positionInParent === undefined) {
       return
     }
 
-    const last = scopes.pop()
+    const last = childScopes.pop()
 
     if (!last || last === scope) {
       return
     }
 
-    scopes[scope.index] = last
-    last.index = scope.index
+    childScopes[scope.positionInParent] = last
+    last.positionInParent = scope.positionInParent
   }
 }
 
@@ -159,7 +159,7 @@ export function recordEffectScope(
   effect: EffectInstance,
   scope: EffectScope | undefined = activeEffectScope,
 ): void {
-  scope?.record(effect)
+  scope?.recordEffect(effect)
 }
 
 /**

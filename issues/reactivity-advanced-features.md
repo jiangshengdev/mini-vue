@@ -2,21 +2,21 @@
 
 ## 1. `Object.hasOwn()` 替代 `hasOwn` 自定义工具函数（可优化）
 
-- 位置：`src/reactivity/internals/base-handlers.ts`、`src/reactivity/ref/api.ts`
-- 现状：代码多处使用自定义的 `hasOwn(target, key)` 工具函数来检查对象自有属性，而 ES2022 已原生支持 `Object.hasOwn(target, key)` 方法，具备更好的类型推断和性能优化。
-- 建议：在 `src/reactivity/internals/base-handlers.ts` 第 33 行和 65 行，将 `hasOwn(target, key)` 替换为 `Object.hasOwn(target, key)`；在 `src/reactivity/ref/api.ts` 第 29 行同样替换。这样可以移除对自定义工具函数的依赖，利用原生实现获得更好的性能和类型安全。
+- 位置：`src/reactivity/internals/base-handlers.ts`
+- 现状：代码在第 33 行和 65 行使用自定义的 `hasOwn(target, key)` 工具函数来检查对象自有属性，而 ES2022 已原生支持 `Object.hasOwn(target, key)` 方法，具备更好的类型推断和性能优化。值得注意的是，`src/reactivity/ref/api.ts` 第 29 行已正确使用 `Object.hasOwn(value, refFlag)`，说明项目已部分采用该特性。
+- 建议：在 `src/reactivity/internals/base-handlers.ts` 第 33 行和 65 行，将 `hasOwn(target, key)` 统一替换为 `Object.hasOwn(target, key)`，与 `ref/api.ts` 保持一致。这样可以移除对自定义工具函数的依赖，利用原生实现获得更好的性能和类型安全。
 
 ```typescript
-// 现状（base-handlers.ts:33）
+// 现状（base-handlers.ts:33, 65）
 const hadKey = targetIsArray && keyIsArrayIndex ? Number(key) < target.length : hasOwn(target, key)
+const hadKey = hasOwn(target, key)
 
 // 建议改为
 const hadKey = targetIsArray && keyIsArrayIndex ? Number(key) < target.length : Object.hasOwn(target, key)
+const hadKey = Object.hasOwn(target, key)
 
-// 现状（ref/api.ts:29）
+// 对比：ref/api.ts:29 已正确使用 ✓
 return Object.hasOwn(value, refFlag)
-
-// 此处已使用 Object.hasOwn，符合 ES2022 标准 ✓
 ```
 
 ## 2. 数组负索引访问 `Array.prototype.at()` 已应用（已优化）
@@ -214,7 +214,7 @@ if (!deep && hasOldValue && Object.is(newValue, oldValue)) {
 }
 ```
 
-## 14. TypeScript 5.9 `const` 类型参数（可探索）
+## 14. TypeScript 5.0+ `const` 类型参数（可探索）
 
 - 位置：泛型函数定义（`reactive`、`ref`、`computed` 等）
 - 现状：TypeScript 5.0+ 引入 `const` 类型参数修饰符，可以在泛型函数中推断出更精确的字面量类型。当前代码的泛型函数未使用该特性。
@@ -223,9 +223,12 @@ if (!deep && hasOldValue && Object.is(newValue, oldValue)) {
 ```typescript
 // 潜在示例（需谨慎评估）
 export function ref<const T>(value: T): Ref<T> {
-  // 此时 ref(0) 会推断为 Ref<0> 而非 Ref<number>
-  // 可能不符合响应式系统的预期行为
+  // 此时 ref({ count: 0 }) 会推断为 Ref<{ count: 0 }> 而非 Ref<{ count: number }>
+  // 这种字面量类型对于配置对象可能有用，但对响应式系统可能过于严格
 }
+
+// 注意：const 修饰符的正确语法是 <const T>，表示类型参数 T 的推断会尽可能窄化为字面量类型
+// 实际使用需要根据 API 语义决定是否合适
 ```
 
 ## 15. `Map.prototype.entries()` 与解构（已优化）
@@ -262,6 +265,6 @@ for (const [depKey, dependencyBucket] of depsMap.entries()) {
 1. **`Object.hasOwn()` 替代自定义 `hasOwn`**：在 `base-handlers.ts` 中部分位置仍使用自定义工具函数，可统一替换为 ES2022 原生方法（注：`ref/api.ts` 已正确使用）。
 
 **可探索项（需谨慎评估）：**
-1. **TypeScript 5.9 `const` 类型参数**：在泛型工具函数中引入 `const` 修饰符可能提供更精确的字面量类型推断，但需要评估对现有类型系统的影响，因为响应式 API 通常需要宽松的类型推断以支持值的动态变化。
+1. **TypeScript 5.0+ `const` 类型参数**：在泛型工具函数中引入 `const` 修饰符可能提供更精确的字面量类型推断，但需要评估对现有类型系统的影响，因为响应式 API 通常需要宽松的类型推断以支持值的动态变化。
 
 整体而言，代码质量较高，已充分利用现代 JavaScript 与 TypeScript 特性，仅有个别位置可进一步统一使用原生 API。

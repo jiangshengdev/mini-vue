@@ -29,7 +29,8 @@
 - 位置：`src/shared/utils.ts:52`
 - 现状：使用 `key.startsWith('-')` 判断字符串键名是否表示负数索引
 - 代码上下文：此函数用于验证传入的属性键（可能是字符串、数字或 symbol）是否代表合法的数组索引
-- 评价：**这是正确且高效的实现**。ES2022 的 `Array.prototype.at()` 用于在运行时访问数组元素（如 `arr.at(-1)` 获取最后一个元素），而这里的需求是静态验证字符串键名的格式，判断它是否以负号开头。两者的应用场景完全不同，`startsWith('-')` 是此场景的最佳选择。
+- 评价：**这是正确且高效的实现**。判断字符串是否以负号开头是验证非法索引的必要步骤，`startsWith('-')` 是此场景的最佳选择。
+- 备注：ES2022 的 `Array.prototype.at()` 是用于运行时访问数组元素的方法（如 `arr.at(-1)` 获取最后一个元素），与这里的字符串格式验证场景无关，不适用于此处。
 
 ## 4. `src/shared/error-handling.ts` - 可考虑使用 `using` 声明优化资源管理
 
@@ -75,8 +76,12 @@
 - 代码示例：
   ```typescript
   export type { ElementRef } from '@/runtime-dom/index.ts'
-  export { reactive, effect, watch, computed, ref, ... } from './reactivity/index.ts'
-  export type { Ref, ComputedGetter, ComputedSetter, ... } from './reactivity/index.ts'
+  export { reactive, effect, watch, computed, ref, isRef, unref, toRef, 
+           effectScope, getCurrentScope, onScopeDispose, setMiniErrorHandler } from './reactivity/index.ts'
+  export type { Ref, ComputedGetter, ComputedSetter, WritableComputedOptions,
+                EffectScope, MiniErrorContext, MiniErrorHandler } from './reactivity/index.ts'
+  export { createApp, render } from './runtime-dom/index.ts'
+  export type { SetupFunctionComponent } from './jsx/index.ts'
   ```
 - 评价：完全符合 TypeScript 5.0+ `verbatimModuleSyntax` 严格模式要求，保证类型与值的导入导出明确分离，避免运行时代码污染。
 
@@ -133,7 +138,7 @@
 
 ## 总结
 
-本次检查的 6 个文件（`src/shared/` 目录下的 3 个文件：`error-handling.ts`、`types.ts`、`utils.ts`，以及 3 个 JSX 运行时入口文件：`index.ts`、`jsx-dev-runtime.ts`、`jsx-runtime.ts`）整体已充分利用 ES2022 和 TypeScript 5.9 的现代特性：
+本次检查的 6 个文件（`src/shared/` 目录下的 3 个文件：`error-handling.ts`、`types.ts`、`utils.ts`，以及 3 个 JSX 运行时入口文件：`index.ts`、`jsx-dev-runtime.ts`、`jsx-runtime.ts`）整体已充分利用 ES2022 和 TypeScript 5.2-5.9 的现代特性：
 
 **已正确使用的现代特性：**
 - ✅ ES2022 Error cause（error-handling.ts）

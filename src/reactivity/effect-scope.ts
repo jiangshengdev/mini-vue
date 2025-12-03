@@ -1,5 +1,5 @@
-import type { EffectInstance } from './shared/types.ts'
 import { handleMiniError } from '../shared/error-handling.ts'
+import type { EffectInstance } from './shared/types.ts'
 
 /** 当前正在运行的 effect scope，用于关联副作用与清理。 */
 let activeEffectScope: EffectScope | undefined

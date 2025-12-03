@@ -1,6 +1,6 @@
+import { handleMiniError } from '../shared/error-handling.ts'
 import { recordEffectScope } from './effect-scope.ts'
 import { effectStack } from './internals/effect-stack.ts'
-import { handleMiniError } from '../shared/error-handling.ts'
 import type {
   DependencyBucket,
   EffectHandle,

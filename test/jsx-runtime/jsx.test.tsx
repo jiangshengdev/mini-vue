@@ -45,4 +45,12 @@ describe('jsx-runtime automatic jsx helper', () => {
     expect(isVirtualNode(virtualNode.children[1])).toBe(true)
     expect(virtualNode.children[2]).toBe(0)
   })
+
+  it('支持通过展开语法传入的 key', () => {
+    const spreadProps = { key: 'row-1', class: 'row' }
+    const virtualNode = <li {...spreadProps}>row</li>
+
+    expect(virtualNode.key).toBe('row-1')
+    expect(virtualNode.props).toEqual({ class: 'row' })
+  })
 })

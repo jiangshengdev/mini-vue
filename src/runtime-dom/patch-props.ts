@@ -82,7 +82,7 @@ function applyStyle(element: HTMLElement, value: unknown): void {
       const resolved = styleValue ?? ''
 
       /* 支持的内联属性直接赋值，可避免多余字符串拼接。 */
-      if (name in element.style) {
+      if (Reflect.has(element.style, name)) {
         ;(element.style as WritableStyle)[name] = String(resolved)
       } else {
         /* 非声明属性使用 setProperty，兼容 CSS 自定义变量等场景。 */

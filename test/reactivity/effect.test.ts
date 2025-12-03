@@ -335,7 +335,7 @@ describe('effect', () => {
 
     expect(runCount).toBe(1)
 
-    delete state.foo
+    Reflect.deleteProperty(state, 'foo')
     expect(runCount).toBe(2)
   })
 
@@ -352,7 +352,7 @@ describe('effect', () => {
     state.bar = 2
     expect(keys).toEqual(['foo', 'bar'])
 
-    delete state.foo
+    Reflect.deleteProperty(state, 'foo')
     expect(keys).toEqual(['bar'])
   })
 
@@ -369,7 +369,7 @@ describe('effect', () => {
     state.foo = 1
     expect(hasFoo).toBe(true)
 
-    delete state.foo
+    Reflect.deleteProperty(state, 'foo')
     expect(hasFoo).toBe(false)
   })
 

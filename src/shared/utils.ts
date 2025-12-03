@@ -15,7 +15,7 @@ export function isPlainObject(value: unknown): value is PlainObject {
     return false
   }
 
-  const prototype: unknown = Object.getPrototypeOf(value)
+  const prototype: unknown = Reflect.getPrototypeOf(value)
 
   return prototype === null || prototype === Object.prototype
 }

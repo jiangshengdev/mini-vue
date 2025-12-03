@@ -10,11 +10,11 @@
 - 现状：已正确使用 `Object.hasOwn(props, 'key')` 替代 `Object.prototype.hasOwnProperty.call()`，这是 ES2022 新增的更安全、更简洁的 API。
 - 收益：避免原型链污染问题，代码更清晰。
 
-### 2. 可选链操作符 (`?.`) 与空值合并操作符 (`??`)
+### 2. 空值合并操作符 (`??`)
 
 - 位置：`src/jsx-runtime/shared.ts:32, 80`
 - 现状：使用 `explicitKey ?? (...)` 和 `normalizedProps ?? ({} as ElementProps<T>)` 进行空值合并，这是 ES2020 引入的特性（项目 target 已包含）。
-- 收益：简洁的空值处理逻辑。
+- 收益：简洁的空值处理逻辑，相比 `||` 操作符更精确地处理 `null`/`undefined` 值。
 
 ### 3. Rest/Spread 语法用于对象解构
 
@@ -36,7 +36,16 @@ const propsWithChildren: ElementProps<T> = {
 }
 ```
 
-- 建议：考虑使用 `satisfies` 操作符让 TypeScript 在保持推断类型的同时验证兼容性，但需评估是否与现有类型定义兼容。若 `ElementProps<T>` 定义足够精确且不包含 `children` 字段的索引签名，可能需要调整类型定义，因此暂不强制推荐。
+- 建议：考虑使用 `satisfies` 操作符让 TypeScript 在保持推断类型的同时验证兼容性：
+
+```typescript
+const propsWithChildren = {
+  ...(normalizedProps ?? {}),
+  children,
+} satisfies Partial<ElementProps<T>>
+```
+
+但需评估是否与现有类型定义兼容。若 `ElementProps<T>` 定义足够精确且不包含 `children` 字段的索引签名，可能需要调整类型定义，因此暂不强制推荐。
 
 ### 2. 使用 `Array.prototype.at()` 简化数组访问（ES2022）
 
@@ -67,7 +76,7 @@ export function jsx<const T extends ElementType>(
 ): VirtualNode<T>
 ```
 
-- 评估：需确认 `ElementType` 和 `VirtualNode<T>` 的定义是否受益于更精确的字面量类型。若当前类型推断已满足需求且无性能问题，可保持现状。仅当需要区分不同字符串字面量类型（如 `"div"` vs `"span"`）用于类型级别的静态检查时才有实际价值。
+- 评估：需确认 `ElementType` 和 `VirtualNode<T>` 的定义是否受益于更精确的字面量类型。若当前类型推断已满足需求，可保持现状。仅当需要区分不同字符串字面量类型（如 `"div"` vs `"span"`）用于类型级别的静态检查时才有实际价值。
 
 ### 4. 使用 `using` 声明自动资源管理（TypeScript 5.2+，需 ES2022+ Symbol.dispose）
 

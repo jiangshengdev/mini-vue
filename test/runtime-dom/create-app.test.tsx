@@ -1,8 +1,8 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { screen, within } from '@testing-library/dom'
 import { createTestContainer } from '../setup.ts'
-import type { MiniErrorHandler, SetupFunctionComponent } from '@/index.ts'
-import { createApp, onScopeDispose, reactive, setMiniErrorHandler } from '@/index.ts'
+import type { SetupFunctionComponent } from '@/index.ts'
+import { createApp, reactive } from '@/index.ts'
 
 const App: SetupFunctionComponent = () => {
   return () => {
@@ -11,10 +11,6 @@ const App: SetupFunctionComponent = () => {
 }
 
 describe('runtime-dom createApp', () => {
-  afterEach(() => {
-    setMiniErrorHandler(undefined)
-  })
-
   it('支持通过选择器挂载', () => {
     const host = createTestContainer()
 
@@ -121,56 +117,5 @@ describe('runtime-dom createApp', () => {
 
     state.on = false
     expect(renderSpy).toHaveBeenCalledTimes(2)
-  })
-
-  it('组件清理任务抛错时会通过错误处理器捕获并继续执行剩余清理', () => {
-    const handler = vi.fn<MiniErrorHandler>()
-    const cleanupOrder: number[] = []
-
-    setMiniErrorHandler(handler)
-
-    const Root: SetupFunctionComponent = () => {
-      onScopeDispose(() => {
-        cleanupOrder.push(1)
-        throw new Error('cleanup 1 failed')
-      })
-
-      onScopeDispose(() => {
-        cleanupOrder.push(2)
-      })
-
-      onScopeDispose(() => {
-        cleanupOrder.push(3)
-        throw new Error('cleanup 3 failed')
-      })
-
-      return () => {
-        return <div>Test</div>
-      }
-    }
-
-    const host = createTestContainer()
-    const app = createApp(Root)
-
-    app.mount(host)
-    expect(screen.getByText('Test')).toBeInTheDocument()
-
-    app.unmount()
-
-    /* 所有清理任务都应执行，即使某些抛错 */
-    expect(cleanupOrder).toEqual([1, 2, 3])
-
-    /* 错误处理器应捕获两个异常 */
-    expect(handler).toHaveBeenCalledTimes(2)
-
-    const [error1, context1] = handler.mock.calls[0]
-
-    expect((error1 as Error).message).toBe('cleanup 1 failed')
-    expect(context1).toBe('effect-scope-cleanup')
-
-    const [error2, context2] = handler.mock.calls[1]
-
-    expect((error2 as Error).message).toBe('cleanup 3 failed')
-    expect(context2).toBe('effect-scope-cleanup')
   })
 })

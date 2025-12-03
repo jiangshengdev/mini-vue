@@ -4,7 +4,6 @@
 export type MiniErrorContext =
   | 'scheduler'
   | 'effect-runner'
-  | 'effect-cleanup'
   | 'effect-scope-run'
   | 'effect-scope-cleanup'
   | 'watch-callback'

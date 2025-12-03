@@ -122,11 +122,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
       this.cleanupTasks = []
 
       for (const cleanup of cleanupTasks) {
-        try {
-          cleanup()
-        } catch (error) {
-          handleMiniError(error, 'effect-cleanup')
-        }
+        cleanup()
       }
     }
   }

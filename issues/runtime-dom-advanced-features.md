@@ -1,11 +1,10 @@
-# Runtime DOM 模块 ES2022+ 与 TypeScript 5.9 新特性检查
+# Runtime DOM 模块 ES2022+ 与 TypeScript 5.9 及以下新特性检查
 
 ## 1. `Object.hasOwn` 替代 `in` 操作符检查自有属性
 
 - 位置：`src/runtime-dom/patch-props.ts:85`
 - 现状：使用 `name in element.style` 判断样式属性是否可直接赋值，会同时检查原型链上的属性，虽然在 `CSSStyleDeclaration` 场景下影响不大，但不符合"仅检查自有属性"的语义。
-- 建议：考虑使用 ES2022 的 `Object.hasOwn(element.style, name)` 替代 `name in element.style`，明确表达"检查对象自有属性"的意图，提升代码可读性与语义准确性。同时可避免潜在的原型污染风险（虽然 `CSSStyleDeclaration` 为宿主对象，风险较低）。
-- 建议：改为 `Object.hasOwn(element.style, name)` 或保持现状（因为 `CSSStyleDeclaration` 是宿主对象，原型链查找在此场景下是合理的）。若团队倾向强调"自有属性"语义，可统一使用 `Object.hasOwn`；若认为原型链查找在样式属性场景更符合 DOM 规范，可保持 `in` 操作符。
+- 建议：可考虑使用 ES2022 的 `Object.hasOwn(element.style, name)` 替代 `name in element.style`，明确表达"检查对象自有属性"的意图，提升代码可读性与语义准确性。但需注意 `CSSStyleDeclaration` 是宿主对象，原型链查找在此场景下是合理的，因此保持 `in` 操作符也符合 DOM 规范。建议根据团队对"自有属性"语义的强调程度决定是否采用。
 
 ## 2. `?.` 可选链简化节点移除逻辑
 
@@ -36,7 +35,7 @@
 - 现状：所有模块均为同步逻辑，不涉及异步初始化或资源加载。
 - 判断：当前场景无需顶层 `await`。若未来需要异步加载宿主环境配置或动态导入模块，可考虑使用该特性。
 
-## 7. TypeScript 5.9 `satisfies` 操作符
+## 7. TypeScript 4.9+ `satisfies` 操作符
 
 - 位置：`src/runtime-dom/renderer-options.ts:10`
 - 现状：使用显式类型标注 `export const domRendererOptions: RendererOptions<Node, Element, DocumentFragment> = { ... }`，确保对象字面量符合接口约束。
@@ -64,7 +63,7 @@
 
 `src/runtime-dom` 模块已在部分场景（Error Cause、可选链）中采用 ES2022 特性，代码现代化程度较高。以下是可选的优化建议：
 
-- **可考虑采用**：`Object.hasOwn` 替代 `in` 操作符（若团队强调自有属性语义）；TypeScript `satisfies` 操作符（若需要更灵活的类型推断）。
-- **无需引入**：类字段、顶层 `await`、`using` 声明、正则 `/d` 标志等特性在当前架构下无适用场景。
+- **可考虑采用**：`Object.hasOwn` 替代 `in` 操作符（若团队强调自有属性语义）；TypeScript 4.9+ `satisfies` 操作符（若需要更灵活的类型推断）。
+- **无需引入**：类字段、顶层 `await`、TypeScript 5.2+ `using` 声明、正则 `/d` 标志等特性在当前架构下无适用场景。
 
-整体而言，`src/runtime-dom` 代码已符合 ES2022 与 TypeScript 5.9 要求，暂无强制性升级需求。建议在后续重构或新增功能时优先考虑采用上述现代特性。
+整体而言，`src/runtime-dom` 代码已符合 ES2022 与 TypeScript 5.9 及以下版本的现代语法要求，暂无强制性升级需求。建议在后续重构或新增功能时优先考虑采用上述现代特性。

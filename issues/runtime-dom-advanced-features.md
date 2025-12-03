@@ -1,10 +1,11 @@
 # Runtime DOM 模块 ES2022+ 与 TypeScript 5.9 及以下新特性检查
 
-## 1. `Object.hasOwn` 替代 `in` 操作符检查自有属性
+## 1. `Object.hasOwn` 与 `in` 操作符的选择
 
 - 位置：`src/runtime-dom/patch-props.ts:85`
-- 现状：使用 `name in element.style` 判断样式属性是否可直接赋值，会同时检查原型链上的属性，虽然在 `CSSStyleDeclaration` 场景下影响不大，但不符合"仅检查自有属性"的语义。
-- 建议：可考虑使用 ES2022 的 `Object.hasOwn(element.style, name)` 替代 `name in element.style`，明确表达"检查对象自有属性"的意图，提升代码可读性与语义准确性。但需注意 `CSSStyleDeclaration` 是宿主对象，原型链查找在此场景下是合理的，因此保持 `in` 操作符也符合 DOM 规范。建议根据团队对"自有属性"语义的强调程度决定是否采用。
+- 现状：使用 `name in element.style` 判断样式属性是否可直接赋值。
+- 分析：在此场景下，`in` 操作符是正确选择，因为 CSS 属性定义在 `CSSStyleDeclaration` 的原型链上（作为 getter/setter），而非对象自有属性。使用 `Object.hasOwn(element.style, name)` 会导致无法检测到有效的 CSS 属性，破坏样式应用逻辑。
+- 判断：当前实现已是最佳实践，无需修改。ES2022 的 `Object.hasOwn` 适用于检查自有属性的场景，但不适用于需要原型链查找的 DOM 宿主对象。
 
 ## 2. `?.` 可选链简化节点移除逻辑
 
@@ -38,8 +39,9 @@
 ## 7. TypeScript 4.9+ `satisfies` 操作符
 
 - 位置：`src/runtime-dom/renderer-options.ts:10`
-- 现状：使用显式类型标注 `export const domRendererOptions: RendererOptions<Node, Element, DocumentFragment> = { ... }`，确保对象字面量符合接口约束。
-- 建议：可使用 TypeScript 4.9+ 的 `satisfies` 操作符（如 `export const domRendererOptions = { ... } satisfies RendererOptions<Node, Element, DocumentFragment>`），在保留类型推断的同时验证接口兼容性。但当前显式类型标注已足够清晰，引入 `satisfies` 的收益有限，可根据团队偏好决定是否采用。
+- 现状：使用显式类型标注 `export const domRendererOptions: RendererOptions<Node, Element, DocumentFragment> = { ... }`，确保导出常量具有明确的类型。
+- 分析：显式类型标注是正确选择，因为导出的 `domRendererOptions` 需要为模块消费者提供准确的类型信息。若改用 `satisfies` 操作符，TypeScript 会推断出更宽泛的字面量类型，可能导致类型不匹配或丢失接口约束，破坏类型安全。
+- 判断：当前实现已是最佳实践，无需修改。`satisfies` 操作符适用于需要保留字面量类型推断的场景，但不适用于需要导出特定接口类型的常量声明。
 
 ## 8. TypeScript 5.0+ `const` 类型参数
 
@@ -61,9 +63,10 @@
 
 ## 总结
 
-`src/runtime-dom` 模块已在部分场景（Error Cause、可选链）中采用 ES2022 特性，代码现代化程度较高。以下是可选的优化建议：
+`src/runtime-dom` 模块已在部分场景（Error Cause、可选链）中采用 ES2022 特性，代码现代化程度较高。经过详细分析，现有代码已针对各自场景选择了最佳实践：
 
-- **可考虑采用**：`Object.hasOwn` 替代 `in` 操作符（若团队强调自有属性语义）；TypeScript 4.9+ `satisfies` 操作符（若需要更灵活的类型推断）。
-- **无需引入**：类字段、顶层 `await`、TypeScript 5.2+ `using` 声明、正则 `/d` 标志等特性在当前架构下无适用场景。
+- **已正确使用现代特性**：Error Cause（ES2022）、可选链操作符（ES2020）。
+- **已采用最佳实践**：`in` 操作符用于 DOM 宿主对象原型链查找、显式类型标注用于导出常量。
+- **无适用场景**：类字段、顶层 `await`、TypeScript 5.2+ `using` 声明、正则 `/d` 标志、`Array.prototype.at()`、`const` 类型参数等特性在当前架构下无适用场景。
 
-整体而言，`src/runtime-dom` 代码已符合 ES2022 与 TypeScript 5.9 及以下版本的现代语法要求，暂无强制性升级需求。建议在后续重构或新增功能时优先考虑采用上述现代特性。
+整体而言，`src/runtime-dom` 代码已充分利用 ES2022 与 TypeScript 5.9 及以下版本的现代语法特性，无需额外优化。建议在后续重构或新增功能时继续保持对现代特性的合理运用。

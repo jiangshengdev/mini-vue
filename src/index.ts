@@ -11,12 +11,16 @@ export {
   isRef,
   unref,
   toRef,
+  effectScope,
+  getCurrentScope,
+  onScopeDispose,
 } from './reactivity/index.ts'
 export type { Ref } from './reactivity/index.ts'
 export type {
   ComputedGetter,
   ComputedSetter,
   WritableComputedOptions,
+  EffectScope,
 } from './reactivity/index.ts'
 export { createApp, render } from './runtime-dom/index.ts'
 export type { SetupFunctionComponent } from './jsx/index.ts'

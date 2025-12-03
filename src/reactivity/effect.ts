@@ -1,3 +1,4 @@
+import { recordEffectScope } from './effect-scope.ts'
 import { effectStack } from './internals/effect-stack.ts'
 import type {
   DependencyBucket,
@@ -132,6 +133,8 @@ export function effect<T>(
   const parent = effectStack.current
   /* 每次调用都创建新的 ReactiveEffect 实例 */
   const instance = new ReactiveEffect(fn, options.scheduler)
+
+  recordEffectScope(instance)
 
   if (parent) {
     /* 父级停止时同步停止子级，防止泄漏 */

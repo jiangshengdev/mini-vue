@@ -1,4 +1,5 @@
 import { ReactiveEffect } from '../effect.ts'
+import { recordEffectScope } from '../effect-scope.ts'
 import { trackEffect, triggerEffects } from '../internals/dependency-utils.ts'
 import type { DependencyBucket } from '../shared/types.ts'
 import type { Ref } from './types.ts'
@@ -50,6 +51,8 @@ class ComputedRefImpl<T> implements Ref<T> {
     this.effect = new ReactiveEffect(getter, () => {
       this.markDirty()
     })
+
+    recordEffectScope(this.effect)
   }
 
   /**

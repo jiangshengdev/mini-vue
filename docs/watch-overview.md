@@ -32,6 +32,7 @@
 - `onCleanup(fn)`：回调内部调用后会记录本轮清理函数，在下次 `runWatchJob()` 前或手动 `stop()` 时触发。
 - `stop()`：显式返回给用户的停止函数，调用后 effect 失活并立刻运行末次清理。
 - 父级 effect 关联：若在 effect 内部创建 watch，会通过 `effectStack.current.registerCleanup(stop)` 将停止逻辑挂到父 effect，确保作用域销毁时同步终止。
+- effect scope：若当前存在 `effectScope`（组件 setup 或用户显式创建），`recordEffectScope()` 与 `recordScopeCleanup()` 会把底层 `ReactiveEffect` 与 `stop` 句柄一起纳入 scope，`scope.stop()` 时即可自动终止 watch 并触发最后一次 `onCleanup`。
 
 ## 深度监听策略
 

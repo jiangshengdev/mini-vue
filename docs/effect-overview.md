@@ -39,6 +39,13 @@
 - `effectStack` 记录当前执行链，`effectStack.current` 始终指向 `track()` 需要的副作用；嵌套 effect 会通过 `registerCleanup()` 自动串联生命周期。
 - 由于 `ReactiveEffect.run()` 会在进入栈前清空旧依赖，因此即使 effect 内部条件分支发生变化，也能确保只保留最新一次执行时访问到的字段。
 
+## Effect Scope 托管
+
+- `effectScope()` 会创建可独立停止的作用域，`scope.run(fn)` 在执行回调期间把 `activeEffectScope` 指向自身，保证内部 `effect`/`computed`/`watch` 等调用都会被记录。
+- `recordEffectScope()` 与 `recordScopeCleanup()` 由 `ReactiveEffect`、`computed`、`watch`、组件渲染 effect 等内部模块统一调用，scope `stop()` 即可一次性 `stop()` 所有副作用并依次执行注册的清理函数。
+- 组件实例在 `createComponentInstance()` 时会生成一个 detached scope，并在 `invokeSetup()` 中通过 `instance.scope.run()` 包裹 `setup`；组件卸载时调用 `instance.scope.stop()`，确保 `setup` 内创建的 watch/computed/ effect 全部失活。
+- 对外也暴露 `effectScope`/`getCurrentScope`/`onScopeDispose`，方便高级用户自管理作用域，手动创建的 scope 与组件行为保持一致。
+
 ## 使用要点与风险提示
 
 - 避免在 `stop()` 之后继续手动 `run()`：虽然可行，但会跳过依赖收集，通常只在一次性求值场景使用。

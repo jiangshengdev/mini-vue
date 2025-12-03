@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { effect, reactive } from '@/index.ts'
+import { computed, effect, effectScope, reactive } from '@/index.ts'
 
 describe('effect', () => {
   it('注册后会立刻执行一次副作用', () => {
@@ -338,5 +338,53 @@ describe('effect', () => {
 
     list.length = 2
     expect(third).toBe(-1)
+  })
+
+  it('effectScope 停止后会级联停止内部 effect', () => {
+    const state = reactive({ count: 0 })
+    const scope = effectScope()
+    let observed = -1
+
+    scope.run(() => {
+      effect(() => {
+        observed = state.count
+      })
+    })
+
+    expect(observed).toBe(0)
+
+    state.count = 1
+    expect(observed).toBe(1)
+
+    scope.stop()
+
+    state.count = 2
+    expect(observed).toBe(1)
+  })
+
+  it('effectScope 停止会同步清理 computed 派生值', () => {
+    const scope = effectScope()
+    const state = reactive({ count: 0 })
+    const observed: number[] = []
+
+    scope.run(() => {
+      const doubled = computed(() => {
+        return state.count * 2
+      })
+
+      effect(() => {
+        observed.push(doubled.value)
+      })
+    })
+
+    expect(observed).toEqual([0])
+
+    state.count = 1
+    expect(observed).toEqual([0, 2])
+
+    scope.stop()
+
+    state.count = 2
+    expect(observed).toEqual([0, 2])
   })
 })

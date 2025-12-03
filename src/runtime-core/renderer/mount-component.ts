@@ -14,6 +14,7 @@ import {
   unsetCurrentInstance,
 } from '@/runtime-core/component-instance.ts'
 import { ReactiveEffect } from '@/reactivity/effect.ts'
+import { effectScope, recordEffectScope } from '@/reactivity/effect-scope.ts'
 
 /**
  * 执行函数组件并将返回的子树继续挂载到容器。
@@ -93,6 +94,7 @@ function createComponentInstance<
     },
     cleanupTasks: [],
     setupContext: {},
+    scope: effectScope(true),
   }
 }
 
@@ -117,11 +119,20 @@ function invokeSetup<
 >(
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
 ): ComponentRenderFunction {
-  /* 替换全局 currentInstance 以便 setup 内部通过 API 访问自身。 */
-  setCurrentInstance(instance)
-  const render = instance.type(instance.props)
+  const render = instance.scope.run(() => {
+    /* 替换全局 currentInstance 以便 setup 内部通过 API 访问自身。 */
+    setCurrentInstance(instance)
 
-  unsetCurrentInstance()
+    try {
+      return instance.type(instance.props)
+    } finally {
+      unsetCurrentInstance()
+    }
+  })
+
+  if (!render) {
+    throw new TypeError('组件作用域已失效，无法执行 setup')
+  }
 
   if (typeof render !== 'function') {
     throw new TypeError('组件必须返回渲染函数以托管本地状态')
@@ -164,7 +175,7 @@ function createRenderEffect<
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
   options: RendererOptions<HostNode, HostElement, HostFragment>,
 ): ReactiveEffect<ComponentResult> {
-  return new ReactiveEffect<ComponentResult>(
+  const effect = new ReactiveEffect<ComponentResult>(
     () => {
       /* 每次渲染时记录最新子树，供后续挂载或复用。 */
       const subtree = instance.render()
@@ -178,6 +189,10 @@ function createRenderEffect<
       rerenderComponent(instance, options, renderSchedulerJob)
     },
   )
+
+  recordEffectScope(effect, instance.scope)
+
+  return effect
 }
 
 /**
@@ -245,8 +260,8 @@ function teardownComponentInstance<
   T extends SetupFunctionComponent,
 >(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): void {
   teardownMountedSubtree(instance)
-  /* 停止响应式副作用，阻断后续追踪与回调。 */
-  instance.effect?.stop()
+  /* 停止 scope 以统一回收所有 setup 内创建的副作用。 */
+  instance.scope.stop()
   instance.effect = undefined
 
   if (instance.cleanupTasks.length > 0) {

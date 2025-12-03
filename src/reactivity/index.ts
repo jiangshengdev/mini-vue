@@ -6,6 +6,8 @@ export { reactive } from './reactive.ts'
 export { watch } from './watch/index.ts'
 export { computed, ref, isRef, unref, toRef } from './ref/index.ts'
 export type { Ref } from './ref/index.ts'
+export { effectScope, getCurrentScope, onScopeDispose } from './effect-scope.ts'
+export type { EffectScope } from './effect-scope.ts'
 export type {
   ComputedGetter,
   ComputedSetter,

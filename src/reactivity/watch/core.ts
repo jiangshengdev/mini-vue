@@ -1,4 +1,5 @@
 import { ReactiveEffect } from '../effect.ts'
+import { recordEffectScope, recordScopeCleanup } from '../effect-scope.ts'
 import { effectStack } from '../internals/effect-stack.ts'
 import type { Ref } from '../ref/types.ts'
 import { createGetter, resolveDeepOption } from './utils.ts'
@@ -55,6 +56,8 @@ export function watch<T>(
     runWatchJob()
   })
 
+  recordEffectScope(runner)
+
   /**
    * 在依赖变更时执行的调度任务，负责比较、清理与派发。
    */
@@ -95,6 +98,8 @@ export function watch<T>(
       cleanup = undefined
     }
   }
+
+  recordScopeCleanup(stop)
 
   /* 如存在父级 effect，则登记 stop 以便作用域销毁时统一清理。 */
   const parentEffect = effectStack.current

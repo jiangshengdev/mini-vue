@@ -9,6 +9,7 @@ export type MiniErrorContext =
   | 'effect-scope-cleanup'
   | 'watch-callback'
   | 'watch-cleanup'
+  | 'component-setup'
   | 'component-cleanup'
   | 'computed-setter'
 

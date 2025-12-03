@@ -190,4 +190,26 @@ describe('runtime-dom component reactivity', () => {
     expect((error as Error).message).toBe('component cleanup failed')
     expect(context).toBe('component-cleanup')
   })
+
+  it('setup 抛错会通知错误处理器并保持同步抛错', () => {
+    const container = createTestContainer()
+    const handler = vi.fn<MiniErrorHandler>()
+    const boom = new Error('setup failed')
+
+    setMiniErrorHandler(handler)
+
+    const Faulty: SetupFunctionComponent = () => {
+      throw boom
+    }
+
+    expect(() => {
+      render(<Faulty />, container)
+    }).toThrow(boom)
+
+    expect(handler).toHaveBeenCalledTimes(1)
+    const [error, context] = handler.mock.calls[0]
+
+    expect(error).toBe(boom)
+    expect(context).toBe('component-setup')
+  })
 })

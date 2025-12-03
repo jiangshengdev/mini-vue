@@ -113,16 +113,29 @@ function invokeSetup<
   HostFragment extends HostNode,
   T extends SetupFunctionComponent,
 >(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): ComponentRenderFunction {
+  let hasSetupError = false
+  let setupError: unknown
+
   const render = instance.scope.run(() => {
     /* 替换全局 currentInstance 以便 setup 内部通过 API 访问自身。 */
     setCurrentInstance(instance)
 
     try {
       return instance.type(instance.props)
+    } catch (error) {
+      hasSetupError = true
+      setupError = error
+      handleMiniError(error, 'component-setup', { rethrowAsyncFallback: false })
+
+      return undefined
     } finally {
       unsetCurrentInstance()
     }
   })
+
+  if (hasSetupError) {
+    throw setupError
+  }
 
   if (!render) {
     throw new TypeError('组件作用域已失效，无法执行 setup', { cause: instance.scope })

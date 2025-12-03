@@ -1,4 +1,6 @@
-# shared 与 JSX 运行时模块 ES2022+ 与 TS 5.9 特性检查
+# shared 与 JSX 运行时模块 ES2022+ 与 TS 5.2-5.9 特性检查
+
+> 本文档检查范围包括：ES2022+ JavaScript 特性 和 TypeScript 5.2 至 5.9 引入的新特性。同时记录符合现代最佳实践的 API 使用情况（如 queueMicrotask）。
 
 ## 1. `src/shared/error-handling.ts` - Error cause 特性已正确使用 ✅
 
@@ -25,8 +27,9 @@
 ## 3. `src/shared/utils.ts` - 字符串负数索引判断已采用最佳方案 ✅
 
 - 位置：`src/shared/utils.ts:52`
-- 现状：使用 `key.startsWith('-')` 判断是否为负数索引
-- 评价：**这是正确且高效的实现**。虽然 ES2022 引入了 `Array.prototype.at()` 用于数组的负索引访问，但在此场景中，我们需要判断字符串键名是否表示负数，`startsWith('-')` 是最直接、最高效的方案。两个特性的应用场景不同，无需改动。
+- 现状：使用 `key.startsWith('-')` 判断字符串键名是否表示负数索引
+- 代码上下文：此函数用于验证传入的属性键（可能是字符串、数字或 symbol）是否代表合法的数组索引
+- 评价：**这是正确且高效的实现**。ES2022 的 `Array.prototype.at()` 用于在运行时访问数组元素（如 `arr.at(-1)` 获取最后一个元素），而这里的需求是静态验证字符串键名的格式，判断它是否以负号开头。两者的应用场景完全不同，`startsWith('-')` 是此场景的最佳选择。
 
 ## 4. `src/shared/error-handling.ts` - 可考虑使用 `using` 声明优化资源管理
 
@@ -63,18 +66,41 @@
 - 现状：使用 `Record<PropertyKey, unknown>` 和 `Record<string, unknown>` 定义通用类型
 - 评价：已充分利用 TypeScript 内置工具类型，无需额外优化。`PropertyKey` 联合类型（string | number | symbol）的使用体现了现代 TS 最佳实践。
 
-## 6. `src/index.ts` / `src/jsx-dev-runtime.ts` / `src/jsx-runtime.ts` - 模块导出符合 verbatimModuleSyntax ✅
+## 6. JSX 运行时入口文件 - 模块导出符合 verbatimModuleSyntax ✅
 
-- 位置：三个入口文件
+### 6.1 `src/index.ts` - 主入口文件
+
+- 位置：`src/index.ts`
 - 现状：严格遵循 `verbatimModuleSyntax` 配置，类型导出使用 `export type`，值导出使用 `export`
-- 示例：
+- 代码示例：
   ```typescript
-  // src/index.ts
   export type { ElementRef } from '@/runtime-dom/index.ts'
-  export { reactive, effect, ... } from './reactivity/index.ts'
-  export type { Ref, ComputedGetter, ... } from './reactivity/index.ts'
+  export { reactive, effect, watch, computed, ref, ... } from './reactivity/index.ts'
+  export type { Ref, ComputedGetter, ComputedSetter, ... } from './reactivity/index.ts'
   ```
-- 评价：完全符合 TypeScript 5.0+ `verbatimModuleSyntax` 严格模式要求，保证类型与值的导入导出明确分离。
+- 评价：完全符合 TypeScript 5.0+ `verbatimModuleSyntax` 严格模式要求，保证类型与值的导入导出明确分离，避免运行时代码污染。
+
+### 6.2 `src/jsx-dev-runtime.ts` - JSX 开发运行时入口
+
+- 位置：`src/jsx-dev-runtime.ts`
+- 现状：仅包含简洁的 re-export 语句
+- 代码：
+  ```typescript
+  export { Fragment } from './jsx/index.ts'
+  export { h, jsx, jsxs, jsxDEV } from './jsx-runtime/index.ts'
+  ```
+- 评价：符合入口文件仅做导出的约定（参见仓库 copilot-instructions），无业务逻辑，结构清晰。
+
+### 6.3 `src/jsx-runtime.ts` - JSX 生产运行时入口
+
+- 位置：`src/jsx-runtime.ts`
+- 现状：与 jsx-dev-runtime.ts 结构相同，仅包含 re-export
+- 代码：
+  ```typescript
+  export { Fragment } from './jsx/index.ts'
+  export { h, jsx, jsxs, jsxDEV } from './jsx-runtime/index.ts'
+  ```
+- 评价：与开发运行时保持一致的导出结构，遵循框架约定。React 风格的 JSX 运行时通常会区分 dev 和 prod 版本，这里为简化实现暂时保持相同导出。
 
 ## 7. `src/shared/utils.ts` - Number.isInteger 正确使用 ✅
 
@@ -95,7 +121,8 @@
     throw new Error(String(error), { cause: error })
   })
   ```
-- 评价：`queueMicrotask` 是 WHATWG HTML 规范的标准 API（2019 年引入），在现代浏览器和 Node.js 等多种 JavaScript 运行时环境中广泛支持，相比 `Promise.resolve().then()` 更直接且语义明确。虽然不是 ES2022 新增，但作为现代异步编程最佳实践，在本次检查中予以认可。
+- 评价：`queueMicrotask` 是 WHATWG HTML 规范的标准 API（2019 年引入），在现代浏览器和 Node.js 等多种 JavaScript 运行时环境中广泛支持，相比 `Promise.resolve().then()` 更直接且语义明确。
+- 备注：虽非 ES2022 新增特性，但作为现代异步编程的标准最佳实践，在本次检查中一并记录。
 
 ## 9. `src/shared/utils.ts` - 可考虑使用 satisfies 操作符优化类型注解（TS 4.9+）
 

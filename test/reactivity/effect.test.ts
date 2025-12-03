@@ -1,5 +1,6 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { computed, effect, effectScope, reactive } from '@/index.ts'
+import * as dependencyUtils from '@/reactivity/internals/dependency-utils.ts'
 
 describe('effect', () => {
   it('注册后会立刻执行一次副作用', () => {
@@ -386,5 +387,22 @@ describe('effect', () => {
 
     state.count = 2
     expect(observed).toEqual([0, 2])
+  })
+
+  it('无活跃 effect 读取不会创建空依赖桶', () => {
+    const state = reactive({ count: 0 })
+    const triggerSpy = vi.spyOn(dependencyUtils, 'triggerEffects')
+
+    try {
+      /* 直接读取属性，此时不存在活跃 effect。 */
+      void state.count
+
+      /* 修改属性应不会触发 triggerEffects，因为没有任何依赖桶被创建。 */
+      state.count = 1
+
+      expect(triggerSpy).not.toHaveBeenCalled()
+    } finally {
+      triggerSpy.mockRestore()
+    }
   })
 })

@@ -5,6 +5,7 @@ import {
   triggerOpTypes,
 } from '../shared/constants.ts'
 import { trackEffect, triggerEffects } from './dependency-utils.ts'
+import { effectStack } from './effect-stack.ts'
 import { isArrayIndex } from '@/shared/utils.ts'
 
 /**
@@ -23,6 +24,13 @@ class DependencyRegistry {
    * 把当前活跃副作用加入目标字段的依赖集合。
    */
   track(target: ReactiveTarget, key: PropertyKey): void {
+    /* 没有活跃 effect 时无需创建依赖集合，直接退出节省内存。 */
+    const currentEffect = effectStack.current
+
+    if (!currentEffect) {
+      return
+    }
+
     /* 获取或创建目标字段对应的依赖集合 */
     const dependencyBucket = this.getOrCreateDep(target, key)
 

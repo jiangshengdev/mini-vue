@@ -1,5 +1,5 @@
 /**
- * 管理响应式系统的统一错误处理流程，并描述错误上报时的上下文来源。
+ * 管理 mini-vue 在响应式与运行时阶段的统一错误处理流程，并描述错误上报的上下文来源。
  */
 export type MiniErrorContext =
   | 'scheduler'
@@ -20,9 +20,9 @@ export type MiniErrorHandler = (error: unknown, context: MiniErrorContext) => vo
 let currentMiniErrorHandler: MiniErrorHandler | undefined
 
 /**
- * 允许外部重写默认的错误处理逻辑，便于集成框架级兜底。
+ * 允许外部重写默认的错误处理逻辑，便于在响应式、调度器与组件清理阶段统一兜底。
  *
- * @remarks 注册后的处理器会在 effect、effectScope.run、watch 回调以及调度器等入口发生异常时被调用；个别入口（如 effect）会在回调完成后继续抛出原始错误。
+ * @remarks 注册后的处理器会在 effect、effectScope.run、watch 回调、scheduler 以及组件 cleanup 等入口发生异常时被调用；个别入口（如 effect）会在回调完成后继续抛出原始错误。
  */
 export function setMiniErrorHandler(handler?: MiniErrorHandler): void {
   currentMiniErrorHandler = handler

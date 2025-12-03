@@ -33,7 +33,7 @@ function extractKeyedProps<T extends ElementType>(
     key?: PropertyKey
   }
 
-  /* props 上声明 key 时优先透出，否则改用显式 fallback。 */
+  /* `props` 上声明 key 时优先透出，否则改用显式 fallback。 */
   const normalizedKey =
     fallbackKey ?? (Object.hasOwn(props, 'key') ? extractedKey : undefined)
   const hasRestProps = Reflect.ownKeys(restProps).length > 0
@@ -85,7 +85,7 @@ export function h<T extends ElementType>(
 
   /* 需要人为传入 children 时重新组装 props 并交给底层创建函数。 */
   const propsWithChildren: ElementProps<T> = {
-    /* normalizedProps 可能为空，此处回退到空对象以便附加 children。 */
+    /* `normalizedProps` 可能为空，此处回退到空对象以便附加 children。 */
     ...(normalizedProps ?? ({} as ElementProps<T>)),
     children,
   }

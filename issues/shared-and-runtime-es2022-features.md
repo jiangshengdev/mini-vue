@@ -96,11 +96,11 @@
     throw new Error(String(error), { cause: error })
   })
   ```
-- 评价：`queueMicrotask` 是现代浏览器和 Node.js 支持的标准 API（HTML Living Standard，广泛支持于 ES2018+ 环境），相比 `Promise.resolve().then()` 更直接且语义明确。虽然不是 ES2022 新增特性，但作为现代异步编程最佳实践值得认可。
+- 评价：`queueMicrotask` 是标准的 HTML Living Standard API，在现代浏览器和 Node.js 环境中广泛支持，相比 `Promise.resolve().then()` 更直接且语义明确。虽然不是 ES2022 新增特性，但作为现代异步编程最佳实践值得认可。
 
 ## 9. `src/shared/utils.ts` - 可考虑使用 satisfies 操作符优化类型注解（TS 4.9+）
 
-- 位置：`src/shared/utils.ts:19` (示例位置)
+- 位置：`src/shared/utils.ts`（类型保护函数）
 - 现状：函数返回类型通过类型保护 `value is PlainObject` 明确标注
 - 潜在优化：在某些需要同时保持字面量类型推断和类型约束的场景下，`satisfies` 可以提供更灵活的类型检查
 - 评价：**当前实现已足够优秀**。类型保护（type predicate）在运行时判断场景下比 `satisfies` 更合适，因为它能影响控制流分析。

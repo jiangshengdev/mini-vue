@@ -1,5 +1,4 @@
 import type { PlainObject } from '@/shared/types.ts'
-import type { ReactiveTarget } from '@/reactivity/shared/types.ts'
 
 /**
  * 判断传入值是否为可供 reactive 使用的普通非 null 对象。
@@ -26,13 +25,6 @@ export function isPlainObject(value: unknown): value is PlainObject {
  */
 export function isNil(value: unknown): value is null | undefined {
   return value === null || value === undefined
-}
-
-/**
- * 判断目标是否拥有指定自有属性，封装 Object.hasOwn 调用。
- */
-export function hasOwn(target: ReactiveTarget, key: PropertyKey): boolean {
-  return Object.hasOwn(target, key)
 }
 
 /**

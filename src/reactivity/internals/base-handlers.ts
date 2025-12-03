@@ -2,7 +2,7 @@ import { reactive } from '../reactive.ts'
 import { iterateDependencyKey, triggerOpTypes } from '../shared/constants.ts'
 import type { ReactiveTarget } from '../shared/types.ts'
 import { track, trigger } from './operations.ts'
-import { hasOwn, isArrayIndex, isObject } from '@/shared/utils.ts'
+import { isArrayIndex, isObject } from '@/shared/utils.ts'
 
 /**
  * 响应式读取逻辑：在取值时触发依赖收集，并对嵌套对象递归创建代理。
@@ -30,7 +30,7 @@ const mutableSet: ProxyHandler<ReactiveTarget>['set'] = (target, key, value, rec
   const targetIsArray = Array.isArray(target)
   const keyIsArrayIndex = isArrayIndex(key)
   const hadKey =
-    targetIsArray && keyIsArrayIndex ? Number(key) < target.length : hasOwn(target, key)
+    targetIsArray && keyIsArrayIndex ? Number(key) < target.length : Object.hasOwn(target, key)
 
   /* 读取旧值用于后续的同值判断 */
   const previousValue = Reflect.get(target, key, receiver) as unknown
@@ -62,7 +62,7 @@ const mutableSet: ProxyHandler<ReactiveTarget>['set'] = (target, key, value, rec
  */
 const mutableDeleteProperty: ProxyHandler<ReactiveTarget>['deleteProperty'] = (target, key) => {
   /* 删除前记录字段是否存在，后续只对真实变更触发更新。 */
-  const hadKey = hasOwn(target, key)
+  const hadKey = Object.hasOwn(target, key)
   /* 通过 Reflect 删除属性以保持原生行为一致。 */
   const wasApplied = Reflect.deleteProperty(target, key)
 

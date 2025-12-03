@@ -44,7 +44,7 @@ export class EffectScope {
   /**
    * 在当前 scope 上下文中执行回调，使其创建的副作用被自动托管。
    *
-   * @throws {unknown} 回调内部抛出的异常会同步向上传播，并在传播前交给 setReactivityErrorHandler 处理。
+   * @throws {unknown} 回调内部抛出的异常会同步向上传播，并在传播前交给 setMiniErrorHandler 处理。
    */
   run<T>(fn: () => T): T | undefined {
     /* `scope` 已停用时直接返回，避免在无效上下文中继续注册副作用。 */

@@ -51,7 +51,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
   /**
    * 执行副作用函数并围绕 effect 栈管理依赖收集流程。
    *
-   * @throws {unknown} 原样抛出副作用函数内部的异常，同时会通过 setReactivityErrorHandler 暴露给统一错误处理器。
+   * @throws {unknown} 原样抛出副作用函数内部的异常，同时会通过 setMiniErrorHandler 暴露给统一错误处理器。
    */
   run(): T {
     /* 已停止的副作用只执行原始函数，跳过依赖收集成本 */
@@ -131,7 +131,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
 /**
  * 最小版 effect：立即执行副作用并返回可控的句柄，亦支持传入调度选项。
  *
- * @throws {unknown} 用户副作用执行时抛出的异常会同步传播，并在传播前经过 setReactivityErrorHandler。
+ * @throws {unknown} 用户副作用执行时抛出的异常会同步传播，并在传播前经过 setMiniErrorHandler。
  */
 export function effect<T>(fn: () => T, options: EffectOptions = {}): EffectHandle<T> {
   /* 读取父级副作用，便于建立嵌套清理关系 */

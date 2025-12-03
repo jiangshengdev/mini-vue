@@ -32,7 +32,7 @@ export interface WatchOptions {
  * - 支持深度遍历与懒执行策略。
  * - 允许注册清理逻辑并与父 effect 生命周期同步。
  *
- * @remarks 回调内部抛出的异常不会向外冒泡，而是仅通过 setReactivityErrorHandler 汇报，确保同一触发链的其余副作用可继续执行。
+ * @remarks 回调内部抛出的异常不会向外冒泡，而是仅通过 setMiniErrorHandler 汇报，确保同一触发链的其余副作用可继续执行。
  */
 export function watch<T>(
   source: WatchSource<T>,
@@ -78,11 +78,7 @@ export function watch<T>(
       return
     }
 
-    /* 优先执行上一次注册的清理逻辑，释放副作用。 */
-    if (cleanup) {
-      cleanup()
-      cleanup = undefined
-    }
+    runRegisteredCleanup()
 
     const previousValue = hasOldValue ? oldValue : undefined
 
@@ -102,11 +98,7 @@ export function watch<T>(
    */
   const stop: WatchStopHandle = () => {
     runner.stop()
-
-    if (cleanup) {
-      cleanup()
-      cleanup = undefined
-    }
+    runRegisteredCleanup()
   }
 
   recordScopeCleanup(stop)
@@ -116,6 +108,22 @@ export function watch<T>(
 
   if (parentEffect) {
     parentEffect.registerCleanup(stop)
+  }
+
+  function runRegisteredCleanup(): void {
+    if (!cleanup) {
+      return
+    }
+
+    const previousCleanup = cleanup
+
+    cleanup = undefined
+
+    try {
+      previousCleanup()
+    } catch (error) {
+      handleMiniError(error, 'watch-cleanup')
+    }
   }
 
   /* 根据 immediate 选择立即执行还是先懒获取一次旧值。 */

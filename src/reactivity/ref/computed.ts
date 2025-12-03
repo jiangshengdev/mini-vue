@@ -1,6 +1,7 @@
 import { ReactiveEffect } from '../effect.ts'
 import { recordEffectScope } from '../effect-scope.ts'
 import { trackEffect, triggerEffects } from '../internals/dependency-utils.ts'
+import { handleMiniError } from '../../shared/error-handling.ts'
 import type { DependencyBucket } from '../shared/types.ts'
 import type { Ref } from './types.ts'
 import { refFlag } from './types.ts'
@@ -74,7 +75,12 @@ class ComputedRefImpl<T> implements Ref<T> {
    * 写入 computed 值时交给自定义 setter，由实现自行决定同步策略。
    */
   set value(newValue: T) {
-    this.setter(newValue)
+    try {
+      this.setter(newValue)
+    } catch (error) {
+      handleMiniError(error, 'computed-setter')
+      throw error
+    }
   }
 
   /**

@@ -1,7 +1,11 @@
-import { describe, expect, it, vi } from 'vitest'
-import { computed, effect, ref } from '@/index.ts'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { computed, effect, ref, setMiniErrorHandler } from '@/index.ts'
 
 describe('computed', () => {
+  afterEach(() => {
+    setMiniErrorHandler(undefined)
+  })
+
   it('懒执行并缓存计算结果', () => {
     const state = ref({ count: 0 })
     const getter = vi.fn(() => {
@@ -84,5 +88,32 @@ describe('computed', () => {
 
     base.value = 5
     expect(plusTwo.value).toBe(7)
+  })
+
+  it('setter 抛错时会同步抛出并通知错误处理器', () => {
+    const handler = vi.fn()
+    const base = ref(0)
+    const boom = new Error('setter failed')
+
+    setMiniErrorHandler(handler)
+
+    const custom = computed({
+      get() {
+        return base.value
+      },
+      set() {
+        throw boom
+      },
+    })
+
+    expect(() => {
+      custom.value = 1
+    }).toThrow(boom)
+
+    expect(handler).toHaveBeenCalledTimes(1)
+    const [error, context] = handler.mock.calls[0] ?? []
+
+    expect(error).toBe(boom)
+    expect(context).toBe('computed-setter')
   })
 })

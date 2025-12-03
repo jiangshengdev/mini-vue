@@ -191,4 +191,54 @@ describe('watch', () => {
     expect(error).toBe(boom)
     expect(context).toBe('watch-callback')
   })
+
+  it('cleanup 抛错会被错误处理器捕获且不影响后续流程', () => {
+    const state = reactive({ count: 0 })
+    const handler = vi.fn()
+    const cleanupOrder: number[] = []
+    const stopSpy = vi.fn()
+
+    setMiniErrorHandler(handler)
+
+    const stop = watch(
+      () => {
+        return state.count
+      },
+      (newValue, _oldValue, onCleanup) => {
+        onCleanup(() => {
+          cleanupOrder.push(newValue)
+          throw new Error(`cleanup failed: ${newValue}`)
+        })
+        stopSpy(newValue)
+      },
+      { immediate: true },
+    )
+
+    expect(stopSpy).toHaveBeenCalledTimes(1)
+
+    state.count = 1
+    expect(stopSpy).toHaveBeenCalledTimes(2)
+    expect(cleanupOrder).toEqual([0])
+    expect(handler).toHaveBeenCalledTimes(1)
+    let [error, context] = handler.mock.calls[0] ?? []
+
+    expect((error as Error).message).toBe('cleanup failed: 0')
+    expect(context).toBe('watch-cleanup')
+
+    state.count = 2
+    expect(stopSpy).toHaveBeenCalledTimes(3)
+    expect(cleanupOrder).toEqual([0, 1])
+    expect(handler).toHaveBeenCalledTimes(2)
+    ;[error, context] = handler.mock.calls[1] ?? []
+    expect((error as Error).message).toBe('cleanup failed: 1')
+    expect(context).toBe('watch-cleanup')
+
+    stop()
+    expect(stopSpy).toHaveBeenCalledTimes(3)
+    expect(cleanupOrder).toEqual([0, 1, 2])
+    expect(handler).toHaveBeenCalledTimes(3)
+    ;[error, context] = handler.mock.calls[2] ?? []
+    expect((error as Error).message).toBe('cleanup failed: 2')
+    expect(context).toBe('watch-cleanup')
+  })
 })

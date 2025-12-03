@@ -7,7 +7,9 @@ export type MiniErrorContext =
   | 'effect-scope-run'
   | 'effect-scope-cleanup'
   | 'watch-callback'
+  | 'watch-cleanup'
   | 'component-cleanup'
+  | 'computed-setter'
 
 /**
  * 标准化的错误处理函数签名，统一传入原始异常与上下文标签。

@@ -4,7 +4,7 @@
 import { mountChild } from './renderer/mount-child.ts'
 import type { MountedHandle } from './renderer/mounted-handle.ts'
 import type { ComponentResult } from '@/jsx/index.ts'
-import type { PropsShape, PlainObject } from '@/shared/types.ts'
+import type { PlainObject, PropsShape } from '@/shared/types.ts'
 
 /**
  * 宿主环境需要提供的渲染原语集合。

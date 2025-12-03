@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { reactive, ref, watch, setMiniErrorHandler } from '@/index.ts'
+import { reactive, ref, setMiniErrorHandler, watch } from '@/index.ts'
 
 describe('watch', () => {
   afterEach(() => {

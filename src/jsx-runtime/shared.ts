@@ -1,9 +1,4 @@
-import type {
-  ComponentChildren,
-  ElementProps,
-  ElementType,
-  VirtualNode,
-} from '@/jsx/index.ts'
+import type { ComponentChildren, ElementProps, ElementType, VirtualNode } from '@/jsx/index.ts'
 import { createVirtualNode } from '@/jsx/index.ts'
 import type { PropsShape } from '@/shared/types.ts'
 
@@ -34,8 +29,7 @@ function extractKeyedProps<T extends ElementType>(
   }
 
   /* 显式 key（jsx 第三个参数）优先，其次再尝试 props.key。 */
-  const normalizedKey =
-    explicitKey ?? (Object.hasOwn(props, 'key') ? extractedKey : undefined)
+  const normalizedKey = explicitKey ?? (Object.hasOwn(props, 'key') ? extractedKey : undefined)
   const hasRestProps = Reflect.ownKeys(restProps).length > 0
 
   return {
@@ -53,10 +47,7 @@ export function buildVirtualNode<T extends ElementType>(
   key?: PropertyKey,
 ): VirtualNode<T> {
   /* 统一抽取 key，避免 createVirtualNode 再次处理同一字段。 */
-  const { key: resolvedKey, props: normalizedProps } = extractKeyedProps(
-    props,
-    key,
-  )
+  const { key: resolvedKey, props: normalizedProps } = extractKeyedProps(props, key)
 
   /* 将传入的 props 封装为 createVirtualNode 所需的参数结构 */
   return createVirtualNode({

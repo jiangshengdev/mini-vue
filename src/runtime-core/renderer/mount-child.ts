@@ -8,11 +8,7 @@ import { isNil } from '@/shared/utils.ts'
 /**
  * 根据子节点类型生成宿主节点，统一处理数组、virtualNode 与原始值。
  */
-export function mountChild<
-  HostNode,
-  HostElement extends HostNode,
-  HostFragment extends HostNode,
->(
+export function mountChild<HostNode, HostElement extends HostNode, HostFragment extends HostNode>(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   child: ComponentResult | undefined,
   container: HostElement | HostFragment,

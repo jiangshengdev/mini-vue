@@ -9,10 +9,7 @@ import type {
   VirtualNode,
 } from '@/jsx/index.ts'
 import type { ComponentInstance } from '@/runtime-core/component-instance.ts'
-import {
-  setCurrentInstance,
-  unsetCurrentInstance,
-} from '@/runtime-core/component-instance.ts'
+import { setCurrentInstance, unsetCurrentInstance } from '@/runtime-core/component-instance.ts'
 import { ReactiveEffect } from '@/reactivity/effect.ts'
 import { effectScope, recordEffectScope } from '@/reactivity/effect-scope.ts'
 
@@ -56,9 +53,7 @@ function resolveComponentProps<T extends SetupFunctionComponent>(
   virtualNode: VirtualNode<T>,
 ): ElementProps<T> {
   /* 克隆 props，防止函数组件在运行期写回 virtualNode。 */
-  const props = (
-    virtualNode.props ? { ...virtualNode.props } : {}
-  ) as ElementProps<T>
+  const props = (virtualNode.props ? { ...virtualNode.props } : {}) as ElementProps<T>
   const childCount = virtualNode.children.length
 
   /* 保持 JSX 约定：单个 children 直接给值，多个 children 传数组。 */
@@ -116,9 +111,7 @@ function invokeSetup<
   HostElement extends HostNode,
   HostFragment extends HostNode,
   T extends SetupFunctionComponent,
->(
-  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
-): ComponentRenderFunction {
+>(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): ComponentRenderFunction {
   const render = instance.scope.run(() => {
     /* 替换全局 currentInstance 以便 setup 内部通过 API 访问自身。 */
     setCurrentInstance(instance)
@@ -291,12 +284,7 @@ function attachInstanceToVirtualNode<
 ): void {
   type VirtualNodeWithInstance = VirtualNode<T> & {
     /** 收集到的组件实例，方便调试或测试检索。 */
-    componentInstance?: ComponentInstance<
-      HostNode,
-      HostElement,
-      HostFragment,
-      T
-    >
+    componentInstance?: ComponentInstance<HostNode, HostElement, HostFragment, T>
   }
 
   /* 扩展 virtualNode 类型后写入实例引用，供外部消费。 */

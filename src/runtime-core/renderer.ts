@@ -56,14 +56,9 @@ export function createRenderer<
   HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
->(
-  options: RendererOptions<HostNode, HostElement, HostFragment>,
-): Renderer<HostNode, HostElement> {
+>(options: RendererOptions<HostNode, HostElement, HostFragment>): Renderer<HostNode, HostElement> {
   const { clear } = options
-  const mountedHandlesByContainer = new WeakMap<
-    PlainObject,
-    MountedHandle<HostNode>
-  >()
+  const mountedHandlesByContainer = new WeakMap<PlainObject, MountedHandle<HostNode>>()
 
   /**
    * 将宿主容器断言为对象键，便于复用 WeakMap 存储。

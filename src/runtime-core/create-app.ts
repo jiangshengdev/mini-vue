@@ -42,10 +42,7 @@ interface AppState<HostElement> {
 /**
  * 按当前状态执行一次挂载，负责生成子树并调度渲染。
  */
-function mountApp<HostElement>(
-  state: AppState<HostElement>,
-  target: HostElement,
-): void {
+function mountApp<HostElement>(state: AppState<HostElement>, target: HostElement): void {
   /* 已挂载时直接阻止重复操作，避免宿主状态错乱。 */
   if (state.status === 'mounted') {
     throw new Error('createApp: 当前应用已挂载，不能重复执行 mount')

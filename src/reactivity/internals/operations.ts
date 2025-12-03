@@ -1,9 +1,5 @@
 import type { DependencyBucket, ReactiveTarget } from '../shared/types.ts'
-import {
-  iterateDependencyKey,
-  type TriggerOpType,
-  triggerOpTypes,
-} from '../shared/constants.ts'
+import { iterateDependencyKey, type TriggerOpType, triggerOpTypes } from '../shared/constants.ts'
 import { trackEffect, triggerEffects } from './dependency-utils.ts'
 import { effectStack } from './effect-stack.ts'
 import { isArrayIndex } from '@/shared/utils.ts'
@@ -15,10 +11,7 @@ class DependencyRegistry {
   /**
    * 使用 WeakMap 建立目标对象到属性依赖集合的索引结构。
    */
-  private readonly targetMap = new WeakMap<
-    ReactiveTarget,
-    Map<PropertyKey, DependencyBucket>
-  >()
+  private readonly targetMap = new WeakMap<ReactiveTarget, Map<PropertyKey, DependencyBucket>>()
 
   /**
    * 把当前活跃副作用加入目标字段的依赖集合。
@@ -40,12 +33,7 @@ class DependencyRegistry {
   /**
    * 触发指定字段的依赖集合，逐个执行对应副作用。
    */
-  trigger(
-    target: ReactiveTarget,
-    key: PropertyKey,
-    type: TriggerOpType,
-    newValue?: unknown,
-  ): void {
+  trigger(target: ReactiveTarget, key: PropertyKey, type: TriggerOpType, newValue?: unknown): void {
     const depsMap = this.targetMap.get(target)
 
     if (!depsMap) {
@@ -87,11 +75,7 @@ class DependencyRegistry {
             continue
           }
 
-          if (
-            isArrayIndex(depKey) &&
-            typeof newValue === 'number' &&
-            Number(depKey) >= newValue
-          ) {
+          if (isArrayIndex(depKey) && typeof newValue === 'number' && Number(depKey) >= newValue) {
             /* 截断 length 会影响被裁剪索引的副作用。 */
             addDep(dependencyBucket)
           }
@@ -115,10 +99,7 @@ class DependencyRegistry {
   /**
    * 确保目标字段具备依赖集合，不存在时创建新集合。
    */
-  private getOrCreateDep(
-    target: ReactiveTarget,
-    key: PropertyKey,
-  ): DependencyBucket {
+  private getOrCreateDep(target: ReactiveTarget, key: PropertyKey): DependencyBucket {
     /* 读取或初始化目标对象的依赖映射表 */
     let depsMap = this.targetMap.get(target)
 

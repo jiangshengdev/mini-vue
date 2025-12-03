@@ -11,10 +11,7 @@ describe('runtime-dom style props', () => {
 
     const element = within(container).getByText('text')
 
-    expect(element).toHaveAttribute(
-      'style',
-      expect.stringContaining('color: blue'),
-    )
+    expect(element).toHaveAttribute('style', expect.stringContaining('color: blue'))
   })
 
   it('对象 style 支持 camelCase 键名', () => {
@@ -24,10 +21,7 @@ describe('runtime-dom style props', () => {
 
     const element = within(container).getByText('text')
 
-    expect(element).toHaveAttribute(
-      'style',
-      expect.stringContaining('background-color: red'),
-    )
+    expect(element).toHaveAttribute('style', expect.stringContaining('background-color: red'))
   })
 
   it('对象 style 支持 CSS 变量兜底', () => {

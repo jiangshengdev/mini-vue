@@ -7,11 +7,7 @@ import type { RendererOptions } from '@/runtime-core/index.ts'
 /**
  * DOM 宿主环境完整的渲染原语集合，供 renderer 复用。
  */
-export const domRendererOptions: RendererOptions<
-  Node,
-  Element,
-  DocumentFragment
-> = {
+export const domRendererOptions: RendererOptions<Node, Element, DocumentFragment> = {
   /** 创建指定标签的 HTMLElement。 */
   createElement(type): HTMLElement {
     return document.createElement(type)

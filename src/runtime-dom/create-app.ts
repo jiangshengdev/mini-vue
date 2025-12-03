@@ -124,11 +124,7 @@ export function createApp(
 ): DomAppInstance {
   /* 先创建 runtime-core 层的基础应用实例，统一托管渲染。 */
   const state: DomAppState = {
-    baseApp: createAppInstance(
-      { render, unmount: unmountContainer },
-      rootComponent,
-      rootProps,
-    ),
+    baseApp: createAppInstance({ render, unmount: unmountContainer }, rootComponent, rootProps),
     isMounted: false,
   }
 

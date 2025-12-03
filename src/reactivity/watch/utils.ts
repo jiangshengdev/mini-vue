@@ -32,10 +32,7 @@ export function resolveDeepOption(
 /**
  * 按 deep 策略生成统一的 getter，供 effect 收集依赖。
  */
-export function createGetter<T>(
-  source: WatchSource<T>,
-  deep: boolean,
-): () => T {
+export function createGetter<T>(source: WatchSource<T>, deep: boolean): () => T {
   /* 函数源直接作为 getter 使用，保证懒读取。 */
   if (typeof source === 'function') {
     return source

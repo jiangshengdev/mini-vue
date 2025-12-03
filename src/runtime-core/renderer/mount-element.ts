@@ -9,11 +9,7 @@ import type { PropsShape } from '@/shared/types.ts'
 /**
  * 创建宿主元素并同步 props 与 children。
  */
-export function mountElement<
-  HostNode,
-  HostElement extends HostNode,
-  HostFragment extends HostNode,
->(
+export function mountElement<HostNode, HostElement extends HostNode, HostFragment extends HostNode>(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   type: string,
   virtualNode: VirtualNode,
@@ -21,9 +17,7 @@ export function mountElement<
 ): MountedHandle<HostNode> {
   const { createElement, patchProps, appendChild, remove } = options
   const element = createElement(type)
-  const props: PropsShape | undefined = virtualNode.props as
-    | PropsShape
-    | undefined
+  const props: PropsShape | undefined = virtualNode.props as PropsShape | undefined
   const refBinding = resolveElementRefBinding<HostElement>(props?.ref)
 
   /* 在挂载前先写入属性与事件。 */

@@ -1,7 +1,4 @@
-import type {
-  ElementType as MiniElementType,
-  VirtualNode,
-} from '@/jsx/virtual-node/index.ts'
+import type { ElementType as MiniElementType, VirtualNode } from '@/jsx/virtual-node/index.ts'
 import type { ElementRef } from '@/runtime-dom/index.ts'
 import type { PropsShape } from '@/shared/types.ts'
 

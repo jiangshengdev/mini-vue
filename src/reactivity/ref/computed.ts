@@ -21,8 +21,7 @@ export interface WritableComputedOptions<T> {
 }
 
 /** 用于提示只读 computed 被误写入的错误信息。 */
-const readonlyComputedError =
-  '当前 computed 为只读，若需要写入请传入 { get, set } 形式的配置'
+const readonlyComputedError = '当前 computed 为只读，若需要写入请传入 { get, set } 形式的配置'
 
 /**
  * `computed` 的底层实现，通过惰性求值与脏标记保持派生状态最新。

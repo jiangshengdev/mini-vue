@@ -125,10 +125,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
 /**
  * 最小版 effect：立即执行副作用并返回可控的句柄，亦支持传入调度选项。
  */
-export function effect<T>(
-  fn: () => T,
-  options: EffectOptions = {},
-): EffectHandle<T> {
+export function effect<T>(fn: () => T, options: EffectOptions = {}): EffectHandle<T> {
   /* 读取父级副作用，便于建立嵌套清理关系 */
   const parent = effectStack.current
   /* 每次调用都创建新的 ReactiveEffect 实例 */

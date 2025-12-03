@@ -16,11 +16,7 @@ export type VirtualNodeChild = VirtualNode | string | number
  * 运行时（normalizeChildren/mountChild）仍会照常处理 `null` 并视为可忽略节点。
  * 布尔值同样会在运行时被当作空节点忽略。
  */
-export type ComponentChildren =
-  | VirtualNodeChild
-  | VirtualNodeChild[]
-  | boolean
-  | undefined
+export type ComponentChildren = VirtualNodeChild | VirtualNodeChild[] | boolean | undefined
 
 /**
  * 组件渲染函数返回的结果类型。
@@ -54,15 +50,12 @@ type PropsWithChildren<P> = P & { children?: ComponentChildren }
 /**
  * 标准组件函数签名，默认附带 children。
  */
-type ComponentFunction<P> = (
-  props: PropsWithChildren<P>,
-) => ComponentRenderFunction
+type ComponentFunction<P> = (props: PropsWithChildren<P>) => ComponentRenderFunction
 
 /**
  * `setup` + `render` 语义的函数组件类型，默认 props 为通用对象。
  */
-export type SetupFunctionComponent<P = ComponentPropsBase> =
-  ComponentFunction<P>
+export type SetupFunctionComponent<P = ComponentPropsBase> = ComponentFunction<P>
 
 /**
  * Fragment 类型定义，接收 FragmentProps 并返回一组子节点。
@@ -90,12 +83,11 @@ type InferComponentProps<T> =
  * - 原生标签为任意属性对象
  * - 组件则回退到其 props 类型推导
  */
-export type ElementProps<T extends ElementType = ElementType> =
-  T extends FragmentType
-    ? FragmentProps
-    : T extends string
-      ? ComponentPropsBase
-      : InferComponentProps<T>
+export type ElementProps<T extends ElementType = ElementType> = T extends FragmentType
+  ? FragmentProps
+  : T extends string
+    ? ComponentPropsBase
+    : InferComponentProps<T>
 
 /**
  * `mini-vue` 内部使用的虚拟节点结构，承载类型、属性与子节点信息。

@@ -6,9 +6,7 @@ import type { Ref } from '@/reactivity/index.ts'
 import { isRef } from '@/reactivity/index.ts'
 import type { PropsShape } from '@/shared/types.ts'
 
-export type ElementRef =
-  | ((element: Element | undefined) => void)
-  | Ref<Element | undefined>
+export type ElementRef = ((element: Element | undefined) => void) | Ref<Element | undefined>
 
 /** 扩展原生 style 声明，允许对任意属性键执行写入。 */
 type WritableStyle = CSSStyleDeclaration & Record<string, string | undefined>
@@ -80,9 +78,7 @@ function applyStyle(element: HTMLElement, value: unknown): void {
 
   /* 对象形式逐项设置：优先走属性写入，不支持的属性退回 setProperty。 */
   if (typeof value === 'object') {
-    for (const [name, styleValue] of Object.entries(
-      value as Record<string, unknown>,
-    )) {
+    for (const [name, styleValue] of Object.entries(value as Record<string, unknown>)) {
       const resolved = styleValue ?? ''
 
       /* 支持的内联属性直接赋值，可避免多余字符串拼接。 */
@@ -122,10 +118,7 @@ function isElementRef(value: unknown): value is ElementRef {
   return typeof value === 'function' || isRef<Element | undefined>(value)
 }
 
-function assignElementRef(
-  target: ElementRef,
-  element: Element | undefined,
-): void {
+function assignElementRef(target: ElementRef, element: Element | undefined): void {
   if (typeof target === 'function') {
     target(element)
 

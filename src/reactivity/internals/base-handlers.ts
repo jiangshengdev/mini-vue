@@ -7,11 +7,7 @@ import { hasOwn, isArrayIndex, isObject } from '@/shared/utils.ts'
 /**
  * 响应式读取逻辑：在取值时触发依赖收集，并对嵌套对象递归创建代理。
  */
-const mutableGet: ProxyHandler<ReactiveTarget>['get'] = (
-  target,
-  key,
-  receiver,
-) => {
+const mutableGet: ProxyHandler<ReactiveTarget>['get'] = (target, key, receiver) => {
   /* 使用 Reflect 读取原始值，保持与原生访问一致的 this 绑定与行为 */
   const rawValue = Reflect.get(target, key, receiver) as unknown
 
@@ -29,19 +25,12 @@ const mutableGet: ProxyHandler<ReactiveTarget>['get'] = (
 /**
  * 响应式写入逻辑：仅在值实际变更时触发依赖更新。
  */
-const mutableSet: ProxyHandler<ReactiveTarget>['set'] = (
-  target,
-  key,
-  value,
-  receiver,
-) => {
+const mutableSet: ProxyHandler<ReactiveTarget>['set'] = (target, key, value, receiver) => {
   /* 数组的新增与修改需要依赖索引判断，普通对象则通过 hasOwn 区分逻辑分支。 */
   const targetIsArray = Array.isArray(target)
   const keyIsArrayIndex = isArrayIndex(key)
   const hadKey =
-    targetIsArray && keyIsArrayIndex
-      ? Number(key) < target.length
-      : hasOwn(target, key)
+    targetIsArray && keyIsArrayIndex ? Number(key) < target.length : hasOwn(target, key)
 
   /* 读取旧值用于后续的同值判断 */
   const previousValue = Reflect.get(target, key, receiver) as unknown
@@ -71,10 +60,7 @@ const mutableSet: ProxyHandler<ReactiveTarget>['set'] = (
 /**
  * 拦截 delete 操作，确保删除成功后触发对应依赖。
  */
-const mutableDeleteProperty: ProxyHandler<ReactiveTarget>['deleteProperty'] = (
-  target,
-  key,
-) => {
+const mutableDeleteProperty: ProxyHandler<ReactiveTarget>['deleteProperty'] = (target, key) => {
   /* 删除前记录字段是否存在，后续只对真实变更触发更新。 */
   const hadKey = hasOwn(target, key)
   /* 通过 Reflect 删除属性以保持原生行为一致。 */

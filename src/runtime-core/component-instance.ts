@@ -46,12 +46,7 @@ export interface ComponentInstance<
 }
 
 /** 兼容任意宿主类型的组件实例别名，简化当前实例管理。 */
-type AnyComponentInstance = ComponentInstance<
-  unknown,
-  unknown,
-  unknown,
-  SetupFunctionComponent
->
+type AnyComponentInstance = ComponentInstance<unknown, unknown, unknown, SetupFunctionComponent>
 
 /** 当前 setup 调用栈正在处理的实例引用。 */
 let currentInstance: AnyComponentInstance | undefined

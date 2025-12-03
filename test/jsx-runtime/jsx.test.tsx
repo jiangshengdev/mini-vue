@@ -35,9 +35,7 @@ describe('jsx-runtime automatic jsx helper', () => {
   })
 
   it('支持数组表达式作为单子节点以保留 jsx 调用路径', () => {
-    const virtualNode = (
-      <ul class="list">{[<li id="a">A</li>, [<li id="b">B</li>], false, 0]}</ul>
-    )
+    const virtualNode = <ul class="list">{[<li id="a">A</li>, [<li id="b">B</li>], false, 0]}</ul>
 
     expect(virtualNode.props).toEqual({ class: 'list' })
     expect(virtualNode.children).toHaveLength(3)

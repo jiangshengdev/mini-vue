@@ -16,10 +16,7 @@ export function normalizeChildren(rawChildren: unknown): VirtualNodeChild[] {
 /**
  * 内部递归助手，根据不同输入类型填充归一化后的 children 列表。
  */
-function flattenChild(
-  rawChild: unknown,
-  accumulator: VirtualNodeChild[],
-): void {
+function flattenChild(rawChild: unknown, accumulator: VirtualNodeChild[]): void {
   /* `null`、`undefined`、`boolean` 等空值在渲染层会被忽略 */
   if (isNil(rawChild) || typeof rawChild === 'boolean') {
     return

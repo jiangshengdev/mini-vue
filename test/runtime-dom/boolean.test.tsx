@@ -49,9 +49,7 @@ describe('runtime-dom boolean children', () => {
     const container = createTestContainer()
 
     render(
-      <div>
-        {[false, <span key="1">first</span>, true, <span key="2">second</span>]}
-      </div>,
+      <div>{[false, <span key="1">first</span>, true, <span key="2">second</span>]}</div>,
       container,
     )
 

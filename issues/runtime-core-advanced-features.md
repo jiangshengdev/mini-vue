@@ -113,7 +113,7 @@
       })
     }
     ```
-  - **注意**：需要在 `tsconfig.json` 中添加 `"lib": ["ES2024", "ESNext.Disposable"]` 或使用 polyfill；当前项目仅声明 `ES2022` 与 `DOM`，引入此特性需评估构建目标与浏览器兼容性
+  - **注意**：需要在 `tsconfig.json` 中调整 `lib` 配置以支持 Disposable（TypeScript 5.2+ 原生支持需配合 `target: "ES2023"` 或更高，或使用 polyfill）；当前项目仅声明 `ES2022` 与 `DOM`，引入此特性需评估构建目标与浏览器兼容性
   - **推荐度**：中等。该特性显著提升代码安全性，但需要额外的运行时支持与配置变更
 
 ## 6. 错误 `cause` 属性已正确使用
@@ -127,29 +127,31 @@
     ```
 - **评价**：✅ 已正确引入 ES2022 特性，无需改进
 
-## 7. 可选的 `WeakMap.prototype.emplace()` 简化缓存操作（提案阶段）
+## 7. 可选的 `Map/WeakMap.prototype.emplace()` 简化缓存操作（提案阶段）
 
-- **位置**：`src/runtime-core/renderer.ts` 中 `mountedHandlesByContainer` 的 `get`/`set`/`delete` 操作（第 74-81 行）
-- **现状**：通过 `get` 检查、条件分支与 `delete` 完成缓存管理，逻辑清晰但略显冗长
-- **建议**：关注 `Map.prototype.emplace()` 提案（Stage 2），未来可简化"取值-判断-操作"模式
+- **位置**：`src/runtime-core/renderer.ts` 中 `mountedHandlesByContainer` 的 `get`/`delete` 操作（第 74-81 行）与 `set` 操作（第 93 行）
+- **现状**：通过 `get` 检查、条件分支、`delete` 与 `set` 完成缓存管理，逻辑清晰但略显冗长
+- **建议**：关注 `Map.prototype.emplace()` 与 `WeakMap.prototype.emplace()` 提案（Stage 2），未来可简化"取值-判断-操作"模式
   - **示例（提案语法，当前不可用）**：
     ```typescript
-    // 当前写法
+    // 当前写法（teardownContainer）
     const mounted = mountedHandlesByContainer.get(asContainerKey(container))
     if (mounted) {
       mounted.teardown()
       mountedHandlesByContainer.delete(asContainerKey(container))
     }
     
-    // 提案写法
+    // 提案写法（语法仅供参考，需确认最终 API）
     mountedHandlesByContainer.emplace(asContainerKey(container), {
+      insert: () => { throw new Error('not found') },
       update: (existing) => {
         existing.teardown()
-        return undefined // 删除
+        // 配合 delete 完成移除
       }
     })
+    mountedHandlesByContainer.delete(asContainerKey(container))
     ```
-  - **注意**：该提案尚未进入 ES 标准，当前不建议引入；记录在此供未来参考
+  - **注意**：该提案尚未进入 ES 标准，当前不建议引入；`emplace` API 可能随提案演进而变化，此处仅供未来参考
 
 ## 总结
 
@@ -168,7 +170,7 @@
 6. **Error `cause`**（ES2022）：✅ 已正确引入
 
 ### 提案阶段特性
-7. **`WeakMap.emplace()`**（Stage 2 提案）：仅供未来参考，当前不建议引入
+7. **`Map/WeakMap.emplace()`**（Stage 2 提案）：仅供未来参考，当前不建议引入
 
 ## 建议优先级
 
@@ -183,4 +185,4 @@
 - 在对外暴露的配置对象中考虑 `satisfies` 运算符
 
 **不建议**：
-- 泛型 `const` 参数与 `WeakMap.emplace()` 在当前场景中收益不明显或不可用
+- 泛型 `const` 参数与 `Map/WeakMap.emplace()` 在当前场景中收益不明显或不可用

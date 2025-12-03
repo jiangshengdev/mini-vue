@@ -22,12 +22,11 @@
   ```
 - 评价：符合 ES2022 标准，提升了可读性和类型安全性。
 
-## 3. `src/shared/utils.ts` - 可使用 `Array.prototype.at()` 优化数组索引判断
+## 3. `src/shared/utils.ts` - 字符串负数索引判断已采用最佳方案 ✅
 
 - 位置：`src/shared/utils.ts:52`
-- 现状：使用传统的字符串起始判断方式 `key.startsWith('-')`
-- 建议：虽然当前实现已经很清晰，但从语义角度，检查负数索引的场景可以考虑未来扩展时使用 `Array.prototype.at()` 的模式思维
-- 评价：**当前实现已足够优秀**，此建议仅作为知识点记录，实际场景中 `startsWith('-')` 更直接高效
+- 现状：使用 `key.startsWith('-')` 判断是否为负数索引
+- 评价：**这是正确且高效的实现**。虽然 ES2022 引入了 `Array.prototype.at()` 用于数组的负索引访问，但在此场景中，我们需要判断字符串键名是否表示负数，`startsWith('-')` 是最直接、最高效的方案。两个特性的应用场景不同，无需改动。
 
 ## 4. `src/shared/error-handling.ts` - 可考虑使用 `using` 声明优化资源管理
 
@@ -83,7 +82,7 @@
 - 现状：使用 ES2015 的 `Number.isInteger()` 进行整数判断
 - 评价：虽非 ES2022 新增，但相比传统的 `value % 1 === 0` 更语义化且安全（不会发生类型强制转换），符合现代最佳实践。
 
-## 8. `src/shared/error-handling.ts` - queueMicrotask 正确使用 ✅
+## 8. `src/shared/error-handling.ts` - queueMicrotask 现代最佳实践 ✅
 
 - 位置：`src/shared/error-handling.ts:70`
 - 现状：使用标准的 `queueMicrotask` API 进行异步错误抛出
@@ -96,7 +95,7 @@
     throw new Error(String(error), { cause: error })
   })
   ```
-- 评价：`queueMicrotask` 是 WHATWG HTML 规范的标准 API，在现代浏览器和 Node.js 等多种 JavaScript 运行时环境中广泛支持，相比 `Promise.resolve().then()` 更直接且语义明确。虽然不是 ES2022 新增特性，但作为现代异步编程最佳实践值得认可。
+- 评价：`queueMicrotask` 是 WHATWG HTML 规范的标准 API（2019 年引入），在现代浏览器和 Node.js 等多种 JavaScript 运行时环境中广泛支持，相比 `Promise.resolve().then()` 更直接且语义明确。虽然不是 ES2022 新增，但作为现代异步编程最佳实践，在本次检查中予以认可。
 
 ## 9. `src/shared/utils.ts` - 可考虑使用 satisfies 操作符优化类型注解（TS 4.9+）
 

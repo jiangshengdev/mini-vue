@@ -1,46 +1,44 @@
 # 本仓库的 Copilot 指南
 
-目的：帮助 AI 快速掌握 mini-vue 的响应式与 JSX 实现，缩短调研时间。
+目的：帮助 AI 快速理解 mini-vue 的响应式与 JSX 渲染实现，并高效参与开发。
 
-## 全局速览
+## 项目速览
 
-- 技术栈：Vite 7（`pnpm overrides` 锁定 `rolldown-vite@7.2.2`）+ TypeScript + Vitest；`src/index.ts` 统一导出 `reactive`/`effect` 与 JSX API。
-- Demo：`index.html` 注入 `src/demo/main.ts`，示例组件位于 `src/demo/app.tsx`、`counter.tsx`，用于人工体验响应式 + JSX。
-- 资源：公共文件放 `public/` 通过绝对路径引用，组件私有资源放 `src/` 内直接 import（见 `app.tsx` 同时引入 `/vite.svg` 与本地 svg）。
+- 技术栈：Vite 7（`pnpm overrides` 锁到 `rolldown-vite@7.2.2`）+ TypeScript + Vitest，借助 `tsdown` 产出 `dist`；`src/index.ts` 仅做 re-export，真实实现按模块拆在 `src/**`。
+- `tsconfig.json` 设定 `jsxImportSource: "@"` + `@/*` 别名并强制 `.ts` 扩展，IDE 自动补全依赖于此，请保持文件内的显式扩展名。
+- 源码主目录：`reactivity/`、`runtime-core/`、`runtime-dom/`、`jsx/`、`jsx-runtime/`；`docs/` 收录 VitePress 文档，`playground/` 是 Vite demo（`pnpm play`），`public/` 承载绝对路径资源。
+- `pnpm dev` 运行 `tsdown --watch` 负责库构建；体验 demo/调试 DOM 需使用 `pnpm play`（HMR）或 `pnpm play:build`/`play:preview`。
+- `playground/` Demo 组件统一 import `@/index.ts`，便于验证包内 API，与文档示例保持同步。
 
 ## 响应式内核
 
-- `reactive.ts` 通过 `ReactiveCache` 复用 Proxy，并显式拒绝数组；必须通过缓存 API 生成代理以维持依赖一致性。
-- `internals/base-handlers.ts`：`get` 读值时 `track` 并对嵌套对象懒代理，`set` 用 `Object.is` 判等后 `trigger`；扩展新 handler 时不要跳过这套判等策略。
-- `effect.ts`：`ReactiveEffect` 负责依赖清理与嵌套生命周期，`effect()` 会立刻 `run()` 并将子 effect 注册到父级 `registerCleanup` 中，避免手动 stop 遗漏。
-- `internals/operations.ts`：`DependencyRegistry` 以 `WeakMap<object, Map<key, DependencyBucket>>` 维护依赖，并通过快照触发副作用；切换依赖前务必读取新字段以重建追踪。
+- `reactivity/reactive.ts` 通过 `ReactiveCache` 复用 Proxy，并**仅**接受普通对象与数组；`internals/base-handlers.ts` 的 `get/set` 负责 track/trigger 且用 `Object.is` 判等，不要绕过。
+- `internals/operations.ts` 的 `DependencyRegistry` 维护 `WeakMap<object, Map<key, Set<effect>>>`，触发前会快照当前依赖集合，避免迭代期间新增/删除导致错乱。
+- `effect.ts` 暴露 `ReactiveEffect` 与 `effect()`：每次 run 前都会 `flushDependencies`，并依赖 `effectStack` 为嵌套 effect 建立父子清理；`effect-scope.ts`/`watch/` 也复用这套 stop 语义。
+- `shared/error-handling.ts` 允许通过 `setMiniErrorHandler` 统一捕获 `effect`、`scheduler`、`watch` 与组件清理阶段的异常，默认回退 `queueMicrotask` 异步抛错。
+- 典型使用示例：`test/reactivity/*.test.ts` 覆盖缓存策略、ref、computed、watch，新增 API 时可参考测试内的断言与 `createTestContainer()`。
 
-## JSX 渲染栈
+## JSX 与渲染链路
 
-- `runtime-core/renderer.ts` 注入宿主原语后负责整棵子树的全量挂载，仍然采用“清空容器再重建”的策略，暂不支持 diff/patch。
-- `runtime-core/create-app.ts` 生成平台无关的应用实例，持有根容器状态并调用注入的 `render`/`clear`。
-- `runtime-dom/renderer-options.ts` + `runtime-dom/patch-props.ts` 提供 DOM 侧的元素创建、属性打补丁与事件绑定，数组 children 仍通过 `DocumentFragment` 承载后整体插入。
+- `jsx/virtual-node` 内的 `buildVirtualNode` 负责归一化 `children`（字符串、数组、Fragment），`jsx-runtime/runtime.ts` 将编译产物统一转换为 VirtualNode。
+- `runtime-core/renderer.ts` 注入 `RendererOptions` 后会在每次 render 前 `teardown` + `clear(container)`，不做 diff；子树挂载调度集中在 `renderer/mount-child.ts`。
+- `runtime-core/component-instance.ts` 维护组件 effect scope、cleanupTasks 与 `mountedHandle.teardown()`，`create-app.ts` 通过闭包记住容器，重复 mount 会先 `unmount`。
+- DOM 实现位于 `runtime-dom/renderer-options.ts` + `patch-props.ts`：事件名统一转小写、`ref` 支持函数和 `Ref`、`style` 兼容字符串/对象/自定义属性，数组 children 借助 `DocumentFragment` 一次性插入。
 
-## Demo 与测试
+## 构建 / 测试 / 文档
 
-- Demo 的 `counter.tsx` 展示了 `ref` 捕获真实 DOM + `reactive`/`effect` 协同的推荐范式，可作为绑定事件或直接写 DOM 的参考。
-- Vitest：`vitest.config.ts` 复用 Vite 配置并设置 jsdom；`test/*.test.ts(x)` 覆盖 reactive 缓存、effect 嵌套、createApp 挂载、JSX 渲染等场景，新增功能时优先仿照现有断言风格。
-- 常用命令：`pnpm dev`（demo HMR）、`pnpm test`（一次性 run，可用 `pnpm test effect.test.ts` 精准调试）、`pnpm build`（先 `tsc` 再 `vite build`）、`pnpm preview`、`pnpm lint`、`pnpm format`。
+- 一次性构建：`pnpm build`（tsdown）；发布前自动走 `prepublishOnly`。类型检查独立 `pnpm typecheck`。
+- 测试：`pnpm test`（Vitest run，jsdom）。`vitest.config.ts` 引入 `test/setup.ts`，该文件会在 `afterEach` 里清空通过 `createTestContainer()` 注册的 DOM，避免泄漏。
+- Lint：`pnpm lint` 串行 `oxlint` + `eslint`（都允许 `_` 开头参数），`pnpm format` 走 Prettier；若只想跑 ESLint 用 `pnpm lint:eslint`。
+- 文档：`pnpm docs:dev/build/preview` 对 `docs/` 的 VitePress 站点进行预览或构建，笔记与 issues 目录里的 Markdown 记录各子系统决策。
 
-## 约定与配置
+## 约定与常见坑
 
-- 中文输出：文档、注释、机器人回复统一使用中文。
-- 模块解析：必须写 `.ts` 扩展名并遵循 `@/*` 别名；`verbatimModuleSyntax` 下禁止虚构默认导入。
-- 类型导入：类型和值必须拆成独立语句，统一使用 `import type { Foo } from './bar.ts'`；禁止在同一条导入中混合 `type` 与运行时代码。
-- DOM 选择统一 `document.querySelector<T>()`；只有明确存在的节点才使用 `!` 断言（参考 `src/demo/main.ts`）。
-- ESLint/TSLint 均允许 `_` 前缀形参表示刻意未用；新增与 Vue API 对齐的钩子时可利用该规则。
-- `index.ts` 文件仅负责 re-export：所有实现代码必须放在同目录的其他文件中，避免在入口文件内编写业务逻辑。
+- 代码、注释、文档需使用中文；新增内容保持与现有语气一致。
+- 类型导入必须与运行时代码拆分：`import type { Foo } from './foo.ts'` + `import { bar } from './foo.ts'`；切勿在同一条 import 中混用。
+- `document.querySelector<T>()` 是默认 DOM 查找方式，只有明确存在的节点才可使用 `!` 断言（参见 `playground/main.ts`）。
+- `render()` 每次都会清空容器（包括根 effect teardown），调用者需要自行保存 state 或重新构造虚拟树。
+- 未读取的字段不会被 track，修改前先访问以建立依赖；`Map/Set` 等结构仍未支持，会直接抛出 `reactive 目前仅支持普通对象或数组`。
+- 事件 props（`onClick` 等）会被转为小写事件名称；若挂载自定义事件，请在 DOM 上使用匹配的小写名字以便 `addEventListener` 命中。
 
-## 常见坑
-
-- Reactive 目前支持普通对象与数组：Map/Set 等其他原生集合仍需扩展 handler，非法类型会抛出 `reactive 目前仅支持普通对象或数组`。
-- 多次渲染：`render()` 会清空容器，调用者需自行保存旧状态或重新创建树。
-- 依赖失效：忘记读取新增字段时 `effect` 不会追踪；确认通过读取建立依赖后再修改。
-- 事件命名：`onClick` 会被转为小写 `click` 事件，若绑定原生自定义事件需遵循该小写规则。
-
-若某部分仍不清晰，请告知具体段落，我会继续补充。
+若某部分仍不清晰，请指出章节，我会继续补充。

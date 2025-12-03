@@ -10,7 +10,7 @@
     "test": "vitest run",
     "lint": "eslint src test",
     "xo": "xo",
-    "format": "prettier docs src test --write",
+    "format": "prettier docs playground src test --write",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs"

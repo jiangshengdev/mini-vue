@@ -520,4 +520,47 @@ describe('effect', () => {
       triggerSpy.mockRestore()
     }
   })
+
+  it('嵌套 effect 清理时抛错会通过错误处理器捕获并继续执行', () => {
+    const handler = vi.fn<MiniErrorHandler>()
+    const state = reactive({ count: 0 })
+    const cleanupOrder: string[] = []
+
+    setMiniErrorHandler(handler)
+
+    const parentEffect = effect(() => {
+      void state.count
+
+      effect(() => {
+        cleanupOrder.push('child1-run')
+      }).registerCleanup(() => {
+        cleanupOrder.push('child1-cleanup')
+        throw new Error('child1 cleanup failed')
+      })
+
+      effect(() => {
+        cleanupOrder.push('child2-run')
+      }).registerCleanup(() => {
+        cleanupOrder.push('child2-cleanup')
+      })
+    })
+
+    expect(cleanupOrder).toEqual(['child1-run', 'child2-run'])
+
+    cleanupOrder.length = 0
+
+    /* 触发父 effect 重新运行时，会先清理上一轮的子 effect */
+    state.count = 1
+
+    /* 所有清理任务都应执行，即使某些抛错 */
+    expect(cleanupOrder).toEqual(['child1-cleanup', 'child2-cleanup', 'child1-run', 'child2-run'])
+
+    expect(handler).toHaveBeenCalledTimes(1)
+    const [error, context] = handler.mock.calls[0]
+
+    expect((error as Error).message).toBe('child1 cleanup failed')
+    expect(context).toBe('effect-cleanup')
+
+    parentEffect.stop()
+  })
 })

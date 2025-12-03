@@ -28,10 +28,11 @@
     "noUncheckedSideEffectImports": true
   },
   "include": [
+    "eslint.config.ts",
     "playground",
     "src",
     "test",
-    "eslint.config.ts",
+    "tsdown.config.ts",
     "vite.config.ts",
     "vitest.config.ts",
     "xo.config.ts"

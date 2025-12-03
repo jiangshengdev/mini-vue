@@ -45,7 +45,7 @@ interface AppState<HostElement> {
 function mountApp<HostElement>(state: AppState<HostElement>, target: HostElement): void {
   /* 已挂载时直接阻止重复操作，避免宿主状态错乱。 */
   if (state.status === 'mounted') {
-    throw new Error('createApp: 当前应用已挂载，不能重复执行 mount')
+    throw new Error('createApp: 当前应用已挂载，不能重复执行 mount', { cause: state.container })
   }
 
   /* 缓存容器以便后续执行 unmount。 */

@@ -101,8 +101,8 @@ class ComputedRefImpl<T> implements Ref<T> {
  * 生成只读 computed 的 setter，在运行时抛出明确的类型错误。
  */
 function createReadonlySetter<T>(): ComputedSetter<T> {
-  return () => {
-    throw new TypeError(readonlyComputedError)
+  return (newValue) => {
+    throw new TypeError(readonlyComputedError, { cause: newValue })
   }
 }
 

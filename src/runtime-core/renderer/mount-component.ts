@@ -125,11 +125,11 @@ function invokeSetup<
   })
 
   if (!render) {
-    throw new TypeError('组件作用域已失效，无法执行 setup')
+    throw new TypeError('组件作用域已失效，无法执行 setup', { cause: instance.scope })
   }
 
   if (typeof render !== 'function') {
-    throw new TypeError('组件必须返回渲染函数以托管本地状态')
+    throw new TypeError('组件必须返回渲染函数以托管本地状态', { cause: render })
   }
 
   /* 始终返回函数，供 effect 每次执行时拿到最新子树。 */

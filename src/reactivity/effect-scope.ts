@@ -219,7 +219,7 @@ export function onScopeDispose(cleanup: () => void): void {
 
   /* 若无活跃 scope，说明调用栈不在托管上下文中，直接报错。 */
   if (!scope) {
-    throw new TypeError('onScopeDispose 仅能在活跃的 effect scope 中调用')
+    throw new TypeError('onScopeDispose 仅能在活跃的 effect scope 中调用', { cause: scope })
   }
 
   scope.addCleanup(cleanup)

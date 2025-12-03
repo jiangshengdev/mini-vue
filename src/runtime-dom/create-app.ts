@@ -58,7 +58,7 @@ function mountDomApp(state: DomAppState, target: string | Element): void {
 
   /* 若用户未提供有效容器，立即报错避免静默失败。 */
   if (!container) {
-    throw new Error('createApp: 未找到可用的挂载容器')
+    throw new Error('createApp: 未找到可用的挂载容器', { cause: target })
   }
 
   state.lastMountTarget = target

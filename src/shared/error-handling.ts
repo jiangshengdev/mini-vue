@@ -73,6 +73,6 @@ function rethrowAsync(error: unknown): void {
     }
 
     /* 对非 Error 类型做兜底转换，保证输出信息可读。 */
-    throw new Error(String(error))
+    throw new Error(String(error), { cause: error })
   })
 }

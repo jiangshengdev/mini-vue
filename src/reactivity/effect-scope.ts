@@ -28,9 +28,13 @@ export class EffectScope {
   /** 由用户注册的清理回调。 */
   private readonly cleanups: Array<() => void> = []
 
+  /**
+   * 构造函数可选择与父 scope 自动关联，便于层级 stop 时级联处理。
+   */
   constructor(detached = false) {
     this.detached = detached
 
+    /* 非独立 scope 会挂到当前活跃 scope 下，复用其生命周期。 */
     if (!detached && activeEffectScope) {
       activeEffectScope.trackChildScope(this)
     }
@@ -40,17 +44,20 @@ export class EffectScope {
    * 在当前 scope 上下文中执行回调，使其创建的副作用被自动托管。
    */
   run<T>(fn: () => T): T | undefined {
+    /* `scope` 已停用时直接返回，避免在无效上下文中继续注册副作用。 */
     if (!this.active) {
       return undefined
     }
 
     const previousScope = activeEffectScope
 
+    /* 切换全局活跃 scope，确保回调内部的所有副作用归属于当前 scope。 */
     setActiveEffectScope(this)
 
     try {
       return fn()
     } finally {
+      /* 无论回调如何结束，都要恢复先前 scope，保持栈式嵌套关系。 */
       setActiveEffectScope(previousScope)
     }
   }
@@ -59,6 +66,7 @@ export class EffectScope {
    * 记录一个副作用，等待 scope stop 时统一停止。
    */
   recordEffect(effect: EffectInstance): void {
+    /* 仅在 scope 仍活跃时登记副作用，避免 stop 之后再次触发清理。 */
     if (this.active) {
       this.effects.push(effect)
     }
@@ -68,6 +76,7 @@ export class EffectScope {
    * 为 scope 注册一次性清理回调。
    */
   addCleanup(cleanup: () => void): void {
+    /* 清理函数只会在活跃期收集，防止无主回调导致的潜在泄漏。 */
     if (this.active) {
       this.cleanups.push(cleanup)
     }
@@ -81,15 +90,18 @@ export class EffectScope {
       return
     }
 
+    /* 逐个停止 scope 内缓存的副作用，释放依赖关系。 */
     for (const effect of this.effects) {
       effect.stop()
     }
 
+    /* 执行用户注册的清理任务，用于销毁副作用外部资源。 */
     for (const cleanup of this.cleanups) {
       cleanup()
     }
 
     if (this.childScopes) {
+      /* 通知所有子 scope 级联 stop，并告知它们来源于父级。 */
       for (const scope of this.childScopes) {
         scope.stop(true)
       }
@@ -97,6 +109,7 @@ export class EffectScope {
       this.childScopes = undefined
     }
 
+    /* 非 detached scope 需要从父级移除，防止残留引用。 */
     if (!this.detached && this.parent && !fromParent) {
       this.parent.removeChildScope(this)
     }
@@ -105,8 +118,12 @@ export class EffectScope {
     this.active = false
   }
 
+  /**
+   * 记录子 scope，并缓存其在父级数组中的位置，方便快速删除。
+   */
   private trackChildScope(scope: EffectScope): void {
     scope.parent = this
+    /* 记录当前 scope 在列表中的位置，方便 O(1) 交换删除。 */
     scope.positionInParent = this.childScopes?.length ?? 0
 
     if (this.childScopes) {
@@ -116,6 +133,9 @@ export class EffectScope {
     }
   }
 
+  /**
+   * 将指定子 scope 从父级列表中移除，保持索引连续性。
+   */
   private removeChildScope(scope: EffectScope): void {
     const { childScopes } = this
 
@@ -125,10 +145,12 @@ export class EffectScope {
 
     const last = childScopes.pop()
 
+    /* 若 pop 到的刚好是目标 scope，说明其已位于末尾无需重排。 */
     if (!last || last === scope) {
       return
     }
 
+    /* 将末尾元素移到待删除位置，并同步更新其索引缓存。 */
     childScopes[scope.positionInParent] = last
     last.positionInParent = scope.positionInParent
   }
@@ -148,6 +170,7 @@ export function getCurrentScope(): EffectScope | undefined {
   return activeEffectScope
 }
 
+/** 更新全局活跃 scope 引用，供 run 切换上下文使用。 */
 function setActiveEffectScope(scope: EffectScope | undefined): void {
   activeEffectScope = scope
 }
@@ -168,6 +191,7 @@ export function recordEffectScope(
 export function onScopeDispose(cleanup: () => void): void {
   const scope = activeEffectScope
 
+  /* 若无活跃 scope，说明调用栈不在托管上下文中，直接报错。 */
   if (!scope) {
     throw new TypeError('onScopeDispose 仅能在活跃的 effect scope 中调用')
   }

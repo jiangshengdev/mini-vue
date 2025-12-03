@@ -21,7 +21,7 @@
 ## 2. 使用 `Array.prototype.at()` 简化数组末尾访问
 
 - **位置**：`src/runtime-core/renderer/mount-component.ts` 中访问数组元素，特别是 `virtualNode.children` 处理
-- **现状**：当前代码通过 `children.length` 判断与索引访问 `children[0]`（第 61-65 行）
+- **现状**：当前代码通过 `children.length` 判断与索引访问 `children[0]`（第 58-65 行）
 - **建议**：在需要访问数组最后一个元素或倒数位置时，使用 `Array.prototype.at(-1)` 替代 `arr[arr.length - 1]`
   - **收益**：负索引语法更直观，减少 `length - 1` 计算，降低 off-by-one 错误风险
   - **兼容性**：ES2022 原生支持，与当前 target 匹配
@@ -86,7 +86,7 @@
 
 ## 5. `using` 声明实现自动资源管理（TypeScript 5.2+）
 
-- **位置**：`src/runtime-core/renderer/mount-component.ts` 的 `teardownComponentInstance` 与 `setCurrentInstance`/`unsetCurrentInstance` 配对（第 117-124 行）
+- **位置**：`src/runtime-core/renderer/mount-component.ts` 的 `invokeSetup` 函数中 `setCurrentInstance`/`unsetCurrentInstance` 配对（第 118-123 行）
 - **现状**：通过 `try...finally` 手动保证 `unsetCurrentInstance` 执行，模式安全但略显冗长
 - **建议**：引入 `Symbol.dispose` 与 `using` 声明，将 `currentInstance` 的设置与清理封装为可释放资源
   - **收益**：自动资源清理，减少 `try...finally` 样板代码，避免遗忘清理逻辑
@@ -129,7 +129,7 @@
 
 ## 7. 可选的 `WeakMap.prototype.emplace()` 简化缓存操作（提案阶段）
 
-- **位置**：`src/runtime-core/renderer.ts` 中 `mountedHandlesByContainer` 的 `get`/`set`/`delete` 操作（第 74-82 行）
+- **位置**：`src/runtime-core/renderer.ts` 中 `mountedHandlesByContainer` 的 `get`/`set`/`delete` 操作（第 74-81 行）
 - **现状**：通过 `get` 检查、条件分支与 `delete` 完成缓存管理，逻辑清晰但略显冗长
 - **建议**：关注 `Map.prototype.emplace()` 提案（Stage 2），未来可简化"取值-判断-操作"模式
   - **示例（提案语法，当前不可用）**：

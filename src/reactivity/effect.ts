@@ -56,7 +56,12 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
   run(): T {
     /* 已停止的副作用只执行原始函数，跳过依赖收集成本 */
     if (!this.innerActive) {
-      return this.fn()
+      try {
+        return this.fn()
+      } catch (error) {
+        handleMiniError(error, 'effect-runner', { rethrowAsyncFallback: false })
+        throw error
+      }
     }
 
     /* 运行前重置上一轮留下的依赖，确保收集结果保持最新 */

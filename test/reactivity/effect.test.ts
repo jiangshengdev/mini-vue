@@ -319,6 +319,33 @@ describe('effect', () => {
     expect(context).toBe('effect-runner')
   })
 
+  it('停止后的 effect 重新执行抛错也会触发错误处理', () => {
+    const handler = vi.fn<MiniErrorHandler>()
+    const boom = new Error('stopped effect failed')
+    let shouldThrow = false
+
+    setMiniErrorHandler(handler)
+
+    const handle = effect(() => {
+      if (shouldThrow) {
+        throw boom
+      }
+    })
+
+    handle.stop()
+    shouldThrow = true
+
+    expect(() => {
+      handle.run()
+    }).toThrow(boom)
+
+    expect(handler).toHaveBeenCalledTimes(1)
+    const [error, context] = handler.mock.calls[0]
+
+    expect(error).toBe(boom)
+    expect(context).toBe('effect-runner')
+  })
+
   it('scheduler 抛错时不会阻断其余 effect 并触发统一错误处理', () => {
     const state = reactive({ count: 0 })
     const handler = vi.fn<MiniErrorHandler>()

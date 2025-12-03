@@ -78,7 +78,7 @@ class ComputedRefImpl<T> implements Ref<T> {
     try {
       this.setter(newValue)
     } catch (error) {
-      handleMiniError(error, 'computed-setter')
+      handleMiniError(error, 'computed-setter', { rethrowAsyncFallback: false })
       throw error
     }
   }

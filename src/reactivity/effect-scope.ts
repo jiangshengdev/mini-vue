@@ -60,7 +60,7 @@ export class EffectScope {
     try {
       return fn()
     } catch (error) {
-      handleMiniError(error, 'effect-scope-run')
+      handleMiniError(error, 'effect-scope-run', { rethrowAsyncFallback: false })
       throw error
     } finally {
       /* 无论回调如何结束，都要恢复先前 scope，保持栈式嵌套关系。 */

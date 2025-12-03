@@ -67,7 +67,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
     try {
       return this.fn()
     } catch (error) {
-      handleMiniError(error, 'effect-runner')
+      handleMiniError(error, 'effect-runner', { rethrowAsyncFallback: false })
       throw error
     } finally {
       /* 无论执行成功与否都需弹出自身，避免污染外层作用域 */

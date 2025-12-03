@@ -14,6 +14,11 @@ export type MiniErrorContext =
 /**
  * 标准化的错误处理函数签名，统一传入原始异常与上下文标签。
  */
+export interface MiniErrorOptions {
+  /** 当未注册处理器时是否回退到异步抛错，默认为 true。 */
+  readonly rethrowAsyncFallback?: boolean
+}
+
 export type MiniErrorHandler = (error: unknown, context: MiniErrorContext) => void
 
 /**
@@ -33,7 +38,13 @@ export function setMiniErrorHandler(handler?: MiniErrorHandler): void {
 /**
  * 在内部捕获异常时调用，统一调度至用户提供的处理器或兜底方案。
  */
-export function handleMiniError(error: unknown, context: MiniErrorContext): void {
+export function handleMiniError(
+  error: unknown,
+  context: MiniErrorContext,
+  options: MiniErrorOptions = {},
+): void {
+  const { rethrowAsyncFallback = true } = options
+
   /* 优先通过用户注册的处理器上报，以便框架层做统一告警。 */
   if (currentMiniErrorHandler) {
     try {
@@ -46,7 +57,9 @@ export function handleMiniError(error: unknown, context: MiniErrorContext): void
     return
   }
 
-  rethrowAsync(error)
+  if (rethrowAsyncFallback) {
+    rethrowAsync(error)
+  }
 }
 
 /**

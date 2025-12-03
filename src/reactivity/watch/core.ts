@@ -81,10 +81,15 @@ export function watch<T>(
       cleanup = undefined
     }
 
-    /* 调用用户回调并提供本轮注册清理的机会。 */
-    callback(newValue, hasOldValue ? oldValue : undefined, onCleanup)
-    oldValue = newValue
-    hasOldValue = true
+    const previousValue = hasOldValue ? oldValue : undefined
+
+    /* 调用用户回调并提供本轮注册清理的机会，异常也要更新旧值。 */
+    try {
+      callback(newValue, previousValue, onCleanup)
+    } finally {
+      oldValue = newValue
+      hasOldValue = true
+    }
   }
 
   /**

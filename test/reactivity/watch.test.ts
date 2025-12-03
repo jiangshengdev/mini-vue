@@ -127,4 +127,38 @@ describe('watch', () => {
     expect(spy).toHaveBeenCalledTimes(1)
     expect(spy).toHaveBeenLastCalledWith(1)
   })
+
+  it('回调抛错后仍会更新旧值并执行 cleanup', () => {
+    const state = reactive({ count: 0 })
+    const spy = vi.fn()
+    const cleanupSpy = vi.fn()
+    const boom = new Error('boom')
+
+    watch(
+      () => {
+        return state.count
+      },
+      (newValue, oldValue, onCleanup) => {
+        onCleanup(() => {
+          cleanupSpy(oldValue)
+        })
+
+        if (newValue === 1) {
+          throw boom
+        }
+
+        spy({ newValue, oldValue })
+      },
+    )
+
+    expect(() => {
+      state.count = 1
+    }).toThrow(boom)
+
+    state.count = 2
+    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy).toHaveBeenLastCalledWith({ newValue: 2, oldValue: 1 })
+    expect(cleanupSpy).toHaveBeenCalledTimes(1)
+    expect(cleanupSpy).toHaveBeenLastCalledWith(0)
+  })
 })

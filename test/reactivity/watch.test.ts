@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { reactive, ref, setMiniErrorHandler, watch } from '@/index.ts'
-import type { MiniErrorHandler } from '@/index.ts'
+import { reactive, ref, setRuntimeErrorHandler, watch } from '@/index.ts'
+import type { RuntimeErrorHandler } from '@/index.ts'
 
 describe('watch', () => {
   afterEach(() => {
-    setMiniErrorHandler(undefined)
+    setRuntimeErrorHandler(undefined)
   })
 
   it('默认懒执行并在源变化后触发回调', () => {
@@ -138,9 +138,9 @@ describe('watch', () => {
     const spy = vi.fn()
     const cleanupSpy = vi.fn()
     const boom = new Error('boom')
-    const handler = vi.fn<MiniErrorHandler>()
+    const handler = vi.fn<RuntimeErrorHandler>()
 
-    setMiniErrorHandler(handler)
+    setRuntimeErrorHandler(handler)
 
     watch(
       () => {
@@ -171,10 +171,10 @@ describe('watch', () => {
 
   it('回调抛错时会通知错误处理器', () => {
     const state = reactive({ count: 0 })
-    const handler = vi.fn<MiniErrorHandler>()
+    const handler = vi.fn<RuntimeErrorHandler>()
     const boom = new Error('callback failed')
 
-    setMiniErrorHandler(handler)
+    setRuntimeErrorHandler(handler)
 
     watch(
       () => {
@@ -195,11 +195,11 @@ describe('watch', () => {
 
   it('cleanup 抛错会被错误处理器捕获且不影响后续流程', () => {
     const state = reactive({ count: 0 })
-    const handler = vi.fn<MiniErrorHandler>()
+    const handler = vi.fn<RuntimeErrorHandler>()
     const cleanupOrder: number[] = []
     const stopSpy = vi.fn()
 
-    setMiniErrorHandler(handler)
+    setRuntimeErrorHandler(handler)
 
     const stop = watch(
       () => {

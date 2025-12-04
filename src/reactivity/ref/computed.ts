@@ -4,7 +4,7 @@ import { trackEffect, triggerEffects } from '../internals/dependency-utils.ts'
 import type { DependencyBucket } from '../shared/types.ts'
 import type { Ref } from './types.ts'
 import { refFlag } from './types.ts'
-import { handleMiniError } from '@/shared/error-handling.ts'
+import { runWithErrorChannel } from '@/shared/runtime-error-channel.ts'
 
 /** `computed` getter 负责在依赖图中派生出最终结果。 */
 export type ComputedGetter<T> = () => T
@@ -75,12 +75,16 @@ class ComputedRefImpl<T> implements Ref<T> {
    * 写入 computed 值时交给自定义 setter，由实现自行决定同步策略。
    */
   set value(newValue: T) {
-    try {
-      this.setter(newValue)
-    } catch (error) {
-      handleMiniError(error, 'computed-setter', { rethrowAsyncFallback: false })
-      throw error
-    }
+    runWithErrorChannel(
+      () => {
+        this.setter(newValue)
+      },
+      {
+        origin: 'computed-setter',
+        handlerPhase: 'sync',
+        propagate: 'sync',
+      },
+    )
   }
 
   /**

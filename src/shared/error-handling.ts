@@ -1,56 +1,56 @@
-/**
- * 管理 mini-vue 在响应式与运行时阶段的统一错误处理流程，并描述错误上报的上下文来源。
- */
-export type MiniErrorContext =
-  | 'scheduler'
-  | 'effect-runner'
-  | 'effect-cleanup'
-  | 'effect-scope-run'
-  | 'effect-scope-cleanup'
-  | 'watch-callback'
-  | 'watch-cleanup'
-  | 'component-setup'
-  | 'component-cleanup'
-  | 'computed-setter'
+import type {
+  RuntimeErrorContext,
+  RuntimeErrorHandlerPhase,
+  RuntimeErrorMeta,
+  RuntimeErrorToken,
+} from './runtime-error-channel.ts'
+
+export type { RuntimeErrorContext } from './runtime-error-channel.ts'
 
 /**
  * 标准化的错误处理函数签名，统一传入原始异常与上下文标签。
  */
-export interface MiniErrorOptions {
-  /** 当未注册处理器时是否回退到异步抛错，默认为 true。 */
-  readonly rethrowAsyncFallback?: boolean
+export interface RuntimeErrorDetail {
+  readonly origin: RuntimeErrorContext
+  readonly handlerPhase: RuntimeErrorHandlerPhase
+  readonly meta?: RuntimeErrorMeta
+  readonly token?: RuntimeErrorToken
 }
 
-export type MiniErrorHandler = (error: unknown, context: MiniErrorContext) => void
+export type RuntimeErrorHandler = (
+  error: unknown,
+  context: RuntimeErrorContext,
+  detail?: RuntimeErrorDetail,
+) => void
 
 /**
  * 缓存当前生效的错误处理器，未设置时保持 undefined 以便回退默认行为。
  */
-let currentMiniErrorHandler: MiniErrorHandler | undefined
+let currentRuntimeErrorHandler: RuntimeErrorHandler | undefined
 
 /**
  * 允许外部重写默认的错误处理逻辑，便于在响应式、调度器与组件清理阶段统一兜底。
  *
  * @remarks 注册后的处理器会在 effect、effectScope.run、watch 回调、scheduler 以及组件 cleanup 等入口发生异常时被调用；个别入口（如 effect）会在回调完成后继续抛出原始错误。
  */
-export function setMiniErrorHandler(handler?: MiniErrorHandler): void {
-  currentMiniErrorHandler = handler
+export function setRuntimeErrorHandler(handler?: RuntimeErrorHandler): void {
+  currentRuntimeErrorHandler = handler
 }
 
 /**
  * 在内部捕获异常时调用，统一调度至用户提供的处理器或兜底方案。
  */
-export function handleMiniError(
+export function handleRuntimeError(
   error: unknown,
-  context: MiniErrorContext,
-  options: MiniErrorOptions = {},
+  detail: RuntimeErrorDetail,
+  rethrowAsyncFallback = true,
 ): void {
-  const { rethrowAsyncFallback = true } = options
+  const { origin } = detail
 
   /* 优先通过用户注册的处理器上报，以便框架层做统一告警。 */
-  if (currentMiniErrorHandler) {
+  if (currentRuntimeErrorHandler) {
     try {
-      currentMiniErrorHandler(error, context)
+      currentRuntimeErrorHandler(error, origin, detail)
     } catch (handlerError) {
       /* 处理器自身抛错时仍需异步抛出，但不能阻断当前触发链。 */
       rethrowAsync(handlerError)

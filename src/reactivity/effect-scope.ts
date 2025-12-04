@@ -1,4 +1,4 @@
-import { handleMiniError } from '../shared/error-handling.ts'
+import { runWithErrorChannel } from '../shared/runtime-error-channel.ts'
 import type { EffectInstance } from './shared/types.ts'
 
 /** 当前正在运行的 effect scope，用于关联副作用与清理。 */
@@ -44,7 +44,7 @@ export class EffectScope {
   /**
    * 在当前 scope 上下文中执行回调，使其创建的副作用被自动托管。
    *
-   * @throws {unknown} 回调内部抛出的异常会同步向上传播，并在传播前交给 setMiniErrorHandler 处理。
+   * @throws {unknown} 回调内部抛出的异常会同步向上传播，并在传播前交给 setRuntimeErrorHandler 处理。
    */
   run<T>(fn: () => T): T | undefined {
     /* `scope` 已停用时直接返回，避免在无效上下文中继续注册副作用。 */
@@ -54,18 +54,19 @@ export class EffectScope {
 
     const previousScope = activeEffectScope
 
-    /* 切换全局活跃 scope，确保回调内部的所有副作用归属于当前 scope。 */
-    setActiveEffectScope(this)
-
-    try {
-      return fn()
-    } catch (error) {
-      handleMiniError(error, 'effect-scope-run', { rethrowAsyncFallback: false })
-      throw error
-    } finally {
-      /* 无论回调如何结束，都要恢复先前 scope，保持栈式嵌套关系。 */
-      setActiveEffectScope(previousScope)
-    }
+    return runWithErrorChannel(fn, {
+      origin: 'effect-scope-run',
+      handlerPhase: 'sync',
+      propagate: 'sync',
+      beforeRun: () => {
+        /* 切换全局活跃 scope，确保回调内部的所有副作用归属于当前 scope。 */
+        setActiveEffectScope(this)
+      },
+      afterRun: () => {
+        /* 无论回调如何结束，都要恢复先前 scope，保持栈式嵌套关系。 */
+        setActiveEffectScope(previousScope)
+      },
+    })
   }
 
   /**
@@ -98,11 +99,16 @@ export class EffectScope {
 
     /* 逐个停止 scope 内缓存的副作用，释放依赖关系。 */
     for (const effect of this.effects) {
-      try {
-        effect.stop()
-      } catch (error) {
-        handleMiniError(error, 'effect-scope-cleanup')
-      }
+      runWithErrorChannel(
+        () => {
+          effect.stop()
+        },
+        {
+          origin: 'effect-scope-cleanup',
+          handlerPhase: 'sync',
+          propagate: 'swallow',
+        },
+      )
     }
 
     this.effects.length = 0
@@ -114,22 +120,27 @@ export class EffectScope {
       this.cleanups.length = 0
 
       for (const cleanup of registeredCleanups) {
-        try {
-          cleanup()
-        } catch (error) {
-          handleMiniError(error, 'effect-scope-cleanup')
-        }
+        runWithErrorChannel(cleanup, {
+          origin: 'effect-scope-cleanup',
+          handlerPhase: 'sync',
+          propagate: 'swallow',
+        })
       }
     }
 
     if (this.childScopes) {
       /* 通知所有子 scope 级联 stop，并告知它们来源于父级。 */
       for (const scope of this.childScopes) {
-        try {
-          scope.stop(true)
-        } catch (error) {
-          handleMiniError(error, 'effect-scope-cleanup')
-        }
+        runWithErrorChannel(
+          () => {
+            scope.stop(true)
+          },
+          {
+            origin: 'effect-scope-cleanup',
+            handlerPhase: 'sync',
+            propagate: 'swallow',
+          },
+        )
       }
 
       this.childScopes = undefined

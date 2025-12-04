@@ -14,7 +14,7 @@ export {
   effectScope,
   getCurrentScope,
   onScopeDispose,
-  setMiniErrorHandler,
+  setRuntimeErrorHandler,
 } from './reactivity/index.ts'
 export type { Ref } from './reactivity/index.ts'
 export type {
@@ -22,8 +22,8 @@ export type {
   ComputedSetter,
   WritableComputedOptions,
   EffectScope,
-  MiniErrorContext,
-  MiniErrorHandler,
+  RuntimeErrorContext,
+  RuntimeErrorHandler,
 } from './reactivity/index.ts'
 export { createApp, render } from './runtime-dom/index.ts'
 export type { SetupFunctionComponent } from './jsx/index.ts'

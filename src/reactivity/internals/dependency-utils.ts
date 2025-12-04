@@ -1,6 +1,6 @@
 import type { DependencyBucket, EffectInstance } from '../shared/types.ts'
 import { effectStack } from './effect-stack.ts'
-import { handleMiniError } from '@/shared/error-handling.ts'
+import { runWithErrorChannel } from '@/shared/runtime-error-channel.ts'
 
 /**
  * 收集当前活跃的副作用到依赖集合，确保后续触发时能够回调。
@@ -74,11 +74,16 @@ function schedule(effect: EffectInstance): void {
       effect.run()
     }
 
-    try {
-      scheduler(job)
-    } catch (error) {
-      handleMiniError(error, 'scheduler')
-    }
+    runWithErrorChannel(
+      () => {
+        scheduler(job)
+      },
+      {
+        origin: 'scheduler',
+        handlerPhase: 'sync',
+        propagate: 'swallow',
+      },
+    )
 
     return
   }

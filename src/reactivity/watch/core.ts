@@ -3,7 +3,7 @@ import { recordEffectScope, recordScopeCleanup } from '../effect-scope.ts'
 import { effectStack } from '../internals/effect-stack.ts'
 import type { Ref } from '../ref/types.ts'
 import { createGetter, resolveDeepOption } from './utils.ts'
-import { handleMiniError } from '@/shared/error-handling.ts'
+import { runWithErrorChannel } from '@/shared/runtime-error-channel.ts'
 import type { PlainObject } from '@/shared/types.ts'
 
 /** `watch` 可接受的追踪源类型，覆盖 ref、getter 与普通对象。 */
@@ -32,7 +32,7 @@ export interface WatchOptions {
  * - 支持深度遍历与懒执行策略。
  * - 允许注册清理逻辑并与父 effect 生命周期同步。
  *
- * @remarks 回调内部抛出的异常不会向外冒泡，而是仅通过 setMiniErrorHandler 汇报，确保同一触发链的其余副作用可继续执行。
+ * @remarks 回调内部抛出的异常不会向外冒泡，而是仅通过 setRuntimeErrorHandler 汇报，确保同一触发链的其余副作用可继续执行。
  */
 export function watch<T>(
   source: WatchSource<T>,
@@ -83,14 +83,20 @@ export function watch<T>(
     const previousValue = hasOldValue ? oldValue : undefined
 
     /* 调用用户回调并提供本轮注册清理的机会，异常也要更新旧值。 */
-    try {
-      callback(newValue, previousValue, onCleanup)
-    } catch (error) {
-      handleMiniError(error, 'watch-callback')
-    } finally {
-      oldValue = newValue
-      hasOldValue = true
-    }
+    runWithErrorChannel(
+      () => {
+        callback(newValue, previousValue, onCleanup)
+      },
+      {
+        origin: 'watch-callback',
+        handlerPhase: 'sync',
+        propagate: 'swallow',
+        afterRun: () => {
+          oldValue = newValue
+          hasOldValue = true
+        },
+      },
+    )
   }
 
   /**
@@ -119,11 +125,11 @@ export function watch<T>(
 
     cleanup = undefined
 
-    try {
-      previousCleanup()
-    } catch (error) {
-      handleMiniError(error, 'watch-cleanup')
-    }
+    runWithErrorChannel(previousCleanup, {
+      origin: 'watch-cleanup',
+      handlerPhase: 'sync',
+      propagate: 'swallow',
+    })
   }
 
   /* 根据 immediate 选择立即执行还是先懒获取一次旧值。 */

@@ -1,4 +1,4 @@
-import { handleMiniError } from '../shared/error-handling.ts'
+import { runWithErrorChannel } from '../shared/runtime-error-channel.ts'
 import { recordEffectScope } from './effect-scope.ts'
 import { effectStack } from './internals/effect-stack.ts'
 import type {
@@ -51,33 +51,41 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
   /**
    * 执行副作用函数并围绕 effect 栈管理依赖收集流程。
    *
-   * @throws {unknown} 原样抛出副作用函数内部的异常，同时会通过 setMiniErrorHandler 暴露给统一错误处理器。
+   * @throws {unknown} 原样抛出副作用函数内部的异常，同时会通过 setRuntimeErrorHandler 暴露给统一错误处理器。
    */
   run(): T {
+    const runEffectFunction = (shouldTrack: boolean): T => {
+      return runWithErrorChannel(
+        () => {
+          return this.fn()
+        },
+        {
+          origin: 'effect-runner',
+          handlerPhase: 'sync',
+          propagate: 'sync',
+          beforeRun: () => {
+            if (shouldTrack) {
+              effectStack.push(this)
+            }
+          },
+          afterRun: () => {
+            if (shouldTrack) {
+              effectStack.pop()
+            }
+          },
+        },
+      )
+    }
+
     /* 已停止的副作用只执行原始函数，跳过依赖收集成本 */
     if (!this.innerActive) {
-      try {
-        return this.fn()
-      } catch (error) {
-        handleMiniError(error, 'effect-runner', { rethrowAsyncFallback: false })
-        throw error
-      }
+      return runEffectFunction(false)
     }
 
     /* 运行前重置上一轮留下的依赖，确保收集结果保持最新 */
     this.flushDependencies()
-    /* 将当前实例压入 effect 栈，允许 track 捕获它 */
-    effectStack.push(this)
 
-    try {
-      return this.fn()
-    } catch (error) {
-      handleMiniError(error, 'effect-runner', { rethrowAsyncFallback: false })
-      throw error
-    } finally {
-      /* 无论执行成功与否都需弹出自身，避免污染外层作用域 */
-      effectStack.pop()
-    }
+    return runEffectFunction(true)
   }
 
   /**
@@ -127,11 +135,11 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
       this.cleanupTasks = []
 
       for (const cleanup of cleanupTasks) {
-        try {
-          cleanup()
-        } catch (error) {
-          handleMiniError(error, 'effect-cleanup')
-        }
+        runWithErrorChannel(cleanup, {
+          origin: 'effect-cleanup',
+          handlerPhase: 'sync',
+          propagate: 'swallow',
+        })
       }
     }
   }
@@ -140,7 +148,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
 /**
  * 最小版 effect：立即执行副作用并返回可控的句柄，亦支持传入调度选项。
  *
- * @throws {unknown} 用户副作用执行时抛出的异常会同步传播，并在传播前经过 setMiniErrorHandler。
+ * @throws {unknown} 用户副作用执行时抛出的异常会同步传播，并在传播前经过 setRuntimeErrorHandler。
  */
 export function effect<T>(fn: () => T, options: EffectOptions = {}): EffectHandle<T> {
   /* 读取父级副作用，便于建立嵌套清理关系 */

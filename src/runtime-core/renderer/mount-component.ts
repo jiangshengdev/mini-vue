@@ -12,7 +12,7 @@ import type { ComponentInstance } from '@/runtime-core/component-instance.ts'
 import { setCurrentInstance, unsetCurrentInstance } from '@/runtime-core/component-instance.ts'
 import { ReactiveEffect } from '@/reactivity/effect.ts'
 import { effectScope, recordEffectScope } from '@/reactivity/effect-scope.ts'
-import { handleMiniError } from '@/shared/error-handling.ts'
+import { runWithErrorChannel } from '@/shared/runtime-error-channel.ts'
 
 /**
  * 执行函数组件并将返回的子树继续挂载到容器。
@@ -113,29 +113,25 @@ function invokeSetup<
   HostFragment extends HostNode,
   T extends SetupFunctionComponent,
 >(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): ComponentRenderFunction {
-  let hasSetupError = false
-  let setupError: unknown
-
   const render = instance.scope.run(() => {
-    /* 替换全局 currentInstance 以便 setup 内部通过 API 访问自身。 */
-    setCurrentInstance(instance)
-
-    try {
-      return instance.type(instance.props)
-    } catch (error) {
-      hasSetupError = true
-      setupError = error
-      handleMiniError(error, 'component-setup', { rethrowAsyncFallback: false })
-
-      return undefined
-    } finally {
-      unsetCurrentInstance()
-    }
+    return runWithErrorChannel(
+      () => {
+        return instance.type(instance.props)
+      },
+      {
+        origin: 'component-setup',
+        handlerPhase: 'sync',
+        propagate: 'sync',
+        beforeRun: () => {
+          /* 替换全局 currentInstance 以便 setup 内部通过 API 访问自身。 */
+          setCurrentInstance(instance)
+        },
+        afterRun: () => {
+          unsetCurrentInstance()
+        },
+      },
+    )
   })
-
-  if (hasSetupError) {
-    throw setupError
-  }
 
   if (!render) {
     throw new TypeError('组件作用域已失效，无法执行 setup', { cause: instance.scope })
@@ -217,7 +213,11 @@ function rerenderComponent<
 ): void {
   /* 依次保证 teardown → renderSchedulerJob → remount 的同步顺序。 */
   teardownMountedSubtree(instance)
-  renderSchedulerJob()
+  runWithErrorChannel(renderSchedulerJob, {
+    origin: 'scheduler',
+    handlerPhase: 'sync',
+    propagate: 'sync',
+  })
   mountLatestSubtree(instance, options)
 }
 
@@ -279,11 +279,11 @@ function teardownComponentInstance<
 
     /* 逐一运行外部注册的清理逻辑，避免引用泄漏。 */
     for (const task of tasks) {
-      try {
-        task()
-      } catch (error) {
-        handleMiniError(error, 'component-cleanup')
-      }
+      runWithErrorChannel(task, {
+        origin: 'component-cleanup',
+        handlerPhase: 'sync',
+        propagate: 'swallow',
+      })
     }
   }
 }

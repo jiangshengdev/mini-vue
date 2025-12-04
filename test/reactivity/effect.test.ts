@@ -5,15 +5,15 @@ import {
   effectScope,
   onScopeDispose,
   reactive,
-  setMiniErrorHandler,
+  setRuntimeErrorHandler,
 } from '@/index.ts'
-import type { MiniErrorHandler } from '@/index.ts'
+import type { RuntimeErrorHandler } from '@/index.ts'
 import * as dependencyUtils from '@/reactivity/internals/dependency-utils.ts'
 import { effectStack } from '@/reactivity/internals/effect-stack.ts'
 
 describe('effect', () => {
   afterEach(() => {
-    setMiniErrorHandler(undefined)
+    setRuntimeErrorHandler(undefined)
   })
 
   it('注册后会立刻执行一次副作用', () => {
@@ -272,10 +272,10 @@ describe('effect', () => {
 
   it('effect cleanup 抛错会通知错误处理器并继续执行剩余清理', () => {
     const state = reactive({ count: 0 })
-    const handler = vi.fn<MiniErrorHandler>()
+    const handler = vi.fn<RuntimeErrorHandler>()
     const cleanupOrder: string[] = []
 
-    setMiniErrorHandler(handler)
+    setRuntimeErrorHandler(handler)
 
     effect(() => {
       void state.count
@@ -301,10 +301,10 @@ describe('effect', () => {
   })
 
   it('effect 抛错会通知错误处理器并保持原有抛出行为', () => {
-    const handler = vi.fn<MiniErrorHandler>()
+    const handler = vi.fn<RuntimeErrorHandler>()
     const boom = new Error('effect failed')
 
-    setMiniErrorHandler(handler)
+    setRuntimeErrorHandler(handler)
 
     expect(() => {
       effect(() => {
@@ -320,11 +320,11 @@ describe('effect', () => {
   })
 
   it('停止后的 effect 重新执行抛错也会触发错误处理', () => {
-    const handler = vi.fn<MiniErrorHandler>()
+    const handler = vi.fn<RuntimeErrorHandler>()
     const boom = new Error('stopped effect failed')
     let shouldThrow = false
 
-    setMiniErrorHandler(handler)
+    setRuntimeErrorHandler(handler)
 
     const handle = effect(() => {
       if (shouldThrow) {
@@ -348,9 +348,9 @@ describe('effect', () => {
 
   it('scheduler 抛错时不会阻断其余 effect 并触发统一错误处理', () => {
     const state = reactive({ count: 0 })
-    const handler = vi.fn<MiniErrorHandler>()
+    const handler = vi.fn<RuntimeErrorHandler>()
 
-    setMiniErrorHandler(handler)
+    setRuntimeErrorHandler(handler)
 
     effect(
       () => {
@@ -516,10 +516,10 @@ describe('effect', () => {
 
   it('effectScope 停止时 cleanup 抛错不会阻断剩余任务', () => {
     const scope = effectScope()
-    const handler = vi.fn<MiniErrorHandler>()
+    const handler = vi.fn<RuntimeErrorHandler>()
     const cleanupOrder: string[] = []
 
-    setMiniErrorHandler(handler)
+    setRuntimeErrorHandler(handler)
 
     scope.run(() => {
       onScopeDispose(() => {
@@ -544,10 +544,10 @@ describe('effect', () => {
 
   it('effectScope.run 抛错会触发错误处理器', () => {
     const scope = effectScope()
-    const handler = vi.fn<MiniErrorHandler>()
+    const handler = vi.fn<RuntimeErrorHandler>()
     const boom = new Error('scope failed')
 
-    setMiniErrorHandler(handler)
+    setRuntimeErrorHandler(handler)
 
     expect(() => {
       scope.run(() => {

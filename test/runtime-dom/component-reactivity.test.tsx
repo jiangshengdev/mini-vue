@@ -1,13 +1,13 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { within } from '@testing-library/dom'
 import { createTestContainer } from '../setup.ts'
-import type { SetupFunctionComponent, MiniErrorHandler } from '@/index.ts'
-import { reactive, render, setMiniErrorHandler, watch } from '@/index.ts'
+import type { SetupFunctionComponent, RuntimeErrorHandler } from '@/index.ts'
+import { reactive, render, setRuntimeErrorHandler, watch } from '@/index.ts'
 import { getCurrentInstance } from '@/runtime-core/component-instance.ts'
 
 describe('runtime-dom component reactivity', () => {
   afterEach(() => {
-    setMiniErrorHandler(undefined)
+    setRuntimeErrorHandler(undefined)
   })
 
   it('组件体读取 reactive 数据时会自动重渲染', () => {
@@ -155,10 +155,10 @@ describe('runtime-dom component reactivity', () => {
 
   it('组件 cleanupTasks 抛错时不会阻塞后续清理', () => {
     const container = createTestContainer()
-    const handler = vi.fn<MiniErrorHandler>()
+    const handler = vi.fn<RuntimeErrorHandler>()
     const cleanupOrder: string[] = []
 
-    setMiniErrorHandler(handler)
+    setRuntimeErrorHandler(handler)
 
     const WithCleanup: SetupFunctionComponent = () => {
       const instance = getCurrentInstance()
@@ -193,10 +193,10 @@ describe('runtime-dom component reactivity', () => {
 
   it('setup 抛错会通知错误处理器并保持同步抛错', () => {
     const container = createTestContainer()
-    const handler = vi.fn<MiniErrorHandler>()
+    const handler = vi.fn<RuntimeErrorHandler>()
     const boom = new Error('setup failed')
 
-    setMiniErrorHandler(handler)
+    setRuntimeErrorHandler(handler)
 
     const Faulty: SetupFunctionComponent = () => {
       throw boom

@@ -8,23 +8,23 @@ export const runtimeErrorContexts = {
   /** 调度队列或 scheduler 内部抛错。 */
   scheduler: 'scheduler',
   /** 副作用 runner 执行阶段的异常。 */
-  effectRunner: 'effect-runner',
+  effectRunner: 'effectRunner',
   /** 副作用 cleanup 函数抛出的异常。 */
-  effectCleanup: 'effect-cleanup',
+  effectCleanup: 'effectCleanup',
   /** `effect` scope run 阶段的错误。 */
-  effectScopeRun: 'effect-scope-run',
+  effectScopeRun: 'effectScopeRun',
   /** `effect` scope cleanup 中的错误。 */
-  effectScopeCleanup: 'effect-scope-cleanup',
+  effectScopeCleanup: 'effectScopeCleanup',
   /** `watch` 回调体抛出的异常。 */
-  watchCallback: 'watch-callback',
+  watchCallback: 'watchCallback',
   /** `watch` 清理函数抛出的异常。 */
-  watchCleanup: 'watch-cleanup',
+  watchCleanup: 'watchCleanup',
   /** 组件 setup 阶段出错。 */
-  componentSetup: 'component-setup',
+  componentSetup: 'componentSetup',
   /** 组件卸载或 cleanup 阶段出错。 */
-  componentCleanup: 'component-cleanup',
+  componentCleanup: 'componentCleanup',
   /** `computed` setter 抛出的异常。 */
-  computedSetter: 'computed-setter',
+  computedSetter: 'computedSetter',
 } as const
 export type RuntimeErrorContext = (typeof runtimeErrorContexts)[keyof typeof runtimeErrorContexts]
 

@@ -169,13 +169,13 @@ export function dispatchRuntimeError(
 export function runWithErrorChannel<T>(
   runner: () => T,
   options: RunWithErrorChannelOptions & {
-    propagate: (typeof runtimeErrorPropagationStrategies)['sync']
+    propagate: typeof runtimeErrorPropagationStrategies.sync
   },
 ): T
 export function runWithErrorChannel<T>(
   runner: () => T,
   options: RunWithErrorChannelOptions & {
-    propagate: (typeof runtimeErrorPropagationStrategies)['silent']
+    propagate: typeof runtimeErrorPropagationStrategies.silent
   },
 ): T | undefined
 

@@ -4,10 +4,10 @@ import type { RuntimeErrorHandler } from '@/shared/error-handling.ts'
 import type { ErrorChannelAfterHook } from '@/shared/runtime-error-channel.ts'
 import {
   dispatchRuntimeError,
-  runWithErrorChannel,
   runtimeErrorContexts,
   runtimeErrorHandlerPhases,
   runtimeErrorPropagationStrategies,
+  runWithErrorChannel,
 } from '@/shared/runtime-error-channel.ts'
 
 describe('runtime-error-channel', () => {

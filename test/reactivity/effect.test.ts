@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import type { RuntimeErrorHandler } from '@/index.ts'
 import {
   computed,
   effect,
@@ -7,7 +8,6 @@ import {
   reactive,
   setRuntimeErrorHandler,
 } from '@/index.ts'
-import type { RuntimeErrorHandler } from '@/index.ts'
 import * as dependencyUtils from '@/reactivity/internals/dependency-utils.ts'
 import { effectStack } from '@/reactivity/internals/effect-stack.ts'
 import { runtimeErrorContexts } from '@/shared/runtime-error-channel.ts'

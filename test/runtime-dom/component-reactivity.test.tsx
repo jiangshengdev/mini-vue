@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { within } from '@testing-library/dom'
 import { createTestContainer } from '../setup.ts'
-import type { SetupFunctionComponent, RuntimeErrorHandler } from '@/index.ts'
+import type { RuntimeErrorHandler, SetupFunctionComponent } from '@/index.ts'
 import { reactive, render, setRuntimeErrorHandler, watch } from '@/index.ts'
 import { getCurrentInstance } from '@/runtime-core/component-instance.ts'
 import { runtimeErrorContexts } from '@/shared/runtime-error-channel.ts'

@@ -1,8 +1,8 @@
 import {
-  runWithErrorChannel,
   runtimeErrorContexts,
   runtimeErrorHandlerPhases,
   runtimeErrorPropagationStrategies,
+  runWithErrorChannel,
 } from '../shared/runtime-error-channel.ts'
 import { recordEffectScope } from './effect-scope.ts'
 import { effectStack } from './internals/effect-stack.ts'

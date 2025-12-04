@@ -15,4 +15,4 @@ export type {
   VirtualNode,
   VirtualNodeChild,
 } from './types.ts'
-export { virtualNodeFlag } from './types.ts'
+export { virtualNodeFlag } from './constants.ts'

@@ -4,6 +4,11 @@
 export const iterateDependencyKey = Symbol('iterate')
 
 /**
+ * 标记对象具备 Ref 能力的内部符号，避免与用户属性冲突。
+ */
+export const refFlag = Symbol('isRef')
+
+/**
  * 触发操作类型常量，与依赖注册时的行为保持一致。
  */
 export const triggerOpTypes = {

@@ -1,9 +1,5 @@
 import type { PropsShape } from '@/shared/types.ts'
-
-/**
- * 标记对象为由 mini-vue 创建的 virtualNode，用于运行时类型守卫。
- */
-export const virtualNodeFlag = Symbol('isVirtualNode')
+import type { virtualNodeFlag } from '@/jsx/virtual-node/constants.ts'
 
 /**
  * 单个子节点的联合类型：可以是 virtualNode 或原始文本。

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { computed, effect, ref, setRuntimeErrorHandler } from '@/index.ts'
 import type { RuntimeErrorHandler } from '@/index.ts'
+import { computed, effect, ref, setRuntimeErrorHandler } from '@/index.ts'
 import { runtimeErrorContexts } from '@/shared/runtime-error-channel.ts'
 
 describe('computed', () => {

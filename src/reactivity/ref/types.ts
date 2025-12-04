@@ -1,9 +1,5 @@
 import type { DependencyBucket } from '../shared/types.ts'
-
-/**
- * 标记对象具备 Ref 能力的内部符号，避免与用户属性冲突。
- */
-export const refFlag = Symbol('isRef')
+import type { refFlag } from '@/reactivity/shared/constants.ts'
 
 /**
  * Ref 接口暴露响应式值的访问器。

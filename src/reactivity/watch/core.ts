@@ -4,10 +4,10 @@ import { effectStack } from '../internals/effect-stack.ts'
 import type { Ref } from '../ref/types.ts'
 import { createGetter, resolveDeepOption } from './utils.ts'
 import {
-  runWithErrorChannel,
   runtimeErrorContexts,
   runtimeErrorHandlerPhases,
   runtimeErrorPropagationStrategies,
+  runWithErrorChannel,
 } from '@/shared/runtime-error-channel.ts'
 import type { PlainObject } from '@/shared/types.ts'
 

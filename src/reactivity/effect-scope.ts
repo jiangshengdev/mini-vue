@@ -1,8 +1,8 @@
 import {
-  runWithErrorChannel,
   runtimeErrorContexts,
   runtimeErrorHandlerPhases,
   runtimeErrorPropagationStrategies,
+  runWithErrorChannel,
 } from '../shared/runtime-error-channel.ts'
 import type { EffectInstance } from './shared/types.ts'
 

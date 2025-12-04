@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { reactive, ref, setRuntimeErrorHandler, watch } from '@/index.ts'
 import type { RuntimeErrorHandler } from '@/index.ts'
+import { reactive, ref, setRuntimeErrorHandler, watch } from '@/index.ts'
 import { runtimeErrorContexts } from '@/shared/runtime-error-channel.ts'
 
 describe('watch', () => {

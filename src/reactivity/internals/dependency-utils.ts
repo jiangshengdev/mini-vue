@@ -1,10 +1,10 @@
 import type { DependencyBucket, EffectInstance } from '../shared/types.ts'
 import { effectStack } from './effect-stack.ts'
 import {
-  runWithErrorChannel,
   runtimeErrorContexts,
   runtimeErrorHandlerPhases,
   runtimeErrorPropagationStrategies,
+  runWithErrorChannel,
 } from '@/shared/runtime-error-channel.ts'
 
 /**

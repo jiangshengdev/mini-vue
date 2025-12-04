@@ -1,5 +1,5 @@
-import type { VirtualNodeChild } from './types.ts'
-import { isVirtualNode } from './guards.ts'
+import type { VirtualNodeChild } from '@/jsx/index.ts'
+import { isVirtualNode } from '@/jsx/index.ts'
 import { isNil } from '@/shared/utils.ts'
 
 /**

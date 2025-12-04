@@ -5,8 +5,6 @@ import type {
   RuntimeErrorToken,
 } from './runtime-error-channel.ts'
 
-export type { RuntimeErrorContext } from './runtime-error-channel.ts'
-
 /**
  * 标准化的错误处理函数签名，统一传入原始异常与上下文标签。
  */

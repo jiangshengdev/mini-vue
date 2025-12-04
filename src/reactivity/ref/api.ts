@@ -1,9 +1,9 @@
 import { isReactive } from '../reactive.ts'
 import { ObjectRefImpl, RefImpl } from './impl.ts'
 import type { Ref } from './types.ts'
-import { refFlag } from './types.ts'
 import { isObject } from '@/shared/utils.ts'
 import type { PlainObject } from '@/shared/types.ts'
+import { refFlag } from '@/reactivity/shared/constants.ts'
 
 /**
  * 将任意值转换为 Ref，若已经是 Ref 则原样返回。

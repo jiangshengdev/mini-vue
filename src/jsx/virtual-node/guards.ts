@@ -1,6 +1,6 @@
-import type { VirtualNode } from './types.ts'
-import { virtualNodeFlag } from './types.ts'
+import type { VirtualNode } from '@/jsx/index.ts'
 import { isObject } from '@/shared/utils.ts'
+import { virtualNodeFlag } from '@/jsx/index.ts'
 
 /**
  * 判断给定值是否为由本系统创建的 virtualNode 对象。

@@ -13,10 +13,10 @@ import { setCurrentInstance, unsetCurrentInstance } from '@/runtime-core/compone
 import { ReactiveEffect } from '@/reactivity/effect.ts'
 import { effectScope, recordEffectScope } from '@/reactivity/effect-scope.ts'
 import {
-  runWithErrorChannel,
   runtimeErrorContexts,
   runtimeErrorHandlerPhases,
   runtimeErrorPropagationStrategies,
+  runWithErrorChannel,
 } from '@/shared/runtime-error-channel.ts'
 
 /**

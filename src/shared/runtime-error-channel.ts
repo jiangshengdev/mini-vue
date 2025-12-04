@@ -11,19 +11,19 @@ export const runtimeErrorContexts = {
   effectRunner: 'effect-runner',
   /** 副作用 cleanup 函数抛出的异常。 */
   effectCleanup: 'effect-cleanup',
-  /** effect scope run 阶段的错误。 */
+  /** `effect` scope run 阶段的错误。 */
   effectScopeRun: 'effect-scope-run',
-  /** effect scope cleanup 中的错误。 */
+  /** `effect` scope cleanup 中的错误。 */
   effectScopeCleanup: 'effect-scope-cleanup',
-  /** watch 回调体抛出的异常。 */
+  /** `watch` 回调体抛出的异常。 */
   watchCallback: 'watch-callback',
-  /** watch 清理函数抛出的异常。 */
+  /** `watch` 清理函数抛出的异常。 */
   watchCleanup: 'watch-cleanup',
   /** 组件 setup 阶段出错。 */
   componentSetup: 'component-setup',
   /** 组件卸载或 cleanup 阶段出错。 */
   componentCleanup: 'component-cleanup',
-  /** computed setter 抛出的异常。 */
+  /** `computed` setter 抛出的异常。 */
   computedSetter: 'computed-setter',
 } as const
 export type RuntimeErrorContext = (typeof runtimeErrorContexts)[keyof typeof runtimeErrorContexts]
@@ -143,6 +143,11 @@ export function dispatchRuntimeError(
     notifiedErrorRegistry.add(error as PlainObject)
   }
 
+  /* 判断当前 dispatch 是否处于异步阶段。 */
+  const isAsyncPhase = dispatchOptions.handlerPhase === runtimeErrorHandlerPhases.async
+  /* 允许调用方显式关闭异步重抛。 */
+  const shouldRethrowAsync = isAsyncPhase && dispatchOptions.shouldRethrowAsync !== false
+
   /* 委托给框架级错误处理函数，并按需开启异步重抛。 */
   handleRuntimeError(
     error,
@@ -152,8 +157,7 @@ export function dispatchRuntimeError(
       meta: dispatchOptions.meta,
       token,
     },
-    dispatchOptions.handlerPhase === runtimeErrorHandlerPhases.async &&
-      dispatchOptions.shouldRethrowAsync !== false,
+    shouldRethrowAsync,
   )
 
   return token

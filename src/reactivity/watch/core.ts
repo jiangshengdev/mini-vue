@@ -93,7 +93,7 @@ export function watch<T>(
         callback(newValue, previousValue, onCleanup)
       },
       {
-        origin: runtimeErrorContexts['watchCallback'],
+        origin: runtimeErrorContexts.watchCallback,
         handlerPhase: runtimeErrorHandlerPhases.sync,
         propagate: runtimeErrorPropagationStrategies.silent,
         afterRun() {
@@ -131,7 +131,7 @@ export function watch<T>(
     cleanup = undefined
 
     runWithErrorChannel(previousCleanup, {
-      origin: runtimeErrorContexts['watchCleanup'],
+      origin: runtimeErrorContexts.watchCleanup,
       handlerPhase: runtimeErrorHandlerPhases.sync,
       propagate: runtimeErrorPropagationStrategies.silent,
     })

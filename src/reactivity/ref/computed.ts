@@ -85,7 +85,7 @@ class ComputedRefImpl<T> implements Ref<T> {
         this.setter(newValue)
       },
       {
-        origin: runtimeErrorContexts['computedSetter'],
+        origin: runtimeErrorContexts.computedSetter,
         handlerPhase: runtimeErrorHandlerPhases.sync,
         propagate: runtimeErrorPropagationStrategies.sync,
       },

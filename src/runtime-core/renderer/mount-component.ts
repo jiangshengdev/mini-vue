@@ -124,7 +124,7 @@ function invokeSetup<
         return instance.type(instance.props)
       },
       {
-        origin: runtimeErrorContexts['componentSetup'],
+        origin: runtimeErrorContexts.componentSetup,
         handlerPhase: runtimeErrorHandlerPhases.sync,
         propagate: runtimeErrorPropagationStrategies.sync,
         beforeRun() {
@@ -285,7 +285,7 @@ function teardownComponentInstance<
     /* 逐一运行外部注册的清理逻辑，避免引用泄漏。 */
     for (const task of tasks) {
       runWithErrorChannel(task, {
-        origin: runtimeErrorContexts['componentCleanup'],
+        origin: runtimeErrorContexts.componentCleanup,
         handlerPhase: runtimeErrorHandlerPhases.sync,
         propagate: runtimeErrorPropagationStrategies.silent,
       })

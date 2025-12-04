@@ -65,7 +65,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
           return this.fn()
         },
         {
-          origin: runtimeErrorContexts['effectRunner'],
+          origin: runtimeErrorContexts.effectRunner,
           handlerPhase: runtimeErrorHandlerPhases.sync,
           propagate: runtimeErrorPropagationStrategies.sync,
           beforeRun: () => {
@@ -141,7 +141,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
 
       for (const cleanup of cleanupTasks) {
         runWithErrorChannel(cleanup, {
-          origin: runtimeErrorContexts['effectCleanup'],
+          origin: runtimeErrorContexts.effectCleanup,
           handlerPhase: runtimeErrorHandlerPhases.sync,
           propagate: runtimeErrorPropagationStrategies.silent,
         })

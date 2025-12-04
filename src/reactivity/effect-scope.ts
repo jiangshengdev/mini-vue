@@ -60,7 +60,7 @@ export class EffectScope {
     const previousScope = activeEffectScope
 
     return runWithErrorChannel(fn, {
-      origin: runtimeErrorContexts['effectScopeRun'],
+      origin: runtimeErrorContexts.effectScopeRun,
       handlerPhase: runtimeErrorHandlerPhases.sync,
       propagate: runtimeErrorPropagationStrategies.sync,
       beforeRun: () => {
@@ -109,7 +109,7 @@ export class EffectScope {
           effect.stop()
         },
         {
-          origin: runtimeErrorContexts['effectScopeCleanup'],
+          origin: runtimeErrorContexts.effectScopeCleanup,
           handlerPhase: runtimeErrorHandlerPhases.sync,
           propagate: runtimeErrorPropagationStrategies.silent,
         },
@@ -126,7 +126,7 @@ export class EffectScope {
 
       for (const cleanup of registeredCleanups) {
         runWithErrorChannel(cleanup, {
-          origin: runtimeErrorContexts['effectScopeCleanup'],
+          origin: runtimeErrorContexts.effectScopeCleanup,
           handlerPhase: runtimeErrorHandlerPhases.sync,
           propagate: runtimeErrorPropagationStrategies.silent,
         })
@@ -141,7 +141,7 @@ export class EffectScope {
             scope.stop(true)
           },
           {
-            origin: runtimeErrorContexts['effectScopeCleanup'],
+            origin: runtimeErrorContexts.effectScopeCleanup,
             handlerPhase: runtimeErrorHandlerPhases.sync,
             propagate: runtimeErrorPropagationStrategies.silent,
           },

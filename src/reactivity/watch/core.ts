@@ -90,7 +90,7 @@ export function watch<T>(
       {
         origin: 'watch-callback',
         handlerPhase: 'sync',
-        propagate: 'swallow',
+        propagate: 'silent',
         afterRun() {
           oldValue = newValue
           hasOldValue = true
@@ -128,7 +128,7 @@ export function watch<T>(
     runWithErrorChannel(previousCleanup, {
       origin: 'watch-cleanup',
       handlerPhase: 'sync',
-      propagate: 'swallow',
+      propagate: 'silent',
     })
   }
 

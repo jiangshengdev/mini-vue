@@ -81,7 +81,7 @@ function schedule(effect: EffectInstance): void {
       {
         origin: 'scheduler',
         handlerPhase: 'sync',
-        propagate: 'swallow',
+        propagate: 'silent',
       },
     )
 

@@ -138,7 +138,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
         runWithErrorChannel(cleanup, {
           origin: 'effect-cleanup',
           handlerPhase: 'sync',
-          propagate: 'swallow',
+          propagate: 'silent',
         })
       }
     }

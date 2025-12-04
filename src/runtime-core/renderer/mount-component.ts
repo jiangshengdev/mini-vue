@@ -282,7 +282,7 @@ function teardownComponentInstance<
       runWithErrorChannel(task, {
         origin: 'component-cleanup',
         handlerPhase: 'sync',
-        propagate: 'swallow',
+        propagate: 'silent',
       })
     }
   }

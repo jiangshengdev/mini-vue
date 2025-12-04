@@ -121,26 +121,26 @@ describe('runtime-error-channel', () => {
     expect(token?.notified).toBe(true)
   })
 
-  it('runWithErrorChannel 在 swallow 模式下会吃掉异常但仍会通知处理器', () => {
+  it('runWithErrorChannel 在 silent 模式下会吃掉异常但仍会通知处理器', () => {
     const handler = vi.fn<RuntimeErrorHandler>()
 
     setRuntimeErrorHandler(handler)
 
-    const error = new Error('swallow runner crash')
+    const error = new Error('silent runner crash')
 
     const throwCleanupError = (): never => {
       throw error
     }
 
-    const invokeSwallowChannel = () => {
+    const invokeSilentChannel = () => {
       runWithErrorChannel<never>(throwCleanupError, {
         origin: 'component-cleanup',
         handlerPhase: 'sync',
-        propagate: 'swallow',
+        propagate: 'silent',
       })
     }
 
-    expect(invokeSwallowChannel).not.toThrow()
+    expect(invokeSilentChannel).not.toThrow()
     expect(handler).toHaveBeenCalledTimes(1)
 
     const [, context, detail] = handler.mock.calls[0]
@@ -173,7 +173,7 @@ describe('runtime-error-channel', () => {
           {
             origin: 'scheduler',
             handlerPhase: 'async',
-            propagate: 'swallow',
+            propagate: 'silent',
           },
         )
       }).not.toThrow()

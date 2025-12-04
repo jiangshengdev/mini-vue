@@ -13,22 +13,21 @@ export type RuntimeErrorContext =
   | 'component-cleanup'
   | 'computed-setter'
 
-export type RuntimeErrorOrigin = RuntimeErrorContext
-export type RuntimeErrorPropagationStrategy = 'sync' | 'swallow'
+export type RuntimeErrorPropagationStrategy = 'sync' | 'silent'
 export type RuntimeErrorHandlerPhase = 'sync' | 'async'
 
 export type RuntimeErrorMeta = Readonly<PlainObject>
 
-interface RuntimeErrorDescriptor {
-  readonly origin: RuntimeErrorOrigin
+interface RuntimeErrorDispatchOptions {
+  readonly origin: RuntimeErrorContext
   readonly handlerPhase: RuntimeErrorHandlerPhase
   readonly meta?: RuntimeErrorMeta
-  readonly rethrowAsyncFallback?: boolean
+  readonly shouldRethrowAsync?: boolean
 }
 
 export interface RuntimeErrorToken {
   readonly error: unknown
-  readonly origin: RuntimeErrorOrigin
+  readonly origin: RuntimeErrorContext
   readonly handlerPhase: RuntimeErrorHandlerPhase
   readonly meta?: RuntimeErrorMeta
   /** 当前 dispatch 是否实际触发错误处理器，便于上层判断是否需要额外补偿。 */
@@ -38,7 +37,7 @@ export interface RuntimeErrorToken {
 export type ErrorChannelBeforeHook = () => void
 export type ErrorChannelAfterHook = (token?: RuntimeErrorToken) => void
 
-export interface RunWithErrorChannelOptions extends RuntimeErrorDescriptor {
+export interface RunWithErrorChannelOptions extends RuntimeErrorDispatchOptions {
   readonly propagate: RuntimeErrorPropagationStrategy
   readonly beforeRun?: ErrorChannelBeforeHook
   readonly afterRun?: ErrorChannelAfterHook
@@ -48,7 +47,7 @@ const notifiedErrorRegistry = new WeakSet<PlainObject>()
 
 export function dispatchRuntimeError(
   error: unknown,
-  descriptor: RuntimeErrorDescriptor,
+  dispatchOptions: RuntimeErrorDispatchOptions,
 ): RuntimeErrorToken {
   const shouldTrack = typeof error === 'object' && error !== null
   const alreadyNotified = shouldTrack && notifiedErrorRegistry.has(error as PlainObject)
@@ -56,9 +55,9 @@ export function dispatchRuntimeError(
 
   const token: RuntimeErrorToken = {
     error,
-    origin: descriptor.origin,
-    handlerPhase: descriptor.handlerPhase,
-    meta: descriptor.meta,
+    origin: dispatchOptions.origin,
+    handlerPhase: dispatchOptions.handlerPhase,
+    meta: dispatchOptions.meta,
     notified: shouldNotify,
   }
 
@@ -73,12 +72,12 @@ export function dispatchRuntimeError(
   handleRuntimeError(
     error,
     {
-      origin: descriptor.origin,
-      handlerPhase: descriptor.handlerPhase,
-      meta: descriptor.meta,
+      origin: dispatchOptions.origin,
+      handlerPhase: dispatchOptions.handlerPhase,
+      meta: dispatchOptions.meta,
       token,
     },
-    descriptor.handlerPhase === 'async' && descriptor.rethrowAsyncFallback !== false,
+    dispatchOptions.handlerPhase === 'async' && dispatchOptions.shouldRethrowAsync !== false,
   )
 
   return token
@@ -90,7 +89,7 @@ export function runWithErrorChannel<T>(
 ): T
 export function runWithErrorChannel<T>(
   runner: () => T,
-  options: RunWithErrorChannelOptions & { propagate: 'swallow' },
+  options: RunWithErrorChannelOptions & { propagate: 'silent' },
 ): T | undefined
 
 export function runWithErrorChannel<T>(

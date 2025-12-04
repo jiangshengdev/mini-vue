@@ -17,13 +17,13 @@
 
 1. **Error Channel 基础设施（已完成）**
    - 新增 `src/shared/runtime-error-channel.ts`：导出 `runWithErrorChannel()`、`dispatchRuntimeError()`、`RuntimeErrorToken`。
-   - `runWithErrorChannel(fn, options)` 负责 before/after hook + 错误捕获；`options` 至少包含 `origin`、`propagate`（`'sync' | 'swallow'`）、`handlerPhase`（`'sync' | 'async'`）、`meta`、`rethrowAsyncFallback`。
+   - `runWithErrorChannel(fn, options)` 负责 before/after hook + 错误捕获；`options` 至少包含 `origin`、`propagate`（`'sync' | 'silent'`）、`handlerPhase`（`'sync' | 'async'`）、`meta`、`rethrowAsyncFallback`。
    - `dispatchRuntimeError` 内部维护 `WeakSet<object>`，避免相同 `error` 在不同 origin 被重复上报；未注册 handler 且 `handlerPhase === 'async'` 时才 fallback 到 `queueMicrotask`。
    - 状态：2025-12-04 已完成，新增 `src/shared/runtime-error-channel.ts` 与配套用例 `test/shared/runtime-error-channel.test.ts` 覆盖去重、同步/吞错与异步抛错语义。
 
 2. **EffectScope 与 ReactiveEffect 接入（已完成）**
    - 重写 `EffectScope.run`：不再直接 `try...catch`，而是调用 `runWithErrorChannel(fn, { origin: 'effect-scope-run', propagate: 'sync', handlerPhase: 'sync', beforeRun, afterRun })`。
-   - `ReactiveEffect.run` 同理，声明 `origin: 'effect-runner'`；`stop`/`flushDependencies` 内部的 cleanup 也改用 channel（`origin: 'effect-cleanup'`, `propagate: 'swallow'`）。
+   - `ReactiveEffect.run` 同理，声明 `origin: 'effect-runner'`；`stop`/`flushDependencies` 内部的 cleanup 也改用 channel（`origin: 'effect-cleanup'`, `propagate: 'silent'`）。
    - 此阶段要通过所有 reactivity 层测试，验证基础设施稳定。
    - 状态：2025-12-04 已完成，`EffectScope.run/stop` 与 `ReactiveEffect.run/flushDependencies` 均接入 Error Channel，并通过 `test/reactivity/effect.test.ts`、`test/reactivity/watch.test.ts` 回归。
 
@@ -42,7 +42,7 @@
    - 回归 `test/reactivity/**/*`、`test/runtime-dom/**/*`、`test/jsx-runtime/**/*`。
    - 新增 Error Channel 专用单测：
      - 同一异常被不同 origin 调用时只通知一次。
-     - `propagate: 'swallow'` 场景不会抛出到调用栈。
+     - `propagate: 'silent'` 场景不会抛出到调用栈。
      - handler 未注册 + `handlerPhase: 'async'` 时确实异步抛错。
    - 更新 `issues/runtime-error-handling-plan.md`、`docs/*`（若有）以及开发说明，标记旧方案废弃并记录新语义。
    - 状态：2025-12-04 已完成，`pnpm vitest run` 覆盖 15 个文件共 98 个用例全部通过，并补充 `issues/public-api-error-handling.md` 中的统一错误通道说明。
@@ -67,7 +67,7 @@
 
 - 仓库内不再有 `hasSetupError`/`setupError` 一类的临时缓存逻辑。
 - `pnpm vitest run test/runtime-dom/component-reactivity.test.tsx` 中“setup 抛错会通知错误处理器并保持同步抛错”断言稳定，只收到一次 handler 调用。
-- 所有入口若声明 `propagate: 'sync'`，调用方能捕获到原始异常；若声明 `propagate: 'swallow'`，异常不会窜出当前调用栈。
+- 所有入口若声明 `propagate: 'sync'`，调用方能捕获到原始异常；若声明 `propagate: 'silent'`，异常不会窜出当前调用栈。
 - 新增的 Error Channel 测试覆盖率 ≥ 90%，并在 CI 中开启。
 
 ## 风险与缓解

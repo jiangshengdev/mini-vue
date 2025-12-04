@@ -106,7 +106,7 @@ export class EffectScope {
         {
           origin: 'effect-scope-cleanup',
           handlerPhase: 'sync',
-          propagate: 'swallow',
+          propagate: 'silent',
         },
       )
     }
@@ -123,7 +123,7 @@ export class EffectScope {
         runWithErrorChannel(cleanup, {
           origin: 'effect-scope-cleanup',
           handlerPhase: 'sync',
-          propagate: 'swallow',
+          propagate: 'silent',
         })
       }
     }
@@ -138,7 +138,7 @@ export class EffectScope {
           {
             origin: 'effect-scope-cleanup',
             handlerPhase: 'sync',
-            propagate: 'swallow',
+            propagate: 'silent',
           },
         )
       }

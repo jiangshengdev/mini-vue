@@ -10,7 +10,7 @@ export type { RuntimeErrorContext } from './runtime-error-channel.ts'
 /**
  * 标准化的错误处理函数签名，统一传入原始异常与上下文标签。
  */
-export interface RuntimeErrorDetail {
+export interface RuntimeErrorDispatchPayload {
   readonly origin: RuntimeErrorContext
   readonly handlerPhase: RuntimeErrorHandlerPhase
   readonly meta?: RuntimeErrorMeta
@@ -20,7 +20,7 @@ export interface RuntimeErrorDetail {
 export type RuntimeErrorHandler = (
   error: unknown,
   context: RuntimeErrorContext,
-  detail?: RuntimeErrorDetail,
+  dispatchPayload?: RuntimeErrorDispatchPayload,
 ) => void
 
 /**
@@ -42,15 +42,15 @@ export function setRuntimeErrorHandler(handler?: RuntimeErrorHandler): void {
  */
 export function handleRuntimeError(
   error: unknown,
-  detail: RuntimeErrorDetail,
-  rethrowAsyncFallback = true,
+  dispatchPayload: RuntimeErrorDispatchPayload,
+  shouldRethrowAsync = true,
 ): void {
-  const { origin } = detail
+  const { origin } = dispatchPayload
 
   /* 优先通过用户注册的处理器上报，以便框架层做统一告警。 */
   if (currentRuntimeErrorHandler) {
     try {
-      currentRuntimeErrorHandler(error, origin, detail)
+      currentRuntimeErrorHandler(error, origin, dispatchPayload)
     } catch (handlerError) {
       /* 处理器自身抛错时仍需异步抛出，但不能阻断当前触发链。 */
       rethrowAsync(handlerError)
@@ -59,7 +59,7 @@ export function handleRuntimeError(
     return
   }
 
-  if (rethrowAsyncFallback) {
+  if (shouldRethrowAsync) {
     rethrowAsync(error)
   }
 }

@@ -11,12 +11,19 @@ export type { RuntimeErrorContext } from './runtime-error-channel.ts'
  * 标准化的错误处理函数签名，统一传入原始异常与上下文标签。
  */
 export interface RuntimeErrorDispatchPayload {
+  /** 标记触发错误的运行上下文，方便分类处理。 */
   readonly origin: RuntimeErrorContext
+  /** 指示本次调度发生在同步还是异步阶段。 */
   readonly handlerPhase: RuntimeErrorHandlerPhase
+  /** 透传的可选元数据，用于补充定位信息。 */
   readonly meta?: RuntimeErrorMeta
+  /** 调度过程中生成的 token，便于外部追踪状态。 */
   readonly token?: RuntimeErrorToken
 }
 
+/**
+ * 自定义的错误处理器签名，统一接收原始异常、上下文标签与调度 payload。
+ */
 export type RuntimeErrorHandler = (
   error: unknown,
   context: RuntimeErrorContext,
@@ -59,6 +66,7 @@ export function handleRuntimeError(
     return
   }
 
+  /* 未自定义处理器时，根据配置选择是否异步抛出原始异常。 */
   if (shouldRethrowAsync) {
     rethrowAsync(error)
   }

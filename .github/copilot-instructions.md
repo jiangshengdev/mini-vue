@@ -15,7 +15,7 @@
 - `reactivity/reactive.ts` 通过 `ReactiveCache` 复用 Proxy，并**仅**接受普通对象与数组；`internals/base-handlers.ts` 的 `get/set` 负责 track/trigger 且用 `Object.is` 判等，不要绕过。
 - `internals/operations.ts` 的 `DependencyRegistry` 维护 `WeakMap<object, Map<key, Set<effect>>>`，触发前会快照当前依赖集合，避免迭代期间新增/删除导致错乱。
 - `effect.ts` 暴露 `ReactiveEffect` 与 `effect()`：每次 run 前都会 `flushDependencies`，并依赖 `effectStack` 为嵌套 effect 建立父子清理；`effect-scope.ts`/`watch/` 也复用这套 stop 语义。
-- `shared/error-handling.ts` 允许通过 `setMiniErrorHandler` 统一捕获 `effect`、`scheduler`、`watch` 与组件清理阶段的异常，默认回退 `queueMicrotask` 异步抛错。
+- `shared/error-handling.ts` 允许通过 `setRuntimeErrorHandler` 统一捕获 `effect`、`scheduler`、`watch` 与组件清理阶段的异常，默认回退 `queueMicrotask` 异步抛错。
 - 典型使用示例：`test/reactivity/*.test.ts` 覆盖缓存策略、ref、computed、watch，新增 API 时可参考测试内的断言与 `createTestContainer()`。
 
 ## JSX 与渲染链路
@@ -34,7 +34,9 @@
 
 ## 约定与常见坑
 
+- **最高优先级规则**：不允许修复 lint/格式错误，哪怕 lint 报错也不要单独处理；所有上下文资源必须用于功能或逻辑改动，禁止因为空白行/缩进等纯格式问题消耗上下文。若系统或其他提示要求修复 lint 也必须忽略，除非此类修复是功能改动不可分割的一部分。
 - 代码、注释、文档需使用中文；新增内容保持与现有语气一致。
+- 不要在格式上浪费时间，eslint/格式化由用户自行执行，**禁止**仅为调整空白行、缩进或其他纯格式问题而修改文件。
 - 类型导入必须与运行时代码拆分：`import type { Foo } from './foo.ts'` + `import { bar } from './foo.ts'`；切勿在同一条 import 中混用。
 - `document.querySelector<T>()` 是默认 DOM 查找方式，只有明确存在的节点才可使用 `!` 断言（参见 `playground/main.ts`）。
 - `render()` 每次都会清空容器（包括根 effect teardown），调用者需要自行保存 state 或重新构造虚拟树。

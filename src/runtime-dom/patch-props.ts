@@ -1,7 +1,7 @@
 /**
  * DOM 专用的属性打补丁逻辑，负责将 virtualNode props 应用到真实元素上。
  */
-import { isNil } from '@/shared/utils.ts'
+import { isNil, isObject } from '@/shared/utils.ts'
 import type { Ref } from '@/reactivity/index.ts'
 import { isRef } from '@/reactivity/index.ts'
 import type { PropsShape } from '@/shared/types.ts'
@@ -77,7 +77,7 @@ function applyStyle(element: HTMLElement, value: unknown): void {
   }
 
   /* 对象形式逐项设置：优先走属性写入，不支持的属性退回 setProperty。 */
-  if (typeof value === 'object') {
+  if (isObject(value)) {
     for (const [name, styleValue] of Object.entries(value as Record<string, unknown>)) {
       const resolved = styleValue ?? ''
 

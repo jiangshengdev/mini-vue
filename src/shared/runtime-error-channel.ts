@@ -1,4 +1,5 @@
 import { handleRuntimeError } from './error-handling.ts'
+import { isObject } from '@/shared/utils.ts'
 import type { PlainObject } from '@/shared/types.ts'
 
 /**
@@ -120,8 +121,8 @@ export function dispatchRuntimeError(
   dispatchOptions: RuntimeErrorDispatchOptions,
 ): RuntimeErrorToken {
   /* 仅对对象类型做去重记录，原始类型直接透传。 */
-  const shouldTrack = typeof error === 'object' && error !== null
-  const alreadyNotified = shouldTrack && notifiedErrorRegistry.has(error as PlainObject)
+  const shouldTrack = isObject(error)
+  const alreadyNotified = shouldTrack && notifiedErrorRegistry.has(error)
   const shouldNotify = !alreadyNotified
 
   /* 构造 token 以记录本次调度的真实触发信息，供钩子与上层使用。 */
@@ -140,7 +141,7 @@ export function dispatchRuntimeError(
 
   /* 记录已上报的对象，防止递归触发导致重复告警。 */
   if (shouldTrack) {
-    notifiedErrorRegistry.add(error as PlainObject)
+    notifiedErrorRegistry.add(error)
   }
 
   /* 判断当前 dispatch 是否处于异步阶段。 */

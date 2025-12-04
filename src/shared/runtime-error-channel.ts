@@ -5,15 +5,25 @@ import type { PlainObject } from '@/shared/types.ts'
  * 框架内预设的错误上下文标签，标记异常来源位置。
  */
 export const runtimeErrorContexts = {
+  /** 调度队列或 scheduler 内部抛错。 */
   scheduler: 'scheduler',
+  /** 副作用 runner 执行阶段的异常。 */
   'effect-runner': 'effect-runner',
+  /** 副作用 cleanup 函数抛出的异常。 */
   'effect-cleanup': 'effect-cleanup',
+  /** effect scope run 阶段的错误。 */
   'effect-scope-run': 'effect-scope-run',
+  /** effect scope cleanup 中的错误。 */
   'effect-scope-cleanup': 'effect-scope-cleanup',
+  /** watch 回调体抛出的异常。 */
   'watch-callback': 'watch-callback',
+  /** watch 清理函数抛出的异常。 */
   'watch-cleanup': 'watch-cleanup',
+  /** 组件 setup 阶段出错。 */
   'component-setup': 'component-setup',
+  /** 组件卸载或 cleanup 阶段出错。 */
   'component-cleanup': 'component-cleanup',
+  /** computed setter 抛出的异常。 */
   'computed-setter': 'computed-setter',
 } as const
 export type RuntimeErrorContext =
@@ -23,7 +33,9 @@ export type RuntimeErrorContext =
  * 控制异常是否向上传播，`silent` 模式吞掉同步异常。
  */
 export const runtimeErrorPropagationStrategies = {
+  /** 捕获后同步抛出，交由调用者处理。 */
   sync: 'sync',
+  /** 在同步阶段吞掉异常，避免污染主流程。 */
   silent: 'silent',
 } as const
 export type RuntimeErrorPropagationStrategy =
@@ -32,7 +44,9 @@ export type RuntimeErrorPropagationStrategy =
  * 区分当前错误是在同步还是异步阶段被捕获。
  */
 export const runtimeErrorHandlerPhases = {
+  /** 代表当前异常在同步栈内被捕获。 */
   sync: 'sync',
+  /** 表示由异步兜底（如 microtask）捕获。 */
   async: 'async',
 } as const
 export type RuntimeErrorHandlerPhase =
@@ -111,6 +125,7 @@ export function dispatchRuntimeError(
   const alreadyNotified = shouldTrack && notifiedErrorRegistry.has(error as PlainObject)
   const shouldNotify = !alreadyNotified
 
+  /* 构造 token 以记录本次调度的真实触发信息，供钩子与上层使用。 */
   const token: RuntimeErrorToken = {
     error,
     origin: dispatchOptions.origin,
@@ -163,12 +178,14 @@ export function runWithErrorChannel<T>(
   /* 在主逻辑前执行 before hook，便于构建错误上下文。 */
   options.beforeRun?.()
 
+  /* 保存 dispatch token 以便 finally 阶段透出调度结果。 */
   let token: RuntimeErrorToken | undefined
 
   try {
     /* 尝试执行用户逻辑，一旦抛错交由 catch 统一处理。 */
     return runner()
   } catch (error) {
+    /* 将异常交给错误通道统一调度，并获得可观测 token。 */
     token = dispatchRuntimeError(error, options)
 
     /* 同步传播策略需要立即抛出原始异常。 */

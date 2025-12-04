@@ -62,7 +62,7 @@ export class EffectScope {
         /* 切换全局活跃 scope，确保回调内部的所有副作用归属于当前 scope。 */
         setActiveEffectScope(this)
       },
-      afterRun: () => {
+      afterRun() {
         /* 无论回调如何结束，都要恢复先前 scope，保持栈式嵌套关系。 */
         setActiveEffectScope(previousScope)
       },

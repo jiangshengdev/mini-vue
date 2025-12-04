@@ -91,7 +91,7 @@ export function watch<T>(
         origin: 'watch-callback',
         handlerPhase: 'sync',
         propagate: 'swallow',
-        afterRun: () => {
+        afterRun() {
           oldValue = newValue
           hasOldValue = true
         },

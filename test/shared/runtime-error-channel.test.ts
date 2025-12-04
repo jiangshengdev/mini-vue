@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { setRuntimeErrorHandler } from '@/index.ts'
+import type { RuntimeErrorHandler } from '@/shared/error-handling.ts'
+import type { ErrorChannelAfterHook } from '@/shared/runtime-error-channel.ts'
 import { dispatchRuntimeError, runWithErrorChannel } from '@/shared/runtime-error-channel.ts'
 
 describe('runtime-error-channel', () => {
@@ -12,7 +14,7 @@ describe('runtime-error-channel', () => {
   })
 
   it('dispatchRuntimeError 只会上报一次相同的 error', () => {
-    const handler = vi.fn()
+    const handler = vi.fn<RuntimeErrorHandler>()
 
     setRuntimeErrorHandler(handler)
 
@@ -26,7 +28,7 @@ describe('runtime-error-channel', () => {
     expect(handler).toHaveBeenCalledTimes(1)
     expect(firstToken.notified).toBe(true)
 
-    const [, context, detail] = handler.mock.calls[0]!
+    const [, context, detail] = handler.mock.calls[0]
 
     expect(context).toBe('component-setup')
     expect(detail?.token).toBe(firstToken)
@@ -41,41 +43,41 @@ describe('runtime-error-channel', () => {
   })
 
   it('嵌套 runWithErrorChannel 共享同一错误时只通知一次', () => {
-    const handler = vi.fn()
+    const handler = vi.fn<RuntimeErrorHandler>()
 
     setRuntimeErrorHandler(handler)
 
     const error = new Error('nested crash')
-    const outerAfterRun = vi.fn()
-    const innerAfterRun = vi.fn()
+    const outerAfterRun = vi.fn<ErrorChannelAfterHook>()
+    const innerAfterRun = vi.fn<ErrorChannelAfterHook>()
 
-    expect(() => {
-      runWithErrorChannel(
-        () => {
-          runWithErrorChannel(
-            () => {
-              throw error
-            },
-            {
-              origin: 'component-setup',
-              handlerPhase: 'sync',
-              propagate: 'sync',
-              afterRun: innerAfterRun,
-            },
-          )
-        },
-        {
-          origin: 'effect-scope-run',
-          handlerPhase: 'sync',
-          propagate: 'sync',
-          afterRun: outerAfterRun,
-        },
-      )
-    }).toThrow(error)
+    const throwNestedError = () => {
+      throw error
+    }
+
+    const runInnerChannel = () => {
+      return runWithErrorChannel(throwNestedError, {
+        origin: 'component-setup',
+        handlerPhase: 'sync',
+        propagate: 'sync',
+        afterRun: innerAfterRun,
+      })
+    }
+
+    const runNestedChannel = () => {
+      return runWithErrorChannel(runInnerChannel, {
+        origin: 'effect-scope-run',
+        handlerPhase: 'sync',
+        propagate: 'sync',
+        afterRun: outerAfterRun,
+      })
+    }
+
+    expect(runNestedChannel).toThrow(error)
 
     expect(handler).toHaveBeenCalledTimes(1)
 
-    const [, context, detail] = handler.mock.calls[0]!
+    const [, context, detail] = handler.mock.calls[0]
 
     expect(context).toBe('component-setup')
     expect(detail?.token?.notified).toBe(true)
@@ -87,13 +89,13 @@ describe('runtime-error-channel', () => {
   })
 
   it('runWithErrorChannel 在 sync 场景会同步抛错', () => {
-    const handler = vi.fn()
+    const handler = vi.fn<RuntimeErrorHandler>()
 
     setRuntimeErrorHandler(handler)
 
     const error = new Error('sync runner crash')
     const beforeRun = vi.fn()
-    const afterRun = vi.fn()
+    const afterRun = vi.fn<ErrorChannelAfterHook>()
 
     expect(() => {
       runWithErrorChannel(
@@ -120,27 +122,28 @@ describe('runtime-error-channel', () => {
   })
 
   it('runWithErrorChannel 在 swallow 模式下会吃掉异常但仍会通知处理器', () => {
-    const handler = vi.fn()
+    const handler = vi.fn<RuntimeErrorHandler>()
 
     setRuntimeErrorHandler(handler)
 
     const error = new Error('swallow runner crash')
 
-    const result = runWithErrorChannel(
-      () => {
-        throw error
-      },
-      {
+    const throwCleanupError = (): never => {
+      throw error
+    }
+
+    const invokeSwallowChannel = () => {
+      runWithErrorChannel<never>(throwCleanupError, {
         origin: 'component-cleanup',
         handlerPhase: 'sync',
         propagate: 'swallow',
-      },
-    )
+      })
+    }
 
-    expect(result).toBeUndefined()
+    expect(invokeSwallowChannel).not.toThrow()
     expect(handler).toHaveBeenCalledTimes(1)
 
-    const [, context, detail] = handler.mock.calls[0]!
+    const [, context, detail] = handler.mock.calls[0]
 
     expect(context).toBe('component-cleanup')
     expect(detail?.token?.error).toBe(error)
@@ -177,9 +180,9 @@ describe('runtime-error-channel', () => {
 
       expect(queueSpy).toHaveBeenCalledTimes(1)
       expect(callbacks).toHaveLength(1)
-      expect(() => {
-        callbacks[0]!()
-      }).toThrow(error)
+      const queuedCallback = callbacks[0]
+
+      expect(queuedCallback).toThrow(error)
     } finally {
       ;(
         globalThis as typeof globalThis & {

@@ -68,7 +68,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
               effectStack.push(this)
             }
           },
-          afterRun: () => {
+          afterRun() {
             if (shouldTrack) {
               effectStack.pop()
             }

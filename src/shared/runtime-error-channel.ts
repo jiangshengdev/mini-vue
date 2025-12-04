@@ -1,4 +1,5 @@
 import { handleRuntimeError } from './error-handling.ts'
+import type { PlainObject } from '@/shared/types.ts'
 
 export type RuntimeErrorContext =
   | 'scheduler'
@@ -16,9 +17,7 @@ export type RuntimeErrorOrigin = RuntimeErrorContext
 export type RuntimeErrorPropagationStrategy = 'sync' | 'swallow'
 export type RuntimeErrorHandlerPhase = 'sync' | 'async'
 
-export interface RuntimeErrorMeta {
-  readonly [key: string]: unknown
-}
+export type RuntimeErrorMeta = Readonly<PlainObject>
 
 interface RuntimeErrorDescriptor {
   readonly origin: RuntimeErrorOrigin
@@ -36,20 +35,23 @@ export interface RuntimeErrorToken {
   readonly notified: boolean
 }
 
+export type ErrorChannelBeforeHook = () => void
+export type ErrorChannelAfterHook = (token?: RuntimeErrorToken) => void
+
 export interface RunWithErrorChannelOptions extends RuntimeErrorDescriptor {
   readonly propagate: RuntimeErrorPropagationStrategy
-  readonly beforeRun?: () => void
-  readonly afterRun?: (token?: RuntimeErrorToken) => void
+  readonly beforeRun?: ErrorChannelBeforeHook
+  readonly afterRun?: ErrorChannelAfterHook
 }
 
-const notifiedErrorRegistry = new WeakSet<object>()
+const notifiedErrorRegistry = new WeakSet<PlainObject>()
 
 export function dispatchRuntimeError(
   error: unknown,
   descriptor: RuntimeErrorDescriptor,
 ): RuntimeErrorToken {
   const shouldTrack = typeof error === 'object' && error !== null
-  const alreadyNotified = shouldTrack && notifiedErrorRegistry.has(error as object)
+  const alreadyNotified = shouldTrack && notifiedErrorRegistry.has(error as PlainObject)
   const shouldNotify = !alreadyNotified
 
   const token: RuntimeErrorToken = {
@@ -65,7 +67,7 @@ export function dispatchRuntimeError(
   }
 
   if (shouldTrack) {
-    notifiedErrorRegistry.add(error as object)
+    notifiedErrorRegistry.add(error as PlainObject)
   }
 
   handleRuntimeError(

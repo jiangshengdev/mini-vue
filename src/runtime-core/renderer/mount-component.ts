@@ -122,11 +122,11 @@ function invokeSetup<
         origin: 'component-setup',
         handlerPhase: 'sync',
         propagate: 'sync',
-        beforeRun: () => {
+        beforeRun() {
           /* 替换全局 currentInstance 以便 setup 内部通过 API 访问自身。 */
           setCurrentInstance(instance)
         },
-        afterRun: () => {
+        afterRun() {
           unsetCurrentInstance()
         },
       },

@@ -34,10 +34,10 @@ describe('runtime-error-channel', () => {
     expect(handler).toHaveBeenCalledTimes(1)
     expect(firstToken.notified).toBe(true)
 
-    const [, context, detail] = handler.mock.calls[0]
+    const [, context, payload] = handler.mock.calls[0]
 
     expect(context).toBe(runtimeErrorContexts.componentSetup)
-    expect(detail?.token).toBe(firstToken)
+    expect(payload?.token).toBe(firstToken)
 
     const secondToken = dispatchRuntimeError(error, {
       origin: runtimeErrorContexts.effectRunner,
@@ -83,10 +83,10 @@ describe('runtime-error-channel', () => {
 
     expect(handler).toHaveBeenCalledTimes(1)
 
-    const [, context, detail] = handler.mock.calls[0]
+    const [, context, payload] = handler.mock.calls[0]
 
     expect(context).toBe(runtimeErrorContexts.componentSetup)
-    expect(detail?.token?.notified).toBe(true)
+    expect(payload?.token?.notified).toBe(true)
 
     expect(innerAfterRun).toHaveBeenCalledTimes(1)
     expect(innerAfterRun.mock.calls[0]?.[0]?.notified).toBe(true)
@@ -149,11 +149,11 @@ describe('runtime-error-channel', () => {
     expect(invokeSilentChannel).not.toThrow()
     expect(handler).toHaveBeenCalledTimes(1)
 
-    const [, context, detail] = handler.mock.calls[0]
+    const [, context, payload] = handler.mock.calls[0]
 
     expect(context).toBe(runtimeErrorContexts.componentCleanup)
-    expect(detail?.token?.error).toBe(error)
-    expect(detail?.token?.notified).toBe(true)
+    expect(payload?.token?.error).toBe(error)
+    expect(payload?.token?.notified).toBe(true)
   })
 
   it('handler 未注册且 handlerPhase 为 async 时会异步抛错', () => {

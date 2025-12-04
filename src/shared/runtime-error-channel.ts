@@ -4,26 +4,39 @@ import type { PlainObject } from '@/shared/types.ts'
 /**
  * 框架内预设的错误上下文标签，标记异常来源位置。
  */
+export const runtimeErrorContexts = {
+  scheduler: 'scheduler',
+  'effect-runner': 'effect-runner',
+  'effect-cleanup': 'effect-cleanup',
+  'effect-scope-run': 'effect-scope-run',
+  'effect-scope-cleanup': 'effect-scope-cleanup',
+  'watch-callback': 'watch-callback',
+  'watch-cleanup': 'watch-cleanup',
+  'component-setup': 'component-setup',
+  'component-cleanup': 'component-cleanup',
+  'computed-setter': 'computed-setter',
+} as const
 export type RuntimeErrorContext =
-  | 'scheduler'
-  | 'effect-runner'
-  | 'effect-cleanup'
-  | 'effect-scope-run'
-  | 'effect-scope-cleanup'
-  | 'watch-callback'
-  | 'watch-cleanup'
-  | 'component-setup'
-  | 'component-cleanup'
-  | 'computed-setter'
+  (typeof runtimeErrorContexts)[keyof typeof runtimeErrorContexts]
 
 /**
  * 控制异常是否向上传播，`silent` 模式吞掉同步异常。
  */
-export type RuntimeErrorPropagationStrategy = 'sync' | 'silent'
+export const runtimeErrorPropagationStrategies = {
+  sync: 'sync',
+  silent: 'silent',
+} as const
+export type RuntimeErrorPropagationStrategy =
+  (typeof runtimeErrorPropagationStrategies)[keyof typeof runtimeErrorPropagationStrategies]
 /**
  * 区分当前错误是在同步还是异步阶段被捕获。
  */
-export type RuntimeErrorHandlerPhase = 'sync' | 'async'
+export const runtimeErrorHandlerPhases = {
+  sync: 'sync',
+  async: 'async',
+} as const
+export type RuntimeErrorHandlerPhase =
+  (typeof runtimeErrorHandlerPhases)[keyof typeof runtimeErrorHandlerPhases]
 
 /**
  * 允许透传只读的附加上下文信息，便于错误处理器记录。

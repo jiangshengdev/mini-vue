@@ -4,7 +4,12 @@ import { trackEffect, triggerEffects } from '../internals/dependency-utils.ts'
 import type { DependencyBucket } from '../shared/types.ts'
 import type { Ref } from './types.ts'
 import { refFlag } from './types.ts'
-import { runWithErrorChannel } from '@/shared/runtime-error-channel.ts'
+import {
+  runWithErrorChannel,
+  runtimeErrorContexts,
+  runtimeErrorHandlerPhases,
+  runtimeErrorPropagationStrategies,
+} from '@/shared/runtime-error-channel.ts'
 
 /** `computed` getter 负责在依赖图中派生出最终结果。 */
 export type ComputedGetter<T> = () => T
@@ -80,9 +85,9 @@ class ComputedRefImpl<T> implements Ref<T> {
         this.setter(newValue)
       },
       {
-        origin: 'computed-setter',
-        handlerPhase: 'sync',
-        propagate: 'sync',
+        origin: runtimeErrorContexts['computedSetter'],
+        handlerPhase: runtimeErrorHandlerPhases.sync,
+        propagate: runtimeErrorPropagationStrategies.sync,
       },
     )
   }

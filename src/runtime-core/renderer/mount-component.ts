@@ -12,7 +12,12 @@ import type { ComponentInstance } from '@/runtime-core/component-instance.ts'
 import { setCurrentInstance, unsetCurrentInstance } from '@/runtime-core/component-instance.ts'
 import { ReactiveEffect } from '@/reactivity/effect.ts'
 import { effectScope, recordEffectScope } from '@/reactivity/effect-scope.ts'
-import { runWithErrorChannel } from '@/shared/runtime-error-channel.ts'
+import {
+  runWithErrorChannel,
+  runtimeErrorContexts,
+  runtimeErrorHandlerPhases,
+  runtimeErrorPropagationStrategies,
+} from '@/shared/runtime-error-channel.ts'
 
 /**
  * 执行函数组件并将返回的子树继续挂载到容器。
@@ -119,9 +124,9 @@ function invokeSetup<
         return instance.type(instance.props)
       },
       {
-        origin: 'component-setup',
-        handlerPhase: 'sync',
-        propagate: 'sync',
+        origin: runtimeErrorContexts['componentSetup'],
+        handlerPhase: runtimeErrorHandlerPhases.sync,
+        propagate: runtimeErrorPropagationStrategies.sync,
         beforeRun() {
           /* 替换全局 currentInstance 以便 setup 内部通过 API 访问自身。 */
           setCurrentInstance(instance)
@@ -214,9 +219,9 @@ function rerenderComponent<
   /* 依次保证 teardown → renderSchedulerJob → remount 的同步顺序。 */
   teardownMountedSubtree(instance)
   runWithErrorChannel(renderSchedulerJob, {
-    origin: 'scheduler',
-    handlerPhase: 'sync',
-    propagate: 'sync',
+    origin: runtimeErrorContexts.scheduler,
+    handlerPhase: runtimeErrorHandlerPhases.sync,
+    propagate: runtimeErrorPropagationStrategies.sync,
   })
   mountLatestSubtree(instance, options)
 }
@@ -280,9 +285,9 @@ function teardownComponentInstance<
     /* 逐一运行外部注册的清理逻辑，避免引用泄漏。 */
     for (const task of tasks) {
       runWithErrorChannel(task, {
-        origin: 'component-cleanup',
-        handlerPhase: 'sync',
-        propagate: 'silent',
+        origin: runtimeErrorContexts['componentCleanup'],
+        handlerPhase: runtimeErrorHandlerPhases.sync,
+        propagate: runtimeErrorPropagationStrategies.silent,
       })
     }
   }

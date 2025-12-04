@@ -33,7 +33,7 @@
 ## 5. 统一错误通道缺失导致重复告警（已修复）
 
 - 位置：`src/shared/runtime-error-channel.ts`、`src/reactivity/watch/core.ts`、`src/reactivity/ref/computed.ts`、`src/reactivity/internals/dependency-utils.ts` 等入口。
-- 现状：2025-12-04 起所有运行时入口改用 `runWithErrorChannel()` 描述 `origin`、`propagate`、`handlerPhase` 与 `meta`，`dispatchRuntimeError()` 负责去重并在未注册 handler 且 `handlerPhase === 'async'` 时回退 `queueMicrotask`。`watch` 回调/cleanup、`computed` setter 以及自定义 `scheduler(job)` 均接入该通道。
+- 现状：2025-12-04 起所有运行时入口改用 `runWithErrorChannel()` 描述 `origin`、`propagate`、`handlerPhase` 与 `meta`，`dispatchRuntimeError()` 负责去重并在未注册 handler 且 `handlerPhase === runtimeErrorHandlerPhases.async` 时回退 `queueMicrotask`。`watch` 回调/cleanup、`computed` setter 以及自定义 `scheduler(job)` 均接入该通道。
 - 影响：同一个异常只会在首个 origin 上报一次，且可根据 `propagate` 控制是否同步抛错，再也无需 `hasSetupError` 之类的临时代码。外部通过 `setRuntimeErrorHandler` 即可拿到包含 `detail.origin`、`detail.meta`、`detail.token` 的完整上下文。
 - 提示：如需扩展新的生命周期或异步任务，只需声明对应的 `origin` 并复用 `runWithErrorChannel`，无需手写 `try...catch`。
 

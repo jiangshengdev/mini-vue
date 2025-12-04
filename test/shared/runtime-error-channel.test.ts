@@ -2,7 +2,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { setRuntimeErrorHandler } from '@/index.ts'
 import type { RuntimeErrorHandler } from '@/shared/error-handling.ts'
 import type { ErrorChannelAfterHook } from '@/shared/runtime-error-channel.ts'
-import { dispatchRuntimeError, runWithErrorChannel } from '@/shared/runtime-error-channel.ts'
+import {
+  dispatchRuntimeError,
+  runWithErrorChannel,
+  runtimeErrorContexts,
+  runtimeErrorHandlerPhases,
+  runtimeErrorPropagationStrategies,
+} from '@/shared/runtime-error-channel.ts'
 
 describe('runtime-error-channel', () => {
   beforeEach(() => {
@@ -21,8 +27,8 @@ describe('runtime-error-channel', () => {
     const error = new Error('component boom')
 
     const firstToken = dispatchRuntimeError(error, {
-      origin: 'component-setup',
-      handlerPhase: 'sync',
+      origin: runtimeErrorContexts.componentSetup,
+      handlerPhase: runtimeErrorHandlerPhases.sync,
     })
 
     expect(handler).toHaveBeenCalledTimes(1)
@@ -30,12 +36,12 @@ describe('runtime-error-channel', () => {
 
     const [, context, detail] = handler.mock.calls[0]
 
-    expect(context).toBe('component-setup')
+    expect(context).toBe(runtimeErrorContexts.componentSetup)
     expect(detail?.token).toBe(firstToken)
 
     const secondToken = dispatchRuntimeError(error, {
-      origin: 'effect-runner',
-      handlerPhase: 'async',
+      origin: runtimeErrorContexts.effectRunner,
+      handlerPhase: runtimeErrorHandlerPhases.async,
     })
 
     expect(handler).toHaveBeenCalledTimes(1)
@@ -57,18 +63,18 @@ describe('runtime-error-channel', () => {
 
     const runInnerChannel = () => {
       return runWithErrorChannel(throwNestedError, {
-        origin: 'component-setup',
-        handlerPhase: 'sync',
-        propagate: 'sync',
+        origin: runtimeErrorContexts.componentSetup,
+        handlerPhase: runtimeErrorHandlerPhases.sync,
+        propagate: runtimeErrorPropagationStrategies.sync,
         afterRun: innerAfterRun,
       })
     }
 
     const runNestedChannel = () => {
       return runWithErrorChannel(runInnerChannel, {
-        origin: 'effect-scope-run',
-        handlerPhase: 'sync',
-        propagate: 'sync',
+        origin: runtimeErrorContexts.effectScopeRun,
+        handlerPhase: runtimeErrorHandlerPhases.sync,
+        propagate: runtimeErrorPropagationStrategies.sync,
         afterRun: outerAfterRun,
       })
     }
@@ -79,7 +85,7 @@ describe('runtime-error-channel', () => {
 
     const [, context, detail] = handler.mock.calls[0]
 
-    expect(context).toBe('component-setup')
+    expect(context).toBe(runtimeErrorContexts.componentSetup)
     expect(detail?.token?.notified).toBe(true)
 
     expect(innerAfterRun).toHaveBeenCalledTimes(1)
@@ -103,9 +109,9 @@ describe('runtime-error-channel', () => {
           throw error
         },
         {
-          origin: 'effect-runner',
-          handlerPhase: 'sync',
-          propagate: 'sync',
+          origin: runtimeErrorContexts.effectRunner,
+          handlerPhase: runtimeErrorHandlerPhases.sync,
+          propagate: runtimeErrorPropagationStrategies.sync,
           beforeRun,
           afterRun,
         },
@@ -134,9 +140,9 @@ describe('runtime-error-channel', () => {
 
     const invokeSilentChannel = () => {
       runWithErrorChannel<never>(throwCleanupError, {
-        origin: 'component-cleanup',
-        handlerPhase: 'sync',
-        propagate: 'silent',
+        origin: runtimeErrorContexts.componentCleanup,
+        handlerPhase: runtimeErrorHandlerPhases.sync,
+        propagate: runtimeErrorPropagationStrategies.silent,
       })
     }
 
@@ -145,7 +151,7 @@ describe('runtime-error-channel', () => {
 
     const [, context, detail] = handler.mock.calls[0]
 
-    expect(context).toBe('component-cleanup')
+    expect(context).toBe(runtimeErrorContexts.componentCleanup)
     expect(detail?.token?.error).toBe(error)
     expect(detail?.token?.notified).toBe(true)
   })
@@ -171,9 +177,9 @@ describe('runtime-error-channel', () => {
             throw error
           },
           {
-            origin: 'scheduler',
-            handlerPhase: 'async',
-            propagate: 'silent',
+            origin: runtimeErrorContexts.scheduler,
+            handlerPhase: runtimeErrorHandlerPhases.async,
+            propagate: runtimeErrorPropagationStrategies.silent,
           },
         )
       }).not.toThrow()

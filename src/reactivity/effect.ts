@@ -1,4 +1,9 @@
-import { runWithErrorChannel } from '../shared/runtime-error-channel.ts'
+import {
+  runWithErrorChannel,
+  runtimeErrorContexts,
+  runtimeErrorHandlerPhases,
+  runtimeErrorPropagationStrategies,
+} from '../shared/runtime-error-channel.ts'
 import { recordEffectScope } from './effect-scope.ts'
 import { effectStack } from './internals/effect-stack.ts'
 import type {
@@ -60,9 +65,9 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
           return this.fn()
         },
         {
-          origin: 'effect-runner',
-          handlerPhase: 'sync',
-          propagate: 'sync',
+          origin: runtimeErrorContexts['effectRunner'],
+          handlerPhase: runtimeErrorHandlerPhases.sync,
+          propagate: runtimeErrorPropagationStrategies.sync,
           beforeRun: () => {
             if (shouldTrack) {
               effectStack.push(this)
@@ -136,9 +141,9 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
 
       for (const cleanup of cleanupTasks) {
         runWithErrorChannel(cleanup, {
-          origin: 'effect-cleanup',
-          handlerPhase: 'sync',
-          propagate: 'silent',
+          origin: runtimeErrorContexts['effectCleanup'],
+          handlerPhase: runtimeErrorHandlerPhases.sync,
+          propagate: runtimeErrorPropagationStrategies.silent,
         })
       }
     }

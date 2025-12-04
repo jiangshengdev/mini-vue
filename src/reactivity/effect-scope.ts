@@ -1,4 +1,9 @@
-import { runWithErrorChannel } from '../shared/runtime-error-channel.ts'
+import {
+  runWithErrorChannel,
+  runtimeErrorContexts,
+  runtimeErrorHandlerPhases,
+  runtimeErrorPropagationStrategies,
+} from '../shared/runtime-error-channel.ts'
 import type { EffectInstance } from './shared/types.ts'
 
 /** 当前正在运行的 effect scope，用于关联副作用与清理。 */
@@ -55,9 +60,9 @@ export class EffectScope {
     const previousScope = activeEffectScope
 
     return runWithErrorChannel(fn, {
-      origin: 'effect-scope-run',
-      handlerPhase: 'sync',
-      propagate: 'sync',
+      origin: runtimeErrorContexts['effectScopeRun'],
+      handlerPhase: runtimeErrorHandlerPhases.sync,
+      propagate: runtimeErrorPropagationStrategies.sync,
       beforeRun: () => {
         /* 切换全局活跃 scope，确保回调内部的所有副作用归属于当前 scope。 */
         setActiveEffectScope(this)
@@ -104,9 +109,9 @@ export class EffectScope {
           effect.stop()
         },
         {
-          origin: 'effect-scope-cleanup',
-          handlerPhase: 'sync',
-          propagate: 'silent',
+          origin: runtimeErrorContexts['effectScopeCleanup'],
+          handlerPhase: runtimeErrorHandlerPhases.sync,
+          propagate: runtimeErrorPropagationStrategies.silent,
         },
       )
     }
@@ -121,9 +126,9 @@ export class EffectScope {
 
       for (const cleanup of registeredCleanups) {
         runWithErrorChannel(cleanup, {
-          origin: 'effect-scope-cleanup',
-          handlerPhase: 'sync',
-          propagate: 'silent',
+          origin: runtimeErrorContexts['effectScopeCleanup'],
+          handlerPhase: runtimeErrorHandlerPhases.sync,
+          propagate: runtimeErrorPropagationStrategies.silent,
         })
       }
     }
@@ -136,9 +141,9 @@ export class EffectScope {
             scope.stop(true)
           },
           {
-            origin: 'effect-scope-cleanup',
-            handlerPhase: 'sync',
-            propagate: 'silent',
+            origin: runtimeErrorContexts['effectScopeCleanup'],
+            handlerPhase: runtimeErrorHandlerPhases.sync,
+            propagate: runtimeErrorPropagationStrategies.silent,
           },
         )
       }

@@ -8,26 +8,25 @@ export const runtimeErrorContexts = {
   /** 调度队列或 scheduler 内部抛错。 */
   scheduler: 'scheduler',
   /** 副作用 runner 执行阶段的异常。 */
-  'effect-runner': 'effect-runner',
+  effectRunner: 'effect-runner',
   /** 副作用 cleanup 函数抛出的异常。 */
-  'effect-cleanup': 'effect-cleanup',
+  effectCleanup: 'effect-cleanup',
   /** effect scope run 阶段的错误。 */
-  'effect-scope-run': 'effect-scope-run',
+  effectScopeRun: 'effect-scope-run',
   /** effect scope cleanup 中的错误。 */
-  'effect-scope-cleanup': 'effect-scope-cleanup',
+  effectScopeCleanup: 'effect-scope-cleanup',
   /** watch 回调体抛出的异常。 */
-  'watch-callback': 'watch-callback',
+  watchCallback: 'watch-callback',
   /** watch 清理函数抛出的异常。 */
-  'watch-cleanup': 'watch-cleanup',
+  watchCleanup: 'watch-cleanup',
   /** 组件 setup 阶段出错。 */
-  'component-setup': 'component-setup',
+  componentSetup: 'component-setup',
   /** 组件卸载或 cleanup 阶段出错。 */
-  'component-cleanup': 'component-cleanup',
+  componentCleanup: 'component-cleanup',
   /** computed setter 抛出的异常。 */
-  'computed-setter': 'computed-setter',
+  computedSetter: 'computed-setter',
 } as const
-export type RuntimeErrorContext =
-  (typeof runtimeErrorContexts)[keyof typeof runtimeErrorContexts]
+export type RuntimeErrorContext = (typeof runtimeErrorContexts)[keyof typeof runtimeErrorContexts]
 
 /**
  * 控制异常是否向上传播，`silent` 模式吞掉同步异常。
@@ -153,7 +152,8 @@ export function dispatchRuntimeError(
       meta: dispatchOptions.meta,
       token,
     },
-    dispatchOptions.handlerPhase === 'async' && dispatchOptions.shouldRethrowAsync !== false,
+    dispatchOptions.handlerPhase === runtimeErrorHandlerPhases.async &&
+      dispatchOptions.shouldRethrowAsync !== false,
   )
 
   return token
@@ -164,11 +164,15 @@ export function dispatchRuntimeError(
  */
 export function runWithErrorChannel<T>(
   runner: () => T,
-  options: RunWithErrorChannelOptions & { propagate: 'sync' },
+  options: RunWithErrorChannelOptions & {
+    propagate: (typeof runtimeErrorPropagationStrategies)['sync']
+  },
 ): T
 export function runWithErrorChannel<T>(
   runner: () => T,
-  options: RunWithErrorChannelOptions & { propagate: 'silent' },
+  options: RunWithErrorChannelOptions & {
+    propagate: (typeof runtimeErrorPropagationStrategies)['silent']
+  },
 ): T | undefined
 
 export function runWithErrorChannel<T>(
@@ -189,7 +193,7 @@ export function runWithErrorChannel<T>(
     token = dispatchRuntimeError(error, options)
 
     /* 同步传播策略需要立即抛出原始异常。 */
-    if (options.propagate === 'sync') {
+    if (options.propagate === runtimeErrorPropagationStrategies.sync) {
       throw error
     }
 

@@ -4,6 +4,7 @@ import { createTestContainer } from '../setup.ts'
 import type { SetupFunctionComponent, RuntimeErrorHandler } from '@/index.ts'
 import { reactive, render, setRuntimeErrorHandler, watch } from '@/index.ts'
 import { getCurrentInstance } from '@/runtime-core/component-instance.ts'
+import { runtimeErrorContexts } from '@/shared/runtime-error-channel.ts'
 
 describe('runtime-dom component reactivity', () => {
   afterEach(() => {
@@ -188,7 +189,7 @@ describe('runtime-dom component reactivity', () => {
     const [error, context] = handler.mock.calls[0]
 
     expect((error as Error).message).toBe('component cleanup failed')
-    expect(context).toBe('component-cleanup')
+    expect(context).toBe(runtimeErrorContexts.componentCleanup)
   })
 
   it('setup 抛错会通知错误处理器并保持同步抛错', () => {
@@ -210,6 +211,6 @@ describe('runtime-dom component reactivity', () => {
     const [error, context] = handler.mock.calls[0]
 
     expect(error).toBe(boom)
-    expect(context).toBe('component-setup')
+    expect(context).toBe(runtimeErrorContexts.componentSetup)
   })
 })

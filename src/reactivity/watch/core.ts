@@ -3,7 +3,12 @@ import { recordEffectScope, recordScopeCleanup } from '../effect-scope.ts'
 import { effectStack } from '../internals/effect-stack.ts'
 import type { Ref } from '../ref/types.ts'
 import { createGetter, resolveDeepOption } from './utils.ts'
-import { runWithErrorChannel } from '@/shared/runtime-error-channel.ts'
+import {
+  runWithErrorChannel,
+  runtimeErrorContexts,
+  runtimeErrorHandlerPhases,
+  runtimeErrorPropagationStrategies,
+} from '@/shared/runtime-error-channel.ts'
 import type { PlainObject } from '@/shared/types.ts'
 
 /** `watch` 可接受的追踪源类型，覆盖 ref、getter 与普通对象。 */
@@ -88,9 +93,9 @@ export function watch<T>(
         callback(newValue, previousValue, onCleanup)
       },
       {
-        origin: 'watch-callback',
-        handlerPhase: 'sync',
-        propagate: 'silent',
+        origin: runtimeErrorContexts['watchCallback'],
+        handlerPhase: runtimeErrorHandlerPhases.sync,
+        propagate: runtimeErrorPropagationStrategies.silent,
         afterRun() {
           oldValue = newValue
           hasOldValue = true
@@ -126,9 +131,9 @@ export function watch<T>(
     cleanup = undefined
 
     runWithErrorChannel(previousCleanup, {
-      origin: 'watch-cleanup',
-      handlerPhase: 'sync',
-      propagate: 'silent',
+      origin: runtimeErrorContexts['watchCleanup'],
+      handlerPhase: runtimeErrorHandlerPhases.sync,
+      propagate: runtimeErrorPropagationStrategies.silent,
     })
   }
 

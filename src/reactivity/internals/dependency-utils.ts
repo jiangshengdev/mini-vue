@@ -1,6 +1,11 @@
 import type { DependencyBucket, EffectInstance } from '../shared/types.ts'
 import { effectStack } from './effect-stack.ts'
-import { runWithErrorChannel } from '@/shared/runtime-error-channel.ts'
+import {
+  runWithErrorChannel,
+  runtimeErrorContexts,
+  runtimeErrorHandlerPhases,
+  runtimeErrorPropagationStrategies,
+} from '@/shared/runtime-error-channel.ts'
 
 /**
  * 收集当前活跃的副作用到依赖集合，确保后续触发时能够回调。
@@ -79,9 +84,9 @@ function schedule(effect: EffectInstance): void {
         scheduler(job)
       },
       {
-        origin: 'scheduler',
-        handlerPhase: 'sync',
-        propagate: 'silent',
+        origin: runtimeErrorContexts.scheduler,
+        handlerPhase: runtimeErrorHandlerPhases.sync,
+        propagate: runtimeErrorPropagationStrategies.silent,
       },
     )
 

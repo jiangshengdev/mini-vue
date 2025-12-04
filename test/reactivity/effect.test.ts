@@ -10,6 +10,7 @@ import {
 import type { RuntimeErrorHandler } from '@/index.ts'
 import * as dependencyUtils from '@/reactivity/internals/dependency-utils.ts'
 import { effectStack } from '@/reactivity/internals/effect-stack.ts'
+import { runtimeErrorContexts } from '@/shared/runtime-error-channel.ts'
 
 describe('effect', () => {
   afterEach(() => {
@@ -297,7 +298,7 @@ describe('effect', () => {
     const [error, context] = handler.mock.calls[0]
 
     expect((error as Error).message).toBe('effect cleanup failed')
-    expect(context).toBe('effect-cleanup')
+    expect(context).toBe(runtimeErrorContexts.effectCleanup)
   })
 
   it('effect 抛错会通知错误处理器并保持原有抛出行为', () => {
@@ -316,7 +317,7 @@ describe('effect', () => {
     const [error, context] = handler.mock.calls[0]
 
     expect(error).toBe(boom)
-    expect(context).toBe('effect-runner')
+    expect(context).toBe(runtimeErrorContexts.effectRunner)
   })
 
   it('停止后的 effect 重新执行抛错也会触发错误处理', () => {
@@ -343,7 +344,7 @@ describe('effect', () => {
     const [error, context] = handler.mock.calls[0]
 
     expect(error).toBe(boom)
-    expect(context).toBe('effect-runner')
+    expect(context).toBe(runtimeErrorContexts.effectRunner)
   })
 
   it('scheduler 抛错时不会阻断其余 effect 并触发统一错误处理', () => {
@@ -379,7 +380,7 @@ describe('effect', () => {
     const [error, context] = handler.mock.calls[0]
 
     expect((error as Error).message).toBe('scheduler failed')
-    expect(context).toBe('scheduler')
+    expect(context).toBe(runtimeErrorContexts.scheduler)
   })
 
   it('删除属性会触发相关 effect', () => {
@@ -539,7 +540,7 @@ describe('effect', () => {
     const [error, context] = handler.mock.calls[0]
 
     expect((error as Error).message).toBe('scope cleanup failed')
-    expect(context).toBe('effect-scope-cleanup')
+    expect(context).toBe(runtimeErrorContexts.effectScopeCleanup)
   })
 
   it('effectScope.run 抛错会触发错误处理器', () => {
@@ -559,7 +560,7 @@ describe('effect', () => {
     const [error, context] = handler.mock.calls[0]
 
     expect(error).toBe(boom)
-    expect(context).toBe('effect-scope-run')
+    expect(context).toBe(runtimeErrorContexts.effectScopeRun)
   })
 
   it('无活跃 effect 读取不会创建空依赖桶', () => {

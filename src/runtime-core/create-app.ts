@@ -3,6 +3,16 @@ import type { ElementProps, SetupFunctionComponent } from '@/jsx/index.ts'
 import { createVirtualNode } from '@/jsx/index.ts'
 import type { PropsShape } from '@/shared/types.ts'
 
+/** 应用生命周期状态常量，区分是否已挂载。 */
+const appLifecycleStatus = {
+  /** 尚未执行 mount，应用处于空闲等待状态。 */
+  idle: 'idle',
+  /** 根节点已挂载在容器上，需先 unmount 才能重复挂载。 */
+  mounted: 'mounted',
+} as const
+
+type AppLifecycleStatus = (typeof appLifecycleStatus)[keyof typeof appLifecycleStatus]
+
 /**
  * 宿主平台注入的渲染配置，提供渲染与清理能力。
  */
@@ -28,7 +38,7 @@ export interface AppInstance<HostElement> {
  */
 interface AppState<HostElement> {
   /** 标识应用当前是否已挂载。 */
-  status: 'idle' | 'mounted'
+  status: AppLifecycleStatus
   /** 最近一次挂载的宿主容器引用。 */
   container: HostElement | undefined
   /** 宿主注入的渲染配置。 */
@@ -44,7 +54,7 @@ interface AppState<HostElement> {
  */
 function mountApp<HostElement>(state: AppState<HostElement>, target: HostElement): void {
   /* 已挂载时直接阻止重复操作，避免宿主状态错乱。 */
-  if (state.status === 'mounted') {
+  if (state.status === appLifecycleStatus.mounted) {
     throw new Error('createApp: 当前应用已挂载，不能重复执行 mount', { cause: state.container })
   }
 
@@ -56,7 +66,7 @@ function mountApp<HostElement>(state: AppState<HostElement>, target: HostElement
 
   /* 交由渲染器负责真正的 DOM 挂载，并让组件 effect 托管更新。 */
   state.config.render(rootNode, target)
-  state.status = 'mounted'
+  state.status = appLifecycleStatus.mounted
 }
 
 /**
@@ -70,7 +80,7 @@ function unmountApp<HostElement>(state: AppState<HostElement>): void {
 
   /* 调用宿主清理逻辑并重置状态，便于后续重新挂载。 */
   state.config.unmount(state.container)
-  state.status = 'idle'
+  state.status = appLifecycleStatus.idle
   state.container = undefined
 }
 
@@ -97,7 +107,7 @@ export function createAppInstance<HostElement>(
   initialRootProps?: PropsShape,
 ): AppInstance<HostElement> {
   const state: AppState<HostElement> = {
-    status: 'idle',
+    status: appLifecycleStatus.idle,
     container: undefined,
     config,
     rootComponent,

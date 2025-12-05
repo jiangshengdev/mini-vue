@@ -1,11 +1,10 @@
 # API 文档问题记录
 
-## 1. `@internal` 标记与公开导出冲突【未解决】
+## 1. `@internal` 标记与公开导出冲突【已解决，统一归入 @beta】
 
 - 位置：`src/shared/error-handling.ts`、`src/shared/runtime-error-channel.ts`、`src/runtime-dom/patch-props.ts`，以及聚合导出的 `src/index.ts`
-- 现状：`RuntimeErrorHandler`、`RuntimeErrorContext`、`setRuntimeErrorHandler` 与 `ElementRef` 在实现文件中标记为 `@internal`，但 `src/index.ts` 又将它们对外 re-export。API Extractor 会把这些条目视作私有成员而从报告里剔除，导致用户在消费类型定义时无法找到对应声明。
-- 风险：发布包的 d.ts 中缺失上述 API，使用者无法类型安全地接入统一错误处理或 DOM `ref`。
-- 建议：与导出语义保持一致——要么把 `@internal` 改为 `@public`，要么停止对外 re-export 并在文档中标注为私有能力。
+- 进展：上述导出与其实现文件的 TSDoc 现已同步移除 `@internal`，统一标注为 `@beta`，与入口导出语义保持一致，API Extractor 会正常产出公开条目。
+- 说明：仍保留 `@beta` 以提醒调用方这些能力尚处测试阶段，一旦决定稳定需再将标签调整为 `@public` 并在文档中声明。
 
 ## 2. `@throws {@link unknown}` 链接无法解析【未解决】
 

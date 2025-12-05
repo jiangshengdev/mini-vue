@@ -7,9 +7,14 @@ import type { AppInstance } from '@/runtime-core/index.ts'
 import { createAppInstance, createRenderer } from '@/runtime-core/index.ts'
 import type { PropsShape } from '@/shared/types.ts'
 
-const { render, unmount: unmountContainer } = createRenderer(domRendererOptions)
+const { render: renderDomRootImpl, unmount: unmountContainer } = createRenderer(domRendererOptions)
 
-export { render }
+/**
+ * DOM 宿主复用的根级渲染函数，可直接挂载 JSX 或组件树。
+ *
+ * @public
+ */
+export const renderDomRoot = renderDomRootImpl
 
 /**
  * DOM 宿主应用内部状态，保存 runtime-core 返回的基础实例。
@@ -128,7 +133,11 @@ export function createApp(
 ): DomAppInstance {
   /* 先创建 runtime-core 层的基础应用实例，统一托管渲染。 */
   const state: DomAppState = {
-    baseApp: createAppInstance({ render, unmount: unmountContainer }, rootComponent, rootProps),
+    baseApp: createAppInstance(
+      { render: renderDomRoot, unmount: unmountContainer },
+      rootComponent,
+      rootProps,
+    ),
     isMounted: false,
   }
 

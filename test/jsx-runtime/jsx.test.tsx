@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { isVirtualNode, virtualNodeFlag } from '@/jsx/index.ts'
 
 /**
@@ -15,6 +15,46 @@ describe('jsx-runtime automatic jsx helper', () => {
 
     expect(virtualNode.children).toEqual(['first', 2, 'nested'])
     expect(virtualNode.props).toEqual({ id: 'root', 'data-ctx': 'stub' })
+  })
+
+  it('忽略对象与函数等不可渲染的 children', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
+      return undefined
+    })
+
+    const rawObject = { foo: 'bar' }
+    const fnChild = () => {
+      return 'noop'
+    }
+
+    const symbolChild = Symbol('skip-me')
+
+    try {
+      const virtualNode = (
+        <div>
+          {[
+            'text',
+            rawObject,
+            fnChild,
+            symbolChild,
+            <span id="label">label</span>,
+            0,
+            [{ nested: true }, ['inner']],
+          ]}
+        </div>
+      )
+
+      expect(virtualNode.children).toHaveLength(4)
+      const [textChild, spanChild, zeroChild, innerChild] = virtualNode.children
+
+      expect(textChild).toBe('text')
+      expect(isVirtualNode(spanChild)).toBe(true)
+      expect(zeroChild).toBe(0)
+      expect(innerChild).toBe('inner')
+      expect(warnSpy).toHaveBeenCalledTimes(4)
+    } finally {
+      warnSpy.mockRestore()
+    }
   })
 
   it('将 key 从 jsx 属性提升为 virtualNode.key', () => {

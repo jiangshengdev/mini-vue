@@ -1,6 +1,16 @@
 import type { VirtualNodeChild } from '@/jsx/index.ts'
 import { isVirtualNode } from '@/jsx/index.ts'
-import { isNil } from '@/shared/utils.ts'
+import { isDevEnvironment, isNil } from '@/shared/utils.ts'
+
+const shouldWarnUnsupportedChildren = isDevEnvironment()
+
+function warnUnsupportedChild(child: unknown): void {
+  if (!shouldWarnUnsupportedChildren) {
+    return
+  }
+
+  console.warn('[mini-vue][jsx] 检测到无法渲染的 children，已被忽略：', child)
+}
 
 /**
  * 将任意形式的 children 归一化为扁平的 VirtualNodeChild 数组。
@@ -45,6 +55,8 @@ function flattenChild(rawChild: unknown, accumulator: VirtualNodeChild[]): void 
     return
   }
 
-  /* 其余类型统一转为字符串，方便调试输出 */
-  accumulator.push(String(rawChild))
+  /* 函数、对象等不受支持类型直接忽略，保持与 Vue 3 对齐 */
+  warnUnsupportedChild(rawChild)
+
+  return
 }

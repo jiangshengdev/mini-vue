@@ -4,6 +4,7 @@ import type { PlainObject } from '@/shared/types.ts'
  * 判断传入值是否为可供 reactive 使用的普通非 null 对象。
  */
 export function isObject(value: unknown): value is PlainObject {
+  /* Proxy 仅接受 object/array，因此需要显式过滤掉 null。 */
   return typeof value === 'object' && value !== null
 }
 
@@ -15,6 +16,7 @@ export function isPlainObject(value: unknown): value is PlainObject {
     return false
   }
 
+  /* 仅允许普通对象或无原型对象，以保证序列化语义稳定。 */
   const prototype: unknown = Reflect.getPrototypeOf(value)
 
   return prototype === null || prototype === Object.prototype
@@ -24,6 +26,7 @@ export function isPlainObject(value: unknown): value is PlainObject {
  * 判断传入值是否为 null 或 undefined。
  */
 export function isNil(value: unknown): value is null | undefined {
+  /* 与 looseEqual 不同，这里只接受严格 null/undefined。 */
   return value === null || value === undefined
 }
 
@@ -31,10 +34,12 @@ export function isNil(value: unknown): value is null | undefined {
  * 判断属性键是否为非负整数索引，兼容 string/number 形式。
  */
 export function isArrayIndex(key: PropertyKey): boolean {
+  /* `symbol` 键永远不会被视为索引，直接拒绝。 */
   if (typeof key === 'symbol') {
     return false
   }
 
+  /* `number` 类型只需校验是否为非负整数。 */
   if (typeof key === 'number') {
     return Number.isInteger(key) && key >= 0
   }
@@ -52,4 +57,29 @@ export function isArrayIndex(key: PropertyKey): boolean {
   }
 
   return false
+}
+
+/**
+ * 依据 Vite 注入的 `import.meta.env` 判断当前是否处于开发模式。
+ */
+export function isDevEnvironment(): boolean {
+  const metaEnv = import.meta.env
+
+  /* Vite 提供最可靠的 DEV 标志，存在即可直接返回。 */
+  if (typeof metaEnv?.DEV === 'boolean') {
+    return metaEnv.DEV
+  }
+
+  /* PROD 只在 build 阶段为 true，可作为 DEV 的反向兜底。 */
+  if (typeof metaEnv?.PROD === 'boolean') {
+    return !metaEnv.PROD
+  }
+
+  /* 最后回退到 mode 字符串，约定非 production 即为开发语义。 */
+  if (typeof metaEnv?.MODE === 'string') {
+    return metaEnv.MODE !== 'production'
+  }
+
+  /* 默认以开发模式处理，方便在缺乏构建信息时暴露告警。 */
+  return true
 }

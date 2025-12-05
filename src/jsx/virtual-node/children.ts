@@ -57,6 +57,4 @@ function flattenChild(rawChild: unknown, accumulator: VirtualNodeChild[]): void 
 
   /* 函数、对象等不受支持类型直接忽略，保持与 Vue 3 对齐 */
   warnUnsupportedChild(rawChild)
-
-  return
 }

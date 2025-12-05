@@ -11,20 +11,39 @@ import {
 } from '@/shared/runtime-error-channel.ts'
 import type { PlainObject } from '@/shared/types.ts'
 
-/** `watch` 可接受的追踪源类型，覆盖 ref、getter 与普通对象。 */
+/**
+ * `watch` 可接受的追踪源类型，覆盖 ref、getter 与普通对象。
+ *
+ * @public
+ */
 export type WatchSource<T> = Ref<T> | (() => T) | PlainObject
-/** 外部可调用的停止函数类型。 */
+
+/**
+ * 外部可调用的停止函数类型。
+ *
+ * @public
+ */
 export type WatchStopHandle = () => void
+
 /** 供用户注册的清理回调类型。 */
 export type WatchCleanup = () => void
-/** `watch` 回调签名，暴露新旧值和清理钩子。 */
+
+/**
+ * `watch` 回调签名，暴露新旧值和清理钩子。
+ *
+ * @public
+ */
 export type WatchCallback<T> = (
   newValue: T,
   oldValue: T | undefined,
   onCleanup: (cleanup: WatchCleanup) => void,
 ) => void
 
-/** 控制 `watch` 行为的可选项。 */
+/**
+ * 控制 `watch` 行为的可选项。
+ *
+ * @public
+ */
 export interface WatchOptions {
   /** `true` 时立即执行一次回调。 */
   immediate?: boolean

@@ -109,6 +109,8 @@ function remountDomApp(state: DomAppState): void {
 
 /**
  * 基于 DOM 宿主能力的 createApp，实现字符串选择器解析等平台逻辑。
+ *
+ * @public
  */
 export interface DomAppInstance extends AppInstance<Element> {
   /** 支持传入 CSS 选择器或真实节点的 mount 能力。 */

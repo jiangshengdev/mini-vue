@@ -1,10 +1,10 @@
 # JSX 模块问题记录
 
-## 1. virtualNode 标记值未做真假校验【未解决】
+## 1. virtualNode 标记值未做真假校验【已解决】
 
 - 位置：`src/jsx/virtual-node/guards.ts`
-- 现状：`isVirtualNode` 只要检测到传入对象拥有 `virtualNodeFlag` 这个 symbol 键就直接返回 true，没有验证该键对应的值是否确为内部写入的 `true`。外部若手动注入同名 symbol 属性即可伪装成 virtualNode，可能让渲染管线错误地访问 props/children。
-- 建议：在 `Object.hasOwn(value, virtualNodeFlag)` 通过后继续校验 `value[virtualNodeFlag] === true`；同时在文档里说明该 symbol 仅用于框架内部，避免误用。
+- 现状：`isVirtualNode` 现已通过链式判断确保传入值同时满足“为对象”“拥有虚拟节点标记”“标记值为 true”，避免外部仅注入 symbol 键即伪装成功。
+- 进展：`src/jsx/virtual-node/guards.ts` 与 `test/jsx-runtime/jsx.test.tsx` 已更新，新增回归测试覆盖伪造标记路径。
 
 ## 2. 未知 children 默认被字符串化【未解决】
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isVirtualNode } from '@/jsx/index.ts'
+import { isVirtualNode, virtualNodeFlag } from '@/jsx/index.ts'
 
 /**
  * 这些用例通过真实 jsx 语法触发 TS 的自动 jsx 转换，
@@ -50,5 +50,11 @@ describe('jsx-runtime automatic jsx helper', () => {
 
     expect(virtualNode.key).toBe('row-1')
     expect(virtualNode.props).toEqual({ class: 'row' })
+  })
+
+  it('忽略伪造的 virtualNode 标记', () => {
+    const forgedNode = { [virtualNodeFlag]: 'spoofed' }
+
+    expect(isVirtualNode(forgedNode)).toBe(false)
   })
 })

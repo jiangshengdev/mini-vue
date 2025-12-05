@@ -26,5 +26,6 @@ coverage
 
 .eslintcache
 
-/docs/.vitepress/cache/
-temp
+/docs/.vitepress/cache
+/temp
+/etc

@@ -27,6 +27,9 @@ export const runtimeErrorContexts = {
   /** `computed` setter 抛出的异常。 */
   computedSetter: 'computedSetter',
 } as const
+/**
+ * @internal
+ */
 export type RuntimeErrorContext = (typeof runtimeErrorContexts)[keyof typeof runtimeErrorContexts]
 
 /**

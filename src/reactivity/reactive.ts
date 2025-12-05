@@ -56,9 +56,17 @@ const unsupportedTypeMessage = 'reactive 目前仅支持普通对象或数组'
 
 /**
  * 将普通对象或数组转换为响应式 Proxy。
+ *
+ * @public
  */
 export function reactive<T extends PlainObject>(target: T): T
+/**
+ * @public
+ */
 export function reactive<T>(target: T[]): T[]
+/**
+ * @public
+ */
 export function reactive<T>(target: T): T
 
 export function reactive(target: unknown): unknown {
@@ -88,6 +96,8 @@ export function reactive(target: unknown): unknown {
 
 /**
  * 判断给定值是否为 reactive 生成的 Proxy。
+ *
+ * @public
  */
 export function isReactive(target: unknown): target is ReactiveTarget {
   if (!isObject(target)) {

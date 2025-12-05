@@ -3,6 +3,8 @@ import type { refFlag } from '@/reactivity/shared/constants.ts'
 
 /**
  * Ref 接口暴露响应式值的访问器。
+ *
+ * @public
  */
 export interface Ref<T = unknown> {
   value: T

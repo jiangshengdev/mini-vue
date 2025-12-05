@@ -11,13 +11,24 @@ import {
 } from '@/shared/runtime-error-channel.ts'
 import { refFlag } from '@/reactivity/shared/constants.ts'
 
-/** `computed` getter 负责在依赖图中派生出最终结果。 */
+/**
+ * `computed` getter 负责在依赖图中派生出最终结果。
+ *
+ * @public
+ */
 export type ComputedGetter<T> = () => T
-/** `computed` setter 在可写场景下接收外部写入值。 */
+
+/**
+ * `computed` setter 在可写场景下接收外部写入值。
+ *
+ * @public
+ */
 export type ComputedSetter<T> = (value: T) => void
 
 /**
  * 可写 computed 的配置项，显式声明读取与写入逻辑。
+ *
+ * @public
  */
 export interface WritableComputedOptions<T> {
   /** 读取时返回派生值，并建立依赖关系。 */
@@ -115,12 +126,17 @@ function createReadonlySetter<T>(): ComputedSetter<T> {
   }
 }
 
-export function computed<T>(getter: ComputedGetter<T>): Ref<T>
-export function computed<T>(options: WritableComputedOptions<T>): Ref<T>
-
 /**
  * 对外暴露的 computed API，根据传参类型决定只读或可写实现。
+ *
+ * @public
  */
+export function computed<T>(getter: ComputedGetter<T>): Ref<T>
+/**
+ * @public
+ */
+export function computed<T>(options: WritableComputedOptions<T>): Ref<T>
+
 export function computed<T>(
   getterOrOptions: ComputedGetter<T> | WritableComputedOptions<T>,
 ): Ref<T> {

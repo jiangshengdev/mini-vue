@@ -117,6 +117,8 @@ export interface DomAppInstance extends AppInstance<Element> {
 
 /**
  * 创建基于 DOM 宿主的应用实例，实现字符串容器解析等平台差异。
+ *
+ * @public
  */
 export function createApp(
   rootComponent: SetupFunctionComponent,

@@ -6,6 +6,9 @@ import type { Ref } from '@/reactivity/index.ts'
 import { isRef } from '@/reactivity/index.ts'
 import type { PropsShape } from '@/shared/types.ts'
 
+/**
+ * @internal
+ */
 export type ElementRef = ((element: Element | undefined) => void) | Ref<Element | undefined>
 
 /** 扩展原生 style 声明，允许对任意属性键执行写入。 */

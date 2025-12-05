@@ -11,6 +11,8 @@ let activeEffectScope: EffectScope | undefined
 
 /**
  * `EffectScope` 负责集中托管多个副作用，统一 stop 时可全部清理。
+ *
+ * @public
  */
 export class EffectScope {
   /** 当前 scope 是否仍可用，stop 后将不再收集副作用。 */
@@ -49,7 +51,7 @@ export class EffectScope {
   /**
    * 在当前 scope 上下文中执行回调，使其创建的副作用被自动托管。
    *
-   * @throws {unknown} 回调内部抛出的异常会同步向上传播，并在传播前交给 setRuntimeErrorHandler 处理。
+   * @throws {@link unknown} 回调内部抛出的异常会同步向上传播，并在传播前交给 setRuntimeErrorHandler 处理。
    */
   run<T>(fn: () => T): T | undefined {
     /* `scope` 已停用时直接返回，避免在无效上下文中继续注册副作用。 */
@@ -200,6 +202,8 @@ export class EffectScope {
 
 /**
  * 创建一个新的 effect scope，可选地与现有 scope 自动关联。
+ *
+ * @public
  */
 export function effectScope(detached = false): EffectScope {
   return new EffectScope(detached)
@@ -207,6 +211,8 @@ export function effectScope(detached = false): EffectScope {
 
 /**
  * 返回当前生效的 scope，供手动记录副作用或注册清理使用。
+ *
+ * @public
  */
 export function getCurrentScope(): EffectScope | undefined {
   return activeEffectScope
@@ -229,6 +235,8 @@ export function recordEffectScope(
 
 /**
  * 注册 scope 清理回调，仅能在活跃 scope 中调用。
+ *
+ * @public
  */
 export function onScopeDispose(cleanup: () => void): void {
   const scope = activeEffectScope

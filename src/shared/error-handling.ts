@@ -21,6 +21,8 @@ export interface RuntimeErrorDispatchPayload {
 
 /**
  * 自定义的错误处理器签名，统一接收原始异常、上下文标签与调度 payload。
+ *
+ * @internal
  */
 export type RuntimeErrorHandler = (
   error: unknown,
@@ -37,6 +39,8 @@ let currentRuntimeErrorHandler: RuntimeErrorHandler | undefined
  * 允许外部重写默认的错误处理逻辑，便于在响应式、调度器与组件清理阶段统一兜底。
  *
  * @remarks 注册后的处理器会在 effect、effectScope.run、watch 回调、scheduler 以及组件 cleanup 等入口发生异常时被调用；个别入口（如 effect）会在回调完成后继续抛出原始错误。
+ *
+ * @internal
  */
 export function setRuntimeErrorHandler(handler?: RuntimeErrorHandler): void {
   currentRuntimeErrorHandler = handler

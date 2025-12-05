@@ -50,6 +50,8 @@ type ComponentFunction<P> = (props: PropsWithChildren<P>) => ComponentRenderFunc
 
 /**
  * `setup` + `render` 语义的函数组件类型，默认 props 为通用对象。
+ *
+ * @beta
  */
 export type SetupFunctionComponent<P = ComponentPropsBase> = ComponentFunction<P>
 

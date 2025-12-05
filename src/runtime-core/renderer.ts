@@ -41,7 +41,11 @@ export type RootRenderFunction<HostElement> = (
 
 /** 渲染器工厂返回值，包含渲染与清理能力。 */
 export interface Renderer<HostNode, HostElement extends HostNode> {
-  /** 将 virtualNode 子树渲染到指定容器中。 */
+  /**
+   * 将 virtualNode 子树渲染到指定容器中。
+   *
+   * @public
+   */
   render: RootRenderFunction<HostElement>
   /** 清空容器内容并触发宿主层清理。 */
   clear: (container: HostElement) => void

@@ -43,10 +43,8 @@
 - 修复：`track()` 先检查 `effectStack.current`，只有存在活跃 effect 时才创建依赖桶，避免无意义的 `Set` 占用内存。
 - 覆盖：`test/reactivity/effect.test.ts` 增加 “无活跃 effect 读取不会创建空依赖桶” 用例，通过监视 `triggerEffects` 确认未收集依赖时不会触发调度。
 
-## 8. 深度 watch 无法触发 Symbol 属性依赖（待修复）
+## 8. 深度 watch 无法触发 Symbol 属性依赖（已修复）
 
 - 位置：`src/reactivity/watch/utils.ts`
-- 现状：`traverse()` 仅遍历 `Object.keys`，忽略 `Symbol` 类型键名，导致带有 `Symbol` 属性的响应式对象在深度监听时无法建立依赖。
-- 影响：用户把业务状态挂在 `Symbol` 属性上（例如私有字段或框架内部标记）时，`watch(source, cb, { deep: true })` 不会在属性变化后触发回调。
-- 下一步：改为遍历 `Reflect.ownKeys` 或补充 `Object.getOwnPropertySymbols`，确保深度遍历同时覆盖字符串与 `Symbol` 键，并在 `seen` 集合中依旧去重引用。
-- 测试建议：在 `test/reactivity/watch.test.ts` 增加 “深度 watch 可追踪 Symbol 属性” 用例，构造带 `Symbol` 键的响应式对象并验证回调会随变更触发。
+- 修复：`traverse()` 改为遍历 `Reflect.ownKeys` 并借助 `propertyIsEnumerable` 过滤不可枚举键，既能覆盖 `Symbol` 字段又保持与原有行为一致，深度 watch 现可正确收集这些依赖。
+- 覆盖：`test/reactivity/watch.test.ts` 新增 “深度 watch 可追踪 Symbol 属性” 用例，通过带 `Symbol` 键的响应式对象验证回调会随变更触发。

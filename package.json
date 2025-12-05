@@ -40,6 +40,7 @@
     "xo": "xo",
     "format": "prettier docs playground src test --write",
     "typecheck": "tsc --noEmit",
+    "api": "api-extractor run --local --verbose -c api-extractor.jsonc",
     "release": "bumpp && pnpm publish",
     "prepublishOnly": "pnpm run build",
     "docs:dev": "vitepress dev docs",

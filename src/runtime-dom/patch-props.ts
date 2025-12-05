@@ -7,7 +7,7 @@ import { isRef } from '@/reactivity/index.ts'
 import type { PropsShape } from '@/shared/types.ts'
 
 /**
- * @internal
+ * @beta
  */
 export type ElementRef = ((element: Element | undefined) => void) | Ref<Element | undefined>
 

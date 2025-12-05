@@ -28,7 +28,7 @@ export const runtimeErrorContexts = {
   computedSetter: 'computedSetter',
 } as const
 /**
- * @internal
+ * @beta
  */
 export type RuntimeErrorContext = (typeof runtimeErrorContexts)[keyof typeof runtimeErrorContexts]
 

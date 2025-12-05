@@ -28,6 +28,7 @@
     "noUncheckedSideEffectImports": true
   },
   "include": [
+    "env.d.ts",
     "eslint.config.ts",
     "playground",
     "src",

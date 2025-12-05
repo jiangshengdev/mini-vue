@@ -29,6 +29,8 @@ export type {
 export { createApp, render } from './runtime-dom/index.ts'
 export type { DomAppInstance } from './runtime-dom/index.ts'
 export type { SetupFunctionComponent, ElementType, VirtualNode } from './jsx/index.ts'
+export { Fragment } from './jsx/index.ts'
+export { h, jsx, jsxs, jsxDEV } from './jsx-runtime/index.ts'
 export type { PropsShape } from './shared/types.ts'
 export type { RuntimeErrorContext } from './shared/runtime-error-channel.ts'
 export type { RuntimeErrorHandler } from './shared/error-handling.ts'

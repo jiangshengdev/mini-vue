@@ -69,10 +69,10 @@ export type ElementType = string | ComponentConstraint | FragmentType
  * 推导给定元素类型对应的 props 形状。
  */
 type InferComponentProps<T> =
-  T extends SetupFunctionComponent<infer P>
-    ? PropsWithChildren<P>
-    : T extends (props: infer P) => ComponentRenderFunction
-      ? P
+  T extends SetupFunctionComponent<infer Props>
+    ? PropsWithChildren<Props>
+    : T extends (props: infer Props) => ComponentRenderFunction
+      ? Props
       : ComponentPropsBase
 
 /**

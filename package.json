@@ -23,12 +23,20 @@
     ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
+  "typesVersions": {
+    "*": {
+      "jsx": [
+        "dist/jsx/index.d.ts"
+      ]
+    }
+  },
   "publishConfig": {
     "access": "public",
     "tag": "beta"
   },
   "scripts": {
-    "build": "tsdown",
+    "build": "tsdown && pnpm run copy:jsx-shim",
+    "copy:jsx-shim": "node scripts/copy-jsx-shim.mjs",
     "dev": "tsdown --watch",
     "play": "vite",
     "play:build": "tsc && vite build",
@@ -38,7 +46,7 @@
     "lint:eslint": "eslint . --fix --cache",
     "lint": "run-s lint:*",
     "xo": "xo",
-    "format": "prettier docs playground src test --write",
+    "format": "prettier docs playground scripts src test --write",
     "typecheck": "tsc --noEmit",
     "api": "api-extractor run --local --verbose -c api-extractor.jsonc",
     "release": "bumpp && pnpm publish",

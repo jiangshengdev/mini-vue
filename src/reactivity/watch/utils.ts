@@ -2,7 +2,6 @@ import { isReactive } from '../reactive.ts'
 import { isRef } from '../ref/api.ts'
 import type { WatchSource } from './core.ts'
 import { isObject } from '@/shared/utils.ts'
-import type { PlainObject } from '@/shared/types.ts'
 
 /**
  * 根据显式传参与源类型推导是否需要深度监听。
@@ -76,25 +75,27 @@ export function createGetter<T>(source: WatchSource<T>, deep: boolean): () => T 
 /**
  * 递归访问对象所有字段以触发依赖，避免循环引用导致死循环。
  */
-function traverse<T>(value: T, seen = new Set<unknown>()): T {
+function traverse<T>(target: T, seen = new Set<unknown>()): T {
   /* 非对象或已访问过的节点直接返回，防止无限递归。 */
-  if (!isObject(value) || seen.has(value)) {
-    return value
+  if (!isObject(target) || seen.has(target)) {
+    return target
   }
 
-  seen.add(value)
+  seen.add(target)
 
-  /* 遇到 ref 时继续深入其 value，保持与响应式对象一致。 */
-  if (isRef(value)) {
-    traverse(value.value, seen)
+  /* 遇到 ref 时继续深入其 target，保持与响应式对象一致。 */
+  if (isRef(target)) {
+    traverse(target.value, seen)
 
-    return value
+    return target
   }
 
-  /* 普通对象逐个字段递归，确保嵌套属性建立依赖。 */
-  for (const key of Object.keys(value)) {
-    traverse((value as PlainObject)[key], seen)
+  /* 仅遍历可枚举自有键，包含字符串与 Symbol。 */
+  for (const key of Reflect.ownKeys(target)) {
+    if (Object.prototype.propertyIsEnumerable.call(target, key)) {
+      traverse(target[key], seen)
+    }
   }
 
-  return value
+  return target
 }

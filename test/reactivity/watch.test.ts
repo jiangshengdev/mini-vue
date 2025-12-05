@@ -134,6 +134,26 @@ describe('watch', () => {
     expect(spy).toHaveBeenLastCalledWith(1)
   })
 
+  it('深度 watch 可追踪 Symbol 属性', () => {
+    const secret = Symbol('secret')
+    const state = reactive<Record<symbol, { value: number }>>({
+      [secret]: { value: 0 },
+    })
+    const spy = vi.fn()
+
+    watch(
+      state,
+      () => {
+        spy(state[secret].value)
+      },
+      { deep: true },
+    )
+
+    state[secret].value = 1
+    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy).toHaveBeenLastCalledWith(1)
+  })
+
   it('回调抛错后仍会更新旧值并执行 cleanup', () => {
     const state = reactive({ count: 0 })
     const spy = vi.fn()

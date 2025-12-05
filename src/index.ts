@@ -21,8 +21,13 @@ export type {
   ComputedSetter,
   WritableComputedOptions,
   EffectScope,
+  WatchSource,
+  WatchCallback,
+  WatchOptions,
+  WatchStopHandle,
 } from './reactivity/index.ts'
 export { createApp, render } from './runtime-dom/index.ts'
+export type { DomAppInstance } from './runtime-dom/index.ts'
 export type { SetupFunctionComponent } from './jsx/index.ts'
 export type { RuntimeErrorContext } from './shared/runtime-error-channel.ts'
 export type { RuntimeErrorHandler } from './shared/error-handling.ts'

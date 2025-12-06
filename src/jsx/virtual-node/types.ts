@@ -62,6 +62,8 @@ export type FragmentType = (props: FragmentProps) => ComponentChildren
 
 /**
  * JSX 中元素的类型：原生标签名、组件或 Fragment。
+ *
+ * @beta
  */
 export type ElementType = string | ComponentConstraint | FragmentType
 
@@ -89,6 +91,8 @@ export type ElementProps<T extends ElementType = ElementType> = T extends Fragme
 
 /**
  * `mini-vue` 内部使用的虚拟节点结构，承载类型、属性与子节点信息。
+ *
+ * @beta
  */
 export interface VirtualNode<T extends ElementType = ElementType> {
   /** 通过唯一 symbol 标识当前对象为 mini-vue 生成的 virtualNode */

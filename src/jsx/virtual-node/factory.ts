@@ -12,6 +12,8 @@ import type { PropsShape } from '@/shared/types.ts'
 
 /**
  * JSX 片段组件，不创建额外节点，直接返回 children。
+ *
+ * @public
  */
 export function Fragment(props: FragmentProps): ComponentChildren {
   return props.children

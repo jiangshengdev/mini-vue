@@ -59,6 +59,8 @@ export function buildVirtualNode<T extends ElementType>(
 
 /**
  * 运行时友好的 h 函数，支持 props 与可变 children 参数。
+ *
+ * @public
  */
 export function h<T extends ElementType>(
   type: T,

@@ -9,7 +9,7 @@ import {
   setRuntimeErrorHandler,
 } from '@/index.ts'
 import * as dependencyUtils from '@/reactivity/internals/dependency-utils.ts'
-import { effectStack } from '@/reactivity/internals/effect-stack.ts'
+import { effectStack } from '@/reactivity/internals/index.ts'
 import { runtimeErrorContexts } from '@/shared/index.ts'
 
 describe('effect', () => {

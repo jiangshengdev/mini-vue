@@ -184,7 +184,8 @@ function performInitialRender<
     {
       origin: runtimeErrorContexts.effectRunner,
       handlerPhase: runtimeErrorHandlerPhases.sync,
-      propagate: runtimeErrorPropagationStrategies.sync,
+      /* 与 Vue 类似：首渲染错误上报但不中断兄弟挂载。 */
+      propagate: runtimeErrorPropagationStrategies.silent,
       afterRun(token) {
         if (token?.error) {
           teardownComponentInstance(instance, options)

@@ -244,12 +244,17 @@ describe('runtime-dom component reactivity', () => {
     expect(context).toBe(runtimeErrorContexts.componentSetup)
   })
 
-  it('首次渲染抛错会停止组件 effect', () => {
+  it('首次渲染抛错会停止组件 effect 且不阻断兄弟渲染', () => {
     const container = createTestContainer()
     const handler = vi.fn<RuntimeErrorHandler>()
     const boom = new Error('render failed')
     const state = reactive({ count: 0 })
     const renderSpy = vi.fn()
+    const Sibling: SetupFunctionComponent = () => {
+      return () => {
+        return <div data-testid="sibling">ok</div>
+      }
+    }
 
     setRuntimeErrorHandler(handler)
 
@@ -262,9 +267,13 @@ describe('runtime-dom component reactivity', () => {
       }
     }
 
-    expect(() => {
-      render(<Faulty />, container)
-    }).toThrow(boom)
+    render(
+      <>
+        <Faulty />
+        <Sibling />
+      </>,
+      container,
+    )
 
     expect(handler).toHaveBeenCalledTimes(1)
     const [error, context] = handler.mock.calls[0]
@@ -272,13 +281,12 @@ describe('runtime-dom component reactivity', () => {
     expect(error).toBe(boom)
     expect(context).toBe(runtimeErrorContexts.effectRunner)
     expect(renderSpy).toHaveBeenCalledTimes(1)
+    expect(container.querySelector('[data-testid="sibling"]')?.textContent).toBe('ok')
 
-    expect(() => {
-      state.count += 1
-    }).not.toThrow()
+    state.count += 1
 
     expect(renderSpy).toHaveBeenCalledTimes(1)
     expect(handler).toHaveBeenCalledTimes(1)
-    expect(container).toBeEmptyDOMElement()
+    expect(container.querySelector('[data-testid="sibling"]')?.textContent).toBe('ok')
   })
 })

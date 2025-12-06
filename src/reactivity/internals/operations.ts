@@ -1,6 +1,6 @@
 import type { DependencyBucket, ReactiveTarget } from '../shared/types.ts'
-import { iterateDependencyKey, triggerOpTypes } from '../shared/constants.ts'
 import type { TriggerOpType } from '../shared/constants.ts'
+import { iterateDependencyKey, triggerOpTypes } from '../shared/constants.ts'
 import { trackEffect, triggerEffects } from './dependency-utils.ts'
 import { effectStack } from './effect-stack.ts'
 import { isArrayIndex } from '@/shared/utils.ts'

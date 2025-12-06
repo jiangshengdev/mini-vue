@@ -165,14 +165,29 @@ function performInitialRender<
 ): MountedHandle<HostNode> | undefined {
   /* 每个组件实例持有独立 effect，负责跟踪依赖并调度重渲染。 */
   instance.effect = createRenderEffect(instance, options)
+
   /* 首次 run() 会同步生成子树结果。 */
-  const subtree = instance.effect.run()
-  /* 子树由通用 mountChild 继续挂载到宿主容器。 */
-  const mounted = mountChild(options, subtree, instance.container)
+  return runWithErrorChannel(
+    () => {
+      const subtree = instance.effect!.run()
+      /* 子树由通用 mountChild 继续挂载到宿主容器。 */
+      const mounted = mountChild(options, subtree, instance.container)
 
-  instance.mountedHandle = mounted
+      instance.mountedHandle = mounted
 
-  return mounted
+      return mounted
+    },
+    {
+      origin: runtimeErrorContexts.effectRunner,
+      handlerPhase: runtimeErrorHandlerPhases.sync,
+      propagate: runtimeErrorPropagationStrategies.sync,
+      afterRun(token) {
+        if (token?.error) {
+          teardownComponentInstance(instance)
+        }
+      },
+    },
+  )
 }
 
 function createRenderEffect<

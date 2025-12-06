@@ -1,0 +1,138 @@
+import type { RendererOptions } from '../../renderer.ts'
+import type { MountedHandle } from '../mounted-handle.ts'
+import type { ComponentResult, SetupFunctionComponent } from '@/jsx/index.ts'
+import type { ComponentInstance } from '@/runtime-core/component-instance.ts'
+import { ReactiveEffect } from '@/reactivity/effect.ts'
+import { recordEffectScope } from '@/reactivity/effect-scope.ts'
+import {
+  runtimeErrorContexts,
+  runtimeErrorHandlerPhases,
+  runtimeErrorPropagationStrategies,
+  runWithErrorChannel,
+} from '@/shared/runtime-error-channel.ts'
+import { teardownComponentInstance, teardownMountedSubtree } from './teardown.ts'
+import { mountChildWithAnchor } from './anchor.ts'
+
+/**
+ * 运行组件 effect 并将首个结果挂载到容器。
+ */
+export function performInitialRender<
+  HostNode,
+  HostElement extends HostNode,
+  HostFragment extends HostNode,
+  T extends SetupFunctionComponent,
+>(
+  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
+  options: RendererOptions<HostNode, HostElement, HostFragment>,
+): MountedHandle<HostNode> | undefined {
+  /* 每个组件实例持有独立 effect，负责跟踪依赖并调度重渲染。 */
+  instance.effect = createRenderEffect(instance, options)
+
+  /* 首次 run() 会同步生成子树结果。 */
+  return runWithErrorChannel(
+    () => {
+      const subtree = instance.effect!.run()
+      /* 子树由通用 mountChild 继续挂载到宿主容器。 */
+      const mounted = mountChildWithAnchor(instance, options, subtree)
+
+      instance.mountedHandle = mounted
+
+      return mounted
+    },
+    {
+      origin: runtimeErrorContexts.effectRunner,
+      handlerPhase: runtimeErrorHandlerPhases.sync,
+      /* 与 Vue 类似：首渲染错误上报但不中断兄弟挂载。 */
+      propagate: runtimeErrorPropagationStrategies.silent,
+      afterRun(token) {
+        if (token?.error) {
+          teardownComponentInstance(instance, options)
+        }
+      },
+    },
+  )
+}
+
+function createRenderEffect<
+  HostNode,
+  HostElement extends HostNode,
+  HostFragment extends HostNode,
+  T extends SetupFunctionComponent,
+>(
+  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
+  options: RendererOptions<HostNode, HostElement, HostFragment>,
+): ReactiveEffect<ComponentResult> {
+  const effect = new ReactiveEffect<ComponentResult>(
+    () => {
+      /* 每次渲染时记录最新子树，供后续挂载或复用。 */
+      const subtree = instance.render()
+
+      instance.subTree = subtree
+
+      return subtree
+    },
+    (renderSchedulerJob) => {
+      /* 调度阶段需要先卸载旧子树，再执行 render 并挂载。 */
+      rerenderComponent(instance, options, renderSchedulerJob)
+    },
+  )
+
+  recordEffectScope(effect, instance.scope)
+
+  return effect
+}
+
+/**
+ * Rerender 时先卸载旧子树，再运行调度任务并重新挂载新子树。
+ */
+function rerenderComponent<
+  HostNode,
+  HostElement extends HostNode,
+  HostFragment extends HostNode,
+  T extends SetupFunctionComponent,
+>(
+  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
+  options: RendererOptions<HostNode, HostElement, HostFragment>,
+  renderSchedulerJob: () => void,
+): void {
+  /* 依次保证 teardown → renderSchedulerJob → remount 的同步顺序。 */
+  teardownMountedSubtree(instance)
+  let rerenderFailed = false
+
+  runWithErrorChannel(renderSchedulerJob, {
+    origin: runtimeErrorContexts.scheduler,
+    handlerPhase: runtimeErrorHandlerPhases.sync,
+    propagate: runtimeErrorPropagationStrategies.silent,
+    afterRun(token) {
+      if (token?.error) {
+        rerenderFailed = true
+      }
+    },
+  })
+
+  if (rerenderFailed) {
+    teardownComponentInstance(instance, options)
+
+    return
+  }
+
+  mountLatestSubtree(instance, options)
+}
+
+/**
+ * 将最新的子树结果重新挂载回容器并记录。
+ */
+function mountLatestSubtree<
+  HostNode,
+  HostElement extends HostNode,
+  HostFragment extends HostNode,
+  T extends SetupFunctionComponent,
+>(
+  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
+  options: RendererOptions<HostNode, HostElement, HostFragment>,
+): void {
+  /* 使用缓存的子树结果重新交给宿主挂载。 */
+  const mounted = mountChildWithAnchor(instance, options, instance.subTree)
+
+  instance.mountedHandle = mounted
+}

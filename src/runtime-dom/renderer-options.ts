@@ -32,7 +32,7 @@ export const domRendererOptions: RendererOptions<Node, Element, DocumentFragment
    * 将节点从其父容器中移除，兼容文本、元素等所有宿主节点。
    */
   remove(node): void {
-    node.parentNode?.removeChild(node)
+    ;(node as ChildNode).remove()
   },
   /** DOM 属性打补丁逻辑，转发到专用实现。 */
   patchProps,

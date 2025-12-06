@@ -1,5 +1,7 @@
-import '@testing-library/jest-dom/vitest'
+import * as jestDom from '@testing-library/jest-dom/vitest'
 import { afterEach } from 'vitest'
+
+void jestDom
 
 const mountedContainers = new Set<HTMLElement>()
 

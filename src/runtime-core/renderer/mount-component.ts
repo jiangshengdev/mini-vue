@@ -40,7 +40,13 @@ export function mountComponent<
 
   /* 让 virtualNode 拥有实例引用，方便调试或测试检索。 */
   attachInstanceToVirtualNode(virtualNode, instance)
-  setupComponent(instance)
+  const setupSucceeded = setupComponent(instance)
+
+  if (!setupSucceeded) {
+    teardownComponentInstance(instance, options)
+
+    return undefined
+  }
 
   /* 执行首次渲染并将子树挂载到宿主容器。 */
   const mounted = performInitialRender(instance, options)
@@ -112,9 +118,17 @@ function setupComponent<
   HostElement extends HostNode,
   HostFragment extends HostNode,
   T extends SetupFunctionComponent,
->(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): void {
+>(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): boolean {
   /* `setup` 返回的渲染闭包会成为 effect 调度的核心逻辑。 */
-  instance.render = invokeSetup(instance)
+  const render = invokeSetup(instance)
+
+  if (!render) {
+    return false
+  }
+
+  instance.render = render
+
+  return true
 }
 
 function invokeSetup<
@@ -122,7 +136,11 @@ function invokeSetup<
   HostElement extends HostNode,
   HostFragment extends HostNode,
   T extends SetupFunctionComponent,
->(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): ComponentRenderFunction {
+>(
+  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
+): ComponentRenderFunction | undefined {
+  let setupFailed = false
+
   const render = instance.scope.run(() => {
     return runWithErrorChannel(
       () => {
@@ -131,24 +149,40 @@ function invokeSetup<
       {
         origin: runtimeErrorContexts.componentSetup,
         handlerPhase: runtimeErrorHandlerPhases.sync,
-        propagate: runtimeErrorPropagationStrategies.sync,
+        propagate: runtimeErrorPropagationStrategies.silent,
         beforeRun() {
           /* 替换全局 currentInstance 以便 setup 内部通过 API 访问自身。 */
           setCurrentInstance(instance)
         },
-        afterRun() {
+        afterRun(token) {
           unsetCurrentInstance()
+
+          if (token?.error) {
+            setupFailed = true
+          }
         },
       },
     )
   })
 
-  if (!render) {
-    throw new TypeError('组件作用域已失效，无法执行 setup', { cause: instance.scope })
+  if (setupFailed || !render) {
+    /* setup 抛错或返回空值时静默失败，交给上层跳过挂载。 */
+    return undefined
   }
 
   if (typeof render !== 'function') {
-    throw new TypeError('组件必须返回渲染函数以托管本地状态', { cause: render })
+    runWithErrorChannel(
+      () => {
+        throw new TypeError('组件必须返回渲染函数以托管本地状态', { cause: render })
+      },
+      {
+        origin: runtimeErrorContexts.componentSetup,
+        handlerPhase: runtimeErrorHandlerPhases.sync,
+        propagate: runtimeErrorPropagationStrategies.silent,
+      },
+    )
+
+    return undefined
   }
 
   /* 始终返回函数，供 effect 每次执行时拿到最新子树。 */
@@ -239,11 +273,25 @@ function rerenderComponent<
 ): void {
   /* 依次保证 teardown → renderSchedulerJob → remount 的同步顺序。 */
   teardownMountedSubtree(instance)
+  let rerenderFailed = false
+
   runWithErrorChannel(renderSchedulerJob, {
     origin: runtimeErrorContexts.scheduler,
     handlerPhase: runtimeErrorHandlerPhases.sync,
-    propagate: runtimeErrorPropagationStrategies.sync,
+    propagate: runtimeErrorPropagationStrategies.silent,
+    afterRun(token) {
+      if (token?.error) {
+        rerenderFailed = true
+      }
+    },
   })
+
+  if (rerenderFailed) {
+    teardownComponentInstance(instance, options)
+
+    return
+  }
+
   mountLatestSubtree(instance, options)
 }
 

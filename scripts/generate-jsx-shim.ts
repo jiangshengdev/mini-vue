@@ -21,9 +21,15 @@ async function ensureSourceExists() {
 async function resolvePackageName() {
   const packageJsonPath = resolve(projectRoot, 'package.json')
   const packageRaw = await readFile(packageJsonPath, 'utf8')
-  const { name } = JSON.parse(packageRaw)
+  const parsed = JSON.parse(packageRaw) as unknown
 
-  if (!name) {
+  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+    throw new Error('package.json 解析失败，预期为对象')
+  }
+
+  const { name } = parsed as { name?: unknown }
+
+  if (typeof name !== 'string' || name.trim() === '') {
     throw new Error('package.json 缺少 name 字段，无法生成 JSX 类型引用路径')
   }
 
@@ -53,8 +59,10 @@ async function generateShim() {
   console.log(`已生成 ${readableSource} -> ${readableTarget}`)
 }
 
-generateShim().catch((error) => {
+try {
+  await generateShim()
+} catch (error: unknown) {
   console.error('[generate-jsx-shim] 生成 JSX shim 失败：')
   console.error(error)
-  process.exit(1)
-})
+  throw error
+}

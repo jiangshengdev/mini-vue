@@ -1,6 +1,6 @@
 import { ReactiveEffect } from '../effect.ts'
 import { recordEffectScope, recordScopeCleanup } from '../effect-scope.ts'
-import { effectStack } from '../internals/effect-stack.ts'
+import { effectStack } from '../internals/index.ts'
 import type { Ref } from '../ref/types.ts'
 import { createGetter, resolveDeepOption } from './utils.ts'
 import {

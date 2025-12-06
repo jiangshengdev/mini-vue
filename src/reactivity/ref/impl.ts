@@ -1,5 +1,5 @@
 import { reactive } from '../reactive.ts'
-import { trackEffect, triggerEffects } from '../internals/dependency-utils.ts'
+import { trackEffect, triggerEffects } from '../internals/index.ts'
 import type { DependencyBucket } from '../shared/types.ts'
 import type { Ref } from './types.ts'
 import { isPlainObject } from '@/shared/utils.ts'

@@ -5,7 +5,7 @@ import {
   runWithErrorChannel,
 } from '../shared/runtime-error-channel.ts'
 import { recordEffectScope } from './effect-scope.ts'
-import { effectStack } from './internals/effect-stack.ts'
+import { effectStack } from './internals/index.ts'
 import type {
   DependencyBucket,
   EffectHandle,

@@ -31,8 +31,8 @@
     "tag": "beta"
   },
   "scripts": {
-    "build": "tsdown && pnpm run copy:jsx-shim",
-    "copy:jsx-shim": "node scripts/copy-jsx-shim.mjs",
+    "build": "tsdown && pnpm run generate:jsx-shim",
+    "generate:jsx-shim": "tsx scripts/generate-jsx-shim.ts",
     "dev": "tsdown --watch",
     "play": "vite",
     "play:build": "tsc && vite build",

@@ -14,7 +14,7 @@ async function ensureSourceExists() {
   try {
     await access(sourcePath)
   } catch {
-    throw new Error('未找到 src/jsx/jsx-shim.d.ts，无法复制 JSX 类型声明')
+    throw new Error('未找到 src/jsx/jsx-shim.d.ts，无法生成 JSX 类型声明')
   }
 }
 
@@ -30,7 +30,7 @@ async function resolvePackageName() {
   return name
 }
 
-function buildShimContent(rawContent, packageName) {
+function prepareShimContent(rawContent: string, packageName: string) {
   const stripped = rawContent.replaceAll(importStripPattern, '')
   const normalizedBody = stripped.replace(/^\n+/, '')
   const headerImport = `import type { ElementRef, ElementType as MiniElementType, PropsShape, VirtualNode } from '${packageName}'\n\n`
@@ -39,22 +39,22 @@ function buildShimContent(rawContent, packageName) {
   return result.endsWith('\n') ? result : `${result}\n`
 }
 
-async function copyShim() {
+async function generateShim() {
   await ensureSourceExists()
   const packageName = await resolvePackageName()
   const rawContent = await readFile(sourcePath, 'utf8')
-  const finalContent = buildShimContent(rawContent, packageName)
+  const finalContent = prepareShimContent(rawContent, packageName)
 
   await mkdir(targetDir, { recursive: true })
   await writeFile(targetPath, finalContent, 'utf8')
   const readableSource = relative(projectRoot, sourcePath)
   const readableTarget = relative(projectRoot, targetPath)
 
-  console.log(`已复制 ${readableSource} -> ${readableTarget}`)
+  console.log(`已生成 ${readableSource} -> ${readableTarget}`)
 }
 
-copyShim().catch((error) => {
-  console.error('[copy-jsx-shim] 复制 JSX shim 失败：')
+generateShim().catch((error) => {
+  console.error('[generate-jsx-shim] 生成 JSX shim 失败：')
   console.error(error)
   process.exit(1)
 })

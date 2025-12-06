@@ -31,6 +31,7 @@
     "env.d.ts",
     "eslint.config.ts",
     "playground",
+    "scripts",
     "src",
     "test",
     "tsdown.config.ts",

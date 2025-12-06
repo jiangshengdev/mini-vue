@@ -28,6 +28,8 @@ export function mountElement<HostNode, HostElement extends HostNode, HostFragmen
 
   appendChild(container, element)
 
+  assignElementRef(refBinding, element)
+
   return {
     nodes: [element],
     teardown(): void {

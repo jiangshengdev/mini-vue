@@ -30,9 +30,8 @@ export function patchProps(element: Element, props?: PropsShape): void {
   }
 
   for (const [key, value] of Object.entries(props)) {
-    /* `ref` 需要拿到真实元素或响应式 Ref，因此直接赋值。 */
+    /* `ref` 由挂载流程统一处理，跳过。 */
     if (key === 'ref' && isElementRef(value)) {
-      assignElementRef(value, element)
       continue
     }
 
@@ -119,14 +118,4 @@ function patchDomAttr(element: Element, key: string, value: unknown): void {
 
 function isElementRef(value: unknown): value is ElementRef {
   return typeof value === 'function' || isRef<Element | undefined>(value)
-}
-
-function assignElementRef(target: ElementRef, element: Element | undefined): void {
-  if (typeof target === 'function') {
-    target(element)
-
-    return
-  }
-
-  target.value = element
 }

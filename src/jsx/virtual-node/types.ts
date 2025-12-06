@@ -1,4 +1,4 @@
-import type { PropsShape } from '@/shared/types.ts'
+import type { PropsShape } from '@/shared/index.ts'
 import type { virtualNodeFlag } from '@/jsx/virtual-node/constants.ts'
 
 /**

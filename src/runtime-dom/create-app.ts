@@ -5,7 +5,7 @@ import { domRendererOptions } from './renderer-options.ts'
 import type { SetupFunctionComponent } from '@/jsx/index.ts'
 import type { AppInstance } from '@/runtime-core/index.ts'
 import { createAppInstance, createRenderer } from '@/runtime-core/index.ts'
-import type { PropsShape } from '@/shared/types.ts'
+import type { PropsShape } from '@/shared/index.ts'
 
 const { render: renderDomRootImpl, unmount: unmountContainer } = createRenderer(domRendererOptions)
 

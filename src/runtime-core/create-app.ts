@@ -1,7 +1,7 @@
 import type { RootRenderFunction } from './renderer.ts'
 import type { ElementProps, SetupFunctionComponent } from '@/jsx/index.ts'
 import { createVirtualNode } from '@/jsx/index.ts'
-import type { PropsShape } from '@/shared/types.ts'
+import type { PropsShape } from '@/shared/index.ts'
 
 /** 应用生命周期状态常量，区分是否已挂载。 */
 const appLifecycleStatus = {

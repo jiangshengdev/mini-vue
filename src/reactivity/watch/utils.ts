@@ -1,7 +1,7 @@
 import { isReactive } from '../reactive.ts'
 import { isRef } from '../ref/api.ts'
 import type { WatchSource } from './core.ts'
-import { isObject } from '@/shared/utils.ts'
+import { isObject } from '@/shared/index.ts'
 
 /**
  * 根据显式传参与源类型推导是否需要深度监听。

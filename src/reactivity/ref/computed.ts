@@ -8,7 +8,7 @@ import {
   runtimeErrorHandlerPhases,
   runtimeErrorPropagationStrategies,
   runWithErrorChannel,
-} from '@/shared/runtime-error-channel.ts'
+} from '@/shared/index.ts'
 import { refFlag } from '@/reactivity/shared/constants.ts'
 
 /**

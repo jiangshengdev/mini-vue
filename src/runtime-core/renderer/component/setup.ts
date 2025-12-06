@@ -6,7 +6,7 @@ import {
   runtimeErrorHandlerPhases,
   runtimeErrorPropagationStrategies,
   runWithErrorChannel,
-} from '@/shared/runtime-error-channel.ts'
+} from '@/shared/index.ts'
 
 /**
  * 初始化组件，创建 setup 阶段与渲染闭包。

@@ -1,4 +1,4 @@
-import type { PlainObject } from '@/shared/types.ts'
+import type { PlainObject } from '@/shared/index.ts'
 
 /**
  * 判断传入值是否为可供 reactive 使用的普通非 null 对象。

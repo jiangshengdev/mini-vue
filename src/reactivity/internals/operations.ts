@@ -3,7 +3,7 @@ import type { TriggerOpType } from '../shared/index.ts'
 import { iterateDependencyKey, triggerOpTypes } from '../shared/index.ts'
 import { trackEffect, triggerEffects } from './dependency-utils.ts'
 import { effectStack } from './effect-stack.ts'
-import { isArrayIndex } from '@/shared/utils.ts'
+import { isArrayIndex } from '@/shared/index.ts'
 
 /**
  * 集中管理对象属性与副作用之间的依赖关系。

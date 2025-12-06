@@ -2,7 +2,7 @@ import { reactive } from '../reactive.ts'
 import { iterateDependencyKey, triggerOpTypes } from '../shared/index.ts'
 import type { ReactiveTarget } from '../shared/index.ts'
 import { track, trigger } from './operations.ts'
-import { isArrayIndex, isObject } from '@/shared/utils.ts'
+import { isArrayIndex, isObject } from '@/shared/index.ts'
 
 /**
  * 响应式读取逻辑：在取值时触发依赖收集，并对嵌套对象递归创建代理。

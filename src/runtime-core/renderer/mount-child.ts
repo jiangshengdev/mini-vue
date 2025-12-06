@@ -3,7 +3,7 @@ import { mountVirtualNode } from './mount-virtual-node.ts'
 import type { MountedHandle } from './mounted-handle.ts'
 import type { ComponentResult } from '@/jsx/index.ts'
 import { isVirtualNode } from '@/jsx/index.ts'
-import { isNil } from '@/shared/utils.ts'
+import { isNil } from '@/shared/index.ts'
 
 /**
  * 根据子节点类型生成宿主节点，统一处理数组、virtualNode 与原始值。

@@ -3,8 +3,8 @@
  */
 import { mutableHandlers } from './internals/index.ts'
 import type { ReactiveTarget } from './shared/index.ts'
-import { isObject, isPlainObject } from '@/shared/utils.ts'
-import type { PlainObject } from '@/shared/types.ts'
+import { isObject, isPlainObject } from '@/shared/index.ts'
+import type { PlainObject } from '@/shared/index.ts'
 
 /**
  * 封装原对象与代理实例之间的双向缓存。

@@ -1,6 +1,6 @@
 import type { ComponentChildren, ElementProps, ElementType, VirtualNode } from '@/jsx/index.ts'
 import { createVirtualNode } from '@/jsx/index.ts'
-import type { PropsShape } from '@/shared/types.ts'
+import type { PropsShape } from '@/shared/index.ts'
 
 /**
  * 记录剥离 key 后的 props 副本与归一化的 key 值。

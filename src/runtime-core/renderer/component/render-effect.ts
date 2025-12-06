@@ -9,7 +9,7 @@ import {
   runtimeErrorHandlerPhases,
   runtimeErrorPropagationStrategies,
   runWithErrorChannel,
-} from '@/shared/runtime-error-channel.ts'
+} from '@/shared/index.ts'
 import { teardownComponentInstance, teardownMountedSubtree } from './teardown.ts'
 import { mountChildWithAnchor } from './anchor.ts'
 

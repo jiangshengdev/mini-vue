@@ -8,8 +8,8 @@ import {
   runtimeErrorHandlerPhases,
   runtimeErrorPropagationStrategies,
   runWithErrorChannel,
-} from '@/shared/runtime-error-channel.ts'
-import type { PlainObject } from '@/shared/types.ts'
+} from '@/shared/index.ts'
+import type { PlainObject } from '@/shared/index.ts'
 
 /**
  * `watch` 可接受的追踪源类型，覆盖 ref、getter 与普通对象。

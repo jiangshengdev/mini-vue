@@ -1,4 +1,4 @@
-import type { PlainObject } from '@/shared/types.ts'
+import type { PlainObject } from '@/shared/index.ts'
 
 /**
  * 描述 effect 对应的外部可用接口。

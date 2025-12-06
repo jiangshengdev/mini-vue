@@ -1,6 +1,6 @@
 import type { VirtualNodeChild } from '@/jsx/index.ts'
 import { isVirtualNode } from '@/jsx/index.ts'
-import { isDevEnvironment, isNil } from '@/shared/utils.ts'
+import { isDevEnvironment, isNil } from '@/shared/index.ts'
 
 const shouldWarnUnsupportedChildren = isDevEnvironment()
 

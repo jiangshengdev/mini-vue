@@ -72,6 +72,7 @@
     "oxlint": "~1.30.0",
     "prettier": "3.6.2",
     "tsdown": "^0.16.4",
+    "tsx": "^4.21.0",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
     "vite": "npm:rolldown-vite@7.2.2",
@@ -84,6 +85,7 @@
       "vite": "npm:rolldown-vite@7.2.2"
     },
     "onlyBuiltDependencies": [
+      "esbuild",
       "unrs-resolver"
     ]
   }

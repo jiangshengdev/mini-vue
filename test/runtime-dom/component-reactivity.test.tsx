@@ -113,6 +113,36 @@ describe('runtime-dom component reactivity', () => {
     expect(renderSpy).toHaveBeenCalledTimes(2)
   })
 
+  it('Fragment 空子树组件也会在卸载时停止 effect', () => {
+    const container = createTestContainer()
+    const state = reactive({ count: 0 })
+    const renderSpy = vi.fn()
+
+    const Ghost: SetupFunctionComponent = () => {
+      return () => {
+        renderSpy()
+
+        return state.count >= 0 ? undefined : undefined
+      }
+    }
+
+    render(
+      <>
+        <Ghost />
+      </>,
+      container,
+    )
+
+    expect(renderSpy).toHaveBeenCalledTimes(1)
+    expect(container).toBeEmptyDOMElement()
+
+    render(<div>next</div>, container)
+    expect(container.textContent).toBe('next')
+
+    state.count = 1
+    expect(renderSpy).toHaveBeenCalledTimes(1)
+  })
+
   it('组件卸载时会清理 setup 内的 watch', () => {
     const container = createTestContainer()
     const state = reactive({ count: 0 })

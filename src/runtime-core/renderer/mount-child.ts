@@ -38,10 +38,6 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
 
     appendChild(container, fragment)
 
-    if (nodes.length === 0) {
-      return undefined
-    }
-
     return {
       nodes,
       teardown(): void {

@@ -29,6 +29,7 @@ export function performInitialRender<
   instance.effect = createRenderEffect(instance, options)
 
   /* 首次 run() 会同步生成子树结果。 */
+  /* 包裹错误通道：首渲染异常需清理实例但不中断兄弟挂载。 */
   return runWithErrorChannel(
     () => {
       const subtree = instance.effect!.run()
@@ -99,6 +100,7 @@ function rerenderComponent<
   teardownMountedSubtree(instance)
   let rerenderFailed = false
 
+  /* 调度执行由 effect 决定，异常时标记失败并避免重新挂载。 */
   runWithErrorChannel(renderSchedulerJob, {
     origin: runtimeErrorContexts.scheduler,
     handlerPhase: runtimeErrorHandlerPhases.sync,
@@ -110,6 +112,7 @@ function rerenderComponent<
     },
   })
 
+  /* 调度失败时整棵组件树已经不可用，直接执行完整清理。 */
   if (rerenderFailed) {
     teardownComponentInstance(instance, options)
 

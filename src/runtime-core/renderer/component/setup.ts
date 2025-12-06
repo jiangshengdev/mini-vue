@@ -21,6 +21,7 @@ export function setupComponent<
   const render = invokeSetup(instance)
 
   if (!render) {
+    /* setup 失败或返回空值时跳过后续挂载。 */
     return false
   }
 
@@ -39,6 +40,7 @@ function invokeSetup<
 ): ComponentRenderFunction | undefined {
   let setupFailed = false
 
+  /* 在组件专属 scope 内运行 setup，便于后续统一 stop。 */
   const render = instance.scope.run(() => {
     return runWithErrorChannel(
       () => {
@@ -69,6 +71,7 @@ function invokeSetup<
   }
 
   if (typeof render !== 'function') {
+    /* setup 必须返回函数，非函数时透过错误通道上报。 */
     runWithErrorChannel(
       () => {
         throw new TypeError('组件必须返回渲染函数以托管本地状态', { cause: render })

@@ -48,6 +48,9 @@ type ElementRefBinding<HostElement> =
   | Ref<HostElement | undefined>
   | ((value: HostElement | undefined) => void)
 
+/**
+ * 将组件传入的 ref 属性规整为函数或 Ref 对象，便于统一回写。
+ */
 function resolveElementRefBinding<HostElement>(
   candidate: unknown,
 ): ElementRefBinding<HostElement> | undefined {
@@ -62,6 +65,9 @@ function resolveElementRefBinding<HostElement>(
   return undefined
 }
 
+/**
+ * 在挂载或卸载阶段写回最新宿主元素，兼容函数 ref 与 Ref。
+ */
 function assignElementRef<HostElement>(
   target: ElementRefBinding<HostElement> | undefined,
   value: HostElement | undefined,

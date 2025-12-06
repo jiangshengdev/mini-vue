@@ -20,6 +20,7 @@ export function mountChildren<
   /* 顺序遍历子节点，统一交由 mountChild 处理细分类型。 */
   for (let index = 0; index < children.length; index += 1) {
     const child = children[index]
+    /* 在存在后续兄弟时强制使用锚点，保持节点插入顺序。 */
     const mounted = mountChild(options, child, container, index < children.length - 1)
 
     if (mounted) {

@@ -17,6 +17,7 @@ export function teardownMountedSubtree<
   HostFragment extends HostNode,
   T extends SetupFunctionComponent,
 >(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): void {
+  /* 无挂载记录时无需额外清理，直接返回。 */
   if (!instance.mountedHandle) {
     return
   }
@@ -40,6 +41,7 @@ export function teardownComponentInstance<
 ): void {
   teardownMountedSubtree(instance)
 
+  /* 去除锚点占位符，避免容器残留空文本节点。 */
   if (instance.anchor) {
     options.remove(instance.anchor)
     instance.anchor = undefined

@@ -31,6 +31,7 @@ export function mountComponent<
   const setupSucceeded = setupComponent(instance)
 
   if (!setupSucceeded) {
+    /* setup 阶段失败时直接清理实例并跳过挂载。 */
     teardownComponentInstance(instance, options)
 
     return undefined

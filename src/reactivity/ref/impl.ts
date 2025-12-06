@@ -2,8 +2,8 @@ import { reactive } from '../reactive.ts'
 import { trackEffect, triggerEffects } from '../internals/index.ts'
 import type { DependencyBucket } from '../shared/index.ts'
 import type { Ref } from './types.ts'
-import { isPlainObject } from '@/shared/index.ts'
 import type { PlainObject } from '@/shared/index.ts'
+import { isPlainObject } from '@/shared/index.ts'
 import { refFlag } from '@/reactivity/shared/constants.ts'
 
 /**

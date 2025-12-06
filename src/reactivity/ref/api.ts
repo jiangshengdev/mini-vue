@@ -1,8 +1,8 @@
 import { isReactive } from '../reactive.ts'
 import { ObjectRefImpl, RefImpl } from './impl.ts'
 import type { Ref } from './types.ts'
-import { isObject } from '@/shared/index.ts'
 import type { PlainObject } from '@/shared/index.ts'
+import { isObject } from '@/shared/index.ts'
 import { refFlag } from '@/reactivity/shared/constants.ts'
 
 /**

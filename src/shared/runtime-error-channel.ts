@@ -1,6 +1,6 @@
 import { handleRuntimeError } from './error-handling.ts'
-import { isObject } from '@/shared/index.ts'
 import type { PlainObject } from '@/shared/index.ts'
+import { isObject } from '@/shared/index.ts'
 
 /**
  * 框架内预设的错误上下文标签，标记异常来源位置。

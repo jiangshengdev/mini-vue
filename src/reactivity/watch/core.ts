@@ -3,13 +3,13 @@ import { recordEffectScope, recordScopeCleanup } from '../effect-scope.ts'
 import { effectStack } from '../internals/index.ts'
 import type { Ref } from '../ref/types.ts'
 import { createGetter, resolveDeepOption } from './utils.ts'
+import type { PlainObject } from '@/shared/index.ts'
 import {
   runtimeErrorContexts,
   runtimeErrorHandlerPhases,
   runtimeErrorPropagationStrategies,
   runWithErrorChannel,
 } from '@/shared/index.ts'
-import type { PlainObject } from '@/shared/index.ts'
 
 /**
  * `watch` 可接受的追踪源类型，覆盖 ref、getter 与普通对象。

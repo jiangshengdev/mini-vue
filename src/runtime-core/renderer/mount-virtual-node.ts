@@ -17,6 +17,7 @@ export function mountVirtualNode<
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   virtualNode: VirtualNode,
   container: HostElement | HostFragment,
+  hasNextSibling = false,
 ): MountedHandle<HostNode> | undefined {
   /* Fragment 直接展开自身 children，不走组件路径。 */
   if (virtualNode.type === Fragment) {
@@ -32,6 +33,7 @@ export function mountVirtualNode<
       component,
       virtualNode as VirtualNode<SetupFunctionComponent>,
       container,
+      hasNextSibling,
     )
   }
 

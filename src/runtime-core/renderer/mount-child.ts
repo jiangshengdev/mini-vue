@@ -12,6 +12,7 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   child: ComponentResult | undefined,
   container: HostElement | HostFragment,
+  hasNextSibling = false,
 ): MountedHandle<HostNode> | undefined {
   const { createFragment, appendChild, createText, remove } = options
 
@@ -27,8 +28,9 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
     const teardowns: Array<() => void> = []
 
     /* 递归挂载数组项并收集到片段中。 */
-    for (const item of child) {
-      const mounted = mountChild(options, item, fragment)
+    for (let index = 0; index < child.length; index += 1) {
+      const item = child[index]
+      const mounted = mountChild(options, item, fragment, index < child.length - 1)
 
       if (mounted) {
         nodes.push(...mounted.nodes)
@@ -64,7 +66,7 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
 
   /* 标准 virtualNode 交给 mountVirtualNode 处理组件或元素。 */
   if (isVirtualNode(child)) {
-    return mountVirtualNode(options, child, container)
+    return mountVirtualNode(options, child, container, hasNextSibling)
   }
 
   /* 其他值（如对象）兜底转成字符串输出。 */

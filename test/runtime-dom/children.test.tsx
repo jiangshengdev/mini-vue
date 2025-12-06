@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { within } from '@testing-library/dom'
 import { createTestContainer } from '../setup.ts'
 import type { SetupFunctionComponent } from '@/index.ts'
-import { render } from '@/index.ts'
+import { reactive, render } from '@/index.ts'
 
 describe('runtime-dom children shape', () => {
   it('无 children 时 props.children 为 undefined', () => {
@@ -85,5 +85,39 @@ describe('runtime-dom children shape', () => {
 
     expect(view.getByText('first')).toBeDefined()
     expect(view.getByText('second')).toBeDefined()
+  })
+
+  it('组件重渲染不会改变兄弟顺序', () => {
+    const state = reactive({ mid: 'middle' })
+
+    const Middle: SetupFunctionComponent = () => {
+      return () => {
+        return <span data-testid="mid">{state.mid}</span>
+      }
+    }
+
+    const container = createTestContainer()
+
+    render(
+      <section>
+        <span data-testid="first">first</span>
+        <Middle />
+        <span data-testid="last">last</span>
+      </section>,
+      container,
+    )
+
+    const section = container.querySelector('section')!
+    const readOrder = () => {
+      return Array.from(section.children).map((el) => {
+        return el.textContent
+      })
+    }
+
+    expect(readOrder()).toEqual(['first', 'middle', 'last'])
+
+    state.mid = 'updated'
+
+    expect(readOrder()).toEqual(['first', 'updated', 'last'])
   })
 })

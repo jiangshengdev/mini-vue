@@ -32,10 +32,11 @@ export function mountComponent<
   component: T,
   virtualNode: VirtualNode<T>,
   container: HostElement | HostFragment,
+  hasNextSibling: boolean,
 ): MountedHandle<HostNode> | undefined {
   /* 准备实例前先规整 props，以免 setup 阶段读到旧引用。 */
   const props = resolveComponentProps(virtualNode)
-  const instance = createComponentInstance(component, props, container)
+  const instance = createComponentInstance(component, props, container, hasNextSibling)
 
   /* 让 virtualNode 拥有实例引用，方便调试或测试检索。 */
   attachInstanceToVirtualNode(virtualNode, instance)
@@ -47,7 +48,7 @@ export function mountComponent<
   return {
     nodes: (mounted?.nodes ?? []) as HostNode[],
     teardown(): void {
-      teardownComponentInstance(instance)
+      teardownComponentInstance(instance, options)
     },
   }
 }
@@ -85,6 +86,7 @@ function createComponentInstance<
   component: T,
   props: ElementProps<T>,
   container: HostElement | HostFragment,
+  needsAnchor: boolean,
 ): ComponentInstance<HostNode, HostElement, HostFragment, T> {
   /* `render`/`effect` 初始为空，由 setup 与 performInitialRender 回填。 */
   return {
@@ -97,6 +99,8 @@ function createComponentInstance<
     cleanupTasks: [],
     setupContext: {},
     scope: effectScope(true),
+    anchor: undefined,
+    needsAnchor,
   }
 }
 
@@ -171,7 +175,7 @@ function performInitialRender<
     () => {
       const subtree = instance.effect!.run()
       /* 子树由通用 mountChild 继续挂载到宿主容器。 */
-      const mounted = mountChild(options, subtree, instance.container)
+      const mounted = mountChildWithAnchor(instance, options, subtree)
 
       instance.mountedHandle = mounted
 
@@ -183,7 +187,7 @@ function performInitialRender<
       propagate: runtimeErrorPropagationStrategies.sync,
       afterRun(token) {
         if (token?.error) {
-          teardownComponentInstance(instance)
+          teardownComponentInstance(instance, options)
         }
       },
     },
@@ -273,9 +277,57 @@ function mountLatestSubtree<
   options: RendererOptions<HostNode, HostElement, HostFragment>,
 ): void {
   /* 使用缓存的子树结果重新交给宿主挂载。 */
-  const mounted = mountChild(options, instance.subTree, instance.container)
+  const mounted = mountChildWithAnchor(instance, options, instance.subTree)
 
   instance.mountedHandle = mounted
+}
+
+function mountChildWithAnchor<
+  HostNode,
+  HostElement extends HostNode,
+  HostFragment extends HostNode,
+  T extends SetupFunctionComponent,
+>(
+  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
+  options: RendererOptions<HostNode, HostElement, HostFragment>,
+  child: ComponentResult,
+): MountedHandle<HostNode> | undefined {
+  if (!instance.needsAnchor) {
+    return mountChild(options, child, instance.container)
+  }
+
+  ensureComponentAnchor(instance, options)
+
+  if (!instance.anchor) {
+    return mountChild(options, child, instance.container)
+  }
+
+  const fragment = options.createFragment()
+  const mounted = mountChild(options, child, fragment)
+
+  options.insertBefore(instance.container, fragment, instance.anchor)
+
+  return mounted
+}
+
+function ensureComponentAnchor<
+  HostNode,
+  HostElement extends HostNode,
+  HostFragment extends HostNode,
+  T extends SetupFunctionComponent,
+>(
+  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
+  options: RendererOptions<HostNode, HostElement, HostFragment>,
+): void {
+  if (instance.anchor) {
+    return
+  }
+
+  const anchor = options.createText('') as HostNode
+
+  options.appendChild(instance.container, anchor)
+
+  instance.anchor = anchor
 }
 
 /**
@@ -286,8 +338,17 @@ function teardownComponentInstance<
   HostElement extends HostNode,
   HostFragment extends HostNode,
   T extends SetupFunctionComponent,
->(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): void {
+>(
+  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
+  options: RendererOptions<HostNode, HostElement, HostFragment>,
+): void {
   teardownMountedSubtree(instance)
+
+  if (instance.anchor) {
+    options.remove(instance.anchor)
+    instance.anchor = undefined
+  }
+
   /* 停止 scope 以统一回收所有 setup 内创建的副作用。 */
   instance.scope.stop()
   instance.effect = undefined

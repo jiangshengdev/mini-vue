@@ -18,8 +18,9 @@ export function mountChildren<
   const mountedHandles: Array<MountedHandle<HostNode>> = []
 
   /* 顺序遍历子节点，统一交由 mountChild 处理细分类型。 */
-  for (const child of children) {
-    const mounted = mountChild(options, child, container)
+  for (let index = 0; index < children.length; index += 1) {
+    const child = children[index]
+    const mounted = mountChild(options, child, container, index < children.length - 1)
 
     if (mounted) {
       mountedHandles.push(mounted)

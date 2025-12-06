@@ -12,7 +12,7 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   child: ComponentResult | undefined,
   container: HostElement | HostFragment,
-  hasNextSibling = false,
+  needsAnchor = false,
 ): MountedHandle<HostNode> | undefined {
   const { appendChild, createText, remove } = options
 
@@ -30,7 +30,7 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
     }
 
     if (childCount === 1) {
-      return mountChild(options, child[0], container, hasNextSibling)
+      return mountChild(options, child[0], container, needsAnchor)
     }
 
     const startAnchor = createText('') as HostNode
@@ -83,7 +83,7 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
 
   /* 标准 virtualNode 交给 mountVirtualNode 处理组件或元素。 */
   if (isVirtualNode(child)) {
-    return mountVirtualNode(options, child, container, hasNextSibling)
+    return mountVirtualNode(options, child, container, needsAnchor)
   }
 
   /* 其他值（如对象）兜底转成字符串输出。 */

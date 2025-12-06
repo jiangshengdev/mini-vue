@@ -20,11 +20,11 @@ export function mountComponent<
   component: T,
   virtualNode: VirtualNode<T>,
   container: HostElement | HostFragment,
-  hasNextSibling: boolean,
+  needsAnchor: boolean,
 ): MountedHandle<HostNode> | undefined {
   /* 准备实例前先规整 props，以免 setup 阶段读到旧引用。 */
   const props = resolveComponentProps(virtualNode)
-  const instance = createComponentInstance(component, props, container, hasNextSibling)
+  const instance = createComponentInstance(component, props, container, needsAnchor)
 
   /* 让 virtualNode 拥有实例引用，方便调试或测试检索。 */
   attachInstanceToVirtualNode(virtualNode, instance)

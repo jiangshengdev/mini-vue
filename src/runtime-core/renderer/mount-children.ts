@@ -1,4 +1,4 @@
-import type { RendererOptions } from '../renderer.ts'
+import type { RendererOptions } from '../index.ts'
 import { mountChild } from './mount-child.ts'
 import type { MountedHandle } from './mounted-handle.ts'
 import type { VirtualNodeChild } from '@/jsx/index.ts'

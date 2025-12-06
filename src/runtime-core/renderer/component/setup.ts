@@ -1,6 +1,6 @@
 import type { ComponentRenderFunction, SetupFunctionComponent } from '@/jsx/index.ts'
-import type { ComponentInstance } from '@/runtime-core/component-instance.ts'
-import { setCurrentInstance, unsetCurrentInstance } from '@/runtime-core/component-instance.ts'
+import type { ComponentInstance } from '../../component-instance.ts'
+import { setCurrentInstance, unsetCurrentInstance } from '../../component-instance.ts'
 import {
   runtimeErrorContexts,
   runtimeErrorHandlerPhases,

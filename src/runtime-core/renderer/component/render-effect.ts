@@ -1,7 +1,7 @@
-import type { RendererOptions } from '../../renderer.ts'
+import type { RendererOptions } from '../../index.ts'
 import type { MountedHandle } from '../mounted-handle.ts'
 import type { ComponentResult, SetupFunctionComponent } from '@/jsx/index.ts'
-import type { ComponentInstance } from '@/runtime-core/component-instance.ts'
+import type { ComponentInstance } from '../../component-instance.ts'
 import { ReactiveEffect } from '@/reactivity/effect.ts'
 import { recordEffectScope } from '@/reactivity/effect-scope.ts'
 import {

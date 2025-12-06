@@ -1,4 +1,4 @@
-import type { RendererOptions } from '../renderer.ts'
+import type { RendererOptions } from '../index.ts'
 import { mountComponent } from './component/index.ts'
 import { mountElement } from './mount-element.ts'
 import { mountChild } from './mount-child.ts'

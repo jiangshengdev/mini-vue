@@ -59,7 +59,8 @@ function resolveComponentProps<T extends SetupFunctionComponent>(
   virtualNode: VirtualNode<T>,
 ): ElementProps<T> {
   /* 克隆 props，防止函数组件在运行期写回 virtualNode。 */
-  const props = (virtualNode.props ? { ...virtualNode.props } : {}) as ElementProps<T>
+  const emptyProps: ElementProps<T> = Object.create(null) as ElementProps<T>
+  const props: ElementProps<T> = virtualNode.props ? { ...virtualNode.props } : emptyProps
   const childCount = virtualNode.children.length
 
   /* 保持 JSX 约定：单个 children 直接给值，多个 children 传数组。 */

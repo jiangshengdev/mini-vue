@@ -1,6 +1,7 @@
 import './style.css'
 import { App } from './app.tsx'
-import { createApp, type DomAppInstance } from '@/index.ts'
+import { createApp } from '@/index.ts'
+import type { DomAppInstance } from '@/index.ts'
 
 const host = document.querySelector<HTMLDivElement>('#app')
 

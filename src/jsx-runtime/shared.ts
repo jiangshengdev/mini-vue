@@ -77,9 +77,10 @@ export function h<T extends ElementType>(
   }
 
   /* 需要人为传入 children 时重新组装 props 并交给底层创建函数。 */
+  const emptyProps: ElementProps<T> = Object.create(null) as ElementProps<T>
   const propsWithChildren: ElementProps<T> = {
     /* `normalizedProps` 可能为空，此处回退到空对象以便附加 children。 */
-    ...(normalizedProps ?? ({} as ElementProps<T>)),
+    ...(normalizedProps ?? emptyProps),
     children,
   }
 

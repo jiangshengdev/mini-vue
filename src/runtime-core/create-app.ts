@@ -88,8 +88,8 @@ function unmountApp<HostElement>(state: AppState<HostElement>): void {
  * 通过最新状态生成根级 virtualNode，确保 props 是独立副本。
  */
 function createRootVirtualNode<HostElement>(state: AppState<HostElement>) {
-  const rawProps = state.initialRootProps
-    ? ({ ...state.initialRootProps } as ElementProps<SetupFunctionComponent>)
+  const rawProps: ElementProps<SetupFunctionComponent> | undefined = state.initialRootProps
+    ? { ...state.initialRootProps }
     : undefined
 
   return createVirtualNode({

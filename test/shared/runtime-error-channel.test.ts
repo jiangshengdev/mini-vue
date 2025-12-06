@@ -1,14 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { RuntimeErrorHandler } from '@/index.ts'
 import { setRuntimeErrorHandler } from '@/index.ts'
-import type { ErrorChannelAfterHook } from '@/shared/runtime-error-channel.ts'
+import type { ErrorChannelAfterHook } from '@/shared/index.ts'
 import {
   dispatchRuntimeError,
   runtimeErrorContexts,
   runtimeErrorHandlerPhases,
   runtimeErrorPropagationStrategies,
   runWithErrorChannel,
-} from '@/shared/runtime-error-channel.ts'
+} from '@/shared/index.ts'
 
 describe('runtime-error-channel', () => {
   beforeEach(() => {

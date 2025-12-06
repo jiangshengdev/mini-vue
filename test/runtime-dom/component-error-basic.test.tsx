@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createTestContainer } from '../setup.ts'
 import type { RuntimeErrorHandler, SetupFunctionComponent } from '@/index.ts'
 import { reactive, render, setRuntimeErrorHandler } from '@/index.ts'
-import { runtimeErrorContexts } from '@/shared/runtime-error-channel.ts'
+import { runtimeErrorContexts } from '@/shared/index.ts'
 
 describe('runtime-dom component error isolation (basic)', () => {
   afterEach(() => {

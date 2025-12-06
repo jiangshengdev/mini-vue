@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { RuntimeErrorHandler } from '@/index.ts'
 import { effect, reactive, setRuntimeErrorHandler } from '@/index.ts'
-import { runtimeErrorContexts } from '@/shared/runtime-error-channel.ts'
+import { runtimeErrorContexts } from '@/shared/index.ts'
 
 describe('effect 调度行为', () => {
   afterEach(() => {

@@ -8,7 +8,7 @@ import {
   reactive,
   setRuntimeErrorHandler,
 } from '@/index.ts'
-import { runtimeErrorContexts } from '@/shared/runtime-error-channel.ts'
+import { runtimeErrorContexts } from '@/shared/index.ts'
 
 describe('effectScope 行为', () => {
   afterEach(() => {

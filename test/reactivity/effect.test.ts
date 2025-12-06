@@ -10,7 +10,7 @@ import {
 } from '@/index.ts'
 import * as dependencyUtils from '@/reactivity/internals/dependency-utils.ts'
 import { effectStack } from '@/reactivity/internals/effect-stack.ts'
-import { runtimeErrorContexts } from '@/shared/runtime-error-channel.ts'
+import { runtimeErrorContexts } from '@/shared/index.ts'
 
 describe('effect', () => {
   afterEach(() => {

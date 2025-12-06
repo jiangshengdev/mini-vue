@@ -243,4 +243,55 @@ describe('runtime-dom component error isolation (advanced)', () => {
     expect(container.querySelector('[data-testid="sibling"]')?.textContent).toBe('b:1')
     expect(handler).toHaveBeenCalledTimes(1)
   })
+
+  it('Fragment 内子组件渲染失败不会误移除兄弟', () => {
+    const container = createTestContainer()
+    const handler = vi.fn<RuntimeErrorHandler>()
+    const boom = new Error('fragment rerender failed')
+    const state = reactive({ a: 0, b: 0 })
+
+    setRuntimeErrorHandler(handler)
+
+    const Faulty: SetupFunctionComponent = () => {
+      return () => {
+        void state.a
+
+        if (state.a > 0) {
+          throw boom
+        }
+
+        return <div data-testid="faulty">a:{state.a}</div>
+      }
+    }
+
+    const Sibling: SetupFunctionComponent = () => {
+      return () => {
+        void state.b
+
+        return <div data-testid="sibling">b:{state.b}</div>
+      }
+    }
+
+    render(
+      <>
+        <Faulty />
+        <Sibling />
+      </>,
+      container,
+    )
+
+    expect(container.querySelector('[data-testid="faulty"]')?.textContent).toBe('a:0')
+    expect(container.querySelector('[data-testid="sibling"]')?.textContent).toBe('b:0')
+
+    state.a += 1
+
+    expect(handler).toHaveBeenCalledTimes(1)
+    expect(container.querySelector('[data-testid="faulty"]')).toBeNull()
+    expect(container.querySelector('[data-testid="sibling"]')?.textContent).toBe('b:0')
+
+    state.b += 1
+
+    expect(container.querySelector('[data-testid="sibling"]')?.textContent).toBe('b:1')
+    expect(handler).toHaveBeenCalledTimes(1)
+  })
 })

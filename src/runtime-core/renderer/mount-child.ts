@@ -14,23 +14,36 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
   container: HostElement | HostFragment,
   hasNextSibling = false,
 ): MountedHandle<HostNode> | undefined {
-  const { createFragment, appendChild, createText, remove } = options
+  const { appendChild, createText, remove } = options
 
   /* `null`、`undefined`、布尔值不产生实际节点。 */
   if (isNil(child) || typeof child === 'boolean') {
     return undefined
   }
 
-  /* 数组子节点需要借助片段统一插入。 */
+  /* 数组/Fragment 子节点以锚点包裹，避免共享 DocumentFragment；单个或空数组则直接复用子节点策略。 */
   if (Array.isArray(child)) {
-    const fragment = createFragment()
-    const nodes: HostNode[] = []
+    const childCount = child.length
+
+    if (childCount === 0) {
+      return undefined
+    }
+
+    if (childCount === 1) {
+      return mountChild(options, child[0], container, hasNextSibling)
+    }
+
+    const startAnchor = createText('') as HostNode
+    const endAnchor = createText('') as HostNode
+    const nodes: HostNode[] = [startAnchor]
     const teardowns: Array<() => void> = []
 
-    /* 递归挂载数组项并收集到片段中。 */
+    appendChild(container, startAnchor)
+
+    /* 子项始终视为有后续兄弟，以 endAnchor 充当边界。 */
     for (let index = 0; index < child.length; index += 1) {
       const item = child[index]
-      const mounted = mountChild(options, item, fragment, index < child.length - 1)
+      const mounted = mountChild(options, item, container, true)
 
       if (mounted) {
         nodes.push(...mounted.nodes)
@@ -38,7 +51,8 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
       }
     }
 
-    appendChild(container, fragment)
+    appendChild(container, endAnchor)
+    nodes.push(endAnchor)
 
     return {
       nodes,
@@ -46,6 +60,9 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
         for (const teardown of teardowns) {
           teardown()
         }
+
+        remove(startAnchor)
+        remove(endAnchor)
       },
     }
   }

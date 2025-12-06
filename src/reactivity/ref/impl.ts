@@ -1,7 +1,7 @@
 import { reactive } from '../reactive.ts'
 import { trackEffect, triggerEffects } from '../internals/dependency-utils.ts'
 import type { DependencyBucket } from '../shared/types.ts'
-import type { Ref, RefDepCarrier, RefMarker } from './types.ts'
+import type { Ref } from './types.ts'
 import { isPlainObject } from '@/shared/utils.ts'
 import type { PlainObject } from '@/shared/types.ts'
 import { refFlag } from '@/reactivity/shared/constants.ts'
@@ -9,7 +9,7 @@ import { refFlag } from '@/reactivity/shared/constants.ts'
 /**
  * RefImpl 负责封装普通值的响应式访问器，实现依赖收集与触发。
  */
-export class RefImpl<T> implements Ref<T>, RefDepCarrier {
+export class RefImpl<T> implements Ref<T> {
   readonly dependencyBucket: DependencyBucket = new Set()
 
   readonly [refFlag] = true as const
@@ -55,9 +55,7 @@ export class RefImpl<T> implements Ref<T>, RefDepCarrier {
 /**
  * ObjectRefImpl 将对象属性包装成 Ref，与原始对象读写保持同步。
  */
-export class ObjectRefImpl<T extends PlainObject, K extends keyof T>
-  implements Ref<T[K]>, RefMarker
-{
+export class ObjectRefImpl<T extends PlainObject, K extends keyof T> implements Ref<T[K]> {
   readonly [refFlag] = true as const
 
   private readonly target: T

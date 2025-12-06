@@ -2,7 +2,7 @@
  * 提供 reactive 工具函数，负责缓存并复用响应式 Proxy 实例。
  */
 import { mutableHandlers } from './internals/index.ts'
-import type { ReactiveTarget } from './shared/types.ts'
+import type { ReactiveTarget } from './shared/index.ts'
 import { isObject, isPlainObject } from '@/shared/utils.ts'
 import type { PlainObject } from '@/shared/types.ts'
 

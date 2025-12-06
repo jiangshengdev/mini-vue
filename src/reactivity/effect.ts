@@ -12,7 +12,7 @@ import type {
   EffectInstance,
   EffectOptions,
   EffectScheduler,
-} from './shared/types.ts'
+} from './shared/index.ts'
 
 /**
  * 将副作用封装为类，集中管理依赖收集与生命周期操作。

@@ -11,6 +11,8 @@ export default mergeConfig(
       setupFiles: ['./test/setup.ts'],
       root: fileURLToPath(new URL('./', import.meta.url)),
       testTimeout: 0,
+      hookTimeout: 0,
+      teardownTimeout: 0,
     },
   }),
 )

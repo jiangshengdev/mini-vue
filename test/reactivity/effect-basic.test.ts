@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { effect, reactive } from '@/index.ts'
+import { effectStack } from '@/reactivity/internals/index.ts'
 import * as dependencyUtils from '@/reactivity/internals/dependency-utils.ts'
 
 describe('effect 基础行为', () => {
@@ -86,6 +87,26 @@ describe('effect 基础行为', () => {
 
     state.count = 3
     expect(runCount).toBe(3)
+  })
+
+  it('stop 幂等且 cleanup 只会执行一次', () => {
+    const state = reactive({ count: 0 })
+    const cleanupOrder: string[] = []
+
+    const handle = effect(() => {
+      void state.count
+
+      effectStack.current?.registerCleanup(() => {
+        cleanupOrder.push('cleanup')
+      })
+    })
+
+    expect(cleanupOrder).toEqual([])
+
+    handle.stop()
+    handle.stop()
+
+    expect(cleanupOrder).toEqual(['cleanup'])
   })
 
   it('依赖切换后旧字段不会再触发 effect', () => {

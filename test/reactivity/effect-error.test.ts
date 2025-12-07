@@ -84,4 +84,26 @@ describe('effect 错误处理', () => {
     expect(error).toBe(boom)
     expect(context).toBe(runtimeErrorContexts.effectRunner)
   })
+
+  it('effect 抛错后仍能继续收集新依赖', () => {
+    const state = reactive({ count: 0 })
+
+    expect(() => {
+      effect(() => {
+        throw new Error('boom')
+      })
+    }).toThrowError()
+
+    let observed = -1
+
+    effect(() => {
+      observed = state.count
+    })
+
+    expect(observed).toBe(0)
+
+    state.count = 1
+
+    expect(observed).toBe(1)
+  })
 })

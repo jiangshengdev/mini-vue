@@ -110,4 +110,41 @@ describe('effectScope 行为', () => {
     expect(error).toBe(boom)
     expect(context).toBe(runtimeErrorContexts.effectScopeRun)
   })
+
+  it('detached scope 不受父级 stop 影响且可单独清理', () => {
+    const state = reactive({ count: 0 })
+    const parent = effectScope()
+    const detached = effectScope(true)
+    let fromParent = -1
+    let fromDetached = -1
+
+    parent.run(() => {
+      effect(() => {
+        fromParent = state.count
+      })
+    })
+
+    detached.run(() => {
+      effect(() => {
+        fromDetached = state.count
+      })
+    })
+
+    expect(fromParent).toBe(0)
+    expect(fromDetached).toBe(0)
+
+    parent.stop()
+
+    state.count = 1
+
+    expect(fromParent).toBe(0)
+    expect(fromDetached).toBe(1)
+
+    detached.stop()
+
+    state.count = 2
+
+    expect(fromParent).toBe(0)
+    expect(fromDetached).toBe(1)
+  })
 })

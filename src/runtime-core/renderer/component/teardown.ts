@@ -36,8 +36,8 @@ export function teardownComponentInstance<
   HostFragment extends HostNode,
   T extends SetupFunctionComponent,
 >(
-  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
   options: RendererOptions<HostNode, HostElement, HostFragment>,
+  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
 ): void {
   teardownMountedSubtree(instance)
 

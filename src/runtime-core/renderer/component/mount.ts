@@ -32,18 +32,18 @@ export function mountComponent<
 
   if (!setupSucceeded) {
     /* setup 阶段失败时直接清理实例并跳过挂载。 */
-    teardownComponentInstance(instance, options)
+    teardownComponentInstance(options, instance)
 
     return undefined
   }
 
   /* 执行首次渲染并将子树挂载到宿主容器。 */
-  const mounted = performInitialRender(instance, options)
+  const mounted = performInitialRender(options, instance)
 
   return {
     nodes: (mounted?.nodes ?? []) as HostNode[],
     teardown(): void {
-      teardownComponentInstance(instance, options)
+      teardownComponentInstance(options, instance)
     },
   }
 }

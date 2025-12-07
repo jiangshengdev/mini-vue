@@ -22,11 +22,11 @@ export function performInitialRender<
   HostFragment extends HostNode,
   T extends SetupFunctionComponent,
 >(
-  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
   options: RendererOptions<HostNode, HostElement, HostFragment>,
+  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
 ): MountedHandle<HostNode> | undefined {
   /* 每个组件实例持有独立 effect，负责跟踪依赖并调度重渲染。 */
-  instance.effect = createRenderEffect(instance, options)
+  instance.effect = createRenderEffect(options, instance)
 
   /* 首次 run() 会同步生成子树结果。 */
   /* 包裹错误通道：首渲染异常需清理实例但不中断兄弟挂载。 */
@@ -34,7 +34,7 @@ export function performInitialRender<
     () => {
       const subtree = instance.effect!.run()
       /* 子树由通用 mountChild 继续挂载到宿主容器。 */
-      const mounted = mountChildWithAnchor(instance, options, subtree)
+      const mounted = mountChildWithAnchor(options, instance, subtree)
 
       instance.mountedHandle = mounted
 
@@ -47,7 +47,7 @@ export function performInitialRender<
       propagate: runtimeErrorPropagationStrategies.silent,
       afterRun(token) {
         if (token?.error) {
-          teardownComponentInstance(instance, options)
+          teardownComponentInstance(options, instance)
         }
       },
     },
@@ -60,8 +60,8 @@ function createRenderEffect<
   HostFragment extends HostNode,
   T extends SetupFunctionComponent,
 >(
-  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
   options: RendererOptions<HostNode, HostElement, HostFragment>,
+  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
 ): ReactiveEffect<ComponentResult> {
   const effect = new ReactiveEffect<ComponentResult>(
     () => {
@@ -74,7 +74,7 @@ function createRenderEffect<
     },
     (renderSchedulerJob) => {
       /* 调度阶段需要先卸载旧子树，再执行 render 并挂载。 */
-      rerenderComponent(instance, options, renderSchedulerJob)
+      rerenderComponent(options, instance, renderSchedulerJob)
     },
   )
 
@@ -92,8 +92,8 @@ function rerenderComponent<
   HostFragment extends HostNode,
   T extends SetupFunctionComponent,
 >(
-  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
   options: RendererOptions<HostNode, HostElement, HostFragment>,
+  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
   renderSchedulerJob: () => void,
 ): void {
   /* 依次保证 teardown → renderSchedulerJob → remount 的同步顺序。 */
@@ -114,12 +114,12 @@ function rerenderComponent<
 
   /* 调度失败时整棵组件树已经不可用，直接执行完整清理。 */
   if (rerenderFailed) {
-    teardownComponentInstance(instance, options)
+    teardownComponentInstance(options, instance)
 
     return
   }
 
-  mountLatestSubtree(instance, options)
+  mountLatestSubtree(options, instance)
 }
 
 /**
@@ -131,11 +131,11 @@ function mountLatestSubtree<
   HostFragment extends HostNode,
   T extends SetupFunctionComponent,
 >(
-  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
   options: RendererOptions<HostNode, HostElement, HostFragment>,
+  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
 ): void {
   /* 使用缓存的子树结果重新交给宿主挂载。 */
-  const mounted = mountChildWithAnchor(instance, options, instance.subTree)
+  const mounted = mountChildWithAnchor(options, instance, instance.subTree)
 
   instance.mountedHandle = mounted
 }

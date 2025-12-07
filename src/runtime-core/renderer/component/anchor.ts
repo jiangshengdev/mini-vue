@@ -13,8 +13,8 @@ export function mountChildWithAnchor<
   HostFragment extends HostNode,
   T extends SetupFunctionComponent,
 >(
-  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
   options: RendererOptions<HostNode, HostElement, HostFragment>,
+  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
   child: ComponentResult,
 ): MountedHandle<HostNode> | undefined {
   /* 不需要锚点的组件直接复用容器尾部挂载策略。 */
@@ -23,7 +23,7 @@ export function mountChildWithAnchor<
   }
 
   /* 需要锚点时先保证容器内已有占位符，便于后续插入片段。 */
-  ensureComponentAnchor(instance, options)
+  ensureComponentAnchor(options, instance)
 
   if (!instance.anchor) {
     return mountChild<HostNode, HostElement, HostFragment>(options, child, instance.container)
@@ -47,8 +47,8 @@ function ensureComponentAnchor<
   HostFragment extends HostNode,
   T extends SetupFunctionComponent,
 >(
-  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
   options: RendererOptions<HostNode, HostElement, HostFragment>,
+  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
 ): void {
   /* 已经创建过锚点时复用旧节点，避免重复插入。 */
   if (instance.anchor) {

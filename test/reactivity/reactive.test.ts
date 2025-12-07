@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { reactive } from '@/index.ts'
+import { isReactive } from '@/reactivity/reactive.ts'
 
 describe('reactive', () => {
   it('创建后可读取和写入属性', () => {
@@ -70,6 +71,37 @@ describe('reactive', () => {
 
     proxy[0].count = 2
     expect(raw[0].count).toBe(2)
+  })
+
+  it('同一数组重复代理保持幂等', () => {
+    const raw = [1, 2]
+    const proxy1 = reactive(raw)
+    const proxy2 = reactive(raw)
+    const wrapped = reactive(proxy1)
+
+    expect(proxy1).toBe(proxy2)
+    expect(wrapped).toBe(proxy1)
+  })
+
+  it('无原型对象可被视为普通对象代理', () => {
+    const raw = Object.create(null)
+
+    raw.count = 1
+
+    const proxy = reactive(raw)
+
+    proxy.count = 3
+    expect(raw.count).toBe(3)
+  })
+
+  it('isReactive 对代理与原始值的判定', () => {
+    const raw = { foo: 1 }
+    const proxy = reactive(raw)
+
+    expect(isReactive(proxy)).toBe(true)
+    expect(isReactive(raw)).toBe(false)
+    expect(isReactive(1)).toBe(false)
+    expect(isReactive(new Map())).toBe(false)
   })
 
   it('非普通内建对象会报错', () => {

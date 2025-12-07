@@ -1,6 +1,6 @@
-import type { ComponentRenderFunction, SetupFunctionComponent } from '@/jsx/index.ts'
 import type { ComponentInstance } from '../../component-instance.ts'
 import { setCurrentInstance, unsetCurrentInstance } from '../../component-instance.ts'
+import type { ComponentRenderFunction, SetupFunctionComponent } from '@/jsx/index.ts'
 import {
   runtimeErrorContexts,
   runtimeErrorHandlerPhases,
@@ -21,7 +21,7 @@ export function setupComponent<
   const render = invokeSetup(instance)
 
   if (!render) {
-    /* setup 失败或返回空值时跳过后续挂载。 */
+    /* `setup` 失败或返回空值时跳过后续挂载。 */
     return false
   }
 
@@ -66,12 +66,12 @@ function invokeSetup<
   })
 
   if (setupFailed || !render) {
-    /* setup 抛错或返回空值时静默失败，交给上层跳过挂载。 */
+    /* `setup` 抛错或返回空值时静默失败，交给上层跳过挂载。 */
     return undefined
   }
 
   if (typeof render !== 'function') {
-    /* setup 必须返回函数，非函数时透过错误通道上报。 */
+    /* `setup` 必须返回函数，非函数时透过错误通道上报。 */
     runWithErrorChannel(
       () => {
         throw new TypeError('组件必须返回渲染函数以托管本地状态', { cause: render })

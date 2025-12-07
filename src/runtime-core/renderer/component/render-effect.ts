@@ -1,7 +1,9 @@
 import type { RendererOptions } from '../../index.ts'
 import type { MountedHandle } from '../mounted-handle.ts'
-import type { ComponentResult, SetupFunctionComponent } from '@/jsx/index.ts'
 import type { ComponentInstance } from '../../component-instance.ts'
+import { teardownComponentInstance, teardownMountedSubtree } from './teardown.ts'
+import { mountChildWithAnchor } from './anchor.ts'
+import type { ComponentResult, SetupFunctionComponent } from '@/jsx/index.ts'
 import { ReactiveEffect } from '@/reactivity/effect.ts'
 import { recordEffectScope } from '@/reactivity/effect-scope.ts'
 import {
@@ -10,8 +12,6 @@ import {
   runtimeErrorPropagationStrategies,
   runWithErrorChannel,
 } from '@/shared/index.ts'
-import { teardownComponentInstance, teardownMountedSubtree } from './teardown.ts'
-import { mountChildWithAnchor } from './anchor.ts'
 
 /**
  * 运行组件 effect 并将首个结果挂载到容器。

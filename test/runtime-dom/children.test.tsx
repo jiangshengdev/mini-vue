@@ -109,8 +109,8 @@ describe('runtime-dom children shape', () => {
 
     const section = container.querySelector('section')!
     const readOrder = () => {
-      return Array.from(section.children).map((el) => {
-        return el.textContent
+      return [...section.children].map((element) => {
+        return element.textContent
       })
     }
 

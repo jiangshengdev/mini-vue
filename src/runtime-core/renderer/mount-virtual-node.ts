@@ -26,11 +26,8 @@ export function mountVirtualNode<
 
   /* 函数组件通过 mountComponent 执行并挂载其返回值。 */
   if (typeof virtualNode.type === 'function') {
-    const component = virtualNode.type as SetupFunctionComponent
-
     return mountComponent(
       options,
-      component,
       virtualNode as VirtualNode<SetupFunctionComponent>,
       container,
       needsAnchor,

@@ -1,8 +1,8 @@
 import type { RendererOptions } from '../../index.ts'
 import { mountChild } from '../mount-child.ts'
 import type { MountedHandle } from '../mounted-handle.ts'
-import type { ComponentResult, SetupFunctionComponent } from '@/jsx/index.ts'
 import type { ComponentInstance } from '../../component-instance.ts'
+import type { ComponentResult, SetupFunctionComponent } from '@/jsx/index.ts'
 
 /**
  * 处理需要锚点的组件子树挂载，避免与兄弟节点混淆。
@@ -55,7 +55,7 @@ function ensureComponentAnchor<
     return
   }
 
-  const anchor = options.createText('') as HostNode
+  const anchor = options.createText('')
 
   options.appendChild(instance.container, anchor)
 

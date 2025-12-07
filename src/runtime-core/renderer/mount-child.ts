@@ -33,16 +33,15 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
       return mountChild(options, child[0], container, needsAnchor)
     }
 
-    const startAnchor = createText('') as HostNode
-    const endAnchor = createText('') as HostNode
+    const startAnchor = createText('')
+    const endAnchor = createText('')
     const nodes: HostNode[] = [startAnchor]
     const teardowns: Array<() => void> = []
 
     appendChild(container, startAnchor)
 
     /* 子项始终视为有后续兄弟，以 endAnchor 充当边界。 */
-    for (let index = 0; index < child.length; index += 1) {
-      const item = child[index]
+    for (const item of child) {
       const mounted = mountChild(options, item, container, true)
 
       if (mounted) {

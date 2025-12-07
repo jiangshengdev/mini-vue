@@ -1,6 +1,6 @@
 import type { RendererOptions } from '../../index.ts'
-import type { SetupFunctionComponent } from '@/jsx/index.ts'
 import type { ComponentInstance } from '../../component-instance.ts'
+import type { SetupFunctionComponent } from '@/jsx/index.ts'
 import {
   runtimeErrorContexts,
   runtimeErrorHandlerPhases,

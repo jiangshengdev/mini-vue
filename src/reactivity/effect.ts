@@ -1,9 +1,3 @@
-import {
-  runtimeErrorContexts,
-  runtimeErrorHandlerPhases,
-  runtimeErrorPropagationStrategies,
-  runWithErrorChannel,
-} from '../shared/runtime-error-channel.ts'
 import { recordEffectScope } from './effect-scope.ts'
 import { effectStack } from './internals/index.ts'
 import type {
@@ -13,6 +7,12 @@ import type {
   EffectOptions,
   EffectScheduler,
 } from './shared/index.ts'
+import {
+  runtimeErrorContexts,
+  runtimeErrorHandlerPhases,
+  runtimeErrorPropagationStrategies,
+  runWithErrorChannel,
+} from '@/shared/index.ts'
 
 /**
  * 将副作用封装为类，集中管理依赖收集与生命周期操作。

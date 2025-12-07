@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { reactive } from '@/index.ts'
 import { isReactive } from '@/reactivity/reactive.ts'
+import type { PlainObject } from '@/shared'
 
 describe('reactive', () => {
   it('创建后可读取和写入属性', () => {
@@ -84,7 +85,7 @@ describe('reactive', () => {
   })
 
   it('无原型对象可被视为普通对象代理', () => {
-    const raw = Object.create(null)
+    const raw = Object.create(null) as PlainObject
 
     raw.count = 1
 

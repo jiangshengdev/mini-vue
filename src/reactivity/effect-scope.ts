@@ -1,10 +1,10 @@
+import type { EffectInstance } from './shared/index.ts'
 import {
   runtimeErrorContexts,
   runtimeErrorHandlerPhases,
   runtimeErrorPropagationStrategies,
   runWithErrorChannel,
-} from '../shared/runtime-error-channel.ts'
-import type { EffectInstance } from './shared/index.ts'
+} from '@/shared/index.ts'
 
 /** 当前正在运行的 effect scope，用于关联副作用与清理。 */
 let activeEffectScope: EffectScope | undefined

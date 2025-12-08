@@ -2,6 +2,7 @@ import { ReactiveEffect } from '../effect.ts'
 import { recordEffectScope } from '../effect-scope.ts'
 import { trackEffect, triggerEffects } from '../internals/index.ts'
 import type { DependencyBucket } from '../shared/index.ts'
+import { refFlag } from '../shared/index.ts'
 import type { Ref } from './types.ts'
 import {
   runtimeErrorContexts,
@@ -9,7 +10,6 @@ import {
   runtimeErrorPropagationStrategies,
   runWithErrorChannel,
 } from '@/shared/index.ts'
-import { refFlag } from '../shared/index.ts'
 
 /**
  * `computed` getter 负责在依赖图中派生出最终结果。

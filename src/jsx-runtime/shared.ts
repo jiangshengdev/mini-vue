@@ -1,4 +1,9 @@
-import type { ComponentChildren, ElementProps, ElementType, VirtualNode } from '@/jsx-foundation/index.ts'
+import type {
+  ComponentChildren,
+  ElementProps,
+  ElementType,
+  VirtualNode,
+} from '@/jsx-foundation/index.ts'
 import { createVirtualNode } from '@/jsx-foundation/index.ts'
 import type { PropsShape } from '@/shared/index.ts'
 

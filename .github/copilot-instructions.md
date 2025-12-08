@@ -1,0 +1,28 @@
+# Copilot Instructions
+
+- Scope: this repo is a minimal Vue 3-style runtime with two pillars: reactivity in `src/reactivity/**` (effects, refs, watch, effect scopes) and rendering in `src/runtime-core/**` plus DOM glue in `src/runtime-dom/**`. JSX authoring lives in `src/jsx-foundation/**` and `src/jsx-runtime/**`; the public entrypoint is `src/index.ts`.
+- Architecture
+  - `createRenderer` in `runtime-core/renderer.ts` is platform-agnostic; it caches mounted handles per container and calls host `RendererOptions` for create/insert/remove/patchProps.
+  - `createAppInstance` in `runtime-core/create-app.ts` wraps root components, tracks mount state, and refuses duplicate mounts; `unmount` clears the container via host hooks.
+  - DOM host wiring in `runtime-dom/create-app.ts` resolves string selectors, stores the last container, and adds Vite HMR hooks to unmount before updates and remount afterward.
+  - DOM mutations are centralized in `runtime-dom/renderer-options.ts` + `patch-props.ts`: class is normalized, style accepts string or object keys, events use lowercased names, boolean/`null`/`false` remove attrs, `ref` props are handled by the mount layer, and `ElementRef` can be a callback or `Ref`.
+  - Reactivity centers on `ReactiveEffect` in `reactivity/effect.ts`: it tracks dependencies via `effectStack`, supports schedulers, cleans up dependencies and nested cleanup tasks on stop, and forwards errors through the shared error channel.
+  - Error handling: `setErrorHandler` in `shared/error-handling.ts` installs a global handler for effect/watch/scope errors; unhandled errors are rethrown asynchronously with `queueMicrotask`.
+- Conventions
+  - TypeScript ESM with explicit `.ts` imports, `moduleResolution: bundler`, `jsx: react-jsx`, and `jsxImportSource: '@'`; alias `@` -> `src`. Keep new files strict/typed; avoid implicit `any`.
+  - Public exports are curated in `src/index.ts`; prefer importing from there for user-facing API changes.
+  - DOM props: use normalized `class`/`className`, object `style` values map through `CSSStyleDeclaration` keys (fallback to `setProperty`), events must be functions on `onX` props.
+  - Effects/scopes: nested effects are cleaned when parents stop; avoid holding onto stale dependency buckets—use provided cleanup registration rather than manual mutation.
+  - Components/rendering: `createApp` only mounts once until `unmount` runs; reuse `renderDomRoot` for raw JSX mounting when no app wrapper is needed.
+- Workflows
+  - Install: `pnpm install` (pnpm is expected).
+  - Build library: `pnpm build` (tsdown bundle + generate JSX shim). Dev bundle watch: `pnpm dev`.
+  - Playground: `pnpm play` (Vite dev, uses `vite.config.ts` alias), `pnpm play:build`/`play:preview` for production preview.
+  - Tests: `pnpm test` (Vitest, jsdom, zero timeouts, setup `test/setup.ts`). Targeted tests live under `test/**` mirroring module names (reactivity, runtime-dom, jsx-runtime).
+  - Linting: `pnpm lint` runs oxlint + eslint; `pnpm typecheck` for TS; formatting via `pnpm format`.
+  - API report: `pnpm api` runs API Extractor against `api-extractor.jsonc`; release flow uses `pnpm release` (bumpp + publish) with `prepublishOnly` building first.
+- Tips for changes
+  - Prefer small, focused modules under existing folders (`reactivity`, `runtime-core`, `runtime-dom`, `jsx-*`, `shared`). Maintain host-agnostic logic in `runtime-core` and defer DOM specifics to `runtime-dom`.
+  - Preserve error routing via `handleError` helpers when wrapping user callbacks; use `runSilent`/`runThrowing` from `shared` utilities if adding new execution points.
+  - Keep props normalization and HMR behaviors intact; when extending DOM features, update `patch-props.ts` and associated tests in `test/runtime-dom/**`.
+  - Add tests alongside the relevant area (e.g., new reactive behavior -> `test/reactivity`, JSX changes -> `test/jsx-runtime`).

@@ -1,7 +1,7 @@
 import type { DependencyBucket, ReactiveTarget, TriggerOpType } from '../contracts/index.ts'
 import { iterateDependencyKey, triggerOpTypes } from '../contracts/index.ts'
+import { effectStack } from '../effect.ts'
 import { trackEffect, triggerEffects } from './dependency.ts'
-import { effectStack } from '../../shared/context-stack.ts'
 import { isArrayIndex } from '@/shared/index.ts'
 
 /**

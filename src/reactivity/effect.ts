@@ -1,5 +1,4 @@
 import { recordEffectScope } from './effect-scope.ts'
-import { effectStack } from './internals/index.ts'
 import type {
   DependencyBucket,
   EffectHandle,
@@ -7,7 +6,9 @@ import type {
   EffectOptions,
   EffectScheduler,
 } from './contracts/index.ts'
-import { errorContexts, errorPhases, runSilent, runThrowing } from '@/shared/index.ts'
+import { ContextStack, errorContexts, errorPhases, runSilent, runThrowing } from '@/shared/index.ts'
+
+export const effectStack = new ContextStack<EffectInstance>()
 
 /**
  * 将副作用封装为类，集中管理依赖收集与生命周期操作。

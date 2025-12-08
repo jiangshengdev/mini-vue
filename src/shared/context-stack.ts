@@ -1,5 +1,3 @@
-import type { EffectInstance } from '../reactivity/contracts'
-
 /**
  * 提供通用的栈式管理能力，保证嵌套上下文可被精确追踪。
  */
@@ -40,5 +38,3 @@ export class ContextStack<T> {
     return popped
   }
 }
-
-export const effectStack = new ContextStack<EffectInstance>()

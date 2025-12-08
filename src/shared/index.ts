@@ -19,3 +19,4 @@ export type {
 } from './error-channel.ts'
 export type { PlainObject, PropsShape } from './types.ts'
 export { isArrayIndex, isDevEnvironment, isNil, isObject, isPlainObject } from './utils.ts'
+export { ContextStack } from './context-stack.ts'

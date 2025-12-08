@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { ErrorHandler } from '@/index.ts'
 import { effect, reactive, setErrorHandler } from '@/index.ts'
-import { effectStack } from '@/reactivity/internals/index.ts'
 import { errorContexts } from '@/shared/index.ts'
+import { effectStack } from '@/reactivity/index.ts'
 
 describe('effect 错误处理', () => {
   afterEach(() => {

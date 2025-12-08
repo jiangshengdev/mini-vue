@@ -1,6 +1,5 @@
 import type { EffectInstance } from './contracts/index.ts'
-import { ContextStack } from '../shared/context-stack.ts'
-import { errorContexts, errorPhases, runSilent, runThrowing } from '@/shared/index.ts'
+import { ContextStack, errorContexts, errorPhases, runSilent, runThrowing } from '@/shared/index.ts'
 
 /** 当前正在运行的 effect scope 栈，用于关联副作用与清理。 */
 const effectScopeStack = new ContextStack<EffectScope>()

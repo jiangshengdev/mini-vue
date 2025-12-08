@@ -116,7 +116,7 @@
     "overrideTsconfig": {
       "extends": "./tsconfig.json",
       "exclude": [
-        "src/jsx-foundation/jsx-shim.d.ts"
+        "src/jsx-shim.d.ts"
       ]
     }
     /**

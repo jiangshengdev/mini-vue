@@ -4,17 +4,17 @@ export {
   runSilent,
   runThrowing,
   errorContexts,
-  handlerPhases,
-  propagateMode,
+  errorPhases,
+  errorMode,
 } from './error-channel.ts'
 export type {
   ErrorChannelAfterHook,
   ErrorChannelBeforeHook,
   ErrorChannelOptions,
   ErrorContext,
-  ErrorHandlerPhase,
+  ErrorPhase,
   ErrorMeta,
-  ErrorPropagationStrategy,
+  ErrorMode,
   ErrorToken,
 } from './error-channel.ts'
 export type { PlainObject, PropsShape } from './types.ts'

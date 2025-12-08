@@ -5,7 +5,7 @@ import type { ErrorChannelAfterHook } from '@/shared/index.ts'
 import {
   dispatchError,
   errorContexts,
-  handlerPhases,
+  errorPhases,
   runSilent,
   runThrowing,
 } from '@/shared/index.ts'
@@ -28,7 +28,7 @@ describe('runtime-error-channel', () => {
 
     const firstToken = dispatchError(error, {
       origin: errorContexts.componentSetup,
-      handlerPhase: handlerPhases.sync,
+      handlerPhase: errorPhases.sync,
     })
 
     expect(handler).toHaveBeenCalledTimes(1)
@@ -41,7 +41,7 @@ describe('runtime-error-channel', () => {
 
     const secondToken = dispatchError(error, {
       origin: errorContexts.effectRunner,
-      handlerPhase: handlerPhases.async,
+      handlerPhase: errorPhases.async,
     })
 
     expect(handler).toHaveBeenCalledTimes(1)
@@ -64,7 +64,7 @@ describe('runtime-error-channel', () => {
     const runInnerChannel = () => {
       return runThrowing(throwNestedError, {
         origin: errorContexts.componentSetup,
-        handlerPhase: handlerPhases.sync,
+        handlerPhase: errorPhases.sync,
         afterRun: innerAfterRun,
       })
     }
@@ -72,7 +72,7 @@ describe('runtime-error-channel', () => {
     const runNestedChannel = () => {
       return runThrowing(runInnerChannel, {
         origin: errorContexts.effectScopeRun,
-        handlerPhase: handlerPhases.sync,
+        handlerPhase: errorPhases.sync,
         afterRun: outerAfterRun,
       })
     }
@@ -108,7 +108,7 @@ describe('runtime-error-channel', () => {
         },
         {
           origin: errorContexts.effectRunner,
-          handlerPhase: handlerPhases.sync,
+          handlerPhase: errorPhases.sync,
           beforeRun,
           afterRun,
         },
@@ -138,7 +138,7 @@ describe('runtime-error-channel', () => {
     const invokeSilentChannel = () => {
       runSilent<never>(throwCleanupError, {
         origin: errorContexts.componentCleanup,
-        handlerPhase: handlerPhases.sync,
+        handlerPhase: errorPhases.sync,
       })
     }
 
@@ -174,7 +174,7 @@ describe('runtime-error-channel', () => {
           },
           {
             origin: errorContexts.scheduler,
-            handlerPhase: handlerPhases.async,
+            handlerPhase: errorPhases.async,
           },
         )
       }).not.toThrow()

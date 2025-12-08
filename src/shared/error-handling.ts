@@ -1,4 +1,4 @@
-import type { ErrorContext, ErrorHandlerPhase, ErrorMeta, ErrorToken } from './error-channel.ts'
+import type { ErrorContext, ErrorPhase, ErrorMeta, ErrorToken } from './error-channel.ts'
 
 /**
  * 标准化的错误处理函数签名，统一传入原始异常与上下文标签。
@@ -7,7 +7,7 @@ export interface ErrorDispatchPayload {
   /** 标记触发错误的运行上下文，方便分类处理。 */
   readonly origin: ErrorContext
   /** 指示本次调度发生在同步还是异步阶段。 */
-  readonly handlerPhase: ErrorHandlerPhase
+  readonly handlerPhase: ErrorPhase
   /** 透传的可选元数据，用于补充定位信息。 */
   readonly meta?: ErrorMeta
   /** 调度过程中生成的 token，便于外部追踪状态。 */

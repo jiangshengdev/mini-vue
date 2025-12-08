@@ -1,7 +1,7 @@
 import type { ComponentInstance } from './context.ts'
 import { setCurrentInstance, unsetCurrentInstance } from './context.ts'
 import type { RenderFunction, SetupComponent } from '@/jsx-foundation'
-import { errorContexts, handlerPhases, runSilent } from '@/shared/index.ts'
+import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
 
 /**
  * 初始化组件，创建 setup 阶段与渲染闭包。
@@ -43,7 +43,7 @@ function invokeSetup<
       },
       {
         origin: errorContexts.componentSetup,
-        handlerPhase: handlerPhases.sync,
+        handlerPhase: errorPhases.sync,
         beforeRun() {
           /* 替换全局 currentInstance 以便 setup 内部通过 API 访问自身。 */
           setCurrentInstance(instance)
@@ -72,7 +72,7 @@ function invokeSetup<
       },
       {
         origin: errorContexts.componentSetup,
-        handlerPhase: handlerPhases.sync,
+        handlerPhase: errorPhases.sync,
       },
     )
 

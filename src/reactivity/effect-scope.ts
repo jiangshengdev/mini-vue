@@ -1,5 +1,5 @@
 import type { EffectInstance } from './contracts/index.ts'
-import { errorContexts, handlerPhases, runSilent, runThrowing } from '@/shared/index.ts'
+import { errorContexts, errorPhases, runSilent, runThrowing } from '@/shared/index.ts'
 
 /** 当前正在运行的 effect scope，用于关联副作用与清理。 */
 let activeEffectScope: EffectScope | undefined
@@ -60,7 +60,7 @@ export class EffectScope {
 
     return runThrowing(fn, {
       origin: errorContexts.effectScopeRun,
-      handlerPhase: handlerPhases.sync,
+      handlerPhase: errorPhases.sync,
       beforeRun: () => {
         /* 切换全局活跃 scope，确保回调内部的所有副作用归属于当前 scope。 */
         setActiveEffectScope(this)
@@ -108,7 +108,7 @@ export class EffectScope {
         },
         {
           origin: errorContexts.effectScopeCleanup,
-          handlerPhase: handlerPhases.sync,
+          handlerPhase: errorPhases.sync,
         },
       )
     }
@@ -124,7 +124,7 @@ export class EffectScope {
       for (const cleanup of registeredCleanups) {
         runSilent(cleanup, {
           origin: errorContexts.effectScopeCleanup,
-          handlerPhase: handlerPhases.sync,
+          handlerPhase: errorPhases.sync,
         })
       }
     }
@@ -138,7 +138,7 @@ export class EffectScope {
           },
           {
             origin: errorContexts.effectScopeCleanup,
-            handlerPhase: handlerPhases.sync,
+            handlerPhase: errorPhases.sync,
           },
         )
       }

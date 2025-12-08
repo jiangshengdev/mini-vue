@@ -20,8 +20,8 @@ describe('effectScope 行为', () => {
     const scope = effectScope()
     let observed = -1
 
-    scope.run(() => {
-      effect(() => {
+    scope.run(function runScope() {
+      effect(function trackScope() {
         observed = state.count
       })
     })
@@ -42,12 +42,12 @@ describe('effectScope 行为', () => {
     const state = reactive({ count: 0 })
     const observed: number[] = []
 
-    scope.run(() => {
-      const doubled = computed(() => {
+    scope.run(function runComputed() {
+      const doubled = computed(function getDoubled() {
         return state.count * 2
       })
 
-      effect(() => {
+      effect(function trackDoubled() {
         observed.push(doubled.value)
       })
     })
@@ -70,13 +70,13 @@ describe('effectScope 行为', () => {
 
     setRuntimeErrorHandler(handler)
 
-    scope.run(() => {
-      onScopeDispose(() => {
+    scope.run(function registerCleanups() {
+      onScopeDispose(function cleanupFirst() {
         cleanupOrder.push('first')
         throw new Error('scope cleanup failed')
       })
 
-      onScopeDispose(() => {
+      onScopeDispose(function cleanupSecond() {
         cleanupOrder.push('second')
       })
     })
@@ -99,7 +99,7 @@ describe('effectScope 行为', () => {
     setRuntimeErrorHandler(handler)
 
     expect(() => {
-      scope.run(() => {
+      scope.run(function scopeThrows() {
         throw boom
       })
     }).toThrow(boom)
@@ -118,14 +118,14 @@ describe('effectScope 行为', () => {
     let fromParent = -1
     let fromDetached = -1
 
-    parent.run(() => {
-      effect(() => {
+    parent.run(function parentScope() {
+      effect(function trackParent() {
         fromParent = state.count
       })
     })
 
-    detached.run(() => {
-      effect(() => {
+    detached.run(function detachedScope() {
+      effect(function trackDetached() {
         fromDetached = state.count
       })
     })

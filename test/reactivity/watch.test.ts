@@ -13,10 +13,10 @@ describe('watch', () => {
     const spy = vi.fn()
 
     watch(
-      () => {
+      function readCount() {
         return state.count
       },
-      (newValue, oldValue) => {
+      function onChange(newValue, oldValue) {
         spy({
           newValue,
           oldValue,
@@ -40,10 +40,10 @@ describe('watch', () => {
     const spy = vi.fn()
 
     watch(
-      () => {
+      function readCount() {
         return state.count
       },
-      (newValue, oldValue) => {
+      function onChange(newValue, oldValue) {
         spy({
           newValue,
           oldValue,
@@ -65,10 +65,10 @@ describe('watch', () => {
     const spy = vi.fn()
 
     const stop = watch(
-      () => {
+      function readCount() {
         return state.count
       },
-      (newValue, oldValue) => {
+      function onChange(newValue, oldValue) {
         spy({ newValue, oldValue })
       },
     )
@@ -86,7 +86,7 @@ describe('watch', () => {
     const state = reactive({ nested: { value: 0 } })
     const spy = vi.fn()
 
-    watch(state, () => {
+    watch(state, function onNested() {
       spy(state.nested.value)
     })
 
@@ -100,11 +100,11 @@ describe('watch', () => {
     const cleanups: number[] = []
 
     watch(
-      () => {
+      function readCount() {
         return state.count
       },
-      (newValue, _oldValue, onCleanup) => {
-        onCleanup(() => {
+      function onChange(newValue, _oldValue, onCleanup) {
+        onCleanup(function pushCleanup() {
           cleanups.push(newValue)
         })
       },
@@ -123,7 +123,7 @@ describe('watch', () => {
 
     watch(
       state,
-      () => {
+      function onNested() {
         spy(state.value.nested.value)
       },
       { deep: true },
@@ -143,7 +143,7 @@ describe('watch', () => {
 
     watch(
       state,
-      () => {
+      function onSymbol() {
         spy(state[secret].value)
       },
       { deep: true },
@@ -164,11 +164,11 @@ describe('watch', () => {
     setRuntimeErrorHandler(handler)
 
     watch(
-      () => {
+      function readCount() {
         return state.count
       },
-      (newValue, oldValue, onCleanup) => {
-        onCleanup(() => {
+      function onChange(newValue, oldValue, onCleanup) {
+        onCleanup(function cleanupPrev() {
           cleanupSpy(oldValue)
         })
 
@@ -198,10 +198,10 @@ describe('watch', () => {
     setRuntimeErrorHandler(handler)
 
     watch(
-      () => {
+      function readCount() {
         return state.count
       },
-      () => {
+      function throwInCallback() {
         throw boom
       },
     )
@@ -223,11 +223,11 @@ describe('watch', () => {
     setRuntimeErrorHandler(handler)
 
     const stop = watch(
-      () => {
+      function readCount() {
         return state.count
       },
-      (newValue, _oldValue, onCleanup) => {
-        onCleanup(() => {
+      function onChange(newValue, _oldValue, onCleanup) {
+        onCleanup(function cleanupCount() {
           cleanupOrder.push(newValue)
           throw new Error(`cleanup failed: ${newValue}`)
         })

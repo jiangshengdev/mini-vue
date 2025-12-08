@@ -16,15 +16,15 @@ describe('effect 错误处理', () => {
 
     setRuntimeErrorHandler(handler)
 
-    effect(() => {
+    effect(function cleanupErrorEffect() {
       void state.count
 
-      effectStack.current?.registerCleanup(() => {
+      effectStack.current?.registerCleanup(function cleanupFirst() {
         cleanupOrder.push('first')
         throw new Error('effect cleanup failed')
       })
 
-      effectStack.current?.registerCleanup(() => {
+      effectStack.current?.registerCleanup(function cleanupSecond() {
         cleanupOrder.push('second')
       })
     })
@@ -46,7 +46,7 @@ describe('effect 错误处理', () => {
     setRuntimeErrorHandler(handler)
 
     expect(() => {
-      effect(() => {
+      effect(function throwingEffect() {
         throw boom
       })
     }).toThrow(boom)
@@ -65,7 +65,7 @@ describe('effect 错误处理', () => {
 
     setRuntimeErrorHandler(handler)
 
-    const handle = effect(() => {
+    const handle = effect(function maybeThrowEffect() {
       if (shouldThrow) {
         throw boom
       }
@@ -89,14 +89,14 @@ describe('effect 错误处理', () => {
     const state = reactive({ count: 0 })
 
     expect(() => {
-      effect(() => {
+      effect(function throwingEffect() {
         throw new Error('boom')
       })
     }).toThrowError()
 
     let observed = -1
 
-    effect(() => {
+    effect(function collectAfterError() {
       observed = state.count
     })
 

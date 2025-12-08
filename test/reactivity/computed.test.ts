@@ -10,7 +10,7 @@ describe('computed', () => {
 
   it('懒执行并缓存计算结果', () => {
     const state = ref({ count: 0 })
-    const getter = vi.fn(() => {
+    const getter = vi.fn(function getDouble() {
       return state.value.count * 2
     })
     const doubled = computed(getter)
@@ -34,12 +34,12 @@ describe('computed', () => {
 
   it('可被 effect 追踪并在依赖变化后重新求值', () => {
     const state = ref(0)
-    const plusOne = computed(() => {
+    const plusOne = computed(function getPlusOne() {
       return state.value + 1
     })
     let observed = -1
 
-    effect(() => {
+    effect(function trackPlusOne() {
       observed = plusOne.value
     })
 
@@ -52,10 +52,10 @@ describe('computed', () => {
   it('支持自定义 setter 将值映射回源数据', () => {
     const base = ref(1)
     const doubled = computed({
-      get() {
+      get: function getDoubled() {
         return base.value * 2
       },
-      set(next) {
+      set: function setFromDoubled(next) {
         base.value = next / 2
       },
     })
@@ -68,7 +68,7 @@ describe('computed', () => {
   })
 
   it('只读 computed 赋值时抛错', () => {
-    const readonlyComputed = computed(() => {
+    const readonlyComputed = computed(function getReadonly() {
       return 1
     })
 
@@ -79,10 +79,10 @@ describe('computed', () => {
 
   it('支持链式 computed 共享脏标记', () => {
     const base = ref(1)
-    const plusOne = computed(() => {
+    const plusOne = computed(function getPlusOne() {
       return base.value + 1
     })
-    const plusTwo = computed(() => {
+    const plusTwo = computed(function getPlusTwo() {
       return plusOne.value + 1
     })
 
@@ -100,10 +100,10 @@ describe('computed', () => {
     setRuntimeErrorHandler(handler)
 
     const custom = computed({
-      get() {
+      get: function getBase() {
         return base.value
       },
-      set() {
+      set: function throwSetter() {
         throw boom
       },
     })

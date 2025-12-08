@@ -14,12 +14,12 @@ describe('effect 调度行为', () => {
     const jobs: Array<() => void> = []
 
     effect(
-      () => {
+      function schedTrack() {
         runCount += 1
         void state.count
       },
       {
-        scheduler(job) {
+        scheduler: function queueJob(job) {
           jobs.push(job)
         },
       },
@@ -47,12 +47,12 @@ describe('effect 调度行为', () => {
     const jobs: Array<() => void> = []
 
     const handle = effect(
-      () => {
+      function schedTrackStop() {
         runCount += 1
         void state.count
       },
       {
-        scheduler(job) {
+        scheduler: function queueJob(job) {
           jobs.push(job)
         },
       },
@@ -83,12 +83,12 @@ describe('effect 调度行为', () => {
     const jobs: Array<() => void> = []
 
     const handle = effect(
-      () => {
+      function schedTrackNoResub() {
         runCount += 1
         void state.count
       },
       {
-        scheduler(job) {
+        scheduler: function queueJob(job) {
           jobs.push(job)
         },
       },
@@ -120,11 +120,11 @@ describe('effect 调度行为', () => {
     setRuntimeErrorHandler(handler)
 
     effect(
-      () => {
+      function failSchedEffect() {
         void state.count
       },
       {
-        scheduler() {
+        scheduler: function throwSched() {
           throw new Error('scheduler failed')
         },
       },
@@ -132,7 +132,7 @@ describe('effect 调度行为', () => {
 
     let fallbackRuns = 0
 
-    effect(() => {
+    effect(function fallbackEffect() {
       fallbackRuns += 1
       void state.count
     })
@@ -155,11 +155,11 @@ describe('effect 调度行为', () => {
     const steps: number[] = []
 
     effect(
-      () => {
+      function recordSteps() {
         steps.push(state.count)
       },
       {
-        scheduler(job) {
+        scheduler: function queueJob(job) {
           jobs.push(job)
         },
       },

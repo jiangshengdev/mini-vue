@@ -67,7 +67,7 @@ describe('effect 基础行为', () => {
     const state = reactive({ count: 0 })
     let runCount = 0
 
-    const handle = effect(() => {
+    const handle = effect(function trackStop() {
       runCount += 1
       void state.count
     })
@@ -93,10 +93,10 @@ describe('effect 基础行为', () => {
     const state = reactive({ count: 0 })
     const cleanupOrder: string[] = []
 
-    const handle = effect(() => {
+    const handle = effect(function trackCleanup() {
       void state.count
 
-      effectStack.current?.registerCleanup(() => {
+      effectStack.current?.registerCleanup(function pushCleanup() {
         cleanupOrder.push('cleanup')
       })
     })
@@ -177,7 +177,7 @@ describe('effect 基础行为', () => {
     const state = reactive<Partial<Record<string, number>>>({ foo: 1 })
     let runCount = 0
 
-    effect(() => {
+    effect(function trackDelete() {
       runCount += 1
       void state.foo
     })
@@ -192,7 +192,7 @@ describe('effect 基础行为', () => {
     const state = reactive<Partial<Record<string, number>>>({ foo: 1 })
     let keys: string[] = []
 
-    effect(() => {
+    effect(function trackKeys() {
       keys = Object.keys(state)
     })
 
@@ -209,7 +209,7 @@ describe('effect 基础行为', () => {
     const state = reactive<Partial<Record<string, number>>>({})
     let hasFoo = false
 
-    effect(() => {
+    effect(function trackIn() {
       hasFoo = 'foo' in state
     })
 
@@ -227,11 +227,11 @@ describe('effect 基础行为', () => {
     let length = -1
     let first = -1
 
-    effect(() => {
+    effect(function trackLength() {
       length = list.length
     })
 
-    effect(() => {
+    effect(function trackFirst() {
       first = list[0] ?? -1
     })
 
@@ -247,7 +247,7 @@ describe('effect 基础行为', () => {
     const list: number[] = reactive([1, 2, 3])
     let third = 0
 
-    effect(() => {
+    effect(function trackThird() {
       third = list[2] ?? -1
     })
 

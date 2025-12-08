@@ -6,7 +6,7 @@ describe('ref', () => {
     const count = ref(0)
     let observed = -1
 
-    effect(() => {
+    effect(function trackCount() {
       observed = count.value
     })
 
@@ -23,7 +23,7 @@ describe('ref', () => {
     const state = ref({ count: 0 })
     let dummy = -1
 
-    effect(() => {
+    effect(function trackNested() {
       dummy = state.value.count
     })
 
@@ -37,7 +37,7 @@ describe('ref', () => {
     const list = ref<number[]>([])
     let length = -1
 
-    effect(() => {
+    effect(function trackLength() {
       length = list.value.length
     })
 
@@ -62,7 +62,7 @@ describe('ref', () => {
     const countRef = toRef(state, 'count')
     let observed = -1
 
-    effect(() => {
+    effect(function trackCountRef() {
       observed = countRef.value
     })
 
@@ -82,7 +82,7 @@ describe('ref', () => {
     let observed = -1
     let runs = 0
 
-    effect(() => {
+    effect(function trackPlainRef() {
       runs += 1
       observed = countRef.value
     })

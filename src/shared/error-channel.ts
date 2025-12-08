@@ -41,8 +41,7 @@ export const propagateMode = {
   /** 在同步阶段吞掉异常，避免污染主流程。 */
   silent: 'silent',
 } as const
-export type ErrorPropagationStrategy =
-  (typeof propagateMode)[keyof typeof propagateMode]
+export type ErrorPropagationStrategy = (typeof propagateMode)[keyof typeof propagateMode]
 /**
  * 区分当前错误是在同步还是异步阶段被捕获。
  */

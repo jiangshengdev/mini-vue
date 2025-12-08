@@ -1,6 +1,6 @@
 import type { ComponentInstance } from './context.ts'
 import { setCurrentInstance, unsetCurrentInstance } from './context.ts'
-import type { ComponentRenderFunction, SetupFunctionComponent } from '@/jsx-foundation'
+import type { ComponentRenderFunction, SetupFunctionComponent } from '@/virtual-node'
 import {
   runtimeErrorContexts,
   errorHandlerPhases,

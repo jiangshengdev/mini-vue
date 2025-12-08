@@ -1,4 +1,4 @@
-import type { ElementProps, SetupFunctionComponent, VirtualNode } from '@/jsx-foundation'
+import type { ElementProps, SetupFunctionComponent, VirtualNode } from '@/virtual-node'
 
 /**
  * 规整组件 props，并根据 children 数量注入合适的 children 形态。

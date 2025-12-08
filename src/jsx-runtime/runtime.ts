@@ -1,5 +1,5 @@
 import { buildVirtualNode } from './builder.ts'
-import type { ElementProps, ElementType, VirtualNode } from '@/jsx-foundation/index.ts'
+import type { ElementProps, ElementType, VirtualNode } from '@/virtual-node/index.ts'
 
 /**
  * 标准 JSX 运行时入口，对应生产环境编译产物中的 jsx 调用。

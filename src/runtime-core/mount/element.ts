@@ -1,7 +1,7 @@
 import type { RendererOptions } from '../index.ts'
 import { mountChildren } from './children.ts'
 import type { MountedHandle } from './handle.ts'
-import type { VirtualNode } from '@/jsx-foundation/index.ts'
+import type { VirtualNode } from '@/virtual-node/index.ts'
 import type { Ref } from '@/reactivity/index.ts'
 import { isRef } from '@/reactivity/index.ts'
 import type { PropsShape } from '@/shared/index.ts'

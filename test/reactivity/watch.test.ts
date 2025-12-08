@@ -168,7 +168,7 @@ describe('watch', () => {
         return state.count
       },
       function onChange(newValue, oldValue, onCleanup) {
-        onCleanup(function cleanupPrev() {
+        onCleanup(function cleanupPrevious() {
           cleanupSpy(oldValue)
         })
 

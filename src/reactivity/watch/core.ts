@@ -58,7 +58,7 @@ export interface WatchOptions {
  *
  * @public
  *
- * @remarks 回调内部抛出的异常不会向外冒泡，而是仅通过 setRuntimeErrorHandler 汇报，确保同一触发链的其余副作用可继续执行。
+ * @remarks 回调内部抛出的异常不会向外冒泡，而是仅通过 setErrorHandler 汇报，确保同一触发链的其余副作用可继续执行。
  */
 export function watch<T>(
   source: WatchSource<T>,

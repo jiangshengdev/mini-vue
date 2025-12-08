@@ -53,7 +53,7 @@ export class EffectScope {
    *
    * @throws
    * @see {@link https://www.typescriptlang.org/docs/handbook/2/functions.html#unknown | unknown }
-   * 回调内部抛出的异常会同步向上传播，并在传播前交给 setRuntimeErrorHandler 处理。
+   * 回调内部抛出的异常会同步向上传播，并在传播前交给 setErrorHandler 处理。
    */
   run<T>(fn: () => T): T | undefined {
     /* `scope` 已停用时直接返回，避免在无效上下文中继续注册副作用。 */

@@ -5,6 +5,7 @@ import type { MountedHandle } from '../mount'
 import type { ElementProps, RenderFunction, RenderOutput, SetupComponent } from '@/jsx-foundation'
 import type { ReactiveEffect } from '@/reactivity/effect.ts'
 import type { EffectScope } from '@/reactivity/effect-scope.ts'
+import { ContextStack } from '@/shared/index.ts'
 import type { PlainObject } from '@/shared/index.ts'
 
 /**
@@ -48,7 +49,7 @@ export interface ComponentInstance<
 type AnyComponentInstance = ComponentInstance<unknown, unknown, unknown, SetupComponent>
 
 /** 当前 setup 调用栈正在处理的实例引用。 */
-let currentInstance: AnyComponentInstance | undefined
+const instanceStack = new ContextStack<AnyComponentInstance>()
 
 /**
  * 设置当前运行中的组件实例，供 setup 期间访问。
@@ -59,19 +60,19 @@ export function setCurrentInstance<
   HostFragment extends HostNode,
   T extends SetupComponent,
 >(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): void {
-  currentInstance = instance as AnyComponentInstance
+  instanceStack.push(instance as AnyComponentInstance)
 }
 
 /**
  * 清空当前实例引用，避免泄漏。
  */
 export function unsetCurrentInstance(): void {
-  currentInstance = undefined
+  instanceStack.pop()
 }
 
 /**
  * 读取当前组件实例，仅供内部组合式能力使用。
  */
 export function getCurrentInstance(): AnyComponentInstance | undefined {
-  return currentInstance
+  return instanceStack.current
 }

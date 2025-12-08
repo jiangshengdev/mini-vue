@@ -2,7 +2,7 @@ import type { ComponentInstance } from './context.ts'
 import { setCurrentInstance, unsetCurrentInstance } from './context.ts'
 import type { ComponentRenderFunction, SetupFunctionComponent } from '@/jsx-foundation'
 import {
-  runtimeErrorContexts,
+  errorContexts,
   errorHandlerPhases,
   errorPropagationStrategies,
   runWithErrorChannel,
@@ -47,7 +47,7 @@ function invokeSetup<
         return instance.type(instance.props)
       },
       {
-        origin: runtimeErrorContexts.componentSetup,
+        origin: errorContexts.componentSetup,
         handlerPhase: errorHandlerPhases.sync,
         propagate: errorPropagationStrategies.silent,
         beforeRun() {
@@ -77,7 +77,7 @@ function invokeSetup<
         throw new TypeError('组件必须返回渲染函数以托管本地状态', { cause: render })
       },
       {
-        origin: runtimeErrorContexts.componentSetup,
+        origin: errorContexts.componentSetup,
         handlerPhase: errorHandlerPhases.sync,
         propagate: errorPropagationStrategies.silent,
       },

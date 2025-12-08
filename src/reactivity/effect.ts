@@ -8,7 +8,7 @@ import type {
   EffectScheduler,
 } from './contracts/index.ts'
 import {
-  runtimeErrorContexts,
+  errorContexts,
   errorHandlerPhases,
   errorPropagationStrategies,
   runWithErrorChannel,
@@ -67,7 +67,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
           return this.fn()
         },
         {
-          origin: runtimeErrorContexts.effectRunner,
+          origin: errorContexts.effectRunner,
           handlerPhase: errorHandlerPhases.sync,
           propagate: errorPropagationStrategies.sync,
           beforeRun: () => {
@@ -143,7 +143,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
 
       for (const cleanup of cleanupTasks) {
         runWithErrorChannel(cleanup, {
-          origin: runtimeErrorContexts.effectCleanup,
+          origin: errorContexts.effectCleanup,
           handlerPhase: errorHandlerPhases.sync,
           propagate: errorPropagationStrategies.silent,
         })

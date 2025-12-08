@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { ErrorHandler } from '@/index.ts'
 import { reactive, ref, setErrorHandler, watch } from '@/index.ts'
-import { runtimeErrorContexts } from '@/shared/index.ts'
+import { errorContexts } from '@/shared/index.ts'
 
 describe('watch', () => {
   afterEach(() => {
@@ -211,7 +211,7 @@ describe('watch', () => {
     const [error, context] = handler.mock.calls[0]
 
     expect(error).toBe(boom)
-    expect(context).toBe(runtimeErrorContexts.watchCallback)
+    expect(context).toBe(errorContexts.watchCallback)
   })
 
   it('cleanup 抛错会被错误处理器捕获且不影响后续流程', () => {
@@ -245,7 +245,7 @@ describe('watch', () => {
     let [error, context] = handler.mock.calls[0]
 
     expect((error as Error).message).toBe('cleanup failed: 0')
-    expect(context).toBe(runtimeErrorContexts.watchCleanup)
+    expect(context).toBe(errorContexts.watchCleanup)
 
     state.count = 2
     expect(stopSpy).toHaveBeenCalledTimes(3)
@@ -253,7 +253,7 @@ describe('watch', () => {
     expect(handler).toHaveBeenCalledTimes(2)
     ;[error, context] = handler.mock.calls[1]
     expect((error as Error).message).toBe('cleanup failed: 1')
-    expect(context).toBe(runtimeErrorContexts.watchCleanup)
+    expect(context).toBe(errorContexts.watchCleanup)
 
     stop()
     expect(stopSpy).toHaveBeenCalledTimes(3)
@@ -261,6 +261,6 @@ describe('watch', () => {
     expect(handler).toHaveBeenCalledTimes(3)
     ;[error, context] = handler.mock.calls[2]
     expect((error as Error).message).toBe('cleanup failed: 2')
-    expect(context).toBe(runtimeErrorContexts.watchCleanup)
+    expect(context).toBe(errorContexts.watchCleanup)
   })
 })

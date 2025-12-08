@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createTestContainer } from '../setup.ts'
 import type { ErrorHandler, SetupFunctionComponent } from '@/index.ts'
 import { reactive, render, setErrorHandler } from '@/index.ts'
-import { runtimeErrorContexts } from '@/shared/index.ts'
+import { errorContexts } from '@/shared/index.ts'
 
 describe('runtime-dom component error isolation (fragment)', () => {
   afterEach(() => {
@@ -32,7 +32,7 @@ describe('runtime-dom component error isolation (fragment)', () => {
     const [error, context] = handler.mock.calls[0]
 
     expect(error).toBe(boom)
-    expect(context).toBe(runtimeErrorContexts.componentSetup)
+    expect(context).toBe(errorContexts.componentSetup)
     expect(container.children.length).toBe(1)
     expect(container.querySelector('[data-testid="sibling"]')?.textContent).toBe('ok')
   })

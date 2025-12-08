@@ -4,7 +4,7 @@ import { createTestContainer } from '../setup.ts'
 import type { ErrorHandler, SetupFunctionComponent } from '@/index.ts'
 import { reactive, render, setErrorHandler, watch } from '@/index.ts'
 import { getCurrentInstance } from '@/runtime-core/component/context.ts'
-import { runtimeErrorContexts } from '@/shared/index.ts'
+import { errorContexts } from '@/shared/index.ts'
 
 describe('runtime-dom component reactivity', () => {
   afterEach(() => {
@@ -219,6 +219,6 @@ describe('runtime-dom component reactivity', () => {
     const [error, context] = handler.mock.calls[0]
 
     expect((error as Error).message).toBe('component cleanup failed')
-    expect(context).toBe(runtimeErrorContexts.componentCleanup)
+    expect(context).toBe(errorContexts.componentCleanup)
   })
 })

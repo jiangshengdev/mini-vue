@@ -5,7 +5,7 @@ import type { DependencyBucket } from '../contracts/index.ts'
 import { refFlag } from '../contracts/index.ts'
 import type { Ref } from './types.ts'
 import {
-  runtimeErrorContexts,
+  errorContexts,
   errorHandlerPhases,
   errorPropagationStrategies,
   runWithErrorChannel,
@@ -96,7 +96,7 @@ class ComputedRefImpl<T> implements Ref<T> {
         this.setter(newValue)
       },
       {
-        origin: runtimeErrorContexts.computedSetter,
+        origin: errorContexts.computedSetter,
         handlerPhase: errorHandlerPhases.sync,
         propagate: errorPropagationStrategies.sync,
       },

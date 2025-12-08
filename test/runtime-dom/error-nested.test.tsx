@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createTestContainer } from '../setup.ts'
 import type { ErrorHandler, SetupFunctionComponent } from '@/index.ts'
 import { reactive, render, setErrorHandler } from '@/index.ts'
-import { runtimeErrorContexts } from '@/shared/index.ts'
+import { errorContexts } from '@/shared/index.ts'
 
 describe('runtime-dom component error isolation (nested)', () => {
   afterEach(() => {
@@ -37,7 +37,7 @@ describe('runtime-dom component error isolation (nested)', () => {
     const [error, context] = handler.mock.calls[0]
 
     expect(error).toBe(boom)
-    expect(context).toBe(runtimeErrorContexts.componentSetup)
+    expect(context).toBe(errorContexts.componentSetup)
     expect(container.querySelector('[data-testid="sibling"]')?.textContent).toBe('stay')
   })
 
@@ -84,7 +84,7 @@ describe('runtime-dom component error isolation (nested)', () => {
     const [error, context] = handler.mock.calls[0]
 
     expect(error).toBe(boom)
-    expect(context).toBe(runtimeErrorContexts.effectRunner)
+    expect(context).toBe(errorContexts.effectRunner)
     expect(container.querySelector('[data-testid="faulty"]')).toBeNull()
     expect(container.querySelector('[data-testid="sibling"]')?.textContent).toBe('stay')
   })
@@ -112,7 +112,7 @@ describe('runtime-dom component error isolation (nested)', () => {
     const [error, context] = handler.mock.calls[0]
 
     expect(error).toBe(boom)
-    expect(context).toBe(runtimeErrorContexts.componentSetup)
+    expect(context).toBe(errorContexts.componentSetup)
     expect(container.querySelector('[data-testid="ok"]')?.textContent).toBe('ok')
   })
 
@@ -155,7 +155,7 @@ describe('runtime-dom component error isolation (nested)', () => {
     const [error, context] = handler.mock.calls[0]
 
     expect(error).toBe(boom)
-    expect(context).toBe(runtimeErrorContexts.effectRunner)
+    expect(context).toBe(errorContexts.effectRunner)
     expect(container.querySelector('[data-testid="faulty"]')).toBeNull()
     expect(container.querySelector('[data-testid="ok"]')?.textContent).toBe('ok')
   })

@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createTestContainer } from '../setup.ts'
 import type { ErrorHandler, SetupFunctionComponent } from '@/index.ts'
 import { reactive, render, setErrorHandler } from '@/index.ts'
-import { runtimeErrorContexts } from '@/shared/index.ts'
+import { errorContexts } from '@/shared/index.ts'
 
 describe('runtime-dom component error isolation (basic)', () => {
   afterEach(() => {
@@ -26,7 +26,7 @@ describe('runtime-dom component error isolation (basic)', () => {
     const [error, context] = handler.mock.calls[0]
 
     expect(error).toBe(boom)
-    expect(context).toBe(runtimeErrorContexts.componentSetup)
+    expect(context).toBe(errorContexts.componentSetup)
     expect(container.childNodes.length).toBe(0)
   })
 
@@ -59,7 +59,7 @@ describe('runtime-dom component error isolation (basic)', () => {
     const [error, context] = handler.mock.calls[0]
 
     expect(error).toBe(boom)
-    expect(context).toBe(runtimeErrorContexts.componentSetup)
+    expect(context).toBe(errorContexts.componentSetup)
     expect(container.querySelector('[data-testid="sibling"]')?.textContent).toBe('ok')
     expect(container.querySelector('[data-testid="faulty"]')).toBeNull()
   })
@@ -99,7 +99,7 @@ describe('runtime-dom component error isolation (basic)', () => {
     const [error, context] = handler.mock.calls[0]
 
     expect(error).toBe(boom)
-    expect(context).toBe(runtimeErrorContexts.effectRunner)
+    expect(context).toBe(errorContexts.effectRunner)
     expect(renderSpy).toHaveBeenCalledTimes(1)
     expect(container.querySelector('[data-testid="sibling"]')?.textContent).toBe('ok')
 
@@ -154,7 +154,7 @@ describe('runtime-dom component error isolation (basic)', () => {
     const [error, context] = handler.mock.calls[0]
 
     expect(error).toBe(boom)
-    expect(context).toBe(runtimeErrorContexts.effectRunner)
+    expect(context).toBe(errorContexts.effectRunner)
     expect(container.querySelector('[data-testid="faulty"]')).toBeNull()
     expect(container.querySelector('[data-testid="sibling"]')?.textContent).toBe('ok')
   })

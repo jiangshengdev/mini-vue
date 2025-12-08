@@ -5,7 +5,7 @@ import type { Ref } from '../ref/types.ts'
 import { createGetter, resolveDeepOption } from './utils.ts'
 import type { PlainObject } from '@/shared/index.ts'
 import {
-  runtimeErrorContexts,
+  errorContexts,
   errorHandlerPhases,
   errorPropagationStrategies,
   runWithErrorChannel,
@@ -114,7 +114,7 @@ export function watch<T>(
         callback(newValue, previousValue, onCleanup)
       },
       {
-        origin: runtimeErrorContexts.watchCallback,
+        origin: errorContexts.watchCallback,
         handlerPhase: errorHandlerPhases.sync,
         propagate: errorPropagationStrategies.silent,
         afterRun() {
@@ -152,7 +152,7 @@ export function watch<T>(
     cleanup = undefined
 
     runWithErrorChannel(previousCleanup, {
-      origin: runtimeErrorContexts.watchCleanup,
+      origin: errorContexts.watchCleanup,
       handlerPhase: errorHandlerPhases.sync,
       propagate: errorPropagationStrategies.silent,
     })

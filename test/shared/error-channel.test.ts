@@ -4,7 +4,7 @@ import { setErrorHandler } from '@/index.ts'
 import type { ErrorChannelAfterHook } from '@/shared/index.ts'
 import {
   dispatchError,
-  runtimeErrorContexts,
+  errorContexts,
   errorHandlerPhases,
   errorPropagationStrategies,
   runWithErrorChannel,
@@ -27,7 +27,7 @@ describe('runtime-error-channel', () => {
     const error = new Error('component boom')
 
     const firstToken = dispatchError(error, {
-      origin: runtimeErrorContexts.componentSetup,
+      origin: errorContexts.componentSetup,
       handlerPhase: errorHandlerPhases.sync,
     })
 
@@ -36,11 +36,11 @@ describe('runtime-error-channel', () => {
 
     const [, context, payload] = handler.mock.calls[0]
 
-    expect(context).toBe(runtimeErrorContexts.componentSetup)
+    expect(context).toBe(errorContexts.componentSetup)
     expect(payload?.token).toBe(firstToken)
 
     const secondToken = dispatchError(error, {
-      origin: runtimeErrorContexts.effectRunner,
+      origin: errorContexts.effectRunner,
       handlerPhase: errorHandlerPhases.async,
     })
 
@@ -63,7 +63,7 @@ describe('runtime-error-channel', () => {
 
     const runInnerChannel = () => {
       return runWithErrorChannel(throwNestedError, {
-        origin: runtimeErrorContexts.componentSetup,
+        origin: errorContexts.componentSetup,
         handlerPhase: errorHandlerPhases.sync,
         propagate: errorPropagationStrategies.sync,
         afterRun: innerAfterRun,
@@ -72,7 +72,7 @@ describe('runtime-error-channel', () => {
 
     const runNestedChannel = () => {
       return runWithErrorChannel(runInnerChannel, {
-        origin: runtimeErrorContexts.effectScopeRun,
+        origin: errorContexts.effectScopeRun,
         handlerPhase: errorHandlerPhases.sync,
         propagate: errorPropagationStrategies.sync,
         afterRun: outerAfterRun,
@@ -85,7 +85,7 @@ describe('runtime-error-channel', () => {
 
     const [, context, payload] = handler.mock.calls[0]
 
-    expect(context).toBe(runtimeErrorContexts.componentSetup)
+    expect(context).toBe(errorContexts.componentSetup)
     expect(payload?.token?.notified).toBe(true)
 
     expect(innerAfterRun).toHaveBeenCalledTimes(1)
@@ -109,7 +109,7 @@ describe('runtime-error-channel', () => {
           throw error
         },
         {
-          origin: runtimeErrorContexts.effectRunner,
+          origin: errorContexts.effectRunner,
           handlerPhase: errorHandlerPhases.sync,
           propagate: errorPropagationStrategies.sync,
           beforeRun,
@@ -140,7 +140,7 @@ describe('runtime-error-channel', () => {
 
     const invokeSilentChannel = () => {
       runWithErrorChannel<never>(throwCleanupError, {
-        origin: runtimeErrorContexts.componentCleanup,
+        origin: errorContexts.componentCleanup,
         handlerPhase: errorHandlerPhases.sync,
         propagate: errorPropagationStrategies.silent,
       })
@@ -151,7 +151,7 @@ describe('runtime-error-channel', () => {
 
     const [, context, payload] = handler.mock.calls[0]
 
-    expect(context).toBe(runtimeErrorContexts.componentCleanup)
+    expect(context).toBe(errorContexts.componentCleanup)
     expect(payload?.token?.error).toBe(error)
     expect(payload?.token?.notified).toBe(true)
   })
@@ -177,7 +177,7 @@ describe('runtime-error-channel', () => {
             throw error
           },
           {
-            origin: runtimeErrorContexts.scheduler,
+            origin: errorContexts.scheduler,
             handlerPhase: errorHandlerPhases.async,
             propagate: errorPropagationStrategies.silent,
           },

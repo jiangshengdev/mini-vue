@@ -1,7 +1,7 @@
 import type { DependencyBucket, EffectInstance } from '../contracts/index.ts'
 import { effectStack } from './effect-stack.ts'
 import {
-  runtimeErrorContexts,
+  errorContexts,
   errorHandlerPhases,
   errorPropagationStrategies,
   runWithErrorChannel,
@@ -84,7 +84,7 @@ function schedule(effect: EffectInstance): void {
         scheduler(job)
       },
       {
-        origin: runtimeErrorContexts.scheduler,
+        origin: errorContexts.scheduler,
         handlerPhase: errorHandlerPhases.sync,
         propagate: errorPropagationStrategies.silent,
       },

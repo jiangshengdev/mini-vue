@@ -1,6 +1,6 @@
 import type { EffectInstance } from './contracts/index.ts'
 import {
-  runtimeErrorContexts,
+  errorContexts,
   errorHandlerPhases,
   errorPropagationStrategies,
   runWithErrorChannel,
@@ -64,7 +64,7 @@ export class EffectScope {
     const previousScope = activeEffectScope
 
     return runWithErrorChannel(fn, {
-      origin: runtimeErrorContexts.effectScopeRun,
+      origin: errorContexts.effectScopeRun,
       handlerPhase: errorHandlerPhases.sync,
       propagate: errorPropagationStrategies.sync,
       beforeRun: () => {
@@ -113,7 +113,7 @@ export class EffectScope {
           effect.stop()
         },
         {
-          origin: runtimeErrorContexts.effectScopeCleanup,
+          origin: errorContexts.effectScopeCleanup,
           handlerPhase: errorHandlerPhases.sync,
           propagate: errorPropagationStrategies.silent,
         },
@@ -130,7 +130,7 @@ export class EffectScope {
 
       for (const cleanup of registeredCleanups) {
         runWithErrorChannel(cleanup, {
-          origin: runtimeErrorContexts.effectScopeCleanup,
+          origin: errorContexts.effectScopeCleanup,
           handlerPhase: errorHandlerPhases.sync,
           propagate: errorPropagationStrategies.silent,
         })
@@ -145,7 +145,7 @@ export class EffectScope {
             scope.stop(true)
           },
           {
-            origin: runtimeErrorContexts.effectScopeCleanup,
+            origin: errorContexts.effectScopeCleanup,
             handlerPhase: errorHandlerPhases.sync,
             propagate: errorPropagationStrategies.silent,
           },

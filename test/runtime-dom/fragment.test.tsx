@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createTestContainer } from '../setup.ts'
 import type { ErrorHandler, SetupFunctionComponent } from '@/index.ts'
 import { reactive, render, setErrorHandler } from '@/index.ts'
-import { runtimeErrorContexts } from '@/shared/index.ts'
+import { errorContexts } from '@/shared/index.ts'
 
 describe('runtime-dom fragment boundary', () => {
   afterEach(() => {
@@ -86,7 +86,7 @@ describe('runtime-dom fragment boundary', () => {
     const [error, context] = handler.mock.calls[0]
 
     expect(error).toBe(boom)
-    expect(context).toBe(runtimeErrorContexts.effectRunner)
+    expect(context).toBe(errorContexts.effectRunner)
     expect(container.querySelector('[data-testid="faulty"]')).toBeNull()
     expect(container.querySelector('[data-testid="stable"]')?.textContent).toBe('stable:0')
     expect(container.querySelector('[data-testid="tail"]')?.textContent).toBe('tail:0')

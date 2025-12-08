@@ -2,7 +2,7 @@ import type { RendererOptions } from '../index.ts'
 import type { ComponentInstance } from './context.ts'
 import type { SetupFunctionComponent } from '@/jsx-foundation'
 import {
-  runtimeErrorContexts,
+  errorContexts,
   errorHandlerPhases,
   errorPropagationStrategies,
   runWithErrorChannel,
@@ -60,7 +60,7 @@ export function teardownComponentInstance<
     /* 逐一运行外部注册的清理逻辑，避免引用泄漏。 */
     for (const task of tasks) {
       runWithErrorChannel(task, {
-        origin: runtimeErrorContexts.componentCleanup,
+        origin: errorContexts.componentCleanup,
         handlerPhase: errorHandlerPhases.sync,
         propagate: errorPropagationStrategies.silent,
       })

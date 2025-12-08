@@ -2,7 +2,7 @@ export { handleError, setErrorHandler } from './error-handling.ts'
 export {
   dispatchError,
   runWithErrorChannel,
-  runtimeErrorContexts,
+  errorContexts,
   errorHandlerPhases,
   errorPropagationStrategies,
 } from './error-channel.ts'

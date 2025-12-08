@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { ErrorHandler } from '@/index.ts'
 import { computed, effect, ref, setErrorHandler } from '@/index.ts'
-import { runtimeErrorContexts } from '@/shared/index.ts'
+import { errorContexts } from '@/shared/index.ts'
 
 describe('computed', () => {
   afterEach(() => {
@@ -116,6 +116,6 @@ describe('computed', () => {
     const [error, context] = handler.mock.calls[0]
 
     expect(error).toBe(boom)
-    expect(context).toBe(runtimeErrorContexts.computedSetter)
+    expect(context).toBe(errorContexts.computedSetter)
   })
 })

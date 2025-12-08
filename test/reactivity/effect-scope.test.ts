@@ -8,7 +8,7 @@ import {
   reactive,
   setErrorHandler,
 } from '@/index.ts'
-import { runtimeErrorContexts } from '@/shared/index.ts'
+import { errorContexts } from '@/shared/index.ts'
 
 describe('effectScope 行为', () => {
   afterEach(() => {
@@ -88,7 +88,7 @@ describe('effectScope 行为', () => {
     const [error, context] = handler.mock.calls[0]
 
     expect((error as Error).message).toBe('scope cleanup failed')
-    expect(context).toBe(runtimeErrorContexts.effectScopeCleanup)
+    expect(context).toBe(errorContexts.effectScopeCleanup)
   })
 
   it('effectScope.run 抛错会触发错误处理器', () => {
@@ -108,7 +108,7 @@ describe('effectScope 行为', () => {
     const [error, context] = handler.mock.calls[0]
 
     expect(error).toBe(boom)
-    expect(context).toBe(runtimeErrorContexts.effectScopeRun)
+    expect(context).toBe(errorContexts.effectScopeRun)
   })
 
   it('detached scope 不受父级 stop 影响且可单独清理', () => {

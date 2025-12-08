@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { ErrorHandler } from '@/index.ts'
 import { effect, reactive, setErrorHandler } from '@/index.ts'
 import { effectStack } from '@/reactivity/internals/index.ts'
-import { runtimeErrorContexts } from '@/shared/index.ts'
+import { errorContexts } from '@/shared/index.ts'
 
 describe('effect 错误处理', () => {
   afterEach(() => {
@@ -36,7 +36,7 @@ describe('effect 错误处理', () => {
     const [error, context] = handler.mock.calls[0]
 
     expect((error as Error).message).toBe('effect cleanup failed')
-    expect(context).toBe(runtimeErrorContexts.effectCleanup)
+    expect(context).toBe(errorContexts.effectCleanup)
   })
 
   it('effect 抛错会通知错误处理器并保持原有抛出行为', () => {
@@ -55,7 +55,7 @@ describe('effect 错误处理', () => {
     const [error, context] = handler.mock.calls[0]
 
     expect(error).toBe(boom)
-    expect(context).toBe(runtimeErrorContexts.effectRunner)
+    expect(context).toBe(errorContexts.effectRunner)
   })
 
   it('停止后的 effect 重新执行抛错也会触发错误处理', () => {
@@ -82,7 +82,7 @@ describe('effect 错误处理', () => {
     const [error, context] = handler.mock.calls[0]
 
     expect(error).toBe(boom)
-    expect(context).toBe(runtimeErrorContexts.effectRunner)
+    expect(context).toBe(errorContexts.effectRunner)
   })
 
   it('effect 抛错后仍能继续收集新依赖', () => {

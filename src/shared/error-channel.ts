@@ -5,7 +5,7 @@ import { isObject } from './utils.ts'
 /**
  * 框架内预设的错误上下文标签，标记异常来源位置。
  */
-export const runtimeErrorContexts = {
+export const errorContexts = {
   /** 调度队列或 scheduler 内部抛错。 */
   scheduler: 'scheduler',
   /** 副作用 runner 执行阶段的异常。 */
@@ -30,7 +30,7 @@ export const runtimeErrorContexts = {
 /**
  * @beta
  */
-export type ErrorContext = (typeof runtimeErrorContexts)[keyof typeof runtimeErrorContexts]
+export type ErrorContext = (typeof errorContexts)[keyof typeof errorContexts]
 
 /**
  * 控制异常是否向上传播，`silent` 模式吞掉同步异常。

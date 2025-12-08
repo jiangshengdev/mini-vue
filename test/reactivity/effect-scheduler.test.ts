@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { ErrorHandler } from '@/index.ts'
 import { effect, reactive, setErrorHandler } from '@/index.ts'
-import { runtimeErrorContexts } from '@/shared/index.ts'
+import { errorContexts } from '@/shared/index.ts'
 
 describe('effect 调度行为', () => {
   afterEach(() => {
@@ -146,7 +146,7 @@ describe('effect 调度行为', () => {
     const [error, context] = handler.mock.calls[0]
 
     expect((error as Error).message).toBe('scheduler failed')
-    expect(context).toBe(runtimeErrorContexts.scheduler)
+    expect(context).toBe(errorContexts.scheduler)
   })
 
   it('调度队列按触发顺序执行，每次 flush 读取当前值', () => {

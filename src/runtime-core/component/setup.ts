@@ -1,12 +1,7 @@
 import type { ComponentInstance } from './context.ts'
 import { setCurrentInstance, unsetCurrentInstance } from './context.ts'
 import type { ComponentRenderFunction, SetupFunctionComponent } from '@/jsx-foundation'
-import {
-  errorContexts,
-  errorHandlerPhases,
-  errorPropagationStrategies,
-  runWithErrorChannel,
-} from '@/shared/index.ts'
+import { errorContexts, errorHandlerPhases, runWithErrorChannelSilent } from '@/shared/index.ts'
 
 /**
  * 初始化组件，创建 setup 阶段与渲染闭包。
@@ -42,14 +37,13 @@ function invokeSetup<
 
   /* 在组件专属 scope 内运行 setup，便于后续统一 stop。 */
   const render = instance.scope.run(() => {
-    return runWithErrorChannel(
+    return runWithErrorChannelSilent(
       () => {
         return instance.type(instance.props)
       },
       {
         origin: errorContexts.componentSetup,
         handlerPhase: errorHandlerPhases.sync,
-        propagate: errorPropagationStrategies.silent,
         beforeRun() {
           /* 替换全局 currentInstance 以便 setup 内部通过 API 访问自身。 */
           setCurrentInstance(instance)
@@ -72,14 +66,13 @@ function invokeSetup<
 
   if (typeof render !== 'function') {
     /* `setup` 必须返回函数，非函数时透过错误通道上报。 */
-    runWithErrorChannel(
+    runWithErrorChannelSilent(
       () => {
         throw new TypeError('组件必须返回渲染函数以托管本地状态', { cause: render })
       },
       {
         origin: errorContexts.componentSetup,
         handlerPhase: errorHandlerPhases.sync,
-        propagate: errorPropagationStrategies.silent,
       },
     )
 

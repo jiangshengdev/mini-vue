@@ -1,10 +1,5 @@
 import type { EffectInstance } from './contracts/index.ts'
-import {
-  errorContexts,
-  errorHandlerPhases,
-  errorPropagationStrategies,
-  runWithErrorChannel,
-} from '@/shared/index.ts'
+import { errorContexts, errorHandlerPhases, runWithErrorChannelSilent, runWithErrorChannelThrow } from '@/shared/index.ts'
 
 /** 当前正在运行的 effect scope，用于关联副作用与清理。 */
 let activeEffectScope: EffectScope | undefined
@@ -63,10 +58,9 @@ export class EffectScope {
 
     const previousScope = activeEffectScope
 
-    return runWithErrorChannel(fn, {
+    return runWithErrorChannelThrow(fn, {
       origin: errorContexts.effectScopeRun,
       handlerPhase: errorHandlerPhases.sync,
-      propagate: errorPropagationStrategies.throw,
       beforeRun: () => {
         /* 切换全局活跃 scope，确保回调内部的所有副作用归属于当前 scope。 */
         setActiveEffectScope(this)
@@ -108,14 +102,13 @@ export class EffectScope {
 
     /* 逐个停止 scope 内缓存的副作用，释放依赖关系。 */
     for (const effect of this.effects) {
-      runWithErrorChannel(
+      runWithErrorChannelSilent(
         () => {
           effect.stop()
         },
         {
           origin: errorContexts.effectScopeCleanup,
           handlerPhase: errorHandlerPhases.sync,
-          propagate: errorPropagationStrategies.silent,
         },
       )
     }
@@ -129,10 +122,9 @@ export class EffectScope {
       this.cleanups.length = 0
 
       for (const cleanup of registeredCleanups) {
-        runWithErrorChannel(cleanup, {
+        runWithErrorChannelSilent(cleanup, {
           origin: errorContexts.effectScopeCleanup,
           handlerPhase: errorHandlerPhases.sync,
-          propagate: errorPropagationStrategies.silent,
         })
       }
     }
@@ -140,14 +132,13 @@ export class EffectScope {
     if (this.childScopes) {
       /* 通知所有子 scope 级联 stop，并告知它们来源于父级。 */
       for (const scope of this.childScopes) {
-        runWithErrorChannel(
+        runWithErrorChannelSilent(
           () => {
             scope.stop(true)
           },
           {
             origin: errorContexts.effectScopeCleanup,
             handlerPhase: errorHandlerPhases.sync,
-            propagate: errorPropagationStrategies.silent,
           },
         )
       }

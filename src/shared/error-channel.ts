@@ -102,8 +102,6 @@ export type ErrorChannelAfterHook = (token?: ErrorToken) => void
  * 运行带错误通道的回调时附带的配置项。
  */
 export interface RunWithErrorChannelOptions extends ErrorDispatchOptions {
-  /** 指定捕获后是同步抛出还是静默吞掉异常。 */
-  readonly propagate: ErrorPropagationStrategy
   /** 调度前执行的 Hook，通常用于准备工作。 */
   readonly beforeRun?: ErrorChannelBeforeHook
   /** 调度结束后的 Hook，可感知 token 结果。 */
@@ -163,24 +161,9 @@ export function dispatchError(error: unknown, dispatchOptions: ErrorDispatchOpti
   return token
 }
 
-/**
- * 使用统一的错误通道执行回调，按配置决定是否同步抛出。
- */
-export function runWithErrorChannel<T>(
+function runWithErrorChannelBase<T>(
   runner: () => T,
-  options: RunWithErrorChannelOptions & {
-    propagate: typeof errorPropagationStrategies.throw
-  },
-): T
-export function runWithErrorChannel<T>(
-  runner: () => T,
-  options: RunWithErrorChannelOptions & {
-    propagate: typeof errorPropagationStrategies.silent
-  },
-): T | undefined
-
-export function runWithErrorChannel<T>(
-  runner: () => T,
+  propagate: ErrorPropagationStrategy,
   options: RunWithErrorChannelOptions,
 ): T | undefined {
   /* 在主逻辑前执行 before hook，便于构建错误上下文。 */
@@ -197,7 +180,7 @@ export function runWithErrorChannel<T>(
     token = dispatchError(error, options)
 
     /* 同步传播策略需要立即抛出原始异常。 */
-    if (options.propagate === errorPropagationStrategies.throw) {
+    if (propagate === errorPropagationStrategies.throw) {
       throw error
     }
 
@@ -207,4 +190,24 @@ export function runWithErrorChannel<T>(
     /* 无论成功或失败都执行 after hook，并透出 token。 */
     options.afterRun?.(token)
   }
+}
+
+/**
+ * 同步传播异常，调用方接收原始抛错。
+ */
+export function runWithErrorChannelThrow<T>(
+  runner: () => T,
+  options: RunWithErrorChannelOptions,
+): T {
+  return runWithErrorChannelBase(runner, errorPropagationStrategies.throw, options) as T
+}
+
+/**
+ * 静默处理异常，调用方接收 undefined 以继续流程。
+ */
+export function runWithErrorChannelSilent<T>(
+  runner: () => T,
+  options: RunWithErrorChannelOptions,
+): T | undefined {
+  return runWithErrorChannelBase(runner, errorPropagationStrategies.silent, options)
 }

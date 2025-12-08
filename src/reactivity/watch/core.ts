@@ -4,12 +4,7 @@ import { effectStack } from '../internals/index.ts'
 import type { Ref } from '../ref/types.ts'
 import { createGetter, resolveDeepOption } from './utils.ts'
 import type { PlainObject } from '@/shared/index.ts'
-import {
-  errorContexts,
-  errorHandlerPhases,
-  errorPropagationStrategies,
-  runWithErrorChannel,
-} from '@/shared/index.ts'
+import { errorContexts, errorHandlerPhases, runWithErrorChannelSilent } from '@/shared/index.ts'
 
 /**
  * `watch` 可接受的追踪源类型，覆盖 ref、getter 与普通对象。
@@ -109,14 +104,13 @@ export function watch<T>(
     const previousValue = hasOldValue ? oldValue : undefined
 
     /* 调用用户回调并提供本轮注册清理的机会，异常也要更新旧值。 */
-    runWithErrorChannel(
+    runWithErrorChannelSilent(
       () => {
         callback(newValue, previousValue, onCleanup)
       },
       {
         origin: errorContexts.watchCallback,
         handlerPhase: errorHandlerPhases.sync,
-        propagate: errorPropagationStrategies.silent,
         afterRun() {
           oldValue = newValue
           hasOldValue = true
@@ -151,10 +145,9 @@ export function watch<T>(
 
     cleanup = undefined
 
-    runWithErrorChannel(previousCleanup, {
+    runWithErrorChannelSilent(previousCleanup, {
       origin: errorContexts.watchCleanup,
       handlerPhase: errorHandlerPhases.sync,
-      propagate: errorPropagationStrategies.silent,
     })
   }
 

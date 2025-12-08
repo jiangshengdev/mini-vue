@@ -4,12 +4,7 @@ import { trackEffect, triggerEffects } from '../internals/index.ts'
 import type { DependencyBucket } from '../contracts/index.ts'
 import { refFlag } from '../contracts/index.ts'
 import type { Ref } from './types.ts'
-import {
-  errorContexts,
-  errorHandlerPhases,
-  errorPropagationStrategies,
-  runWithErrorChannel,
-} from '@/shared/index.ts'
+import { errorContexts, errorHandlerPhases, runWithErrorChannelThrow } from '@/shared/index.ts'
 
 /**
  * `computed` getter 负责在依赖图中派生出最终结果。
@@ -91,14 +86,13 @@ class ComputedRefImpl<T> implements Ref<T> {
    * 写入 computed 值时交给自定义 setter，由实现自行决定同步策略。
    */
   set value(newValue: T) {
-    runWithErrorChannel(
+    runWithErrorChannelThrow(
       () => {
         this.setter(newValue)
       },
       {
         origin: errorContexts.computedSetter,
         handlerPhase: errorHandlerPhases.sync,
-        propagate: errorPropagationStrategies.throw,
       },
     )
   }

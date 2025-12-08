@@ -6,8 +6,8 @@ import {
   dispatchError,
   errorContexts,
   errorHandlerPhases,
-  errorPropagationStrategies,
-  runWithErrorChannel,
+  runWithErrorChannelSilent,
+  runWithErrorChannelThrow,
 } from '@/shared/index.ts'
 
 describe('runtime-error-channel', () => {
@@ -48,7 +48,7 @@ describe('runtime-error-channel', () => {
     expect(secondToken.notified).toBe(false)
   })
 
-  it('嵌套 runWithErrorChannel 共享同一错误时只通知一次', () => {
+  it('嵌套 runWithErrorChannelThrow 共享同一错误时只通知一次', () => {
     const handler = vi.fn<ErrorHandler>()
 
     setErrorHandler(handler)
@@ -62,19 +62,17 @@ describe('runtime-error-channel', () => {
     }
 
     const runInnerChannel = () => {
-      return runWithErrorChannel(throwNestedError, {
+      return runWithErrorChannelThrow(throwNestedError, {
         origin: errorContexts.componentSetup,
         handlerPhase: errorHandlerPhases.sync,
-        propagate: errorPropagationStrategies.throw,
         afterRun: innerAfterRun,
       })
     }
 
     const runNestedChannel = () => {
-      return runWithErrorChannel(runInnerChannel, {
+      return runWithErrorChannelThrow(runInnerChannel, {
         origin: errorContexts.effectScopeRun,
         handlerPhase: errorHandlerPhases.sync,
-        propagate: errorPropagationStrategies.throw,
         afterRun: outerAfterRun,
       })
     }
@@ -94,7 +92,7 @@ describe('runtime-error-channel', () => {
     expect(outerAfterRun.mock.calls[0]?.[0]?.notified).toBe(false)
   })
 
-  it('runWithErrorChannel 在 sync 场景会同步抛错', () => {
+  it('runWithErrorChannelThrow 在 sync 场景会同步抛错', () => {
     const handler = vi.fn<ErrorHandler>()
 
     setErrorHandler(handler)
@@ -104,14 +102,13 @@ describe('runtime-error-channel', () => {
     const afterRun = vi.fn<ErrorChannelAfterHook>()
 
     expect(() => {
-      runWithErrorChannel(
+      runWithErrorChannelThrow(
         () => {
           throw error
         },
         {
           origin: errorContexts.effectRunner,
           handlerPhase: errorHandlerPhases.sync,
-          propagate: errorPropagationStrategies.throw,
           beforeRun,
           afterRun,
         },
@@ -127,7 +124,7 @@ describe('runtime-error-channel', () => {
     expect(token?.notified).toBe(true)
   })
 
-  it('runWithErrorChannel 在 silent 模式下会吃掉异常但仍会通知处理器', () => {
+  it('runWithErrorChannelSilent 会吃掉异常但仍会通知处理器', () => {
     const handler = vi.fn<ErrorHandler>()
 
     setErrorHandler(handler)
@@ -139,10 +136,9 @@ describe('runtime-error-channel', () => {
     }
 
     const invokeSilentChannel = () => {
-      runWithErrorChannel<never>(throwCleanupError, {
+      runWithErrorChannelSilent<never>(throwCleanupError, {
         origin: errorContexts.componentCleanup,
         handlerPhase: errorHandlerPhases.sync,
-        propagate: errorPropagationStrategies.silent,
       })
     }
 
@@ -172,14 +168,13 @@ describe('runtime-error-channel', () => {
 
     try {
       expect(() => {
-        runWithErrorChannel(
+        runWithErrorChannelSilent(
           () => {
             throw error
           },
           {
             origin: errorContexts.scheduler,
             handlerPhase: errorHandlerPhases.async,
-            propagate: errorPropagationStrategies.silent,
           },
         )
       }).not.toThrow()

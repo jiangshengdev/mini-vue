@@ -8,9 +8,9 @@ export {
   errorMode,
 } from './error-channel.ts'
 export type {
-  ErrorChannelAfterHook,
-  ErrorChannelBeforeHook,
-  ErrorChannelOptions,
+  ErrorAfterHook,
+  ErrorBeforeHook,
+  ErrorRunOptions,
   ErrorContext,
   ErrorPhase,
   ErrorMeta,

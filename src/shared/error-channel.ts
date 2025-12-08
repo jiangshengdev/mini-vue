@@ -91,20 +91,20 @@ export interface ErrorToken {
 /**
  * 调度前执行的钩子，可用于埋点或切换追踪上下文。
  */
-export type ErrorChannelBeforeHook = () => void
+export type ErrorBeforeHook = () => void
 /**
  * 调度结束后的钩子，接收最终 token 以便记录结果。
  */
-export type ErrorChannelAfterHook = (token?: ErrorToken) => void
+export type ErrorAfterHook = (token?: ErrorToken) => void
 
 /**
  * 运行带错误通道的回调时附带的配置项。
  */
-export interface ErrorChannelOptions extends ErrorDispatchOptions {
+export interface ErrorRunOptions extends ErrorDispatchOptions {
   /** 调度前执行的 Hook，通常用于准备工作。 */
-  readonly beforeRun?: ErrorChannelBeforeHook
+  readonly beforeRun?: ErrorBeforeHook
   /** 调度结束后的 Hook，可感知 token 结果。 */
-  readonly afterRun?: ErrorChannelAfterHook
+  readonly afterRun?: ErrorAfterHook
 }
 
 /**
@@ -163,7 +163,7 @@ export function dispatchError(error: unknown, dispatchOptions: ErrorDispatchOpti
 function runWithChannel<T>(
   runner: () => T,
   propagate: ErrorMode,
-  options: ErrorChannelOptions,
+  options: ErrorRunOptions,
 ): T | undefined {
   /* 在主逻辑前执行 before hook，便于构建错误上下文。 */
   options.beforeRun?.()
@@ -194,13 +194,13 @@ function runWithChannel<T>(
 /**
  * 同步传播异常，调用方接收原始抛错。
  */
-export function runThrowing<T>(runner: () => T, options: ErrorChannelOptions): T {
+export function runThrowing<T>(runner: () => T, options: ErrorRunOptions): T {
   return runWithChannel(runner, errorMode.throw, options) as T
 }
 
 /**
  * 静默处理异常，调用方接收 undefined 以继续流程。
  */
-export function runSilent<T>(runner: () => T, options: ErrorChannelOptions): T | undefined {
+export function runSilent<T>(runner: () => T, options: ErrorRunOptions): T | undefined {
   return runWithChannel(runner, errorMode.silent, options)
 }

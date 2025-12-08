@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { ErrorHandler } from '@/index.ts'
 import { setErrorHandler } from '@/index.ts'
-import type { ErrorChannelAfterHook } from '@/shared/index.ts'
+import type { ErrorAfterHook } from '@/shared/index.ts'
 import {
   dispatchError,
   errorContexts,
@@ -54,8 +54,8 @@ describe('runtime-error-channel', () => {
     setErrorHandler(handler)
 
     const error = new Error('nested crash')
-    const outerAfterRun = vi.fn<ErrorChannelAfterHook>()
-    const innerAfterRun = vi.fn<ErrorChannelAfterHook>()
+    const outerAfterRun = vi.fn<ErrorAfterHook>()
+    const innerAfterRun = vi.fn<ErrorAfterHook>()
 
     const throwNestedError = () => {
       throw error
@@ -99,7 +99,7 @@ describe('runtime-error-channel', () => {
 
     const error = new Error('sync runner crash')
     const beforeRun = vi.fn()
-    const afterRun = vi.fn<ErrorChannelAfterHook>()
+    const afterRun = vi.fn<ErrorAfterHook>()
 
     expect(() => {
       runThrowing(

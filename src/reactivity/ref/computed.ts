@@ -9,7 +9,7 @@ import {
   runtimeErrorPropagationStrategies,
   runWithErrorChannel,
 } from '@/shared/index.ts'
-import { refFlag } from '@/reactivity/shared/constants.ts'
+import { refFlag } from '../shared/index.ts'
 
 /**
  * `computed` getter 负责在依赖图中派生出最终结果。

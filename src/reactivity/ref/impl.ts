@@ -4,7 +4,7 @@ import type { DependencyBucket } from '../shared/index.ts'
 import type { Ref } from './types.ts'
 import type { PlainObject } from '@/shared/index.ts'
 import { isPlainObject } from '@/shared/index.ts'
-import { refFlag } from '@/reactivity/shared/constants.ts'
+import { refFlag } from '../shared/index.ts'
 
 /**
  * RefImpl 负责封装普通值的响应式访问器，实现依赖收集与触发。

@@ -37,7 +37,7 @@ export type ErrorContext = (typeof errorContexts)[keyof typeof errorContexts]
  */
 export const errorPropagationStrategies = {
   /** 捕获后同步抛出，交由调用者处理。 */
-  sync: 'sync',
+  throw: 'throw',
   /** 在同步阶段吞掉异常，避免污染主流程。 */
   silent: 'silent',
 } as const
@@ -169,7 +169,7 @@ export function dispatchError(error: unknown, dispatchOptions: ErrorDispatchOpti
 export function runWithErrorChannel<T>(
   runner: () => T,
   options: RunWithErrorChannelOptions & {
-    propagate: typeof errorPropagationStrategies.sync
+    propagate: typeof errorPropagationStrategies.throw
   },
 ): T
 export function runWithErrorChannel<T>(
@@ -197,7 +197,7 @@ export function runWithErrorChannel<T>(
     token = dispatchError(error, options)
 
     /* 同步传播策略需要立即抛出原始异常。 */
-    if (options.propagate === errorPropagationStrategies.sync) {
+    if (options.propagate === errorPropagationStrategies.throw) {
       throw error
     }
 

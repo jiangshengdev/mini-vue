@@ -98,7 +98,7 @@ class ComputedRefImpl<T> implements Ref<T> {
       {
         origin: errorContexts.computedSetter,
         handlerPhase: errorHandlerPhases.sync,
-        propagate: errorPropagationStrategies.sync,
+        propagate: errorPropagationStrategies.throw,
       },
     )
   }

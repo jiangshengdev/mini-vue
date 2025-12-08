@@ -69,7 +69,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
         {
           origin: errorContexts.effectRunner,
           handlerPhase: errorHandlerPhases.sync,
-          propagate: errorPropagationStrategies.sync,
+          propagate: errorPropagationStrategies.throw,
           beforeRun: () => {
             if (shouldTrack) {
               effectStack.push(this)

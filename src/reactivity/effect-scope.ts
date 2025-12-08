@@ -66,7 +66,7 @@ export class EffectScope {
     return runWithErrorChannel(fn, {
       origin: errorContexts.effectScopeRun,
       handlerPhase: errorHandlerPhases.sync,
-      propagate: errorPropagationStrategies.sync,
+      propagate: errorPropagationStrategies.throw,
       beforeRun: () => {
         /* 切换全局活跃 scope，确保回调内部的所有副作用归属于当前 scope。 */
         setActiveEffectScope(this)

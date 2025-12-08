@@ -65,7 +65,7 @@ describe('runtime-error-channel', () => {
       return runWithErrorChannel(throwNestedError, {
         origin: errorContexts.componentSetup,
         handlerPhase: errorHandlerPhases.sync,
-        propagate: errorPropagationStrategies.sync,
+        propagate: errorPropagationStrategies.throw,
         afterRun: innerAfterRun,
       })
     }
@@ -74,7 +74,7 @@ describe('runtime-error-channel', () => {
       return runWithErrorChannel(runInnerChannel, {
         origin: errorContexts.effectScopeRun,
         handlerPhase: errorHandlerPhases.sync,
-        propagate: errorPropagationStrategies.sync,
+        propagate: errorPropagationStrategies.throw,
         afterRun: outerAfterRun,
       })
     }
@@ -111,7 +111,7 @@ describe('runtime-error-channel', () => {
         {
           origin: errorContexts.effectRunner,
           handlerPhase: errorHandlerPhases.sync,
-          propagate: errorPropagationStrategies.sync,
+          propagate: errorPropagationStrategies.throw,
           beforeRun,
           afterRun,
         },

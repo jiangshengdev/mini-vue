@@ -4,6 +4,7 @@
 export type { ElementRef } from '@/runtime-dom/index.ts'
 export {
   reactive,
+  isReactive,
   effect,
   watch,
   computed,

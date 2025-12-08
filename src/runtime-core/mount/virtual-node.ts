@@ -3,8 +3,8 @@ import { mountComponent } from '@/runtime-core/component/index.ts'
 import { mountElement } from './element.ts'
 import { mountChild } from './child.ts'
 import type { MountedHandle } from './handle.ts'
-import type { SetupFunctionComponent, VirtualNode } from '@/virtual-node/index.ts'
-import { Fragment } from '@/virtual-node/index.ts'
+import type { SetupFunctionComponent, VirtualNode } from '@/jsx-foundation/index.ts'
+import { Fragment } from '@/jsx-foundation/index.ts'
 
 /**
  * 将通用 virtualNode 分派给组件或元素挂载路径。

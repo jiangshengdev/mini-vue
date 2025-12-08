@@ -3,8 +3,8 @@ import type {
   ElementProps,
   ElementType,
   VirtualNode,
-} from '@/virtual-node/index.ts'
-import { createVirtualNode } from '@/virtual-node/index.ts'
+} from '@/jsx-foundation/index.ts'
+import { createVirtualNode } from '@/jsx-foundation/index.ts'
 import type { PropsShape } from '@/shared/index.ts'
 
 /**

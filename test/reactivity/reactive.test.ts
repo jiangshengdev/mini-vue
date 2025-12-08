@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { reactive } from '@/index.ts'
 import { isReactive } from '@/reactivity/reactive.ts'
-import type { PlainObject } from '@/shared'
+import type { PlainObject } from '@/shared/index.ts'
 
 describe('reactive', () => {
   it('创建后可读取和写入属性', () => {

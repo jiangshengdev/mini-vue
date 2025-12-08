@@ -1,52 +1,24 @@
-# 组件内直接使用响应式的迭代计划
+# 组件响应式问题记录
 
-## 背景
+## 1. 渲染仍是全量卸载重建且无调度（待优化）
 
-目前函数组件在 `mountComponent` 内部只执行一次，后续依靠手写 `effect` 才能追踪响应式状态。若要让组件体内直接读取 `reactive` 数据并自动更新 UI，需要为组件引入受控的响应式渲染流程和最小化的更新机制。
+- 位置：`src/runtime-core/renderer.ts`、`src/runtime-core/component/render-effect.ts`、`src/runtime-core/mount/index.ts`
+- 现状：组件 effect 触发时会先 teardown 上次子树并清空容器，再重新 `mountChild`；scheduler 同步执行，缺少批量或微任务合并。
+- 影响：同一帧多次状态更新会频繁卸载重建，DOM 抖动导致焦点与事件状态丢失，复杂子树的性能开销明显。
+- 建议：
+  - 在组件 rerender 时引入最小化 patch 流程，利用已有 Fragment/组件锚点限定增量更新范围，避免全量清空。
+  - 增加简单调度器（微任务批量刷新或队列去重），合并同一轮更新请求。
 
-## 总体目标
+## 2. 缺少对非闭包组件的兼容层（待设计）
 
-- 组件函数可以直接访问 `reactive`/`ref` 数据，依赖变化时自动触发组件重新渲染。
-- 渲染副作用在 `unmount` 时能彻底清理，避免内存泄漏或重复订阅。
-- 确保现有测试通过，并补充必要的新用例覆盖组件级响应式行为。
+- 位置：`src/runtime-core/component/setup.ts`
+- 现状：setup 未返回渲染闭包会直接抛出“组件必须返回渲染函数以托管本地状态”，缺少对返回 VNode/JSX 组件的软性兜底。
+- 影响：迁移旧版或第三方组件成本高，开发者无法在 Dev 环境获得渐进式升级指引。
+- 建议：仅在 Dev 模式下自动将返回的 VNode 包裹为闭包并输出 warning，提供迁移提示；Prod 维持严格校验以避免行为差异。
 
-## 迭代路线
+## 3. 实例上下文尚未承载生命周期/依赖注入（待规划）
 
-1. **渲染副作用基础设施（已完成）**
-   - 为组件实例创建 `ReactiveEffect`，封装 `component(props)` 的执行。
-   - 在 `mountComponent` 中保存实例状态（最近一次子树、挂载容器、cleanup 钩子）。
-   - 支持通过 `effect` 的 `scheduler` 钩子将重新渲染请求放入任务队列（初期可直接同步执行）。
-
-2. **重新渲染流程（粗暴刷新版）（已完成）**
-   - 当组件 effect 被触发时，先卸载上次渲染结果，再重新 `mountChild`。
-   - 暂时接受全量重建 DOM，确保功能正确性优先。
-
-3. **销毁与清理（已完成）**
-   - 扩展 `mountComponent` 创建的实例，暴露 `unmount` 能力。
-   - `render`/`createApp` 在卸载或替换节点时，主动调用组件实例的清理逻辑，停止 effect 并断开 DOM 引用。
-
-4. **组件本地状态托管（已完成）**
-   - 新增 `component-instance` 模块，统一记录实例的 `setupState`/`setupContext` 并暴露 `setCurrentInstance`/`getCurrentInstance` 私有 API，为后续生命周期与组合式扩展打地基。
-   - JSX 类型系统强制 `SetupFunctionComponent` 返回渲染闭包；运行时在 setup 阶段仅执行一次组件函数并校验结果，若未返回闭包会抛出“组件必须返回渲染函数以托管本地状态”。
-   - `ReactiveEffect` 现在只负责驱动渲染闭包，组件内部声明的 `reactive`/`ref` 会在 setup 内初始化一次并在每次 rerender 时复用。
-   - Demo 与 `runtime-dom` 组件响应式测试已改写为在组件内创建本地 state，并断言卸载后 effect 停止，覆盖 setup 托管的完整路径。
-
-5. **测试补充（已完成）**
-   - 在 `test/runtime-dom` 增加用例：组件仅依赖响应式数据且无手写 `effect`，多次 state 更新应正确渲染。
-   - 验证卸载后响应式依赖已释放。
-
-6. **（可选）细粒度优化**
-   - 将“卸载-重建”替换为最小化的 `patch` 流程，减少 DOM 抖动。
-   - 引入简单的更新调度（批量、微任务刷新）。
-   - 数组/Fragment 子树已引入 start/end 锚点与组件级锚点，占位范围已准备好，后续可直接在此基础上实现 diff/insertBefore 等增量更新而不影响兄弟节点。
-
-## 后续考虑
-
-- 为不符合契约的第三方组件提供兼容层，例如 Dev 模式下自动将节点结果包裹成闭包并输出 warning，以降低迁移存量代码的门槛。
-- 借助 `currentInstance` 扩展基础生命周期/组合式 API（如 `onMounted`、实例级依赖注入），并让 `setupState` 真正被这些 API 读取与注册，打通完整的组合式体验。
-
-## 阶段验收标准
-
-- 第 2 步完成后：组件无需额外 `effect` 即可随响应式状态更新。
-- 第 3 步完成后：重复挂载/卸载无内存或副作用残留。
-- 第 5 步（可选）：在性能敏感场景下减少不必要的 DOM 重建。
+- 位置：`src/runtime-core/component/context.ts`、`src/runtime-core/component/instance.ts`
+- 现状：`setCurrentInstance`/`getCurrentInstance` 仅用于渲染 effect 构造，没有暴露 `onMounted` 等生命周期注册或 provide/inject 管道，`setupState` 也未被这些能力消费。
+- 影响：组件内部本地 state 无法与潜在的组合式 API 配合，未来扩展生命周期或依赖注入时缺少统一的注册与清理通路。
+- 建议：设计实例级 Hook 注册与清理框架，让生命周期与依赖注入可以读取 `setupState`，并在 teardown 中统一释放。

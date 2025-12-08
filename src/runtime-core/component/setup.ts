@@ -6,7 +6,7 @@ import {
   errorHandlerPhases,
   errorPropagationStrategies,
   runWithErrorChannel,
-} from '@/shared'
+} from '@/shared/index.ts'
 
 /**
  * 初始化组件，创建 setup 阶段与渲染闭包。

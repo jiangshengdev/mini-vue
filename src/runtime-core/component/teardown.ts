@@ -6,7 +6,7 @@ import {
   errorHandlerPhases,
   errorPropagationStrategies,
   runWithErrorChannel,
-} from '@/shared'
+} from '@/shared/index.ts'
 
 /**
  * 移除当前缓存的宿主节点，防止重复保留旧 DOM。

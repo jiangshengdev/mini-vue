@@ -10,7 +10,7 @@ import type {
 } from '@/jsx-foundation'
 import type { ReactiveEffect } from '@/reactivity/effect.ts'
 import type { EffectScope } from '@/reactivity/effect-scope.ts'
-import type { PlainObject } from '@/shared'
+import type { PlainObject } from '@/shared/index.ts'
 
 /**
  * 运行期组件实例结构，统一记录渲染与清理状态。

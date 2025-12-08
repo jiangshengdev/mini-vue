@@ -11,7 +11,7 @@ import {
   errorHandlerPhases,
   errorPropagationStrategies,
   runWithErrorChannel,
-} from '@/shared'
+} from '@/shared/index.ts'
 
 /**
  * 运行组件 effect 并将首个结果挂载到容器。

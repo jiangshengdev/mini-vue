@@ -8,7 +8,7 @@ import type {
   VirtualNodeChild,
 } from './types.ts'
 import { virtualNodeFlag } from './constants.ts'
-import type { PropsShape } from '@/shared'
+import type { PropsShape } from '@/shared/index.ts'
 
 /**
  * JSX 片段组件，不创建额外节点，直接返回 children。

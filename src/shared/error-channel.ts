@@ -52,8 +52,7 @@ export const errorHandlerPhases = {
   /** 表示由异步兜底（如 microtask）捕获。 */
   async: 'async',
 } as const
-export type ErrorHandlerPhase =
-  (typeof errorHandlerPhases)[keyof typeof errorHandlerPhases]
+export type ErrorHandlerPhase = (typeof errorHandlerPhases)[keyof typeof errorHandlerPhases]
 
 /**
  * 允许透传只读的附加上下文信息，便于错误处理器记录。
@@ -119,10 +118,7 @@ const notifiedErrorRegistry = new WeakSet<PlainObject>()
 /**
  * 将捕获到的异常交由错误处理器统一上报，并返回调度 token。
  */
-export function dispatchError(
-  error: unknown,
-  dispatchOptions: ErrorDispatchOptions,
-): ErrorToken {
+export function dispatchError(error: unknown, dispatchOptions: ErrorDispatchOptions): ErrorToken {
   /* 仅对对象类型做去重记录，原始类型直接透传。 */
   const shouldTrack = isObject(error)
   const alreadyNotified = shouldTrack && notifiedErrorRegistry.has(error)

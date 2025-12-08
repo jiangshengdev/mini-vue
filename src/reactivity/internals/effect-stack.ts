@@ -1,44 +1,44 @@
-/**
- * 将 effect 栈封装为对象，集中管理活跃副作用状态。
- */
 import type { EffectInstance } from '../contracts/index.ts'
 
 /**
- * 提供 effect 嵌套时的栈式管理能力，保证当前活跃副作用可被精确追踪。
+ * 提供通用的栈式管理能力，保证嵌套上下文可被精确追踪。
  */
-class EffectStack {
+export class EffectStack<T> {
   /**
-   * 保存所有入栈的副作用实例，维护调用栈结构。
+   * 保存所有入栈的实例，维护调用栈结构。
    */
-  private readonly stack: EffectInstance[] = []
+  private readonly stack: T[] = []
 
   /**
-   * 指向当前正在执行的副作用，便于依赖收集阶段引用。
+   * 指向当前正在执行的实例，便于依赖收集阶段引用。
    */
-  private innerCurrent: EffectInstance | undefined
+  private innerCurrent: T | undefined
 
   /**
-   * 暴露栈顶副作用，供依赖收集阶段读取。
+   * 暴露栈顶实例，供依赖收集阶段读取。
    */
-  get current(): EffectInstance | undefined {
+  get current(): T | undefined {
     return this.innerCurrent
   }
 
   /**
-   * 将副作用压入栈顶并标记为当前活跃对象。
+   * 将实例压入栈顶并标记为当前活跃对象。
    */
-  push(effect: EffectInstance): void {
-    this.stack.push(effect)
-    this.innerCurrent = effect
+  push(value: T): void {
+    this.stack.push(value)
+    this.innerCurrent = value
   }
 
   /**
-   * 弹出最近入栈的副作用，同时恢复上层上下文。
+   * 弹出最近入栈的实例，同时恢复上层上下文。
    */
-  pop(): void {
-    this.stack.pop()
+  pop(): T | undefined {
+    const popped = this.stack.pop()
+
     this.innerCurrent = this.stack.at(-1)
+
+    return popped
   }
 }
 
-export const effectStack = new EffectStack()
+export const effectStack = new EffectStack<EffectInstance>()

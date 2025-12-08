@@ -1,8 +1,9 @@
 import type { EffectInstance } from './contracts/index.ts'
+import { EffectStack } from './internals/effect-stack.ts'
 import { errorContexts, errorPhases, runSilent, runThrowing } from '@/shared/index.ts'
 
-/** 当前正在运行的 effect scope，用于关联副作用与清理。 */
-let activeEffectScope: EffectScope | undefined
+/** 当前正在运行的 effect scope 栈，用于关联副作用与清理。 */
+const effectScopeStack = new EffectStack<EffectScope>()
 
 /**
  * `EffectScope` 负责集中托管多个副作用，统一 stop 时可全部清理。
@@ -38,8 +39,10 @@ export class EffectScope {
     this.detached = detached
 
     /* 非独立 scope 会挂到当前活跃 scope 下，复用其生命周期。 */
-    if (!detached && activeEffectScope) {
-      activeEffectScope.trackChildScope(this)
+    const currentScope = effectScopeStack.current
+
+    if (!detached && currentScope) {
+      currentScope.trackChildScope(this)
     }
   }
 
@@ -56,18 +59,16 @@ export class EffectScope {
       return undefined
     }
 
-    const previousScope = activeEffectScope
-
     return runThrowing(fn, {
       origin: errorContexts.effectScopeRun,
       handlerPhase: errorPhases.sync,
       beforeRun: () => {
         /* 切换全局活跃 scope，确保回调内部的所有副作用归属于当前 scope。 */
-        setActiveEffectScope(this)
+        effectScopeStack.push(this)
       },
       afterRun() {
         /* 无论回调如何结束，都要恢复先前 scope，保持栈式嵌套关系。 */
-        setActiveEffectScope(previousScope)
+        effectScopeStack.pop()
       },
     })
   }
@@ -208,12 +209,7 @@ export function effectScope(detached = false): EffectScope {
  * @public
  */
 export function getCurrentScope(): EffectScope | undefined {
-  return activeEffectScope
-}
-
-/** 更新全局活跃 scope 引用，供 run 切换上下文使用。 */
-function setActiveEffectScope(scope: EffectScope | undefined): void {
-  activeEffectScope = scope
+  return effectScopeStack.current
 }
 
 /**
@@ -221,7 +217,7 @@ function setActiveEffectScope(scope: EffectScope | undefined): void {
  */
 export function recordEffectScope(
   effect: EffectInstance,
-  scope: EffectScope | undefined = activeEffectScope,
+  scope: EffectScope | undefined = effectScopeStack.current,
 ): void {
   scope?.recordEffect(effect)
 }
@@ -232,7 +228,7 @@ export function recordEffectScope(
  * @public
  */
 export function onScopeDispose(cleanup: () => void): void {
-  const scope = activeEffectScope
+  const scope = effectScopeStack.current
 
   /* 若无活跃 scope，说明调用栈不在托管上下文中，直接报错。 */
   if (!scope) {
@@ -247,7 +243,7 @@ export function onScopeDispose(cleanup: () => void): void {
  */
 export function recordScopeCleanup(
   cleanup: () => void,
-  scope: EffectScope | undefined = activeEffectScope,
+  scope: EffectScope | undefined = effectScopeStack.current,
 ): void {
   scope?.addCleanup(cleanup)
 }

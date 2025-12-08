@@ -1,4 +1,4 @@
-import { buildVirtualNode } from './shared.ts'
+import { buildVirtualNode } from './builder.ts'
 import type { ElementProps, ElementType, VirtualNode } from '@/jsx-foundation/index.ts'
 
 /**

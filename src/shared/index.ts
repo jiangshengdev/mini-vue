@@ -5,7 +5,7 @@ export {
   runtimeErrorContexts,
   runtimeErrorHandlerPhases,
   runtimeErrorPropagationStrategies,
-} from './runtime-error-channel.ts'
+} from './error-channel.ts'
 export type {
   ErrorChannelAfterHook,
   ErrorChannelBeforeHook,
@@ -15,6 +15,6 @@ export type {
   RuntimeErrorMeta,
   RuntimeErrorPropagationStrategy,
   RuntimeErrorToken,
-} from './runtime-error-channel.ts'
+} from './error-channel.ts'
 export type { PlainObject, PropsShape } from './types.ts'
 export { isArrayIndex, isDevEnvironment, isNil, isObject, isPlainObject } from './utils.ts'

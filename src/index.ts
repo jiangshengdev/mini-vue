@@ -33,6 +33,6 @@ export type { SetupFunctionComponent, ElementType, VirtualNode } from '@/jsx-fou
 export { Fragment } from '@/jsx-foundation/index.ts'
 export { h, jsx, jsxs, jsxDEV } from '@/jsx-runtime/index.ts'
 export type { PropsShape } from '@/shared/types.ts'
-export type { RuntimeErrorContext } from '@/shared/runtime-error-channel.ts'
+export type { RuntimeErrorContext } from '@/shared/error-channel.ts'
 export type { RuntimeErrorHandler } from '@/shared/error-handling.ts'
 export { setRuntimeErrorHandler } from '@/shared/error-handling.ts'

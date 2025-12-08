@@ -3,7 +3,7 @@ import type {
   RuntimeErrorHandlerPhase,
   RuntimeErrorMeta,
   RuntimeErrorToken,
-} from './runtime-error-channel.ts'
+} from './error-channel.ts'
 
 /**
  * 标准化的错误处理函数签名，统一传入原始异常与上下文标签。

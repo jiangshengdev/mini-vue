@@ -1,7 +1,7 @@
 /**
  * 暴露核心响应式与 JSX 运行时能力，供外部统一引入。
  */
-export type { ElementRef } from './runtime-dom/index.ts'
+export type { ElementRef } from '@/runtime-dom/index.ts'
 export {
   reactive,
   effect,
@@ -14,8 +14,8 @@ export {
   effectScope,
   getCurrentScope,
   onScopeDispose,
-} from './reactivity/index.ts'
-export type { Ref } from './reactivity/index.ts'
+} from '@/reactivity/index.ts'
+export type { Ref } from '@/reactivity/index.ts'
 export type {
   ComputedGetter,
   ComputedSetter,
@@ -25,13 +25,13 @@ export type {
   WatchCallback,
   WatchOptions,
   WatchStopHandle,
-} from './reactivity/index.ts'
-export { createApp, render } from './runtime-dom/index.ts'
-export type { DomAppInstance } from './runtime-dom/index.ts'
+} from '@/reactivity/index.ts'
+export { createApp, render } from '@/runtime-dom/index.ts'
+export type { DomAppInstance } from '@/runtime-dom/index.ts'
 export type { SetupFunctionComponent, ElementType, VirtualNode } from '@/jsx-foundation/index.ts'
 export { Fragment } from '@/jsx-foundation/index.ts'
-export { h, jsx, jsxs, jsxDEV } from './jsx-runtime/index.ts'
-export type { PropsShape } from './shared/types.ts'
-export type { RuntimeErrorContext } from './shared/runtime-error-channel.ts'
-export type { RuntimeErrorHandler } from './shared/error-handling.ts'
-export { setRuntimeErrorHandler } from './shared/error-handling.ts'
+export { h, jsx, jsxs, jsxDEV } from '@/jsx-runtime/index.ts'
+export type { PropsShape } from '@/shared/types.ts'
+export type { RuntimeErrorContext } from '@/shared/runtime-error-channel.ts'
+export type { RuntimeErrorHandler } from '@/shared/error-handling.ts'
+export { setRuntimeErrorHandler } from '@/shared/error-handling.ts'

@@ -1,9 +1,9 @@
 import type {
   ElementType as MiniElementType,
   VirtualNode,
-} from './jsx-foundation/virtual-node/types.ts'
-import type { ElementRef } from '@/runtime-dom'
-import type { PropsShape } from '@/shared'
+} from '@/jsx-foundation/index.ts'
+import type { ElementRef } from '@/runtime-dom/index.ts'
+import type { PropsShape } from '@/shared/index.ts'
 
 /**
  * 为 TypeScript 提供 mini-vue JSX 环境下的类型声明。

@@ -6,7 +6,7 @@ export {
   Fragment,
   isVirtualNode,
   virtualNodeFlag,
-} from './virtual-node/index.ts'
+} from '@/virtual-node/index.ts'
 export type {
   ComponentChildren,
   ComponentResult,
@@ -18,4 +18,4 @@ export type {
   FragmentType,
   VirtualNode,
   VirtualNodeChild,
-} from './virtual-node/index.ts'
+} from '@/virtual-node/index.ts'

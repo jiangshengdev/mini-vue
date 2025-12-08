@@ -1,4 +1,4 @@
-import type { ComponentInstance } from '../../component-instance.ts'
+import type { ComponentInstance } from './context.ts'
 import type { ElementProps, SetupFunctionComponent, VirtualNode } from '@/jsx-foundation/index.ts'
 import { effectScope } from '@/reactivity/effect-scope.ts'
 

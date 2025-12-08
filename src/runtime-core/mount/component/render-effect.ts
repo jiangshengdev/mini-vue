@@ -1,6 +1,6 @@
 import type { RendererOptions } from '../../index.ts'
 import type { MountedHandle } from '../mounted-handle.ts'
-import type { ComponentInstance } from '../../component-instance.ts'
+import type { ComponentInstance } from './context.ts'
 import { teardownComponentInstance, teardownMountedSubtree } from './teardown.ts'
 import { mountChildWithAnchor } from './anchor.ts'
 import type { ComponentResult, SetupFunctionComponent } from '@/jsx-foundation/index.ts'

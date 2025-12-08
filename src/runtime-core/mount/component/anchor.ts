@@ -1,7 +1,7 @@
 import type { RendererOptions } from '../../index.ts'
 import { mountChild } from '../mount-child.ts'
 import type { MountedHandle } from '../mounted-handle.ts'
-import type { ComponentInstance } from '../../component-instance.ts'
+import type { ComponentInstance } from './context.ts'
 import type { ComponentResult, SetupFunctionComponent } from '@/jsx-foundation/index.ts'
 
 /**

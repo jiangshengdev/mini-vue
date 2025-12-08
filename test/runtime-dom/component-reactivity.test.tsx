@@ -3,7 +3,7 @@ import { within } from '@testing-library/dom'
 import { createTestContainer } from '../setup.ts'
 import type { RuntimeErrorHandler, SetupFunctionComponent } from '@/index.ts'
 import { reactive, render, setRuntimeErrorHandler, watch } from '@/index.ts'
-import { getCurrentInstance } from '@/runtime-core/component-instance.ts'
+import { getCurrentInstance } from '@/runtime-core/mount/component/context.ts'
 import { runtimeErrorContexts } from '@/shared/index.ts'
 
 describe('runtime-dom component reactivity', () => {

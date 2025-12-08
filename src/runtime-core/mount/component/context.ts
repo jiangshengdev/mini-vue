@@ -1,7 +1,7 @@
 /**
  * 组件实例的共享定义与当前实例管理工具。
  */
-import type { MountedHandle } from './mount/index.ts'
+import type { MountedHandle } from '../index.ts'
 import type {
   ComponentRenderFunction,
   ComponentResult,

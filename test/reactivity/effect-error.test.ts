@@ -1,20 +1,20 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { RuntimeErrorHandler } from '@/index.ts'
-import { effect, reactive, setRuntimeErrorHandler } from '@/index.ts'
+import type { ErrorHandler } from '@/index.ts'
+import { effect, reactive, setErrorHandler } from '@/index.ts'
 import { effectStack } from '@/reactivity/internals/index.ts'
 import { runtimeErrorContexts } from '@/shared/index.ts'
 
 describe('effect 错误处理', () => {
   afterEach(() => {
-    setRuntimeErrorHandler(undefined)
+    setErrorHandler(undefined)
   })
 
   it('effect cleanup 抛错会通知错误处理器并继续执行剩余清理', () => {
     const state = reactive({ count: 0 })
-    const handler = vi.fn<RuntimeErrorHandler>()
+    const handler = vi.fn<ErrorHandler>()
     const cleanupOrder: string[] = []
 
-    setRuntimeErrorHandler(handler)
+    setErrorHandler(handler)
 
     effect(function cleanupErrorEffect() {
       void state.count
@@ -40,10 +40,10 @@ describe('effect 错误处理', () => {
   })
 
   it('effect 抛错会通知错误处理器并保持原有抛出行为', () => {
-    const handler = vi.fn<RuntimeErrorHandler>()
+    const handler = vi.fn<ErrorHandler>()
     const boom = new Error('effect failed')
 
-    setRuntimeErrorHandler(handler)
+    setErrorHandler(handler)
 
     expect(() => {
       effect(function throwingEffect() {
@@ -59,11 +59,11 @@ describe('effect 错误处理', () => {
   })
 
   it('停止后的 effect 重新执行抛错也会触发错误处理', () => {
-    const handler = vi.fn<RuntimeErrorHandler>()
+    const handler = vi.fn<ErrorHandler>()
     const boom = new Error('stopped effect failed')
     let shouldThrow = false
 
-    setRuntimeErrorHandler(handler)
+    setErrorHandler(handler)
 
     const handle = effect(function maybeThrowEffect() {
       if (shouldThrow) {

@@ -1,20 +1,20 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createTestContainer } from '../setup.ts'
-import type { RuntimeErrorHandler, SetupFunctionComponent } from '@/index.ts'
-import { reactive, render, setRuntimeErrorHandler } from '@/index.ts'
+import type { ErrorHandler, SetupFunctionComponent } from '@/index.ts'
+import { reactive, render, setErrorHandler } from '@/index.ts'
 import { runtimeErrorContexts } from '@/shared/index.ts'
 
 describe('runtime-dom component error isolation (basic)', () => {
   afterEach(() => {
-    setRuntimeErrorHandler(undefined)
+    setErrorHandler(undefined)
   })
 
   it('setup 抛错会通知错误处理器且跳过挂载', () => {
     const container = createTestContainer()
-    const handler = vi.fn<RuntimeErrorHandler>()
+    const handler = vi.fn<ErrorHandler>()
     const boom = new Error('setup failed')
 
-    setRuntimeErrorHandler(handler)
+    setErrorHandler(handler)
 
     const Faulty: SetupFunctionComponent = () => {
       throw boom
@@ -32,10 +32,10 @@ describe('runtime-dom component error isolation (basic)', () => {
 
   it('setup 抛错不影响兄弟挂载', () => {
     const container = createTestContainer()
-    const handler = vi.fn<RuntimeErrorHandler>()
+    const handler = vi.fn<ErrorHandler>()
     const boom = new Error('setup failed')
 
-    setRuntimeErrorHandler(handler)
+    setErrorHandler(handler)
 
     const Faulty: SetupFunctionComponent = () => {
       throw boom
@@ -66,7 +66,7 @@ describe('runtime-dom component error isolation (basic)', () => {
 
   it('首次渲染抛错会停止组件 effect 且不阻断兄弟渲染', () => {
     const container = createTestContainer()
-    const handler = vi.fn<RuntimeErrorHandler>()
+    const handler = vi.fn<ErrorHandler>()
     const boom = new Error('render failed')
     const state = reactive({ count: 0 })
     const renderSpy = vi.fn()
@@ -76,7 +76,7 @@ describe('runtime-dom component error isolation (basic)', () => {
       }
     }
 
-    setRuntimeErrorHandler(handler)
+    setErrorHandler(handler)
 
     const Faulty: SetupFunctionComponent = () => {
       return () => {
@@ -112,11 +112,11 @@ describe('runtime-dom component error isolation (basic)', () => {
 
   it('更新阶段抛错会卸载组件且不影响兄弟', () => {
     const container = createTestContainer()
-    const handler = vi.fn<RuntimeErrorHandler>()
+    const handler = vi.fn<ErrorHandler>()
     const boom = new Error('update failed')
     const state = reactive({ count: 0 })
 
-    setRuntimeErrorHandler(handler)
+    setErrorHandler(handler)
 
     const Faulty: SetupFunctionComponent = () => {
       return () => {

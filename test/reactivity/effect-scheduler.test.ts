@@ -1,11 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { RuntimeErrorHandler } from '@/index.ts'
-import { effect, reactive, setRuntimeErrorHandler } from '@/index.ts'
+import type { ErrorHandler } from '@/index.ts'
+import { effect, reactive, setErrorHandler } from '@/index.ts'
 import { runtimeErrorContexts } from '@/shared/index.ts'
 
 describe('effect 调度行为', () => {
   afterEach(() => {
-    setRuntimeErrorHandler(undefined)
+    setErrorHandler(undefined)
   })
 
   it('支持 scheduler 自定义调度时延迟执行', () => {
@@ -115,9 +115,9 @@ describe('effect 调度行为', () => {
 
   it('scheduler 抛错时不会阻断其余 effect 并触发统一错误处理', () => {
     const state = reactive({ count: 0 })
-    const handler = vi.fn<RuntimeErrorHandler>()
+    const handler = vi.fn<ErrorHandler>()
 
-    setRuntimeErrorHandler(handler)
+    setErrorHandler(handler)
 
     effect(
       function failSchedEffect() {

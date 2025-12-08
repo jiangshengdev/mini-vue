@@ -1,12 +1,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createTestContainer } from '../setup.ts'
-import type { RuntimeErrorHandler, SetupFunctionComponent } from '@/index.ts'
-import { reactive, render, setRuntimeErrorHandler } from '@/index.ts'
+import type { ErrorHandler, SetupFunctionComponent } from '@/index.ts'
+import { reactive, render, setErrorHandler } from '@/index.ts'
 import { runtimeErrorContexts } from '@/shared/index.ts'
 
 describe('runtime-dom fragment boundary', () => {
   afterEach(() => {
-    setRuntimeErrorHandler(undefined)
+    setErrorHandler(undefined)
   })
 
   it('隐藏片段不会误移除外部兄弟', () => {
@@ -39,11 +39,11 @@ describe('runtime-dom fragment boundary', () => {
 
   it('片段子组件故障清理后外部兄弟仍可更新', () => {
     const container = createTestContainer()
-    const handler = vi.fn<RuntimeErrorHandler>()
+    const handler = vi.fn<ErrorHandler>()
     const boom = new Error('fragment child failed')
     const state = reactive({ fail: false, stable: 0, tail: 0 })
 
-    setRuntimeErrorHandler(handler)
+    setErrorHandler(handler)
 
     const Faulty: SetupFunctionComponent = () => {
       return () => {

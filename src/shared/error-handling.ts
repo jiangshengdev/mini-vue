@@ -1,5 +1,5 @@
 import type {
-  RuntimeErrorContext,
+  ErrorContext,
   RuntimeErrorHandlerPhase,
   RuntimeErrorMeta,
   RuntimeErrorToken,
@@ -10,7 +10,7 @@ import type {
  */
 export interface RuntimeErrorDispatchPayload {
   /** 标记触发错误的运行上下文，方便分类处理。 */
-  readonly origin: RuntimeErrorContext
+  readonly origin: ErrorContext
   /** 指示本次调度发生在同步还是异步阶段。 */
   readonly handlerPhase: RuntimeErrorHandlerPhase
   /** 透传的可选元数据，用于补充定位信息。 */
@@ -24,16 +24,16 @@ export interface RuntimeErrorDispatchPayload {
  *
  * @beta
  */
-export type RuntimeErrorHandler = (
+export type ErrorHandler = (
   error: unknown,
-  context: RuntimeErrorContext,
+  context: ErrorContext,
   dispatchPayload?: RuntimeErrorDispatchPayload,
 ) => void
 
 /**
  * 缓存当前生效的错误处理器，未设置时保持 undefined 以便回退默认行为。
  */
-let currentRuntimeErrorHandler: RuntimeErrorHandler | undefined
+let currentRuntimeErrorHandler: ErrorHandler | undefined
 
 /**
  * 允许外部重写默认的错误处理逻辑，便于在响应式、调度器与组件清理阶段统一兜底。
@@ -42,7 +42,7 @@ let currentRuntimeErrorHandler: RuntimeErrorHandler | undefined
  *
  * @beta
  */
-export function setRuntimeErrorHandler(handler?: RuntimeErrorHandler): void {
+export function setErrorHandler(handler?: ErrorHandler): void {
   currentRuntimeErrorHandler = handler
 }
 

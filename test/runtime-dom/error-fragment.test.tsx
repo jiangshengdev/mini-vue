@@ -1,20 +1,20 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createTestContainer } from '../setup.ts'
-import type { RuntimeErrorHandler, SetupFunctionComponent } from '@/index.ts'
-import { reactive, render, setRuntimeErrorHandler } from '@/index.ts'
+import type { ErrorHandler, SetupFunctionComponent } from '@/index.ts'
+import { reactive, render, setErrorHandler } from '@/index.ts'
 import { runtimeErrorContexts } from '@/shared/index.ts'
 
 describe('runtime-dom component error isolation (fragment)', () => {
   afterEach(() => {
-    setRuntimeErrorHandler(undefined)
+    setErrorHandler(undefined)
   })
 
   it('片段中首个组件 setup 失败会清理锚点且不挡住后续节点', () => {
     const container = createTestContainer()
-    const handler = vi.fn<RuntimeErrorHandler>()
+    const handler = vi.fn<ErrorHandler>()
     const boom = new Error('fragment setup failed')
 
-    setRuntimeErrorHandler(handler)
+    setErrorHandler(handler)
 
     const Faulty: SetupFunctionComponent = () => {
       throw boom
@@ -39,11 +39,11 @@ describe('runtime-dom component error isolation (fragment)', () => {
 
   it('有故障的子组件移除后兄弟仍可响应更新', () => {
     const container = createTestContainer()
-    const handler = vi.fn<RuntimeErrorHandler>()
+    const handler = vi.fn<ErrorHandler>()
     const boom = new Error('rerender failed')
     const state = reactive({ a: 0, b: 0 })
 
-    setRuntimeErrorHandler(handler)
+    setErrorHandler(handler)
 
     const Faulty: SetupFunctionComponent = () => {
       return () => {
@@ -95,11 +95,11 @@ describe('runtime-dom component error isolation (fragment)', () => {
 
   it('Fragment 内子组件渲染失败不会误移除兄弟', () => {
     const container = createTestContainer()
-    const handler = vi.fn<RuntimeErrorHandler>()
+    const handler = vi.fn<ErrorHandler>()
     const boom = new Error('fragment rerender failed')
     const state = reactive({ a: 0, b: 0 })
 
-    setRuntimeErrorHandler(handler)
+    setErrorHandler(handler)
 
     const Faulty: SetupFunctionComponent = () => {
       return () => {

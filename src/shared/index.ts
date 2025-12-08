@@ -1,4 +1,4 @@
-export { handleRuntimeError, setRuntimeErrorHandler } from './error-handling.ts'
+export { handleRuntimeError, setErrorHandler } from './error-handling.ts'
 export {
   dispatchRuntimeError,
   runWithErrorChannel,
@@ -10,7 +10,7 @@ export type {
   ErrorChannelAfterHook,
   ErrorChannelBeforeHook,
   RunWithErrorChannelOptions,
-  RuntimeErrorContext,
+  ErrorContext,
   RuntimeErrorHandlerPhase,
   RuntimeErrorMeta,
   RuntimeErrorPropagationStrategy,

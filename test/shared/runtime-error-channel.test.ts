@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { RuntimeErrorHandler } from '@/index.ts'
-import { setRuntimeErrorHandler } from '@/index.ts'
+import type { ErrorHandler } from '@/index.ts'
+import { setErrorHandler } from '@/index.ts'
 import type { ErrorChannelAfterHook } from '@/shared/index.ts'
 import {
   dispatchRuntimeError,
@@ -12,17 +12,17 @@ import {
 
 describe('runtime-error-channel', () => {
   beforeEach(() => {
-    setRuntimeErrorHandler(undefined)
+    setErrorHandler(undefined)
   })
 
   afterEach(() => {
-    setRuntimeErrorHandler(undefined)
+    setErrorHandler(undefined)
   })
 
   it('dispatchRuntimeError 只会上报一次相同的 error', () => {
-    const handler = vi.fn<RuntimeErrorHandler>()
+    const handler = vi.fn<ErrorHandler>()
 
-    setRuntimeErrorHandler(handler)
+    setErrorHandler(handler)
 
     const error = new Error('component boom')
 
@@ -49,9 +49,9 @@ describe('runtime-error-channel', () => {
   })
 
   it('嵌套 runWithErrorChannel 共享同一错误时只通知一次', () => {
-    const handler = vi.fn<RuntimeErrorHandler>()
+    const handler = vi.fn<ErrorHandler>()
 
-    setRuntimeErrorHandler(handler)
+    setErrorHandler(handler)
 
     const error = new Error('nested crash')
     const outerAfterRun = vi.fn<ErrorChannelAfterHook>()
@@ -95,9 +95,9 @@ describe('runtime-error-channel', () => {
   })
 
   it('runWithErrorChannel 在 sync 场景会同步抛错', () => {
-    const handler = vi.fn<RuntimeErrorHandler>()
+    const handler = vi.fn<ErrorHandler>()
 
-    setRuntimeErrorHandler(handler)
+    setErrorHandler(handler)
 
     const error = new Error('sync runner crash')
     const beforeRun = vi.fn()
@@ -128,9 +128,9 @@ describe('runtime-error-channel', () => {
   })
 
   it('runWithErrorChannel 在 silent 模式下会吃掉异常但仍会通知处理器', () => {
-    const handler = vi.fn<RuntimeErrorHandler>()
+    const handler = vi.fn<ErrorHandler>()
 
-    setRuntimeErrorHandler(handler)
+    setErrorHandler(handler)
 
     const error = new Error('silent runner crash')
 

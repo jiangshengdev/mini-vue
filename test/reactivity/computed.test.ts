@@ -1,11 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { RuntimeErrorHandler } from '@/index.ts'
-import { computed, effect, ref, setRuntimeErrorHandler } from '@/index.ts'
+import type { ErrorHandler } from '@/index.ts'
+import { computed, effect, ref, setErrorHandler } from '@/index.ts'
 import { runtimeErrorContexts } from '@/shared/index.ts'
 
 describe('computed', () => {
   afterEach(() => {
-    setRuntimeErrorHandler(undefined)
+    setErrorHandler(undefined)
   })
 
   it('懒执行并缓存计算结果', () => {
@@ -93,11 +93,11 @@ describe('computed', () => {
   })
 
   it('setter 抛错时会同步抛出并通知错误处理器', () => {
-    const handler = vi.fn<RuntimeErrorHandler>()
+    const handler = vi.fn<ErrorHandler>()
     const base = ref(0)
     const boom = new Error('setter failed')
 
-    setRuntimeErrorHandler(handler)
+    setErrorHandler(handler)
 
     const custom = computed({
       get: function getBase() {

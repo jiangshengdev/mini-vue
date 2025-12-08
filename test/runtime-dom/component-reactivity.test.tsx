@@ -1,14 +1,14 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { within } from '@testing-library/dom'
 import { createTestContainer } from '../setup.ts'
-import type { RuntimeErrorHandler, SetupFunctionComponent } from '@/index.ts'
-import { reactive, render, setRuntimeErrorHandler, watch } from '@/index.ts'
+import type { ErrorHandler, SetupFunctionComponent } from '@/index.ts'
+import { reactive, render, setErrorHandler, watch } from '@/index.ts'
 import { getCurrentInstance } from '@/runtime-core/mount/component/context.ts'
 import { runtimeErrorContexts } from '@/shared/index.ts'
 
 describe('runtime-dom component reactivity', () => {
   afterEach(() => {
-    setRuntimeErrorHandler(undefined)
+    setErrorHandler(undefined)
   })
 
   it('组件体读取 reactive 数据时会自动重渲染', () => {
@@ -186,10 +186,10 @@ describe('runtime-dom component reactivity', () => {
 
   it('组件 cleanupTasks 抛错时不会阻塞后续清理', () => {
     const container = createTestContainer()
-    const handler = vi.fn<RuntimeErrorHandler>()
+    const handler = vi.fn<ErrorHandler>()
     const cleanupOrder: string[] = []
 
-    setRuntimeErrorHandler(handler)
+    setErrorHandler(handler)
 
     const WithCleanup: SetupFunctionComponent = () => {
       const instance = getCurrentInstance()

@@ -1,18 +1,18 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { RuntimeErrorHandler } from '@/index.ts'
+import type { ErrorHandler } from '@/index.ts'
 import {
   computed,
   effect,
   effectScope,
   onScopeDispose,
   reactive,
-  setRuntimeErrorHandler,
+  setErrorHandler,
 } from '@/index.ts'
 import { runtimeErrorContexts } from '@/shared/index.ts'
 
 describe('effectScope 行为', () => {
   afterEach(() => {
-    setRuntimeErrorHandler(undefined)
+    setErrorHandler(undefined)
   })
 
   it('effectScope 停止后会级联停止内部 effect', () => {
@@ -65,10 +65,10 @@ describe('effectScope 行为', () => {
 
   it('effectScope 停止时 cleanup 抛错不会阻断剩余任务', () => {
     const scope = effectScope()
-    const handler = vi.fn<RuntimeErrorHandler>()
+    const handler = vi.fn<ErrorHandler>()
     const cleanupOrder: string[] = []
 
-    setRuntimeErrorHandler(handler)
+    setErrorHandler(handler)
 
     scope.run(function registerCleanups() {
       onScopeDispose(function cleanupFirst() {
@@ -93,10 +93,10 @@ describe('effectScope 行为', () => {
 
   it('effectScope.run 抛错会触发错误处理器', () => {
     const scope = effectScope()
-    const handler = vi.fn<RuntimeErrorHandler>()
+    const handler = vi.fn<ErrorHandler>()
     const boom = new Error('scope failed')
 
-    setRuntimeErrorHandler(handler)
+    setErrorHandler(handler)
 
     expect(() => {
       scope.run(function scopeThrows() {

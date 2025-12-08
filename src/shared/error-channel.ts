@@ -30,7 +30,7 @@ export const runtimeErrorContexts = {
 /**
  * @beta
  */
-export type RuntimeErrorContext = (typeof runtimeErrorContexts)[keyof typeof runtimeErrorContexts]
+export type ErrorContext = (typeof runtimeErrorContexts)[keyof typeof runtimeErrorContexts]
 
 /**
  * 控制异常是否向上传播，`silent` 模式吞掉同步异常。
@@ -65,7 +65,7 @@ export type RuntimeErrorMeta = Readonly<PlainObject>
  */
 interface RuntimeErrorDispatchOptions {
   /** 标记异常发生的运行时上下文，用于日志聚合。 */
-  readonly origin: RuntimeErrorContext
+  readonly origin: ErrorContext
   /** 指示当前捕获处于同步还是异步阶段。 */
   readonly handlerPhase: RuntimeErrorHandlerPhase
   /** 透传额外的业务数据，辅助错误定位。 */
@@ -81,7 +81,7 @@ export interface RuntimeErrorToken {
   /** 捕获到的原始异常对象。 */
   readonly error: unknown
   /** 异常来源标签，便于上层辨别来源。 */
-  readonly origin: RuntimeErrorContext
+  readonly origin: ErrorContext
   /** 调度所处阶段，帮助区分 sync/async 管线。 */
   readonly handlerPhase: RuntimeErrorHandlerPhase
   /** 伴随异常一起上报的元数据。 */

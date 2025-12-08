@@ -1,20 +1,20 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createTestContainer } from '../setup.ts'
-import type { RuntimeErrorHandler, SetupFunctionComponent } from '@/index.ts'
-import { reactive, render, setRuntimeErrorHandler } from '@/index.ts'
+import type { ErrorHandler, SetupFunctionComponent } from '@/index.ts'
+import { reactive, render, setErrorHandler } from '@/index.ts'
 import { runtimeErrorContexts } from '@/shared/index.ts'
 
 describe('runtime-dom component error isolation (nested)', () => {
   afterEach(() => {
-    setRuntimeErrorHandler(undefined)
+    setErrorHandler(undefined)
   })
 
   it('嵌套子组件 setup 抛错不影响同级节点', () => {
     const container = createTestContainer()
-    const handler = vi.fn<RuntimeErrorHandler>()
+    const handler = vi.fn<ErrorHandler>()
     const boom = new Error('nested setup failed')
 
-    setRuntimeErrorHandler(handler)
+    setErrorHandler(handler)
 
     const Faulty: SetupFunctionComponent = () => {
       throw boom
@@ -43,11 +43,11 @@ describe('runtime-dom component error isolation (nested)', () => {
 
   it('嵌套子组件更新抛错仅卸载自身', () => {
     const container = createTestContainer()
-    const handler = vi.fn<RuntimeErrorHandler>()
+    const handler = vi.fn<ErrorHandler>()
     const boom = new Error('nested update failed')
     const state = reactive({ count: 0 })
 
-    setRuntimeErrorHandler(handler)
+    setErrorHandler(handler)
 
     const Faulty: SetupFunctionComponent = () => {
       return () => {
@@ -91,10 +91,10 @@ describe('runtime-dom component error isolation (nested)', () => {
 
   it('数组 children 中某项 setup 抛错不影响其他项', () => {
     const container = createTestContainer()
-    const handler = vi.fn<RuntimeErrorHandler>()
+    const handler = vi.fn<ErrorHandler>()
     const boom = new Error('list setup failed')
 
-    setRuntimeErrorHandler(handler)
+    setErrorHandler(handler)
 
     const Faulty: SetupFunctionComponent = () => {
       throw boom
@@ -118,11 +118,11 @@ describe('runtime-dom component error isolation (nested)', () => {
 
   it('数组 children 更新抛错仅移除对应项', () => {
     const container = createTestContainer()
-    const handler = vi.fn<RuntimeErrorHandler>()
+    const handler = vi.fn<ErrorHandler>()
     const boom = new Error('list update failed')
     const state = reactive({ count: 0 })
 
-    setRuntimeErrorHandler(handler)
+    setErrorHandler(handler)
 
     const Faulty: SetupFunctionComponent = () => {
       return () => {

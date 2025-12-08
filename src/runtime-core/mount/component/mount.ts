@@ -1,5 +1,5 @@
 import type { RendererOptions } from '../../index.ts'
-import type { MountedHandle } from '../mounted-handle.ts'
+import type { MountedHandle } from '../handle.ts'
 import { attachInstanceToVirtualNode, createComponentInstance } from './instance.ts'
 import { resolveComponentProps } from './props.ts'
 import { performInitialRender } from './render-effect.ts'

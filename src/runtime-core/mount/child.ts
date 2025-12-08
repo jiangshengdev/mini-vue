@@ -1,6 +1,6 @@
 import type { RendererOptions } from '../index.ts'
-import { mountVirtualNode } from './mount-virtual-node.ts'
-import type { MountedHandle } from './mounted-handle.ts'
+import { mountVirtualNode } from './virtual-node.ts'
+import type { MountedHandle } from './handle.ts'
 import type { ComponentResult } from '@/jsx-foundation/index.ts'
 import { isVirtualNode } from '@/jsx-foundation/index.ts'
 import { isNil } from '@/shared/index.ts'

@@ -1,5 +1,5 @@
 import type { RendererOptions } from '../../index.ts'
-import type { MountedHandle } from '../mounted-handle.ts'
+import type { MountedHandle } from '../handle.ts'
 import type { ComponentInstance } from './context.ts'
 import { teardownComponentInstance, teardownMountedSubtree } from './teardown.ts'
 import { mountChildWithAnchor } from './anchor.ts'

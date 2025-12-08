@@ -1,6 +1,6 @@
 import type { RendererOptions } from '../index.ts'
-import { mountChild } from './mount-child.ts'
-import type { MountedHandle } from './mounted-handle.ts'
+import { mountChild } from './child.ts'
+import type { MountedHandle } from './handle.ts'
 import type { VirtualNodeChild } from '@/jsx-foundation/index.ts'
 
 /**

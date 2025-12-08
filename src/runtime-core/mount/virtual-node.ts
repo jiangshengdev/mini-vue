@@ -1,8 +1,8 @@
 import type { RendererOptions } from '../index.ts'
 import { mountComponent } from './component/index.ts'
-import { mountElement } from './mount-element.ts'
-import { mountChild } from './mount-child.ts'
-import type { MountedHandle } from './mounted-handle.ts'
+import { mountElement } from './element.ts'
+import { mountChild } from './child.ts'
+import type { MountedHandle } from './handle.ts'
 import type { SetupFunctionComponent, VirtualNode } from '@/jsx-foundation/index.ts'
 import { Fragment } from '@/jsx-foundation/index.ts'
 

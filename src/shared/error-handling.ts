@@ -1,4 +1,4 @@
-import type { ErrorContext, ErrorPhase, ErrorMeta, ErrorToken } from './error-channel.ts'
+import type { ErrorContext, ErrorMeta, ErrorPhase, ErrorToken } from './error-channel.ts'
 
 /**
  * 标准化的错误处理函数签名，统一传入原始异常与上下文标签。

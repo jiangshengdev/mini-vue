@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { effect, reactive } from '@/index.ts'
 import { effectStack } from '@/reactivity/internals/index.ts'
-import * as dependencyUtils from '@/reactivity/internals/dependency-utils.ts'
+import * as dependencyUtils from '@/reactivity/internals/dependency.ts'
 
 describe('effect 基础行为', () => {
   it('注册后会立刻执行一次副作用', () => {

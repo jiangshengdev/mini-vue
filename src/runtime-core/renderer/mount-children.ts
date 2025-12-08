@@ -1,7 +1,7 @@
 import type { RendererOptions } from '../index.ts'
 import { mountChild } from './mount-child.ts'
 import type { MountedHandle } from './mounted-handle.ts'
-import type { VirtualNodeChild } from '@/jsx/index.ts'
+import type { VirtualNodeChild } from '@/jsx-foundation/index.ts'
 
 /**
  * 依次挂载元素的 children，保持声明顺序插入。

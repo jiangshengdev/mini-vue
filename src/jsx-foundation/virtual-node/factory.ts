@@ -6,8 +6,8 @@ import type {
   FragmentProps,
   VirtualNode,
   VirtualNodeChild,
-} from '@/jsx/index.ts'
-import { virtualNodeFlag } from '@/jsx/index.ts'
+} from '@/jsx-foundation/index.ts'
+import { virtualNodeFlag } from '@/jsx-foundation/index.ts'
 import type { PropsShape } from '@/shared/index.ts'
 
 /**

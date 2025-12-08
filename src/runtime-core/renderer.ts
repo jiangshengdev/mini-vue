@@ -3,7 +3,7 @@
  */
 import { mountChild } from './renderer/mount-child.ts'
 import type { MountedHandle } from './renderer/index.ts'
-import type { ComponentResult } from '@/jsx/index.ts'
+import type { ComponentResult } from '@/jsx-foundation/index.ts'
 import type { PlainObject, PropsShape } from '@/shared/index.ts'
 
 /**

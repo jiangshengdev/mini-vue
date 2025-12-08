@@ -7,7 +7,7 @@ import type {
   ComponentResult,
   ElementProps,
   SetupFunctionComponent,
-} from '@/jsx/index.ts'
+} from '@/jsx-foundation/index.ts'
 import type { ReactiveEffect } from '@/reactivity/effect.ts'
 import type { EffectScope } from '@/reactivity/effect-scope.ts'
 import type { PlainObject } from '@/shared/index.ts'

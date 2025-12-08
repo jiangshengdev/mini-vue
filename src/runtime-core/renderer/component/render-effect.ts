@@ -3,7 +3,7 @@ import type { MountedHandle } from '../mounted-handle.ts'
 import type { ComponentInstance } from '../../component-instance.ts'
 import { teardownComponentInstance, teardownMountedSubtree } from './teardown.ts'
 import { mountChildWithAnchor } from './anchor.ts'
-import type { ComponentResult, SetupFunctionComponent } from '@/jsx/index.ts'
+import type { ComponentResult, SetupFunctionComponent } from '@/jsx-foundation/index.ts'
 import { ReactiveEffect } from '@/reactivity/effect.ts'
 import { recordEffectScope } from '@/reactivity/effect-scope.ts'
 import {

@@ -1,5 +1,5 @@
-import type { VirtualNode } from '@/jsx/index.ts'
-import { virtualNodeFlag } from '@/jsx/index.ts'
+import type { VirtualNode } from '@/jsx-foundation/index.ts'
+import { virtualNodeFlag } from '@/jsx-foundation/index.ts'
 import { isObject } from '@/shared/index.ts'
 
 /**

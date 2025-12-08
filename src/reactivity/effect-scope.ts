@@ -1,8 +1,8 @@
 import type { EffectInstance } from './contracts/index.ts'
 import {
   runtimeErrorContexts,
-  runtimeErrorHandlerPhases,
-  runtimeErrorPropagationStrategies,
+  errorHandlerPhases,
+  errorPropagationStrategies,
   runWithErrorChannel,
 } from '@/shared/index.ts'
 
@@ -65,8 +65,8 @@ export class EffectScope {
 
     return runWithErrorChannel(fn, {
       origin: runtimeErrorContexts.effectScopeRun,
-      handlerPhase: runtimeErrorHandlerPhases.sync,
-      propagate: runtimeErrorPropagationStrategies.sync,
+      handlerPhase: errorHandlerPhases.sync,
+      propagate: errorPropagationStrategies.sync,
       beforeRun: () => {
         /* 切换全局活跃 scope，确保回调内部的所有副作用归属于当前 scope。 */
         setActiveEffectScope(this)
@@ -114,8 +114,8 @@ export class EffectScope {
         },
         {
           origin: runtimeErrorContexts.effectScopeCleanup,
-          handlerPhase: runtimeErrorHandlerPhases.sync,
-          propagate: runtimeErrorPropagationStrategies.silent,
+          handlerPhase: errorHandlerPhases.sync,
+          propagate: errorPropagationStrategies.silent,
         },
       )
     }
@@ -131,8 +131,8 @@ export class EffectScope {
       for (const cleanup of registeredCleanups) {
         runWithErrorChannel(cleanup, {
           origin: runtimeErrorContexts.effectScopeCleanup,
-          handlerPhase: runtimeErrorHandlerPhases.sync,
-          propagate: runtimeErrorPropagationStrategies.silent,
+          handlerPhase: errorHandlerPhases.sync,
+          propagate: errorPropagationStrategies.silent,
         })
       }
     }
@@ -146,8 +146,8 @@ export class EffectScope {
           },
           {
             origin: runtimeErrorContexts.effectScopeCleanup,
-            handlerPhase: runtimeErrorHandlerPhases.sync,
-            propagate: runtimeErrorPropagationStrategies.silent,
+            handlerPhase: errorHandlerPhases.sync,
+            propagate: errorPropagationStrategies.silent,
           },
         )
       }

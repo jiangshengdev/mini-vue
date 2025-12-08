@@ -9,8 +9,8 @@ import type {
 } from './contracts/index.ts'
 import {
   runtimeErrorContexts,
-  runtimeErrorHandlerPhases,
-  runtimeErrorPropagationStrategies,
+  errorHandlerPhases,
+  errorPropagationStrategies,
   runWithErrorChannel,
 } from '@/shared/index.ts'
 
@@ -68,8 +68,8 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
         },
         {
           origin: runtimeErrorContexts.effectRunner,
-          handlerPhase: runtimeErrorHandlerPhases.sync,
-          propagate: runtimeErrorPropagationStrategies.sync,
+          handlerPhase: errorHandlerPhases.sync,
+          propagate: errorPropagationStrategies.sync,
           beforeRun: () => {
             if (shouldTrack) {
               effectStack.push(this)
@@ -144,8 +144,8 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
       for (const cleanup of cleanupTasks) {
         runWithErrorChannel(cleanup, {
           origin: runtimeErrorContexts.effectCleanup,
-          handlerPhase: runtimeErrorHandlerPhases.sync,
-          propagate: runtimeErrorPropagationStrategies.silent,
+          handlerPhase: errorHandlerPhases.sync,
+          propagate: errorPropagationStrategies.silent,
         })
       }
     }

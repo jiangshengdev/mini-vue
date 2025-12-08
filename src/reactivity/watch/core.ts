@@ -6,8 +6,8 @@ import { createGetter, resolveDeepOption } from './utils.ts'
 import type { PlainObject } from '@/shared/index.ts'
 import {
   runtimeErrorContexts,
-  runtimeErrorHandlerPhases,
-  runtimeErrorPropagationStrategies,
+  errorHandlerPhases,
+  errorPropagationStrategies,
   runWithErrorChannel,
 } from '@/shared/index.ts'
 
@@ -115,8 +115,8 @@ export function watch<T>(
       },
       {
         origin: runtimeErrorContexts.watchCallback,
-        handlerPhase: runtimeErrorHandlerPhases.sync,
-        propagate: runtimeErrorPropagationStrategies.silent,
+        handlerPhase: errorHandlerPhases.sync,
+        propagate: errorPropagationStrategies.silent,
         afterRun() {
           oldValue = newValue
           hasOldValue = true
@@ -153,8 +153,8 @@ export function watch<T>(
 
     runWithErrorChannel(previousCleanup, {
       origin: runtimeErrorContexts.watchCleanup,
-      handlerPhase: runtimeErrorHandlerPhases.sync,
-      propagate: runtimeErrorPropagationStrategies.silent,
+      handlerPhase: errorHandlerPhases.sync,
+      propagate: errorPropagationStrategies.silent,
     })
   }
 

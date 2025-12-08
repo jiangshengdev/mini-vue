@@ -3,8 +3,8 @@ import type { ComponentInstance } from './context.ts'
 import type { SetupFunctionComponent } from '@/jsx-foundation/index.ts'
 import {
   runtimeErrorContexts,
-  runtimeErrorHandlerPhases,
-  runtimeErrorPropagationStrategies,
+  errorHandlerPhases,
+  errorPropagationStrategies,
   runWithErrorChannel,
 } from '@/shared/index.ts'
 
@@ -61,8 +61,8 @@ export function teardownComponentInstance<
     for (const task of tasks) {
       runWithErrorChannel(task, {
         origin: runtimeErrorContexts.componentCleanup,
-        handlerPhase: runtimeErrorHandlerPhases.sync,
-        propagate: runtimeErrorPropagationStrategies.silent,
+        handlerPhase: errorHandlerPhases.sync,
+        propagate: errorPropagationStrategies.silent,
       })
     }
   }

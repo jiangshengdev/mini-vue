@@ -8,8 +8,8 @@ import { ReactiveEffect } from '@/reactivity/effect.ts'
 import { recordEffectScope } from '@/reactivity/effect-scope.ts'
 import {
   runtimeErrorContexts,
-  runtimeErrorHandlerPhases,
-  runtimeErrorPropagationStrategies,
+  errorHandlerPhases,
+  errorPropagationStrategies,
   runWithErrorChannel,
 } from '@/shared/index.ts'
 
@@ -42,9 +42,9 @@ export function performInitialRender<
     },
     {
       origin: runtimeErrorContexts.effectRunner,
-      handlerPhase: runtimeErrorHandlerPhases.sync,
+      handlerPhase: errorHandlerPhases.sync,
       /* 与 Vue 类似：首渲染错误上报但不中断兄弟挂载。 */
-      propagate: runtimeErrorPropagationStrategies.silent,
+      propagate: errorPropagationStrategies.silent,
       afterRun(token) {
         if (token?.error) {
           teardownComponentInstance(options, instance)
@@ -103,8 +103,8 @@ function rerenderComponent<
   /* 调度执行由 effect 决定，异常时标记失败并避免重新挂载。 */
   runWithErrorChannel(renderSchedulerJob, {
     origin: runtimeErrorContexts.scheduler,
-    handlerPhase: runtimeErrorHandlerPhases.sync,
-    propagate: runtimeErrorPropagationStrategies.silent,
+    handlerPhase: errorHandlerPhases.sync,
+    propagate: errorPropagationStrategies.silent,
     afterRun(token) {
       if (token?.error) {
         rerenderFailed = true

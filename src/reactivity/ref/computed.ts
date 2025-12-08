@@ -6,8 +6,8 @@ import { refFlag } from '../contracts/index.ts'
 import type { Ref } from './types.ts'
 import {
   runtimeErrorContexts,
-  runtimeErrorHandlerPhases,
-  runtimeErrorPropagationStrategies,
+  errorHandlerPhases,
+  errorPropagationStrategies,
   runWithErrorChannel,
 } from '@/shared/index.ts'
 
@@ -97,8 +97,8 @@ class ComputedRefImpl<T> implements Ref<T> {
       },
       {
         origin: runtimeErrorContexts.computedSetter,
-        handlerPhase: runtimeErrorHandlerPhases.sync,
-        propagate: runtimeErrorPropagationStrategies.sync,
+        handlerPhase: errorHandlerPhases.sync,
+        propagate: errorPropagationStrategies.sync,
       },
     )
   }

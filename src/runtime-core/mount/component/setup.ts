@@ -3,8 +3,8 @@ import { setCurrentInstance, unsetCurrentInstance } from './context.ts'
 import type { ComponentRenderFunction, SetupFunctionComponent } from '@/jsx-foundation/index.ts'
 import {
   runtimeErrorContexts,
-  runtimeErrorHandlerPhases,
-  runtimeErrorPropagationStrategies,
+  errorHandlerPhases,
+  errorPropagationStrategies,
   runWithErrorChannel,
 } from '@/shared/index.ts'
 
@@ -48,8 +48,8 @@ function invokeSetup<
       },
       {
         origin: runtimeErrorContexts.componentSetup,
-        handlerPhase: runtimeErrorHandlerPhases.sync,
-        propagate: runtimeErrorPropagationStrategies.silent,
+        handlerPhase: errorHandlerPhases.sync,
+        propagate: errorPropagationStrategies.silent,
         beforeRun() {
           /* 替换全局 currentInstance 以便 setup 内部通过 API 访问自身。 */
           setCurrentInstance(instance)
@@ -78,8 +78,8 @@ function invokeSetup<
       },
       {
         origin: runtimeErrorContexts.componentSetup,
-        handlerPhase: runtimeErrorHandlerPhases.sync,
-        propagate: runtimeErrorPropagationStrategies.silent,
+        handlerPhase: errorHandlerPhases.sync,
+        propagate: errorPropagationStrategies.silent,
       },
     )
 

@@ -3,10 +3,10 @@ import type { ErrorHandler } from '@/index.ts'
 import { setErrorHandler } from '@/index.ts'
 import type { ErrorChannelAfterHook } from '@/shared/index.ts'
 import {
-  dispatchRuntimeError,
+  dispatchError,
   runtimeErrorContexts,
-  runtimeErrorHandlerPhases,
-  runtimeErrorPropagationStrategies,
+  errorHandlerPhases,
+  errorPropagationStrategies,
   runWithErrorChannel,
 } from '@/shared/index.ts'
 
@@ -26,9 +26,9 @@ describe('runtime-error-channel', () => {
 
     const error = new Error('component boom')
 
-    const firstToken = dispatchRuntimeError(error, {
+    const firstToken = dispatchError(error, {
       origin: runtimeErrorContexts.componentSetup,
-      handlerPhase: runtimeErrorHandlerPhases.sync,
+      handlerPhase: errorHandlerPhases.sync,
     })
 
     expect(handler).toHaveBeenCalledTimes(1)
@@ -39,9 +39,9 @@ describe('runtime-error-channel', () => {
     expect(context).toBe(runtimeErrorContexts.componentSetup)
     expect(payload?.token).toBe(firstToken)
 
-    const secondToken = dispatchRuntimeError(error, {
+    const secondToken = dispatchError(error, {
       origin: runtimeErrorContexts.effectRunner,
-      handlerPhase: runtimeErrorHandlerPhases.async,
+      handlerPhase: errorHandlerPhases.async,
     })
 
     expect(handler).toHaveBeenCalledTimes(1)
@@ -64,8 +64,8 @@ describe('runtime-error-channel', () => {
     const runInnerChannel = () => {
       return runWithErrorChannel(throwNestedError, {
         origin: runtimeErrorContexts.componentSetup,
-        handlerPhase: runtimeErrorHandlerPhases.sync,
-        propagate: runtimeErrorPropagationStrategies.sync,
+        handlerPhase: errorHandlerPhases.sync,
+        propagate: errorPropagationStrategies.sync,
         afterRun: innerAfterRun,
       })
     }
@@ -73,8 +73,8 @@ describe('runtime-error-channel', () => {
     const runNestedChannel = () => {
       return runWithErrorChannel(runInnerChannel, {
         origin: runtimeErrorContexts.effectScopeRun,
-        handlerPhase: runtimeErrorHandlerPhases.sync,
-        propagate: runtimeErrorPropagationStrategies.sync,
+        handlerPhase: errorHandlerPhases.sync,
+        propagate: errorPropagationStrategies.sync,
         afterRun: outerAfterRun,
       })
     }
@@ -110,8 +110,8 @@ describe('runtime-error-channel', () => {
         },
         {
           origin: runtimeErrorContexts.effectRunner,
-          handlerPhase: runtimeErrorHandlerPhases.sync,
-          propagate: runtimeErrorPropagationStrategies.sync,
+          handlerPhase: errorHandlerPhases.sync,
+          propagate: errorPropagationStrategies.sync,
           beforeRun,
           afterRun,
         },
@@ -141,8 +141,8 @@ describe('runtime-error-channel', () => {
     const invokeSilentChannel = () => {
       runWithErrorChannel<never>(throwCleanupError, {
         origin: runtimeErrorContexts.componentCleanup,
-        handlerPhase: runtimeErrorHandlerPhases.sync,
-        propagate: runtimeErrorPropagationStrategies.silent,
+        handlerPhase: errorHandlerPhases.sync,
+        propagate: errorPropagationStrategies.silent,
       })
     }
 
@@ -178,8 +178,8 @@ describe('runtime-error-channel', () => {
           },
           {
             origin: runtimeErrorContexts.scheduler,
-            handlerPhase: runtimeErrorHandlerPhases.async,
-            propagate: runtimeErrorPropagationStrategies.silent,
+            handlerPhase: errorHandlerPhases.async,
+            propagate: errorPropagationStrategies.silent,
           },
         )
       }).not.toThrow()

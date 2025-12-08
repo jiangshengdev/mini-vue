@@ -1,20 +1,20 @@
-export { handleRuntimeError, setErrorHandler } from './error-handling.ts'
+export { handleError, setErrorHandler } from './error-handling.ts'
 export {
-  dispatchRuntimeError,
+  dispatchError,
   runWithErrorChannel,
   runtimeErrorContexts,
-  runtimeErrorHandlerPhases,
-  runtimeErrorPropagationStrategies,
+  errorHandlerPhases,
+  errorPropagationStrategies,
 } from './error-channel.ts'
 export type {
   ErrorChannelAfterHook,
   ErrorChannelBeforeHook,
   RunWithErrorChannelOptions,
   ErrorContext,
-  RuntimeErrorHandlerPhase,
-  RuntimeErrorMeta,
-  RuntimeErrorPropagationStrategy,
-  RuntimeErrorToken,
+  ErrorHandlerPhase,
+  ErrorMeta,
+  ErrorPropagationStrategy,
+  ErrorToken,
 } from './error-channel.ts'
 export type { PlainObject, PropsShape } from './types.ts'
 export { isArrayIndex, isDevEnvironment, isNil, isObject, isPlainObject } from './utils.ts'

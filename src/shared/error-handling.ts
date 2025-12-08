@@ -1,22 +1,22 @@
 import type {
   ErrorContext,
-  RuntimeErrorHandlerPhase,
-  RuntimeErrorMeta,
-  RuntimeErrorToken,
+  ErrorHandlerPhase,
+  ErrorMeta,
+  ErrorToken,
 } from './error-channel.ts'
 
 /**
  * 标准化的错误处理函数签名，统一传入原始异常与上下文标签。
  */
-export interface RuntimeErrorDispatchPayload {
+export interface ErrorDispatchPayload {
   /** 标记触发错误的运行上下文，方便分类处理。 */
   readonly origin: ErrorContext
   /** 指示本次调度发生在同步还是异步阶段。 */
-  readonly handlerPhase: RuntimeErrorHandlerPhase
+  readonly handlerPhase: ErrorHandlerPhase
   /** 透传的可选元数据，用于补充定位信息。 */
-  readonly meta?: RuntimeErrorMeta
+  readonly meta?: ErrorMeta
   /** 调度过程中生成的 token，便于外部追踪状态。 */
-  readonly token?: RuntimeErrorToken
+  readonly token?: ErrorToken
 }
 
 /**
@@ -27,13 +27,13 @@ export interface RuntimeErrorDispatchPayload {
 export type ErrorHandler = (
   error: unknown,
   context: ErrorContext,
-  dispatchPayload?: RuntimeErrorDispatchPayload,
+  dispatchPayload?: ErrorDispatchPayload,
 ) => void
 
 /**
  * 缓存当前生效的错误处理器，未设置时保持 undefined 以便回退默认行为。
  */
-let currentRuntimeErrorHandler: ErrorHandler | undefined
+let currentErrorHandler: ErrorHandler | undefined
 
 /**
  * 允许外部重写默认的错误处理逻辑，便于在响应式、调度器与组件清理阶段统一兜底。
@@ -43,23 +43,23 @@ let currentRuntimeErrorHandler: ErrorHandler | undefined
  * @beta
  */
 export function setErrorHandler(handler?: ErrorHandler): void {
-  currentRuntimeErrorHandler = handler
+  currentErrorHandler = handler
 }
 
 /**
  * 在内部捕获异常时调用，统一调度至用户提供的处理器或兜底方案。
  */
-export function handleRuntimeError(
+export function handleError(
   error: unknown,
-  dispatchPayload: RuntimeErrorDispatchPayload,
+  dispatchPayload: ErrorDispatchPayload,
   shouldRethrowAsync = true,
 ): void {
   const { origin } = dispatchPayload
 
   /* 优先通过用户注册的处理器上报，以便框架层做统一告警。 */
-  if (currentRuntimeErrorHandler) {
+  if (currentErrorHandler) {
     try {
-      currentRuntimeErrorHandler(error, origin, dispatchPayload)
+      currentErrorHandler(error, origin, dispatchPayload)
     } catch (handlerError) {
       /* 处理器自身抛错时仍需异步抛出，但不能阻断当前触发链。 */
       rethrowAsync(handlerError)

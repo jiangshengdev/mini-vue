@@ -1,4 +1,4 @@
-import { handleRuntimeError } from './error-handling.ts'
+import { handleError } from './error-handling.ts'
 import type { PlainObject } from './types.ts'
 import { isObject } from './utils.ts'
 
@@ -35,41 +35,41 @@ export type ErrorContext = (typeof runtimeErrorContexts)[keyof typeof runtimeErr
 /**
  * 控制异常是否向上传播，`silent` 模式吞掉同步异常。
  */
-export const runtimeErrorPropagationStrategies = {
+export const errorPropagationStrategies = {
   /** 捕获后同步抛出，交由调用者处理。 */
   sync: 'sync',
   /** 在同步阶段吞掉异常，避免污染主流程。 */
   silent: 'silent',
 } as const
-export type RuntimeErrorPropagationStrategy =
-  (typeof runtimeErrorPropagationStrategies)[keyof typeof runtimeErrorPropagationStrategies]
+export type ErrorPropagationStrategy =
+  (typeof errorPropagationStrategies)[keyof typeof errorPropagationStrategies]
 /**
  * 区分当前错误是在同步还是异步阶段被捕获。
  */
-export const runtimeErrorHandlerPhases = {
+export const errorHandlerPhases = {
   /** 代表当前异常在同步栈内被捕获。 */
   sync: 'sync',
   /** 表示由异步兜底（如 microtask）捕获。 */
   async: 'async',
 } as const
-export type RuntimeErrorHandlerPhase =
-  (typeof runtimeErrorHandlerPhases)[keyof typeof runtimeErrorHandlerPhases]
+export type ErrorHandlerPhase =
+  (typeof errorHandlerPhases)[keyof typeof errorHandlerPhases]
 
 /**
  * 允许透传只读的附加上下文信息，便于错误处理器记录。
  */
-export type RuntimeErrorMeta = Readonly<PlainObject>
+export type ErrorMeta = Readonly<PlainObject>
 
 /**
  * 触发错误上报时的配置项，控制来源标签与处理策略。
  */
-interface RuntimeErrorDispatchOptions {
+interface ErrorDispatchOptions {
   /** 标记异常发生的运行时上下文，用于日志聚合。 */
   readonly origin: ErrorContext
   /** 指示当前捕获处于同步还是异步阶段。 */
-  readonly handlerPhase: RuntimeErrorHandlerPhase
+  readonly handlerPhase: ErrorHandlerPhase
   /** 透传额外的业务数据，辅助错误定位。 */
-  readonly meta?: RuntimeErrorMeta
+  readonly meta?: ErrorMeta
   /** 允许在异步阶段关闭兜底重抛，避免重复噪声。 */
   readonly shouldRethrowAsync?: boolean
 }
@@ -77,15 +77,15 @@ interface RuntimeErrorDispatchOptions {
 /**
  * 每次错误调度返回的 token，用于描述真实触发情况。
  */
-export interface RuntimeErrorToken {
+export interface ErrorToken {
   /** 捕获到的原始异常对象。 */
   readonly error: unknown
   /** 异常来源标签，便于上层辨别来源。 */
   readonly origin: ErrorContext
   /** 调度所处阶段，帮助区分 sync/async 管线。 */
-  readonly handlerPhase: RuntimeErrorHandlerPhase
+  readonly handlerPhase: ErrorHandlerPhase
   /** 伴随异常一起上报的元数据。 */
-  readonly meta?: RuntimeErrorMeta
+  readonly meta?: ErrorMeta
   /** 当前 dispatch 是否实际触发错误处理器，便于上层判断是否需要额外补偿。 */
   readonly notified: boolean
 }
@@ -97,14 +97,14 @@ export type ErrorChannelBeforeHook = () => void
 /**
  * 调度结束后的钩子，接收最终 token 以便记录结果。
  */
-export type ErrorChannelAfterHook = (token?: RuntimeErrorToken) => void
+export type ErrorChannelAfterHook = (token?: ErrorToken) => void
 
 /**
  * 运行带错误通道的回调时附带的配置项。
  */
-export interface RunWithErrorChannelOptions extends RuntimeErrorDispatchOptions {
+export interface RunWithErrorChannelOptions extends ErrorDispatchOptions {
   /** 指定捕获后是同步抛出还是静默吞掉异常。 */
-  readonly propagate: RuntimeErrorPropagationStrategy
+  readonly propagate: ErrorPropagationStrategy
   /** 调度前执行的 Hook，通常用于准备工作。 */
   readonly beforeRun?: ErrorChannelBeforeHook
   /** 调度结束后的 Hook，可感知 token 结果。 */
@@ -119,17 +119,17 @@ const notifiedErrorRegistry = new WeakSet<PlainObject>()
 /**
  * 将捕获到的异常交由错误处理器统一上报，并返回调度 token。
  */
-export function dispatchRuntimeError(
+export function dispatchError(
   error: unknown,
-  dispatchOptions: RuntimeErrorDispatchOptions,
-): RuntimeErrorToken {
+  dispatchOptions: ErrorDispatchOptions,
+): ErrorToken {
   /* 仅对对象类型做去重记录，原始类型直接透传。 */
   const shouldTrack = isObject(error)
   const alreadyNotified = shouldTrack && notifiedErrorRegistry.has(error)
   const shouldNotify = !alreadyNotified
 
   /* 构造 token 以记录本次调度的真实触发信息，供钩子与上层使用。 */
-  const token: RuntimeErrorToken = {
+  const token: ErrorToken = {
     error,
     origin: dispatchOptions.origin,
     handlerPhase: dispatchOptions.handlerPhase,
@@ -148,12 +148,12 @@ export function dispatchRuntimeError(
   }
 
   /* 判断当前 dispatch 是否处于异步阶段。 */
-  const isAsyncPhase = dispatchOptions.handlerPhase === runtimeErrorHandlerPhases.async
+  const isAsyncPhase = dispatchOptions.handlerPhase === errorHandlerPhases.async
   /* 允许调用方显式关闭异步重抛。 */
   const shouldRethrowAsync = isAsyncPhase && dispatchOptions.shouldRethrowAsync !== false
 
   /* 委托给框架级错误处理函数，并按需开启异步重抛。 */
-  handleRuntimeError(
+  handleError(
     error,
     {
       origin: dispatchOptions.origin,
@@ -173,13 +173,13 @@ export function dispatchRuntimeError(
 export function runWithErrorChannel<T>(
   runner: () => T,
   options: RunWithErrorChannelOptions & {
-    propagate: typeof runtimeErrorPropagationStrategies.sync
+    propagate: typeof errorPropagationStrategies.sync
   },
 ): T
 export function runWithErrorChannel<T>(
   runner: () => T,
   options: RunWithErrorChannelOptions & {
-    propagate: typeof runtimeErrorPropagationStrategies.silent
+    propagate: typeof errorPropagationStrategies.silent
   },
 ): T | undefined
 
@@ -191,17 +191,17 @@ export function runWithErrorChannel<T>(
   options.beforeRun?.()
 
   /* 保存 dispatch token 以便 finally 阶段透出调度结果。 */
-  let token: RuntimeErrorToken | undefined
+  let token: ErrorToken | undefined
 
   try {
     /* 尝试执行用户逻辑，一旦抛错交由 catch 统一处理。 */
     return runner()
   } catch (error) {
     /* 将异常交给错误通道统一调度，并获得可观测 token。 */
-    token = dispatchRuntimeError(error, options)
+    token = dispatchError(error, options)
 
     /* 同步传播策略需要立即抛出原始异常。 */
-    if (options.propagate === runtimeErrorPropagationStrategies.sync) {
+    if (options.propagate === errorPropagationStrategies.sync) {
       throw error
     }
 

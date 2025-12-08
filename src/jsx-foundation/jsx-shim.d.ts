@@ -1,7 +1,7 @@
 import type {
   ElementType as MiniElementType,
   VirtualNode,
-} from '@/jsx-foundation/virtual-node/index.ts'
+} from './virtual-node/types.ts'
 import type { ElementRef } from '@/runtime-dom/index.ts'
 import type { PropsShape } from '@/shared/index.ts'
 

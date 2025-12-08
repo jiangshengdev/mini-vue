@@ -1,9 +1,9 @@
-import type { EffectInstance } from '../contracts/index.ts'
+import type { EffectInstance } from '../reactivity/contracts'
 
 /**
  * 提供通用的栈式管理能力，保证嵌套上下文可被精确追踪。
  */
-export class EffectStack<T> {
+export class ContextStack<T> {
   /**
    * 保存所有入栈的实例，维护调用栈结构。
    */
@@ -41,4 +41,4 @@ export class EffectStack<T> {
   }
 }
 
-export const effectStack = new EffectStack<EffectInstance>()
+export const effectStack = new ContextStack<EffectInstance>()

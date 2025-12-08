@@ -1,5 +1,5 @@
 import type { DependencyBucket, EffectInstance } from '../contracts/index.ts'
-import { effectStack } from './effect-stack.ts'
+import { effectStack } from '../../shared/context-stack.ts'
 import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
 
 /**

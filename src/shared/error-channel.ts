@@ -35,24 +35,24 @@ export type ErrorContext = (typeof errorContexts)[keyof typeof errorContexts]
 /**
  * 控制异常是否向上传播，`silent` 模式吞掉同步异常。
  */
-export const errorPropagationStrategies = {
+export const propagateMode = {
   /** 捕获后同步抛出，交由调用者处理。 */
   throw: 'throw',
   /** 在同步阶段吞掉异常，避免污染主流程。 */
   silent: 'silent',
 } as const
 export type ErrorPropagationStrategy =
-  (typeof errorPropagationStrategies)[keyof typeof errorPropagationStrategies]
+  (typeof propagateMode)[keyof typeof propagateMode]
 /**
  * 区分当前错误是在同步还是异步阶段被捕获。
  */
-export const errorHandlerPhases = {
+export const handlerPhases = {
   /** 代表当前异常在同步栈内被捕获。 */
   sync: 'sync',
   /** 表示由异步兜底（如 microtask）捕获。 */
   async: 'async',
 } as const
-export type ErrorHandlerPhase = (typeof errorHandlerPhases)[keyof typeof errorHandlerPhases]
+export type ErrorHandlerPhase = (typeof handlerPhases)[keyof typeof handlerPhases]
 
 /**
  * 允许透传只读的附加上下文信息，便于错误处理器记录。
@@ -101,7 +101,7 @@ export type ErrorChannelAfterHook = (token?: ErrorToken) => void
 /**
  * 运行带错误通道的回调时附带的配置项。
  */
-export interface RunWithErrorChannelOptions extends ErrorDispatchOptions {
+export interface ErrorChannelOptions extends ErrorDispatchOptions {
   /** 调度前执行的 Hook，通常用于准备工作。 */
   readonly beforeRun?: ErrorChannelBeforeHook
   /** 调度结束后的 Hook，可感知 token 结果。 */
@@ -142,7 +142,7 @@ export function dispatchError(error: unknown, dispatchOptions: ErrorDispatchOpti
   }
 
   /* 判断当前 dispatch 是否处于异步阶段。 */
-  const isAsyncPhase = dispatchOptions.handlerPhase === errorHandlerPhases.async
+  const isAsyncPhase = dispatchOptions.handlerPhase === handlerPhases.async
   /* 允许调用方显式关闭异步重抛。 */
   const shouldRethrowAsync = isAsyncPhase && dispatchOptions.shouldRethrowAsync !== false
 
@@ -161,10 +161,10 @@ export function dispatchError(error: unknown, dispatchOptions: ErrorDispatchOpti
   return token
 }
 
-function runWithErrorChannelBase<T>(
+function runWithChannel<T>(
   runner: () => T,
   propagate: ErrorPropagationStrategy,
-  options: RunWithErrorChannelOptions,
+  options: ErrorChannelOptions,
 ): T | undefined {
   /* 在主逻辑前执行 before hook，便于构建错误上下文。 */
   options.beforeRun?.()
@@ -180,7 +180,7 @@ function runWithErrorChannelBase<T>(
     token = dispatchError(error, options)
 
     /* 同步传播策略需要立即抛出原始异常。 */
-    if (propagate === errorPropagationStrategies.throw) {
+    if (propagate === propagateMode.throw) {
       throw error
     }
 
@@ -195,19 +195,13 @@ function runWithErrorChannelBase<T>(
 /**
  * 同步传播异常，调用方接收原始抛错。
  */
-export function runWithErrorChannelThrow<T>(
-  runner: () => T,
-  options: RunWithErrorChannelOptions,
-): T {
-  return runWithErrorChannelBase(runner, errorPropagationStrategies.throw, options) as T
+export function runThrowing<T>(runner: () => T, options: ErrorChannelOptions): T {
+  return runWithChannel(runner, propagateMode.throw, options) as T
 }
 
 /**
  * 静默处理异常，调用方接收 undefined 以继续流程。
  */
-export function runWithErrorChannelSilent<T>(
-  runner: () => T,
-  options: RunWithErrorChannelOptions,
-): T | undefined {
-  return runWithErrorChannelBase(runner, errorPropagationStrategies.silent, options)
+export function runSilent<T>(runner: () => T, options: ErrorChannelOptions): T | undefined {
+  return runWithChannel(runner, propagateMode.silent, options)
 }

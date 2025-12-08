@@ -1,6 +1,6 @@
 import type { DependencyBucket, EffectInstance } from '../contracts/index.ts'
 import { effectStack } from './effect-stack.ts'
-import { errorContexts, errorHandlerPhases, runWithErrorChannelSilent } from '@/shared/index.ts'
+import { errorContexts, handlerPhases, runSilent } from '@/shared/index.ts'
 
 /**
  * 收集当前活跃的副作用到依赖集合，确保后续触发时能够回调。
@@ -74,13 +74,13 @@ function schedule(effect: EffectInstance): void {
       effect.run()
     }
 
-    runWithErrorChannelSilent(
+    runSilent(
       () => {
         scheduler(job)
       },
       {
         origin: errorContexts.scheduler,
-        handlerPhase: errorHandlerPhases.sync,
+        handlerPhase: handlerPhases.sync,
       },
     )
 

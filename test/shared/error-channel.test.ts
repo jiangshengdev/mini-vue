@@ -5,9 +5,9 @@ import type { ErrorChannelAfterHook } from '@/shared/index.ts'
 import {
   dispatchError,
   errorContexts,
-  errorHandlerPhases,
-  runWithErrorChannelSilent,
-  runWithErrorChannelThrow,
+  handlerPhases,
+  runSilent,
+  runThrowing,
 } from '@/shared/index.ts'
 
 describe('runtime-error-channel', () => {
@@ -28,7 +28,7 @@ describe('runtime-error-channel', () => {
 
     const firstToken = dispatchError(error, {
       origin: errorContexts.componentSetup,
-      handlerPhase: errorHandlerPhases.sync,
+      handlerPhase: handlerPhases.sync,
     })
 
     expect(handler).toHaveBeenCalledTimes(1)
@@ -41,7 +41,7 @@ describe('runtime-error-channel', () => {
 
     const secondToken = dispatchError(error, {
       origin: errorContexts.effectRunner,
-      handlerPhase: errorHandlerPhases.async,
+      handlerPhase: handlerPhases.async,
     })
 
     expect(handler).toHaveBeenCalledTimes(1)
@@ -62,17 +62,17 @@ describe('runtime-error-channel', () => {
     }
 
     const runInnerChannel = () => {
-      return runWithErrorChannelThrow(throwNestedError, {
+      return runThrowing(throwNestedError, {
         origin: errorContexts.componentSetup,
-        handlerPhase: errorHandlerPhases.sync,
+        handlerPhase: handlerPhases.sync,
         afterRun: innerAfterRun,
       })
     }
 
     const runNestedChannel = () => {
-      return runWithErrorChannelThrow(runInnerChannel, {
+      return runThrowing(runInnerChannel, {
         origin: errorContexts.effectScopeRun,
-        handlerPhase: errorHandlerPhases.sync,
+        handlerPhase: handlerPhases.sync,
         afterRun: outerAfterRun,
       })
     }
@@ -102,13 +102,13 @@ describe('runtime-error-channel', () => {
     const afterRun = vi.fn<ErrorChannelAfterHook>()
 
     expect(() => {
-      runWithErrorChannelThrow(
+      runThrowing(
         () => {
           throw error
         },
         {
           origin: errorContexts.effectRunner,
-          handlerPhase: errorHandlerPhases.sync,
+          handlerPhase: handlerPhases.sync,
           beforeRun,
           afterRun,
         },
@@ -136,9 +136,9 @@ describe('runtime-error-channel', () => {
     }
 
     const invokeSilentChannel = () => {
-      runWithErrorChannelSilent<never>(throwCleanupError, {
+      runSilent<never>(throwCleanupError, {
         origin: errorContexts.componentCleanup,
-        handlerPhase: errorHandlerPhases.sync,
+        handlerPhase: handlerPhases.sync,
       })
     }
 
@@ -168,13 +168,13 @@ describe('runtime-error-channel', () => {
 
     try {
       expect(() => {
-        runWithErrorChannelSilent(
+        runSilent(
           () => {
             throw error
           },
           {
             origin: errorContexts.scheduler,
-            handlerPhase: errorHandlerPhases.async,
+            handlerPhase: handlerPhases.async,
           },
         )
       }).not.toThrow()

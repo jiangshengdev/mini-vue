@@ -1,16 +1,16 @@
 export { handleError, setErrorHandler } from './error-handling.ts'
 export {
   dispatchError,
-  runWithErrorChannelSilent,
-  runWithErrorChannelThrow,
+  runSilent,
+  runThrowing,
   errorContexts,
-  errorHandlerPhases,
-  errorPropagationStrategies,
+  handlerPhases,
+  propagateMode,
 } from './error-channel.ts'
 export type {
   ErrorChannelAfterHook,
   ErrorChannelBeforeHook,
-  RunWithErrorChannelOptions,
+  ErrorChannelOptions,
   ErrorContext,
   ErrorHandlerPhase,
   ErrorMeta,

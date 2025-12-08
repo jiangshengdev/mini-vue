@@ -1,7 +1,7 @@
 import type { RendererOptions } from '../index.ts'
 import type { ComponentInstance } from './context.ts'
 import type { SetupFunctionComponent } from '@/jsx-foundation'
-import { errorContexts, errorHandlerPhases, runWithErrorChannelSilent } from '@/shared/index.ts'
+import { errorContexts, handlerPhases, runSilent } from '@/shared/index.ts'
 
 /**
  * 移除当前缓存的宿主节点，防止重复保留旧 DOM。
@@ -54,9 +54,9 @@ export function teardownComponentInstance<
 
     /* 逐一运行外部注册的清理逻辑，避免引用泄漏。 */
     for (const task of tasks) {
-      runWithErrorChannelSilent(task, {
+      runSilent(task, {
         origin: errorContexts.componentCleanup,
-        handlerPhase: errorHandlerPhases.sync,
+        handlerPhase: handlerPhases.sync,
       })
     }
   }

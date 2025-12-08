@@ -7,7 +7,7 @@ import type {
   EffectOptions,
   EffectScheduler,
 } from './contracts/index.ts'
-import { errorContexts, errorHandlerPhases, runWithErrorChannelSilent, runWithErrorChannelThrow } from '@/shared/index.ts'
+import { errorContexts, handlerPhases, runSilent, runThrowing } from '@/shared/index.ts'
 
 /**
  * 将副作用封装为类，集中管理依赖收集与生命周期操作。
@@ -57,13 +57,13 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
    */
   run(): T {
     const runEffectFunction = (shouldTrack: boolean): T => {
-      return runWithErrorChannelThrow(
+      return runThrowing(
         () => {
           return this.fn()
         },
         {
           origin: errorContexts.effectRunner,
-          handlerPhase: errorHandlerPhases.sync,
+          handlerPhase: handlerPhases.sync,
           beforeRun: () => {
             if (shouldTrack) {
               effectStack.push(this)
@@ -136,9 +136,9 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
       this.cleanupTasks = []
 
       for (const cleanup of cleanupTasks) {
-        runWithErrorChannelSilent(cleanup, {
+        runSilent(cleanup, {
           origin: errorContexts.effectCleanup,
-          handlerPhase: errorHandlerPhases.sync,
+          handlerPhase: handlerPhases.sync,
         })
       }
     }

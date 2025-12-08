@@ -6,7 +6,7 @@ import { mountChildWithAnchor } from './anchor.ts'
 import type { ComponentResult, SetupFunctionComponent } from '@/jsx-foundation'
 import { ReactiveEffect } from '@/reactivity/effect.ts'
 import { recordEffectScope } from '@/reactivity/effect-scope.ts'
-import { errorContexts, errorHandlerPhases, runWithErrorChannelSilent } from '@/shared/index.ts'
+import { errorContexts, handlerPhases, runSilent } from '@/shared/index.ts'
 
 /**
  * 运行组件 effect 并将首个结果挂载到容器。
@@ -25,7 +25,7 @@ export function performInitialRender<
 
   /* 首次 run() 会同步生成子树结果。 */
   /* 包裹错误通道：首渲染异常需清理实例但不中断兄弟挂载。 */
-  return runWithErrorChannelSilent(
+  return runSilent(
     () => {
       const subtree = instance.effect!.run()
       /* 子树由通用 mountChild 继续挂载到宿主容器。 */
@@ -37,7 +37,7 @@ export function performInitialRender<
     },
     {
       origin: errorContexts.effectRunner,
-      handlerPhase: errorHandlerPhases.sync,
+      handlerPhase: handlerPhases.sync,
       /* 与 Vue 类似：首渲染错误上报但不中断兄弟挂载。 */
       afterRun(token) {
         if (token?.error) {
@@ -95,9 +95,9 @@ function rerenderComponent<
   let rerenderFailed = false
 
   /* 调度执行由 effect 决定，异常时标记失败并避免重新挂载。 */
-  runWithErrorChannelSilent(renderSchedulerJob, {
+  runSilent(renderSchedulerJob, {
     origin: errorContexts.scheduler,
-    handlerPhase: errorHandlerPhases.sync,
+    handlerPhase: handlerPhases.sync,
     afterRun(token) {
       if (token?.error) {
         rerenderFailed = true

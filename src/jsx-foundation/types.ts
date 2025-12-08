@@ -22,7 +22,7 @@ export type RenderOutput = ComponentChildren
 /**
  * 组件渲染阶段需要执行的函数签名。
  */
-export type ComponentRenderFunction = () => RenderOutput
+export type RenderFunction = () => RenderOutput
 
 /**
  * 组件 props 的基础约束：放宽为对象即可，避免要求字符串索引签名。
@@ -36,7 +36,7 @@ export interface FragmentProps extends ComponentPropsBase {
 /**
  * 用于约束组件类型的函数签名，供 ElementType 统一推导。
  */
-type ComponentLike = (props: never) => ComponentRenderFunction
+type ComponentLike = (props: never) => RenderFunction
 
 /**
  * 为任意 props 类型补充可选 children 字段。
@@ -48,7 +48,7 @@ type PropsWithChildren<P> = P & { children?: ComponentChildren }
  *
  * @beta
  */
-export type SetupComponent<P = ComponentPropsBase> = (props: PropsWithChildren<P>) => ComponentRenderFunction
+export type SetupComponent<P = ComponentPropsBase> = (props: PropsWithChildren<P>) => RenderFunction
 
 /**
  * Fragment 类型定义，接收 FragmentProps 并返回一组子节点。
@@ -68,7 +68,7 @@ export type ElementType = string | ComponentLike | FragmentType
 type InferComponentProps<T> =
   T extends SetupComponent<infer Props>
     ? PropsWithChildren<Props>
-    : T extends (props: infer Props) => ComponentRenderFunction
+    : T extends (props: infer Props) => RenderFunction
       ? Props
       : ComponentPropsBase
 

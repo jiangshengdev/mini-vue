@@ -1,6 +1,6 @@
 import type { ComponentInstance } from './context.ts'
 import { setCurrentInstance, unsetCurrentInstance } from './context.ts'
-import type { ComponentRenderFunction, SetupComponent } from '@/jsx-foundation'
+import type { RenderFunction, SetupComponent } from '@/jsx-foundation'
 import { errorContexts, handlerPhases, runSilent } from '@/shared/index.ts'
 
 /**
@@ -32,7 +32,7 @@ function invokeSetup<
   T extends SetupComponent,
 >(
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
-): ComponentRenderFunction | undefined {
+): RenderFunction | undefined {
   let setupFailed = false
 
   /* 在组件专属 scope 内运行 setup，便于后续统一 stop。 */

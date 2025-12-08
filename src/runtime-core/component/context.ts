@@ -3,7 +3,7 @@
  */
 import type { MountedHandle } from '../mount'
 import type {
-  ComponentRenderFunction,
+  RenderFunction,
   RenderOutput,
   ElementProps,
   SetupComponent,
@@ -28,7 +28,7 @@ export interface ComponentInstance<
   /** 组件接收到的 props 副本。 */
   readonly props: ElementProps<T>
   /** `setup` 返回的渲染闭包，每次 effect 执行都会调用。 */
-  render: ComponentRenderFunction
+  render: RenderFunction
   /** 组件独立的响应式副作用，驱动更新调度。 */
   effect?: ReactiveEffect<RenderOutput>
   /** 组件级 effect scope，托管所有 setup 内部副作用。 */

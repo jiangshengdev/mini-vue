@@ -20,6 +20,8 @@ const xoConfig: FlatXoConfig = [
       'import-x/no-duplicates': ['error', { 'prefer-inline': false }],
       'import-x/consistent-type-specifier-style': ['error', 'prefer-top-level'],
       'arrow-body-style': ['error', 'always'],
+      'func-names': ['error', 'always'],
+      'func-name-matching': ['error', 'never'],
     },
   },
 ]

@@ -1,11 +1,11 @@
 /**
  * DOM 专用的属性打补丁逻辑，负责将 virtualNode props 应用到真实元素上。
  */
+import { normalizeClass } from './normalize-class.ts'
 import type { PropsShape } from '@/shared/index.ts'
 import { isNil, isObject } from '@/shared/index.ts'
 import type { Ref } from '@/reactivity/index.ts'
 import { isRef } from '@/reactivity/index.ts'
-import { normalizeClass } from './normalize-class.ts'
 
 /**
  * @beta

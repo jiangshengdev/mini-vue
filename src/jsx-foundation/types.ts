@@ -1,5 +1,5 @@
-import type { PropsShape } from '@/shared/index.ts'
 import type { virtualNodeFlag } from './constants.ts'
+import type { PropsShape } from '@/shared/index.ts'
 
 /**
  * 单个子节点的联合类型：可以是 virtualNode 或原始文本。

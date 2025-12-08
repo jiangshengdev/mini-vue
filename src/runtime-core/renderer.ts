@@ -1,8 +1,8 @@
 /**
  * 平台无关的渲染核心定义，通过注入宿主环境能力完成挂载流程。
  */
-import { mountChild } from './mount/index.ts'
 import type { MountedHandle } from './mount/index.ts'
+import { mountChild } from './mount/index.ts'
 import type { ComponentResult } from '@/jsx-foundation/index.ts'
 import type { PlainObject, PropsShape } from '@/shared/index.ts'
 

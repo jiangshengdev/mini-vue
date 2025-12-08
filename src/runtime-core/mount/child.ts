@@ -1,7 +1,7 @@
 import type { RendererOptions } from '../index.ts'
 import { mountVirtualNode } from './virtual-node.ts'
 import type { MountedHandle } from './handle.ts'
-import type { ComponentResult } from '@/jsx-foundation/index.ts'
+import type { RenderOutput } from '@/jsx-foundation/index.ts'
 import { isVirtualNode } from '@/jsx-foundation/index.ts'
 import { isNil } from '@/shared/index.ts'
 
@@ -10,7 +10,7 @@ import { isNil } from '@/shared/index.ts'
  */
 export function mountChild<HostNode, HostElement extends HostNode, HostFragment extends HostNode>(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
-  child: ComponentResult | undefined,
+  child: RenderOutput | undefined,
   container: HostElement | HostFragment,
   needsAnchor = false,
 ): MountedHandle<HostNode> | undefined {

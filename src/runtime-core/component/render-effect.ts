@@ -3,7 +3,7 @@ import type { MountedHandle } from '../mount/handle.ts'
 import type { ComponentInstance } from './context.ts'
 import { teardownComponentInstance, teardownMountedSubtree } from './teardown.ts'
 import { mountChildWithAnchor } from './anchor.ts'
-import type { ComponentResult, SetupFunctionComponent } from '@/jsx-foundation'
+import type { RenderOutput, SetupFunctionComponent } from '@/jsx-foundation'
 import { ReactiveEffect } from '@/reactivity/effect.ts'
 import { recordEffectScope } from '@/reactivity/effect-scope.ts'
 import { errorContexts, handlerPhases, runSilent } from '@/shared/index.ts'
@@ -56,8 +56,8 @@ function createRenderEffect<
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
-): ReactiveEffect<ComponentResult> {
-  const effect = new ReactiveEffect<ComponentResult>(
+): ReactiveEffect<RenderOutput> {
+  const effect = new ReactiveEffect<RenderOutput>(
     () => {
       /* 每次渲染时记录最新子树，供后续挂载或复用。 */
       const subtree = instance.render()

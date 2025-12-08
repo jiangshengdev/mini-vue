@@ -17,12 +17,12 @@ export type ComponentChildren = VirtualNodeChild | VirtualNodeChild[] | boolean 
 /**
  * 组件渲染函数返回的结果类型。
  */
-export type ComponentResult = ComponentChildren
+export type RenderOutput = ComponentChildren
 
 /**
  * 组件渲染阶段需要执行的函数签名。
  */
-export type ComponentRenderFunction = () => ComponentResult
+export type ComponentRenderFunction = () => RenderOutput
 
 /**
  * 组件 props 的基础约束：放宽为对象即可，避免要求字符串索引签名。
@@ -36,7 +36,7 @@ export interface FragmentProps extends ComponentPropsBase {
 /**
  * 用于约束组件类型的函数签名，供 ElementType 统一推导。
  */
-type ComponentConstraint = (props: never) => ComponentRenderFunction
+type ComponentLike = (props: never) => ComponentRenderFunction
 
 /**
  * 为任意 props 类型补充可选 children 字段。
@@ -44,16 +44,11 @@ type ComponentConstraint = (props: never) => ComponentRenderFunction
 type PropsWithChildren<P> = P & { children?: ComponentChildren }
 
 /**
- * 标准组件函数签名，默认附带 children。
- */
-type ComponentFunction<P> = (props: PropsWithChildren<P>) => ComponentRenderFunction
-
-/**
  * `setup` + `render` 语义的函数组件类型，默认 props 为通用对象。
  *
  * @beta
  */
-export type SetupFunctionComponent<P = ComponentPropsBase> = ComponentFunction<P>
+export type SetupFunctionComponent<P = ComponentPropsBase> = (props: PropsWithChildren<P>) => ComponentRenderFunction
 
 /**
  * Fragment 类型定义，接收 FragmentProps 并返回一组子节点。
@@ -65,7 +60,7 @@ export type FragmentType = (props: FragmentProps) => ComponentChildren
  *
  * @beta
  */
-export type ElementType = string | ComponentConstraint | FragmentType
+export type ElementType = string | ComponentLike | FragmentType
 
 /**
  * 推导给定元素类型对应的 props 形状。

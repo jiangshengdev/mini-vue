@@ -5,7 +5,7 @@ export { createVirtualNode, Fragment } from './factory.ts'
 export { isVirtualNode } from './guards.ts'
 export type {
   ComponentChildren,
-  ComponentResult,
+  RenderOutput,
   ComponentRenderFunction,
   SetupFunctionComponent,
   ElementProps,

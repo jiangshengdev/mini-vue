@@ -3,7 +3,7 @@
  */
 import type { MountedHandle } from './mount/index.ts'
 import { mountChild } from './mount/index.ts'
-import type { ComponentResult } from '@/jsx-foundation/index.ts'
+import type { RenderOutput } from '@/jsx-foundation/index.ts'
 import type { PlainObject, PropsShape } from '@/shared/index.ts'
 
 /**
@@ -37,7 +37,7 @@ export interface RendererOptions<
 
 /** 根级渲染函数签名，负责将顶层子树挂载到容器。 */
 export type RootRenderFunction<HostElement> = (
-  virtualNode: ComponentResult,
+  virtualNode: RenderOutput,
   container: HostElement,
 ) => void
 
@@ -90,7 +90,7 @@ export function createRenderer<
   /**
    * 根渲染函数会先清空容器，再挂载整棵子树。
    */
-  function render(virtualNode: ComponentResult, container: HostElement): void {
+  function render(virtualNode: RenderOutput, container: HostElement): void {
     teardownContainer(container)
     clear(container)
     const mounted = mountChild(options, virtualNode, container)

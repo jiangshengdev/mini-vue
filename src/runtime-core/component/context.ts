@@ -4,7 +4,7 @@
 import type { MountedHandle } from '../mount'
 import type {
   ComponentRenderFunction,
-  ComponentResult,
+  RenderOutput,
   ElementProps,
   SetupFunctionComponent,
 } from '@/jsx-foundation'
@@ -30,11 +30,11 @@ export interface ComponentInstance<
   /** `setup` 返回的渲染闭包，每次 effect 执行都会调用。 */
   render: ComponentRenderFunction
   /** 组件独立的响应式副作用，驱动更新调度。 */
-  effect?: ReactiveEffect<ComponentResult>
+  effect?: ReactiveEffect<RenderOutput>
   /** 组件级 effect scope，托管所有 setup 内部副作用。 */
   scope: EffectScope
   /** 最近一次渲染生成的虚拟子树结果。 */
-  subTree?: ComponentResult
+  subTree?: RenderOutput
   /** 当前挂载到宿主的节点句柄，支持 teardown。 */
   mountedHandle?: MountedHandle<HostNode>
   /** 组件在父容器中的锚点节点，用于保持兄弟顺序。 */

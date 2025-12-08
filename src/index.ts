@@ -29,7 +29,7 @@ export type {
 } from '@/reactivity/index.ts'
 export { createApp, render } from '@/runtime-dom/index.ts'
 export type { DomAppInstance } from '@/runtime-dom/index.ts'
-export type { SetupFunctionComponent, ElementType, VirtualNode } from '@/jsx-foundation/index.ts'
+export type { SetupComponent, ElementType, VirtualNode } from '@/jsx-foundation/index.ts'
 export { Fragment } from '@/jsx-foundation/index.ts'
 export { h, jsx, jsxs, jsxDEV } from '@/jsx-runtime/index.ts'
 export type { PropsShape } from '@/shared/types.ts'

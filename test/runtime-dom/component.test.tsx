@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { within } from '@testing-library/dom'
 import { createTestContainer } from '../setup.ts'
-import type { ErrorHandler, SetupFunctionComponent } from '@/index.ts'
+import type { ErrorHandler, SetupComponent } from '@/index.ts'
 import { reactive, render, setErrorHandler, watch } from '@/index.ts'
 import { getCurrentInstance } from '@/runtime-core/component/context.ts'
 import { errorContexts } from '@/shared/index.ts'
@@ -14,7 +14,7 @@ describe('runtime-dom component reactivity', () => {
   it('组件体读取 reactive 数据时会自动重渲染', () => {
     let capturedState: { count: number } | undefined
 
-    const Counter: SetupFunctionComponent = () => {
+    const Counter: SetupComponent = () => {
       const state = reactive({ count: 0 })
 
       capturedState = state
@@ -43,7 +43,7 @@ describe('runtime-dom component reactivity', () => {
     const renderSpy = vi.fn()
     let capturedState: { on: boolean } | undefined
 
-    const Toggle: SetupFunctionComponent = () => {
+    const Toggle: SetupComponent = () => {
       const state = reactive({ on: false })
 
       capturedState = state
@@ -79,7 +79,7 @@ describe('runtime-dom component reactivity', () => {
     const renderSpy = vi.fn()
     let capturedState: { visible: boolean } | undefined
 
-    const Ghost: SetupFunctionComponent = () => {
+    const Ghost: SetupComponent = () => {
       const state = reactive({ visible: false })
 
       capturedState = state
@@ -118,7 +118,7 @@ describe('runtime-dom component reactivity', () => {
     const state = reactive({ count: 0 })
     const renderSpy = vi.fn()
 
-    const Ghost: SetupFunctionComponent = () => {
+    const Ghost: SetupComponent = () => {
       return () => {
         renderSpy()
 
@@ -149,7 +149,7 @@ describe('runtime-dom component reactivity', () => {
     const watchSpy = vi.fn()
     const cleanupSpy = vi.fn()
 
-    const Tracker: SetupFunctionComponent = () => {
+    const Tracker: SetupComponent = () => {
       watch(
         () => {
           return state.count
@@ -191,7 +191,7 @@ describe('runtime-dom component reactivity', () => {
 
     setErrorHandler(handler)
 
-    const WithCleanup: SetupFunctionComponent = () => {
+    const WithCleanup: SetupComponent = () => {
       const instance = getCurrentInstance()
 
       instance?.cleanupTasks.push(() => {

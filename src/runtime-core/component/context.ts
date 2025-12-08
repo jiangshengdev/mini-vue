@@ -6,7 +6,7 @@ import type {
   ComponentRenderFunction,
   RenderOutput,
   ElementProps,
-  SetupFunctionComponent,
+  SetupComponent,
 } from '@/jsx-foundation'
 import type { ReactiveEffect } from '@/reactivity/effect.ts'
 import type { EffectScope } from '@/reactivity/effect-scope.ts'
@@ -19,7 +19,7 @@ export interface ComponentInstance<
   HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
-  T extends SetupFunctionComponent,
+  T extends SetupComponent,
 > {
   /** 组件定义本身，保存以便多次渲染重用。 */
   readonly type: T
@@ -50,7 +50,7 @@ export interface ComponentInstance<
 }
 
 /** 兼容任意宿主类型的组件实例别名，简化当前实例管理。 */
-type AnyComponentInstance = ComponentInstance<unknown, unknown, unknown, SetupFunctionComponent>
+type AnyComponentInstance = ComponentInstance<unknown, unknown, unknown, SetupComponent>
 
 /** 当前 setup 调用栈正在处理的实例引用。 */
 let currentInstance: AnyComponentInstance | undefined
@@ -62,7 +62,7 @@ export function setCurrentInstance<
   HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
-  T extends SetupFunctionComponent,
+  T extends SetupComponent,
 >(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): void {
   currentInstance = instance as AnyComponentInstance
 }

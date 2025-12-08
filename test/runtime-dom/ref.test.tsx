@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { within } from '@testing-library/dom'
 import { createTestContainer } from '../setup.ts'
-import type { SetupFunctionComponent } from '@/index.ts'
+import type { SetupComponent } from '@/index.ts'
 import { createApp, reactive, ref, render } from '@/index.ts'
 
 describe('runtime-dom ref 回调', () => {
@@ -31,7 +31,7 @@ describe('runtime-dom ref 回调', () => {
     const refSpy = vi.fn<(element: Element | undefined) => void>()
     const state = reactive({ label: 'first' })
 
-    const CounterButton: SetupFunctionComponent = () => {
+    const CounterButton: SetupComponent = () => {
       return () => {
         return (
           <button type="button" ref={refSpy}>
@@ -90,7 +90,7 @@ describe('runtime-dom ref 回调', () => {
     const elementRef = ref<Element | undefined>(undefined)
     const state = reactive({ label: 'first' })
 
-    const CounterButton: SetupFunctionComponent = () => {
+    const CounterButton: SetupComponent = () => {
       return () => {
         return (
           <button type="button" ref={elementRef}>

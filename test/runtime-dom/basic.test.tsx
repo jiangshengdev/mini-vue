@@ -3,7 +3,7 @@ import { within } from '@testing-library/dom'
 import userEvent from '@testing-library/user-event'
 import { createTestContainer } from '../setup.ts'
 import { Fragment } from '@/jsx-runtime.ts'
-import type { SetupFunctionComponent } from '@/index.ts'
+import type { SetupComponent } from '@/index.ts'
 import { render } from '@/index.ts'
 
 describe('runtime-dom basic rendering', () => {
@@ -32,7 +32,7 @@ describe('runtime-dom basic rendering', () => {
       onClick: () => void
     }
 
-    const Button: SetupFunctionComponent<ButtonProps> = (props) => {
+    const Button: SetupComponent<ButtonProps> = (props) => {
       return () => {
         return (
           <button class="btn" onClick={props.onClick}>
@@ -57,7 +57,7 @@ describe('runtime-dom basic rendering', () => {
       children?: unknown
     }
 
-    const Wrapper: SetupFunctionComponent<WrapperProps> = (props) => {
+    const Wrapper: SetupComponent<WrapperProps> = (props) => {
       return () => {
         return (
           <section>

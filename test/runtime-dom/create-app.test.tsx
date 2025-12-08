@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from 'vitest'
 import { screen, within } from '@testing-library/dom'
 import { createTestContainer } from '../setup.ts'
-import type { SetupFunctionComponent } from '@/index.ts'
+import type { SetupComponent } from '@/index.ts'
 import { createApp, reactive } from '@/index.ts'
 
-const App: SetupFunctionComponent = () => {
+const App: SetupComponent = () => {
   return () => {
     return <div class="hello">Hello</div>
   }
@@ -66,7 +66,7 @@ describe('runtime-dom createApp', () => {
   it('根组件可以直接消费 reactive 并刷新视图', () => {
     const state = reactive({ count: 0 })
 
-    const Root: SetupFunctionComponent = () => {
+    const Root: SetupComponent = () => {
       return () => {
         return <p>count: {state.count}</p>
       }
@@ -92,7 +92,7 @@ describe('runtime-dom createApp', () => {
     const renderSpy = vi.fn()
     const state = reactive({ on: false })
 
-    const Root: SetupFunctionComponent = () => {
+    const Root: SetupComponent = () => {
       return () => {
         renderSpy()
 

@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import { within } from '@testing-library/dom'
 import { createTestContainer } from '../setup.ts'
-import type { SetupFunctionComponent } from '@/index.ts'
+import type { SetupComponent } from '@/index.ts'
 import { reactive, render } from '@/index.ts'
 
 describe('runtime-dom children shape', () => {
   it('无 children 时 props.children 为 undefined', () => {
     const received: unknown[] = []
 
-    const Capture: SetupFunctionComponent = (props) => {
+    const Capture: SetupComponent = (props) => {
       received.push(props.children)
 
       return () => {
@@ -28,7 +28,7 @@ describe('runtime-dom children shape', () => {
   it('单个 children 时 props.children 为该节点', () => {
     const received: unknown[] = []
 
-    const Capture: SetupFunctionComponent = (props) => {
+    const Capture: SetupComponent = (props) => {
       received.push(props.children)
 
       return () => {
@@ -59,7 +59,7 @@ describe('runtime-dom children shape', () => {
   it('多个 children 时 props.children 为数组', () => {
     const received: unknown[] = []
 
-    const Capture: SetupFunctionComponent = (props) => {
+    const Capture: SetupComponent = (props) => {
       received.push(props.children)
 
       return () => {
@@ -90,7 +90,7 @@ describe('runtime-dom children shape', () => {
   it('组件重渲染不会改变兄弟顺序', () => {
     const state = reactive({ mid: 'middle' })
 
-    const Middle: SetupFunctionComponent = () => {
+    const Middle: SetupComponent = () => {
       return () => {
         return <span data-testid="mid">{state.mid}</span>
       }

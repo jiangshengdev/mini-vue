@@ -3,7 +3,7 @@ import type { MountedHandle } from '../mount/handle.ts'
 import type { ComponentInstance } from './context.ts'
 import { teardownComponentInstance, teardownMountedSubtree } from './teardown.ts'
 import { mountChildWithAnchor } from './anchor.ts'
-import type { RenderOutput, SetupFunctionComponent } from '@/jsx-foundation'
+import type { RenderOutput, SetupComponent } from '@/jsx-foundation'
 import { ReactiveEffect } from '@/reactivity/effect.ts'
 import { recordEffectScope } from '@/reactivity/effect-scope.ts'
 import { errorContexts, handlerPhases, runSilent } from '@/shared/index.ts'
@@ -15,7 +15,7 @@ export function performInitialRender<
   HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
-  T extends SetupFunctionComponent,
+  T extends SetupComponent,
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
@@ -52,7 +52,7 @@ function createRenderEffect<
   HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
-  T extends SetupFunctionComponent,
+  T extends SetupComponent,
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
@@ -84,7 +84,7 @@ function rerenderComponent<
   HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
-  T extends SetupFunctionComponent,
+  T extends SetupComponent,
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
@@ -122,7 +122,7 @@ function mountLatestSubtree<
   HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
-  T extends SetupFunctionComponent,
+  T extends SetupComponent,
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,

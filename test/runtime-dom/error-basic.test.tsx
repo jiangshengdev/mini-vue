@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createTestContainer } from '../setup.ts'
-import type { ErrorHandler, SetupFunctionComponent } from '@/index.ts'
+import type { ErrorHandler, SetupComponent } from '@/index.ts'
 import { reactive, render, setErrorHandler } from '@/index.ts'
 import { errorContexts } from '@/shared/index.ts'
 
@@ -16,7 +16,7 @@ describe('runtime-dom component error isolation (basic)', () => {
 
     setErrorHandler(handler)
 
-    const Faulty: SetupFunctionComponent = () => {
+    const Faulty: SetupComponent = () => {
       throw boom
     }
 
@@ -37,11 +37,11 @@ describe('runtime-dom component error isolation (basic)', () => {
 
     setErrorHandler(handler)
 
-    const Faulty: SetupFunctionComponent = () => {
+    const Faulty: SetupComponent = () => {
       throw boom
     }
 
-    const Sibling: SetupFunctionComponent = () => {
+    const Sibling: SetupComponent = () => {
       return () => {
         return <div data-testid="sibling">ok</div>
       }
@@ -70,7 +70,7 @@ describe('runtime-dom component error isolation (basic)', () => {
     const boom = new Error('render failed')
     const state = reactive({ count: 0 })
     const renderSpy = vi.fn()
-    const Sibling: SetupFunctionComponent = () => {
+    const Sibling: SetupComponent = () => {
       return () => {
         return <div data-testid="sibling">ok</div>
       }
@@ -78,7 +78,7 @@ describe('runtime-dom component error isolation (basic)', () => {
 
     setErrorHandler(handler)
 
-    const Faulty: SetupFunctionComponent = () => {
+    const Faulty: SetupComponent = () => {
       return () => {
         renderSpy()
         void state.count
@@ -118,7 +118,7 @@ describe('runtime-dom component error isolation (basic)', () => {
 
     setErrorHandler(handler)
 
-    const Faulty: SetupFunctionComponent = () => {
+    const Faulty: SetupComponent = () => {
       return () => {
         void state.count
 
@@ -130,7 +130,7 @@ describe('runtime-dom component error isolation (basic)', () => {
       }
     }
 
-    const Sibling: SetupFunctionComponent = () => {
+    const Sibling: SetupComponent = () => {
       return () => {
         return <div data-testid="sibling">ok</div>
       }

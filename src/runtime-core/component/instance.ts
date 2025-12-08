@@ -1,5 +1,5 @@
 import type { ComponentInstance } from './context.ts'
-import type { ElementProps, SetupFunctionComponent, VirtualNode } from '@/jsx-foundation'
+import type { ElementProps, SetupComponent, VirtualNode } from '@/jsx-foundation'
 import { effectScope } from '@/reactivity/effect-scope.ts'
 
 /**
@@ -9,7 +9,7 @@ export function createComponentInstance<
   HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
-  T extends SetupFunctionComponent,
+  T extends SetupComponent,
 >(
   component: T,
   props: ElementProps<T>,
@@ -39,7 +39,7 @@ export function attachInstanceToVirtualNode<
   HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
-  T extends SetupFunctionComponent,
+  T extends SetupComponent,
 >(
   virtualNode: VirtualNode<T>,
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,

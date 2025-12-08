@@ -5,7 +5,7 @@ import { resolveComponentProps } from './props.ts'
 import { performInitialRender } from './render-effect.ts'
 import { setupComponent } from './setup.ts'
 import { teardownComponentInstance } from './teardown.ts'
-import type { SetupFunctionComponent, VirtualNode } from '@/jsx-foundation'
+import type { SetupComponent, VirtualNode } from '@/jsx-foundation'
 
 /**
  * 执行函数组件并将返回的子树继续挂载到容器。
@@ -16,7 +16,7 @@ export function mountComponent<
   HostFragment extends HostNode,
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
-  virtualNode: VirtualNode<SetupFunctionComponent>,
+  virtualNode: VirtualNode<SetupComponent>,
   container: HostElement | HostFragment,
   needsAnchor = false,
 ): MountedHandle<HostNode> | undefined {

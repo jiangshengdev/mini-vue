@@ -1,9 +1,9 @@
 import typescriptLogo from './typescript.svg'
 import viteLogo from '/vite.svg'
 import { Counter } from './counter.tsx'
-import type { SetupFunctionComponent } from '@/index.ts'
+import type { SetupComponent } from '@/index.ts'
 
-export const App: SetupFunctionComponent = () => {
+export const App: SetupComponent = () => {
   return () => {
     return (
       <div>

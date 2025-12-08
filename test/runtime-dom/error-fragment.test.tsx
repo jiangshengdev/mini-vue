@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createTestContainer } from '../setup.ts'
-import type { ErrorHandler, SetupFunctionComponent } from '@/index.ts'
+import type { ErrorHandler, SetupComponent } from '@/index.ts'
 import { reactive, render, setErrorHandler } from '@/index.ts'
 import { errorContexts } from '@/shared/index.ts'
 
@@ -16,7 +16,7 @@ describe('runtime-dom component error isolation (fragment)', () => {
 
     setErrorHandler(handler)
 
-    const Faulty: SetupFunctionComponent = () => {
+    const Faulty: SetupComponent = () => {
       throw boom
     }
 
@@ -45,7 +45,7 @@ describe('runtime-dom component error isolation (fragment)', () => {
 
     setErrorHandler(handler)
 
-    const Faulty: SetupFunctionComponent = () => {
+    const Faulty: SetupComponent = () => {
       return () => {
         void state.a
 
@@ -57,7 +57,7 @@ describe('runtime-dom component error isolation (fragment)', () => {
       }
     }
 
-    const Sibling: SetupFunctionComponent = () => {
+    const Sibling: SetupComponent = () => {
       return () => {
         void state.b
 
@@ -65,7 +65,7 @@ describe('runtime-dom component error isolation (fragment)', () => {
       }
     }
 
-    const Parent: SetupFunctionComponent = () => {
+    const Parent: SetupComponent = () => {
       return () => {
         return (
           <div data-testid="root">
@@ -101,7 +101,7 @@ describe('runtime-dom component error isolation (fragment)', () => {
 
     setErrorHandler(handler)
 
-    const Faulty: SetupFunctionComponent = () => {
+    const Faulty: SetupComponent = () => {
       return () => {
         void state.a
 
@@ -113,7 +113,7 @@ describe('runtime-dom component error isolation (fragment)', () => {
       }
     }
 
-    const Sibling: SetupFunctionComponent = () => {
+    const Sibling: SetupComponent = () => {
       return () => {
         void state.b
 

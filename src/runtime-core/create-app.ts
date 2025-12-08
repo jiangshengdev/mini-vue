@@ -1,5 +1,5 @@
 import type { RootRenderFunction } from './renderer.ts'
-import type { ElementProps, SetupFunctionComponent } from '@/jsx-foundation/index.ts'
+import type { ElementProps, SetupComponent } from '@/jsx-foundation/index.ts'
 import { createVirtualNode } from '@/jsx-foundation/index.ts'
 import type { PropsShape } from '@/shared/index.ts'
 
@@ -44,7 +44,7 @@ interface AppState<HostElement> {
   /** 宿主注入的渲染配置。 */
   config: AppRuntimeConfig<HostElement>
   /** 根组件定义，用于生成顶层子树。 */
-  rootComponent: SetupFunctionComponent
+  rootComponent: SetupComponent
   /** 传入根组件的初始 props。 */
   initialRootProps?: PropsShape
 }
@@ -88,7 +88,7 @@ function unmountApp<HostElement>(state: AppState<HostElement>): void {
  * 通过最新状态生成根级 virtualNode，确保 props 是独立副本。
  */
 function createRootVirtualNode<HostElement>(state: AppState<HostElement>) {
-  const rawProps: ElementProps<SetupFunctionComponent> | undefined = state.initialRootProps
+  const rawProps: ElementProps<SetupComponent> | undefined = state.initialRootProps
     ? { ...state.initialRootProps }
     : undefined
 
@@ -103,7 +103,7 @@ function createRootVirtualNode<HostElement>(state: AppState<HostElement>) {
  */
 export function createAppInstance<HostElement>(
   config: AppRuntimeConfig<HostElement>,
-  rootComponent: SetupFunctionComponent,
+  rootComponent: SetupComponent,
   initialRootProps?: PropsShape,
 ): AppInstance<HostElement> {
   const state: AppState<HostElement> = {

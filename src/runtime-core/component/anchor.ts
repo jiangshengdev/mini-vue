@@ -2,7 +2,7 @@ import type { RendererOptions } from '../index.ts'
 import { mountChild } from '../mount/child.ts'
 import type { MountedHandle } from '../mount/handle.ts'
 import type { ComponentInstance } from './context.ts'
-import type { RenderOutput, SetupFunctionComponent } from '@/jsx-foundation'
+import type { RenderOutput, SetupComponent } from '@/jsx-foundation'
 
 /**
  * 处理需要锚点的组件子树挂载，避免与兄弟节点混淆。
@@ -11,7 +11,7 @@ export function mountChildWithAnchor<
   HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
-  T extends SetupFunctionComponent,
+  T extends SetupComponent,
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
@@ -45,7 +45,7 @@ function ensureComponentAnchor<
   HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
-  T extends SetupFunctionComponent,
+  T extends SetupComponent,
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,

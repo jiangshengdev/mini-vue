@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createTestContainer } from '../setup.ts'
-import type { ErrorHandler, SetupFunctionComponent } from '@/index.ts'
+import type { ErrorHandler, SetupComponent } from '@/index.ts'
 import { reactive, render, setErrorHandler } from '@/index.ts'
 import { errorContexts } from '@/shared/index.ts'
 
@@ -13,7 +13,7 @@ describe('runtime-dom fragment boundary', () => {
     const container = createTestContainer()
     const state = reactive({ show: true })
 
-    const Parent: SetupFunctionComponent = () => {
+    const Parent: SetupComponent = () => {
       return () => {
         return (
           <>
@@ -45,7 +45,7 @@ describe('runtime-dom fragment boundary', () => {
 
     setErrorHandler(handler)
 
-    const Faulty: SetupFunctionComponent = () => {
+    const Faulty: SetupComponent = () => {
       return () => {
         void state.fail
 
@@ -57,7 +57,7 @@ describe('runtime-dom fragment boundary', () => {
       }
     }
 
-    const Parent: SetupFunctionComponent = () => {
+    const Parent: SetupComponent = () => {
       return () => {
         return (
           <>

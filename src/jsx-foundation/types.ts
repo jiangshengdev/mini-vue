@@ -48,7 +48,7 @@ type PropsWithChildren<P> = P & { children?: ComponentChildren }
  *
  * @beta
  */
-export type SetupFunctionComponent<P = ComponentPropsBase> = (props: PropsWithChildren<P>) => ComponentRenderFunction
+export type SetupComponent<P = ComponentPropsBase> = (props: PropsWithChildren<P>) => ComponentRenderFunction
 
 /**
  * Fragment 类型定义，接收 FragmentProps 并返回一组子节点。
@@ -66,7 +66,7 @@ export type ElementType = string | ComponentLike | FragmentType
  * 推导给定元素类型对应的 props 形状。
  */
 type InferComponentProps<T> =
-  T extends SetupFunctionComponent<infer Props>
+  T extends SetupComponent<infer Props>
     ? PropsWithChildren<Props>
     : T extends (props: infer Props) => ComponentRenderFunction
       ? Props

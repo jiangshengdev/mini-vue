@@ -1,6 +1,6 @@
 import type { ComponentInstance } from './context.ts'
 import { setCurrentInstance, unsetCurrentInstance } from './context.ts'
-import type { ComponentRenderFunction, SetupFunctionComponent } from '@/jsx-foundation'
+import type { ComponentRenderFunction, SetupComponent } from '@/jsx-foundation'
 import { errorContexts, handlerPhases, runSilent } from '@/shared/index.ts'
 
 /**
@@ -10,7 +10,7 @@ export function setupComponent<
   HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
-  T extends SetupFunctionComponent,
+  T extends SetupComponent,
 >(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): boolean {
   /* `setup` 返回的渲染闭包会成为 effect 调度的核心逻辑。 */
   const render = invokeSetup(instance)
@@ -29,7 +29,7 @@ function invokeSetup<
   HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
-  T extends SetupFunctionComponent,
+  T extends SetupComponent,
 >(
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
 ): ComponentRenderFunction | undefined {

@@ -1,6 +1,6 @@
 import type { RendererOptions } from '../index.ts'
 import type { ComponentInstance } from './context.ts'
-import type { SetupFunctionComponent } from '@/jsx-foundation'
+import type { SetupComponent } from '@/jsx-foundation'
 import { errorContexts, handlerPhases, runSilent } from '@/shared/index.ts'
 
 /**
@@ -10,7 +10,7 @@ export function teardownMountedSubtree<
   HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
-  T extends SetupFunctionComponent,
+  T extends SetupComponent,
 >(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): void {
   /* 无挂载记录时无需额外清理，直接返回。 */
   if (!instance.mountedHandle) {
@@ -29,7 +29,7 @@ export function teardownComponentInstance<
   HostNode,
   HostElement extends HostNode,
   HostFragment extends HostNode,
-  T extends SetupFunctionComponent,
+  T extends SetupComponent,
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,

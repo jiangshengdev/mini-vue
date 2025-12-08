@@ -2,7 +2,7 @@
  * `runtime-dom` 负责整合 DOM 宿主的渲染器与应用创建逻辑。
  */
 import { domRendererOptions } from './renderer-options.ts'
-import type { SetupFunctionComponent } from '@/jsx-foundation/index.ts'
+import type { SetupComponent } from '@/jsx-foundation/index.ts'
 import type { AppInstance } from '@/runtime-core/index.ts'
 import { createAppInstance, createRenderer } from '@/runtime-core/index.ts'
 import type { PropsShape } from '@/shared/index.ts'
@@ -128,7 +128,7 @@ export interface DomAppInstance extends AppInstance<Element> {
  * @public
  */
 export function createApp(
-  rootComponent: SetupFunctionComponent,
+  rootComponent: SetupComponent,
   rootProps?: PropsShape,
 ): DomAppInstance {
   /* 先创建 runtime-core 层的基础应用实例，统一托管渲染。 */

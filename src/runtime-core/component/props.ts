@@ -1,9 +1,9 @@
-import type { ElementProps, SetupFunctionComponent, VirtualNode } from '@/jsx-foundation'
+import type { ElementProps, SetupComponent, VirtualNode } from '@/jsx-foundation'
 
 /**
  * 规整组件 props，并根据 children 数量注入合适的 children 形态。
  */
-export function resolveComponentProps<T extends SetupFunctionComponent>(
+export function resolveComponentProps<T extends SetupComponent>(
   virtualNode: VirtualNode<T>,
 ): ElementProps<T> {
   /* 克隆 props，防止函数组件在运行期写回 virtualNode。 */

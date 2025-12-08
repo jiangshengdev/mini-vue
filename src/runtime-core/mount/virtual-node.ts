@@ -3,7 +3,7 @@ import { mountComponent } from '../component/index.ts'
 import { mountElement } from './element.ts'
 import { mountChild } from './child.ts'
 import type { MountedHandle } from './handle.ts'
-import type { SetupFunctionComponent, VirtualNode } from '@/jsx-foundation/index.ts'
+import type { SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
 import { Fragment } from '@/jsx-foundation/index.ts'
 
 /**
@@ -28,7 +28,7 @@ export function mountVirtualNode<
   if (typeof virtualNode.type === 'function') {
     return mountComponent(
       options,
-      virtualNode as VirtualNode<SetupFunctionComponent>,
+      virtualNode as VirtualNode<SetupComponent>,
       container,
       needsAnchor,
     )

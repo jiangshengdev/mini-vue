@@ -1,12 +1,12 @@
-import type { RendererOptions } from '../../index.ts'
+import type { RendererOptions } from '../index.ts'
 import type { ComponentInstance } from './context.ts'
-import type { SetupFunctionComponent } from '@/jsx-foundation/index.ts'
+import type { SetupFunctionComponent } from '@/jsx-foundation'
 import {
   runtimeErrorContexts,
   errorHandlerPhases,
   errorPropagationStrategies,
   runWithErrorChannel,
-} from '@/shared/index.ts'
+} from '@/shared'
 
 /**
  * 移除当前缓存的宿主节点，防止重复保留旧 DOM。

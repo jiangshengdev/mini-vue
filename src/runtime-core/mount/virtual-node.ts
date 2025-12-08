@@ -1,5 +1,5 @@
 import type { RendererOptions } from '../index.ts'
-import { mountComponent } from './component/index.ts'
+import { mountComponent } from '@/runtime-core/component/index.ts'
 import { mountElement } from './element.ts'
 import { mountChild } from './child.ts'
 import type { MountedHandle } from './handle.ts'

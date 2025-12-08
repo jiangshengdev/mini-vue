@@ -1,12 +1,12 @@
 import type { ComponentInstance } from './context.ts'
 import { setCurrentInstance, unsetCurrentInstance } from './context.ts'
-import type { ComponentRenderFunction, SetupFunctionComponent } from '@/jsx-foundation/index.ts'
+import type { ComponentRenderFunction, SetupFunctionComponent } from '@/jsx-foundation'
 import {
   runtimeErrorContexts,
   errorHandlerPhases,
   errorPropagationStrategies,
   runWithErrorChannel,
-} from '@/shared/index.ts'
+} from '@/shared'
 
 /**
  * 初始化组件，创建 setup 阶段与渲染闭包。

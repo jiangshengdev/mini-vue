@@ -1,16 +1,16 @@
 /**
  * 组件实例的共享定义与当前实例管理工具。
  */
-import type { MountedHandle } from '../index.ts'
+import type { MountedHandle } from '../mount'
 import type {
   ComponentRenderFunction,
   ComponentResult,
   ElementProps,
   SetupFunctionComponent,
-} from '@/jsx-foundation/index.ts'
+} from '@/jsx-foundation'
 import type { ReactiveEffect } from '@/reactivity/effect.ts'
 import type { EffectScope } from '@/reactivity/effect-scope.ts'
-import type { PlainObject } from '@/shared/index.ts'
+import type { PlainObject } from '@/shared'
 
 /**
  * 运行期组件实例结构，统一记录渲染与清理状态。

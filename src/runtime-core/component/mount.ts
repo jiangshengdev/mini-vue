@@ -1,11 +1,11 @@
-import type { RendererOptions } from '../../index.ts'
-import type { MountedHandle } from '../handle.ts'
+import type { RendererOptions } from '../index.ts'
+import type { MountedHandle } from '../mount/handle.ts'
 import { attachInstanceToVirtualNode, createComponentInstance } from './instance.ts'
 import { resolveComponentProps } from './props.ts'
 import { performInitialRender } from './render-effect.ts'
 import { setupComponent } from './setup.ts'
 import { teardownComponentInstance } from './teardown.ts'
-import type { SetupFunctionComponent, VirtualNode } from '@/jsx-foundation/index.ts'
+import type { SetupFunctionComponent, VirtualNode } from '@/jsx-foundation'
 
 /**
  * 执行函数组件并将返回的子树继续挂载到容器。

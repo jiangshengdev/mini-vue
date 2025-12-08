@@ -1,0 +1,59 @@
+import { describe, expect, it } from 'vitest'
+import { within } from '@testing-library/dom'
+import { createTestContainer } from '../setup.ts'
+import { render } from '@/index.ts'
+
+describe('runtime-dom class 归一化', () => {
+  it('字符串 class 直接写入', () => {
+    const container = createTestContainer()
+
+    render(<div class="foo bar">text</div>, container)
+
+    const element = within(container).getByText('text')
+
+    expect(element.className).toBe('foo bar')
+  })
+
+  it('数组 class 会递归展开', () => {
+    const container = createTestContainer()
+
+    render(<div class={['foo', ['bar', undefined], 'baz']}>text</div>, container)
+
+    const element = within(container).getByText('text')
+
+    expect(element.className).toBe('foo bar baz')
+  })
+
+  it('对象 class 仅保留 truthy 键', () => {
+    const container = createTestContainer()
+
+    render(<div class={{ foo: true, bar: false, baz: 1, qux: 0 }}>text</div>, container)
+
+    const element = within(container).getByText('text')
+
+    expect(element.className).toBe('foo baz')
+  })
+
+  it('混合数组与对象写法', () => {
+    const container = createTestContainer()
+
+    render(
+      <div class={['foo', { bar: true, baz: false }, ['qux', { quux: true }]]}>text</div>,
+      container,
+    )
+
+    const element = within(container).getByText('text')
+
+    expect(element.className).toBe('foo bar qux quux')
+  })
+
+  it('空值应输出空 className', () => {
+    const container = createTestContainer()
+
+    render(<div class={null}>text</div>, container)
+
+    const element = within(container).getByText('text')
+
+    expect(element.className).toBe('')
+  })
+})

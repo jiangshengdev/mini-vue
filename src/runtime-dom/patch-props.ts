@@ -5,6 +5,7 @@ import type { PropsShape } from '@/shared/index.ts'
 import { isNil, isObject } from '@/shared/index.ts'
 import type { Ref } from '@/reactivity/index.ts'
 import { isRef } from '@/reactivity/index.ts'
+import { normalizeClass } from './normalize-class.ts'
 
 /**
  * @beta
@@ -35,9 +36,9 @@ export function patchProps(element: Element, props?: PropsShape): void {
       continue
     }
 
-    /* `class`/`className` 统一走 `className`，确保字符串化处理。 */
+    /* `class`/`className` 统一走 `className`，归一化复杂写法。 */
     if (key === 'class' || key === 'className') {
-      element.className = isNil(value) ? '' : String(value)
+      element.className = normalizeClass(value)
       continue
     }
 

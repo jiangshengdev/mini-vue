@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const projectRoot = resolve(__dirname, '..')
-const sourcePath = resolve(projectRoot, 'src/jsx/jsx-shim.d.ts')
+const sourcePath = resolve(projectRoot, 'src/jsx-foundation/jsx-shim.d.ts')
 const targetDir = resolve(projectRoot, 'dist/jsx')
 const targetPath = resolve(targetDir, 'index.d.ts')
 
@@ -14,7 +14,7 @@ async function ensureSourceExists() {
   try {
     await access(sourcePath)
   } catch {
-    throw new Error('未找到 src/jsx/jsx-shim.d.ts，无法生成 JSX 类型声明')
+    throw new Error('未找到 src/jsx-foundation/jsx-shim.d.ts，无法生成 JSX 类型声明')
   }
 }
 

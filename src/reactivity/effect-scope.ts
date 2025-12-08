@@ -1,4 +1,4 @@
-import type { EffectInstance } from './shared/index.ts'
+import type { EffectInstance } from './contracts/index.ts'
 import {
   runtimeErrorContexts,
   runtimeErrorHandlerPhases,

@@ -6,7 +6,7 @@ import type {
   EffectInstance,
   EffectOptions,
   EffectScheduler,
-} from './shared/index.ts'
+} from './contracts/index.ts'
 import {
   runtimeErrorContexts,
   runtimeErrorHandlerPhases,

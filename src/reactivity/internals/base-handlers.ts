@@ -1,6 +1,6 @@
 import { reactive } from '../reactive.ts'
-import type { ReactiveTarget } from '../shared/index.ts'
-import { iterateDependencyKey, triggerOpTypes } from '../shared/index.ts'
+import type { ReactiveTarget } from '../contracts/index.ts'
+import { iterateDependencyKey, triggerOpTypes } from '../contracts/index.ts'
 import { track, trigger } from './operations.ts'
 import { isArrayIndex, isObject } from '@/shared/index.ts'
 

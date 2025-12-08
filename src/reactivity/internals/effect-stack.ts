@@ -1,7 +1,7 @@
 /**
  * 将 effect 栈封装为对象，集中管理活跃副作用状态。
  */
-import type { EffectInstance } from '../shared/index.ts'
+import type { EffectInstance } from '../contracts/index.ts'
 
 /**
  * 提供 effect 嵌套时的栈式管理能力，保证当前活跃副作用可被精确追踪。

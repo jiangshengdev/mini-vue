@@ -3,7 +3,7 @@ import { ObjectRefImpl, RefImpl } from './impl.ts'
 import type { Ref } from './types.ts'
 import type { PlainObject } from '@/shared/index.ts'
 import { isObject } from '@/shared/index.ts'
-import { refFlag } from '../shared/index.ts'
+import { refFlag } from '../contracts/index.ts'
 
 /**
  * 将任意值转换为 Ref，若已经是 Ref 则原样返回。

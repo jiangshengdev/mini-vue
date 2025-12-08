@@ -1,4 +1,4 @@
-import type { refFlag } from '../shared/index.ts'
+import type { refFlag } from '../contracts/index.ts'
 
 /**
  * Ref 接口暴露响应式值的访问器，并携带 refFlag 标记。

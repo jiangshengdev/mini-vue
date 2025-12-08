@@ -30,9 +30,7 @@ function invokeSetup<
   HostElement extends HostNode,
   HostFragment extends HostNode,
   T extends SetupComponent,
->(
-  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
-): RenderFunction | undefined {
+>(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): RenderFunction | undefined {
   let setupFailed = false
 
   /* 在组件专属 scope 内运行 setup，便于后续统一 stop。 */

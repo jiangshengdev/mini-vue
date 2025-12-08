@@ -127,10 +127,7 @@ export interface DomAppInstance extends AppInstance<Element> {
  *
  * @public
  */
-export function createApp(
-  rootComponent: SetupComponent,
-  rootProps?: PropsShape,
-): DomAppInstance {
+export function createApp(rootComponent: SetupComponent, rootProps?: PropsShape): DomAppInstance {
   /* 先创建 runtime-core 层的基础应用实例，统一托管渲染。 */
   const state: DomAppState = {
     baseApp: createAppInstance(

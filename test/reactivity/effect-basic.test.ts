@@ -3,7 +3,7 @@ import { effect, reactive } from '@/index.ts'
 import * as dependencyUtils from '@/reactivity/internals/dependency.ts'
 import { effectStack } from '@/reactivity/index.ts'
 
-vi.mock('@/reactivity/internals/dependency-utils.ts', { spy: true })
+vi.mock('@/reactivity/internals/dependency.ts', { spy: true })
 
 describe('effect 基础行为', () => {
   it('注册后会立刻执行一次副作用', () => {
@@ -272,5 +272,7 @@ describe('effect 基础行为', () => {
     state.count = 1
 
     expect(triggerSpy).not.toHaveBeenCalled()
+
+    triggerSpy.mockRestore()
   })
 })

@@ -4,7 +4,7 @@ import { trackEffect, triggerEffects } from '../internals/index.ts'
 import type { DependencyBucket } from '../contracts/index.ts'
 import { refFlag } from '../contracts/index.ts'
 import type { Ref } from './types.ts'
-import { errorContexts, errorPhases, runThrowing } from '@/shared/index.ts'
+import { createDebugLogger, errorContexts, errorPhases, runThrowing } from '@/shared/index.ts'
 
 /**
  * `computed` getter 负责在依赖图中派生出最终结果。
@@ -35,6 +35,8 @@ export interface WritableComputedOptions<T> {
 /** 用于提示只读 computed 被误写入的错误信息。 */
 const readonlyComputedError = '当前 computed 为只读，若需要写入请传入 { get, set } 形式的配置'
 
+const debug = createDebugLogger('computed')
+
 /**
  * `computed` 的底层实现，通过惰性求值与脏标记保持派生状态最新。
  */
@@ -44,6 +46,8 @@ class ComputedRefImpl<T> implements Ref<T> {
   readonly [refFlag] = true as const
 
   private readonly effect: ReactiveEffect<T>
+
+  private readonly effectName: string
 
   private readonly setter: ComputedSetter<T>
 
@@ -58,6 +62,7 @@ class ComputedRefImpl<T> implements Ref<T> {
    */
   constructor(getter: ComputedGetter<T>, setter: ComputedSetter<T>) {
     this.setter = setter
+    this.effectName = getter.name
     /* 依赖变更时通过调度器标记脏值并触发外层依赖。 */
     this.effect = new ReactiveEffect(getter, () => {
       this.markDirty()
@@ -71,12 +76,22 @@ class ComputedRefImpl<T> implements Ref<T> {
    */
   get value(): T {
     /* 外层 effect 访问 computed 时记录依赖，便于后续触发。 */
-    trackEffect(this.dependencyBucket)
+    trackEffect(this.dependencyBucket, { source: 'computed.value' })
 
     /* 首次访问或依赖脏时重新运行 getter，并缓存结果。 */
     if (this.needsRecompute) {
+      debug('get value', '重新计算派生值', {
+        cachedValue: this.cachedValue,
+        effectName: this.effectName,
+        needsRecompute: this.needsRecompute,
+      })
       this.needsRecompute = false
       this.cachedValue = this.effect.run()
+      debug('get value', '派生值已更新', {
+        cachedValue: this.cachedValue,
+        effectName: this.effectName,
+        needsRecompute: this.needsRecompute,
+      })
     }
 
     return this.cachedValue
@@ -86,6 +101,7 @@ class ComputedRefImpl<T> implements Ref<T> {
    * 写入 computed 值时交给自定义 setter，由实现自行决定同步策略。
    */
   set value(newValue: T) {
+    debug('set value', '收到写入请求', { value: newValue })
     runThrowing(
       () => {
         this.setter(newValue)
@@ -107,6 +123,11 @@ class ComputedRefImpl<T> implements Ref<T> {
     }
 
     this.needsRecompute = true
+    debug('markDirty', '标记为脏值，准备触发依赖', {
+      dependencySize: this.dependencyBucket.size,
+      effectName: this.effectName,
+      needsRecompute: this.needsRecompute,
+    })
     triggerEffects(this.dependencyBucket)
   }
 }

@@ -5,8 +5,8 @@ import type { MountedHandle } from '../mount'
 import type { ElementProps, RenderFunction, RenderOutput, SetupComponent } from '@/jsx-foundation'
 import type { ReactiveEffect } from '@/reactivity/effect.ts'
 import type { EffectScope } from '@/reactivity/effect-scope.ts'
-import { ContextStack } from '@/shared/index.ts'
 import type { PlainObject } from '@/shared/index.ts'
+import { ContextStack } from '@/shared/index.ts'
 
 /**
  * 运行期组件实例结构，统一记录渲染与清理状态。

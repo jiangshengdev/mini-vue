@@ -27,7 +27,11 @@ class DependencyRegistry {
     /* 获取或创建目标字段对应的依赖集合 */
     const dependencyBucket = this.getOrCreateDep(target, key)
 
-    trackEffect(dependencyBucket)
+    trackEffect(dependencyBucket, {
+      source: 'reactive:get',
+      target,
+      key,
+    })
   }
 
   /**

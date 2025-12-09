@@ -31,7 +31,11 @@ export class RefImpl<T> implements Ref<T> {
    */
   get value(): T {
     /* 读取时登记当前副作用，保持追踪关系。 */
-    trackEffect(this.dependencyBucket)
+    trackEffect(this.dependencyBucket, {
+      source: 'ref.value',
+      rawValue: this.rawValue,
+      innerValue: this.innerValue,
+    })
 
     return this.innerValue
   }
@@ -84,7 +88,11 @@ export class ObjectRefImpl<T extends PlainObject, K extends keyof T> implements 
 
     if (this.dependencyBucket) {
       /* 普通对象属性通过自身 dependencyBucket 追踪依赖。 */
-      trackEffect(this.dependencyBucket)
+      trackEffect(this.dependencyBucket, {
+        source: 'object-ref',
+        target: this.target,
+        key: this.key,
+      })
     }
 
     /* 不额外缓存值，直接透传原对象，确保和原始 getter 一致。 */

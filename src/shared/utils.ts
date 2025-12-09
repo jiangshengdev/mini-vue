@@ -139,7 +139,7 @@ export function createDebugLogger(namespace: string): DebugLogger {
     }
 
     console.debug(prefix, method, message)
-    console.debug(JSON.stringify(payload))
-    console.debug()
+    console.debug(JSON.stringify(payload, null, 2))
+    console.debug('')
   }
 }

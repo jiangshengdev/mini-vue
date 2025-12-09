@@ -13,6 +13,8 @@ describe('computed', () => {
     const getter = vi.fn(function getDouble() {
       return state.value.count * 2
     })
+
+    getter.mockName('getDouble')
     const doubled = computed(getter)
 
     expect(getter).not.toHaveBeenCalled()

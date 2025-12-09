@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import { ReactiveEffect } from '../effect.ts'
 import { recordEffectScope } from '../effect-scope.ts'
 import { trackEffect, triggerEffects } from '../internals/index.ts'
@@ -62,7 +63,10 @@ class ComputedRefImpl<T> implements Ref<T> {
    */
   constructor(getter: ComputedGetter<T>, setter: ComputedSetter<T>) {
     this.setter = setter
-    this.effectName = getter.name
+
+    const getterMock = getter as Mock<ComputedGetter<T>>
+
+    this.effectName = getterMock.getMockName ? getterMock.getMockName() : getter.name
     /* 依赖变更时通过调度器标记脏值并触发外层依赖。 */
     this.effect = new ReactiveEffect(getter, () => {
       this.markDirty()

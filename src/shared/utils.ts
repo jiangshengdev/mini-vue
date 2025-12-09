@@ -92,7 +92,20 @@ export function isNodeDebugEnvironment(): boolean {
     return false
   }
 
-  const nodeOptions: unknown = import.meta.env?.NODE_OPTIONS
+  const meta = import.meta
+  const { env } = meta
+
+  if (env.MODE !== 'test') {
+    return false
+  }
+
+  const url = new URL(meta.url)
+
+  if (url.port === '63315') {
+    return true
+  }
+
+  const nodeOptions: unknown = env?.NODE_OPTIONS
 
   if (typeof nodeOptions !== 'string' || nodeOptions.length === 0) {
     return false
@@ -126,7 +139,7 @@ export function createDebugLogger(namespace: string): DebugLogger {
     }
 
     console.debug(prefix, method, message)
-    console.debug(payload)
+    console.debug(JSON.stringify(payload))
     console.debug()
   }
 }

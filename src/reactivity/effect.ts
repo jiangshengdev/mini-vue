@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import { recordEffectScope } from './effect-scope.ts'
 import type {
   DependencyBucket,
@@ -51,9 +52,11 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
   private innerActive = true
 
   constructor(fn: () => T, scheduler?: EffectScheduler) {
+    const fnMock = fn as Mock<() => T>
+
     /* 构造时记录调度器，使后续 trigger 能根据配置选择执行策略 */
     this.fn = fn
-    this.fnName = fn.name
+    this.fnName = fnMock.getMockName ? fnMock.getMockName() : fn.name
     this.scheduler = scheduler
   }
 

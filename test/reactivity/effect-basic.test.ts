@@ -3,6 +3,8 @@ import { effect, reactive } from '@/index.ts'
 import * as dependencyUtils from '@/reactivity/internals/dependency.ts'
 import { effectStack } from '@/reactivity/index.ts'
 
+vi.mock('@/reactivity/internals/dependency-utils.ts', { spy: true })
+
 describe('effect 基础行为', () => {
   it('注册后会立刻执行一次副作用', () => {
     const state = reactive({ count: 0 })
@@ -259,18 +261,16 @@ describe('effect 基础行为', () => {
 
   it('无活跃 effect 读取不会创建空依赖桶', () => {
     const state = reactive({ count: 0 })
-    const triggerSpy = vi.spyOn(dependencyUtils, 'triggerEffects')
+    const triggerSpy = vi.mocked(dependencyUtils.triggerEffects)
 
-    try {
-      /* 直接读取属性，此时不存在活跃 effect。 */
-      void state.count
+    triggerSpy.mockClear()
 
-      /* 修改属性应不会触发 triggerEffects，因为没有任何依赖桶被创建。 */
-      state.count = 1
+    /* 直接读取属性，此时不存在活跃 effect。 */
+    void state.count
 
-      expect(triggerSpy).not.toHaveBeenCalled()
-    } finally {
-      triggerSpy.mockRestore()
-    }
+    /* 修改属性应不会触发 triggerEffects，因为没有任何依赖桶被创建。 */
+    state.count = 1
+
+    expect(triggerSpy).not.toHaveBeenCalled()
   })
 })

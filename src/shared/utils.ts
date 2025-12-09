@@ -1,4 +1,5 @@
 import type { PlainObject } from './types.ts'
+import { server } from '@vitest/browser/context'
 
 /**
  * 判断传入值是否为可供 reactive 使用的普通非 null 对象。
@@ -95,13 +96,7 @@ export function isNodeDebugEnvironment(): boolean {
   const meta = import.meta
   const { env } = meta
 
-  if (env.MODE !== 'test') {
-    return false
-  }
-
-  const url = new URL(meta.url)
-
-  if (url.port === '63315') {
+  if (server.config.inspectBrk) {
     return true
   }
 

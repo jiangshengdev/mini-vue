@@ -26,3 +26,5 @@
   - 包装用户回调时保留 `handleError` 路由；新增执行入口用 `shared` 的 `runSilent`/`runThrowing`。
   - 扩展 DOM 能力时保持 props 归一化与 HMR 行为，更新 `patch-props.ts` 并补充 `test/runtime-dom/**`。
   - 新特性请在对应区域补测试（如响应式行为 -> `test/reactivity`，JSX 变更 -> `test/jsx-runtime`）。
+
+- 交流与输出：代码注释、日志输出（含 print/console）、对话回复均使用简体中文。

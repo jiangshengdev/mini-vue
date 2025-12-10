@@ -3,7 +3,7 @@ import type { ErrorContext, ErrorMeta, ErrorPhase, ErrorToken } from './error-ch
 /**
  * 标准化的错误处理函数签名，统一传入原始异常与上下文标签。
  */
-export interface ErrorDispatchPayload {
+export interface ErrorPayload {
   /** 标记触发错误的运行上下文，方便分类处理。 */
   readonly origin: ErrorContext
   /** 指示本次调度发生在同步还是异步阶段。 */
@@ -19,11 +19,7 @@ export interface ErrorDispatchPayload {
  *
  * @beta
  */
-export type ErrorHandler = (
-  error: unknown,
-  context: ErrorContext,
-  dispatchPayload?: ErrorDispatchPayload,
-) => void
+export type ErrorHandler = (error: unknown, context: ErrorContext, payload?: ErrorPayload) => void
 
 /**
  * 缓存当前生效的错误处理器，未设置时保持 undefined 以便回退默认行为。
@@ -46,15 +42,15 @@ export function setErrorHandler(handler?: ErrorHandler): void {
  */
 export function handleError(
   error: unknown,
-  dispatchPayload: ErrorDispatchPayload,
+  payload: ErrorPayload,
   shouldRethrowAsync = true,
 ): void {
-  const { origin } = dispatchPayload
+  const { origin } = payload
 
   /* 优先通过用户注册的处理器上报，以便框架层做统一告警。 */
   if (currentErrorHandler) {
     try {
-      currentErrorHandler(error, origin, dispatchPayload)
+      currentErrorHandler(error, origin, payload)
     } catch (handlerError) {
       /* 处理器自身抛错时仍需异步抛出，但不能阻断当前触发链。 */
       rethrowAsync(handlerError)

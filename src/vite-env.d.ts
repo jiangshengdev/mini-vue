@@ -5,7 +5,8 @@ interface ViteTypeOptions {
 }
 
 interface ImportMetaEnv {
-  readonly INTERNAL_DEV?: boolean
+  // 仅 Vitest 浏览器 runner 注入，值为字符串 'true' 用于内部调试，构建时被固化为 undefined。
+  readonly INTERNAL_DEV?: string
   // 更多环境变量...
 }
 

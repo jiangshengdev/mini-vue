@@ -7,6 +7,10 @@ export default mergeConfig(
   vitestConfig,
   defineConfig({
     test: {
+      env: {
+        // 仅 Vitest 浏览器 runner 注入，值为字符串 'true' 触发内部调试路径。
+        INTERNAL_DEV: 'true',
+      },
       browser: {
         enabled: true,
         headless: true,

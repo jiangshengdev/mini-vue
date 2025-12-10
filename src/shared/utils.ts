@@ -1,5 +1,4 @@
 import type { PlainObject } from './types.ts'
-import { server } from '@vitest/browser/context'
 
 /**
  * 判断传入值是否为可供 reactive 使用的普通非 null 对象。
@@ -58,83 +57,4 @@ export function isArrayIndex(key: PropertyKey): boolean {
   }
 
   return false
-}
-
-/**
- * 依据 Vite 注入的 `import.meta.env` 判断当前是否处于开发模式。
- */
-export function isDevEnvironment(): boolean {
-  const metaEnv = import.meta.env
-
-  /* Vite 提供最可靠的 DEV 标志，存在即可直接返回。 */
-  if (typeof metaEnv?.DEV === 'boolean') {
-    return metaEnv.DEV
-  }
-
-  /* PROD 只在 build 阶段为 true，可作为 DEV 的反向兜底。 */
-  if (typeof metaEnv?.PROD === 'boolean') {
-    return !metaEnv.PROD
-  }
-
-  /* 最后回退到 mode 字符串，约定非 production 即为开发语义。 */
-  if (typeof metaEnv?.MODE === 'string') {
-    return metaEnv.MODE !== 'production'
-  }
-
-  /* 默认以开发模式处理，方便在缺乏构建信息时暴露告警。 */
-  return true
-}
-
-/**
- * 在开发模式下，通过 NODE_OPTIONS 判定是否启用了 Node 调试（inspector/调试器注入）。
- */
-export function isNodeDebugEnvironment(): boolean {
-  if (!isDevEnvironment()) {
-    return false
-  }
-
-  const meta = import.meta
-  const { env } = meta
-
-  if (server.config.inspectBrk) {
-    return true
-  }
-
-  const nodeOptions: unknown = env?.NODE_OPTIONS
-
-  if (typeof nodeOptions !== 'string' || nodeOptions.length === 0) {
-    return false
-  }
-
-  /* 兼容 --inspect / --inspect-brk / --debug 以及 IDE 注入的调试连接器。 */
-  return (
-    nodeOptions.includes('inspect') ||
-    nodeOptions.includes('debug') ||
-    nodeOptions.includes('debugConnector')
-  )
-}
-
-/**
- * 创建带命名空间的调试日志函数，方便在调试环境下输出结构化信息。
- */
-export type DebugLogger = (method: string, message: string, payload?: unknown) => void
-
-export function createDebugLogger(namespace: string): DebugLogger {
-  return (method, message, payload) => {
-    if (!isNodeDebugEnvironment()) {
-      return
-    }
-
-    const prefix = `[${namespace}]`
-
-    if (payload === undefined) {
-      console.debug(prefix, method, message)
-
-      return
-    }
-
-    console.debug(prefix, method, message)
-    console.debug(JSON.stringify(payload, null, 2))
-    console.debug('')
-  }
 }

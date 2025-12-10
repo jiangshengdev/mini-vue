@@ -2,6 +2,8 @@ import type { ErrorContext, ErrorMeta, ErrorPhase, ErrorToken } from './error-ch
 
 /**
  * 标准化的错误处理函数签名，统一传入原始异常与上下文标签。
+ *
+ * @beta
  */
 export interface ErrorPayload {
   /** 标记触发错误的运行上下文，方便分类处理。 */

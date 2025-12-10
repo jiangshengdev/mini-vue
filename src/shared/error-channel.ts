@@ -55,6 +55,8 @@ export type ErrorPhase = (typeof errorPhases)[keyof typeof errorPhases]
 
 /**
  * 允许透传只读的附加上下文信息，便于错误处理器记录。
+ *
+ * @beta
  */
 export type ErrorMeta = Readonly<PlainObject>
 
@@ -74,6 +76,8 @@ interface ErrorDispatchOptions {
 
 /**
  * 每次错误调度返回的 token，用于描述真实触发情况。
+ *
+ * @beta
  */
 export interface ErrorToken {
   /** 捕获到的原始异常对象。 */

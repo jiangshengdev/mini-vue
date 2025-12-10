@@ -20,6 +20,6 @@ export type {
 export type { PlainObject, PropsShape } from './types.ts'
 export { isArrayIndex, isNil, isObject, isPlainObject } from './utils.ts'
 export { ContextStack } from './context-stack.ts'
-export { isDevEnvironment, isDevDebugEnvironment } from '@/shared/env.ts'
+export { __DEV__, isDevDebugEnvironment } from '@/shared/env.ts'
 export { createDebugLogger } from '@/shared/debug.ts'
 export type { DebugLogger } from '@/shared/debug.ts'

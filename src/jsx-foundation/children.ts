@@ -1,11 +1,9 @@
 import type { VirtualNodeChild } from './types.ts'
 import { isVirtualNode } from './guards.ts'
-import { isDevEnvironment, isNil } from '@/shared/index.ts'
-
-const shouldWarnUnsupportedChildren = isDevEnvironment()
+import { __DEV__, isNil } from '@/shared/index.ts'
 
 function warnUnsupportedChild(child: unknown): void {
-  if (!shouldWarnUnsupportedChildren) {
+  if (!__DEV__) {
     return
   }
 
@@ -56,5 +54,5 @@ function flattenChild(rawChild: unknown, accumulator: VirtualNodeChild[]): void 
   }
 
   /* 函数、对象等不受支持类型直接忽略，保持与 Vue 3 对齐 */
-  warnUnsupportedChild(rawChild)
+  __DEV__ && warnUnsupportedChild(rawChild)
 }

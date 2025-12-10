@@ -1,28 +1,7 @@
 /**
- * 依据 Vite 注入的 `import.meta.env` 判断当前是否处于开发模式。
+ * 直接使用 Vite 注入的 DEV 常量，便于编译期摇树。
  */
-export function isDevEnvironment(): boolean {
-  /* Vite 在构建期注入 import.meta.env，这里先取出作为环境判定的主来源。 */
-  const metaEnv = import.meta.env
-
-  /* Vite 提供最可靠的 DEV 标志，存在即可直接返回。 */
-  if (typeof metaEnv?.DEV === 'boolean') {
-    return metaEnv.DEV
-  }
-
-  /* PROD 只在 build 阶段为 true，可作为 DEV 的反向兜底。 */
-  if (typeof metaEnv?.PROD === 'boolean') {
-    return !metaEnv.PROD
-  }
-
-  /* 最后回退到 mode 字符串，约定非 production 即为开发语义。 */
-  if (typeof metaEnv?.MODE === 'string') {
-    return metaEnv.MODE !== 'production'
-  }
-
-  /* 默认以开发模式处理，方便在缺乏构建信息时暴露告警。 */
-  return true
-}
+export const __DEV__ = import.meta.env.DEV
 
 /**
  * 检测 Vitest 浏览器运行器是否开启 inspect-brk 调试。
@@ -92,7 +71,7 @@ function hasNodeDebugFlag(): boolean {
  */
 export function isDevDebugEnvironment(): boolean {
   /* 非开发模式直接短路，避免生产环境误触调试逻辑。 */
-  if (!isDevEnvironment()) {
+  if (!__DEV__) {
     return false
   }
 

@@ -9,6 +9,7 @@ import type {
 } from './contracts/index.ts'
 import type { PlainObject } from '@/shared/index.ts'
 import {
+  __INTERNAL_DEV__,
   ContextStack,
   createDebugLogger,
   errorContexts,
@@ -16,7 +17,6 @@ import {
   runSilent,
   runThrowing,
 } from '@/shared/index.ts'
-import { __INTERNAL_DEV__ } from '@/shared/env.ts'
 
 export const effectStack = new ContextStack<EffectInstance>()
 const debug = __INTERNAL_DEV__ ? createDebugLogger('effect') : null

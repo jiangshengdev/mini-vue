@@ -1,6 +1,6 @@
 import type { ComponentInstance } from './context.ts'
 import { setCurrentInstance, unsetCurrentInstance } from './context.ts'
-import type { RenderFunction, SetupComponent } from '@/jsx-foundation'
+import type { RenderFunction, SetupComponent } from '@/jsx-foundation/index.ts'
 import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
 
 /**

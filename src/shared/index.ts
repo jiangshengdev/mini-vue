@@ -1,3 +1,4 @@
+export type { ErrorPayload, ErrorHandler } from './error-handling.ts'
 export { handleError, setErrorHandler } from './error-handling.ts'
 export {
   dispatchError,
@@ -20,6 +21,6 @@ export type {
 export type { PlainObject, PropsShape } from './types.ts'
 export { isArrayIndex, isNil, isObject, isPlainObject } from './utils.ts'
 export { ContextStack } from './context-stack.ts'
-export { __DEV__, isDevDebugEnvironment } from '@/shared/env.ts'
-export { createDebugLogger } from '@/shared/debug.ts'
-export type { DebugLogger } from '@/shared/debug.ts'
+export { __DEV__, __INTERNAL_DEV__, isDevDebugEnvironment } from './env.ts'
+export { createDebugLogger } from './debug.ts'
+export type { DebugLogger } from './debug.ts'

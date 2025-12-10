@@ -31,7 +31,12 @@ export { createApp, render } from '@/runtime-dom/index.ts'
 export type { SetupComponent, ElementType, VirtualNode } from '@/jsx-foundation/index.ts'
 export { Fragment } from '@/jsx-foundation/index.ts'
 export { h, jsx, jsxs, jsxDEV } from '@/jsx-runtime/index.ts'
-export type { PropsShape } from '@/shared/types.ts'
-export type { ErrorContext, ErrorMeta, ErrorToken } from '@/shared/error-channel.ts'
-export type { ErrorPayload, ErrorHandler } from '@/shared/error-handling.ts'
-export { setErrorHandler } from '@/shared/error-handling.ts'
+export type {
+  ErrorContext,
+  ErrorHandler,
+  ErrorMeta,
+  ErrorPayload,
+  ErrorToken,
+  PropsShape,
+} from '@/shared/index.ts'
+export { setErrorHandler } from '@/shared/index.ts'

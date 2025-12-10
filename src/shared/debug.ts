@@ -1,4 +1,4 @@
-import { __INTERNAL_DEV__, isDevDebugEnvironment } from '@/shared/env.ts'
+import { __INTERNAL_DEV__, isDevDebugEnvironment } from './env.ts'
 
 /**
  * 调试日志记录器签名，按方法名、描述与可选负载输出调试信息。

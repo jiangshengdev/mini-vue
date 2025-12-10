@@ -1,6 +1,6 @@
 import type { RendererOptions } from '../index.ts'
 import type { ComponentInstance } from './context.ts'
-import type { SetupComponent } from '@/jsx-foundation'
+import type { SetupComponent } from '@/jsx-foundation/index.ts'
 import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
 
 /**

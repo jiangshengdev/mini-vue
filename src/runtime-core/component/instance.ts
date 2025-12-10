@@ -1,6 +1,6 @@
 import type { ComponentInstance } from './context.ts'
-import type { ElementProps, SetupComponent, VirtualNode } from '@/jsx-foundation'
-import { effectScope } from '@/reactivity/effect-scope.ts'
+import type { ElementProps, SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
+import { effectScope } from '@/reactivity/index.ts'
 
 /**
  * 创建组件实例与关联的 effect 作用域。

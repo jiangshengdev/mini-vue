@@ -2,9 +2,13 @@
  * 组件实例的共享定义与当前实例管理工具。
  */
 import type { MountedHandle } from '../mount'
-import type { ElementProps, RenderFunction, RenderOutput, SetupComponent } from '@/jsx-foundation'
-import type { ReactiveEffect } from '@/reactivity/effect.ts'
-import type { EffectScope } from '@/reactivity/effect-scope.ts'
+import type {
+  ElementProps,
+  RenderFunction,
+  RenderOutput,
+  SetupComponent,
+} from '@/jsx-foundation/index.ts'
+import type { EffectScope, ReactiveEffect } from '@/reactivity/index.ts'
 import type { PlainObject } from '@/shared/index.ts'
 import { ContextStack } from '@/shared/index.ts'
 

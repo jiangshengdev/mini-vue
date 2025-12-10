@@ -5,7 +5,7 @@ import { resolveComponentProps } from './props.ts'
 import { performInitialRender } from './render-effect.ts'
 import { setupComponent } from './setup.ts'
 import { teardownComponentInstance } from './teardown.ts'
-import type { SetupComponent, VirtualNode } from '@/jsx-foundation'
+import type { SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
 
 /**
  * 执行函数组件并将返回的子树继续挂载到容器。

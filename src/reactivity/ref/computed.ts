@@ -5,8 +5,13 @@ import { trackEffect, triggerEffects } from '../internals/index.ts'
 import type { DependencyBucket } from '../contracts/index.ts'
 import { refFlag } from '../contracts/index.ts'
 import type { Ref } from './types.ts'
-import { createDebugLogger, errorContexts, errorPhases, runThrowing } from '@/shared/index.ts'
-import { __INTERNAL_DEV__ } from '@/shared/env.ts'
+import {
+  __INTERNAL_DEV__,
+  createDebugLogger,
+  errorContexts,
+  errorPhases,
+  runThrowing,
+} from '@/shared/index.ts'
 
 /**
  * `computed` getter 负责在依赖图中派生出最终结果。

@@ -6,6 +6,7 @@ import type { DependencyBucket } from '../contracts/index.ts'
 import { refFlag } from '../contracts/index.ts'
 import type { Ref } from './types.ts'
 import { createDebugLogger, errorContexts, errorPhases, runThrowing } from '@/shared/index.ts'
+import { __INTERNAL_DEV__ } from '@/shared/env.ts'
 
 /**
  * `computed` getter 负责在依赖图中派生出最终结果。
@@ -36,7 +37,7 @@ export interface WritableComputedOptions<T> {
 /** 用于提示只读 computed 被误写入的错误信息。 */
 const readonlyComputedError = '当前 computed 为只读，若需要写入请传入 { get, set } 形式的配置'
 
-const debug = createDebugLogger('computed')
+const debug = __INTERNAL_DEV__ ? createDebugLogger('computed') : null
 
 /**
  * `computed` 的底层实现，通过惰性求值与脏标记保持派生状态最新。
@@ -84,18 +85,24 @@ class ComputedRefImpl<T> implements Ref<T> {
 
     /* 首次访问或依赖脏时重新运行 getter，并缓存结果。 */
     if (this.needsRecompute) {
-      debug('get value', '重新计算派生值', {
-        cachedValue: this.cachedValue,
-        effectName: this.effectName,
-        needsRecompute: this.needsRecompute,
-      })
+      if (__INTERNAL_DEV__ && debug) {
+        debug('get value', '重新计算派生值', {
+          cachedValue: this.cachedValue,
+          effectName: this.effectName,
+          needsRecompute: this.needsRecompute,
+        })
+      }
+
       this.needsRecompute = false
       this.cachedValue = this.effect.run()
-      debug('get value', '派生值已更新', {
-        cachedValue: this.cachedValue,
-        effectName: this.effectName,
-        needsRecompute: this.needsRecompute,
-      })
+
+      if (__INTERNAL_DEV__ && debug) {
+        debug('get value', '派生值已更新', {
+          cachedValue: this.cachedValue,
+          effectName: this.effectName,
+          needsRecompute: this.needsRecompute,
+        })
+      }
     }
 
     return this.cachedValue
@@ -105,7 +112,10 @@ class ComputedRefImpl<T> implements Ref<T> {
    * 写入 computed 值时交给自定义 setter，由实现自行决定同步策略。
    */
   set value(newValue: T) {
-    debug('set value', '收到写入请求', { value: newValue })
+    if (__INTERNAL_DEV__ && debug) {
+      debug('set value', '收到写入请求', { value: newValue })
+    }
+
     runThrowing(
       () => {
         this.setter(newValue)
@@ -127,11 +137,15 @@ class ComputedRefImpl<T> implements Ref<T> {
     }
 
     this.needsRecompute = true
-    debug('markDirty', '标记为脏值，准备触发依赖', {
-      dependencySize: this.dependencyBucket.size,
-      effectName: this.effectName,
-      needsRecompute: this.needsRecompute,
-    })
+
+    if (__INTERNAL_DEV__ && debug) {
+      debug('markDirty', '标记为脏值，准备触发依赖', {
+        dependencySize: this.dependencyBucket.size,
+        effectName: this.effectName,
+        needsRecompute: this.needsRecompute,
+      })
+    }
+
     triggerEffects(this.dependencyBucket)
   }
 }

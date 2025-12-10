@@ -4,6 +4,11 @@
 export const __DEV__ = import.meta.env.DEV
 
 /**
+ * 内部专用的开发期开关，构建时通过 define 固化为 false 以剔除内部调试代码。
+ */
+export const __INTERNAL_DEV__ = import.meta.env.INTERNAL_DEV
+
+/**
  * 检测 Vitest 浏览器运行器是否开启 inspect-brk 调试。
  */
 function isVitestBrowserInspectActive(): boolean {

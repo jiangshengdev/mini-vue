@@ -1,4 +1,4 @@
-import { isDevDebugEnvironment } from '@/shared/env.ts'
+import { __INTERNAL_DEV__, isDevDebugEnvironment } from '@/shared/env.ts'
 
 /**
  * 调试日志记录器签名，按方法名、描述与可选负载输出调试信息。
@@ -9,6 +9,13 @@ export type DebugLogger = (method: string, message: string, payload?: unknown) =
  * 创建具名调试记录器，在创建时判定是否启用日志，便于生产环境 tree-shake。
  */
 export function createDebugLogger(namespace: string): DebugLogger {
+  /* 内部调试可在构建期直接裁剪。 */
+  if (!__INTERNAL_DEV__) {
+    return () => {
+      return undefined
+    }
+  }
+
   /* 创建阶段缓存调试开关，避免每次调用重复判断环境。 */
   const shouldLog = isDevDebugEnvironment()
 

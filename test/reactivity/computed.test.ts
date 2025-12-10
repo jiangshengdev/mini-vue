@@ -10,28 +10,28 @@ describe('computed', () => {
 
   it('懒执行并缓存计算结果', () => {
     const state = ref({ count: 0 })
-    const getter = vi.fn(function getDouble() {
+    const getDouble = vi.fn(function getDouble() {
       return state.value.count * 2
     })
 
-    getter.mockName('getDouble')
-    const doubled = computed(getter)
+    getDouble.mockName('getDouble')
+    const doubled = computed(getDouble)
 
-    expect(getter).not.toHaveBeenCalled()
+    expect(getDouble).not.toHaveBeenCalled()
 
     expect(doubled.value).toBe(0)
-    expect(getter).toHaveBeenCalledTimes(1)
+    expect(getDouble).toHaveBeenCalledTimes(1)
 
     /* 二次读取命中缓存，不会重新执行 getter。 */
     expect(doubled.value).toBe(0)
-    expect(getter).toHaveBeenCalledTimes(1)
+    expect(getDouble).toHaveBeenCalledTimes(1)
 
     state.value.count = 1
     /* 未读取前不重新计算。 */
-    expect(getter).toHaveBeenCalledTimes(1)
+    expect(getDouble).toHaveBeenCalledTimes(1)
 
     expect(doubled.value).toBe(2)
-    expect(getter).toHaveBeenCalledTimes(2)
+    expect(getDouble).toHaveBeenCalledTimes(2)
   })
 
   it('可被 effect 追踪并在依赖变化后重新求值', () => {

@@ -1,5 +1,7 @@
-import './style.css'
+import './styles/main.css'
+import './styles/router.css'
 import { App } from './app.tsx'
+import { router } from './router/index.ts'
 import type { DomAppInstance } from '@/index.ts'
 import { createApp } from '@/index.ts'
 
@@ -11,4 +13,5 @@ if (!host) {
 
 const app: DomAppInstance = createApp(App)
 
+router.start()
 app.mount(host)

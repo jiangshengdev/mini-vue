@@ -27,6 +27,15 @@ export type {
   WatchStopHandle,
   WritableComputedOptions,
 } from '@/reactivity/index.ts'
+export { createRouter, RouterLink, RouterView } from '@/router/index.ts'
+export type {
+  RouteLocation,
+  RouteRecord,
+  Router,
+  RouterConfig,
+  RouterLinkProps,
+  RouterViewProps,
+} from '@/router/index.ts'
 export { createApp, render } from '@/runtime-dom/index.ts'
 export type { SetupComponent, ElementType, VirtualNode } from '@/jsx-foundation/index.ts'
 export { Fragment } from '@/jsx-foundation/index.ts'

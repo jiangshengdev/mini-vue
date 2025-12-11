@@ -35,7 +35,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
    */
   private readonly fn: () => T
 
-  private readonly fnName: string
+  private readonly fnName?: string
 
   /**
    * 记录当前副作用绑定的依赖集合，方便统一清理。
@@ -53,11 +53,15 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
   private innerActive = true
 
   constructor(fn: () => T, scheduler?: EffectScheduler) {
-    const fnMock = fn as Mock<() => T>
-
     /* 构造时记录调度器，使后续 trigger 能根据配置选择执行策略 */
     this.fn = fn
-    this.fnName = fnMock.getMockName ? fnMock.getMockName() : fn.name
+
+    if (__INTERNAL_DEV__ && debug) {
+      const fnMock = fn as Mock<() => T>
+
+      this.fnName = fnMock.getMockName ? fnMock.getMockName() : fn.name
+    }
+
     this.scheduler = scheduler
   }
 

@@ -54,7 +54,7 @@ class ComputedRefImpl<T> implements Ref<T> {
 
   private readonly effect: ReactiveEffect<T>
 
-  private readonly effectName: string
+  private readonly effectName?: string
 
   private readonly setter: ComputedSetter<T>
 
@@ -70,9 +70,12 @@ class ComputedRefImpl<T> implements Ref<T> {
   constructor(getter: ComputedGetter<T>, setter: ComputedSetter<T>) {
     this.setter = setter
 
-    const getterMock = getter as Mock<ComputedGetter<T>>
+    if (__INTERNAL_DEV__ && debug) {
+      const getterMock = getter as Mock<ComputedGetter<T>>
 
-    this.effectName = getterMock.getMockName ? getterMock.getMockName() : getter.name
+      this.effectName = getterMock.getMockName ? getterMock.getMockName() : getter.name
+    }
+
     /* 依赖变更时通过调度器标记脏值并触发外层依赖。 */
     this.effect = new ReactiveEffect(getter, () => {
       this.markDirty()

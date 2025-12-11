@@ -94,6 +94,35 @@ describe('computed', () => {
     expect(plusTwo.value).toBe(7)
   })
 
+  it('共享 computed 时父停子不停，其他消费者仍能更新', () => {
+    const base = ref(1)
+    const doubled = computed(function getDoubled() {
+      return base.value * 2
+    })
+
+    let a = -1
+    let b = -1
+
+    const effectA = effect(function consumeA() {
+      a = doubled.value
+    })
+
+    effect(function consumeB() {
+      b = doubled.value
+    })
+
+    expect(a).toBe(2)
+    expect(b).toBe(2)
+
+    /* 停掉其中一个 effect，不应影响 computed 的活性 */
+    effectA.stop()
+
+    base.value = 2
+
+    expect(a).toBe(2) /* 已停的 effect 不再更新 */
+    expect(b).toBe(4) /* 仍在运行的 effect 正常收到更新 */
+  })
+
   it('setter 抛错时会同步抛出并通知错误处理器', () => {
     const handler = vi.fn<ErrorHandler>()
     const base = ref(0)

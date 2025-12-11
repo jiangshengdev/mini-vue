@@ -1,22 +1,30 @@
 .layout {
-  display: flex;
+  display: grid;
+  grid-template-columns: 240px 1fr;
   gap: 1.5rem;
   align-items: flex-start;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 3rem;
 }
 
 .nav {
+  position: sticky;
+  top: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  min-width: 140px;
+  min-width: 200px;
+  height: fit-content;
   padding: 1rem;
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  background: #f8fafc;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
 }
 
 .nav a {
-  color: #2563eb;
+  color: #1d4ed8;
   text-decoration: none;
   font-weight: 600;
 }

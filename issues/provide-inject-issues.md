@@ -48,12 +48,18 @@
 
 - `test/runtime-dom/provide-inject.test.tsx` 新增用例：直接 `render(vnode, container)` 且只通过 `vnode.appContext` 也能 `inject()` 命中。
 
-## 2. router.install() 无条件 start，可能重复启动监听且缺少自动 stop 对应（待修复）
+## 2. router.install() 无条件 start，可能重复启动监听且缺少自动 stop 对应（已修复）
 
 - 位置：`src/router/core/create-router.ts`
-- 现状：`install(app)` 内部直接调用 `start()`，未防重复启动；同时路由器生命周期与 `app.unmount()` 没有自动对应的 `stop()`。
-- 影响：用户手动 `start()` 或重复 `app.use(router)` 时可能重复注册事件监听；卸载应用后仍保留监听，存在行为异常或资源泄漏风险。
-- 提示：需要明确 `start/stop` 的幂等语义，并在安装/卸载阶段形成闭环。
+- 修复前：`install(app)` 会触发 `start()`，但与 `app.unmount()` 无自动对应的 `stop()`，导致卸载后仍保留 window 监听，存在资源泄漏风险。
+- 修复后：
+  - `install(app)` 对同一个 app 幂等（重复 `app.use(router)` 不重复安装）。
+  - 仅在“首个 app 安装”时 `start()`；多个 app 共享同一 router 时只启动一次监听。
+  - 在 `install(app)` 阶段包装 `app.unmount()`，当最后一个 app 卸载后自动 `stop()`，形成安装/卸载闭环。
+
+回归测试：
+
+- `test/runtime-dom/router-injection.test.tsx` 覆盖重复 install 与多 app 共享 router 的监听启停行为。
 
 ## 3. app.provide 接收 symbol 键，但 provides 容器类型可能不一致（待确认/待修复）
 

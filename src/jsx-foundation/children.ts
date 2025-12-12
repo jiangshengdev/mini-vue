@@ -7,7 +7,7 @@ function warnUnsupportedChild(child: unknown): void {
     return
   }
 
-  console.warn('[mini-vue][jsx] 检测到无法渲染的 children，已被忽略：', child)
+  console.warn('[jsx] 检测到无法渲染的 children，已被忽略：', child)
 }
 
 /**

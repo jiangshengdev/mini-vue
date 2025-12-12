@@ -1,8 +1,14 @@
 import { getCurrentInstance } from './component/context.ts'
 
-export type InjectionKey<T = unknown> = PropertyKey & { __miniVueInjectionKey?: T }
+declare const injectionKeyBrand: unique symbol
 
-export function provide<T>(key: InjectionKey<T>, value: T): void {
+export type InjectionKey<T = unknown> = symbol & { readonly [injectionKeyBrand]?: T }
+
+export type InjectionToken<T = unknown> = InjectionKey<T> | string
+
+export function provide<T>(key: InjectionToken<T>, value: T): void
+
+export function provide(key: InjectionToken, value: unknown): void {
   const instance = getCurrentInstance()
 
   if (!instance) {
@@ -12,10 +18,10 @@ export function provide<T>(key: InjectionKey<T>, value: T): void {
   instance.provides[key] = value
 }
 
-export function inject<T>(key: InjectionKey<T>): T | undefined
-export function inject<T>(key: InjectionKey<T>, defaultValue: T): T
+export function inject<T>(key: InjectionToken<T>): T | undefined
+export function inject<T>(key: InjectionToken<T>, defaultValue: T): T
 
-export function inject<T>(key: InjectionKey<T>, defaultValue?: T): T | undefined {
+export function inject<T>(key: InjectionToken<T>, defaultValue?: T): T | undefined {
   const instance = getCurrentInstance()
 
   if (!instance) {

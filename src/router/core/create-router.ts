@@ -1,6 +1,6 @@
 import { normalizePath } from './paths.ts'
 import type { RouteLocation, Router, RouterConfig, RouteRecord } from './types.ts'
-import { ROUTER_KEY } from './injection.ts'
+import { routerInjectionKey } from './injection.ts'
 import type { Ref } from '@/reactivity/index.ts'
 import { ref } from '@/reactivity/index.ts'
 
@@ -94,7 +94,7 @@ export function createRouter(config: RouterConfig): Router {
     stop,
     install(app) {
       start()
-      app.provide(ROUTER_KEY, router)
+      app.provide(routerInjectionKey, router)
     },
   }
 

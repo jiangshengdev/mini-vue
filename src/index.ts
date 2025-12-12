@@ -27,12 +27,7 @@ export type {
   WatchStopHandle,
   WritableComputedOptions,
 } from '@/reactivity/index.ts'
-export {
-  createRouter,
-  RouterLink,
-  RouterView,
-  useRouter,
-} from '@/router/index.ts'
+export { createRouter, RouterLink, RouterView, useRouter } from '@/router/index.ts'
 export type {
   RouteLocation,
   RouteRecord,

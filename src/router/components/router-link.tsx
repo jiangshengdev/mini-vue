@@ -20,7 +20,7 @@ export interface RouterLinkProps extends PropsShape {
  * 轻量链接组件：拦截点击并通过路由器执行导航。
  */
 export const RouterLink: SetupComponent<RouterLinkProps> = (props) => {
-  const router = props.router ?? useRouter()
+  const resolvedRouter = props.router ?? useRouter()
 
   /* 点击时阻止默认跳转，转为 history 导航。 */
   const handleClick = (event?: Event): void => {
@@ -28,7 +28,7 @@ export const RouterLink: SetupComponent<RouterLinkProps> = (props) => {
       event.preventDefault()
     }
 
-    router.navigate(props.to)
+    resolvedRouter.navigate(props.to)
   }
 
   /* 渲染标准 a 标签并挂载导航行为。 */

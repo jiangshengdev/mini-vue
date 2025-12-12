@@ -2,7 +2,7 @@ import type { Router } from './types.ts'
 import type { InjectionKey } from '@/runtime-core/index.ts'
 import { inject } from '@/runtime-core/index.ts'
 
-export const ROUTER_KEY: InjectionKey<Router> = Symbol('mini-vue-router') as InjectionKey<Router>
+export const routerInjectionKey: InjectionKey<Router> = Symbol('router') as InjectionKey<Router>
 
 /**
  * 读取当前组件树注入的 router。
@@ -10,7 +10,7 @@ export const ROUTER_KEY: InjectionKey<Router> = Symbol('mini-vue-router') as Inj
  * 注意：当前实现仅保证在组件 setup 阶段可用。
  */
 export function useRouter(): Router {
-  const router = inject(ROUTER_KEY)
+  const router = inject(routerInjectionKey)
 
   if (!router) {
     throw new Error(

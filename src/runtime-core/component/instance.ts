@@ -22,13 +22,13 @@ export function createComponentInstance<
   const parent = context?.parent
   const needsAnchor = context?.needsAnchor ?? false
   const appContext = getCurrentAppContext()
-  const providesBase: PlainObject =
+  const providesSource: PlainObject =
     parent?.provides ?? appContext?.provides ?? (Object.create(null) as PlainObject)
 
   /* `render`/`effect` 初始为空，由 setup 与 performInitialRender 回填。 */
   return {
     parent,
-    provides: Object.create(providesBase) as PlainObject,
+    provides: Object.create(providesSource) as PlainObject,
     type: component,
     container,
     props,

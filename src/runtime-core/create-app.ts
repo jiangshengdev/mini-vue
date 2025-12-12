@@ -171,7 +171,7 @@ export function createAppInstance<HostElement>(
           throw new TypeError('createApp.use: plugin 必须是函数或带 install(app) 的对象')
         },
         {
-          origin: errorContexts.appUse,
+          origin: errorContexts.appPluginUse,
           handlerPhase: errorPhases.sync,
         },
       )

@@ -12,7 +12,7 @@ import type { EffectScope, ReactiveEffect } from '@/reactivity/index.ts'
 import type { PlainObject } from '@/shared/index.ts'
 import { ContextStack } from '@/shared/index.ts'
 
-export type ComponentProvides = PlainObject
+export type Provides = PlainObject
 
 /**
  * 运行期组件实例结构，统一记录渲染与清理状态。
@@ -26,7 +26,7 @@ export interface ComponentInstance<
   /** 父组件实例引用，用于依赖注入与上下文继承。 */
   parent?: AnyComponentInstance
   /** 依赖注入容器，默认通过原型链继承父/应用级 provides。 */
-  provides: ComponentProvides
+  provides: Provides
   /** 组件定义本身，保存以便多次渲染重用。 */
   readonly type: T
   /** 宿主容器或片段引用，挂载子树时作为根。 */

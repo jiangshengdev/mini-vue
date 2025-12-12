@@ -1,12 +1,12 @@
+import styles from './handling-user-input.module.css'
 import type { SetupComponent } from '@/index.ts'
 import { ref } from '@/index.ts'
-import styles from './handling-user-input.module.css'
 
 export const HandlingUserInput: SetupComponent = () => {
   const message = ref('Hello World!')
 
   const reverseMessage = (): void => {
-    message.value = message.value.split('').reverse().join('')
+    message.value = [...message.value].reverse().join('')
   }
 
   const appendExclamation = (): void => {

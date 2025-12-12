@@ -22,17 +22,17 @@ export const ConditionalsAndLoops: SetupComponent = () => {
   }
 
   const renderList = () => {
-    if (show.value && list.value.length) {
+    if (show.value && list.value.length > 0) {
       return (
         <ul>
-          {list.value.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
+          {list.value.map((item) => {
+            return <li key={item}>{item}</li>
+          })}
         </ul>
       )
     }
 
-    if (list.value.length) {
+    if (list.value.length > 0) {
       return <p>List is not empty, but hidden.</p>
     }
 

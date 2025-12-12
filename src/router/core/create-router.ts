@@ -41,7 +41,7 @@ export function createRouter(config: RouterConfig): Router {
   /* 用当前地址初始化路由状态，确保首屏渲染一致。 */
   const currentRoute: Ref<RouteLocation> = ref<RouteLocation>(matchRoute(getCurrentBrowserPath()))
 
-  /* popstate 触发时同步最新路径到路由状态。 */
+  /* `popstate` 触发时同步最新路径到路由状态。 */
   const onPopState = (): void => {
     currentRoute.value = matchRoute(getCurrentBrowserPath())
   }

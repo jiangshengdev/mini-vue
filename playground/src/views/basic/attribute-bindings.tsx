@@ -1,6 +1,6 @@
+import styles from './attribute-bindings.module.css'
 import type { SetupComponent } from '@/index.ts'
 import { ref } from '@/index.ts'
-import styles from './attribute-bindings.module.css'
 
 export const AttributeBindings: SetupComponent = () => {
   const message = ref('Hello World!')

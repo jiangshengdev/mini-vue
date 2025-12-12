@@ -1,6 +1,7 @@
+import type { Todo } from './todo-item.tsx'
+import { TodoItem } from './todo-item.tsx'
 import type { SetupComponent } from '@/index.ts'
 import { ref } from '@/index.ts'
-import { type Todo, TodoItem } from './todo-item.tsx'
 
 export const SimpleComponent: SetupComponent = () => {
   const groceryList = ref<Todo[]>([
@@ -14,9 +15,9 @@ export const SimpleComponent: SetupComponent = () => {
       <section class="card">
         <h2>Simple Component</h2>
         <ol>
-          {groceryList.value.map((item) => (
-            <TodoItem key={item.id} todo={item} />
-          ))}
+          {groceryList.value.map((item) => {
+            return <TodoItem key={item.id} todo={item} />
+          })}
         </ol>
       </section>
     )

@@ -43,7 +43,7 @@ const readonlyComputedError = '当前 computed 为只读，若需要写入请传
 
 const debug = __INTERNAL_DEV__ ? createDebugLogger('computed') : null
 
-type GetterMockLike = {
+interface GetterMockLike {
   getMockName?: () => string
 }
 

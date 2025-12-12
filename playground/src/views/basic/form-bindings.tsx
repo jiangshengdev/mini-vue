@@ -10,27 +10,36 @@ export const FormBindings: SetupComponent = () => {
   const multiSelected = ref<string[]>(['A'])
 
   const updateText = (event: Event): void => {
-    const target = event.target as HTMLInputElement | null
-
-    text.value = target?.value ?? ''
-  }
-
-  const updateChecked = (event: Event): void => {
-    const target = event.target as HTMLInputElement | null
-
-    checked.value = target?.checked ?? false
-  }
-
-  const updateCheckedNames = (event: Event): void => {
-    const target = event.target as HTMLInputElement | null
+    const { target } = event
 
     if (!target) {
       return
     }
 
-    const value = target.value
+    text.value = (target as HTMLInputElement).value
+  }
 
-    if (target.checked) {
+  const updateChecked = (event: Event): void => {
+    const { target } = event
+
+    if (!target) {
+      return
+    }
+
+    checked.value = (target as HTMLInputElement).checked
+  }
+
+  const updateCheckedNames = (event: Event): void => {
+    const { target } = event
+
+    if (!target) {
+      return
+    }
+
+    const input = target as HTMLInputElement
+    const { value } = input
+
+    if (input.checked) {
       if (!checkedNames.value.includes(value)) {
         checkedNames.value.push(value)
       }
@@ -38,29 +47,43 @@ export const FormBindings: SetupComponent = () => {
       return
     }
 
-    checkedNames.value = checkedNames.value.filter((name) => name !== value)
+    checkedNames.value = checkedNames.value.filter((name) => {
+      return name !== value
+    })
   }
 
   const updatePicked = (event: Event): void => {
-    const target = event.target as HTMLInputElement | null
-
-    picked.value = target?.value ?? ''
-  }
-
-  const updateSelected = (event: Event): void => {
-    const target = event.target as HTMLSelectElement | null
-
-    selected.value = target?.value ?? ''
-  }
-
-  const updateMultiSelected = (event: Event): void => {
-    const target = event.target as HTMLSelectElement | null
+    const { target } = event
 
     if (!target) {
       return
     }
 
-    multiSelected.value = Array.from(target.selectedOptions).map((option) => option.value)
+    picked.value = (target as HTMLInputElement).value
+  }
+
+  const updateSelected = (event: Event): void => {
+    const { target } = event
+
+    if (!target) {
+      return
+    }
+
+    selected.value = (target as HTMLSelectElement).value
+  }
+
+  const updateMultiSelected = (event: Event): void => {
+    const { target } = event
+
+    if (!target) {
+      return
+    }
+
+    const select = target as HTMLSelectElement
+
+    multiSelected.value = [...select.selectedOptions].map((option) => {
+      return option.value
+    })
   }
 
   return () => {

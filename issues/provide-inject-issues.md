@@ -68,12 +68,14 @@
 - 影响：API 语义不一致、误用面更大；且 `number` 键在对象上会被字符串化，基本没有必要支持。
 - 修复：将 `app.provide` 的 key 统一收敛为 `InjectionToken`，并为 `InjectionKey<T>` 增加 value 的类型推导；对外补充导出 `InjectionToken` 类型。
 
-## 4. provide/inject 作为公共 API 导出，但运行期限制“仅 setup 可用”易触发异常（待确认/待修复）
+## 4. provide/inject 作为公共 API 导出，但运行期限制“仅 setup 可用”易触发异常（已澄清/已补文档与 TSDoc）
 
-- 位置：`src/runtime-core/provide-inject.ts`、`src/index.ts`
-- 现状：`provide()`/`inject()` 在没有 `getCurrentInstance()` 时会直接抛错（"只能在组件 setup 期间调用"），同时它们被从 `src/index.ts` 对外导出。
-- 影响：用户在插件安装（`app.use`）、路由安装（`router.install`）或其他非组件 setup 的路径上误用时会直接抛异常，导致应用初始化失败；该限制与“公共 API”直觉可能不一致。
-- 提示：需要明确 API 设计边界（仅组件内可用 vs 支持应用级注入），并保证文档/实现一致。
+- 位置：`src/runtime-core/provide-inject.ts`、`src/runtime-core/create-app.ts`、`src/index.ts`、`docs/app-context-provides.md`
+- 决策：保持严格语义 —— `provide()` / `inject()` 只能在组件 `setup()` 执行期间调用（依赖 currentInstance），组件外不提供隐式回退。
+- 风险：用户在插件安装（`app.use`）、路由安装（`router.install`）或其他非组件 `setup` 的路径上误用时会抛异常，导致初始化失败。
+- 处理：
+  - 通过 TSDoc 明确边界与替代方案：组件外请使用 `app.provide()`，组件内再 `inject()`。
+  - 文档补充“严格语义”的使用说明与示例，避免“公共 API = 任意时刻可调用”的误解。
 
 ## 5. Fragment 分支强制 needsAnchor=false，可能导致兄弟插入顺序不稳定（待修复）
 

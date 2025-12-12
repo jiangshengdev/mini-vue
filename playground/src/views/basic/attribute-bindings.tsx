@@ -1,8 +1,8 @@
 import type { SetupComponent } from '@/index.ts'
 import { ref } from '@/index.ts'
-import styles from './attribute-bindings-view.module.css'
+import styles from './attribute-bindings.module.css'
 
-export const AttributeBindingsView: SetupComponent = () => {
+export const AttributeBindings: SetupComponent = () => {
   const message = ref('Hello World!')
   const isRed = ref(true)
   const color = ref('green')

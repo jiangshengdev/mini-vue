@@ -1,7 +1,7 @@
 import type { SetupComponent } from '@/index.ts'
 import { ref } from '@/index.ts'
 
-export const HelloWorldView: SetupComponent = () => {
+export const HelloWorld: SetupComponent = () => {
   const message = ref('Hello World!')
 
   return () => {

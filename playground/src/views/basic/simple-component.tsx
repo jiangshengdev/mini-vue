@@ -2,7 +2,7 @@ import type { SetupComponent } from '@/index.ts'
 import { ref } from '@/index.ts'
 import { type Todo, TodoItem } from './todo-item.tsx'
 
-export const SimpleComponentView: SetupComponent = () => {
+export const SimpleComponent: SetupComponent = () => {
   const groceryList = ref<Todo[]>([
     { id: 0, text: 'Vegetables' },
     { id: 1, text: 'Cheese' },

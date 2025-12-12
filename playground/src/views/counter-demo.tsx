@@ -1,7 +1,7 @@
 import { Counter } from '../components/counter.tsx'
 import type { SetupComponent } from '@/index.ts'
 
-export const CounterView: SetupComponent = () => {
+export const CounterDemo: SetupComponent = () => {
   return () => {
     return (
       <div class="card">

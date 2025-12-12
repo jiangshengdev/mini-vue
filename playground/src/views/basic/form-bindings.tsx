@@ -1,7 +1,7 @@
 import type { SetupComponent } from '@/index.ts'
 import { ref } from '@/index.ts'
 
-export const FormBindingsView: SetupComponent = () => {
+export const FormBindings: SetupComponent = () => {
   const text = ref('Edit me')
   const checked = ref(true)
   const checkedNames = ref<string[]>(['Jack'])

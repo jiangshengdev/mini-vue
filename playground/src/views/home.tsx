@@ -3,7 +3,7 @@ import viteLogo from '/vite.svg'
 import { Counter } from '../components/counter.tsx'
 import type { SetupComponent } from '@/index.ts'
 
-export const HomeView: SetupComponent = () => {
+export const Home: SetupComponent = () => {
   return () => {
     return (
       <div>

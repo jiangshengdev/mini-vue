@@ -1,7 +1,7 @@
 import type { SetupComponent } from '@/index.ts'
 import { ref } from '@/index.ts'
 
-export const ConditionalsAndLoopsView: SetupComponent = () => {
+export const ConditionalsAndLoops: SetupComponent = () => {
   const show = ref(true)
   const list = ref<number[]>([1, 2, 3])
 

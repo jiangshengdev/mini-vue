@@ -1,4 +1,4 @@
-import { router } from './router/index.ts'
+import { router } from '#/router'
 import type { SetupComponent } from '@/index.ts'
 import { RouterLink, RouterView } from '@/index.ts'
 

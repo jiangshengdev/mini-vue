@@ -1,6 +1,6 @@
 import type { SetupComponent } from '@/index.ts'
 
-export const BasicIndexView: SetupComponent = () => {
+export const BasicIndex: SetupComponent = () => {
   return () => {
     return (
       <section class="card">

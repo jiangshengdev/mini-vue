@@ -1,6 +1,6 @@
 import type { SetupComponent } from '@/index.ts'
 
-export const NotFoundView: SetupComponent = () => {
+export const NotFound: SetupComponent = () => {
   return () => {
     return (
       <div>

@@ -1,8 +1,8 @@
 import type { SetupComponent } from '@/index.ts'
 import { ref } from '@/index.ts'
-import styles from './handling-user-input-view.module.css'
+import styles from './handling-user-input.module.css'
 
-export const HandlingUserInputView: SetupComponent = () => {
+export const HandlingUserInput: SetupComponent = () => {
   const message = ref('Hello World!')
 
   const reverseMessage = (): void => {

@@ -46,7 +46,13 @@ export interface AppInstance<HostElement> {
   unmount(): void
   /** 安装插件（函数或对象带 install）。 */
   use(plugin: AppPlugin<HostElement>): void
-  /** 在应用级提供依赖，供整个组件树通过 inject 读取。 */
+  /**
+   * 在应用级提供依赖，供整个组件树通过 `inject()` 读取。
+   *
+   * @remarks
+   * - 这是“组件外”的依赖注入入口，适用于插件安装、路由安装等场景。
+   * - 组件 `setup()` 内请使用 `provide()`/`inject()`，不要在组件外直接调用它们。
+   */
   provide<T>(key: InjectionKey<T>, value: T): void
   provide(key: InjectionToken, value: unknown): void
 }

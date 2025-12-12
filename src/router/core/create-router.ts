@@ -1,11 +1,13 @@
 import { normalizePath } from './paths.ts'
 import type { RouteLocation, Router, RouterConfig, RouteRecord } from './types.ts'
 import { routerInjectionKey } from './injection.ts'
+import type { InjectionKey, InjectionToken } from '@/runtime-core/index.ts'
 import type { Ref } from '@/reactivity/index.ts'
 import { ref } from '@/reactivity/index.ts'
 
 interface RouterInstallApp {
-  provide: (key: PropertyKey, value: unknown) => void
+  provide<T>(key: InjectionKey<T>, value: T): void
+  provide(key: InjectionToken, value: unknown): void
   unmount?: () => void
 }
 

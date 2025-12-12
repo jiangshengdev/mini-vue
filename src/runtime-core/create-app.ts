@@ -1,5 +1,6 @@
 import type { RootRenderFunction } from './renderer.ts'
 import { setCurrentAppContext, unsetCurrentAppContext } from './app-context.ts'
+import type { InjectionKey, InjectionToken } from './provide-inject.ts'
 import type { ElementProps, SetupComponent } from '@/jsx-foundation/index.ts'
 import { createVirtualNode } from '@/jsx-foundation/index.ts'
 import type { PlainObject, PropsShape } from '@/shared/index.ts'
@@ -46,7 +47,8 @@ export interface AppInstance<HostElement> {
   /** 安装插件（函数或对象带 install）。 */
   use(plugin: AppPlugin<HostElement>): void
   /** 在应用级提供依赖，供整个组件树通过 inject 读取。 */
-  provide(key: PropertyKey, value: unknown): void
+  provide<T>(key: InjectionKey<T>, value: T): void
+  provide(key: InjectionToken, value: unknown): void
 }
 
 /**
@@ -180,7 +182,7 @@ export function createAppInstance<HostElement>(
         },
       )
     },
-    provide(key: PropertyKey, value: unknown) {
+    provide(key: InjectionToken, value: unknown) {
       state.appContext.provides[key] = value
     },
   }

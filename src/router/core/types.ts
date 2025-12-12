@@ -1,5 +1,6 @@
 import type { Ref } from '@/reactivity/index.ts'
 import type { SetupComponent } from '@/jsx-foundation/types.ts'
+import type { InjectionKey, InjectionToken } from '@/runtime-core/index.ts'
 
 /**
  * 路由记录：定义原始 path 与对应组件的绑定关系。
@@ -45,7 +46,8 @@ export interface Router {
   stop: () => void
   /** 作为应用插件安装到 app 上（对齐 vue-router 使用方式）。 */
   install: (app: {
-    provide: (key: PropertyKey, value: unknown) => void
+    provide<T>(key: InjectionKey<T>, value: T): void
+    provide(key: InjectionToken, value: unknown): void
     unmount?: () => void
   }) => void
 }

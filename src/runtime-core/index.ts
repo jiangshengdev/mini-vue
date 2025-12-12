@@ -6,4 +6,4 @@ export type { Renderer, RendererOptions, RootRenderFunction } from './renderer.t
 export { createAppInstance } from './create-app.ts'
 export type { AppInstance, AppRuntimeConfig } from './create-app.ts'
 export { inject, provide } from './provide-inject.ts'
-export type { InjectionKey } from './provide-inject.ts'
+export type { InjectionKey, InjectionToken } from './provide-inject.ts'

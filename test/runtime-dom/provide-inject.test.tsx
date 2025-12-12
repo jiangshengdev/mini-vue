@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { createTestContainer } from '../setup.ts'
-import type { SetupComponent } from '@/index.ts'
+import type { InjectionToken, SetupComponent } from '@/index.ts'
 import { createApp, inject, provide, ref, render } from '@/index.ts'
 
 function mountToFreshContainer(component: SetupComponent) {
@@ -85,7 +85,7 @@ describe('runtime-dom: provide/inject', () => {
     const container = createTestContainer()
     const vnode = <Child />
 
-    ;(vnode as unknown as { appContext?: { provides: Record<PropertyKey, unknown> } }).appContext =
+    ;(vnode as unknown as { appContext?: { provides: Record<InjectionToken, unknown> } }).appContext =
       {
         provides: {
           k: 'v',

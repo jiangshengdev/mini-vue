@@ -1,5 +1,5 @@
 import type { RendererOptions } from '../index.ts'
-import type { AnyComponentInstance } from '../component/context.ts'
+import type { MountContext } from './context.ts'
 import { mountVirtualNode } from './virtual-node.ts'
 import type { MountedHandle } from './handle.ts'
 import type { RenderOutput } from '@/jsx-foundation/index.ts'
@@ -13,9 +13,9 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   child: RenderOutput | undefined,
   container: HostElement | HostFragment,
-  needsAnchor = false,
-  parent?: AnyComponentInstance,
+  context?: MountContext,
 ): MountedHandle<HostNode> | undefined {
+  const needsAnchor = context?.needsAnchor ?? false
   const { appendChild, createText, remove } = options
 
   /* `null`、`undefined`、布尔值不产生实际节点。 */
@@ -32,7 +32,7 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
     }
 
     if (childCount === 1) {
-      return mountChild(options, child[0], container, needsAnchor, parent)
+      return mountChild(options, child[0], container, { ...context, needsAnchor })
     }
 
     const startAnchor = createText('')
@@ -44,7 +44,7 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
 
     /* 子项始终视为有后续兄弟，以 endAnchor 充当边界。 */
     for (const item of child) {
-      const mounted = mountChild(options, item, container, true, parent)
+      const mounted = mountChild(options, item, container, { ...context, needsAnchor: true })
 
       if (mounted) {
         nodes.push(...mounted.nodes)
@@ -84,7 +84,7 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
 
   /* 标准 virtualNode 交给 mountVirtualNode 处理组件或元素。 */
   if (isVirtualNode(child)) {
-    return mountVirtualNode(options, child, container, needsAnchor, parent)
+    return mountVirtualNode(options, child, container, { ...context, needsAnchor })
   }
 
   /* 其他值（如对象）兜底转成字符串输出。 */

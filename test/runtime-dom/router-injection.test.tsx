@@ -1,14 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { createTestContainer } from '../setup.ts'
-import {
-  createApp,
-  createRouter,
-  ref,
-  RouterLink,
-  RouterView
-  
-} from '@/index.ts'
-import type {SetupComponent} from '@/index.ts';
+import type { SetupComponent } from '@/index.ts'
+import { createApp, createRouter, ref, RouterLink, RouterView } from '@/index.ts'
 
 describe('runtime-dom: router injection', () => {
   it('RouterView works without router prop after plugin install', () => {
@@ -17,13 +10,17 @@ describe('runtime-dom: router injection', () => {
     const Home: SetupComponent = () => {
       rendered.value = 'home'
 
-      return () => {return undefined}
+      return () => {
+        return undefined
+      }
     }
 
     const NotFound: SetupComponent = () => {
       rendered.value = '404'
 
-      return () => {return undefined}
+      return () => {
+        return undefined
+      }
     }
 
     const router = createRouter({
@@ -32,7 +29,9 @@ describe('runtime-dom: router injection', () => {
     })
 
     const Root: SetupComponent = () => {
-      return () => {return <RouterView />}
+      return () => {
+        return <RouterView />
+      }
     }
 
     const app = createApp(Root)
@@ -47,8 +46,17 @@ describe('runtime-dom: router injection', () => {
   })
 
   it('RouterLink uses injected router when clicking', () => {
-    const Home: SetupComponent = () => {return () => {return undefined}}
-    const NotFound: SetupComponent = () => {return () => {return undefined}}
+    const Home: SetupComponent = () => {
+      return () => {
+        return undefined
+      }
+    }
+
+    const NotFound: SetupComponent = () => {
+      return () => {
+        return undefined
+      }
+    }
 
     const router = createRouter({
       routes: [{ path: '/', component: Home }],
@@ -58,7 +66,9 @@ describe('runtime-dom: router injection', () => {
     const navigateSpy = vi.spyOn(router, 'navigate')
 
     const Root: SetupComponent = () => {
-      return () => {return <RouterLink to="/counter">go</RouterLink>}
+      return () => {
+        return <RouterLink to="/counter">go</RouterLink>
+      }
     }
 
     const app = createApp(Root)

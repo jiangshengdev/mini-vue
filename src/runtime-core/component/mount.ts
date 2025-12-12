@@ -1,11 +1,11 @@
 import type { RendererOptions } from '../index.ts'
 import type { MountedHandle } from '../mount/handle.ts'
+import type { MountContext } from '../mount/context.ts'
 import { attachInstanceToVirtualNode, createComponentInstance } from './instance.ts'
 import { resolveComponentProps } from './props.ts'
 import { performInitialRender } from './render-effect.ts'
 import { setupComponent } from './setup.ts'
 import { teardownComponentInstance } from './teardown.ts'
-import type { AnyComponentInstance } from './context.ts'
 import type { SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
 
 /**
@@ -19,13 +19,13 @@ export function mountComponent<
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   virtualNode: VirtualNode<SetupComponent>,
   container: HostElement | HostFragment,
-  needsAnchor = false,
-  parent?: AnyComponentInstance,
+  context?: MountContext,
 ): MountedHandle<HostNode> | undefined {
+  const needsAnchor = context?.needsAnchor ?? false
   /* 准备实例前先规整 props，以免 setup 阶段读到旧引用。 */
   const props = resolveComponentProps(virtualNode)
   const component = virtualNode.type
-  const instance = createComponentInstance(component, props, container, needsAnchor, parent)
+  const instance = createComponentInstance(component, props, container, { ...context, needsAnchor })
 
   /* 让 virtualNode 拥有实例引用，方便调试或测试检索。 */
   attachInstanceToVirtualNode(virtualNode, instance)

@@ -1,5 +1,6 @@
 import { getCurrentAppContext } from '../app-context.ts'
-import type { AnyComponentInstance, ComponentInstance } from './context.ts'
+import type { MountContext } from '../mount/context.ts'
+import type { ComponentInstance } from './context.ts'
 import type { ElementProps, SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
 import { effectScope } from '@/reactivity/index.ts'
 import type { PlainObject } from '@/shared'
@@ -16,9 +17,10 @@ export function createComponentInstance<
   component: T,
   props: ElementProps<T>,
   container: HostElement | HostFragment,
-  needsAnchor: boolean,
-  parent?: AnyComponentInstance,
+  context?: MountContext,
 ): ComponentInstance<HostNode, HostElement, HostFragment, T> {
+  const parent = context?.parent
+  const needsAnchor = context?.needsAnchor ?? false
   const appContext = getCurrentAppContext()
   const providesBase: PlainObject =
     parent?.provides ?? appContext?.provides ?? (Object.create(null) as PlainObject)

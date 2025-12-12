@@ -23,7 +23,10 @@ export function mountChildren<
   for (let index = 0; index < children.length; index += 1) {
     const child = children[index]
     /* 在存在后续兄弟时强制使用锚点，保持节点插入顺序。 */
-    const mounted = mountChild(options, child, container, index < children.length - 1, parent)
+    const mounted = mountChild(options, child, container, {
+      needsAnchor: index < children.length - 1,
+      parent,
+    })
 
     if (mounted) {
       mountedHandles.push(mounted)

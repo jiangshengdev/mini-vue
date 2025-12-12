@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { createTestContainer } from '../setup.ts'
-import { createApp, inject, provide, ref  } from '@/index.ts'
-import type {SetupComponent} from '@/index.ts';
+import type { SetupComponent } from '@/index.ts'
+import { createApp, inject, provide, ref } from '@/index.ts'
 
 function mountToFreshContainer(component: SetupComponent) {
   const container = createTestContainer()
@@ -21,17 +21,23 @@ describe('runtime-dom: provide/inject', () => {
 
       injectedText.value = value ?? ''
 
-      return () => {return undefined}
+      return () => {
+        return undefined
+      }
     }
 
     const Parent: SetupComponent = () => {
       provide('k', 'v')
 
-      return () => {return <Child />}
+      return () => {
+        return <Child />
+      }
     }
 
     const Root: SetupComponent = () => {
-      return () => {return <Parent />}
+      return () => {
+        return <Parent />
+      }
     }
 
     const { app } = mountToFreshContainer(Root)
@@ -47,11 +53,15 @@ describe('runtime-dom: provide/inject', () => {
     const Child: SetupComponent = () => {
       injectedText.value = inject('missing', 'fallback')
 
-      return () => {return undefined}
+      return () => {
+        return undefined
+      }
     }
 
     const Root: SetupComponent = () => {
-      return () => {return <Child />}
+      return () => {
+        return <Child />
+      }
     }
 
     const { app } = mountToFreshContainer(Root)

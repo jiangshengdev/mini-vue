@@ -5,12 +5,23 @@ import type { InjectionKey, InjectionToken } from '@/runtime-core/index.ts'
 import type { Ref } from '@/reactivity/index.ts'
 import { ref } from '@/reactivity/index.ts'
 
+/**
+ * Router 作为插件安装时，app 侧需要具备的最小能力子集。
+ *
+ * @remarks
+ * - 该类型避免把运行时 `AppInstance` 强耦合进 router 包。
+ * - 仅用于 `router.install(app)` 的参数约束与内部 bookkeeping。
+ */
 interface RouterInstallApp {
+  /** 可选的卸载钩子：若存在会被 router 包装，以便在卸载时自动 stop。 */
   unmount?: () => void
+  /** 在应用级 provides 中写入依赖（泛型重载用于类型推导）。 */
   provide<T>(key: InjectionKey<T>, value: T): void
+  /** 兼容非泛型 token（如 string）场景的提供能力。 */
   provide(key: InjectionToken, value: unknown): void
 }
 
+/** 是否处于浏览器环境并支持 history/popstate 事件。 */
 const canUseWindowEvents =
   globalThis.window !== undefined && typeof window.addEventListener === 'function'
 
@@ -69,7 +80,7 @@ export function createRouter(config: RouterConfig): Router {
     if (!canUseWindowEvents || listening) return
     globalThis.addEventListener('popstate', onPopState)
     listening = true
-    // 同步一次当前路径，防止在初始化前已有 pushState 调用。
+    /* 同步一次当前路径，防止在初始化前已有 pushState 调用。 */
     currentRoute.value = matchRoute(getCurrentBrowserPath())
   }
 
@@ -104,11 +115,20 @@ export function createRouter(config: RouterConfig): Router {
     navigate,
     start,
     stop,
+    /**
+     * 作为应用插件安装：注入 router 并按需启动/停止监听。
+     *
+     * @remarks
+     * - 首次 install 时自动 start。
+     * - 当所有安装该 router 的 app 都卸载后自动 stop。
+     */
     install(app) {
+      /* 同一 app 多次 install 直接忽略，避免重复注入与计数错误。 */
       if (installedApps.has(app)) {
         return
       }
 
+      /* 只有从 0 → 1 时才需要启动监听，避免多 app 场景重复 start。 */
       const isFirstInstall = installedApps.size === 0
 
       installedApps.add(app)
@@ -117,9 +137,19 @@ export function createRouter(config: RouterConfig): Router {
         start()
       }
 
+      /*
+       * 若 app 支持 unmount，则在其卸载链路中回收 installedApps 计数。
+       *
+       * @remarks
+       * - 用 WeakSet 防止重复包装（同一个 app 可能多次 install）。
+       * - 用 finally 确保 rawUnmount 抛错时也能完成 stop 判断。
+       */
       if (typeof app.unmount === 'function' && !wrappedUnmountApps.has(app)) {
         const rawUnmount = app.unmount.bind(app)
 
+        /*
+         * 用包装函数替换 app.unmount：在用户卸载后回收计数，并在最后一个 app 卸载时 stop。
+         */
         app.unmount = () => {
           try {
             rawUnmount()
@@ -135,6 +165,7 @@ export function createRouter(config: RouterConfig): Router {
         wrappedUnmountApps.add(app)
       }
 
+      /* 通过 app.provide 把 router 注入到组件树中，供 useRouter/RouterLink/RouterView 读取。 */
       app.provide(routerInjectionKey, router)
     },
   }

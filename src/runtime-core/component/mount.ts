@@ -43,6 +43,9 @@ export function mountComponent<
 
   return {
     nodes: (mounted?.nodes ?? []) as HostNode[],
+    /**
+     * 卸载组件：统一走实例 teardown，内部会 stop scope/effect 并清理已挂载子树。
+     */
     teardown(): void {
       teardownComponentInstance(options, instance)
     },

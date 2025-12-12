@@ -2,6 +2,7 @@ import type { Router } from './types.ts'
 import type { InjectionKey } from '@/runtime-core/index.ts'
 import { inject } from '@/runtime-core/index.ts'
 
+/** Router 在组件树中的注入 Key（由 router.install 写入、useRouter 读取）。 */
 export const routerInjectionKey: InjectionKey<Router> = Symbol('router') as InjectionKey<Router>
 
 /**

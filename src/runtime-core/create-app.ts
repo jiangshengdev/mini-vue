@@ -28,6 +28,7 @@ export interface AppRuntimeConfig<HostElement> {
 
 /** 最小的应用级上下文，用于插件与 provide/inject 的根级 provides */
 export interface AppContext {
+  /** 应用级依赖注入容器（root provides），供整棵组件树通过原型链继承读取。 */
   provides: PlainObject
 }
 
@@ -165,6 +166,13 @@ export function createAppInstance<HostElement>(
   return {
     mount,
     unmount,
+    /**
+     * 安装应用插件。
+     *
+     * @remarks
+     * - 统一支持函数插件与 `{ install(app) {} }` 形式。
+     * - 通过共享错误通道上报，保证行为与其他用户回调入口一致。
+     */
     use(plugin: AppPlugin<HostElement>) {
       runThrowing(
         () => {
@@ -188,6 +196,12 @@ export function createAppInstance<HostElement>(
         },
       )
     },
+    /**
+     * 在应用级提供依赖（组件外注入入口）。
+     *
+     * @remarks
+     * - 该值会在根组件实例创建时注入到组件树的 provides 原型链上。
+     */
     provide(key: InjectionToken, value: unknown) {
       state.appContext.provides[key] = value
     },

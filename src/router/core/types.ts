@@ -46,8 +46,11 @@ export interface Router {
   stop: () => void
   /** 作为应用插件安装到 app 上（对齐 vue-router 使用方式）。 */
   install: (app: {
+    /** 可选卸载钩子：存在时 router 会包装它以在卸载后自动 stop。 */
     unmount?: () => void
+    /** 应用级依赖注入入口（泛型重载用于让 routerInjectionKey 具备类型推导）。 */
     provide<T>(key: InjectionKey<T>, value: T): void
+    /** 非泛型 token 入口：用于兼容 string key 等场景。 */
     provide(key: InjectionToken, value: unknown): void
   }) => void
 }

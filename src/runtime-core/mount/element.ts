@@ -32,6 +32,9 @@ export function mountElement<HostNode, HostElement extends HostNode, HostFragmen
 
   return {
     nodes: [element],
+    /**
+     * 卸载元素：先卸载子树与 ref，再移除自身，保证清理顺序可预期。
+     */
     teardown(): void {
       for (const child of mountedHandles) {
         child.teardown()
@@ -44,6 +47,9 @@ export function mountElement<HostNode, HostElement extends HostNode, HostFragmen
   }
 }
 
+/**
+ * 元素 ref 的统一抽象：支持回调 ref 与 `Ref` 容器两种写法。
+ */
 type ElementRefBinding<HostElement> =
   | Ref<HostElement | undefined>
   | ((value: HostElement | undefined) => void)

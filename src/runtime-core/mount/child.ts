@@ -15,6 +15,7 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
   container: HostElement | HostFragment,
   context?: MountContext,
 ): MountedHandle<HostNode> | undefined {
+  /* needsAnchor 表示“当前节点之后是否还有兄弟”，用于决定是否需要占位锚点来保序。 */
   const needsAnchor = context?.needsAnchor ?? false
   const { appendChild, createText, remove } = options
 
@@ -57,6 +58,12 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
 
     return {
       nodes,
+      /**
+       * 先按“子项挂载顺序”执行 teardown，再移除边界锚点。
+       *
+       * @remarks
+       * - 这里不直接 remove(nodes) 是为了保留子项各自的清理语义（effect/refs 等）。
+       */
       teardown(): void {
         for (const teardown of teardowns) {
           teardown()
@@ -76,6 +83,7 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
 
     return {
       nodes: [text],
+      /** 卸载文本节点：仅需从宿主树中移除即可。 */
       teardown(): void {
         remove(text)
       },
@@ -94,6 +102,7 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
 
   return {
     nodes: [text],
+    /** 卸载兜底文本节点：与普通文本路径保持一致。 */
     teardown(): void {
       remove(text)
     },

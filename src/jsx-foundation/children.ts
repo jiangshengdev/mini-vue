@@ -2,6 +2,12 @@ import type { VirtualNodeChild } from './types.ts'
 import { isVirtualNode } from './guards.ts'
 import { __DEV__, isNil } from '@/shared/index.ts'
 
+/**
+ * 开发态兜底告警：提示用户传入了运行时无法渲染的 children。
+ *
+ * @remarks
+ * - 仅在 `__DEV__` 下启用，避免影响生产性能与输出。
+ */
 function warnUnsupportedChild(child: unknown): void {
   if (!__DEV__) {
     return

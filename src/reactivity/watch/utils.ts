@@ -34,7 +34,13 @@ export function resolveDeepOption(
 export function createGetter<T>(source: WatchSource<T>, deep: boolean): () => T {
   /* 函数源直接作为 getter 使用，保证懒读取。 */
   if (typeof source === 'function') {
-    return source
+    if (!deep) {
+      return source
+    }
+
+    return () => {
+      return traverse(source())
+    }
   }
 
   /* `ref` 源在深度模式下递归读取 value，确保嵌套字段被追踪。 */

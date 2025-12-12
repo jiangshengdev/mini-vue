@@ -134,6 +134,25 @@ describe('watch', () => {
     expect(spy).toHaveBeenLastCalledWith(1)
   })
 
+  it('对 getter 启用深度模式可追踪返回值内部字段', () => {
+    const state = reactive({ nested: { value: 0 } })
+    const spy = vi.fn()
+
+    watch(
+      function readNested() {
+        return state.nested
+      },
+      function onChange(newValue) {
+        spy(newValue.value)
+      },
+      { deep: true },
+    )
+
+    state.nested.value = 1
+    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy).toHaveBeenLastCalledWith(1)
+  })
+
   it('深度 watch 可追踪 Symbol 属性', () => {
     const secret = Symbol('secret')
     const state = reactive<Record<symbol, { value: number }>>({

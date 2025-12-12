@@ -7,6 +7,27 @@
 - 影响：更新过程中若创建了新的组件实例（例如条件渲染打开/动态子树出现），`createComponentInstance()` 读取到的 `getCurrentAppContext()` 可能为 `undefined`，导致实例 `provides` 无法继承应用级 `provides`，进而让 `inject()`/`useRouter()` 在更新路径上失效。
 - 提示：需要保证每次进入根渲染/更新渲染链路时都能建立可追踪的 appContext（或以更稳定的方式向组件树传播应用级 provides）。
 
+### 1.1 代码现状复盘（已确认）
+
+- appContext 通过栈管理：`setCurrentAppContext(appContext)` / `unsetCurrentAppContext()` 仅在 `createAppInstance().mount()` 内包裹一次根渲染。
+- 组件实例创建时的 provides 继承源：`parent?.provides ?? appContext?.provides ?? Object.create(null)`；其中 `parent.provides` 优先级最高。
+- 组件更新由 render effect 的 scheduler 驱动（`rerenderComponent`），该路径未建立 appContext 栈。
+
+### 1.2 为什么“更新时创建新组件”有时不受影响
+
+- 目前挂载链路会把父组件实例沿 children/mount 过程向下传递（`parent`），因此更新期在父组件子树中创建的新子组件通常会命中 `parent?.provides`，不依赖 `getCurrentAppContext()`。
+- 因此该问题更像是“存在结构性风险点”，但是否触发取决于是否走到了“无 parent 且无 appContext”的实例创建路径。
+
+### 1.3 触发该问题的更精确条件
+
+- 必要条件：某次 `createComponentInstance()` 执行时 `context.parent` 缺失（或被错误丢失），同时当前不处于 `setCurrentAppContext()` 包裹范围内。
+- 典型高风险路径（示例）：直接调用根级渲染函数（如 `renderDomRoot`）在更新时反复 render，导致进入 `mountChild(options, vnode, container)` 的“根入口”，该入口没有 parent；若外层也没有 appContext 包裹，则 `getCurrentAppContext()` 为 `undefined`。
+
+### 1.4 建议修复方向（优先：方向 1）
+
+- 不依赖“全局 appContext 栈”作为唯一传播手段，改为结构化传播：让组件实例稳定持有 `appContext`（根从 app/vnode 获取，子从 parent 继承），并以此初始化 `provides` 的原型链。
+- appContext 栈可以保留作为“组件外执行某些逻辑”的辅助机制，但不应成为组件树注入继承的基础。
+
 ## 2. router.install() 无条件 start，可能重复启动监听且缺少自动 stop 对应（待修复）
 
 - 位置：`src/router/core/create-router.ts`

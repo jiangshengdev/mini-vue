@@ -2,6 +2,25 @@
 
 > 目标：避免依赖 appContext “临时栈”导致的注入不稳定；让应用级 provides 始终通过组件树结构传播。
 
+## API 使用边界（严格语义）
+
+本仓库对 `provide`/`inject` 采用严格语义：它们依赖“当前组件实例”，因此**只能在组件 `setup()` 执行期间调用**。
+
+- 组件内：使用 `provide(token, value)` 与 `inject(token)`
+- 组件外（插件安装、路由安装、启动逻辑等）：使用 `app.provide(token, value)`
+
+典型用法：
+
+```ts
+// 组件外（例如 app.use(plugin) 内）：写入应用级 provides
+app.provide('k', 'v')
+
+// 组件内（setup 期间）：读取
+const value = inject<string>('k')
+```
+
+如果在组件外直接调用 `provide()` / `inject()`，运行期会抛错（提示“只能在组件 setup 期间调用”）。
+
 ## 背景问题
 
 当前实现中：

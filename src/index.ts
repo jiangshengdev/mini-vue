@@ -27,7 +27,13 @@ export type {
   WatchStopHandle,
   WritableComputedOptions,
 } from '@/reactivity/index.ts'
-export { createRouter, RouterLink, RouterView } from '@/router/index.ts'
+export {
+  createRouter,
+  createRouterPlugin,
+  RouterLink,
+  RouterView,
+  useRouter,
+} from '@/router/index.ts'
 export type {
   RouteLocation,
   RouteRecord,
@@ -37,6 +43,8 @@ export type {
   RouterViewProps,
 } from '@/router/index.ts'
 export { createApp, render } from '@/runtime-dom/index.ts'
+export { inject, provide } from '@/runtime-core/index.ts'
+export type { InjectionKey } from '@/runtime-core/index.ts'
 export type { SetupComponent, ElementType, VirtualNode } from '@/jsx-foundation/index.ts'
 export { Fragment } from '@/jsx-foundation/index.ts'
 export { h, jsx, jsxs, jsxDEV } from '@/jsx-runtime/index.ts'

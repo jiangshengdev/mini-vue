@@ -45,10 +45,8 @@
 
 新增（或扩展）`createApp()` 返回实例的能力：
 
-- `app.use(plugin)`：安装插件（router 将以插件形式安装）。
+- `app.use(plugin)`：安装插件（仅函数形式；router 将以插件形式安装）。
 - （可选）`app.provide(key, value)`：允许在应用级提供依赖（root provides）。
-
-> 注：如果不希望暴露 `app.provide` 为公共 API，也可以仅由插件内部调用内部方法写入 appContext。二选一，优先简单与清晰。
 
 ### 4.2 组合式 API
 
@@ -59,8 +57,6 @@
   - 有 `defaultValue` 则返回 default
   - 否则返回 `undefined`（或抛错，见“错误策略”）
 
-Key 类型建议：`string | symbol`。
-
 ### 4.3 Router
 
 新增导出：
@@ -69,8 +65,7 @@ Key 类型建议：`string | symbol`。
 
 Router 需要具备插件形态（推荐）：
 
-- `Router` 扩展为 `Router & { install(app): void }`
-- 或单独导出 `routerPlugin(router)` / `createRouter` 返回值带 `install`。
+- 最简单：新增导出 `createRouterPlugin(router)`，返回 `(app) => app.provide(ROUTER_KEY, router)`。
 
 ## 5. 设计概览（Design Overview）
 
@@ -83,8 +78,6 @@ Router 需要具备插件形态（推荐）：
 - 在 `ComponentInstance` 增加：
   - `parent?: ComponentInstance`（或更宽泛的 AnyInstance）
   - `provides: Record<string | symbol, unknown>`（基于原型链继承）
-
-创建实例时：
 
 - `provides` 初始为 `Object.create(parent?.provides ?? appContext.provides)`。
 
@@ -104,11 +97,9 @@ Router 需要具备插件形态（推荐）：
 
 建议在 runtime-core 创建一个最小 `AppContext`：
 
-- `provides: Record<PropertyKey, unknown>`
+- `provides: PlainObject`
 
 并让 `createAppInstance()` 维护它。
-
-根组件实例创建时将 `provides` 的原型链指向 appContext.provides，这样插件在 app 级提供的依赖对全树可见。
 
 ### 5.4 错误策略
 
@@ -120,55 +111,51 @@ Router 需要具备插件形态（推荐）：
 
 > 每一步都应保持可编译，并尽量做到“改动最小、回归清晰”。
 
-### Step 1：新增 app context 与插件入口
+### Step 1：新增 app context 与插件入口【已完成】
 
-1. 在 runtime-core 引入最小 `AppContext` 数据结构。
-2. 扩展 `AppInstance`：增加 `use(plugin)`（必要时也增加 `provide(key, value)`）。
+1. 【已完成】在 runtime-core 引入最小 `AppContext` 数据结构。
+2. 【已完成】扩展 `AppInstance`：增加 `use(plugin)` 与 `provide(key, value)`（插件仅函数形式）。
 3. `createAppInstance()`：
-   - 创建 appContext（包含 `provides`）。
-   - `use(plugin)` 调用 `plugin.install(app)`（或等价方式）。
 
-### Step 2：组件实例支持 parent/provides
+- 【已完成】创建 appContext（包含 `provides`）。
+- 【已完成】`use(plugin)` 直接调用 `plugin(app)`。
 
-1. 扩展 `ComponentInstance` 类型：添加 `parent` 与 `provides`。
-2. 在创建组件实例时（`createComponentInstance`/`mountComponent` 链路）：
-   - 传入 `parent`（需要从 mount 子树的上下文获取）。
-   - 初始化 `provides` 原型链。
+### Step 2：组件实例支持 parent/provides【已完成】
 
-### Step 3：扩展 currentInstance 覆盖到 render 阶段
+1. 【已完成】扩展 `ComponentInstance`：增加 `parent` 与 `provides`。
+2. 【已完成】在挂载链路传递 `parent`（`mountChild`/`mountVirtualNode`/`mountComponent`）。
+3. 【已完成】root 组件实例的 `provides` 从 appContext 继承（`Object.create(appContext.provides)`）。
 
-在 `render-effect` 中运行 `instance.render()` 前后：
+### Step 3：扩展 currentInstance 覆盖到 render 阶段【未开始】
+
+1. 【未开始】在 `render-effect` 中运行 `instance.render()` 前后：
 
 - `setCurrentInstance(instance)`
 - 调用 render
 - `unsetCurrentInstance()`
 
-确保：父 render 期间创建子组件时，子组件 `setup()` 的 `inject()` 能读取父提供的内容。
+2. 【未开始】确保 rerender 流程同样覆盖（scheduler 触发的 render 也需要 set/unset）。
 
-### Step 4：实现 provide/inject API
+### Step 4：实现 provide/inject API【已完成】
 
-1. 新增模块：例如 `src/runtime-core/api/inject.ts`（文件名可调整，保持与现有结构一致）。
-2. `provide(key, value)`：写入 `getCurrentInstance().provides[key] = value`。
-3. `inject(key, defaultValue?)`：从 `getCurrentInstance().provides` 读取（原型链自然向上）。
+1. 【已完成】新增模块：`src/runtime-core/provide-inject.ts`。
+2. 【已完成】实现 `provide(key, value)`：写入 `getCurrentInstance().provides[key] = value`。
+3. 【已完成】实现 `inject(key, defaultValue?)`：从 `getCurrentInstance().provides` 读取（原型链自然向上）。
+4. 【已完成】在 `src/runtime-core/index.ts` 与 `src/index.ts` 聚合导出。
 
-并在 `src/index.ts` 聚合导出（如果定位为公共 API）。
+### Step 5：Router 改造为可注入【已完成】
 
-### Step 5：Router 改造为可注入
+1. 【已完成】新增 `ROUTER_KEY` 放在 `src/router/core/injection.ts`。
+2. 【已完成】新增 `createRouterPlugin(router)`：`(app) => app.provide(ROUTER_KEY, router)`。
+3. 【已完成】新增 `useRouter()`：`inject(ROUTER_KEY)`，未命中则抛错。
+4. 【已完成】修改 `RouterLinkProps` / `RouterViewProps`：`router?: Router`，并优先使用 props，否则 `useRouter()`。
 
-1. 新增 `ROUTER_KEY`（建议 `Symbol('mini-vue-router')`）放在 `src/router/core/`。
-2. `createRouter()` 返回对象上增加 `install(app)`：
-   - `app.provide(ROUTER_KEY, router)` 或直接写入 appContext。
-3. 新增 `useRouter()`：`return inject(ROUTER_KEY)`，未命中则抛错。
-4. 修改 `RouterLinkProps` / `RouterViewProps`：
-   - `router?: Router`（可选）
-   - 逻辑：`const router = props.router ?? useRouter()`
+### Step 6：Playground 接入【未开始】
 
-### Step 6：Playground 接入
+1. 【未开始】`playground/src/main.ts`（或创建 app 的位置）执行 `app.use(createRouterPlugin(router))`。
+2. 【未开始】`playground/src/app.tsx` 移除 `router={router}`。
 
-- `playground/src/main.ts`（或创建 app 的位置）执行 `app.use(router)`。
-- `playground/src/app.tsx` 移除 `router={router}`。
-
-### Step 7：测试与回归
+### Step 7：测试与回归【已完成】
 
 新增测试（推荐放在 `test/runtime-dom/`，因为 jsdom + createApp 更贴近真实使用）：
 

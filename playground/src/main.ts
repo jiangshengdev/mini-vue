@@ -13,5 +13,5 @@ if (!host) {
 
 const app: DomAppInstance = createApp(App)
 
-router.start()
+app.use(router)
 app.mount(host)

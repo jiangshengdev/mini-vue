@@ -1,5 +1,6 @@
 import type { RendererOptions } from '../index.ts'
 import { mountComponent } from '../component/index.ts'
+import type { AnyComponentInstance } from '../component/context.ts'
 import { mountElement } from './element.ts'
 import { mountChild } from './child.ts'
 import type { MountedHandle } from './handle.ts'
@@ -18,10 +19,11 @@ export function mountVirtualNode<
   virtualNode: VirtualNode,
   container: HostElement | HostFragment,
   needsAnchor = false,
+  parent?: AnyComponentInstance,
 ): MountedHandle<HostNode> | undefined {
   /* Fragment 直接展开自身 children，不走组件路径。 */
   if (virtualNode.type === Fragment) {
-    return mountChild(options, virtualNode.children, container)
+    return mountChild(options, virtualNode.children, container, false, parent)
   }
 
   /* 函数组件通过 mountComponent 执行并挂载其返回值。 */
@@ -31,9 +33,10 @@ export function mountVirtualNode<
       virtualNode as VirtualNode<SetupComponent>,
       container,
       needsAnchor,
+      parent,
     )
   }
 
   /* 普通标签名直接走元素挂载逻辑。 */
-  return mountElement(options, virtualNode.type, virtualNode, container)
+  return mountElement(options, virtualNode.type, virtualNode, container, parent)
 }

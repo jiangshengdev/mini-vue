@@ -12,6 +12,8 @@ import type { EffectScope, ReactiveEffect } from '@/reactivity/index.ts'
 import type { PlainObject } from '@/shared/index.ts'
 import { ContextStack } from '@/shared/index.ts'
 
+export type ComponentProvides = PlainObject
+
 /**
  * 运行期组件实例结构，统一记录渲染与清理状态。
  */
@@ -21,6 +23,10 @@ export interface ComponentInstance<
   HostFragment extends HostNode,
   T extends SetupComponent,
 > {
+  /** 父组件实例引用，用于依赖注入与上下文继承。 */
+  parent?: AnyComponentInstance
+  /** 依赖注入容器，默认通过原型链继承父/应用级 provides。 */
+  provides: ComponentProvides
   /** 组件定义本身，保存以便多次渲染重用。 */
   readonly type: T
   /** 宿主容器或片段引用，挂载子树时作为根。 */
@@ -50,7 +56,7 @@ export interface ComponentInstance<
 }
 
 /** 兼容任意宿主类型的组件实例别名，简化当前实例管理。 */
-type AnyComponentInstance = ComponentInstance<unknown, unknown, unknown, SetupComponent>
+export type AnyComponentInstance = ComponentInstance<unknown, unknown, unknown, SetupComponent>
 
 /** 当前 setup 调用栈正在处理的实例引用。 */
 const instanceStack = new ContextStack<AnyComponentInstance>()

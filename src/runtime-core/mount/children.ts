@@ -1,4 +1,5 @@
 import type { RendererOptions } from '../index.ts'
+import type { AnyComponentInstance } from '../component/context.ts'
 import { mountChild } from './child.ts'
 import type { MountedHandle } from './handle.ts'
 import type { VirtualNodeChild } from '@/jsx-foundation/index.ts'
@@ -14,6 +15,7 @@ export function mountChildren<
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   children: VirtualNodeChild[],
   container: HostElement,
+  parent?: AnyComponentInstance,
 ): Array<MountedHandle<HostNode>> {
   const mountedHandles: Array<MountedHandle<HostNode>> = []
 
@@ -21,7 +23,7 @@ export function mountChildren<
   for (let index = 0; index < children.length; index += 1) {
     const child = children[index]
     /* 在存在后续兄弟时强制使用锚点，保持节点插入顺序。 */
-    const mounted = mountChild(options, child, container, index < children.length - 1)
+    const mounted = mountChild(options, child, container, index < children.length - 1, parent)
 
     if (mounted) {
       mountedHandles.push(mounted)

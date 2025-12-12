@@ -1,6 +1,8 @@
-import type { ComponentInstance } from './context.ts'
+import { getCurrentAppContext } from '../app-context.ts'
+import type { AnyComponentInstance, ComponentInstance } from './context.ts'
 import type { ElementProps, SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
 import { effectScope } from '@/reactivity/index.ts'
+import type { PlainObject } from '@/shared'
 
 /**
  * 创建组件实例与关联的 effect 作用域。
@@ -15,9 +17,16 @@ export function createComponentInstance<
   props: ElementProps<T>,
   container: HostElement | HostFragment,
   needsAnchor: boolean,
+  parent?: AnyComponentInstance,
 ): ComponentInstance<HostNode, HostElement, HostFragment, T> {
+  const appContext = getCurrentAppContext()
+  const providesBase: PlainObject =
+    parent?.provides ?? appContext?.provides ?? (Object.create(null) as PlainObject)
+
   /* `render`/`effect` 初始为空，由 setup 与 performInitialRender 回填。 */
   return {
+    parent,
+    provides: Object.create(providesBase) as PlainObject,
     type: component,
     container,
     props,

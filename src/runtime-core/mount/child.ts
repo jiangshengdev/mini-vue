@@ -1,4 +1,5 @@
 import type { RendererOptions } from '../index.ts'
+import type { AnyComponentInstance } from '../component/context.ts'
 import { mountVirtualNode } from './virtual-node.ts'
 import type { MountedHandle } from './handle.ts'
 import type { RenderOutput } from '@/jsx-foundation/index.ts'
@@ -13,6 +14,7 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
   child: RenderOutput | undefined,
   container: HostElement | HostFragment,
   needsAnchor = false,
+  parent?: AnyComponentInstance,
 ): MountedHandle<HostNode> | undefined {
   const { appendChild, createText, remove } = options
 
@@ -30,7 +32,7 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
     }
 
     if (childCount === 1) {
-      return mountChild(options, child[0], container, needsAnchor)
+      return mountChild(options, child[0], container, needsAnchor, parent)
     }
 
     const startAnchor = createText('')
@@ -42,7 +44,7 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
 
     /* 子项始终视为有后续兄弟，以 endAnchor 充当边界。 */
     for (const item of child) {
-      const mounted = mountChild(options, item, container, true)
+      const mounted = mountChild(options, item, container, true, parent)
 
       if (mounted) {
         nodes.push(...mounted.nodes)
@@ -82,7 +84,7 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
 
   /* 标准 virtualNode 交给 mountVirtualNode 处理组件或元素。 */
   if (isVirtualNode(child)) {
-    return mountVirtualNode(options, child, container, needsAnchor)
+    return mountVirtualNode(options, child, container, needsAnchor, parent)
   }
 
   /* 其他值（如对象）兜底转成字符串输出。 */

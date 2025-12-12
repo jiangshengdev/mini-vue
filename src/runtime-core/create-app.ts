@@ -1,7 +1,9 @@
 import type { RootRenderFunction } from './renderer.ts'
+import { setCurrentAppContext, unsetCurrentAppContext } from './app-context.ts'
 import type { ElementProps, SetupComponent } from '@/jsx-foundation/index.ts'
 import { createVirtualNode } from '@/jsx-foundation/index.ts'
-import type { PropsShape } from '@/shared/index.ts'
+import type { PlainObject, PropsShape } from '@/shared/index.ts'
+import { errorContexts, errorPhases, runThrowing } from '@/shared/index.ts'
 
 /** 应用生命周期状态常量，区分是否已挂载。 */
 const appLifecycleStatus = {
@@ -23,6 +25,16 @@ export interface AppRuntimeConfig<HostElement> {
   unmount: (container: HostElement) => void
 }
 
+/** 最小的应用级上下文，用于插件与 provide/inject 的根级 provides */
+export interface AppContext {
+  provides: PlainObject
+}
+
+/** 应用插件：仅支持函数形式，保持 API 收敛。 */
+export type AppPlugin<HostElement> =
+  | ((app: AppInstance<HostElement>) => void)
+  | { install: (app: AppInstance<HostElement>) => void }
+
 /**
  * `createApp` 返回的实例 API，封装 `mount`/`unmount` 生命周期。
  */
@@ -31,6 +43,10 @@ export interface AppInstance<HostElement> {
   mount(target: HostElement): void
   /** 停止渲染并释放容器内容。 */
   unmount(): void
+  /** 安装插件（函数或对象带 install）。 */
+  use(plugin: AppPlugin<HostElement>): void
+  /** 在应用级提供依赖，供整个组件树通过 inject 读取。 */
+  provide(key: PropertyKey, value: unknown): void
 }
 
 /**
@@ -47,6 +63,8 @@ interface AppState<HostElement> {
   rootComponent: SetupComponent
   /** 传入根组件的初始 props。 */
   initialRootProps?: PropsShape
+  /** 应用级上下文 */
+  appContext: AppContext
 }
 
 /**
@@ -65,7 +83,14 @@ function mountApp<HostElement>(state: AppState<HostElement>, target: HostElement
   const rootNode = createRootVirtualNode(state)
 
   /* 交由渲染器负责真正的 DOM 挂载，并让组件 effect 托管更新。 */
-  state.config.render(rootNode, target)
+  setCurrentAppContext(state.appContext)
+
+  try {
+    state.config.render(rootNode, target)
+  } finally {
+    unsetCurrentAppContext()
+  }
+
   state.status = appLifecycleStatus.mounted
 }
 
@@ -112,6 +137,7 @@ export function createAppInstance<HostElement>(
     config,
     rootComponent,
     initialRootProps,
+    appContext: { provides: Object.create(null) as PlainObject },
   }
 
   /* 用户态 mount 会透传容器给核心挂载逻辑。 */
@@ -127,5 +153,31 @@ export function createAppInstance<HostElement>(
   return {
     mount,
     unmount,
+    use(plugin: AppPlugin<HostElement>) {
+      runThrowing(
+        () => {
+          if (typeof plugin === 'function') {
+            plugin(this)
+
+            return
+          }
+
+          if (plugin && typeof plugin.install === 'function') {
+            plugin.install(this)
+
+            return
+          }
+
+          throw new TypeError('createApp.use: plugin 必须是函数或带 install(app) 的对象')
+        },
+        {
+          origin: errorContexts.appUse,
+          handlerPhase: errorPhases.sync,
+        },
+      )
+    },
+    provide(key: PropertyKey, value: unknown) {
+      state.appContext.provides[key] = value
+    },
   }
 }

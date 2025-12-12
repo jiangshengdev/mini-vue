@@ -24,6 +24,8 @@ export const errorContexts = {
   componentSetup: 'componentSetup',
   /** 组件卸载或 cleanup 阶段出错。 */
   componentCleanup: 'componentCleanup',
+  /** 应用层插件安装（app.use/app.provide 等）阶段出错。 */
+  appUse: 'appUse',
   /** `computed` setter 抛出的异常。 */
   computedSetter: 'computedSetter',
 } as const

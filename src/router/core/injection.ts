@@ -20,12 +20,3 @@ export function useRouter(): Router {
 
   return router
 }
-
-/**
- * 将 router 安装到应用 provides 中，供 useRouter/RouterLink/RouterView 注入读取。
- */
-export function createRouterPlugin(router: Router) {
-  return (app: { provide: (key: PropertyKey, value: unknown) => void }) => {
-    app.provide(ROUTER_KEY, router)
-  }
-}

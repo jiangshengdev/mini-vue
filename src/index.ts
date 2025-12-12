@@ -29,7 +29,6 @@ export type {
 } from '@/reactivity/index.ts'
 export {
   createRouter,
-  createRouterPlugin,
   RouterLink,
   RouterView,
   useRouter,

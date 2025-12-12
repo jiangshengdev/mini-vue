@@ -4,6 +4,11 @@ import { routerInjectionKey } from './injection.ts'
 import type { Ref } from '@/reactivity/index.ts'
 import { ref } from '@/reactivity/index.ts'
 
+interface RouterInstallApp {
+  provide: (key: PropertyKey, value: unknown) => void
+  unmount?: () => void
+}
+
 const canUseWindowEvents =
   globalThis.window !== undefined && typeof window.addEventListener === 'function'
 
@@ -40,7 +45,7 @@ export function createRouter(config: RouterConfig): Router {
   }
 
   /* 用当前地址初始化路由状态，确保首屏渲染一致。 */
-  const currentRoute: Ref<RouteLocation> = ref<RouteLocation>(matchRoute(getCurrentBrowserPath()))
+  const currentRoute: Ref<RouteLocation> = ref(matchRoute(getCurrentBrowserPath()))
 
   /* `popstate` 触发时同步最新路径到路由状态。 */
   const onPopState = (): void => {
@@ -48,6 +53,11 @@ export function createRouter(config: RouterConfig): Router {
   }
 
   let listening = false
+
+  /** 记录已安装该 router 的 app，避免重复 install 并用于卸载时闭环 stop。 */
+  const installedApps = new Set<RouterInstallApp>()
+  /** 记录已被当前 router 包装过 unmount 的 app，避免重复包装。 */
+  const wrappedUnmountApps = new WeakSet<RouterInstallApp>()
 
   /**
    * 开始监听浏览器前进/后退，并立即同步一次路径。
@@ -93,7 +103,36 @@ export function createRouter(config: RouterConfig): Router {
     start,
     stop,
     install(app) {
-      start()
+      if (installedApps.has(app)) {
+        return
+      }
+
+      const isFirstInstall = installedApps.size === 0
+
+      installedApps.add(app)
+
+      if (isFirstInstall) {
+        start()
+      }
+
+      if (typeof app.unmount === 'function' && !wrappedUnmountApps.has(app)) {
+        const rawUnmount = app.unmount.bind(app)
+
+        app.unmount = () => {
+          try {
+            rawUnmount()
+          } finally {
+            installedApps.delete(app)
+
+            if (installedApps.size === 0) {
+              stop()
+            }
+          }
+        }
+
+        wrappedUnmountApps.add(app)
+      }
+
       app.provide(routerInjectionKey, router)
     },
   }

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { createTestContainer } from '../setup.ts'
 import type { SetupComponent } from '@/index.ts'
-import { createApp, inject, provide, ref } from '@/index.ts'
+import { createApp, inject, provide, ref, render } from '@/index.ts'
 
 function mountToFreshContainer(component: SetupComponent) {
   const container = createTestContainer()
@@ -69,5 +69,33 @@ describe('runtime-dom: provide/inject', () => {
     expect(injectedText.value).toBe('fallback')
 
     app.unmount()
+  })
+
+  it('injects value from vnode.appContext when rendering root vnode directly', () => {
+    const injectedText = ref('')
+
+    const Child: SetupComponent = () => {
+      injectedText.value = inject<string>('k') ?? ''
+
+      return () => {
+        return undefined
+      }
+    }
+
+    const container = createTestContainer()
+    const vnode = <Child />
+
+    ;(vnode as unknown as { appContext?: { provides: Record<PropertyKey, unknown> } }).appContext =
+      {
+        provides: {
+          k: 'v',
+        },
+      }
+
+    render(vnode, container)
+
+    expect(injectedText.value).toBe('v')
+
+    render(undefined, container)
   })
 })

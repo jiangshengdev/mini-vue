@@ -2,6 +2,7 @@
  * 组件实例的共享定义与当前实例管理工具。
  */
 import type { MountedHandle } from '../mount'
+import type { AppContext } from '../create-app.ts'
 import type {
   ElementProps,
   RenderFunction,
@@ -25,6 +26,8 @@ export interface ComponentInstance<
 > {
   /** 父组件实例引用，用于依赖注入与上下文继承。 */
   parent?: AnyComponentInstance
+  /** 应用级上下文（root provides 等），沿组件树结构稳定传播。 */
+  appContext?: AppContext
   /** 依赖注入容器，默认通过原型链继承父/应用级 provides。 */
   provides: Provides
   /** 组件定义本身，保存以便多次渲染重用。 */

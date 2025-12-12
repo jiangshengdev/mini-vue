@@ -1,5 +1,5 @@
 import type { RendererOptions } from '../index.ts'
-import type { AnyComponentInstance } from '../component/context.ts'
+import type { MountContext } from './context.ts'
 import { mountChild } from './child.ts'
 import type { MountedHandle } from './handle.ts'
 import type { VirtualNodeChild } from '@/jsx-foundation/index.ts'
@@ -15,9 +15,11 @@ export function mountChildren<
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   children: VirtualNodeChild[],
   container: HostElement,
-  parent?: AnyComponentInstance,
+  context?: MountContext,
 ): Array<MountedHandle<HostNode>> {
   const mountedHandles: Array<MountedHandle<HostNode>> = []
+  const parent = context?.parent
+  const appContext = context?.appContext
 
   /* 顺序遍历子节点，统一交由 mountChild 处理细分类型。 */
   for (let index = 0; index < children.length; index += 1) {
@@ -26,6 +28,7 @@ export function mountChildren<
     const mounted = mountChild(options, child, container, {
       needsAnchor: index < children.length - 1,
       parent,
+      appContext,
     })
 
     if (mounted) {

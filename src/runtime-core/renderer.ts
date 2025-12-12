@@ -3,7 +3,9 @@
  */
 import type { MountedHandle } from './mount/index.ts'
 import { mountChild } from './mount/index.ts'
+import type { AppContext } from './create-app.ts'
 import type { RenderOutput } from '@/jsx-foundation/index.ts'
+import { isVirtualNode } from '@/jsx-foundation/index.ts'
 import type { PlainObject, PropsShape } from '@/shared/index.ts'
 
 /**
@@ -93,7 +95,12 @@ export function createRenderer<
   function render(virtualNode: RenderOutput, container: HostElement): void {
     teardownContainer(container)
     clear(container)
-    const mounted = mountChild(options, virtualNode, container)
+    const appContext = isVirtualNode(virtualNode)
+      ? (virtualNode as { appContext?: AppContext }).appContext
+      : undefined
+    const mounted = mountChild(options, virtualNode, container, {
+      appContext,
+    })
 
     if (mounted) {
       mountedHandlesByContainer.set(asContainerKey(container), mounted)

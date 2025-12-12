@@ -117,10 +117,14 @@ function createRootVirtualNode<HostElement>(state: AppState<HostElement>) {
     ? { ...state.initialRootProps }
     : undefined
 
-  return createVirtualNode({
+  const node = createVirtualNode({
     type: state.rootComponent,
     rawProps,
   })
+
+  ;(node as unknown as { appContext?: AppContext }).appContext = state.appContext
+
+  return node
 }
 
 /**

@@ -12,7 +12,7 @@ import { ref } from '@/reactivity/index.ts'
  * - 该类型避免把运行时 `AppInstance` 强耦合进 router 包。
  * - 仅用于 `router.install(app)` 的参数约束与内部 bookkeeping。
  */
-interface RouterInstallApp {
+interface InstallableApp {
   /** 可选的卸载钩子：若存在会被 router 包装，以便在卸载时自动 stop。 */
   unmount?: () => void
   /** 在应用级 provides 中写入依赖（泛型重载用于类型推导）。 */
@@ -68,9 +68,9 @@ export function createRouter(config: RouterConfig): Router {
   let listening = false
 
   /** 记录已安装该 router 的 app，避免重复 install 并用于卸载时闭环 stop。 */
-  const installedApps = new Set<RouterInstallApp>()
+  const installedApps = new Set<InstallableApp>()
   /** 记录已被当前 router 包装过 unmount 的 app，避免重复包装。 */
-  const wrappedUnmountApps = new WeakSet<RouterInstallApp>()
+  const wrappedUnmountApps = new WeakSet<InstallableApp>()
 
   /**
    * 开始监听浏览器前进/后退，并立即同步一次路径。

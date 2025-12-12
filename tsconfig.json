@@ -15,7 +15,8 @@
     "jsx": "react-jsx",
     "jsxImportSource": "@",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "#/*": ["./playground/src/*"]
     },
     "noEmit": true,
 

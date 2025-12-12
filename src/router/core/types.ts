@@ -46,8 +46,8 @@ export interface Router {
   stop: () => void
   /** 作为应用插件安装到 app 上（对齐 vue-router 使用方式）。 */
   install: (app: {
+    unmount?: () => void
     provide<T>(key: InjectionKey<T>, value: T): void
     provide(key: InjectionToken, value: unknown): void
-    unmount?: () => void
   }) => void
 }

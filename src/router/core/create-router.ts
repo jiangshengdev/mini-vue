@@ -6,9 +6,9 @@ import type { Ref } from '@/reactivity/index.ts'
 import { ref } from '@/reactivity/index.ts'
 
 interface RouterInstallApp {
+  unmount?: () => void
   provide<T>(key: InjectionKey<T>, value: T): void
   provide(key: InjectionToken, value: unknown): void
-  unmount?: () => void
 }
 
 const canUseWindowEvents =

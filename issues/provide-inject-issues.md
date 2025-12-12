@@ -77,12 +77,12 @@
   - 通过 TSDoc 明确边界与替代方案：组件外请使用 `app.provide()`，组件内再 `inject()`。
   - 文档补充“严格语义”的使用说明与示例，避免“公共 API = 任意时刻可调用”的误解。
 
-## 5. Fragment 分支强制 needsAnchor=false，可能导致兄弟插入顺序不稳定（已修复）
+## 5. Fragment 分支强制 shouldUseAnchor=false，可能导致兄弟插入顺序不稳定（已修复）
 
 - 位置：`src/runtime-core/mount/virtual-node.ts`
-- 修复前：当 `virtualNode.type === Fragment` 时，转发到 `mountChild` 会把 `needsAnchor` 强制置为 `false`。
-- 影响：父层要求保序（`needsAnchor=true`）时，若 Fragment 只包了一个组件子节点，会导致该组件误判“不需要锚点”，在组件重渲染后可能把节点挂到容器末尾，造成兄弟顺序漂移。
-- 修复：Fragment 分支透传 `needsAnchor`，保持父层对锚点与边界的约束。
+- 修复前：当 `virtualNode.type === Fragment` 时，转发到 `mountChild` 会把 `shouldUseAnchor` 强制置为 `false`。
+- 影响：父层要求保序（`shouldUseAnchor=true`）时，若 Fragment 只包了一个组件子节点，会导致该组件误判“不需要锚点”，在组件重渲染后可能把节点挂到容器末尾，造成兄弟顺序漂移。
+- 修复：Fragment 分支透传 `shouldUseAnchor`，保持父层对锚点与边界的约束。
 
 回归测试：
 

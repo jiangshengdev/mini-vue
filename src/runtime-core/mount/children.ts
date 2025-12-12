@@ -26,7 +26,7 @@ export function mountChildren<
     const child = children[index]
     /* 在存在后续兄弟时强制使用锚点，保持节点插入顺序。 */
     const mounted = mountChild(options, child, container, {
-      needsAnchor: index < children.length - 1,
+      shouldUseAnchor: index < children.length - 1,
       parent,
       appContext,
     })

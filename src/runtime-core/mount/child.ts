@@ -15,8 +15,8 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
   container: HostElement | HostFragment,
   context?: MountContext,
 ): MountedHandle<HostNode> | undefined {
-  /* needsAnchor 表示“当前节点之后是否还有兄弟”，用于决定是否需要占位锚点来保序。 */
-  const needsAnchor = context?.needsAnchor ?? false
+  /* shouldUseAnchor 表示“当前节点之后是否还有兄弟”，用于决定是否需要占位锚点来保序。 */
+  const shouldUseAnchor = context?.shouldUseAnchor ?? false
   const { appendChild, createText, remove } = options
 
   /* `null`、`undefined`、布尔值不产生实际节点。 */
@@ -33,7 +33,7 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
     }
 
     if (childCount === 1) {
-      return mountChild(options, child[0], container, { ...context, needsAnchor })
+      return mountChild(options, child[0], container, { ...context, shouldUseAnchor })
     }
 
     const startAnchor = createText('')
@@ -45,7 +45,7 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
 
     /* 子项始终视为有后续兄弟，以 endAnchor 充当边界。 */
     for (const item of child) {
-      const mounted = mountChild(options, item, container, { ...context, needsAnchor: true })
+      const mounted = mountChild(options, item, container, { ...context, shouldUseAnchor: true })
 
       if (mounted) {
         nodes.push(...mounted.nodes)
@@ -92,7 +92,7 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
 
   /* 标准 virtualNode 交给 mountVirtualNode 处理组件或元素。 */
   if (isVirtualNode(child)) {
-    return mountVirtualNode(options, child, container, { ...context, needsAnchor })
+    return mountVirtualNode(options, child, container, { ...context, shouldUseAnchor })
   }
 
   /* 其他值（如对象）兜底转成字符串输出。 */

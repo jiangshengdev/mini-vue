@@ -6,7 +6,7 @@ import type { AppContext } from '../create-app.ts'
  */
 export interface MountContext {
   /** 当前子树是否需要锚点以保持兄弟顺序。 */
-  needsAnchor?: boolean
+  shouldUseAnchor?: boolean
   /** 当前挂载发生在哪个父组件实例下。 */
   parent?: AnyComponentInstance
   /** 当前挂载所属的应用上下文，用于 root provides 的稳定传播。 */

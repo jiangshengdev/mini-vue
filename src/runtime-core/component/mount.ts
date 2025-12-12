@@ -25,7 +25,10 @@ export function mountComponent<
   /* 准备实例前先规整 props，以免 setup 阶段读到旧引用。 */
   const props = resolveComponentProps(virtualNode)
   const component = virtualNode.type
-  const instance = createComponentInstance(component, props, container, { ...context, shouldUseAnchor })
+  const instance = createComponentInstance(component, props, container, {
+    ...context,
+    shouldUseAnchor,
+  })
 
   /* 让 virtualNode 拥有实例引用，方便调试或测试检索。 */
   attachInstanceToVirtualNode(virtualNode, instance)

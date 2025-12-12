@@ -15,7 +15,7 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
   container: HostElement | HostFragment,
   context?: MountContext,
 ): MountedHandle<HostNode> | undefined {
-  /* shouldUseAnchor 表示“当前节点之后是否还有兄弟”，用于决定是否需要占位锚点来保序。 */
+  /* `shouldUseAnchor` 表示“当前节点之后是否还有兄弟”，用于决定是否需要占位锚点来保序。 */
   const shouldUseAnchor = context?.shouldUseAnchor ?? false
   const { appendChild, createText, remove } = options
 

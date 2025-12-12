@@ -29,7 +29,7 @@ export function createComponentInstance<
   const appContext = parent?.appContext ?? context?.appContext ?? getCurrentAppContext()
 
   /*
-   * provides 采用原型链：
+   * `provides` 采用原型链：
    * - 优先继承父组件 provides
    * - 否则继承 appContext.provides（root provides）
    * - 再否则回退到空对象（支持无 createApp/render 的极简场景）
@@ -46,7 +46,7 @@ export function createComponentInstance<
     container,
     props,
     /**
-     * setup 阶段会把它替换为真实 render 闭包；这里提供占位实现以保持类型稳定。
+     * `setup` 阶段会把它替换为真实 render 闭包；这里提供占位实现以保持类型稳定。
      */
     render() {
       return undefined

@@ -120,4 +120,40 @@ describe('runtime-dom children shape', () => {
 
     expect(readOrder()).toEqual(['first', 'updated', 'last'])
   })
+
+  it('Fragment 包单组件时重渲染不会改变兄弟顺序', () => {
+    const state = reactive({ mid: 'middle' })
+
+    const Middle: SetupComponent = () => {
+      return () => {
+        return <span data-testid="mid">{state.mid}</span>
+      }
+    }
+
+    const container = createTestContainer()
+
+    render(
+      <section>
+        <span data-testid="first">first</span>
+        <>
+          <Middle />
+        </>
+        <span data-testid="last">last</span>
+      </section>,
+      container,
+    )
+
+    const section = container.querySelector('section')!
+    const readOrder = () => {
+      return [...section.children].map((element) => {
+        return element.textContent
+      })
+    }
+
+    expect(readOrder()).toEqual(['first', 'middle', 'last'])
+
+    state.mid = 'updated'
+
+    expect(readOrder()).toEqual(['first', 'updated', 'last'])
+  })
 })

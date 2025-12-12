@@ -1,4 +1,3 @@
-import type { Mock } from 'vitest'
 import { recordEffectScope } from './effect-scope.ts'
 import type {
   DependencyBucket,
@@ -20,6 +19,10 @@ import {
 
 export const effectStack = new ContextStack<EffectInstance>()
 const debug = __INTERNAL_DEV__ ? createDebugLogger('effect') : null
+
+type EffectFnMockLike = {
+  getMockName?: () => string
+}
 
 /**
  * 将副作用封装为类，集中管理依赖收集与生命周期操作。
@@ -57,7 +60,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
     this.fn = fn
 
     if (__INTERNAL_DEV__ && debug) {
-      const fnMock = fn as Mock<() => T>
+      const fnMock = fn as (() => T) & EffectFnMockLike
 
       this.fnName = fnMock.getMockName ? fnMock.getMockName() : fn.name
     }

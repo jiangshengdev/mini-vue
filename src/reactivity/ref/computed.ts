@@ -1,4 +1,3 @@
-import type { Mock } from 'vitest'
 import { ReactiveEffect } from '../effect.ts'
 import { recordEffectScope } from '../effect-scope.ts'
 import { trackEffect, triggerEffects } from '../internals/index.ts'
@@ -44,6 +43,10 @@ const readonlyComputedError = '当前 computed 为只读，若需要写入请传
 
 const debug = __INTERNAL_DEV__ ? createDebugLogger('computed') : null
 
+type GetterMockLike = {
+  getMockName?: () => string
+}
+
 /**
  * `computed` 的底层实现，通过惰性求值与脏标记保持派生状态最新。
  */
@@ -71,7 +74,7 @@ class ComputedRefImpl<T> implements Ref<T> {
     this.setter = setter
 
     if (__INTERNAL_DEV__ && debug) {
-      const getterMock = getter as Mock<ComputedGetter<T>>
+      const getterMock = getter as ComputedGetter<T> & GetterMockLike
 
       this.effectName = getterMock.getMockName ? getterMock.getMockName() : getter.name
     }
@@ -101,8 +104,10 @@ class ComputedRefImpl<T> implements Ref<T> {
         })
       }
 
+      const value = this.effect.run()
+
+      this.cachedValue = value
       this.needsRecompute = false
-      this.cachedValue = this.effect.run()
 
       if (__INTERNAL_DEV__ && debug) {
         debug('get value', '派生值已更新', {

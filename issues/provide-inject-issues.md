@@ -61,12 +61,12 @@
 
 - `test/runtime-dom/router-injection.test.tsx` 覆盖重复 install 与多 app 共享 router 的监听启停行为。
 
-## 3. app.provide 接收 symbol 键，但 provides 容器类型可能不一致（待确认/待修复）
+## 3. app.provide key 类型与 InjectionToken 不一致（已修复）
 
-- 位置：`src/runtime-core/create-app.ts`、`src/runtime-core/component/context.ts`（`Provides = PlainObject`）、`src/router/core/injection.ts`（`routerInjectionKey: symbol`）
-- 现状：`app.provide(key: PropertyKey, value)` 允许 `symbol`；但 `state.appContext.provides`/`instance.provides` 的类型基于 `PlainObject`，若其定义并非 `Record<PropertyKey, unknown>`，则类型系统与运行期能力可能不对齐。
-- 影响：注入键采用 `symbol` 时，类型层面可能出现不安全的断言/不一致；若后续对 provides 的实现做了约束，也可能引入隐藏的兼容性问题。
-- 提示：需要统一 provides 的键类型定义与存储结构，确保 `symbol`/`string` 都能稳定支持。
+- 位置：`src/runtime-core/create-app.ts`、`src/runtime-core/provide-inject.ts`
+- 现状：运行期 `PlainObject = Record<PropertyKey, unknown>` 本身已支持 `symbol`；真正的不一致来自类型层：组件侧 `provide/inject` 使用 `InjectionToken = InjectionKey | string`，但应用侧 `app.provide` 过去接受 `PropertyKey`（包含 `number`）。
+- 影响：API 语义不一致、误用面更大；且 `number` 键在对象上会被字符串化，基本没有必要支持。
+- 修复：将 `app.provide` 的 key 统一收敛为 `InjectionToken`，并为 `InjectionKey<T>` 增加 value 的类型推导；对外补充导出 `InjectionToken` 类型。
 
 ## 4. provide/inject 作为公共 API 导出，但运行期限制“仅 setup 可用”易触发异常（待确认/待修复）
 

@@ -26,6 +26,10 @@
 
 这样即使在更新 effect、scheduler、微任务等任意执行环境中创建新子组件，只要它是从父组件渲染树结构创建出来的，就能继承到应用级 provides。
 
+### 当前实现状态
+
+本仓库已按该方向落地：根 vnode 挂载 `appContext`，渲染器透传到挂载上下文，组件实例稳定持有 `appContext`。
+
 ### 在本仓库中的落点建议（只做对齐描述）
 
 - 组件实例结构：扩展 `ComponentInstance`（src/runtime-core/component/context.ts）增加 `appContext` 字段。
@@ -45,3 +49,7 @@
 
 - 在“更新期创建新子组件”的场景下，新子组件的 `inject(XXX)` 仍可读取到 `app.provide(XXX, value)`。
 - 在“无 parent 的根入口”场景（如直接调用根级 render 的封装）也能通过 vnode/app 持有的 appContext 保证继承。
+
+对应回归用例：
+
+- `test/runtime-dom/provide-inject.test.tsx`：直接 `render(vnode, container)`，通过 `vnode.appContext.provides` 仍能 `inject()` 命中。

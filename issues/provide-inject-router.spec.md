@@ -200,3 +200,7 @@ Router 需要具备插件形态（推荐）：
 - rerender 流程也要覆盖：不仅是首渲染，后续 effect rerender 的 render 也应设置 currentInstance。
 - provides 的原型链方式简单但有效；注意避免直接替换 `provides` 导致链路断裂。
 - 如果 `app.use`/`app.provide` 是 public API，记得同步类型导出并保持 DOM 包装层返回类型一致。
+
+补充：
+
+- 若 appContext 仅靠“全局栈”传播，更新期或根级直接 render 可能导致应用级 provides 丢失；建议采用结构化传播（见 `docs/app-context-provides.md`）。

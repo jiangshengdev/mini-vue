@@ -1,6 +1,6 @@
 # Provide/Inject 与 Router 注入问题记录
 
-## 1. App 级 provides 只在首次 mount 生效，后续更新可能丢失注入上下文（待修复）
+## 1. App 级 provides 只在首次 mount 生效，后续更新可能丢失注入上下文（已修复）
 
 - 位置：`src/runtime-core/create-app.ts`、`src/runtime-core/app-context.ts`、`src/runtime-core/component/instance.ts`
 - 现状：`setCurrentAppContext()` 仅包裹首次 `mount()` 内的 `config.render(...)` 调用；而组件更新渲染通常由 effect 触发，不一定处于 appContext 栈内。
@@ -27,6 +27,26 @@
 
 - 不依赖“全局 appContext 栈”作为唯一传播手段，改为结构化传播：让组件实例稳定持有 `appContext`（根从 app/vnode 获取，子从 parent 继承），并以此初始化 `provides` 的原型链。
 - appContext 栈可以保留作为“组件外执行某些逻辑”的辅助机制，但不应成为组件树注入继承的基础。
+
+### 1.5 实际修复（方向 1 已落地）
+
+- 根 vnode 挂载 `appContext`，渲染器从 vnode 读取并通过 `MountContext.appContext` 向下透传，避免依赖“仅 mount 时存在的全局栈”。
+- `ComponentInstance` 增加 `appContext` 字段；`createComponentInstance` 优先从 `parent.appContext` / `context.appContext` 获取，最后才回退到 `getCurrentAppContext()`。
+- 修复了元素 children 挂载链路丢失上下文的问题：`mountElement -> mountChildren` 改为传递完整 `MountContext`。
+
+涉及文件：
+
+- `src/runtime-core/create-app.ts`
+- `src/runtime-core/renderer.ts`
+- `src/runtime-core/mount/context.ts`
+- `src/runtime-core/mount/children.ts`
+- `src/runtime-core/mount/element.ts`
+- `src/runtime-core/component/context.ts`
+- `src/runtime-core/component/instance.ts`
+
+回归测试：
+
+- `test/runtime-dom/provide-inject.test.tsx` 新增用例：直接 `render(vnode, container)` 且只通过 `vnode.appContext` 也能 `inject()` 命中。
 
 ## 2. router.install() 无条件 start，可能重复启动监听且缺少自动 stop 对应（待修复）
 

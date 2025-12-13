@@ -12,10 +12,8 @@ export default defineConfig({
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
-      { text: '首页', link: '/' },
-      { text: 'Reactive', link: '/reactive-overview' },
-      { text: 'Effect', link: '/effect-overview' },
-      { text: 'Computed', link: '/computed-overview' },
+      { text: 'Issues', link: '/issues' },
+      { text: 'Wiki', link: '/wiki' },
     ],
 
     sidebar: buildSidebar(),
@@ -27,6 +25,13 @@ export default defineConfig({
 function buildSidebar() {
   const entries = readdirSync(DOCS_ROOT, { withFileTypes: true })
   const sections = []
+
+  const compareSidebarEntries = (a: { name: string }, b: { name: string }) => {
+    if (a.name === 'index.md') return -1
+    if (b.name === 'index.md') return 1
+
+    return a.name.localeCompare(b.name)
+  }
 
   const rootItems = entries
     .filter((entry) => entry.isFile() && entry.name.endsWith('.md') && entry.name !== 'index.md')
@@ -43,7 +48,7 @@ function buildSidebar() {
       const dirPath = join(DOCS_ROOT, dir.name)
       const dirItems = readdirSync(dirPath, { withFileTypes: true })
         .filter((entry) => entry.isFile() && entry.name.endsWith('.md'))
-        .sort((a, b) => a.name.localeCompare(b.name))
+        .sort(compareSidebarEntries)
         .map((entry) => createSidebarItem(join(dirPath, entry.name)))
 
       if (dirItems.length > 0) {

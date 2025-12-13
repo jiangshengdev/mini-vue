@@ -10,7 +10,7 @@ import {
 } from '@/index.ts'
 import { errorContexts } from '@/shared/index.ts'
 
-describe('effectScope 行为', () => {
+describe('effectScope 生命周期与清理', () => {
   afterEach(() => {
     setErrorHandler(undefined)
   })

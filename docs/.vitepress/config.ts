@@ -20,6 +20,9 @@ export default defineConfig({
 
     socialLinks: [{ icon: 'github', link: 'https://github.com/jiangshengdev/mini-vue' }],
   },
+  markdown: {
+    math: true,
+  },
 })
 
 function buildSidebar() {

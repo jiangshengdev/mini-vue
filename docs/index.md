@@ -9,16 +9,16 @@ hero:
   actions:
     - theme: brand
       text: Reactive
-      link: /reactive-overview
+      link: /wiki/reactive-overview
     - theme: alt
       text: Effect
-      link: /effect-overview
+      link: /wiki/effect-overview
     - theme: alt
       text: Computed
-      link: /computed-overview
+      link: /wiki/computed-overview
     - theme: alt
       text: Watch
-      link: /watch-overview
+      link: /wiki/watch-overview
 
 features:
   - title: 响应式内核

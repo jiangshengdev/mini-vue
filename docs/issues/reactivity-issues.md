@@ -114,3 +114,22 @@
 - 验证结论：成立。
 - 下一步：在移除逻辑中同步重置被移除 scope 的 `positionInParent`，并在 stop 断开 parent 前确保状态一致。
 - 测试建议：已在 `test/reactivity/effect-scope.test.ts` 增补“子 scope 被移除后 positionInParent 不会被重置”的复现用例。
+
+## 13. `ReactiveCache` 采用双向 WeakMap，增加状态冗余且可能影响回收（已验证）
+
+- 位置：`src/reactivity/reactive.ts`
+- 现状：`ReactiveCache` 同时维护 `rawToReactive`（Raw -> Proxy）与 `reactiveToRaw`（Proxy -> Raw）的双向 WeakMap。
+- 影响：
+  - 双向结构引入额外状态与内存开销。
+  - WeakMap 的 value 为强引用，双向缓存会形成 Raw 与 Proxy 的相互引用链；在某些 GC 实现下可能造成对象保留时间变长，进而放大内存占用风险。
+- 验证结论：成立。当前实现确实创建并维护双向映射。
+- 下一步：考虑改为单向缓存（Raw -> Proxy），并通过代理对象上的内部标记（例如 RAW/IS_REACTIVE 等符号/字段）完成必要的反查能力。
+- 测试建议：补充“同一 raw 多次 reactive 返回同一 proxy”的用例；若引入 toRaw/标记，补充“proxy 可还原 raw / 可被识别为 reactive”的用例。
+
+## 14. `isReactive` 依赖私有缓存反查，扩展性受限（已验证）
+
+- 位置：`src/reactivity/reactive.ts`
+- 现状：`isReactive` 仅通过检查对象是否存在于 `reactiveCache` 的反向映射中来判定。
+- 影响：该判定与缓存实例强耦合，不利于未来在同一系统内扩展出不同的代理形态（例如 readonly/shallow 变体）或在不同模块边界复用统一的“响应式标记”语义。
+- 验证结论：成立。当前判断逻辑仅依赖 `reactiveCache`。
+- 下一步：改为检查对象上的内部标记（例如 `__v_isReactive` 或等价符号标记），避免对私有缓存结构产生依赖。

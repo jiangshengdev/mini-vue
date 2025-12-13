@@ -36,3 +36,32 @@
 - 验证结论：成立。
 - 下一步：为数组查询方法做 instrumentations：优先用原始值查找失败时，再回退到用 `toRaw`/或将参数也转代理后再查找（策略需结合本仓库是否暴露 `toRaw` 决定）。
 - 测试建议：新增“reactive([raw]).includes(raw) 为 true / indexOf(raw) 为 0”的回归用例，并覆盖 `lastIndexOf`。
+
+## 5. `toRef` 在创建时读取 `target[key]` 导致错误的依赖收集（已验证）
+
+- 位置：`src/reactivity/ref/api.ts`
+- 现状：`toRef` 为了复用已有 Ref，会先执行 `const existing = target[key]`。当 `target` 为响应式 Proxy 且当前存在活跃副作用时，该读取会触发 `mutableGet -> track(target, key)`，把外层 effect 错误地收集到该属性依赖中。
+- 影响：仅仅是“创建 ref 引用”的操作，也会让外层 effect 订阅 `target[key]` 的变更；后续对该字段的任意更新都会导致 effect 额外重跑，造成过度追踪与性能浪费，且依赖链更难定位。
+- 验证结论：成立。可在 effect 内仅调用 `toRef(state, 'a')`（不读取 `.value`），随后修改 `state.a` 仍会触发该 effect 重新执行。
+- 下一步：避免在追踪开启时直接读取 `target[key]`。
+  - 若引入“暂停追踪/无追踪读取”的机制，可在该检查阶段临时禁用 track。
+  - 若不引入全局开关，可考虑通过 `Object.getOwnPropertyDescriptor` 等路径在不触发 getter 的情况下判断“数据属性是否为 Ref”（但访问器属性仍可能需要权衡是否复用）。
+- 测试建议：新增“effect 内调用 `toRef(reactiveObj, key)` 不应追踪该 key”的回归用例。
+
+## 6. `RefImpl` 的 setter 未对新值做 `toRaw` 处理，导致原始值与代理值切换时触发多余更新（已验证）
+
+- 位置：`src/reactivity/ref/impl.ts`
+- 现状：`RefImpl.set value` 直接以 `Object.is(newValue, this.rawValue)` 判等，并执行 `this.rawValue = newValue`。当用户交替写入同一对象的“原始对象”和“reactive 代理”时（两者不全等），会被判定为变更，从而触发依赖更新。
+- 影响：`rawValue` 在原始值与代理值之间跳变，导致无意义的 `triggerEffects`，进而产生多余 effect 执行。
+- 验证结论：成立。构造 `const obj = {}; const proxy = reactive(obj); const r = ref(obj)`，在 effect 依赖 `r.value` 后，交替执行 `r.value = proxy` 与 `r.value = obj` 会产生额外触发。
+- 下一步：引入 `toRaw`（或等价的代理还原能力），在 setter 中将 `newValue` 归一化为原始对象后再做判等与赋值，以保证 raw/proxy 代表同一实体时不会触发更新。
+- 测试建议：新增“ref 对象值在 raw 与 proxy 间切换赋值不应触发”的回归用例。
+
+## 7. `ComputedRefImpl` 未暴露内部 Effect 或停止方法，限制了手动生命周期管理（已验证）
+
+- 位置：`src/reactivity/ref/computed.ts`
+- 现状：`ComputedRefImpl` 内部创建 `ReactiveEffect` 并通过 `recordEffectScope` 关联到当前作用域，但实现对外仅暴露 `Ref<T>` 接口（`effect` 为 private），也未提供 `stop()`。
+- 影响：在不使用 `EffectScope` 托管的场景（例如全局长期缓存、或手动创建但不在 `effectScope().run()` 内），用户无法主动停止该 computed 的依赖追踪关系；若 computed 被长生命周期对象持有，可能导致依赖链长期保留，增加内存泄漏风险。
+- 验证结论：成立。当前 API 层面无法拿到内部 effect，也无法调用 stop；且在无活跃 scope 时 `recordEffectScope` 不会记录该 effect。
+- 下一步：为 computed 增补手动停止能力（例如对外暴露 `stop()`，或暴露内部 effect 句柄/调试接口；具体 API 需结合对外导出策略决定）。
+- 测试建议：若新增 stop 能力，补充“stop 后 computed 不再参与追踪/触发”的用例；若暂不计划提供能力，应在文档中明确依赖 scope 托管的推荐用法。

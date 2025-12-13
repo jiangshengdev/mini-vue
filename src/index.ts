@@ -19,6 +19,9 @@ export {
 export type {
   ComputedGetter,
   ComputedSetter,
+  EffectHandle,
+  EffectOptions,
+  EffectScheduler,
   EffectScope,
   Ref,
   WatchCallback,

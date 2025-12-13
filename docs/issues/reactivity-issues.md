@@ -76,3 +76,14 @@
   - 若引入“暂停追踪/无追踪执行”的机制，可在读取 `previousValue` 时临时禁用 track。
   - 若不引入全局开关，可考虑在访问器属性场景放弃旧值判等（直接写入并触发），或使用 `Object.getOwnPropertyDescriptor` 仅对数据属性做旧值判等。
 - 测试建议：新增“effect 内仅写入 accessor 属性的 ObjectRef，不应追踪 getter 内部读取”的回归用例。
+
+## 9. effect 执行中途 `stop()` 后仍可能作为 parent 被使用，导致子清理无法随父级释放（边缘问题，已验证）
+
+- 位置：`src/reactivity/effect.ts`、`src/reactivity/watch/core.ts`
+- 现状：`ReactiveEffect.run()` 在 `shouldTrack=true` 时会将当前实例压入 `effectStack`，并在 `afterRun` 中 `pop()`。若用户在副作用函数执行中途调用 `stop()`，当前 effect 会被标记为 `inactive` 并清理依赖，但它仍然会在剩余执行期间留在 `effectStack.current`。
+- 影响：在该 effect 后续执行片段中，如果再创建新的 `effect()` 或 `watch()`，这些逻辑会读取 `effectStack.current` 作为 parent 并向其 `registerCleanup()`。
+  - 由于 parent 此时已 `inactive`，且 `stop()` 已经执行过一次 `flushDependencies()`，后续不会再有机会触发父级的 `flushDependencies()` 来消费这些新登记的 cleanup。
+  - 结果是：子 effect / watch 的停止逻辑无法随父级释放（需要外部显式 stop），在长生命周期对象/复杂嵌套场景中可能表现为资源泄漏或预期外的持续订阅。
+- 验证结论：成立（边缘场景）。可构造“effect 内部先 stop 自己，再创建子 watch/effect，随后仅 stop 父级并不会级联 stop 子级”的复现。
+- 下一步：在 stop 发生于执行期间时，避免让已停止实例继续充当 parent（例如在 `registerCleanup` 前额外校验 `parent.active`，或在 `stop()` 时若当前实例位于 `effectStack` 顶部则提前出栈/标记为不可作为 parent）。
+- 测试建议：新增“effect 执行中 stop 后创建子 watch/effect，父级 stop 不应泄漏子级”的回归用例。

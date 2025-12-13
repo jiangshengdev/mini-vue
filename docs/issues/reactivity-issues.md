@@ -65,3 +65,14 @@
 - 验证结论：成立。当前 API 层面无法拿到内部 effect，也无法调用 stop；且在无活跃 scope 时 `recordEffectScope` 不会记录该 effect。
 - 下一步：为 computed 增补手动停止能力（例如对外暴露 `stop()`，或暴露内部 effect 句柄/调试接口；具体 API 需结合对外导出策略决定）。
 - 测试建议：若新增 stop 能力，补充“stop 后 computed 不再参与追踪/触发”的用例；若暂不计划提供能力，应在文档中明确依赖 scope 托管的推荐用法。
+
+## 8. `ObjectRefImpl` 写入前读取旧值会执行 getter，导致写入阶段意外收集依赖（已验证）
+
+- 位置：`src/reactivity/ref/impl.ts`
+- 现状：当 `ObjectRefImpl` 处于 `needsLocalDep = true`（即 `dependencyBucket` 存在、目标为普通对象属性托管）时，setter 会先执行 `const previousValue = this.target[this.key]` 用于同值判断。若该属性为访问器属性（getter/setter），这一步会直接执行 getter。
+- 影响：若 setter 调用发生在 effect 内（例如 effect 内部“只写不读”某个 `toRef(target, key).value`），getter 内部若读取了任何响应式字段，会在“写入阶段”被错误收集为外层 effect 的依赖，从而造成后续这些字段变更会意外触发该 effect；问题与 `mutableSet` 读取旧值触发 getter 的问题同类，但发生在 ref 层。
+- 验证结论：成立。可构造对象：`get foo(){ return state.bar }`，在 effect 内仅执行 `fooRef.value = 1`；随后修改 `state.bar` 仍会触发该 effect。
+- 下一步：写入阶段读取旧值需要避免触发 getter 或避免在追踪开启时执行 getter。
+  - 若引入“暂停追踪/无追踪执行”的机制，可在读取 `previousValue` 时临时禁用 track。
+  - 若不引入全局开关，可考虑在访问器属性场景放弃旧值判等（直接写入并触发），或使用 `Object.getOwnPropertyDescriptor` 仅对数据属性做旧值判等。
+- 测试建议：新增“effect 内仅写入 accessor 属性的 ObjectRef，不应追踪 getter 内部读取”的回归用例。

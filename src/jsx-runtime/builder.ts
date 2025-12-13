@@ -72,22 +72,18 @@ export function h<T extends ElementType>(
   props?: ElementProps<T>,
   ...children: ComponentChildren[]
 ): VirtualNode<T> {
-  /* 保持手写 h 与编译产物在 key 处理上的一致性。 */
-  const { key, props: normalizedProps } = extractKeyedProps(props)
-
   /* 没有额外 children 时直接透传 props，保留编译器注入的 children。 */
   if (children.length === 0) {
     /* 该分支用于复刻 jsx 单子节点调用语义，不需重建 props。 */
-    return buildVirtualNode(type, normalizedProps, key)
+    return buildVirtualNode(type, props)
   }
 
-  /* 需要人为传入 children 时重新组装 props 并交给底层创建函数。 */
+  /* 需要人为传入 children 时重新组装 props，并交由 buildVirtualNode 统一抽取 key。 */
   const emptyProps: ElementProps<T> = Object.create(null) as ElementProps<T>
   const propsWithChildren: ElementProps<T> = {
-    /* `normalizedProps` 可能为空，此处回退到空对象以便附加 children。 */
-    ...(normalizedProps ?? emptyProps),
+    ...(props ?? emptyProps),
     children,
   }
 
-  return buildVirtualNode(type, propsWithChildren, key)
+  return buildVirtualNode(type, propsWithChildren)
 }

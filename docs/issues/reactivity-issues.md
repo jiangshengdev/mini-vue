@@ -87,3 +87,30 @@
 - 验证结论：成立（边缘场景）。可构造“effect 内部先 stop 自己，再创建子 watch/effect，随后仅 stop 父级并不会级联 stop 子级”的复现。
 - 下一步：在 stop 发生于执行期间时，避免让已停止实例继续充当 parent（例如在 `registerCleanup` 前额外校验 `parent.active`，或在 `stop()` 时若当前实例位于 `effectStack` 顶部则提前出栈/标记为不可作为 parent）。
 - 测试建议：新增“effect 执行中 stop 后创建子 watch/effect，父级 stop 不应泄漏子级”的回归用例。
+
+## 10. `EffectScope.stop()` 执行 cleanup 时不支持重入注册，可能遗漏清理（已验证）
+
+- 位置：`src/reactivity/effect-scope.ts`
+- 现状：`stop()` 会拷贝 `cleanups` 并清空原数组，只遍历一次快照；若 cleanup 执行期间又调用 `onScopeDispose()` / `scope.addCleanup()` 注册新的 cleanup，则这些新 cleanup 会进入已清空的数组，但本次 stop 不会再消费。
+- 影响：清理回调可能被遗漏，外部资源（定时器/订阅/监听等）无法释放，存在泄漏风险。
+- 验证结论：成立。
+- 下一步：明确 stop 语义并实现可预期策略：例如在 stop 中循环 drain `cleanups` 直到为空；或在 stop 期间直接禁止新增 cleanup（但需在文档中说明）。
+- 测试建议：已在 `test/reactivity/effect-scope.test.ts` 增补“stop 时 cleanup 重入注册不会被执行”的复现用例。
+
+## 11. `EffectScope.stop()` 末尾才置 `active=false`，stop 期间仍可录入新 effect 导致泄漏（已验证）
+
+- 位置：`src/reactivity/effect-scope.ts`
+- 现状：`stop()` 在停止已有 effects、执行 cleanups、级联 stop 子 scope 后，才将 `active` 置为 `false`；因此 stop 期间仍可通过 `scope.run()` 创建 effect，并被 `recordEffect()` 记录进 `effects`。
+- 影响：由于停止 effects 的循环已结束，stop 期间新增的 effect 不会被 stop，后续仍会响应响应式更新，造成依赖链与内存泄漏风险。
+- 验证结论：成立。
+- 下一步：调整 stop 时序（建议 stop 一开始就让 scope 不再收集：例如先置 `active=false` 或引入 `stopping` 状态并在 `recordEffect/addCleanup` 阻止录入）。
+- 测试建议：已在 `test/reactivity/effect-scope.test.ts` 增补“stop 过程中仍可录入新 effect 且不会被 stop”的复现用例。
+
+## 12. `removeChildScope` 未重置子 scope 的 `positionInParent`，导致对象状态脏（已验证）
+
+- 位置：`src/reactivity/effect-scope.ts`
+- 现状：父 scope 移除子 scope 时，只通过 swap-pop 调整 `childScopes`，但未将被移除的子 scope 的 `positionInParent` 重置（例如设为 `undefined`）。
+- 影响：子 scope 保留过期索引，实例处于“脏状态”；若该实例被复用或在其他路径再次触发移除逻辑，可能导致错误的数组操作或调试困扰。
+- 验证结论：成立。
+- 下一步：在移除逻辑中同步重置被移除 scope 的 `positionInParent`，并在 stop 断开 parent 前确保状态一致。
+- 测试建议：已在 `test/reactivity/effect-scope.test.ts` 增补“子 scope 被移除后 positionInParent 不会被重置”的复现用例。

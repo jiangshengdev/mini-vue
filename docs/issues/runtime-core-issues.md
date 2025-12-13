@@ -19,9 +19,15 @@
 ## 3. 首次渲染失败时 `mountComponent` 仍返回“空句柄”，可能误导调用方（待修复）
 
 - 位置：`src/runtime-core/component/mount.ts`
-- 现状：`mountComponent` 在 `setupComponent` 成功后调用 `performInitialRender`；但 `performInitialRender` 内部使用 `runSilent` 捕获错误，失败时可能返回 `undefined`。此时 `mountComponent` 仍会返回一个 `MountedHandle`，其中 `nodes` 被兜底为空数组。
-- 影响：调用方无法区分“挂载成功但无节点”与“挂载失败未产生任何 DOM”，并可能继续把该句柄写入缓存或参与后续卸载流程，造成语义混淆。
-- 提示：当 `performInitialRender` 返回 `undefined` 时，`mountComponent` 应当返回 `undefined`（或抛错/向上传播失败），并确保实例已被清理。
+- 现状：`mountComponent` 在 `setupComponent` 成功后调用 `performInitialRender`。由于 `performInitialRender` 使用 `runSilent` 隔离首渲染异常：
+  - 当组件渲染结果“本来就不产生节点”（例如返回 `null`/`false`/空数组等）时，子树挂载会自然得到 `undefined`（属于“空渲染但成功”的语义）。
+  - 当组件首渲染抛错时，`runSilent` 也会返回 `undefined`（属于“渲染失败”的语义）。
+    当前 `mountComponent` 为了始终提供 teardown 入口，会在 `mounted` 为 `undefined` 时仍返回一个 `MountedHandle`，并将 `nodes` 兜底为空数组。
+- 影响：调用方无法区分“空渲染但成功”与“渲染失败被吞掉”，可能错误地把失败当成空渲染继续缓存；反之，如果简单把 `mounted === undefined` 当作失败并直接返回 `undefined`，又会回归“空组件/空渲染没有 teardown 句柄，导致子组件 scope/effect 无法被回收”的问题。
+- 注意：该问题是为了解决“首渲染异常不应中断兄弟挂载/整棵树挂载流程”与“空组件仍需可卸载（避免泄露）”而产生的副作用。修复时不能通过让异常向外抛出、或用 `return undefined` 统一表示失败来处理，否则容易回归上述原问题。
+- 提示：需要把“是否成功”与“是否产生节点”拆成两个维度。
+  - 可选方案：让组件挂载返回“带状态的句柄”（例如 `{ ok: true, handle }` / `{ ok: false, handle? }`，或 `MountedHandle & { ok: boolean }`），并保持即便 `nodes=[]` 也有 teardown。
+  - 或使用判别联合（discriminated union）返回结果，把错误 token/原因显式透出，同时不改变“空渲染仍可卸载”的行为。
 
 ## 4. 未显式拒绝异步 `setup`，错误提示不够准确（待修复）
 

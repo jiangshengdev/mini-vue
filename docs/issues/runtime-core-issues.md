@@ -65,3 +65,19 @@
 - 现状：当 `child` 既不是 `VirtualNode`、也不是字符串/数字、也不是数组时，会走兜底逻辑 `String(child)` 创建文本节点。
 - 影响：对象等复杂值会被渲染为 `[object Object]`，通常并非用户期望；同时缺少开发环境下的告警/指引，排查成本较高。
 - 提示：在 dev 模式输出明确警告，或提供更合理的序列化策略。
+
+## 9. `createRenderer` 使用 WeakMap 缓存容器句柄，限制 HostElement 必须为对象（待修复）
+
+- 位置：`src/runtime-core/renderer.ts`
+- 现状：渲染器内部用 `WeakMap` 以容器作为 key 缓存挂载句柄；`WeakMap` 的 key 必须是对象。
+- 影响：若宿主环境将容器抽象为字符串/数字（例如终端渲染器、某些自定义渲染器），会在运行时报错 `Invalid value used as weak map key`，破坏“平台无关”的承诺。
+- 提示：
+  - 方案 A：约束类型（明确 HostElement 必须是 `object`）并在文档/类型层声明；
+  - 方案 B：对对象 key 用 `WeakMap`、对原始值 key 用 `Map`（需要额外的生命周期清理策略）。
+
+## 10. `mount` 失败时应用状态可能处于“idle 但已缓存 container”的不一致态（待修复）
+
+- 位置：`src/runtime-core/create-app.ts`
+- 现状：`mountApp` 在调用渲染器前就写入 `state.container = target`；若 render 抛错，则 `state.status` 仍为 `idle`，但 container 已被缓存。
+- 影响：语义上状态不够一致，调试时可能困惑；但调用 `unmount()` 仍可清理容器，不属于必然的功能性错误。
+- 提示：render 失败时在 `catch`/`finally` 中回滚 `state.container`，或引入更细的生命周期状态（如 `mounting`）。

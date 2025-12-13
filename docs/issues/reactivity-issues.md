@@ -95,7 +95,7 @@
 - 影响：清理回调可能被遗漏，外部资源（定时器/订阅/监听等）无法释放，存在泄漏风险。
 - 验证结论：成立。
 - 下一步：明确 stop 语义并实现可预期策略：例如在 stop 中循环 drain `cleanups` 直到为空；或在 stop 期间直接禁止新增 cleanup（但需在文档中说明）。
-- 测试建议：已在 `test/reactivity/effect-scope.test.ts` 增补“stop 时 cleanup 重入注册不会被执行”的复现用例。
+- 测试建议：建议在 `test/reactivity/effect-scope.lifecycle.test.ts` 增补“stop 时 cleanup 重入注册不会被执行”的复现用例。
 
 ## 11. `EffectScope.stop()` 末尾才置 `active=false`，stop 期间仍可录入新 effect 导致泄漏（已验证）
 
@@ -104,7 +104,7 @@
 - 影响：由于停止 effects 的循环已结束，stop 期间新增的 effect 不会被 stop，后续仍会响应响应式更新，造成依赖链与内存泄漏风险。
 - 验证结论：成立。
 - 下一步：调整 stop 时序（建议 stop 一开始就让 scope 不再收集：例如先置 `active=false` 或引入 `stopping` 状态并在 `recordEffect/addCleanup` 阻止录入）。
-- 测试建议：已在 `test/reactivity/effect-scope.test.ts` 增补“stop 过程中仍可录入新 effect 且不会被 stop”的复现用例。
+- 测试建议：建议在 `test/reactivity/effect-scope.lifecycle.test.ts` 增补“stop 过程中仍可录入新 effect 且不会被 stop”的复现用例。
 
 ## 12. `removeChildScope` 未重置子 scope 的 `positionInParent`，导致对象状态脏（已验证）
 
@@ -113,7 +113,7 @@
 - 影响：子 scope 保留过期索引，实例处于“脏状态”；若该实例被复用或在其他路径再次触发移除逻辑，可能导致错误的数组操作或调试困扰。
 - 验证结论：成立。
 - 下一步：在移除逻辑中同步重置被移除 scope 的 `positionInParent`，并在 stop 断开 parent 前确保状态一致。
-- 测试建议：已在 `test/reactivity/effect-scope.test.ts` 增补“子 scope 被移除后 positionInParent 不会被重置”的复现用例。
+- 测试建议：建议在 `test/reactivity/effect-scope.lifecycle.test.ts` 增补“子 scope 被移除后 positionInParent 不会被重置”的复现用例。
 
 ## 13. `ReactiveCache` 采用双向 WeakMap，增加状态冗余且可能影响回收（已验证）
 

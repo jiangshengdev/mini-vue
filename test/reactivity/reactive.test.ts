@@ -42,6 +42,7 @@ describe('reactive', () => {
     const proxy = reactive(raw)
 
     expect(proxy.nested.value).toBe(1)
+    expect(isReactive(proxy.nested)).toBe(true)
     proxy.nested.value = 5
     expect(raw.nested.value).toBe(5)
   })
@@ -68,6 +69,7 @@ describe('reactive', () => {
     const proxy = reactive(raw) as Array<{ count: number }>
 
     expect(proxy[0].count).toBe(1)
+    expect(isReactive(proxy[0])).toBe(true)
 
     proxy[0].count = 2
     expect(raw[0].count).toBe(2)
@@ -97,8 +99,10 @@ describe('reactive', () => {
   it('isReactive 对代理与原始值的判定', () => {
     const raw = { foo: 1 }
     const proxy = reactive(raw)
+    const arrayProxy = reactive([1])
 
     expect(isReactive(proxy)).toBe(true)
+    expect(isReactive(arrayProxy)).toBe(true)
     expect(isReactive(raw)).toBe(false)
     expect(isReactive(1)).toBe(false)
     expect(isReactive(new Map())).toBe(false)

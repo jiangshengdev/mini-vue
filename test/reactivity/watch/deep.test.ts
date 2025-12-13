@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
+import type { WatchCallback } from '@/index.ts'
 import { reactive, ref, watch } from '@/index.ts'
 
 describe('watch - deep 行为', () => {
@@ -74,14 +75,18 @@ describe('watch - deep 行为', () => {
   it('deep: false 可覆盖 reactive 默认深度侦听', () => {
     const state = reactive({ nested: { value: 0 } })
 
+    type Nested = (typeof state)['nested']
+
+    type WatchArgs = Parameters<WatchCallback<Nested>>
+
     interface ChangePayload {
-      newValue: { value: number } | undefined
-      oldValue: { value: number } | undefined
+      newValue: WatchArgs[0]
+      oldValue: WatchArgs[1]
     }
 
     const spy = vi.fn<(payload: ChangePayload) => void>()
 
-    watch(
+    watch<Nested>(
       function readNested() {
         return state.nested
       },

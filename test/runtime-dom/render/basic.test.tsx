@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { within } from '@testing-library/dom'
 import userEvent from '@testing-library/user-event'
-import { createTestContainer } from '../setup.ts'
+import { createTestContainer } from '../../setup.ts'
 import { Fragment } from '@/jsx-runtime.ts'
 import type { SetupComponent } from '@/index.ts'
 import { render } from '@/index.ts'

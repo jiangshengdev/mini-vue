@@ -1,6 +1,6 @@
 import { handleError } from './error-handling.ts'
 import type { PlainObject } from './types.ts'
-import { isObject } from './utils.ts'
+import { isObject, isPlainObject } from './utils.ts'
 
 /**
  * 框架内预设的错误上下文标签，标记异常来源位置。
@@ -123,7 +123,7 @@ const normalizedPrimitiveErrorCacheLimit = 50
 const normalizedPrimitiveErrorCache = new Map<unknown, Error>()
 
 function normalizeError(error: unknown): Error | PlainObject {
-  if (error instanceof Error || isObject(error)) {
+  if (error instanceof Error || isPlainObject(error)) {
     return error
   }
 
@@ -133,17 +133,31 @@ function normalizeError(error: unknown): Error | PlainObject {
     return cached
   }
 
-  const normalized = new Error(String(error), { cause: error })
+  let normalizedMessage: string | undefined
 
-  normalizedPrimitiveErrorCache.set(error, normalized)
-
-  if (normalizedPrimitiveErrorCache.size > normalizedPrimitiveErrorCacheLimit) {
-    const oldest = normalizedPrimitiveErrorCache.keys().next().value
-
-    if (oldest !== undefined) {
-      normalizedPrimitiveErrorCache.delete(oldest)
+  if (typeof error === 'string') {
+    normalizedMessage = error
+  } else {
+    try {
+      normalizedMessage = JSON.stringify(error) ?? undefined
+    } catch {
+      normalizedMessage = undefined
     }
   }
+
+  const normalized = new Error(normalizedMessage ?? String(error), { cause: error })
+
+  while (normalizedPrimitiveErrorCache.size >= normalizedPrimitiveErrorCacheLimit) {
+    const oldest = normalizedPrimitiveErrorCache.keys().next().value
+
+    if (oldest === undefined) {
+      break
+    }
+
+    normalizedPrimitiveErrorCache.delete(oldest)
+  }
+
+  normalizedPrimitiveErrorCache.set(error, normalized)
 
   return normalized
 }

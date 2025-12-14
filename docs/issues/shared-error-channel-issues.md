@@ -23,7 +23,7 @@
   - 将 `beforeRun` 纳入同一个 `try/finally` 保护范围，保证只要执行过 `beforeRun`，最终就一定会执行 `afterRun`。
   - 如果需要区分“beforeRun 未成功”场景，可在 `afterRun` 侧根据 token 或额外标记做条件清理。
 
-## 3. `runThrowing` 与 `handlerPhase: 'async'` 组合会造成同步抛错 + 异步重抛的双重错误（待修复）
+## 3. `runThrowing` 与 `handlerPhase: 'async'` 组合会造成同步抛错 + 异步重抛的双重错误（已通过类型约束规避）
 
 - 位置：`src/shared/error-channel.ts`、`src/shared/error-handling.ts`
 - 现状：
@@ -33,12 +33,8 @@
   - 同一个异常会被同步抛出一次，同时又在 microtask 阶段再抛出一次，导致：
     - 控制台/测试中出现双份错误报告。
     - 上层错误边界/测试 runner 可能出现重复失败或不可预测的错误处理顺序。
-- 提示：
-  - 明确 `handlerPhase` 的语义边界：
-    - 若 `runThrowing` 的目标是“同步向上传播”，则不应与 “async 阶段异步兜底重抛” 同时启用。
-  - 可选修复方向：
-    - 在 `runThrowing` 分支遇到 `handlerPhase: 'async'` 时，自动关闭 `shouldRethrowAsync`（避免双抛）。
-    - 或者约束 `runThrowing` 只能使用 `handlerPhase: 'sync'`，并在 dev 直接断言提示。
+- 处理：
+  - 通过 `ThrowingErrorRunOptions` 类型将 `runThrowing` 的 `handlerPhase` 限定为 `sync`，编译期阻止异步阶段配置，避免双重抛错。
 
 ## 4. 错误去重 registry 使用 `WeakSet`，无法对原始类型错误去重（待修复）
 

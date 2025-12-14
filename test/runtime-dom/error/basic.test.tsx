@@ -157,5 +157,11 @@ describe('runtime-dom component error isolation (basic)', () => {
     expect(context).toBe(errorContexts.effectRunner)
     expect(container.querySelector('[data-testid="faulty"]')).toBeNull()
     expect(container.querySelector('[data-testid="sibling"]')?.textContent).toBe('ok')
+
+    state.count += 1
+
+    expect(handler).toHaveBeenCalledTimes(1)
+    expect(container.querySelector('[data-testid="faulty"]')).toBeNull()
+    expect(container.querySelector('[data-testid="sibling"]')?.textContent).toBe('ok')
   })
 })

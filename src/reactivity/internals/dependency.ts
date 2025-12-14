@@ -90,14 +90,11 @@ export function resetTracking(): void {
  * 在关闭依赖追踪的上下文中执行回调。
  */
 export function runWithPausedTracking<T>(fn: () => T): T {
-  const previous = shouldTrack
-
-  shouldTrack = false
-
+  pauseTracking()
   try {
     return fn()
   } finally {
-    shouldTrack = previous
+    resetTracking()
   }
 }
 

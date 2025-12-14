@@ -1,4 +1,4 @@
-import { reactive } from '../reactive.ts'
+import { reactive, toRaw } from '../reactive.ts'
 import { trackEffect, triggerEffects } from '../internals/index.ts'
 import type { DependencyBucket } from '../contracts/index.ts'
 import { refFlag } from '../contracts/index.ts'
@@ -22,8 +22,10 @@ export class RefImpl<T> implements Ref<T> {
    * 构造函数缓存原始值，并在必要时将其转换为响应式对象。
    */
   constructor(value: T) {
-    this.rawValue = value
-    this.innerValue = maybeReactiveValue(value)
+    const rawValue = toRaw(value)
+
+    this.rawValue = rawValue
+    this.innerValue = maybeReactiveValue(rawValue)
   }
 
   /**
@@ -44,14 +46,16 @@ export class RefImpl<T> implements Ref<T> {
    * 写入 Ref 的值时同步更新原值与响应式副本，并调度依赖副作用。
    */
   set value(newValue: T) {
+    const rawValue = toRaw(newValue)
+
     /* 使用 Object.is 判等，避免无意义的触发。 */
-    if (Object.is(newValue, this.rawValue)) {
+    if (Object.is(rawValue, this.rawValue)) {
       return
     }
 
     /* 更新原始值与响应式引用后，触发依赖的副作用重新执行。 */
-    this.rawValue = newValue
-    this.innerValue = maybeReactiveValue(newValue)
+    this.rawValue = rawValue
+    this.innerValue = maybeReactiveValue(rawValue)
     triggerEffects(this.dependencyBucket)
   }
 }

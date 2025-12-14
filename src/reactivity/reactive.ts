@@ -47,6 +47,13 @@ class ReactiveCache {
   }
 
   /**
+   * 返回代理对应的原始对象，若传入非代理则直接返回自身。
+   */
+  toRaw(target: ReactiveTarget): ReactiveTarget {
+    return this.reactiveToRaw.get(target) ?? target
+  }
+
+  /**
    * 判断传入对象是否为缓存中的响应式 Proxy。
    */
   isReactive(target: ReactiveTarget): boolean {
@@ -120,4 +127,22 @@ export function isReactive(target: unknown): target is ReactiveTarget {
   }
 
   return reactiveCache.isReactive(target as ReactiveTarget)
+}
+
+/**
+ * 获取响应式 Proxy 对应的原始对象。
+ *
+ * @public
+ */
+export function toRaw<T>(target: T): T {
+  if (!isObject(target)) {
+    return target
+  }
+
+  if (!isSupportedTarget(target)) {
+    /* 非支持类型无代理缓存，直接返回原值。 */
+    return target
+  }
+
+  return reactiveCache.toRaw(target as ReactiveTarget) as T
 }

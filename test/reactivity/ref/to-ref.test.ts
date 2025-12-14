@@ -72,4 +72,19 @@ describe('toRef', () => {
 
     expect(toRef(holder, 'count')).toBe(count)
   })
+
+  it('创建 ref 引用时不会对目标属性进行依赖收集', () => {
+    const state = reactive({ value: 1 })
+    let runs = 0
+
+    effect(function track() {
+      runs += 1
+      void toRef(state, 'value')
+    })
+
+    expect(runs).toBe(1)
+
+    state.value = 2
+    expect(runs).toBe(1)
+  })
 })

@@ -118,20 +118,38 @@ export interface ErrorRunOptions extends ErrorDispatchOptions {
 /**
  * 记录已通知的错误对象，避免在同一对象上重复上报。
  */
-const notifiedErrorRegistry = new WeakSet<PlainObject>()
+const notifiedErrorRegistry = new WeakSet<object>()
+const normalizedPrimitiveErrorCache = new Map<unknown, Error>()
+
+function normalizeError(error: unknown): object {
+  if (error instanceof Error || isObject(error)) {
+    return error
+  }
+
+  const cached = normalizedPrimitiveErrorCache.get(error)
+
+  if (cached) {
+    return cached
+  }
+
+  const normalized = new Error(String(error), { cause: error })
+
+  normalizedPrimitiveErrorCache.set(error, normalized)
+
+  return normalized
+}
 
 /**
  * 将捕获到的异常交由错误处理器统一上报，并返回调度 token。
  */
 export function dispatchError(error: unknown, dispatchOptions: ErrorDispatchOptions): ErrorToken {
-  /* 仅对对象类型做去重记录，原始类型直接透传。 */
-  const shouldTrack = isObject(error)
-  const alreadyNotified = shouldTrack && notifiedErrorRegistry.has(error)
+  const normalizedError = normalizeError(error)
+  const alreadyNotified = notifiedErrorRegistry.has(normalizedError)
   const shouldNotify = !alreadyNotified
 
   /* 构造 token 以记录本次调度的真实触发信息，供钩子与上层使用。 */
   const token: ErrorToken = {
-    error,
+    error: normalizedError,
     origin: dispatchOptions.origin,
     handlerPhase: dispatchOptions.handlerPhase,
     meta: dispatchOptions.meta,
@@ -144,9 +162,7 @@ export function dispatchError(error: unknown, dispatchOptions: ErrorDispatchOpti
   }
 
   /* 记录已上报的对象，防止递归触发导致重复告警。 */
-  if (shouldTrack) {
-    notifiedErrorRegistry.add(error)
-  }
+  notifiedErrorRegistry.add(normalizedError)
 
   /* 判断当前 dispatch 是否处于异步阶段。 */
   const isAsyncPhase = dispatchOptions.handlerPhase === errorPhases.async
@@ -155,7 +171,7 @@ export function dispatchError(error: unknown, dispatchOptions: ErrorDispatchOpti
 
   /* 委托给框架级错误处理函数，并按需开启异步重抛。 */
   handleError(
-    error,
+    normalizedError,
     {
       origin: dispatchOptions.origin,
       handlerPhase: dispatchOptions.handlerPhase,
@@ -204,9 +220,9 @@ function runWithChannel<T>(
     /* 将异常交给错误通道统一调度，并获得可观测 token。 */
     token = dispatchError(error, options)
 
-    /* 同步传播策略需要立即抛出原始异常。 */
+    /* 同步传播策略需要立即抛出规范化后的异常。 */
     if (propagate === errorMode.throw) {
-      throw error
+      throw token.error
     }
 
     /* 静默模式下返回 undefined，让调用方自行判断。 */
@@ -218,7 +234,7 @@ function runWithChannel<T>(
 }
 
 /**
- * 同步传播异常，调用方接收原始抛错。
+ * 同步传播异常，调用方接收规范化后的抛错。
  */
 export function runThrowing<T>(runner: () => T, options: ErrorRunOptions): T {
   return runWithChannel(runner, errorMode.throw, options) as T

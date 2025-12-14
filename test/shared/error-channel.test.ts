@@ -48,6 +48,37 @@ describe('runtime-error-channel', () => {
     expect(secondToken.notified).toBe(false)
   })
 
+  it('原始类型错误会被规范化为 Error 并参与去重', () => {
+    const handler = vi.fn<ErrorHandler>()
+
+    setErrorHandler(handler)
+
+    const primitiveError = 'component crash'
+
+    const firstToken = dispatchError(primitiveError, {
+      origin: errorContexts.componentSetup,
+      handlerPhase: errorPhases.sync,
+    })
+
+    expect(handler).toHaveBeenCalledTimes(1)
+
+    const [normalizedError] = handler.mock.calls[0] ?? []
+
+    expect(normalizedError).toBeInstanceOf(Error)
+    expect((normalizedError as Error).cause).toBe(primitiveError)
+    expect(firstToken.error).toBe(normalizedError)
+    expect(firstToken.notified).toBe(true)
+
+    const secondToken = dispatchError(primitiveError, {
+      origin: errorContexts.effectRunner,
+      handlerPhase: errorPhases.sync,
+    })
+
+    expect(handler).toHaveBeenCalledTimes(1)
+    expect(secondToken.error).toBe(normalizedError)
+    expect(secondToken.notified).toBe(false)
+  })
+
   it('嵌套 runWithErrorChannelThrow 共享同一错误时只通知一次', () => {
     const handler = vi.fn<ErrorHandler>()
 

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { within } from '@testing-library/dom'
 import { createTestContainer } from '../../setup.ts'
-import type { ElementRef, SetupComponent } from '@/index.ts'
+import type { SetupComponent } from '@/index.ts'
 import { createApp, reactive, ref, render } from '@/index.ts'
 
 describe('runtime-dom ref 回调', () => {
@@ -90,7 +90,7 @@ describe('runtime-dom ref 回调', () => {
     const container = createTestContainer()
 
     render(
-      <button type="button" ref={'plain' as unknown as ElementRef}>
+      <button type="button" ref={'plain' as any}>
         click
       </button>,
       container,

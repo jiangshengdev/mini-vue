@@ -1,6 +1,6 @@
 # Shared Error Channel 模块问题记录
 
-## 1. `runWithChannel` 不支持 Promise runner，导致异步异常漏报且上下文过早清理（待修复）
+## 1. `runWithChannel` 不支持 Promise runner，导致异步异常漏报且上下文过早清理（已修复）
 
 - 位置：`src/shared/error-channel.ts`
 - 现状：`runWithChannel` 直接 `return runner()` 并依赖 `try/catch/finally` 捕获异常与执行 `afterRun`。
@@ -10,10 +10,7 @@
 - 影响：
   - 异步异常不会被 `dispatchError/handleError` 捕获，导致错误处理器漏报。
   - 嵌套上下文（例如 effect/scope 栈、追踪上下文）在异步操作期间提前被清理，可能引发错误归因、依赖收集紊乱或资源泄漏/误释放。
-- 提示：
-  - 明确该通道是否支持异步 runner：
-    - 若不支持：应在运行时检测 Promise/thenable 并抛出更明确的错误（或在类型上禁止）。
-    - 若需要支持：`runWithChannel` 需要区分同步/异步返回值，对 Promise 链接 `.then/.catch/.finally`，保证 `afterRun` 在 settle 后执行，并在 reject 时走 `dispatchError`。
+- 处理：运行时增加 thenable 检测，Promise/thenable 返回会抛出 TypeError 并走错误通道。
 
 ## 2. `runWithChannel` 的 `beforeRun` 在 `try/finally` 外执行，抛错会跳过 `afterRun`（待修复）
 

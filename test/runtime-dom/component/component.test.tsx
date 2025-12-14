@@ -11,6 +11,58 @@ describe('runtime-dom component reactivity', () => {
     setErrorHandler(undefined)
   })
 
+  it('组件 children 会按数量规整为单值或数组', () => {
+    let singleChildren: unknown
+
+    const Single: SetupComponent = (props) => {
+      singleChildren = props.children
+
+      return () => {
+        return <div>{props.children}</div>
+      }
+    }
+
+    const singleContainer = createTestContainer()
+
+    render(
+      <Single>
+        <span>one</span>
+      </Single>,
+      singleContainer,
+    )
+
+    expect(Array.isArray(singleChildren)).toBe(false)
+    expect((singleChildren as { type: string }).type).toBe('span')
+    expect(within(singleContainer).getByText('one')).toBeInTheDocument()
+
+    let multiChildren: unknown
+
+    const Multiple: SetupComponent = (props) => {
+      multiChildren = props.children
+
+      return () => {
+        return <div>{props.children}</div>
+      }
+    }
+
+    const multipleContainer = createTestContainer()
+
+    render(
+      <Multiple>
+        foo<span>bar</span>
+      </Multiple>,
+      multipleContainer,
+    )
+
+    expect(Array.isArray(multiChildren)).toBe(true)
+    const [firstChild, secondChild] = multiChildren as unknown[]
+
+    expect(firstChild).toBe('foo')
+    expect((secondChild as { type: string }).type).toBe('span')
+    expect(within(multipleContainer).getByText('foo')).toBeInTheDocument()
+    expect(within(multipleContainer).getByText('bar')).toBeInTheDocument()
+  })
+
   it('组件体读取 reactive 数据时会自动重渲染', () => {
     let capturedState: { count: number } | undefined
 

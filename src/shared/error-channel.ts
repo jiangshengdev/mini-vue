@@ -120,6 +120,7 @@ export interface ErrorRunOptions extends ErrorDispatchOptions {
  */
 const notifiedErrorRegistry = new WeakSet<Error | PlainObject>()
 const normalizedPrimitiveErrorCacheLimit = 50
+/* 有上限的缓存用于复用规范化后的 Error，避免原始类型重复上报，同时限制容量防止长期占用内存。 */
 const normalizedPrimitiveErrorCache = new Map<unknown, Error>()
 
 function normalizeError(error: unknown): Error | PlainObject {
@@ -147,15 +148,15 @@ function normalizeError(error: unknown): Error | PlainObject {
 
   const normalized = new Error(normalizedMessage ?? String(error), { cause: error })
 
-  if (normalizedPrimitiveErrorCache.size >= normalizedPrimitiveErrorCacheLimit) {
+  normalizedPrimitiveErrorCache.set(error, normalized)
+
+  while (normalizedPrimitiveErrorCache.size > normalizedPrimitiveErrorCacheLimit) {
     const oldest = normalizedPrimitiveErrorCache.keys().next().value
 
     if (oldest !== undefined) {
       normalizedPrimitiveErrorCache.delete(oldest)
     }
   }
-
-  normalizedPrimitiveErrorCache.set(error, normalized)
 
   return normalized
 }

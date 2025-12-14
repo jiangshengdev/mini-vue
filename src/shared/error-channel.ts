@@ -172,9 +172,10 @@ function isThenable(value: unknown): value is PromiseLike<unknown> {
     return false
   }
 
-  const maybeThen = (value as { then?: unknown }).then
+  const candidate = value as { then?: unknown }
+  const maybeThen = candidate.then
 
-  return 'then' in (value as { then?: unknown }) && typeof maybeThen === 'function'
+  return 'then' in candidate && typeof maybeThen === 'function'
 }
 
 function runWithChannel<T>(

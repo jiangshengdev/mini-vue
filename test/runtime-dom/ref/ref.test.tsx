@@ -4,10 +4,6 @@ import { createTestContainer } from '../../setup.ts'
 import type { ElementRef, SetupComponent } from '@/index.ts'
 import { createApp, reactive, ref, render } from '@/index.ts'
 
-function coerceElementRef(value: unknown): ElementRef {
-  return value as ElementRef
-}
-
 describe('runtime-dom ref 回调', () => {
   it('render 卸载时会以 undefined 调用 ref', () => {
     const container = createTestContainer()
@@ -92,7 +88,7 @@ describe('runtime-dom ref 回调', () => {
 
   it('render 遇到非函数/Ref 的 ref 值时按普通属性处理', () => {
     const container = createTestContainer()
-    const invalidRef = coerceElementRef('plain')
+    const invalidRef = 'plain' as unknown as ElementRef // 故意绕过类型以覆盖非 ElementRef 路径
 
     render(
       <button type="button" ref={invalidRef}>

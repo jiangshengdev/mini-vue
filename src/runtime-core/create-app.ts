@@ -38,9 +38,9 @@ export type AppPlugin<HostElement> =
   | ((app: AppInstance<HostElement>) => void)
   | { install: (app: AppInstance<HostElement>) => void }
 
- /**
-  * `createApp` 返回的实例 API，封装 `mount`/`unmount` 生命周期。
-  */
+/**
+ * `createApp` 返回的实例 API，封装 `mount`/`unmount` 生命周期。
+ */
 export interface AppInstance<HostElement> extends PluginInstallApp {
   /** 指定宿主容器并触发首次渲染。 */
   mount(target: HostElement): void

@@ -25,7 +25,7 @@ export const domRendererOptions: RendererOptions<Node, Element, DocumentFragment
     parent.append(child)
   },
   /** 在指定锚点前插入子节点，保持原有兄弟顺序。 */
-  insertBefore(parent, child, anchor): void {
+  insertBefore(parent, child, anchor?): void {
     if (!anchor) {
       parent.append(child)
 

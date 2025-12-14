@@ -2,14 +2,14 @@ import { describe, expect, it } from 'vitest'
 import { domRendererOptions } from '@/runtime-dom/renderer-options.ts'
 
 describe('runtime-dom insertBefore 宿主实现', () => {
-  it('anchor 为 null 时退化为 append 到父节点末尾', () => {
+  it('anchor 为 undefined 时退化为 append 到父节点末尾', () => {
     const parent = document.createElement('div')
     const first = document.createElement('span')
     const child = document.createElement('p')
 
     parent.append(first)
 
-    domRendererOptions.insertBefore(parent, child, null)
+    domRendererOptions.insertBefore(parent, child, undefined)
 
     expect([...parent.childNodes]).toEqual([first, child])
   })

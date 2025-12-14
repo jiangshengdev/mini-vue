@@ -1,5 +1,5 @@
 import { describe, expect, expectTypeOf, it } from 'vitest'
-import { effect, isRef, ref, unref } from '@/index.ts'
+import { effect, isRef, reactive, ref, unref } from '@/index.ts'
 
 describe('ref', () => {
   it('基础读写并触发 effect', () => {
@@ -67,6 +67,26 @@ describe('ref', () => {
       void state.value
     })
 
+    expect(runs).toBe(1)
+
+    state.value = raw
+    expect(runs).toBe(1)
+  })
+
+  it('在原始对象与其代理之间切换不会重复触发 effect', () => {
+    const raw = { count: 0 }
+    const proxy = reactive(raw)
+    const state = ref(raw)
+    let runs = 0
+
+    effect(function trackState() {
+      runs += 1
+      void state.value
+    })
+
+    expect(runs).toBe(1)
+
+    state.value = proxy
     expect(runs).toBe(1)
 
     state.value = raw

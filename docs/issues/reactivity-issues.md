@@ -48,7 +48,7 @@
   - 若不引入全局开关，可考虑通过 `Object.getOwnPropertyDescriptor` 等路径在不触发 getter 的情况下判断“数据属性是否为 Ref”（但访问器属性仍可能需要权衡是否复用）。
 - 测试建议：新增“effect 内调用 `toRef(reactiveObj, key)` 不应追踪该 key”的回归用例。
 
-## 6. `RefImpl` 的 setter 未对新值做 `toRaw` 处理，导致原始值与代理值切换时触发多余更新（已验证）
+## 6. `RefImpl` 的 setter 未对新值做 `toRaw` 处理，导致原始值与代理值切换时触发多余更新（已修复）
 
 - 位置：`src/reactivity/ref/impl.ts`
 - 现状：`RefImpl.set value` 直接以 `Object.is(newValue, this.rawValue)` 判等，并执行 `this.rawValue = newValue`。当用户交替写入同一对象的“原始对象”和“reactive 代理”时（两者不全等），会被判定为变更，从而触发依赖更新。

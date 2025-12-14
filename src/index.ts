@@ -12,6 +12,7 @@ export {
   onScopeDispose,
   reactive,
   ref,
+  toRaw,
   toRef,
   unref,
   watch,

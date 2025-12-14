@@ -106,7 +106,7 @@
 - 下一步：调整 stop 时序（建议 stop 一开始就让 scope 不再收集：例如先置 `active=false` 或引入 `stopping` 状态并在 `recordEffect/addCleanup` 阻止录入）。
 - 测试建议：建议在 `test/reactivity/effect-scope.lifecycle.test.ts` 增补“stop 过程中仍可录入新 effect 且不会被 stop”的复现用例。
 
-## 12. `removeChildScope` 未重置子 scope 的 `positionInParent`，导致对象状态脏（已验证）
+## 12. `removeChildScope` 未重置子 scope 的 `positionInParent`，导致对象状态脏（已修复）
 
 - 位置：`src/reactivity/effect-scope.ts`
 - 现状：父 scope 移除子 scope 时，只通过 swap-pop 调整 `childScopes`，但未将被移除的子 scope 的 `positionInParent` 重置（例如设为 `undefined`）。

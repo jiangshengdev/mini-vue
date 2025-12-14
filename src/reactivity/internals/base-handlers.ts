@@ -1,6 +1,7 @@
 import { reactive } from '../reactive.ts'
 import type { ReactiveTarget } from '../contracts/index.ts'
 import { iterateDependencyKey, triggerOpTypes } from '../contracts/index.ts'
+import { isRef } from '../ref/api.ts'
 import { track, trigger } from './operations.ts'
 import { isArrayIndex, isObject } from '@/shared/index.ts'
 
@@ -13,6 +14,15 @@ const mutableGet: ProxyHandler<ReactiveTarget>['get'] = (target, key, receiver) 
 
   /* 读取属性同时收集依赖，连接目标字段与当前副作用 */
   track(target, key)
+
+  if (isRef(rawValue)) {
+    /* 数组索引上的 Ref 保持原样返回，其余场景自动解包 */
+    if (Array.isArray(target) && isArrayIndex(key)) {
+      return rawValue
+    }
+
+    return rawValue.value
+  }
 
   if (isObject(rawValue)) {
     /* 对嵌套对象进行懒加载代理，避免初始化时递归遍历 */

@@ -15,7 +15,7 @@
     - 若不支持：应在运行时检测 Promise/thenable 并抛出更明确的错误（或在类型上禁止）。
     - 若需要支持：`runWithChannel` 需要区分同步/异步返回值，对 Promise 链接 `.then/.catch/.finally`，保证 `afterRun` 在 settle 后执行，并在 reject 时走 `dispatchError`。
 
-## 2. `runWithChannel` 的 `beforeRun` 在 `try/finally` 外执行，抛错会跳过 `afterRun`（待修复）
+## 2. `runWithChannel` 的 `beforeRun` 在 `try/finally` 外执行，抛错会跳过 `afterRun`（已修复）
 
 - 位置：`src/shared/error-channel.ts`
 - 现状：`options.beforeRun?.()` 在进入 `try {}` 之前执行。

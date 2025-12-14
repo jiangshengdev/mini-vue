@@ -66,7 +66,8 @@ describe('runtime-error-channel', () => {
 
     expect(normalizedError).toBeInstanceOf(Error)
     expect((normalizedError as Error).cause).toBe(primitiveError)
-    expect(firstToken.error).toBe(normalizedError)
+    expect(firstToken.error).toBeInstanceOf(Error)
+    expect((firstToken.error as Error).cause).toBe(primitiveError)
     expect(firstToken.notified).toBe(true)
 
     const secondToken = dispatchError(primitiveError, {
@@ -75,7 +76,9 @@ describe('runtime-error-channel', () => {
     })
 
     expect(handler).toHaveBeenCalledTimes(1)
-    expect(secondToken.error).toBe(normalizedError)
+    expect(secondToken.error).toBeInstanceOf(Error)
+    expect(secondToken.error).not.toBe(firstToken.error)
+    expect((secondToken.error as Error).cause).toBe(primitiveError)
     expect(secondToken.notified).toBe(false)
   })
 

@@ -119,19 +119,11 @@ export interface ErrorRunOptions extends ErrorDispatchOptions {
  * 记录已通知的错误对象，避免在同一对象上重复上报。
  */
 const notifiedErrorRegistry = new WeakSet<Error | PlainObject>()
-const normalizedPrimitiveErrorCacheLimit = 50
-/* 有上限的缓存用于复用规范化后的 Error，避免原始类型重复上报，同时限制容量防止长期占用内存。 */
-const normalizedPrimitiveErrorCache = new Map<unknown, Error>()
+const notifiedPrimitiveRegistry = new Set<string | number | symbol | bigint | boolean | null | undefined>()
 
 function normalizeError(error: unknown): Error | PlainObject {
   if (error instanceof Error || isPlainObject(error)) {
     return error
-  }
-
-  const cached = normalizedPrimitiveErrorCache.get(error)
-
-  if (cached) {
-    return cached
   }
 
   let normalizedMessage: string | undefined
@@ -151,16 +143,6 @@ function normalizeError(error: unknown): Error | PlainObject {
     fallbackMessage.length > 200 ? `${fallbackMessage.slice(0, 200)}…` : fallbackMessage
   const normalized = new Error(normalizedMessageText, { cause: error })
 
-  if (normalizedPrimitiveErrorCache.size >= normalizedPrimitiveErrorCacheLimit) {
-    const firstKey = normalizedPrimitiveErrorCache.keys().next().value
-
-    if (firstKey !== undefined) {
-      normalizedPrimitiveErrorCache.delete(firstKey)
-    }
-  }
-
-  normalizedPrimitiveErrorCache.set(error, normalized)
-
   return normalized
 }
 
@@ -169,7 +151,20 @@ function normalizeError(error: unknown): Error | PlainObject {
  */
 export function dispatchError(error: unknown, dispatchOptions: ErrorDispatchOptions): ErrorToken {
   const normalizedError = normalizeError(error)
-  const alreadyNotified = notifiedErrorRegistry.has(normalizedError)
+  const isPrimitiveError =
+    typeof error === 'string' ||
+    typeof error === 'number' ||
+    typeof error === 'boolean' ||
+    typeof error === 'symbol' ||
+    typeof error === 'bigint' ||
+    error === null ||
+    error === undefined
+
+  const alreadyNotified = isPrimitiveError
+    ? notifiedPrimitiveRegistry.has(error as string | number | symbol | bigint | boolean | null | undefined)
+    : isObject(error)
+      ? notifiedErrorRegistry.has(error as Error | PlainObject)
+      : false
   const shouldNotify = !alreadyNotified
 
   /* 构造 token 以记录本次调度的真实触发信息，供钩子与上层使用。 */
@@ -187,7 +182,11 @@ export function dispatchError(error: unknown, dispatchOptions: ErrorDispatchOpti
   }
 
   /* 记录已上报的对象，防止递归触发导致重复告警。 */
-  notifiedErrorRegistry.add(normalizedError)
+  if (isPrimitiveError) {
+    notifiedPrimitiveRegistry.add(error as string | number | symbol | bigint | boolean | null | undefined)
+  } else if (isObject(error)) {
+    notifiedErrorRegistry.add(error as Error | PlainObject)
+  }
 
   /* 判断当前 dispatch 是否处于异步阶段。 */
   const isAsyncPhase = dispatchOptions.handlerPhase === errorPhases.async

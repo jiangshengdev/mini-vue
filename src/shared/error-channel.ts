@@ -119,6 +119,7 @@ export interface ErrorRunOptions extends ErrorDispatchOptions {
  * 记录已通知的错误对象，避免在同一对象上重复上报。
  */
 const notifiedErrorRegistry = new WeakSet<object>()
+const normalizedPrimitiveErrorCacheLimit = 50
 const normalizedPrimitiveErrorCache = new Map<unknown, Error>()
 
 function normalizeError(error: unknown): object {
@@ -133,6 +134,10 @@ function normalizeError(error: unknown): object {
   }
 
   const normalized = new Error(String(error), { cause: error })
+
+  if (normalizedPrimitiveErrorCache.size >= normalizedPrimitiveErrorCacheLimit) {
+    normalizedPrimitiveErrorCache.clear()
+  }
 
   normalizedPrimitiveErrorCache.set(error, normalized)
 

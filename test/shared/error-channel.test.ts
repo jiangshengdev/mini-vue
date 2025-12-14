@@ -130,11 +130,11 @@ describe('runtime-error-channel', () => {
     setErrorHandler(handler)
 
     const error = new Error('before hook crash')
-    const runner = vi.fn()
+    const runner = vi.fn<() => void>()
     const afterRun = vi.fn<ErrorAfterHook>()
 
     const invoke = () => {
-      return runSilent(runner, {
+      runSilent(runner, {
         origin: errorContexts.effectRunner,
         handlerPhase: errorPhases.sync,
         beforeRun() {
@@ -163,7 +163,7 @@ describe('runtime-error-channel', () => {
     const afterRun = vi.fn<ErrorAfterHook>()
 
     expect(() => {
-      runThrowing(
+      void runThrowing(
         async () => {
           return 1
         },

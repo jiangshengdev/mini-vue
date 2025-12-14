@@ -49,11 +49,16 @@ interface DomAppHmrState {
 function resolveContainer(target: string | Element): Element | undefined {
   /* 字符串容器走 querySelector，以支持常见挂载写法。 */
   if (typeof target === 'string') {
-    const resolved = runSilent(() => document.querySelector(target) ?? undefined, {
-      origin: errorContexts.domContainerResolve,
-      handlerPhase: errorPhases.sync,
-      meta: { selector: target },
-    })
+    const resolved = runSilent(
+      () => {
+        return document.querySelector(target) ?? undefined
+      },
+      {
+        origin: errorContexts.domContainerResolve,
+        handlerPhase: errorPhases.sync,
+        meta: { selector: target },
+      },
+    )
 
     return resolved ?? undefined
   }

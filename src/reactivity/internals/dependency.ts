@@ -82,7 +82,11 @@ export function resetTracking(): void {
     return
   }
 
-  const previous = trackingStack.pop()!
+  const previous = trackingStack.pop()
+
+  if (previous === undefined) {
+    return
+  }
 
   shouldTrack = previous
 }

@@ -73,7 +73,7 @@ describe('toRef', () => {
     expect(toRef(holder, 'count')).toBe(count)
   })
 
-  it('创建 ref 引用时不会对目标属性进行依赖收集', () => {
+  it('creating a ref alias does not track the target property', () => {
     const state = reactive({ value: 1 })
     let runs = 0
 

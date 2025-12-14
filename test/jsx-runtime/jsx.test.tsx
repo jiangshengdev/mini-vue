@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { isVirtualNode, virtualNodeFlag } from '@/jsx-foundation/index.ts'
+import { jsxDEV } from '@/jsx-runtime/index.ts'
 
 /**
  * 这些用例通过真实 jsx 语法触发 TS 的自动 jsx 转换，
@@ -90,6 +91,13 @@ describe('jsx-runtime automatic jsx helper', () => {
 
     expect(virtualNode.key).toBe('row-1')
     expect(virtualNode.props).toEqual({ class: 'row' })
+  })
+
+  it('jsxDEV 优先使用显式 key 并保留剩余 props', () => {
+    const virtualNode = jsxDEV('section', { key: 'props-key', title: 'jsx-dev' }, 'explicit-key')
+
+    expect(virtualNode.key).toBe('explicit-key')
+    expect(virtualNode.props).toEqual({ title: 'jsx-dev' })
   })
 
   it('忽略伪造的 virtualNode 标记', () => {

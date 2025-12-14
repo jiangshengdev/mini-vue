@@ -124,6 +124,46 @@ describe('runtime-error-channel', () => {
     expect(token?.notified).toBe(true)
   })
 
+  it('runWithErrorChannel 在成功时会透传返回值并执行钩子', () => {
+    const beforeRun = vi.fn()
+    const afterRun = vi.fn<ErrorAfterHook>()
+
+    const expected = Symbol('ok')
+
+    const result = runThrowing(
+      () => expected,
+      {
+        origin: errorContexts.effectRunner,
+        handlerPhase: errorPhases.sync,
+        beforeRun,
+        afterRun,
+      },
+    )
+
+    expect(result).toBe(expected)
+    expect(beforeRun).toHaveBeenCalledTimes(1)
+    expect(afterRun).toHaveBeenCalledTimes(1)
+    expect(afterRun.mock.calls[0]?.[0]).toBeUndefined()
+
+    const silentBefore = vi.fn()
+    const silentAfter = vi.fn<ErrorAfterHook>()
+
+    const silentResult = runSilent(
+      () => 1,
+      {
+        origin: errorContexts.scheduler,
+        handlerPhase: errorPhases.sync,
+        beforeRun: silentBefore,
+        afterRun: silentAfter,
+      },
+    )
+
+    expect(silentResult).toBe(1)
+    expect(silentBefore).toHaveBeenCalledTimes(1)
+    expect(silentAfter).toHaveBeenCalledTimes(1)
+    expect(silentAfter.mock.calls[0]?.[0]).toBeUndefined()
+  })
+
   it('runWithErrorChannelSilent 会吃掉异常但仍会通知处理器', () => {
     const handler = vi.fn<ErrorHandler>()
 

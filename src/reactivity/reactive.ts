@@ -3,8 +3,27 @@
  */
 import { mutableHandlers } from './internals/index.ts'
 import type { ReactiveTarget } from './contracts/index.ts'
+import type { Ref } from './ref/types.ts'
 import type { PlainObject } from '@/shared/index.ts'
 import { isObject, isPlainObject } from '@/shared/index.ts'
+
+type Primitive = string | number | boolean | bigint | symbol | null | undefined
+
+type UnknownFn = (...args: unknown[]) => unknown
+
+type Builtin = Primitive | UnknownFn
+
+type UnwrapRef<T> = T extends Ref<infer V> ? UnwrapRefSimple<V> : UnwrapRefSimple<T>
+
+type UnwrapRefSimple<T> =
+  T extends Builtin | Ref ? T
+  : T extends readonly unknown[] ? { [K in keyof T]: UnwrapRefSimple<T[K]> }
+    : T extends object ? { [K in keyof T]: UnwrapRef<T[K]> }
+      : T
+
+type UnwrapNestedRefs<T> = T extends Ref ? T : UnwrapRefSimple<T>
+
+export type Reactive<T> = UnwrapNestedRefs<T>
 
 /**
  * 封装原对象与代理实例之间的双向缓存。
@@ -70,11 +89,11 @@ function isSupportedTarget(target: unknown): target is ReactiveTarget {
  *
  * @public
  */
-export function reactive<T extends PlainObject>(target: T): T
+export function reactive<T extends PlainObject>(target: T): Reactive<T>
 /**
  * @public
  */
-export function reactive<T>(target: T[]): T[]
+export function reactive<T extends readonly unknown[]>(target: T): Reactive<T>
 /**
  * @public
  */

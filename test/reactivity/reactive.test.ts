@@ -1,5 +1,6 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, expectTypeOf, it } from 'vitest'
 import { isReactive, isRef, reactive, ref } from '@/index.ts'
+import type { Ref } from '@/index.ts'
 import type { PlainObject } from '@/shared/index.ts'
 
 describe('reactive', () => {
@@ -81,6 +82,8 @@ describe('reactive', () => {
 
     expect(state.count).toBe(1)
 
+    expectTypeOf(state.count).toEqualTypeOf<number>()
+
     count.value = 2
     expect(state.count).toBe(2)
   })
@@ -89,6 +92,7 @@ describe('reactive', () => {
     const list = reactive([ref(1)])
 
     expect(isRef(list[0])).toBe(true)
+    expectTypeOf(list[0]).toEqualTypeOf<Ref<number>>()
   })
 
   it('同一数组重复代理保持幂等', () => {

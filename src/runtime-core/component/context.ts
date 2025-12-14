@@ -32,7 +32,7 @@ export interface ComponentInstance<
   T extends SetupComponent,
 > {
   /** 父组件实例引用，用于依赖注入与上下文继承。 */
-  parent?: AnyComponentInstance
+  parent?: UnknownComponentInstance
   /** 应用级上下文（root provides 等），沿组件树结构稳定传播。 */
   appContext?: AppContext
   /** 依赖注入容器，默认通过原型链继承父/应用级 provides。 */
@@ -66,10 +66,10 @@ export interface ComponentInstance<
 }
 
 /** 兼容任意宿主类型的组件实例别名，简化当前实例管理。 */
-export type AnyComponentInstance = ComponentInstance<unknown, unknown, unknown, SetupComponent>
+export type UnknownComponentInstance = ComponentInstance<unknown, unknown, unknown, SetupComponent>
 
 /** 当前 setup 调用栈正在处理的实例引用。 */
-const instanceStack = new ContextStack<AnyComponentInstance>()
+const instanceStack = new ContextStack<UnknownComponentInstance>()
 
 /**
  * 设置当前运行中的组件实例，供 setup 期间访问。
@@ -80,7 +80,7 @@ export function setCurrentInstance<
   HostFragment extends HostNode,
   T extends SetupComponent,
 >(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): void {
-  instanceStack.push(instance as AnyComponentInstance)
+  instanceStack.push(instance as UnknownComponentInstance)
 }
 
 /**
@@ -93,6 +93,6 @@ export function unsetCurrentInstance(): void {
 /**
  * 读取当前组件实例，仅供内部组合式能力使用。
  */
-export function getCurrentInstance(): AnyComponentInstance | undefined {
+export function getCurrentInstance(): UnknownComponentInstance | undefined {
   return instanceStack.current
 }

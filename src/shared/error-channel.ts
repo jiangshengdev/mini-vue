@@ -166,6 +166,15 @@ export function dispatchError(error: unknown, dispatchOptions: ErrorDispatchOpti
   return token
 }
 
+function isThenable(value: unknown): value is PromiseLike<unknown> {
+  /* Promise/thenable 可能是对象或函数，需兼容两者形态。 */
+  if (!isObject(value) && typeof value !== 'function') {
+    return false
+  }
+
+  return typeof (value as { then?: unknown }).then === 'function'
+}
+
 function runWithChannel<T>(
   runner: () => T,
   propagate: ErrorMode,
@@ -179,7 +188,14 @@ function runWithChannel<T>(
 
   try {
     /* 尝试执行用户逻辑，一旦抛错交由 catch 统一处理。 */
-    return runner()
+    const result = runner()
+
+    /* 明确拒绝 Promise/thenable runner，避免异步阶段漏报与提前清理。 */
+    if (isThenable(result)) {
+      throw new TypeError('runWithChannel: runner 不支持 Promise/thenable 返回值')
+    }
+
+    return result
   } catch (error) {
     /* 将异常交给错误通道统一调度，并获得可观测 token。 */
     token = dispatchError(error, options)

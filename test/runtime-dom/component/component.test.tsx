@@ -11,57 +11,37 @@ describe('runtime-dom component reactivity', () => {
     setErrorHandler(undefined)
   })
 
-  it('组件 children 会按数量规整为单值或数组', () => {
-    let singleChildren: unknown
+  it('规整 children 时会复制 props 避免污染外部引用', () => {
+    const rawProps = { note: 'outer' }
+    let receivedProps: unknown
 
-    const Single: SetupComponent = (props) => {
-      singleChildren = props.children
+    const Capture: SetupComponent = (props) => {
+      receivedProps = props
+      props.note = 'inner'
 
       return () => {
-        return <div>{props.children}</div>
+        return <div class={props.note}>{props.children}</div>
       }
     }
 
-    const singleContainer = createTestContainer()
+    const container = createTestContainer()
 
     render(
-      <Single>
-        <span>one</span>
-      </Single>,
-      singleContainer,
+      <Capture {...rawProps}>
+        <span>first</span>
+        <span>second</span>
+      </Capture>,
+      container,
     )
 
-    expect(Array.isArray(singleChildren)).toBe(false)
-    expect(singleChildren).toMatchObject({ type: 'span' })
-    expect(within(singleContainer).getByText('one')).toBeInTheDocument()
+    expect(rawProps.note).toBe('outer')
+    expect(receivedProps).toMatchObject({ note: 'inner' })
+    const propsSnapshot = receivedProps as { children?: unknown }
 
-    let multiChildren: unknown
-
-    const Multiple: SetupComponent = (props) => {
-      multiChildren = props.children
-
-      return () => {
-        return <div>{props.children}</div>
-      }
-    }
-
-    const multipleContainer = createTestContainer()
-
-    render(
-      <Multiple>
-        {'text child'}
-        <span>element child</span>
-      </Multiple>,
-      multipleContainer,
-    )
-
-    expect(Array.isArray(multiChildren)).toBe(true)
-    const [firstChild, secondChild] = multiChildren as unknown[]
-
-    expect(firstChild).toBe('text child')
-    expect(secondChild).toMatchObject({ type: 'span' })
-    expect(within(multipleContainer).getByText('text child')).toBeInTheDocument()
-    expect(within(multipleContainer).getByText('element child')).toBeInTheDocument()
+    expect(Array.isArray(propsSnapshot.children)).toBe(true)
+    expect((propsSnapshot.children as unknown[])).toHaveLength(2)
+    expect(within(container).getByText('first')).toBeInTheDocument()
+    expect(within(container).getByText('second')).toBeInTheDocument()
   })
 
   it('组件体读取 reactive 数据时会自动重渲染', () => {

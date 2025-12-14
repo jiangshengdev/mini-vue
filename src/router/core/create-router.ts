@@ -1,7 +1,6 @@
 import { normalizePath } from './paths.ts'
 import type { RouteLocation, Router, RouterConfig, RouteRecord } from './types.ts'
 import { routerInjectionKey } from './injection.ts'
-import type { InjectionKey, InjectionToken } from '@/runtime-core/index.ts'
 import type { Ref } from '@/reactivity/index.ts'
 import { ref } from '@/reactivity/index.ts'
 
@@ -12,14 +11,7 @@ import { ref } from '@/reactivity/index.ts'
  * - 该类型避免把运行时 `AppInstance` 强耦合进 router 包。
  * - 仅用于 `router.install(app)` 的参数约束与内部 bookkeeping。
  */
-interface InstallableApp {
-  /** 可选的卸载钩子：若存在会被 router 包装，以便在卸载时自动 stop。 */
-  unmount?: () => void
-  /** 在应用级 provides 中写入依赖（泛型重载用于类型推导）。 */
-  provide<T>(key: InjectionKey<T>, value: T): void
-  /** 兼容非泛型 token（如 string）场景的提供能力。 */
-  provide(key: InjectionToken, value: unknown): void
-}
+type InstallableApp = Parameters<Router['install']>[0]
 
 /** 是否处于浏览器环境并支持 history/popstate 事件。 */
 const canUseWindowEvents =

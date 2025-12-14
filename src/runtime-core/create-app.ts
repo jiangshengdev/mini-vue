@@ -1,10 +1,11 @@
 import type { RootRenderFunction } from './renderer.ts'
 import { setCurrentAppContext, unsetCurrentAppContext } from './app-context.ts'
-import type { InjectionKey, InjectionToken } from './provide-inject.ts'
 import type { ElementProps, SetupComponent } from '@/jsx-foundation/index.ts'
 import { createVirtualNode } from '@/jsx-foundation/index.ts'
+import type { PluginInstallApp } from '@/shared/plugin.ts'
 import type { PlainObject, PropsShape } from '@/shared/index.ts'
 import { errorContexts, errorPhases, runThrowing } from '@/shared/index.ts'
+import type { InjectionKey, InjectionToken } from './provide-inject.ts'
 
 /** 应用生命周期状态常量，区分是否已挂载。 */
 const appLifecycleStatus = {
@@ -37,10 +38,10 @@ export type AppPlugin<HostElement> =
   | ((app: AppInstance<HostElement>) => void)
   | { install: (app: AppInstance<HostElement>) => void }
 
-/**
- * `createApp` 返回的实例 API，封装 `mount`/`unmount` 生命周期。
- */
-export interface AppInstance<HostElement> {
+ /**
+  * `createApp` 返回的实例 API，封装 `mount`/`unmount` 生命周期。
+  */
+export interface AppInstance<HostElement> extends PluginInstallApp {
   /** 指定宿主容器并触发首次渲染。 */
   mount(target: HostElement): void
   /** 停止渲染并释放容器内容。 */

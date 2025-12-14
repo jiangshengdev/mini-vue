@@ -49,7 +49,8 @@ describe('runtime-dom component reactivity', () => {
 
     render(
       <Multiple>
-        foo<span>bar</span>
+        {'text child'}
+        <span>element child</span>
       </Multiple>,
       multipleContainer,
     )
@@ -57,10 +58,10 @@ describe('runtime-dom component reactivity', () => {
     expect(Array.isArray(multiChildren)).toBe(true)
     const [firstChild, secondChild] = multiChildren as unknown[]
 
-    expect(firstChild).toBe('foo')
+    expect(firstChild).toBe('text child')
     expect((secondChild as { type: string }).type).toBe('span')
-    expect(within(multipleContainer).getByText('foo')).toBeInTheDocument()
-    expect(within(multipleContainer).getByText('bar')).toBeInTheDocument()
+    expect(within(multipleContainer).getByText('text child')).toBeInTheDocument()
+    expect(within(multipleContainer).getByText('element child')).toBeInTheDocument()
   })
 
   it('组件体读取 reactive 数据时会自动重渲染', () => {

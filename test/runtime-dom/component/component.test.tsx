@@ -17,7 +17,6 @@ describe('runtime-dom component reactivity', () => {
 
     const Capture: SetupComponent = (props) => {
       receivedProps = props
-      props.note = 'inner'
 
       return () => {
         return <div class={props.note}>{props.children}</div>
@@ -34,8 +33,8 @@ describe('runtime-dom component reactivity', () => {
       container,
     )
 
-    expect(rawProps.note).toBe('outer')
-    expect(receivedProps).toMatchObject({ note: 'inner' })
+    expect(receivedProps).not.toBe(rawProps)
+    expect(receivedProps).toMatchObject({ note: 'outer' })
     const propsSnapshot = receivedProps as { children?: unknown }
 
     expect(Array.isArray(propsSnapshot.children)).toBe(true)

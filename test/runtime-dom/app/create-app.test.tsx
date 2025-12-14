@@ -23,6 +23,14 @@ describe('runtime-dom createApp', () => {
     expect(screen.getByText('Hello')).toBeVisible()
   })
 
+  it('非法 CSS 选择器会按未找到容器处理', () => {
+    const app = createApp(App)
+
+    expect(() => {
+      app.mount('#app[')
+    }).toThrowError('createApp: 未找到可用的挂载容器')
+  })
+
   it('支持直接传入容器', () => {
     const host = createTestContainer()
     const app = createApp(App)

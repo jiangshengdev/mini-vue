@@ -48,7 +48,15 @@ interface DomAppHmrState {
 function resolveContainer(target: string | Element): Element | undefined {
   /* 字符串容器走 querySelector，以支持常见挂载写法。 */
   if (typeof target === 'string') {
-    return document.querySelector(target) ?? undefined
+    try {
+      return document.querySelector(target) ?? undefined
+    } catch (error) {
+      if (error instanceof DOMException || error instanceof SyntaxError) {
+        return undefined
+      }
+
+      throw error
+    }
   }
 
   return target

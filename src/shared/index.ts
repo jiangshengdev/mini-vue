@@ -17,6 +17,7 @@ export type {
   ErrorPhase,
   ErrorRunOptions,
   ErrorToken,
+  ThrowingErrorRunOptions,
 } from './error-channel.ts'
 export type { PlainObject, PropsShape } from './types.ts'
 export type { InjectionKey, InjectionToken } from './injection.ts'

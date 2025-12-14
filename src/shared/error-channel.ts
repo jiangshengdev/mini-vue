@@ -116,6 +116,13 @@ export interface ErrorRunOptions extends ErrorDispatchOptions {
 }
 
 /**
+ * `runThrowing` 专用的配置项，强制要求同步阶段调度以避免双重抛错。
+ */
+export type ThrowingErrorRunOptions = ErrorRunOptions & {
+  readonly handlerPhase: typeof errorPhases.sync
+}
+
+/**
  * 记录已通知的错误对象，避免在同一对象上重复上报。
  */
 const notifiedErrorRegistry = new WeakSet<PlainObject>()
@@ -220,7 +227,7 @@ function runWithChannel<T>(
 /**
  * 同步传播异常，调用方接收原始抛错。
  */
-export function runThrowing<T>(runner: () => T, options: ErrorRunOptions): T {
+export function runThrowing<T>(runner: () => T, options: ThrowingErrorRunOptions): T {
   return runWithChannel(runner, errorMode.throw, options) as T
 }
 

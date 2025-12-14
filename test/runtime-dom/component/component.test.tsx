@@ -39,7 +39,7 @@ describe('runtime-dom component reactivity', () => {
     const propsSnapshot = receivedProps as { children?: unknown }
 
     expect(Array.isArray(propsSnapshot.children)).toBe(true)
-    expect((propsSnapshot.children as unknown[])).toHaveLength(2)
+    expect(propsSnapshot.children as unknown[]).toHaveLength(2)
     expect(within(container).getByText('first')).toBeInTheDocument()
     expect(within(container).getByText('second')).toBeInTheDocument()
   })

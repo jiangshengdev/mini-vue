@@ -11,6 +11,42 @@ describe('runtime-dom component reactivity', () => {
     setErrorHandler(undefined)
   })
 
+  it('should clone props when normalizing children to avoid polluting external references', () => {
+    const rawProps = { note: 'outer' }
+    let receivedProps: unknown
+
+    const Capture: SetupComponent = (props) => {
+      receivedProps = props
+
+      return () => {
+        return <div class={props.note}>{props.children}</div>
+      }
+    }
+
+    const container = createTestContainer()
+
+    render(
+      <Capture {...rawProps}>
+        <span>first</span>
+        <span>second</span>
+      </Capture>,
+      container,
+    )
+
+    expect(receivedProps).not.toBe(rawProps)
+    expect(receivedProps).toMatchObject({ note: 'outer' })
+    const propsSnapshot = receivedProps as { children?: unknown }
+    const { children } = propsSnapshot
+
+    if (!Array.isArray(children)) {
+      throw new Error('children should be normalized to array')
+    }
+
+    expect(children).toHaveLength(2)
+    expect(within(container).getByText('first')).toBeInTheDocument()
+    expect(within(container).getByText('second')).toBeInTheDocument()
+  })
+
   it('组件体读取 reactive 数据时会自动重渲染', () => {
     let capturedState: { count: number } | undefined
 

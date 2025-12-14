@@ -162,14 +162,11 @@ describe('runtime-error-channel', () => {
     const afterRun = vi.fn<ErrorAfterHook>()
 
     expect(() => {
-      runThrowing(
-        () => Promise.resolve(1),
-        {
-          origin: errorContexts.effectRunner,
-          handlerPhase: errorPhases.sync,
-          afterRun,
-        },
-      )
+      runThrowing(() => Promise.resolve(1), {
+        origin: errorContexts.effectRunner,
+        handlerPhase: errorPhases.sync,
+        afterRun,
+      })
     }).toThrowError(/Promise/)
 
     expect(handler).toHaveBeenCalledTimes(1)

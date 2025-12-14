@@ -196,7 +196,9 @@ function runWithChannel<T>(
 
     /* 明确拒绝 Promise/thenable runner，避免异步阶段漏报与提前清理。 */
     if (isThenable(result)) {
-      throw new TypeError('runWithChannel: runner does not support Promise or thenable return value')
+      throw new TypeError(
+        'runWithChannel: runner does not support Promise or thenable return value',
+      )
     }
 
     return result

@@ -15,10 +15,12 @@ type Builtin = Primitive | UnknownFn
 
 type UnwrapRef<T> = T extends Ref<infer V> ? UnwrapRefSimple<V> : UnwrapRefSimple<T>
 
-type UnwrapRefSimple<T> =
-  T extends Builtin | Ref ? T
-  : T extends readonly unknown[] ? { [K in keyof T]: UnwrapRefSimple<T[K]> }
-    : T extends object ? { [K in keyof T]: UnwrapRef<T[K]> }
+type UnwrapRefSimple<T> = T extends Builtin | Ref
+  ? T
+  : T extends readonly unknown[]
+    ? { [K in keyof T]: UnwrapRefSimple<T[K]> }
+    : T extends object
+      ? { [K in keyof T]: UnwrapRef<T[K]> }
       : T
 
 type UnwrapNestedRefs<T> = T extends Ref ? T : UnwrapRefSimple<T>

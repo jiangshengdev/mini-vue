@@ -1,4 +1,5 @@
 import type { Ref } from './ref'
+import type { PlainObject } from '@/shared'
 
 /**
  * 基础原始值类型：在类型层面保持原样，不参与深层解包。
@@ -38,17 +39,17 @@ type UnwrapRefRecursive<T> = T extends UnwrapBailTypes | Ref
   ? T
   : T extends readonly unknown[]
     ? { [K in keyof T]: UnwrapRefRecursive<T[K]> }
-    : T extends object
+    : T extends PlainObject
       ? { [K in keyof T]: UnwrapRef<T[K]> }
       : T
 
 /**
- * reactive 的顶层解包策略：顶层若本身是 Ref，则保持 Ref 不被解包。
+ * `reactive` 的顶层解包策略：顶层若本身是 Ref，则保持 Ref 不被解包。
  */
 type UnwrapNestedRefs<T> = T extends Ref ? T : UnwrapRefRecursive<T>
 
 /**
- * reactive 返回值的类型投射：
+ * `reactive` 返回值的类型投射：
  * - 深层代理对象结构
  * - 对象属性 Ref 解包
  * - 数组索引 Ref 保持 Ref

@@ -133,8 +133,8 @@ describe('runtime-error-channel', () => {
     const runner = vi.fn()
     const afterRun = vi.fn<ErrorAfterHook>()
 
-    const invoke = () =>
-      runSilent(runner, {
+    const invoke = () => {
+      return runSilent(runner, {
         origin: errorContexts.effectRunner,
         handlerPhase: errorPhases.sync,
         beforeRun() {
@@ -142,6 +142,7 @@ describe('runtime-error-channel', () => {
         },
         afterRun,
       })
+    }
 
     expect(invoke).not.toThrow()
     expect(runner).not.toHaveBeenCalled()
@@ -162,11 +163,16 @@ describe('runtime-error-channel', () => {
     const afterRun = vi.fn<ErrorAfterHook>()
 
     expect(() => {
-      runThrowing(() => Promise.resolve(1), {
-        origin: errorContexts.effectRunner,
-        handlerPhase: errorPhases.sync,
-        afterRun,
-      })
+      runThrowing(
+        async () => {
+          return 1
+        },
+        {
+          origin: errorContexts.effectRunner,
+          handlerPhase: errorPhases.sync,
+          afterRun,
+        },
+      )
     }).toThrowError(/Promise/)
 
     expect(handler).toHaveBeenCalledTimes(1)

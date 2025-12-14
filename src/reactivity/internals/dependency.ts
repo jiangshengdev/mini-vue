@@ -3,7 +3,7 @@ import { effectStack } from '../effect.ts'
 import type { PlainObject } from '@/shared/index.ts'
 import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
 
-/* 本响应式实现基于单线程上下文，使用全局标记控制依赖收集状态。 */
+/* Reactive tracking assumes a single-threaded context and is controlled by a global flag. */
 let shouldTrack = true
 const trackingStack: boolean[] = []
 
@@ -70,17 +70,13 @@ function shouldRun(effect: EffectInstance): boolean {
   return effect !== effectStack.current && effect.active
 }
 
-/**
- * 暂停依赖追踪，在需要无副作用读取时使用。
- */
+/** Pause dependency tracking for side-effect-free reads. */
 export function pauseTracking(): void {
   trackingStack.push(shouldTrack)
   shouldTrack = false
 }
 
-/**
- * 恢复到上一次的追踪状态。
- */
+/** Restore the previous tracking state. */
 export function resetTracking(): void {
   if (trackingStack.length === 0) {
     return
@@ -91,9 +87,7 @@ export function resetTracking(): void {
   shouldTrack = previous
 }
 
-/**
- * 在关闭依赖追踪的上下文中执行回调。
- */
+/** Execute a callback with tracking temporarily disabled. */
 export function runWithPausedTracking<T>(fn: () => T): T {
   pauseTracking()
   try {

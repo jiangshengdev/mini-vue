@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { ErrorHandler } from '@/index.ts'
+import type { EffectScope } from '@/reactivity/effect-scope.ts'
 import {
   computed,
   effect,
@@ -109,6 +110,25 @@ describe('effectScope 生命周期与清理', () => {
 
     expect(error).toBe(boom)
     expect(context).toBe(errorContexts.effectScopeRun)
+  })
+
+  it('子 scope 被移除后 positionInParent 会被重置', () => {
+    const parent = effectScope()
+    let first!: EffectScope
+    let second!: EffectScope
+
+    parent.run(function createChildren() {
+      first = effectScope()
+      second = effectScope()
+    })
+
+    expect((first as any).positionInParent).toBe(0)
+    expect((second as any).positionInParent).toBe(1)
+
+    first.stop()
+
+    expect((first as any).positionInParent).toBeUndefined()
+    expect((second as any).positionInParent).toBe(0)
   })
 
   it('detached scope 不受父级 stop 影响且可单独清理', () => {

@@ -180,6 +180,9 @@ export class EffectScope {
       return
     }
 
+    const removedPosition = scope.positionInParent
+    scope.positionInParent = undefined
+
     const last = childScopes.pop()
 
     /* 若 pop 到的刚好是目标 scope，说明其已位于末尾无需重排。 */
@@ -188,8 +191,8 @@ export class EffectScope {
     }
 
     /* 将末尾元素移到待删除位置，并同步更新其索引缓存。 */
-    childScopes[scope.positionInParent] = last
-    last.positionInParent = scope.positionInParent
+    childScopes[removedPosition] = last
+    last.positionInParent = removedPosition
   }
 }
 

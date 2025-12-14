@@ -1,9 +1,9 @@
 import type { DependencyBucket, EffectInstance } from '../contracts/index.ts'
 import { effectStack } from '../effect.ts'
 import type { PlainObject } from '@/shared/index.ts'
-import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
+import { __INTERNAL_DEV__, errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
 
-/* Reactive tracking assumes a single-threaded context and is controlled by a global flag. */
+/* Tracking control relies on module-level state and targets the single-threaded mini runtime. */
 let shouldTrack = true
 const trackingStack: boolean[] = []
 
@@ -81,6 +81,10 @@ export function resetTracking(): void {
   const previous = trackingStack.pop()
 
   if (previous === undefined) {
+    if (__INTERNAL_DEV__) {
+      console.warn('[reactivity] resetTracking called without matching pauseTracking')
+    }
+
     return
   }
 

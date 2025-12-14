@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { createTestContainer } from '../../setup.ts'
 import { Fragment } from '@/jsx-runtime.ts'
 import type { SetupComponent } from '@/index.ts'
-import { render } from '@/index.ts'
+import { reactive, render } from '@/index.ts'
 
 describe('runtime-dom basic rendering', () => {
   it('渲染基本元素与文本', () => {
@@ -85,5 +85,35 @@ describe('runtime-dom basic rendering', () => {
     expect(view.getByRole('heading', { name: 'Hi' })).toBeInTheDocument()
     expect(view.getByText('first')).toBeInTheDocument()
     expect(view.getByText('second')).toBeInTheDocument()
+  })
+
+  it('重复 render 会清理旧树的 effect', () => {
+    const renderSpy = vi.fn()
+    const state = reactive({ count: 0 })
+    const container = createTestContainer()
+
+    const Counter: SetupComponent = () => {
+      return () => {
+        renderSpy()
+
+        return <span data-testid="count">{state.count}</span>
+      }
+    }
+
+    render(<Counter />, container)
+
+    expect(renderSpy).toHaveBeenCalledTimes(1)
+    expect(container.querySelector('[data-testid="count"]')?.textContent).toBe('0')
+
+    state.count = 1
+
+    expect(renderSpy).toHaveBeenCalledTimes(2)
+    expect(container.querySelector('[data-testid="count"]')?.textContent).toBe('1')
+
+    render(<div data-testid="next">next</div>, container)
+    state.count = 2
+
+    expect(renderSpy).toHaveBeenCalledTimes(2)
+    expect(container.querySelector('[data-testid="next"]')?.textContent).toBe('next')
   })
 })

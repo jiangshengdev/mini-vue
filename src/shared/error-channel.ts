@@ -125,23 +125,23 @@ export type ThrowingErrorRunOptions = ErrorRunOptions & {
 /**
  * 记录已通知的错误对象，避免在同一对象上重复上报。
  */
-let notifiedErrorRegistry = new WeakSet<Error>()
-let resetNotifiedRegistryScheduled = false
+let tickNotifiedErrors = new WeakSet<Error>()
+let isDedupeResetScheduled = false
 
-function scheduleResetNotifiedRegistry(): void {
-  if (resetNotifiedRegistryScheduled) {
+function scheduleDedupeRegistryReset(): void {
+  if (isDedupeResetScheduled) {
     return
   }
 
-  resetNotifiedRegistryScheduled = true
+  isDedupeResetScheduled = true
 
   queueMicrotask(() => {
-    notifiedErrorRegistry = new WeakSet<Error>()
-    resetNotifiedRegistryScheduled = false
+    tickNotifiedErrors = new WeakSet<Error>()
+    isDedupeResetScheduled = false
   })
 }
 
-function normalizeError(error: unknown): Error {
+function ensureError(error: unknown): Error {
   if (error instanceof Error) {
     return error
   }
@@ -153,7 +153,7 @@ function normalizeError(error: unknown): Error {
  * 将捕获到的异常交由错误处理器统一上报，并返回调度 token。
  */
 export function dispatchError(error: Error, dispatchOptions: ErrorDispatchOptions): ErrorToken {
-  const alreadyNotified = notifiedErrorRegistry.has(error)
+  const alreadyNotified = tickNotifiedErrors.has(error)
   const shouldNotify = !alreadyNotified
 
   /* 构造 token 以记录本次调度的真实触发信息，供钩子与上层使用。 */
@@ -171,8 +171,8 @@ export function dispatchError(error: Error, dispatchOptions: ErrorDispatchOption
   }
 
   /* 记录已上报的对象，并在当前 tick 结束后重置去重表。 */
-  notifiedErrorRegistry.add(error)
-  scheduleResetNotifiedRegistry()
+  tickNotifiedErrors.add(error)
+  scheduleDedupeRegistryReset()
 
   /* 判断当前 dispatch 是否处于异步阶段。 */
   const isAsyncPhase = dispatchOptions.handlerPhase === errorPhases.async
@@ -229,7 +229,7 @@ function runWithChannel<T>(
 
     return result
   } catch (error) {
-    const normalizedError = normalizeError(error)
+    const normalizedError = ensureError(error)
 
     /* 将异常交给错误通道统一调度，并获得可观测 token。 */
     token = dispatchError(normalizedError, options)

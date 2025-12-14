@@ -51,7 +51,7 @@ function resolveContainer(target: string | Element): Element | undefined {
     try {
       return document.querySelector(target) ?? undefined
     } catch (error) {
-      if (error instanceof DOMException || error instanceof SyntaxError) {
+      if (error instanceof DOMException) {
         return undefined
       }
 

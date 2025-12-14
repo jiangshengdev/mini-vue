@@ -32,6 +32,8 @@ export const errorContexts = {
   domContainerResolve: 'domContainerResolve',
 } as const
 /**
+ * 错误来源上下文的联合类型，用于约束上报入口的来源标签。
+ *
  * @beta
  */
 export type ErrorContext = (typeof errorContexts)[keyof typeof errorContexts]
@@ -45,6 +47,9 @@ export const errorMode = {
   /** 在同步阶段吞掉异常，避免污染主流程。 */
   silent: 'silent',
 } as const
+/**
+ * 错误传播模式的联合类型，控制同步阶段是否把异常继续抛给调用方。
+ */
 export type ErrorMode = (typeof errorMode)[keyof typeof errorMode]
 /**
  * 区分当前错误是在同步还是异步阶段被捕获。
@@ -55,6 +60,9 @@ export const errorPhases = {
   /** 表示由异步兜底（如 microtask）捕获。 */
   async: 'async',
 } as const
+/**
+ * 错误捕获阶段的联合类型，用于标记错误是在同步栈内捕获还是由异步兜底捕获。
+ */
 export type ErrorPhase = (typeof errorPhases)[keyof typeof errorPhases]
 
 /**
@@ -126,8 +134,19 @@ export type ThrowingErrorRunOptions = ErrorRunOptions & {
  * 记录已通知的错误对象，避免在同一对象上重复上报。
  */
 let tickNotifiedErrors = new WeakSet<Error>()
+
+/**
+ * 标记是否已安排过“本 tick 去重表重置”的 microtask，避免重复注册。
+ */
 let isDedupeResetScheduled = false
 
+/**
+ * 在当前事件循环 tick 结束时重置去重表。
+ *
+ * @remarks
+ * - 设计目标是“同一 tick 内同一 Error 对象只上报一次”，避免重复噪声。
+ * - 采用 microtask 让重置尽可能靠近本轮同步逻辑尾部，同时不会阻塞当前调用栈。
+ */
 function scheduleDedupeRegistryReset(): void {
   if (isDedupeResetScheduled) {
     return
@@ -141,6 +160,12 @@ function scheduleDedupeRegistryReset(): void {
   })
 }
 
+/**
+ * 将任意捕获值规范化为 Error 实例，保证错误通道对外的形态一致。
+ *
+ * @remarks
+ * - 非 Error 值会被包装为 Error，并通过 cause 保留原始信息。
+ */
 function ensureError(error: unknown): Error {
   if (error instanceof Error) {
     return error
@@ -194,6 +219,13 @@ export function dispatchError(error: Error, dispatchOptions: ErrorDispatchOption
   return token
 }
 
+/**
+ * 判断 runner 的返回值是否为 Promise/thenable。
+ *
+ * @remarks
+ * 错误通道只覆盖同步执行路径：一旦允许 thenable 返回，会导致异常可能在异步阶段漏报，
+ * 且 finally 钩子会提前执行，从而破坏调用方对清理时序的预期。
+ */
 function isThenable(value: unknown): value is PromiseLike<unknown> {
   /* Promise/thenable 规范允许对象或携带 then 方法的函数，需兼容两者形态。 */
   if (typeof value !== 'function' && !isObject(value)) {
@@ -206,6 +238,13 @@ function isThenable(value: unknown): value is PromiseLike<unknown> {
   return 'then' in candidate && typeof maybeThen === 'function'
 }
 
+/**
+ * 统一封装“执行 runner + 捕获并上报异常”的同步入口。
+ *
+ * @remarks
+ * - 负责串联 before/after hook，保证无论成功与否都能观察到 token。
+ * - 根据传播模式决定是否把规范化后的异常继续同步抛出。
+ */
 function runWithChannel<T>(
   runner: () => T,
   propagate: ErrorMode,

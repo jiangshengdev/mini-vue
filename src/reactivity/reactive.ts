@@ -3,6 +3,7 @@
  */
 import { mutableHandlers } from './internals/index.ts'
 import type { ReactiveTarget } from './contracts/index.ts'
+import type { Reactive } from './types.ts'
 import type { PlainObject } from '@/shared/index.ts'
 import { isObject, isPlainObject } from '@/shared/index.ts'
 
@@ -77,11 +78,11 @@ function isSupportedTarget(target: unknown): target is ReactiveTarget {
  *
  * @public
  */
-export function reactive<T extends PlainObject>(target: T): T
+export function reactive<T extends PlainObject>(target: T): Reactive<T>
 /**
  * @public
  */
-export function reactive<T>(target: T[]): T[]
+export function reactive<T extends readonly unknown[]>(target: T): Reactive<T>
 /**
  * @public
  */

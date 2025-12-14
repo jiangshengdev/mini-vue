@@ -130,10 +130,10 @@ describe('runtime-error-channel', () => {
     setErrorHandler(handler)
 
     const error = new Error('before hook crash')
-    const runner = vi.fn()
+    const runner = vi.fn<() => void>()
     const afterRun = vi.fn<ErrorAfterHook>()
 
-    const invoke = () =>
+    const invoke = () => {
       runSilent(runner, {
         origin: errorContexts.effectRunner,
         handlerPhase: errorPhases.sync,
@@ -142,6 +142,7 @@ describe('runtime-error-channel', () => {
         },
         afterRun,
       })
+    }
 
     expect(invoke).not.toThrow()
     expect(runner).not.toHaveBeenCalled()
@@ -162,8 +163,10 @@ describe('runtime-error-channel', () => {
     const afterRun = vi.fn<ErrorAfterHook>()
 
     expect(() => {
-      runThrowing(
-        () => Promise.resolve(1),
+      void runThrowing(
+        async () => {
+          return 1
+        },
         {
           origin: errorContexts.effectRunner,
           handlerPhase: errorPhases.sync,
@@ -177,11 +180,14 @@ describe('runtime-error-channel', () => {
     const [, context, payload] = handler.mock.calls[0]
     const token = afterRun.mock.calls[0]?.[0]
 
+    expect(token).toBeDefined()
+    const ensuredToken = token!
+
     expect(context).toBe(errorContexts.effectRunner)
-    expect(token?.error).toBeInstanceOf(TypeError)
-    expect((token?.error as Error).message).toContain('Promise')
-    expect(payload?.token).toBe(token)
-    expect(token?.notified).toBe(true)
+    expect(ensuredToken.error).toBeInstanceOf(TypeError)
+    expect((ensuredToken.error as Error).message).toContain('Promise')
+    expect(payload?.token).toBe(ensuredToken)
+    expect(ensuredToken.notified).toBe(true)
   })
 
   it('runWithErrorChannel 在成功时会透传返回值并执行钩子', () => {

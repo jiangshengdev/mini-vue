@@ -22,7 +22,9 @@ describe('runtime-dom insertBefore 宿主实现', () => {
 
     other.append(anchor)
 
-    expect(() => domRendererOptions.insertBefore(parent, child, anchor)).toThrowError(DOMException)
+    expect(() => {
+      domRendererOptions.insertBefore(parent, child, anchor)
+    }).toThrowError(DOMException)
     expect(parent.contains(child)).toBe(false)
     expect(other.firstChild).toBe(anchor)
   })

@@ -14,7 +14,7 @@
 - 影响：带有 `class` 属性的 `<svg>` 节点在 patch 阶段会触发 `TypeError`，导致整次渲染失败，无法继续创建后续 DOM。
 - 提示：需要在处理 SVG 元素时改用 `setAttribute('class', ...)` 等通用路径，或基于 `ownerSVGElement` 判断写入方式。
 
-## 3. 字符串容器选择器为非法 CSS 时会直接抛出异常（待修复）
+## 3. 字符串容器选择器为非法 CSS 时会直接抛出异常（已修复）
 
 - 位置：`src/runtime-dom/create-app.ts`
 - 现状：`resolveContainer()` 在 `target` 为字符串时直接调用 `document.querySelector(target)`；当 `target` 是非法 CSS 选择器（如 `'#app['`）会抛出 `SyntaxError`，目前未捕获。

@@ -16,6 +16,15 @@ describe('jsx-runtime h helper', () => {
     expect(virtualNode.props).toBeUndefined()
   })
 
+  it('支持省略 props 直接传入可变 children', () => {
+    const childNode = h('span', {}, 'inner')
+    const virtualNode = h('div', undefined, 'text', childNode)
+
+    expect(virtualNode.children).toEqual(['text', childNode])
+    expect(virtualNode.props).toBeUndefined()
+    expect(virtualNode.key).toBeUndefined()
+  })
+
   it('保留其他 props 并正确归一化 children', () => {
     const virtualNode = h(
       'section',

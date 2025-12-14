@@ -48,6 +48,32 @@ describe('runtime-error-channel', () => {
     expect(secondToken.notified).toBe(false)
   })
 
+  it('dispatchRuntimeError 在不同 tick 仍会上报同一 error', async () => {
+    const handler = vi.fn<ErrorHandler>()
+
+    setErrorHandler(handler)
+
+    const error = new Error('tick crash')
+
+    const firstToken = dispatchError(error, {
+      origin: errorContexts.componentSetup,
+      handlerPhase: errorPhases.sync,
+    })
+
+    expect(firstToken.notified).toBe(true)
+    expect(handler).toHaveBeenCalledTimes(1)
+
+    await Promise.resolve()
+
+    const secondToken = dispatchError(error, {
+      origin: errorContexts.effectRunner,
+      handlerPhase: errorPhases.sync,
+    })
+
+    expect(secondToken.notified).toBe(true)
+    expect(handler).toHaveBeenCalledTimes(2)
+  })
+
   it('嵌套 runWithErrorChannelThrow 共享同一错误时只通知一次', () => {
     const handler = vi.fn<ErrorHandler>()
 
@@ -124,6 +150,37 @@ describe('runtime-error-channel', () => {
     expect(token?.notified).toBe(true)
   })
 
+  it('runThrowing 会把 primitive 包装成 Error 并同步抛出', () => {
+    const handler = vi.fn<ErrorHandler>()
+
+    setErrorHandler(handler)
+
+    try {
+      runThrowing(
+        () => {
+          throw 'boom'
+        },
+        {
+          origin: errorContexts.effectRunner,
+          handlerPhase: errorPhases.sync,
+        },
+      )
+
+      throw new Error('unreachable')
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error)
+
+      expect((error as Error).message).toBe('boom')
+      expect((error as Error & { cause: unknown }).cause).toBe('boom')
+    }
+
+    expect(handler).toHaveBeenCalledTimes(1)
+    const [error] = handler.mock.calls[0]
+
+    expect(error).toBeInstanceOf(Error)
+    expect((error as Error & { cause: unknown }).cause).toBe('boom')
+  })
+
   it('beforeRun 抛错也会触发错误通道且执行 afterRun', () => {
     const handler = vi.fn<ErrorHandler>()
 
@@ -185,7 +242,7 @@ describe('runtime-error-channel', () => {
 
     expect(context).toBe(errorContexts.effectRunner)
     expect(ensuredToken.error).toBeInstanceOf(TypeError)
-    expect((ensuredToken.error as Error).message).toContain('Promise')
+    expect(ensuredToken.error.message).toContain('Promise')
     expect(payload?.token).toBe(ensuredToken)
     expect(ensuredToken.notified).toBe(true)
   })
@@ -262,6 +319,32 @@ describe('runtime-error-channel', () => {
     expect(payload?.token?.notified).toBe(true)
   })
 
+  it('runSilent 会把 primitive 包装成 Error 并通知 handler', () => {
+    const handler = vi.fn<ErrorHandler>()
+
+    setErrorHandler(handler)
+
+    expect(() => {
+      runSilent(
+        () => {
+          throw 1
+        },
+        {
+          origin: errorContexts.scheduler,
+          handlerPhase: errorPhases.sync,
+        },
+      )
+    }).not.toThrow()
+
+    expect(handler).toHaveBeenCalledTimes(1)
+
+    const [error] = handler.mock.calls[0]
+
+    expect(error).toBeInstanceOf(Error)
+    expect(error.message).toBe('1')
+    expect((error as Error & { cause: unknown }).cause).toBe(1)
+  })
+
   it('handler 未注册且 handlerPhase 为 async 时会异步抛错', () => {
     const error = new Error('async scheduler crash')
     const originalQueueMicrotask = globalThis.queueMicrotask
@@ -289,9 +372,10 @@ describe('runtime-error-channel', () => {
         )
       }).not.toThrow()
 
-      expect(queueSpy).toHaveBeenCalledTimes(1)
-      expect(callbacks).toHaveLength(1)
-      const queuedCallback = callbacks[0]
+      expect(queueSpy).toHaveBeenCalledTimes(2)
+      expect(callbacks).toHaveLength(2)
+
+      const queuedCallback = callbacks.at(-1)!
 
       expect(queuedCallback).toThrow(error)
     } finally {

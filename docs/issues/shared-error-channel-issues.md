@@ -36,12 +36,20 @@
 - 处理：
   - 通过 `ThrowingErrorRunOptions` 类型将 `runThrowing` 的 `handlerPhase` 限定为 `sync`，编译期阻止异步阶段配置，避免双重抛错。
 
-## 4. 错误去重 registry 使用 `WeakSet`，无法对原始类型错误去重（待修复）
+## 4. 错误通道允许抛出非 `Error`，导致对外 API 与错误语义不稳定（已修复）
 
-- 位置：`src/shared/error-channel.ts`
-- 现状：`notifiedErrorRegistry` 为 `WeakSet<PlainObject>`，并且只对 `isObject(error)` 为 true 的错误做去重登记。
+- 位置：`src/shared/error-channel.ts`、`src/shared/error-handling.ts`
+- 现状（修复前）：
+  - `runWithChannel` 捕获到的异常类型为 `unknown`，可能是字符串/数字等原始值。
+  - 对外 `ErrorHandler` 与 `ErrorToken.error` 也使用 `unknown`，导致调用方必须自行兜底转换，错误语义（stack/message/cause）不稳定。
 - 影响：
-  - 当异常为字符串、数字等原始类型时无法去重，可能在重试/重复触发场景下多次进入错误处理器，造成噪声。
-- 提示：
-  - 采用“双轨”结构：对象错误用 `WeakSet<object>` 去重，原始类型错误用 `Set<unknown>`（或 `Set<string | number | symbol | bigint | boolean | null | undefined>`）去重。
-  - 或者在错误通道统一将非 Error/非对象规范化为 Error 实例（注意保留 `cause`），再用对象去重。
+  - 调用方（以及框架内部上报链路）可能接收到非 `Error`，不利于调试与日志聚合。
+  - 也会弱化错误去重的有效性：非 `Error` 无法依赖对象引用语义进行一致处理。
+- 处理：
+  - 在错误捕获点统一做异常规范化：非 `Error` 统一包装为 `new Error(String(raw), { cause: raw })`，并将规范化后的 `Error` 用于上报、写入 token 以及 `runThrowing` 的重新抛出。
+  - 对外 API 收紧为 `Error`：`ErrorHandler(error: Error, ...)`、`ErrorToken.error: Error`、`dispatchError(error: Error, ...)`、`handleError(error: Error, ...)`。
+- 说明：详细规格见 `docs/issues/error-channel-normalization-spec.md`。
+
+补充（去重策略）：
+
+- `dispatchError` 的错误去重为 tick-local：同一 tick 内同一 `Error` 引用只通知一次，并会在 microtask 阶段重置 registry，确保跨 tick 再次抛出同一 `Error` 仍会再次上报。

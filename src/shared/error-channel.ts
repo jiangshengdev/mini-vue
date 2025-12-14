@@ -84,8 +84,8 @@ interface ErrorDispatchOptions {
  * @beta
  */
 export interface ErrorToken {
-  /** 捕获到的原始异常对象。 */
-  readonly error: unknown
+  /** 捕获到的异常对象（框架侧保证为 Error）。 */
+  readonly error: Error
   /** 异常来源标签，便于上层辨别来源。 */
   readonly origin: ErrorContext
   /** 调度所处阶段，帮助区分 sync/async 管线。 */
@@ -125,15 +125,35 @@ export type ThrowingErrorRunOptions = ErrorRunOptions & {
 /**
  * 记录已通知的错误对象，避免在同一对象上重复上报。
  */
-const notifiedErrorRegistry = new WeakSet<PlainObject>()
+let notifiedErrorRegistry = new WeakSet<Error>()
+let resetNotifiedRegistryScheduled = false
+
+function scheduleResetNotifiedRegistry(): void {
+  if (resetNotifiedRegistryScheduled) {
+    return
+  }
+
+  resetNotifiedRegistryScheduled = true
+
+  queueMicrotask(() => {
+    notifiedErrorRegistry = new WeakSet<Error>()
+    resetNotifiedRegistryScheduled = false
+  })
+}
+
+function normalizeError(error: unknown): Error {
+  if (error instanceof Error) {
+    return error
+  }
+
+  return new Error(String(error), { cause: error })
+}
 
 /**
  * 将捕获到的异常交由错误处理器统一上报，并返回调度 token。
  */
-export function dispatchError(error: unknown, dispatchOptions: ErrorDispatchOptions): ErrorToken {
-  /* 仅对对象类型做去重记录，原始类型直接透传。 */
-  const shouldTrack = isObject(error)
-  const alreadyNotified = shouldTrack && notifiedErrorRegistry.has(error)
+export function dispatchError(error: Error, dispatchOptions: ErrorDispatchOptions): ErrorToken {
+  const alreadyNotified = notifiedErrorRegistry.has(error)
   const shouldNotify = !alreadyNotified
 
   /* 构造 token 以记录本次调度的真实触发信息，供钩子与上层使用。 */
@@ -150,10 +170,9 @@ export function dispatchError(error: unknown, dispatchOptions: ErrorDispatchOpti
     return token
   }
 
-  /* 记录已上报的对象，防止递归触发导致重复告警。 */
-  if (shouldTrack) {
-    notifiedErrorRegistry.add(error)
-  }
+  /* 记录已上报的对象，并在当前 tick 结束后重置去重表。 */
+  notifiedErrorRegistry.add(error)
+  scheduleResetNotifiedRegistry()
 
   /* 判断当前 dispatch 是否处于异步阶段。 */
   const isAsyncPhase = dispatchOptions.handlerPhase === errorPhases.async
@@ -210,12 +229,14 @@ function runWithChannel<T>(
 
     return result
   } catch (error) {
-    /* 将异常交给错误通道统一调度，并获得可观测 token。 */
-    token = dispatchError(error, options)
+    const normalizedError = normalizeError(error)
 
-    /* 同步传播策略需要立即抛出原始异常。 */
+    /* 将异常交给错误通道统一调度，并获得可观测 token。 */
+    token = dispatchError(normalizedError, options)
+
+    /* 同步传播策略需要立即抛出规范化后的异常。 */
     if (propagate === errorMode.throw) {
-      throw error
+      throw normalizedError
     }
 
     /* 静默模式下返回 undefined，让调用方自行判断。 */

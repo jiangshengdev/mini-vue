@@ -21,7 +21,7 @@ export interface ErrorPayload {
  *
  * @beta
  */
-export type ErrorHandler = (error: unknown, context: ErrorContext, payload?: ErrorPayload) => void
+export type ErrorHandler = (error: Error, context: ErrorContext, payload?: ErrorPayload) => void
 
 /**
  * 缓存当前生效的错误处理器，未设置时保持 undefined 以便回退默认行为。
@@ -42,11 +42,7 @@ export function setErrorHandler(handler?: ErrorHandler): void {
 /**
  * 在内部捕获异常时调用，统一调度至用户提供的处理器或兜底方案。
  */
-export function handleError(
-  error: unknown,
-  payload: ErrorPayload,
-  shouldRethrowAsync = true,
-): void {
+export function handleError(error: Error, payload: ErrorPayload, shouldRethrowAsync = true): void {
   const { origin } = payload
 
   /* 优先通过用户注册的处理器上报，以便框架层做统一告警。 */

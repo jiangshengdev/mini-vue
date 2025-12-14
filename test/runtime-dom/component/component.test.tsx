@@ -11,7 +11,7 @@ describe('runtime-dom component reactivity', () => {
     setErrorHandler(undefined)
   })
 
-  it('规整 children 时会复制 props 避免污染外部引用', () => {
+  it('should clone props when normalizing children to avoid polluting external references', () => {
     const rawProps = { note: 'outer' }
     let receivedProps: unknown
 

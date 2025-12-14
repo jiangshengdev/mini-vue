@@ -84,7 +84,7 @@ interface ErrorDispatchOptions {
  * @beta
  */
 export interface ErrorToken {
-  /** 捕获到的原始异常对象。 */
+  /** 捕获到的异常对象（可能已做规范化）。 */
   readonly error: unknown
   /** 异常来源标签，便于上层辨别来源。 */
   readonly origin: ErrorContext

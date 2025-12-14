@@ -130,22 +130,20 @@ function normalizeError(error: unknown): Error | PlainObject {
   const cached = normalizedPrimitiveErrorCache.get(error)
 
   if (cached) {
-    normalizedPrimitiveErrorCache.set(error, cached)
-
     return cached
   }
 
   const normalized = new Error(String(error), { cause: error })
 
-  if (normalizedPrimitiveErrorCache.size >= normalizedPrimitiveErrorCacheLimit) {
+  normalizedPrimitiveErrorCache.set(error, normalized)
+
+  if (normalizedPrimitiveErrorCache.size > normalizedPrimitiveErrorCacheLimit) {
     const oldest = normalizedPrimitiveErrorCache.keys().next().value
 
     if (oldest !== undefined) {
       normalizedPrimitiveErrorCache.delete(oldest)
     }
   }
-
-  normalizedPrimitiveErrorCache.set(error, normalized)
 
   return normalized
 }

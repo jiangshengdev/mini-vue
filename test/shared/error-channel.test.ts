@@ -48,7 +48,7 @@ describe('runtime-error-channel', () => {
     expect(secondToken.notified).toBe(false)
   })
 
-  it('原始类型错误会被规范化为 Error 并参与去重', () => {
+  it('primitive errors are normalized to Error and deduped', () => {
     const handler = vi.fn<ErrorHandler>()
 
     setErrorHandler(handler)

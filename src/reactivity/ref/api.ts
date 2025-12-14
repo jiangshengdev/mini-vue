@@ -1,5 +1,6 @@
 import { isReactive } from '../reactive.ts'
 import { refFlag } from '../contracts/index.ts'
+import { runWithPausedTracking } from '../internals/index.ts'
 import { ObjectRefImpl, RefImpl } from './impl.ts'
 import type { Ref } from './types.ts'
 import type { PlainObject } from '@/shared/index.ts'
@@ -49,7 +50,7 @@ export function unref<T>(value: T | Ref<T>): T {
  * @public
  */
 export function toRef<T extends PlainObject, K extends keyof T>(target: T, key: K): Ref<T[K]> {
-  const existing = target[key]
+  const existing = runWithPausedTracking(() => target[key])
 
   /* 属性已是 Ref 时直接复用，避免丢失响应式关系。 */
   if (isRef(existing)) {

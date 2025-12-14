@@ -1,7 +1,11 @@
 import type { DependencyBucket, EffectInstance } from '../contracts/index.ts'
 import { effectStack } from '../effect.ts'
 import type { PlainObject } from '@/shared/index.ts'
-import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
+import { __INTERNAL_DEV__, errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
+
+/* Tracking control relies on module-level state and targets the single-threaded mini runtime. */
+let shouldTrack = true
+const trackingStack: boolean[] = []
 
 /**
  * 收集当前活跃的副作用到依赖集合，确保后续触发时能够回调。
@@ -11,6 +15,10 @@ export function trackEffect(dependencyBucket: DependencyBucket, debugInfo?: Plai
 
   /* 没有当前副作用入栈时直接返回，避免空收集开销 */
   if (!currentEffect) {
+    return
+  }
+
+  if (!shouldTrack) {
     return
   }
 
@@ -60,6 +68,37 @@ function depSnapshot(dependencyBucket: DependencyBucket): DependencyBucket {
 function shouldRun(effect: EffectInstance): boolean {
   /* 避免重复执行当前 effect，并确保目标 effect 尚未停止 */
   return effect !== effectStack.current && effect.active
+}
+
+/** Pause dependency tracking for side-effect-free reads. */
+export function pauseTracking(): void {
+  trackingStack.push(shouldTrack)
+  shouldTrack = false
+}
+
+/** Restore the previous tracking state. */
+export function resetTracking(): void {
+  const previous = trackingStack.pop()
+
+  if (previous === undefined) {
+    if (__INTERNAL_DEV__) {
+      console.warn('[reactivity] resetTracking called without matching pauseTracking')
+    }
+
+    return
+  }
+
+  shouldTrack = previous
+}
+
+/** Execute a callback with tracking temporarily disabled. */
+export function runWithPausedTracking<T>(fn: () => T): T {
+  pauseTracking()
+  try {
+    return fn()
+  } finally {
+    resetTracking()
+  }
 }
 
 /**

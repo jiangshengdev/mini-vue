@@ -88,7 +88,7 @@ export function resetTracking(): void {
 
   const previous = trackingStack.pop()!
 
-  shouldTrack = previous ?? true
+  shouldTrack = previous
 }
 
 /**

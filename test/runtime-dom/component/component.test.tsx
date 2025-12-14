@@ -32,7 +32,7 @@ describe('runtime-dom component reactivity', () => {
     )
 
     expect(Array.isArray(singleChildren)).toBe(false)
-    expect((singleChildren as { type: string }).type).toBe('span')
+    expect(singleChildren).toMatchObject({ type: 'span' })
     expect(within(singleContainer).getByText('one')).toBeInTheDocument()
 
     let multiChildren: unknown
@@ -59,7 +59,7 @@ describe('runtime-dom component reactivity', () => {
     const [firstChild, secondChild] = multiChildren as unknown[]
 
     expect(firstChild).toBe('text child')
-    expect((secondChild as { type: string }).type).toBe('span')
+    expect(secondChild).toMatchObject({ type: 'span' })
     expect(within(multipleContainer).getByText('text child')).toBeInTheDocument()
     expect(within(multipleContainer).getByText('element child')).toBeInTheDocument()
   })

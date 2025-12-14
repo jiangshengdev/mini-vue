@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { within } from '@testing-library/dom'
 import { createTestContainer } from '../../setup.ts'
-import type { SetupComponent } from '@/index.ts'
+import type { ElementRef, SetupComponent } from '@/index.ts'
 import { createApp, reactive, ref, render } from '@/index.ts'
 
 describe('runtime-dom ref 回调', () => {
@@ -88,9 +88,10 @@ describe('runtime-dom ref 回调', () => {
 
   it('render 遇到非函数/Ref 的 ref 值时按普通属性处理', () => {
     const container = createTestContainer()
+    const invalidRef = 'plain' as unknown as ElementRef
 
     render(
-      <button type="button" ref={'plain' as any}>
+      <button type="button" ref={invalidRef}>
         click
       </button>,
       container,

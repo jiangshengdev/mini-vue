@@ -39,7 +39,7 @@ describe('runtime-dom component reactivity', () => {
     const { children } = propsSnapshot
 
     if (!Array.isArray(children)) {
-      throw new Error('children should be normalized to array')
+      throw new TypeError('children should be normalized to array')
     }
 
     expect(children).toHaveLength(2)

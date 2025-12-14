@@ -130,12 +130,17 @@ describe('runtime-error-channel', () => {
 
     const expected = Symbol('ok')
 
-    const result = runThrowing(() => expected, {
-      origin: errorContexts.effectRunner,
-      handlerPhase: errorPhases.sync,
-      beforeRun,
-      afterRun,
-    })
+    const result = runThrowing(
+      () => {
+        return expected
+      },
+      {
+        origin: errorContexts.effectRunner,
+        handlerPhase: errorPhases.sync,
+        beforeRun,
+        afterRun,
+      },
+    )
 
     expect(result).toBe(expected)
     expect(beforeRun).toHaveBeenCalledTimes(1)
@@ -145,12 +150,17 @@ describe('runtime-error-channel', () => {
     const silentBefore = vi.fn()
     const silentAfter = vi.fn<ErrorAfterHook>()
 
-    const silentResult = runSilent(() => 1, {
-      origin: errorContexts.scheduler,
-      handlerPhase: errorPhases.sync,
-      beforeRun: silentBefore,
-      afterRun: silentAfter,
-    })
+    const silentResult = runSilent(
+      () => {
+        return 1
+      },
+      {
+        origin: errorContexts.scheduler,
+        handlerPhase: errorPhases.sync,
+        beforeRun: silentBefore,
+        afterRun: silentAfter,
+      },
+    )
 
     expect(silentResult).toBe(1)
     expect(silentBefore).toHaveBeenCalledTimes(1)

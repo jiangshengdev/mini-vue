@@ -1,5 +1,5 @@
-import type { InjectionToken } from '@/shared/injection.ts'
 import { getCurrentInstance } from './component/context.ts'
+import type { InjectionToken } from '@/shared/injection.ts'
 
 /**
  * 在当前组件实例上提供依赖，供后代组件通过 `inject()` 读取。

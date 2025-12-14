@@ -26,7 +26,7 @@ describe('runtime-dom attrs props', () => {
 
     expect(input.hasAttribute('disabled')).toBe(false)
     expect(input.hasAttribute('title')).toBe(false)
-    expect(input.hasAttribute('data-flag')).toBe(false)
+    expect(Object.hasOwn(input.dataset, 'flag')).toBe(false)
   })
 
   it('空值 style 会移除 style 属性', () => {

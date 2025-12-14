@@ -1,11 +1,11 @@
 import type { RootRenderFunction } from './renderer.ts'
 import { setCurrentAppContext, unsetCurrentAppContext } from './app-context.ts'
+import type { InjectionKey, InjectionToken } from './provide-inject.ts'
 import type { ElementProps, SetupComponent } from '@/jsx-foundation/index.ts'
 import { createVirtualNode } from '@/jsx-foundation/index.ts'
 import type { PluginInstallApp } from '@/shared/plugin.ts'
 import type { PlainObject, PropsShape } from '@/shared/index.ts'
 import { errorContexts, errorPhases, runThrowing } from '@/shared/index.ts'
-import type { InjectionKey, InjectionToken } from './provide-inject.ts'
 
 /** 应用生命周期状态常量，区分是否已挂载。 */
 const appLifecycleStatus = {

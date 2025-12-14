@@ -168,11 +168,15 @@ export function dispatchError(error: unknown, dispatchOptions: ErrorDispatchOpti
 
 function isThenable(value: unknown): value is PromiseLike<unknown> {
   /* Promise/thenable 可能是对象或函数，需兼容两者形态。 */
-  if (!isObject(value) && typeof value !== 'function') {
+  if (typeof value === 'function') {
+    return 'then' in value && typeof (value as { then?: unknown }).then === 'function'
+  }
+
+  if (!isObject(value)) {
     return false
   }
 
-  return typeof (value as { then?: unknown }).then === 'function'
+  return 'then' in value && typeof (value as { then?: unknown }).then === 'function'
 }
 
 function runWithChannel<T>(
@@ -192,7 +196,7 @@ function runWithChannel<T>(
 
     /* 明确拒绝 Promise/thenable runner，避免异步阶段漏报与提前清理。 */
     if (isThenable(result)) {
-      throw new TypeError('runWithChannel: runner 不支持 Promise/thenable 返回值')
+      throw new TypeError('runWithChannel: runner 不支持返回 Promise 或 thenable 值')
     }
 
     return result

@@ -124,7 +124,7 @@ describe('runtime-error-channel', () => {
     expect(token?.notified).toBe(true)
   })
 
-  it('runWithErrorChannel 会拒绝 Promise runner 并给出明确错误', () => {
+  it('runThrowing 会拒绝 Promise runner 并给出明确错误', () => {
     const handler = vi.fn<ErrorHandler>()
 
     setErrorHandler(handler)
@@ -140,7 +140,7 @@ describe('runtime-error-channel', () => {
           afterRun,
         },
       )
-    }).toThrowError('Promise/thenable')
+    }).toThrowError(/Promise/)
 
     expect(handler).toHaveBeenCalledTimes(1)
 
@@ -149,7 +149,7 @@ describe('runtime-error-channel', () => {
 
     expect(context).toBe(errorContexts.effectRunner)
     expect(token?.error).toBeInstanceOf(TypeError)
-    expect((token?.error as Error).message).toContain('Promise/thenable')
+    expect((token?.error as Error).message).toContain('Promise')
     expect(payload?.token).toBe(token)
     expect(token?.notified).toBe(true)
   })

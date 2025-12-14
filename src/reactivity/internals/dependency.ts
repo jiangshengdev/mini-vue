@@ -78,10 +78,6 @@ export function pauseTracking(): void {
 
 /** Restore the previous tracking state. */
 export function resetTracking(): void {
-  if (trackingStack.length === 0) {
-    return
-  }
-
   const previous = trackingStack.pop()
 
   if (previous === undefined) {

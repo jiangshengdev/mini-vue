@@ -7,6 +7,11 @@ import type { AppInstance } from '@/runtime-core/index.ts'
 import { createAppInstance, createRenderer } from '@/runtime-core/index.ts'
 import type { PropsShape } from '@/shared/index.ts'
 
+type HotContext = {
+  on(event: string, handler: () => void): void
+  dispose(handler: () => void): void
+}
+
 const { render: renderDomRootImpl, unmount: unmountContainer } = createRenderer(domRendererOptions)
 
 /**
@@ -162,7 +167,9 @@ export function createApp(rootComponent: SetupComponent, rootProps?: PropsShape)
  */
 function ensureDomHmrLifecycle(state: DomAppState): void {
   /* 仅在 Vite Dev 环境下存在 `import.meta.hot`。 */
-  const { hot } = import.meta
+  const hot =
+    (globalThis as { __MINI_VUE_HMR_HOT__?: HotContext }).__MINI_VUE_HMR_HOT__ ??
+    (import.meta as { hot?: HotContext }).hot
 
   if (!hot) {
     return

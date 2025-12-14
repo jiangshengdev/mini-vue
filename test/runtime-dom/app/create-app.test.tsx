@@ -10,6 +10,46 @@ const App: SetupComponent = () => {
   }
 }
 
+type HotHandler = () => void
+
+interface HotMock {
+  on(event: string, handler: HotHandler): void
+  dispose(handler: HotHandler): void
+  trigger(event: string): void
+  triggerDispose(): void
+  getHandlers(event: string): HotHandler[]
+}
+
+function createHotMock(): HotMock {
+  const handlers = new Map<string, HotHandler[]>()
+  const disposeHandlers: HotHandler[] = []
+
+  return {
+    on(event, handler) {
+      const existing = handlers.get(event) ?? []
+
+      existing.push(handler)
+      handlers.set(event, existing)
+    },
+    dispose(handler) {
+      disposeHandlers.push(handler)
+    },
+    trigger(event) {
+      handlers.get(event)?.forEach((handler) => {
+        handler()
+      })
+    },
+    triggerDispose() {
+      disposeHandlers.forEach((handler) => {
+        handler()
+      })
+    },
+    getHandlers(event) {
+      return handlers.get(event) ?? []
+    },
+  }
+}
+
 describe('runtime-dom createApp', () => {
   it('支持通过选择器挂载', () => {
     const host = createTestContainer()
@@ -117,5 +157,49 @@ describe('runtime-dom createApp', () => {
 
     state.on = false
     expect(renderSpy).toHaveBeenCalledTimes(2)
+  })
+
+  it('在 Vite HMR 下会卸载并按原容器重挂', () => {
+    const globalWithHot = globalThis as { __MINI_VUE_HMR_HOT__?: HotMock }
+    const originalHot = globalWithHot.__MINI_VUE_HMR_HOT__
+    const hotMock = createHotMock()
+
+    globalWithHot.__MINI_VUE_HMR_HOT__ = hotMock
+
+    const renderSpy = vi.fn()
+
+    const Root: SetupComponent = () => {
+      return () => {
+        renderSpy()
+
+        return <div>hmr-root</div>
+      }
+    }
+
+    const host = createTestContainer()
+    const app = createApp(Root)
+
+    expect(hotMock.getHandlers('vite:beforeUpdate')).not.toHaveLength(0)
+
+    app.mount(host)
+
+    expect(renderSpy).toHaveBeenCalledTimes(1)
+    expect(within(host).getByText('hmr-root')).toBeInTheDocument()
+
+    hotMock.trigger('vite:beforeUpdate')
+    expect(host).toBeEmptyDOMElement()
+
+    hotMock.trigger('vite:afterUpdate')
+    expect(renderSpy).toHaveBeenCalledTimes(2)
+    expect(within(host).getByText('hmr-root')).toBeInTheDocument()
+
+    hotMock.triggerDispose()
+    expect(host).toBeEmptyDOMElement()
+
+    if (originalHot === undefined) {
+      delete globalWithHot.__MINI_VUE_HMR_HOT__
+    } else {
+      globalWithHot.__MINI_VUE_HMR_HOT__ = originalHot
+    }
   })
 })

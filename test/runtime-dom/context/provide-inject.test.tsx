@@ -47,6 +47,34 @@ describe('runtime-dom: provide/inject', () => {
     app.unmount()
   })
 
+  it('injects value provided by app.provide', () => {
+    const injectedText = ref('')
+
+    const Child: SetupComponent = () => {
+      injectedText.value = inject<string>('k') ?? ''
+
+      return () => {
+        return undefined
+      }
+    }
+
+    const Root: SetupComponent = () => {
+      return () => {
+        return <Child />
+      }
+    }
+
+    const container = createTestContainer()
+    const app = createApp(Root)
+
+    app.provide('k', 'v')
+    app.mount(container)
+
+    expect(injectedText.value).toBe('v')
+
+    app.unmount()
+  })
+
   it('returns defaultValue when key is missing', () => {
     const injectedText = ref('')
 

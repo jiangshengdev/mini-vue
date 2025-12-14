@@ -122,7 +122,7 @@ const notifiedErrorRegistry = new WeakSet<Error | PlainObject>()
 const normalizedPrimitiveErrorCacheLimit = 50
 const normalizedPrimitiveErrorCache = new Map<unknown, Error>()
 
-function normalizeError(error: unknown): object {
+function normalizeError(error: unknown): Error | PlainObject {
   if (error instanceof Error || isObject(error)) {
     return error
   }
@@ -130,7 +130,6 @@ function normalizeError(error: unknown): object {
   const cached = normalizedPrimitiveErrorCache.get(error)
 
   if (cached) {
-    normalizedPrimitiveErrorCache.delete(error)
     normalizedPrimitiveErrorCache.set(error, cached)
 
     return cached

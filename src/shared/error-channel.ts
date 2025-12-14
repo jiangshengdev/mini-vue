@@ -28,6 +28,8 @@ export const errorContexts = {
   appPluginUse: 'appPluginUse',
   /** `computed` setter 抛出的异常。 */
   computedSetter: 'computedSetter',
+  /** DOM 宿主解析容器选择器时抛出的异常。 */
+  domContainerResolve: 'domContainerResolve',
 } as const
 /**
  * @beta

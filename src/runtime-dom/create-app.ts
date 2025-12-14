@@ -5,6 +5,7 @@ import { domRendererOptions } from './renderer-options.ts'
 import type { SetupComponent } from '@/jsx-foundation/index.ts'
 import type { AppInstance } from '@/runtime-core/index.ts'
 import { createAppInstance, createRenderer } from '@/runtime-core/index.ts'
+import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
 import type { PropsShape } from '@/shared/index.ts'
 
 const { render: renderDomRootImpl, unmount: unmountContainer } = createRenderer(domRendererOptions)
@@ -48,15 +49,14 @@ interface DomAppHmrState {
 function resolveContainer(target: string | Element): Element | undefined {
   /* 字符串容器走 querySelector，以支持常见挂载写法。 */
   if (typeof target === 'string') {
-    try {
-      return document.querySelector(target) ?? undefined
-    } catch (error) {
-      if (error instanceof DOMException) {
-        return undefined
-      }
-
-      throw error
-    }
+    return runSilent(
+      () => document.querySelector(target) ?? undefined,
+      {
+        origin: errorContexts.domContainerResolve,
+        handlerPhase: errorPhases.sync,
+        meta: { selector: target },
+      },
+    )
   }
 
   return target

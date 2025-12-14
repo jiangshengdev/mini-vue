@@ -25,8 +25,23 @@ export const domRendererOptions: RendererOptions<Node, Element, DocumentFragment
     parent.append(child)
   },
   /** 在指定锚点前插入子节点，保持原有兄弟顺序。 */
-  insertBefore(_parent, child, anchor): void {
-    ;(anchor as ChildNode).before(child)
+  insertBefore(parent, child, anchor): void {
+    if (!anchor) {
+      parent.append(child)
+
+      return
+    }
+
+    const anchorNode = anchor as ChildNode
+
+    if (anchorNode.parentNode !== parent) {
+      throw new DOMException(
+        'Failed to execute insertBefore: The node before which the new node is to be inserted is not a child of this node.',
+        'NotFoundError',
+      )
+    }
+
+    anchorNode.before(child)
   },
   /** 重置容器文本内容，相当于全量清空。 */
   clear(container): void {

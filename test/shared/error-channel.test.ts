@@ -174,11 +174,14 @@ describe('runtime-error-channel', () => {
     const [, context, payload] = handler.mock.calls[0]
     const token = afterRun.mock.calls[0]?.[0]
 
+    expect(token).toBeDefined()
+    const ensuredToken = token!
+
     expect(context).toBe(errorContexts.effectRunner)
-    expect(token?.error).toBeInstanceOf(TypeError)
-    expect((token?.error as Error).message).toContain('Promise')
-    expect(payload?.token).toBe(token)
-    expect(token?.notified).toBe(true)
+    expect(ensuredToken.error).toBeInstanceOf(TypeError)
+    expect((ensuredToken.error as Error).message).toContain('Promise')
+    expect(payload?.token).toBe(ensuredToken)
+    expect(ensuredToken.notified).toBe(true)
   })
 
   it('runWithErrorChannel 在成功时会透传返回值并执行钩子', () => {

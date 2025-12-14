@@ -37,7 +37,7 @@
 - 下一步：为数组查询方法做 instrumentations：优先用原始值查找失败时，再回退到用 `toRaw`/或将参数也转代理后再查找（策略需结合本仓库是否暴露 `toRaw` 决定）。
 - 测试建议：新增“reactive([raw]).includes(raw) 为 true / indexOf(raw) 为 0”的回归用例，并覆盖 `lastIndexOf`。
 
-## 5. `toRef` 在创建时读取 `target[key]` 导致错误的依赖收集（已验证）
+## 5. `toRef` 在创建时读取 `target[key]` 导致错误的依赖收集（已修复）
 
 - 位置：`src/reactivity/ref/api.ts`
 - 现状：`toRef` 为了复用已有 Ref，会先执行 `const existing = target[key]`。当 `target` 为响应式 Proxy 且当前存在活跃副作用时，该读取会触发 `mutableGet -> track(target, key)`，把外层 effect 错误地收集到该属性依赖中。

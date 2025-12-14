@@ -36,11 +36,13 @@ describe('runtime-dom component reactivity', () => {
     expect(receivedProps).not.toBe(rawProps)
     expect(receivedProps).toMatchObject({ note: 'outer' })
     const propsSnapshot = receivedProps as { children?: unknown }
+    const { children } = propsSnapshot
 
-    expect(Array.isArray(propsSnapshot.children)).toBe(true)
-    if (Array.isArray(propsSnapshot.children)) {
-      expect(propsSnapshot.children).toHaveLength(2)
+    if (!Array.isArray(children)) {
+      throw new Error('children should be normalized to array')
     }
+
+    expect(children).toHaveLength(2)
     expect(within(container).getByText('first')).toBeInTheDocument()
     expect(within(container).getByText('second')).toBeInTheDocument()
   })

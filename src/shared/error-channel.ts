@@ -168,15 +168,13 @@ export function dispatchError(error: unknown, dispatchOptions: ErrorDispatchOpti
 
 function isThenable(value: unknown): value is PromiseLike<unknown> {
   /* Promise/thenable 可能是对象或函数，需兼容两者形态。 */
-  if (typeof value === 'function') {
-    return 'then' in value && typeof (value as { then?: unknown }).then === 'function'
-  }
-
-  if (!isObject(value)) {
+  if (typeof value !== 'function' && !isObject(value)) {
     return false
   }
 
-  return 'then' in value && typeof (value as { then?: unknown }).then === 'function'
+  const maybeThen = (value as { then?: unknown }).then
+
+  return typeof maybeThen === 'function'
 }
 
 function runWithChannel<T>(

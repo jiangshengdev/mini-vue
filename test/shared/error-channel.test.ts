@@ -124,6 +124,36 @@ describe('runtime-error-channel', () => {
     expect(token?.notified).toBe(true)
   })
 
+  it('beforeRun 抛错也会触发错误通道且执行 afterRun', () => {
+    const handler = vi.fn<ErrorHandler>()
+
+    setErrorHandler(handler)
+
+    const error = new Error('before hook crash')
+    const runner = vi.fn()
+    const afterRun = vi.fn<ErrorAfterHook>()
+
+    const invoke = () =>
+      runSilent(runner, {
+        origin: errorContexts.effectRunner,
+        handlerPhase: errorPhases.sync,
+        beforeRun() {
+          throw error
+        },
+        afterRun,
+      })
+
+    expect(invoke).not.toThrow()
+    expect(runner).not.toHaveBeenCalled()
+    expect(handler).toHaveBeenCalledTimes(1)
+
+    const token = afterRun.mock.calls[0]?.[0]
+
+    expect(afterRun).toHaveBeenCalledTimes(1)
+    expect(token?.error).toBe(error)
+    expect(token?.notified).toBe(true)
+  })
+
   it('runWithErrorChannel 在成功时会透传返回值并执行钩子', () => {
     const beforeRun = vi.fn()
     const afterRun = vi.fn<ErrorAfterHook>()

@@ -17,7 +17,7 @@
 - 下一步：读取旧值应避免使用 `receiver` 驱动 getter（例如改为基于 `target` 取旧值，或在 set 阶段禁用追踪后再读取旧值）。
 - 测试建议：新增“effect 内仅 set getter 属性，不应追踪 getter 内部读取”的回归用例。
 
-## 3. `mutableGet` 对 `Ref` 值缺少自动解包，并会错误地对 Ref 做 `reactive` 包裹（已验证）
+## 3. `mutableGet` 对 `Ref` 值缺少自动解包，并会错误地对 Ref 做 `reactive` 包裹（已修复）
 
 - 位置：`src/reactivity/internals/base-handlers.ts`、`src/reactivity/reactive.ts`
 - 现状：`mutableGet` 只要命中 `isObject(rawValue)` 就会 `return reactive(rawValue)`。当属性值为 `RefImpl/ComputedRefImpl` 等 Ref 对象时，它不是普通对象/数组，当前 `reactive` 会直接抛 `TypeError: reactive 目前仅支持普通对象或数组`。

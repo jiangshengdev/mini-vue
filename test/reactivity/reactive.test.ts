@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isReactive, reactive } from '@/index.ts'
+import { isReactive, isRef, reactive, ref } from '@/index.ts'
 import type { PlainObject } from '@/shared/index.ts'
 
 describe('reactive', () => {
@@ -73,6 +73,22 @@ describe('reactive', () => {
 
     proxy[0].count = 2
     expect(raw[0].count).toBe(2)
+  })
+
+  it('对象属性为 Ref 时会自动解包', () => {
+    const count = ref(1)
+    const state = reactive({ count })
+
+    expect(state.count).toBe(1)
+
+    count.value = 2
+    expect(state.count).toBe(2)
+  })
+
+  it('数组索引上的 Ref 不会被自动解包', () => {
+    const list = reactive([ref(1)])
+
+    expect(isRef(list[0])).toBe(true)
   })
 
   it('同一数组重复代理保持幂等', () => {

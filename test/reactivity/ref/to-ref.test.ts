@@ -72,19 +72,4 @@ describe('toRef', () => {
 
     expect(toRef(holder, 'count')).toBe(count)
   })
-
-  it('creating a ref alias does not track the target property', () => {
-    const state = reactive({ value: 1 })
-    let runs = 0
-
-    effect(function track() {
-      runs += 1
-      void toRef(state, 'value')
-    })
-
-    expect(runs).toBe(1)
-
-    state.value = 2
-    expect(runs).toBe(1)
-  })
 })

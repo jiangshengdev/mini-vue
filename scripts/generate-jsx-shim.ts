@@ -39,7 +39,7 @@ async function resolvePackageName() {
 function prepareShimContent(rawContent: string, packageName: string) {
   const stripped = rawContent.replaceAll(importStripPattern, '')
   const normalizedBody = stripped.replace(/^\n+/, '')
-  const headerImport = `import type { ElementRef, ElementType as MiniElementType, PropsShape, VirtualNode } from '${packageName}'\n\n`
+  const headerImport = `import type { ElementRef, ElementType as VirtualNodeType, PropsShape, VirtualNode } from '${packageName}'\n\n`
   const result = `${headerImport}${normalizedBody}`
 
   return result.endsWith('\n') ? result : `${result}\n`

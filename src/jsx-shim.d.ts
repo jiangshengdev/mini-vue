@@ -1,4 +1,4 @@
-import type { ElementType as MiniElementType, VirtualNode } from '@/jsx-foundation/index.ts'
+import type { ElementType as VirtualNodeType, VirtualNode } from '@/jsx-foundation/index.ts'
 import type { ElementRef } from '@/runtime-dom/index.ts'
 import type { PropsShape } from '@/shared/index.ts'
 
@@ -11,7 +11,7 @@ declare global {
     type Element = VirtualNode
 
     /** JSX 标签名可以是原生标签、组件或 Fragment。 */
-    type ElementType = MiniElementType
+    type ElementType = VirtualNodeType
 
     /** 标记 children 对应的 props 键名，供 TS 推导使用。 */
     interface ElementChildrenAttribute {

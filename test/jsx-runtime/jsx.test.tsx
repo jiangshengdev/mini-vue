@@ -4,6 +4,7 @@ import { isVirtualNode, virtualNodeFlag } from '@/jsx-foundation/index.ts'
 /**
  * 这些用例通过真实 jsx 语法触发 TS 的自动 jsx 转换，
  * 从而间接验证 runtime 暴露的 `jsx` 函数行为是否符合预期。
+ * `jsxs` / `jsxDEV` 复用同一实现，无需重复校验。
  */
 describe('jsx-runtime automatic jsx helper', () => {
   it('归一化 props.children 并剔除剩余 props 中的 children', () => {

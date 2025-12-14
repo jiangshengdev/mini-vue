@@ -1,6 +1,6 @@
-import type { Ref } from '@/reactivity/index.ts'
 import type { SetupComponent } from '@/jsx-foundation/types.ts'
-import type { InjectionKey, InjectionToken } from '@/runtime-core/index.ts'
+import type { PluginInstallApp } from '@/shared/plugin.ts'
+import type { Ref } from '@/reactivity/index.ts'
 
 /**
  * 路由记录：定义原始 path 与对应组件的绑定关系。
@@ -45,12 +45,5 @@ export interface Router {
   /** 停止监听，适用于卸载阶段。 */
   stop: () => void
   /** 作为应用插件安装到 app 上（对齐 vue-router 使用方式）。 */
-  install: (app: {
-    /** 可选卸载钩子：存在时 router 会包装它以在卸载后自动 stop。 */
-    unmount?: () => void
-    /** 应用级依赖注入入口（泛型重载用于让 routerInjectionKey 具备类型推导）。 */
-    provide<T>(key: InjectionKey<T>, value: T): void
-    /** 非泛型 token 入口：用于兼容 string key 等场景。 */
-    provide(key: InjectionToken, value: unknown): void
-  }) => void
+  install: (app: PluginInstallApp) => void
 }

@@ -5,8 +5,8 @@ import { domRendererOptions } from './renderer-options.ts'
 import type { SetupComponent } from '@/jsx-foundation/index.ts'
 import type { AppInstance } from '@/runtime-core/index.ts'
 import { createAppInstance, createRenderer } from '@/runtime-core/index.ts'
-import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
 import type { PropsShape } from '@/shared/index.ts'
+import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
 
 const { render: renderDomRootImpl, unmount: unmountContainer } = createRenderer(domRendererOptions)
 

@@ -1,6 +1,6 @@
 import { describe, expect, expectTypeOf, it } from 'vitest'
-import { isReactive, isRef, reactive, ref } from '@/index.ts'
 import type { Ref } from '@/index.ts'
+import { isReactive, isRef, reactive, ref } from '@/index.ts'
 import type { PlainObject } from '@/shared/index.ts'
 
 describe('reactive', () => {

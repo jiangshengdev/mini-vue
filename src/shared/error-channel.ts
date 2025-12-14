@@ -146,17 +146,20 @@ function normalizeError(error: unknown): Error | PlainObject {
     }
   }
 
-  const normalized = new Error(normalizedMessage ?? String(error), { cause: error })
+  const fallbackMessage = normalizedMessage ?? String(error)
+  const normalizedMessageText =
+    fallbackMessage.length > 200 ? `${fallbackMessage.slice(0, 200)}…` : fallbackMessage
+  const normalized = new Error(normalizedMessageText, { cause: error })
 
-  normalizedPrimitiveErrorCache.set(error, normalized)
+  if (normalizedPrimitiveErrorCache.size >= normalizedPrimitiveErrorCacheLimit) {
+    const firstKey = normalizedPrimitiveErrorCache.keys().next().value
 
-  while (normalizedPrimitiveErrorCache.size > normalizedPrimitiveErrorCacheLimit) {
-    const oldest = normalizedPrimitiveErrorCache.keys().next().value
-
-    if (oldest !== undefined) {
-      normalizedPrimitiveErrorCache.delete(oldest)
+    if (firstKey !== undefined) {
+      normalizedPrimitiveErrorCache.delete(firstKey)
     }
   }
+
+  normalizedPrimitiveErrorCache.set(error, normalized)
 
   return normalized
 }

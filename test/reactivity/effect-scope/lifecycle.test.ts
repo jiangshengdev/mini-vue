@@ -11,6 +11,14 @@ import {
 } from '@/index.ts'
 import { errorContexts } from '@/shared/index.ts'
 
+const positionInParentKey = 'positionInParent' as const
+
+function getPositionInParent(scope: EffectScope): number | undefined {
+  const value: unknown = Reflect.get(scope, positionInParentKey)
+
+  return typeof value === 'number' ? value : undefined
+}
+
 describe('effectScope 生命周期与清理', () => {
   afterEach(() => {
     setErrorHandler(undefined)
@@ -122,13 +130,13 @@ describe('effectScope 生命周期与清理', () => {
       second = effectScope()
     })
 
-    expect((first as any).positionInParent).toBe(0)
-    expect((second as any).positionInParent).toBe(1)
+    expect(getPositionInParent(first)).toBe(0)
+    expect(getPositionInParent(second)).toBe(1)
 
     first.stop()
 
-    expect((first as any).positionInParent).toBeUndefined()
-    expect((second as any).positionInParent).toBe(0)
+    expect(getPositionInParent(first)).toBeUndefined()
+    expect(getPositionInParent(second)).toBe(0)
   })
 
   it('detached scope 不受父级 stop 影响且可单独清理', () => {

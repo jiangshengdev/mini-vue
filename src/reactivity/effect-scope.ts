@@ -181,6 +181,7 @@ export class EffectScope {
     }
 
     const removedPosition = scope.positionInParent
+
     scope.positionInParent = undefined
 
     const last = childScopes.pop()

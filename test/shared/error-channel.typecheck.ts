@@ -1,6 +1,8 @@
 import { errorContexts, errorPhases, runThrowing } from '@/shared/index.ts'
 
-const runner = () => {}
+const runner = () => {
+  return undefined
+}
 
 runThrowing(runner, {
   origin: errorContexts.effectRunner,

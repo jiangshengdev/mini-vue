@@ -171,13 +171,12 @@ function runWithChannel<T>(
   propagate: ErrorMode,
   options: ErrorRunOptions,
 ): T | undefined {
-  /* 在主逻辑前执行 before hook，便于构建错误上下文。 */
-  options.beforeRun?.()
-
   /* 保存 dispatch token 以便 finally 阶段透出调度结果。 */
   let token: ErrorToken | undefined
 
   try {
+    /* 在主逻辑前执行 before hook，便于构建错误上下文。 */
+    options.beforeRun?.()
     /* 尝试执行用户逻辑，一旦抛错交由 catch 统一处理。 */
     return runner()
   } catch (error) {

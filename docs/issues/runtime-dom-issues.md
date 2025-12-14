@@ -21,7 +21,7 @@
 - 影响：`createApp().mount(selector)` 会同步崩溃，且错误并非 “未找到容器” 的语义，导致定位成本较高。
 - 提示：对 `querySelector` 添加 try/catch（至少捕获 `SyntaxError`）并转换为更友好的错误信息或返回 `undefined` 走现有 “未找到容器” 分支。
 
-## 4. insertBefore 忽略 parent 且不兼容 anchor 为 null 的标准语义（待修复）
+## 4. insertBefore 忽略 parent 且不兼容 anchor 为 null 的标准语义（已修复）
 
 - 位置：`src/runtime-dom/renderer-options.ts`
 - 现状：`insertBefore(_parent, child, anchor)` 直接调用 `(anchor as ChildNode).before(child)`，忽略 `parent` 参数。

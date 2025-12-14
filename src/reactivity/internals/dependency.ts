@@ -3,6 +3,7 @@ import { effectStack } from '../effect.ts'
 import type { PlainObject } from '@/shared/index.ts'
 import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
 
+/* 本响应式实现基于单线程上下文，使用全局标记控制依赖收集状态。 */
 let shouldTrack = true
 const trackingStack: boolean[] = []
 
@@ -81,7 +82,11 @@ export function pauseTracking(): void {
  * 恢复到上一次的追踪状态。
  */
 export function resetTracking(): void {
-  const previous = trackingStack.pop()
+  if (trackingStack.length === 0) {
+    return
+  }
+
+  const previous = trackingStack.pop()!
 
   shouldTrack = previous ?? true
 }

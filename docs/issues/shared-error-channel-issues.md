@@ -23,7 +23,7 @@
   - 将 `beforeRun` 纳入同一个 `try/finally` 保护范围，保证只要执行过 `beforeRun`，最终就一定会执行 `afterRun`。
   - 如果需要区分“beforeRun 未成功”场景，可在 `afterRun` 侧根据 token 或额外标记做条件清理。
 
-## 3. `runThrowing` 与 `handlerPhase: 'async'` 组合会造成同步抛错 + 异步重抛的双重错误（已通过类型约束规避）
+## 3. `runThrowing` 与 `handlerPhase: 'async'` 组合会造成同步抛错 + 异步重抛的双重错误（已修复）
 
 - 位置：`src/shared/error-channel.ts`、`src/shared/error-handling.ts`
 - 现状：

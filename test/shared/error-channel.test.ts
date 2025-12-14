@@ -154,6 +154,36 @@ describe('runtime-error-channel', () => {
     expect(token?.notified).toBe(true)
   })
 
+  it('runThrowing 会拒绝 Promise runner 并给出明确错误', () => {
+    const handler = vi.fn<ErrorHandler>()
+
+    setErrorHandler(handler)
+
+    const afterRun = vi.fn<ErrorAfterHook>()
+
+    expect(() => {
+      runThrowing(
+        () => Promise.resolve(1),
+        {
+          origin: errorContexts.effectRunner,
+          handlerPhase: errorPhases.sync,
+          afterRun,
+        },
+      )
+    }).toThrowError(/Promise/)
+
+    expect(handler).toHaveBeenCalledTimes(1)
+
+    const [, context, payload] = handler.mock.calls[0]
+    const token = afterRun.mock.calls[0]?.[0]
+
+    expect(context).toBe(errorContexts.effectRunner)
+    expect(token?.error).toBeInstanceOf(TypeError)
+    expect((token?.error as Error).message).toContain('Promise')
+    expect(payload?.token).toBe(token)
+    expect(token?.notified).toBe(true)
+  })
+
   it('runWithErrorChannel 在成功时会透传返回值并执行钩子', () => {
     const beforeRun = vi.fn()
     const afterRun = vi.fn<ErrorAfterHook>()

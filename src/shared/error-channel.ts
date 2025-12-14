@@ -168,6 +168,18 @@ export function dispatchError(error: unknown, dispatchOptions: ErrorDispatchOpti
   return token
 }
 
+function isThenable(value: unknown): value is PromiseLike<unknown> {
+  /* Promise/thenable 规范允许对象或携带 then 方法的函数，需兼容两者形态。 */
+  if (typeof value !== 'function' && !isObject(value)) {
+    return false
+  }
+
+  const candidate = value as { then?: unknown }
+  const maybeThen = candidate.then
+
+  return 'then' in candidate && typeof maybeThen === 'function'
+}
+
 function runWithChannel<T>(
   runner: () => T,
   propagate: ErrorMode,
@@ -180,7 +192,14 @@ function runWithChannel<T>(
     /* 在主逻辑前执行 before hook，便于构建错误上下文。 */
     options.beforeRun?.()
     /* 尝试执行用户逻辑，一旦抛错交由 catch 统一处理。 */
-    return runner()
+    const result = runner()
+
+    /* 明确拒绝 Promise/thenable runner，避免异步阶段漏报与提前清理。 */
+    if (isThenable(result)) {
+      throw new TypeError('runWithChannel: runner does not support Promise or thenable return value')
+    }
+
+    return result
   } catch (error) {
     /* 将异常交给错误通道统一调度，并获得可观测 token。 */
     token = dispatchError(error, options)

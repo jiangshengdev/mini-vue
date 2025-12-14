@@ -139,7 +139,7 @@ function normalizeError(error: unknown): Error | PlainObject {
     normalizedMessage = error
   } else {
     try {
-      normalizedMessage = JSON.stringify(error) ?? undefined
+      normalizedMessage = JSON.stringify(error)
     } catch {
       normalizedMessage = undefined
     }
@@ -147,14 +147,12 @@ function normalizeError(error: unknown): Error | PlainObject {
 
   const normalized = new Error(normalizedMessage ?? String(error), { cause: error })
 
-  while (normalizedPrimitiveErrorCache.size >= normalizedPrimitiveErrorCacheLimit) {
+  if (normalizedPrimitiveErrorCache.size >= normalizedPrimitiveErrorCacheLimit) {
     const oldest = normalizedPrimitiveErrorCache.keys().next().value
 
-    if (oldest === undefined) {
-      break
+    if (oldest !== undefined) {
+      normalizedPrimitiveErrorCache.delete(oldest)
     }
-
-    normalizedPrimitiveErrorCache.delete(oldest)
   }
 
   normalizedPrimitiveErrorCache.set(error, normalized)

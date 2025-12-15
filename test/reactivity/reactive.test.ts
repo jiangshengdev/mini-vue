@@ -1,6 +1,6 @@
 import { describe, expect, expectTypeOf, it } from 'vitest'
 import type { Ref } from '@/index.ts'
-import { isReactive, isRef, reactive, ref } from '@/index.ts'
+import { effect, isReactive, isRef, reactive, ref } from '@/index.ts'
 import type { PlainObject } from '@/shared/index.ts'
 
 describe('reactive', () => {
@@ -157,5 +157,30 @@ describe('reactive', () => {
         return reactive(value)
       }).toThrowError(new TypeError('reactive 目前仅支持普通对象或数组'))
     }
+  })
+
+  it('写入阶段读取旧值不会意外收集依赖', () => {
+    const state = reactive({
+      _v: 0,
+      get v() {
+        return this._v
+      },
+      set v(next: number) {
+        this._v = next
+      },
+    })
+
+    let runs = 0
+
+    effect(function writeOnly() {
+      runs += 1
+      state.v = 1
+    })
+
+    expect(runs).toBe(1)
+
+    /* 若 set 内部读旧值导致 getter 收集依赖，则这里会触发 writeOnly 重跑。 */
+    state._v = 2
+    expect(runs).toBe(1)
   })
 })

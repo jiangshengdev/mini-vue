@@ -72,4 +72,51 @@ describe('toRef', () => {
 
     expect(toRef(holder, 'count')).toBe(count)
   })
+
+  it('创建 toRef 不应触发依赖收集', () => {
+    const state = reactive({ count: 0 })
+    let runs = 0
+
+    effect(function createOnly() {
+      runs += 1
+      void toRef(state, 'count')
+    })
+
+    expect(runs).toBe(1)
+
+    state.count += 1
+    expect(runs).toBe(1)
+  })
+
+  it('在响应式对象上属性为 ref 时也应直接复用（避免解包影响）', () => {
+    const inner = ref(0)
+    const state = reactive({ count: inner })
+
+    expect(toRef(state, 'count')).toBe(inner)
+  })
+
+  it('ObjectRefImpl 写入前读取旧值不应在写入阶段意外收集依赖', () => {
+    const source = reactive({ n: 0 })
+    const holder = {
+      get count() {
+        return source.n
+      },
+      set count(_next: number) {
+        // No-op
+      },
+    }
+
+    const countRef = toRef(holder, 'count')
+    let runs = 0
+
+    effect(function writeOnly() {
+      runs += 1
+      countRef.value = 1
+    })
+
+    expect(runs).toBe(1)
+
+    source.n += 1
+    expect(runs).toBe(1)
+  })
 })

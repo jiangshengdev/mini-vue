@@ -1,5 +1,6 @@
-import { isReactive } from '../reactive.ts'
+import { isReactive, toRaw } from '../reactive.ts'
 import { refFlag } from '../contracts/index.ts'
+import { withoutTracking } from '../internals/tracking.ts'
 import { ObjectRefImpl, RefImpl } from './impl.ts'
 import type { Ref } from './types.ts'
 import type { PlainObject } from '@/shared/index.ts'
@@ -49,7 +50,17 @@ export function unref<T>(value: T | Ref<T>): T {
  * @public
  */
 export function toRef<T extends PlainObject, K extends keyof T>(target: T, key: K): Ref<T[K]> {
-  const existing = target[key]
+  /*
+   * 创建阶段只做一次“是否为 Ref”的探测。
+   *
+   * @remarks
+   * - 使用 rawTarget 避免 reactive 对 Ref 的自动解包，保证能正确复用原 Ref。
+   * - 使用 withoutTracking 避免在 effect 中创建 toRef 时，把这次探测读取误收集为依赖。
+   */
+  const rawTarget = toRaw(target)
+  const existing = withoutTracking(() => {
+    return rawTarget[key] as unknown
+  })
 
   /* 属性已是 Ref 时直接复用，避免丢失响应式关系。 */
   if (isRef(existing)) {

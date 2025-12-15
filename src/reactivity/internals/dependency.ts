@@ -1,5 +1,6 @@
 import type { DependencyBucket, EffectInstance } from '../contracts/index.ts'
 import { effectStack } from '../effect.ts'
+import { canTrack } from './tracking.ts'
 import type { PlainObject } from '@/shared/index.ts'
 import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
 
@@ -7,6 +8,17 @@ import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
  * 收集当前活跃的副作用到依赖集合，确保后续触发时能够回调。
  */
 export function trackEffect(dependencyBucket: DependencyBucket, debugInfo?: PlainObject): void {
+  /*
+   * 依赖收集被显式禁用时直接跳过。
+   *
+   * @remarks
+   * - 该分支主要用于屏蔽“写入前读旧值 / 创建期探测”这类读取带来的意外收集。
+   * - 这里不仅影响 reactive 的 track，也会影响 ref.value 等通过 trackEffect 收集的路径。
+   */
+  if (!canTrack()) {
+    return
+  }
+
   const currentEffect = effectStack.current
 
   /* 没有当前副作用入栈时直接返回，避免空收集开销 */

@@ -2,6 +2,7 @@ import { reactive, toRaw } from '../reactive.ts'
 import { trackEffect, triggerEffects } from '../internals/index.ts'
 import type { DependencyBucket } from '../contracts/index.ts'
 import { refFlag } from '../contracts/index.ts'
+import { withoutTracking } from '../internals/tracking.ts'
 import type { Ref } from './types.ts'
 import type { PlainObject } from '@/shared/index.ts'
 import { isPlainObject } from '@/shared/index.ts'
@@ -108,7 +109,16 @@ export class ObjectRefImpl<T extends PlainObject, K extends keyof T> implements 
    */
   set value(newValue: T[K]) {
     if (this.dependencyBucket) {
-      const previousValue = this.target[this.key]
+      /*
+       * 判等需要读取旧值，但旧值读取可能触发 getter。
+       *
+       * @remarks
+       * - 该读取发生在“写入流程”内部，不应把 getter 中的 reactive 读取收集为依赖。
+       * - 因此这里显式禁用依赖收集，避免出现“写入阶段意外收集”。
+       */
+      const previousValue = withoutTracking(() => {
+        return this.target[this.key]
+      })
 
       if (Object.is(previousValue, newValue)) {
         return

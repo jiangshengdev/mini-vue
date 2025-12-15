@@ -2,6 +2,7 @@ import { reactive } from '../reactive.ts'
 import type { ReactiveTarget } from '../contracts/index.ts'
 import { iterateDependencyKey, triggerOpTypes } from '../contracts/index.ts'
 import { isRef } from '../ref/api.ts'
+import { withoutTracking } from './tracking.ts'
 import { track, trigger } from './operations.ts'
 import { isArrayIndex, isObject } from '@/shared/index.ts'
 
@@ -42,8 +43,17 @@ const mutableSet: ProxyHandler<ReactiveTarget>['set'] = (target, key, value, rec
   const hadKey =
     targetIsArray && keyIsArrayIndex ? Number(key) < target.length : Object.hasOwn(target, key)
 
-  /* 读取旧值用于后续的同值判断 */
-  const previousValue = Reflect.get(target, key, receiver) as unknown
+  /*
+   * 读取旧值仅用于后续的同值判断。
+   *
+   * @remarks
+   * - 该读取属于写入流程的一部分，不应被视为“用户读取”。
+   * - 若通过 receiver 触发了访问器 getter，getter 内部的 reactive 读取可能会把依赖收集到当前 effect。
+   *   因此这里需要显式禁用依赖收集，避免出现“写入时意外建立依赖”。
+   */
+  const previousValue = withoutTracking(() => {
+    return Reflect.get(target, key, receiver) as unknown
+  })
   /* 调用 Reflect 完成赋值，确保符合原生语义 */
   const wasApplied = Reflect.set(target, key, value, receiver)
 

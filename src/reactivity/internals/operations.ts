@@ -1,6 +1,7 @@
 import type { DependencyBucket, ReactiveTarget, TriggerOpType } from '../contracts/index.ts'
 import { iterateDependencyKey, triggerOpTypes } from '../contracts/index.ts'
 import { effectStack } from '../effect.ts'
+import { canTrack } from './tracking.ts'
 import { trackEffect, triggerEffects } from './dependency.ts'
 import { isArrayIndex } from '@/shared/index.ts'
 
@@ -17,6 +18,14 @@ class DependencyRegistry {
    * 把当前活跃副作用加入目标字段的依赖集合。
    */
   track(target: ReactiveTarget, key: PropertyKey): void {
+    /*
+     * 当外层显式禁用依赖收集时（例如：写入阶段读取旧值、创建阶段探测属性），
+     * 这里必须短路，否则会把“探测读取”的依赖错误地记录到当前 effect。
+     */
+    if (!canTrack()) {
+      return
+    }
+
     /* 没有活跃 effect 时无需创建依赖集合，直接退出节省内存。 */
     const currentEffect = effectStack.current
 

@@ -34,7 +34,7 @@ describe('reactivity - array mutators', () => {
       // 第一次执行时触发一次 mutator 调用；若 mutator 内部误触发依赖收集，
       // 会导致当前 effect 被收集并在本次写入后立即重新执行，从而 runs 增大。
       if (runs === 1) {
-        ;(array as unknown as number[]).push(2)
+        array.push(2)
       }
     })
 

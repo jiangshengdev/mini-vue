@@ -113,9 +113,7 @@ describe('runtime-dom: provide/inject', () => {
     const container = createTestContainer()
     const vnode = <Child />
 
-    ;(
-      vnode as unknown as { appContext?: { provides: Record<InjectionToken, unknown> } }
-    ).appContext = {
+    ;(vnode as { appContext?: { provides: Record<InjectionToken, unknown> } }).appContext = {
       provides: {
         k: 'v',
       },

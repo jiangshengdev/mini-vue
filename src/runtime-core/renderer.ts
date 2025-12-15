@@ -72,7 +72,7 @@ export function createRenderer<
    * 将宿主容器断言为对象键，便于复用 WeakMap 存储。
    */
   function asContainerKey(container: HostElement): PlainObject {
-    return container as unknown as PlainObject
+    return container as PlainObject
   }
 
   /**

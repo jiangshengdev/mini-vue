@@ -132,7 +132,7 @@ function createRootVirtualNode<HostElement>(state: AppState<HostElement>) {
     rawProps,
   })
 
-  ;(node as unknown as { appContext?: AppContext }).appContext = state.appContext
+  ;(node as { appContext?: AppContext }).appContext = state.appContext
 
   return node
 }

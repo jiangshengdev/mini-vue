@@ -1,12 +1,13 @@
 # Reactivity 模块问题记录
 
-## 1. 数组变异方法尚未对依赖做专门处理（待迭代）
+## 1. 数组变异方法尚未对依赖做专门处理（第一层已完成，第二层待迭代）
 
 - 位置：`src/reactivity/internals/base-handlers.ts`
-- 现状：`push`/`pop`/`splice` 等原型方法仍走默认的 `get`/`set`/`length` 联动路径。由于这些方法执行过程中会读取 `length`，当前 `get` 会对 `length` 进行依赖收集；随后数组写入又会触发 `length` 的更新，从而在“副作用函数内调用数组变异方法”的场景产生被动依赖与额外触发。
-- 验证结论：成立。当前实现虽然在触发端会跳过 `effectStack.current`，因此典型的“同步自触发无限循环”不一定会出现，但确实会导致不必要的过度执行（例如 effect 内部首轮调用 `push` 后，之后任意外部 `push` 也会让该 effect 多跑一次）。
-- 下一步：为数组方法注入专用分支，确保 `push`/`unshift` 等操作一次性触发 `length` 与新增索引，`splice`、`sort` 等批量修改可以复用统一的 `triggerOpTypes`，必要时为 `Instrumentations` 新建 helper，与 Vue 3 类似。
-- 测试建议：在 `test/reactivity/effect.test.ts` 增补 `push`/`splice`/`sort` 的回归用例，验证依赖仅触发一次、索引与长度同步更新。
+- 原因：`push`/`pop`/`splice` 等变异方法执行过程中会读取 `length`，默认 `get -> track(length)` 会把“实现细节读取”误收集为用户依赖；随后写入触发 `length` 更新，导致 effect 内调用变异方法时产生被动依赖与额外触发。
+- 第一层处理（已完成）：在 `get` trap 中对数组变异方法注入专用分支，返回经过 `withoutTracking` 包裹的包装函数（实现集中在 `src/reactivity/internals/array-instrumentations.ts`），避免方法内部读取 `length/索引` 时发生依赖收集。
+- 现状：已避免“effect 内首轮调用 push 导致后续任意外部 push 都会让该 effect 额外重跑”的被动依赖问题。
+- 第二层（待迭代）：仍可能存在一次变异触发多次调度的问题（例如索引新增与 `length` 变更分别触发），若要做到“同一轮变更只触发一次”，需要引入批处理/去重（类似 startBatch/endBatch 的效果）。
+- 回归测试（已补充）：`test/reactivity/effect/basic.test.ts` 新增“effect 内调用数组变异方法不会被动收集 length 依赖”。
 
 ## 2. `mutableSet` 读取旧值时不应通过 `receiver` 触发 getter 的依赖收集（已修复）
 

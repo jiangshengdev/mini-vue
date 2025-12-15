@@ -1,8 +1,8 @@
 import type { DependencyBucket, EffectInstance } from '../contracts/index.ts'
 import { effectStack } from '../effect.ts'
 import { canTrack } from './tracking.ts'
+import { enqueueEffect } from './batch.ts'
 import type { PlainObject } from '@/shared/index.ts'
-import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
 
 /**
  * 收集当前活跃的副作用到依赖集合，确保后续触发时能够回调。
@@ -54,7 +54,7 @@ export function triggerEffects(dependencyBucket: DependencyBucket): void {
   for (const effect of depSnapshot(dependencyBucket)) {
     /* 仅执行仍处于活跃状态的副作用，跳过当前 effect */
     if (shouldRun(effect)) {
-      schedule(effect)
+      enqueueEffect(effect)
     }
   }
 }
@@ -72,33 +72,4 @@ function depSnapshot(dependencyBucket: DependencyBucket): DependencyBucket {
 function shouldRun(effect: EffectInstance): boolean {
   /* 避免重复执行当前 effect，并确保目标 effect 尚未停止 */
   return effect !== effectStack.current && effect.active
-}
-
-/**
- * 根据 effect 是否配置调度器来决定执行策略。
- */
-function schedule(effect: EffectInstance): void {
-  const { scheduler } = effect
-
-  if (scheduler) {
-    /* 将副作用封装成可重复执行的任务，交给调度器延迟处理 */
-    const job = () => {
-      /* 即便 effect 已停止也要执行一次原函数，与 Vue 行为保持一致 */
-      effect.run()
-    }
-
-    runSilent(
-      () => {
-        scheduler(job)
-      },
-      {
-        origin: errorContexts.scheduler,
-        handlerPhase: errorPhases.sync,
-      },
-    )
-
-    return
-  }
-
-  effect.run()
 }

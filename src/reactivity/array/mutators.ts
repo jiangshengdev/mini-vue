@@ -1,3 +1,4 @@
+import { runInBatch } from '../internals/batch.ts'
 import { withoutTracking } from '../internals/tracking.ts'
 
 /**
@@ -57,11 +58,13 @@ function callUntracked<K extends ArrayMutatorKey>(
   thisArg: unknown[],
   ...args: Parameters<unknown[][K]>
 ): ReturnType<unknown[][K]> {
-  return withoutTracking(() => {
-    /* 通过预缓存表选择原生实现，避免读取原型链时引入额外行为差异。 */
-    const nativeMethod = nativeMutators[mutator] as ArrayMutatorMethod<K>
+  return runInBatch(() => {
+    return withoutTracking(() => {
+      /* 通过预缓存表选择原生实现，避免读取原型链时引入额外行为差异。 */
+      const nativeMethod = nativeMutators[mutator] as ArrayMutatorMethod<K>
 
-    return nativeMethod.call(thisArg, ...args)
+      return nativeMethod.call(thisArg, ...args)
+    })
   })
 }
 

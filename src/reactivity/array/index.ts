@@ -6,3 +6,8 @@
  * - 当前仅导出“需要无依赖收集的数组变更方法”及其 key 判断工具。
  */
 export { arrayUntrackedMutators, isArrayMutatorKey } from './mutators.ts'
+
+/**
+ * 数组的 identity-sensitive 查询方法（includes/indexOf/lastIndexOf）需要特殊处理。
+ */
+export { arraySearchInstrumentations, isArraySearchKey } from './search.ts'

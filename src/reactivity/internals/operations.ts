@@ -74,6 +74,17 @@ class DependencyRegistry {
     }
 
     if (Array.isArray(target)) {
+      if (type === triggerOpTypes.set && isArrayIndex(key)) {
+        /*
+         * 数组索引替换会改变元素集合，依赖于 includes/indexOf 等查询结果的副作用需要重跑。
+         *
+         * @remarks
+         * - 这些查询方法在实现层面通常依赖“遍历/比较元素”，属于集合级别依赖。
+         * - 因此这里将索引 set 也视为结构性影响的一种，补齐 iterate 的触发。
+         */
+        addDep(depsMap.get(iterateDependencyKey))
+      }
+
       if (type === triggerOpTypes.add && isArrayIndex(key)) {
         /* 数组新增索引意味着 length 变化，需要同步触发 length 依赖。 */
         addDep(depsMap.get('length'))

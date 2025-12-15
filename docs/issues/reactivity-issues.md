@@ -33,14 +33,22 @@
   - 同时避免将 Ref 当作普通对象递归 `reactive`。
 - 测试建议：新增“reactive 对象属性为 Ref 时读取返回解包值且不抛错”的用例，并覆盖数组场景（数组内 Ref 是否解包需明确策略）。
 
-## 4. 响应式数组的 `includes/indexOf/lastIndexOf` 对原始对象查找会失败（已验证）
+## 4. 响应式数组的 `includes/indexOf/lastIndexOf` 对原始对象查找会失败（已修复）
 
 - 位置：`src/reactivity/internals/base-handlers.ts`
 - 现状：响应式数组读取元素时会把对象懒代理成 Proxy，导致 `list.includes(raw)` 实际比较的是 `proxy !== raw`，从而返回 `false`/`-1`。
 - 影响：对“原始对象引用”进行查找与去重会出现错误结果，和 Vue 3 行为不一致。
 - 验证结论：成立。
-- 下一步：为数组查询方法做 instrumentations：优先用原始值查找失败时，再回退到用 `toRaw`/或将参数也转代理后再查找（策略需结合本仓库是否暴露 `toRaw` 决定）。
-- 测试建议：新增“reactive([raw]).includes(raw) 为 true / indexOf(raw) 为 0”的回归用例，并覆盖 `lastIndexOf`。
+- 修复：为数组查询方法做 instrumentations（对齐 Vue 3 思路）。
+  - 在 `get` trap 中对 `includes/indexOf/lastIndexOf` 注入专用分支，返回包装后的方法实现，避免把方法内部的 identity 对比直接落到 `proxy !== raw`。
+  - 包装逻辑：先对原始数组执行一次查询；若失败，则将入参做一次 `toRaw` 等价还原后再回退查询，兼容“数组里存 raw、入参为 proxy”的场景。
+  - 依赖语义：查询方法会 `track(iterateDependencyKey)` 作为集合级依赖；并补齐“数组索引 set 也触发 iterate”的行为，保证 `effect(() => list.includes(x))` 在 `list[i] = y` 时能正确重跑。
+  - 关键实现：
+    - `src/reactivity/array/search.ts`：`arraySearchInstrumentations` 与 `isArraySearchKey`。
+    - `src/reactivity/internals/base-handlers.ts`：数组查询方法 key 的拦截分支。
+    - `src/reactivity/internals/operations.ts`：数组索引 `set` 触发 `iterateDependencyKey`。
+- 回归测试：
+  - `test/reactivity/array/search.test.ts`：覆盖 raw 查找命中、proxy 入参回退命中、以及索引 set 触发重跑。
 
 ## 5. `toRef` 在创建时读取 `target[key]` 导致错误的依赖收集（已修复）
 

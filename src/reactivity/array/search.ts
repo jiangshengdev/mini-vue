@@ -1,0 +1,99 @@
+import type { ReactiveTarget } from '../contracts/index.ts'
+import { iterateDependencyKey, rawFlag } from '../contracts/index.ts'
+import { track } from '../internals/operations.ts'
+
+/**
+ * 需要被特殊处理的数组“查询型”方法名集合。
+ *
+ * @remarks
+ * - 这些方法会基于元素做相等性比较（identity-sensitive）。
+ * - 响应式数组在读取元素时会懒代理对象，若直接调用原生实现会导致 raw/proxy 对比失败。
+ */
+export type ArraySearchKey = 'includes' | 'indexOf' | 'lastIndexOf'
+
+/**
+ * 将数组方法的 this/参数/返回值完整对齐到原生签名，便于包装后仍保持类型精确。
+ */
+type ArraySearchMethod<K extends ArraySearchKey> = (
+  this: unknown[],
+  ...args: Parameters<unknown[][K]>
+) => ReturnType<unknown[][K]>
+
+/**
+ * 缓存原生查询方法实现，避免每次取值都从原型链上动态读取。
+ */
+const nativeSearchMethods = {
+  includes: ([] as unknown[]).includes,
+  indexOf: ([] as unknown[]).indexOf,
+  lastIndexOf: ([] as unknown[]).lastIndexOf,
+} satisfies { [K in ArraySearchKey]: ArraySearchMethod<K> }
+
+/**
+ * 读取响应式代理（若存在）对应的原始值。
+ *
+ * @remarks
+ * - 不直接依赖 `toRaw`，避免与 `reactive.ts` 形成循环依赖。
+ * - 对非 proxy 对象访问 `rawFlag` 会返回 `undefined`，自然回退到原值。
+ */
+function toRawMaybe<T>(value: T): T {
+  if (value && typeof value === 'object') {
+    const raw = (value as { [rawFlag]?: unknown })[rawFlag]
+
+    return (raw ?? value) as T
+  }
+
+  return value
+}
+
+function createSearchWrapper<K extends ArraySearchKey>(key: K): ArraySearchMethod<K> {
+  return function arraySearchWrapper(
+    this: unknown[],
+    ...args: Parameters<unknown[][K]>
+  ): ReturnType<unknown[][K]> {
+    const rawArray = toRawMaybe(this)
+
+    // 查询行为关注数组元素集合的变化，使用 iterate 依赖统一收敛。
+    track(rawArray as unknown as ReactiveTarget, iterateDependencyKey)
+
+    const method = nativeSearchMethods[key] as ArraySearchMethod<K>
+
+    const result = method.call(rawArray, ...(args as unknown as Parameters<unknown[][K]>))
+
+    // `rawArray` 中存的是原始对象时：若用户用 proxy 作为入参，需要回退到 raw 入参再查一次。
+    if (key === 'includes') {
+      if (result === false) {
+        return method.call(
+          rawArray,
+          ...(args.map((arg) => {
+            return toRawMaybe(arg)
+          }) as unknown as Parameters<unknown[][K]>),
+        )
+      }
+
+      return result
+    }
+
+    if (result === -1) {
+      return method.call(
+        rawArray,
+        ...(args.map((arg) => {
+          return toRawMaybe(arg)
+        }) as unknown as Parameters<unknown[][K]>),
+      )
+    }
+
+    return result
+  }
+}
+
+export const arraySearchInstrumentations = {
+  includes: createSearchWrapper('includes'),
+  indexOf: createSearchWrapper('indexOf'),
+  lastIndexOf: createSearchWrapper('lastIndexOf'),
+} satisfies { [K in ArraySearchKey]: ArraySearchMethod<K> }
+
+export function isArraySearchKey(
+  key: PropertyKey,
+): key is keyof typeof arraySearchInstrumentations {
+  return typeof key === 'string' && Object.hasOwn(arraySearchInstrumentations, key)
+}

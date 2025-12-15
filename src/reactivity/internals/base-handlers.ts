@@ -4,7 +4,12 @@ import { iterateDependencyKey, rawFlag, reactiveFlag, triggerOpTypes } from '../
 import { isRef } from '../ref/api.ts'
 import { withoutTracking } from './tracking.ts'
 import { track, trigger } from './operations.ts'
-import { arrayUntrackedMutators, isArrayMutatorKey } from '@/reactivity/array/index.ts'
+import {
+  arraySearchInstrumentations,
+  arrayUntrackedMutators,
+  isArrayMutatorKey,
+  isArraySearchKey,
+} from '@/reactivity/array/index.ts'
 import { isArrayIndex, isObject } from '@/shared/index.ts'
 
 /**
@@ -29,6 +34,17 @@ const mutableGet: ProxyHandler<ReactiveTarget>['get'] = (target, key, receiver) 
    */
   if (Array.isArray(target) && isArrayMutatorKey(key)) {
     return arrayUntrackedMutators[key]
+  }
+
+  /*
+   * 数组查询方法需要走“对 raw/proxy 兼容”的包装版本。
+   *
+   * @remarks
+   * - 直接调用原生 includes/indexOf/lastIndexOf 会读取代理数组元素并进行 identity 对比。
+   * - 元素读取会被懒代理，导致 `proxy !== raw`，从而出现查找失败。
+   */
+  if (Array.isArray(target) && isArraySearchKey(key)) {
+    return arraySearchInstrumentations[key]
   }
 
   /* 使用 Reflect 读取原始值，保持与原生访问一致的 this 绑定与行为 */

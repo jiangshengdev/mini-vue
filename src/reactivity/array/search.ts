@@ -39,11 +39,11 @@ function createIdentitySearchWrapper<K extends ArrayIdentitySearchKey>(
     const rawArray = toRaw(this)
 
     // 查询行为关注数组元素集合的变化，使用 iterate 依赖统一收敛。
-    track(rawArray as unknown as ReactiveTarget, iterateDependencyKey)
+    track(rawArray as ReactiveTarget, iterateDependencyKey)
 
     const method = nativeArraySearchMethods[key] as ArrayIdentitySearchMethod<K>
 
-    const result = method.call(rawArray, ...(args as unknown as Parameters<unknown[][K]>))
+    const result = method.call(rawArray, ...args)
 
     // `rawArray` 中存的是原始对象时：若用户用 proxy 作为入参，需要回退到 raw 入参再查一次。
     if (key === 'includes') {
@@ -52,7 +52,7 @@ function createIdentitySearchWrapper<K extends ArrayIdentitySearchKey>(
           rawArray,
           ...(args.map((arg) => {
             return toRaw(arg)
-          }) as unknown as Parameters<unknown[][K]>),
+          }) as Parameters<unknown[][K]>),
         )
       }
 
@@ -64,7 +64,7 @@ function createIdentitySearchWrapper<K extends ArrayIdentitySearchKey>(
         rawArray,
         ...(args.map((arg) => {
           return toRaw(arg)
-        }) as unknown as Parameters<unknown[][K]>),
+        }) as Parameters<unknown[][K]>),
       )
     }
 

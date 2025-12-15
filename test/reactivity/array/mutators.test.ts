@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { reactive, effect } from '@/index.ts'
+import { effect, reactive } from '@/index.ts'
 import { arrayUntrackedMutators, isArrayMutatorKey } from '@/reactivity/array/index.ts'
 
 describe('reactivity - array mutators', () => {

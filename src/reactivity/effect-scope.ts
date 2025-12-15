@@ -100,6 +100,9 @@ export class EffectScope {
       return
     }
 
+    /* 对齐 Vue：stop 一开始即标记为 inactive，避免 stop 期间继续收集副作用/cleanup。 */
+    this.active = false
+
     /* 逐个停止 scope 内缓存的副作用，释放依赖关系。 */
     for (const effect of this.effects) {
       runSilent(
@@ -117,16 +120,18 @@ export class EffectScope {
 
     /* 执行用户注册的清理任务，用于销毁副作用外部资源。 */
     if (this.cleanups.length > 0) {
-      const registeredCleanups = [...this.cleanups]
+      const cleanupCount = this.cleanups.length
 
-      this.cleanups.length = 0
+      for (let i = 0; i < cleanupCount; i++) {
+        const cleanup = this.cleanups[i]
 
-      for (const cleanup of registeredCleanups) {
         runSilent(cleanup, {
           origin: errorContexts.effectScopeCleanup,
           handlerPhase: errorPhases.sync,
         })
       }
+
+      this.cleanups.length = 0
     }
 
     if (this.childScopes) {
@@ -152,7 +157,6 @@ export class EffectScope {
     }
 
     this.parent = undefined
-    this.active = false
   }
 
   /**

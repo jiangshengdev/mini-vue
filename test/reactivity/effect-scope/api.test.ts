@@ -108,4 +108,62 @@ describe('effectScope API 与作用域栈', () => {
 
     expect(cleanup).toHaveBeenCalledTimes(1)
   })
+
+  it('stop 执行 cleanup 期间注册的新 cleanup 不会被执行（对齐 Vue 语义）', () => {
+    const scope = effectScope()
+    const calls: number[] = []
+    let cleanupCalls = 0
+    let lateCleanupCalls = 0
+
+    function lateCleanup(): void {
+      lateCleanupCalls++
+      calls.push(2)
+    }
+
+    function cleanup(): void {
+      cleanupCalls++
+      calls.push(1)
+      recordScopeCleanup(lateCleanup, scope)
+    }
+
+    recordScopeCleanup(cleanup, scope)
+
+    scope.stop()
+
+    expect(cleanupCalls).toBe(1)
+    expect(lateCleanupCalls).toBe(0)
+    expect(calls).toEqual([1])
+  })
+
+  it('stop 期间 cleanup 内调用 scope.run 不会再创建新 effect（对齐 Vue 语义）', () => {
+    const state = reactive({ count: 0 })
+    const scope = effectScope()
+    let observed = -1
+    let cleanupCalls = 0
+    let runResult: unknown
+
+    function trackObserved(): void {
+      observed = state.count
+    }
+
+    function createEffectInScope(): void {
+      effect(trackObserved)
+    }
+
+    function cleanup(): void {
+      cleanupCalls++
+      runResult = scope.run(createEffectInScope)
+    }
+
+    recordScopeCleanup(cleanup, scope)
+
+    scope.stop()
+
+    expect(cleanupCalls).toBe(1)
+    expect(runResult).toBeUndefined()
+    expect(observed).toBe(-1)
+
+    state.count = 1
+    expect(observed).toBe(-1)
+  })
 })

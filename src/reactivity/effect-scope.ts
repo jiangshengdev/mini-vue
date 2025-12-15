@@ -130,11 +130,7 @@ export class EffectScope {
 
     /* 执行用户注册的清理任务，用于销毁副作用外部资源。 */
     if (this.cleanups.length > 0) {
-      const cleanupCount = this.cleanups.length
-
-      for (let i = 0; i < cleanupCount; i++) {
-        const cleanup = this.cleanups[i]
-
+      for (const cleanup of this.cleanups) {
         runSilent(cleanup, {
           origin: errorContexts.effectScopeCleanup,
           handlerPhase: errorPhases.sync,

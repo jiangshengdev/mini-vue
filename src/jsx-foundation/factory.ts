@@ -15,6 +15,7 @@ import type { PropsShape } from '@/shared/index.ts'
  *
  * @public
  */
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export function Fragment(props: FragmentProps): ComponentChildren {
   return props.children
 }

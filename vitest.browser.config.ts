@@ -9,6 +9,7 @@ export default mergeConfig(
     test: {
       env: {
         // 仅 Vitest 浏览器 runner 注入，值为字符串 'true' 触发内部调试路径。
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         INTERNAL_DEV: 'true',
       },
       browser: {

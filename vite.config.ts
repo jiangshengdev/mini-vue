@@ -5,9 +5,15 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   plugins: [],
   resolve: {
-    alias: {
-      '@': fileURLToPath(new URL('src', import.meta.url)),
-      '#': fileURLToPath(new URL('playground/src', import.meta.url)),
-    },
+    alias: [
+      {
+        find: '@',
+        replacement: fileURLToPath(new URL('src', import.meta.url)),
+      },
+      {
+        find: '#',
+        replacement: fileURLToPath(new URL('playground/src', import.meta.url)),
+      },
+    ],
   },
 })

@@ -27,6 +27,7 @@ export const jsxs = jsx
  *
  * @public
  */
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export function jsxDEV<T extends ElementType>(
   type: T,
   props?: ElementProps<T>,

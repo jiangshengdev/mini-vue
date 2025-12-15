@@ -20,6 +20,13 @@ const mutableGet: ProxyHandler<ReactiveTarget>['get'] = (target, key, receiver) 
     return target
   }
 
+  /*
+   * 数组变更方法需要走“无依赖收集”的包装版本。
+   *
+   * @remarks
+   * - 变更方法内部可能读取 length/索引等，这些读取属于实现细节，不应被 track 到用户 effect 上。
+   * - 因此在代理层读取 `arr.push` 等方法时，直接返回包装后的函数实现。
+   */
   if (Array.isArray(target) && isArrayMutatorKey(key)) {
     return arrayUntrackedMutators[key]
   }

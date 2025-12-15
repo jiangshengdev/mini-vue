@@ -1,6 +1,6 @@
 import type { RootRenderFunction } from './renderer.ts'
 import { setCurrentAppContext, unsetCurrentAppContext } from './app-context.ts'
-import type { InjectionKey, InjectionToken } from './provide-inject.ts'
+import type { InjectionKey, InjectionToken } from '@/shared'
 import type { ElementProps, SetupComponent } from '@/jsx-foundation/index.ts'
 import { createVirtualNode } from '@/jsx-foundation/index.ts'
 import type { PluginInstallApp } from '@/shared/plugin.ts'

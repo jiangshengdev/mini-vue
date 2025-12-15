@@ -2,14 +2,14 @@ import { reactive } from '../reactive.ts'
 import type { ReactiveTarget } from '../contracts/index.ts'
 import { iterateDependencyKey, rawFlag, reactiveFlag, triggerOpTypes } from '../contracts/index.ts'
 import { isRef } from '../ref/api.ts'
-import { withoutTracking } from './tracking.ts'
-import { track, trigger } from './operations.ts'
 import {
   arraySearchInstrumentations,
   arrayUntrackedMutators,
   isArrayMutatorKey,
   isArraySearchKey,
-} from '@/reactivity/array/index.ts'
+} from '../array/index.ts'
+import { withoutTracking } from './tracking.ts'
+import { track, trigger } from './operations.ts'
 import { isArrayIndex, isObject } from '@/shared/index.ts'
 
 /**

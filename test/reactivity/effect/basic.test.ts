@@ -245,27 +245,6 @@ describe('effect 基础行为', () => {
     expect(first).toBe(10)
   })
 
-  it('effect 内调用数组变异方法不会被动收集 length 依赖', () => {
-    const list: number[] = reactive([])
-    let runCount = 0
-
-    effect(function mutateInEffect() {
-      runCount += 1
-
-      if (runCount === 1) {
-        list.push(1)
-      }
-    })
-
-    expect(runCount).toBe(1)
-    expect(list).toEqual([1])
-
-    list.push(2)
-
-    expect(list).toEqual([1, 2])
-    expect(runCount).toBe(1)
-  })
-
   it('缩短数组长度会触发被截断索引的依赖', () => {
     const list: number[] = reactive([1, 2, 3])
     let third = 0

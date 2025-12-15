@@ -109,7 +109,7 @@ describe('effectScope API 与作用域栈', () => {
     expect(cleanup).toHaveBeenCalledTimes(1)
   })
 
-  it('stop 执行 cleanup 期间注册的新 cleanup 不会被执行（对齐 Vue 语义）', () => {
+  it('stop 期间注册的 cleanup 会立即执行（对齐 effect 语义）', () => {
     const scope = effectScope()
     const calls: number[] = []
     let cleanupCalls = 0
@@ -131,8 +131,22 @@ describe('effectScope API 与作用域栈', () => {
     scope.stop()
 
     expect(cleanupCalls).toBe(1)
-    expect(lateCleanupCalls).toBe(0)
-    expect(calls).toEqual([1])
+    expect(lateCleanupCalls).toBe(1)
+    expect(calls).toEqual([1, 2])
+  })
+
+  it('scope stop 后继续注册 cleanup 会立即执行（对齐 effect 语义）', () => {
+    const scope = effectScope()
+    let calls = 0
+
+    function cleanup(): void {
+      calls++
+    }
+
+    scope.stop()
+    recordScopeCleanup(cleanup, scope)
+
+    expect(calls).toBe(1)
   })
 
   it('stop 期间 cleanup 内调用 scope.run 不会再创建新 effect（对齐 Vue 语义）', () => {

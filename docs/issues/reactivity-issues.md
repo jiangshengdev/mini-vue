@@ -87,14 +87,14 @@
 - 修复：采用方向 A（最小改动）。当 `ReactiveEffect` 已 `stop()`（`active=false`）时，`registerCleanup()` 不再将 cleanup 入队，而是立即执行该 cleanup，避免将“子停止逻辑”登记到一个后续不会再被 `flushDependencies()` 消费的队列中。
 - 回归测试：`test/reactivity/effect/stop.test.ts` 新增“effect 执行中途 stop 后创建子 effect 不应导致子清理丢失”的用例。
 
-## 10. `EffectScope.stop()` 执行 cleanup 时不支持重入注册，可能遗漏清理（已修复，语义对齐 Vue）
+## 10. `EffectScope.stop()` 执行 cleanup 时不支持重入注册，可能遗漏清理（已修复）
 
 - 位置：`src/reactivity/effect-scope.ts`
-- 现状：`stop()` 在开头即将 `active` 置为 `false`，并仅执行 stop 开始时已登记的 `cleanups`（固定长度遍历后清空）。
-- 影响：cleanup 执行期间新增注册不会在本次 stop 被执行（与 Vue 官方一致）；不会再出现“遗漏但仍残留在队列里、造成不可预期清理时机”的问题。
-- 验证结论：成立（这属于语义选择）。
-- 修复：对齐 Vue 官方语义：stop 进入即 inactive + cleanup 固定长度遍历。
-- 回归测试：`test/reactivity/effect-scope/api.test.ts` 新增“stop 执行 cleanup 期间注册的新 cleanup 不会被执行”的用例。
+- 现状：`stop()` 进入后立刻将 `active` 置为 `false`；在 stop 期间或 stop 之后继续向该 scope 注册 cleanup 时，不再入队，而是立即执行（对齐 `ReactiveEffect.registerCleanup()` 的处理）。
+- 影响：避免 cleanup 在 stop 期间被登记到一个不会再被消费的队列，从而导致外部资源无法释放。
+- 验证结论：成立。
+- 修复：stop 开始即 inactive；`addCleanup()` 在 inactive 时直接执行 cleanup（不入队）。
+- 回归测试：`test/reactivity/effect-scope/api.test.ts` 覆盖“stop 期间注册的 cleanup 会立即执行 / stop 后注册也会立即执行”。
 
 ## 11. `EffectScope.stop()` 末尾才置 `active=false`，stop 期间仍可录入新 effect 导致泄漏（已修复，语义对齐 Vue）
 

@@ -4,6 +4,7 @@ import { iterateDependencyKey, rawFlag, reactiveFlag, triggerOpTypes } from '../
 import { isRef } from '../ref/api.ts'
 import { withoutTracking } from './tracking.ts'
 import { track, trigger } from './operations.ts'
+import { arrayUntrackedMutators, isArrayMutatorKey } from '@/reactivity/array/index.ts'
 import { isArrayIndex, isObject } from '@/shared/index.ts'
 
 /**
@@ -17,6 +18,10 @@ const mutableGet: ProxyHandler<ReactiveTarget>['get'] = (target, key, receiver) 
 
   if (key === rawFlag) {
     return target
+  }
+
+  if (Array.isArray(target) && isArrayMutatorKey(key)) {
+    return arrayUntrackedMutators[key]
   }
 
   /* 使用 Reflect 读取原始值，保持与原生访问一致的 this 绑定与行为 */

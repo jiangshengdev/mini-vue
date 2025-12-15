@@ -34,15 +34,14 @@ export type {
 export { createRouter, RouterLink, RouterView, useRouter } from '@/router/index.ts'
 export type {
   RouteLocation,
-  RouteRecord,
   Router,
   RouterConfig,
+  RouteRecord,
   RouterLinkProps,
   RouterViewProps,
 } from '@/router/index.ts'
 export { createApp, render } from '@/runtime-dom/index.ts'
 export { inject, provide } from '@/runtime-core/index.ts'
-export type { InjectionKey, InjectionToken } from '@/runtime-core/index.ts'
 export type { SetupComponent, ElementType, VirtualNode } from '@/jsx-foundation/index.ts'
 export { Fragment } from '@/jsx-foundation/index.ts'
 export { h, jsx, jsxs, jsxDEV } from '@/jsx-runtime/index.ts'
@@ -52,6 +51,8 @@ export type {
   ErrorMeta,
   ErrorPayload,
   ErrorToken,
+  InjectionKey,
+  InjectionToken,
   PropsShape,
 } from '@/shared/index.ts'
 export { setErrorHandler } from '@/shared/index.ts'

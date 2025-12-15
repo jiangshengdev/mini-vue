@@ -1,6 +1,6 @@
 import type { Router } from '../core/types.ts'
 import { useRouter } from '../core/injection.ts'
-import type { SetupComponent } from '@/jsx-foundation/types.ts'
+import type { SetupComponent } from '@/jsx-foundation/index.ts'
 
 /**
  * RouterView 的 props，承载路由实例以获取当前视图。

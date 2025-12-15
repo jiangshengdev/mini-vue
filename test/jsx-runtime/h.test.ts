@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { h } from '@/jsx-runtime.ts'
+import { h } from '@/index.ts'
 
 describe('jsx-runtime h helper', () => {
   it('保留 props.children 当可变 children 为空', () => {

@@ -1,4 +1,4 @@
-import { h } from '@/jsx-runtime.ts'
+import { h } from '@/index.ts'
 
 const shouldRenderChild: boolean = Math.random() > 0.5
 

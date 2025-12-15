@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { effect, reactive } from '@/index.ts'
-import { arrayUntrackedMutators, isArrayMutatorKey } from '@/reactivity/array/index.ts'
+import { arrayUntrackedMutators, isArrayMutatorKey } from '@/reactivity/index.ts'
 
 describe('reactivity - array mutators', () => {
   it('暴露了预期的无追踪 mutator 方法', () => {

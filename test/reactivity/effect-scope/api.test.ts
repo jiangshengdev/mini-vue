@@ -1,11 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
-import { effect, effectScope, reactive } from '@/index.ts'
-import { ReactiveEffect } from '@/reactivity/effect.ts'
-import {
-  getCurrentScope,
-  recordEffectScope,
-  recordScopeCleanup,
-} from '@/reactivity/effect-scope.ts'
+import { effect, effectScope, getCurrentScope, reactive } from '@/index.ts'
+import { ReactiveEffect, recordEffectScope, recordScopeCleanup } from '@/reactivity/index.ts'
 
 describe('effectScope API 与作用域栈', () => {
   it('getCurrentScope 在 run 期间指向当前 scope，run 结束后恢复', () => {

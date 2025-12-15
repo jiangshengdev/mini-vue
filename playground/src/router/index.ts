@@ -9,7 +9,7 @@ import {
   HandlingUserInput,
   HelloWorld,
   SimpleComponent,
-} from '#/views/basic'
+} from '#/views/basic/index.ts'
 import type { RouteRecord } from '@/index.ts'
 import { createRouter } from '@/index.ts'
 

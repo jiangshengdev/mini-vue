@@ -1,5 +1,5 @@
-import type { SetupComponent } from '@/jsx-foundation/types.ts'
-import type { PluginInstallApp } from '@/shared/plugin.ts'
+import type { SetupComponent } from '@/jsx-foundation/index.ts'
+import type { PluginInstallApp } from '@/shared/index.ts'
 import type { Ref } from '@/reactivity/index.ts'
 
 /**

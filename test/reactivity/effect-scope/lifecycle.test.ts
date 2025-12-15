@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { ErrorHandler } from '@/index.ts'
+import type { EffectScope, ErrorHandler } from '@/index.ts'
 import {
   computed,
   effect,
@@ -8,7 +8,6 @@ import {
   reactive,
   setErrorHandler,
 } from '@/index.ts'
-import type { EffectScope } from '@/reactivity/effect-scope.ts'
 import { errorContexts } from '@/shared/index.ts'
 
 const positionInParentKey = 'positionInParent' as const

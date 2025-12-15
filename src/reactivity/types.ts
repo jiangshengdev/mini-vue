@@ -1,5 +1,5 @@
 import type { Ref } from './ref'
-import type { PlainObject } from '@/shared'
+import type { PlainObject } from '@/shared/index.ts'
 
 /**
  * 基础原始值类型：在类型层面保持原样，不参与深层解包。

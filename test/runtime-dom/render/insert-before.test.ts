@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { domRendererOptions } from '@/runtime-dom/renderer-options.ts'
+import { domRendererOptions } from '@/runtime-dom/index.ts'
 
 describe('runtime-dom insertBefore 宿主实现', () => {
   it('anchor 为 undefined 时退化为 append 到父节点末尾', () => {

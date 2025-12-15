@@ -3,7 +3,7 @@ import type { MountContext } from '../mount/context.ts'
 import type { ComponentInstance } from './context.ts'
 import type { ElementProps, SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
 import { effectScope } from '@/reactivity/index.ts'
-import type { PlainObject } from '@/shared'
+import type { PlainObject } from '@/shared/index.ts'
 
 /**
  * 创建组件实例与关联的 effect 作用域。

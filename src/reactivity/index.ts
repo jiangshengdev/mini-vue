@@ -1,7 +1,7 @@
 /**
  * 对外统一导出响应式系统的核心接口。
  */
-export { arrayUntrackedMutators, isArrayMutatorKey } from '@/reactivity/array'
+export { arrayUntrackedMutators, isArrayMutatorKey } from './array/index.ts'
 export { ReactiveEffect, effect, effectStack } from './effect.ts'
 export type { EffectHandle, EffectOptions, EffectScheduler } from './contracts/index.ts'
 export { reactive, isReactive, toRaw } from './reactive.ts'

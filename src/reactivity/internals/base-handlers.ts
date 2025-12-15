@@ -3,7 +3,7 @@ import type { ReactiveTarget } from '../contracts/index.ts'
 import { iterateDependencyKey, rawFlag, reactiveFlag, triggerOpTypes } from '../contracts/index.ts'
 import { isRef } from '../ref/api.ts'
 import {
-  arraySearchInstrumentations,
+  arraySearchWrappers,
   arrayUntrackedMutators,
   isArrayMutatorKey,
   isArraySearchKey,
@@ -44,7 +44,7 @@ const mutableGet: ProxyHandler<ReactiveTarget>['get'] = (target, key, receiver) 
    * - 元素读取会被懒代理，导致 `proxy !== raw`，从而出现查找失败。
    */
   if (Array.isArray(target) && isArraySearchKey(key)) {
-    return arraySearchInstrumentations[key]
+    return arraySearchWrappers[key]
   }
 
   /* 使用 Reflect 读取原始值，保持与原生访问一致的 this 绑定与行为 */

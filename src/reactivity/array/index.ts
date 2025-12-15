@@ -10,4 +10,4 @@ export { arrayUntrackedMutators, isArrayMutatorKey } from './mutators.ts'
 /**
  * 数组的 identity-sensitive 查询方法（includes/indexOf/lastIndexOf）需要特殊处理。
  */
-export { arraySearchInstrumentations, isArraySearchKey } from './search.ts'
+export { arraySearchWrappers, isArraySearchKey } from './search.ts'

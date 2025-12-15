@@ -9,12 +9,12 @@ import { track } from '../internals/operations.ts'
  * - 这些方法会基于元素做相等性比较（identity-sensitive）。
  * - 响应式数组在读取元素时会懒代理对象，若直接调用原生实现会导致 raw/proxy 对比失败。
  */
-export type ArraySearchKey = 'includes' | 'indexOf' | 'lastIndexOf'
+export type ArrayIdentitySearchKey = 'includes' | 'indexOf' | 'lastIndexOf'
 
 /**
  * 将数组方法的 this/参数/返回值完整对齐到原生签名，便于包装后仍保持类型精确。
  */
-type ArraySearchMethod<K extends ArraySearchKey> = (
+type ArrayIdentitySearchMethod<K extends ArrayIdentitySearchKey> = (
   this: unknown[],
   ...args: Parameters<unknown[][K]>
 ) => ReturnType<unknown[][K]>
@@ -22,11 +22,11 @@ type ArraySearchMethod<K extends ArraySearchKey> = (
 /**
  * 缓存原生查询方法实现，避免每次取值都从原型链上动态读取。
  */
-const nativeSearchMethods = {
+const nativeArraySearchMethods = {
   includes: ([] as unknown[]).includes,
   indexOf: ([] as unknown[]).indexOf,
   lastIndexOf: ([] as unknown[]).lastIndexOf,
-} satisfies { [K in ArraySearchKey]: ArraySearchMethod<K> }
+} satisfies { [K in ArrayIdentitySearchKey]: ArrayIdentitySearchMethod<K> }
 
 /**
  * 读取响应式代理（若存在）对应的原始值。
@@ -45,7 +45,9 @@ function toRawMaybe<T>(value: T): T {
   return value
 }
 
-function createSearchWrapper<K extends ArraySearchKey>(key: K): ArraySearchMethod<K> {
+function createIdentitySearchWrapper<K extends ArrayIdentitySearchKey>(
+  key: K,
+): ArrayIdentitySearchMethod<K> {
   return function arraySearchWrapper(
     this: unknown[],
     ...args: Parameters<unknown[][K]>
@@ -55,7 +57,7 @@ function createSearchWrapper<K extends ArraySearchKey>(key: K): ArraySearchMetho
     // 查询行为关注数组元素集合的变化，使用 iterate 依赖统一收敛。
     track(rawArray as unknown as ReactiveTarget, iterateDependencyKey)
 
-    const method = nativeSearchMethods[key] as ArraySearchMethod<K>
+    const method = nativeArraySearchMethods[key] as ArrayIdentitySearchMethod<K>
 
     const result = method.call(rawArray, ...(args as unknown as Parameters<unknown[][K]>))
 
@@ -86,14 +88,14 @@ function createSearchWrapper<K extends ArraySearchKey>(key: K): ArraySearchMetho
   }
 }
 
-export const arraySearchInstrumentations = {
-  includes: createSearchWrapper('includes'),
-  indexOf: createSearchWrapper('indexOf'),
-  lastIndexOf: createSearchWrapper('lastIndexOf'),
-} satisfies { [K in ArraySearchKey]: ArraySearchMethod<K> }
+export const arraySearchWrappers = {
+  includes: createIdentitySearchWrapper('includes'),
+  indexOf: createIdentitySearchWrapper('indexOf'),
+  lastIndexOf: createIdentitySearchWrapper('lastIndexOf'),
+} satisfies { [K in ArrayIdentitySearchKey]: ArrayIdentitySearchMethod<K> }
 
 export function isArraySearchKey(
   key: PropertyKey,
-): key is keyof typeof arraySearchInstrumentations {
-  return typeof key === 'string' && Object.hasOwn(arraySearchInstrumentations, key)
+): key is keyof typeof arraySearchWrappers {
+  return typeof key === 'string' && Object.hasOwn(arraySearchWrappers, key)
 }

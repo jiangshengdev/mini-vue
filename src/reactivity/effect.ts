@@ -165,6 +165,15 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
       debug('registerCleanup', '登记清理回调')
     }
 
+    if (!this.innerActive) {
+      runSilent(cleanup, {
+        origin: errorContexts.effectCleanup,
+        handlerPhase: errorPhases.sync,
+      })
+
+      return
+    }
+
     this.cleanupTasks.push(cleanup)
   }
 

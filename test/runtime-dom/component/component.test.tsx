@@ -254,7 +254,7 @@ describe('runtime-dom component reactivity', () => {
     expect(handler).toHaveBeenCalledTimes(1)
     const [error, context] = handler.mock.calls[0]
 
-    expect((error as Error).message).toBe('component cleanup failed')
+    expect(error.message).toBe('component cleanup failed')
     expect(context).toBe(errorContexts.componentCleanup)
   })
 })

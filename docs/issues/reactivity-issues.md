@@ -1,13 +1,17 @@
 # Reactivity 模块问题记录
 
-## 1. 数组变异方法尚未对依赖做专门处理（第一层已完成，第二层待迭代）
+## 1. 数组变异方法尚未对依赖做专门处理（第一层已完成，第二层已完成）
 
 - 位置：`src/reactivity/internals/base-handlers.ts`
 - 原因：`push`/`pop`/`splice` 等变异方法执行过程中会读取 `length`，默认 `get -> track(length)` 会把“实现细节读取”误收集为用户依赖；随后写入触发 `length` 更新，导致 effect 内调用变异方法时产生被动依赖与额外触发。
-- 第一层处理（已完成）：在 `get` trap 中对数组变异方法注入专用分支，返回经过 `withoutTracking` 包裹的包装函数（实现集中在 `src/reactivity/internals/array-instrumentations.ts`），避免方法内部读取 `length/索引` 时发生依赖收集。
+- 第一层处理（已完成）：在 `get` trap 中对数组变异方法注入专用分支，返回经过 `withoutTracking` 包裹的包装函数（实现集中在 `src/reactivity/array/mutators.ts`），避免方法内部读取 `length/索引` 时发生依赖收集。
 - 现状：已避免“effect 内首轮调用 push 导致后续任意外部 push 都会让该 effect 额外重跑”的被动依赖问题。
-- 第二层（待迭代）：仍可能存在一次变异触发多次调度的问题（例如索引新增与 `length` 变更分别触发），若要做到“同一轮变更只触发一次”，需要引入批处理/去重（类似 startBatch/endBatch 的效果）。
-- 回归测试（已补充）：`test/reactivity/effect/basic.test.ts` 新增“effect 内调用数组变异方法不会被动收集 length 依赖”。
+- 第二层（已完成）：引入批处理/去重，收敛“同一次变异触发多次调度/重复入队”的问题（典型场景：索引新增与 `length` 变更分别触发）。
+  - 关键实现：`src/reactivity/internals/batch.ts`（`startBatch/endBatch` + `scheduleEffect` 去重）、`src/reactivity/internals/dependency.ts` 触发侧接入去重调度、`src/reactivity/array/mutators.ts` 在调用原生 mutator 时包裹 `batch()`。
+  - 行为效果：一次 mutator 内多次 `trigger` 最终只会调度同一个 effect 一次；带 `scheduler` 时也只会入队一次 job。
+- 回归测试（已补充）：
+  - `test/reactivity/effect/basic.test.ts`：“effect 内调用数组变异方法不会被动收集 length 依赖”。
+  - `test/reactivity/array/batch-dedup.test.ts`：覆盖同步执行与自定义 scheduler 场景下的去重行为。
 
 ## 2. `mutableSet` 读取旧值时不应通过 `receiver` 触发 getter 的依赖收集（已修复）
 

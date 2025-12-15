@@ -3,12 +3,13 @@
  */
 import { mutableHandlers } from './internals/index.ts'
 import type { ReactiveTarget } from './contracts/index.ts'
+import { rawFlag, reactiveFlag } from './contracts/index.ts'
 import type { Reactive } from './types.ts'
 import type { PlainObject } from '@/shared/index.ts'
 import { isObject, isPlainObject } from '@/shared/index.ts'
 
 /**
- * 封装原对象与代理实例之间的双向缓存。
+ * 封装原对象与代理实例之间的单向缓存。
  */
 class ReactiveCache {
   /**
@@ -17,48 +18,23 @@ class ReactiveCache {
   private readonly rawToReactive = new WeakMap<ReactiveTarget, ReactiveTarget>()
 
   /**
-   * 缓存代理对象到原始对象的映射，支持反查判定。
-   */
-  private readonly reactiveToRaw = new WeakMap<ReactiveTarget, ReactiveTarget>()
-
-  /**
    * 查找目标是否已被代理，避免重复创建 Proxy 实例。
    */
   getCachedProxy(target: ReactiveTarget): ReactiveTarget | undefined {
-    /* 已是代理对象时直接返回自身，避免重复包装。 */
-    if (this.reactiveToRaw.has(target)) {
-      return target
-    }
-
     /* 原对象若命中缓存则复用已有代理。 */
     return this.rawToReactive.get(target)
   }
 
   /**
-   * 为给定对象创建新的响应式代理，并记录双向映射。
+   * 为给定对象创建新的响应式代理，并记录单向映射。
    */
   create(target: ReactiveTarget): ReactiveTarget {
     /* 委托 mutableHandlers 处理 get/set 等拦截。 */
     const proxy = new Proxy(target, mutableHandlers)
 
     this.rawToReactive.set(target, proxy)
-    this.reactiveToRaw.set(proxy, target)
 
     return proxy
-  }
-
-  /**
-   * 返回代理对应的原始对象，若传入非代理则直接返回自身。
-   */
-  toRaw(target: ReactiveTarget): ReactiveTarget {
-    return this.reactiveToRaw.get(target) ?? target
-  }
-
-  /**
-   * 判断传入对象是否为缓存中的响应式 Proxy。
-   */
-  isReactive(target: ReactiveTarget): boolean {
-    return this.reactiveToRaw.has(target)
   }
 }
 
@@ -91,6 +67,11 @@ export function reactive<T>(target: T): T
 export function reactive(target: unknown): unknown {
   /* 非对象值无法建立响应式代理，直接返回原值 */
   if (!isObject(target)) {
+    return target
+  }
+
+  /* 已是 reactive 代理则保持幂等。 */
+  if ((target as ReactiveTarget)[reactiveFlag] === true) {
     return target
   }
 
@@ -127,7 +108,7 @@ export function isReactive(target: unknown): target is ReactiveTarget {
     return false
   }
 
-  return reactiveCache.isReactive(target as ReactiveTarget)
+  return (target as ReactiveTarget)[reactiveFlag] === true
 }
 
 /**
@@ -145,5 +126,7 @@ export function toRaw<T>(target: T): T {
     return target
   }
 
-  return reactiveCache.toRaw(target as ReactiveTarget) as T
+  const raw = (target as ReactiveTarget)[rawFlag] as unknown
+
+  return (raw ?? target) as T
 }

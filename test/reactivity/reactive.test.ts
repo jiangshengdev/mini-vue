@@ -1,6 +1,6 @@
 import { describe, expect, expectTypeOf, it } from 'vitest'
 import type { Ref } from '@/index.ts'
-import { effect, isReactive, isRef, reactive, ref } from '@/index.ts'
+import { effect, isReactive, isRef, reactive, ref, toRaw } from '@/index.ts'
 import type { PlainObject } from '@/shared/index.ts'
 
 describe('reactive', () => {
@@ -126,6 +126,15 @@ describe('reactive', () => {
     expect(isReactive(raw)).toBe(false)
     expect(isReactive(1)).toBe(false)
     expect(isReactive(new Map())).toBe(false)
+  })
+
+  it('toRaw 可还原 reactive 代理对应的原始对象', () => {
+    const raw = { nested: { count: 1 } }
+    const proxy = reactive(raw)
+
+    expect(toRaw(proxy)).toBe(raw)
+    expect(isReactive(toRaw(proxy))).toBe(false)
+    expect(toRaw(raw)).toBe(raw)
   })
 
   it('非普通内建对象会报错', () => {

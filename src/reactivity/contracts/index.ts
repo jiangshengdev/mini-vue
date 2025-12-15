@@ -1,4 +1,10 @@
-export { iterateDependencyKey, refFlag, triggerOpTypes } from './constants.ts'
+export {
+  iterateDependencyKey,
+  rawFlag,
+  reactiveFlag,
+  refFlag,
+  triggerOpTypes,
+} from './constants.ts'
 export type { TriggerOpType } from './constants.ts'
 export type {
   DependencyBucket,

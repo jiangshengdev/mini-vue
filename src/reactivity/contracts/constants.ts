@@ -9,6 +9,24 @@ export const iterateDependencyKey = Symbol('iterate')
 export const refFlag = Symbol('isRef')
 
 /**
+ * 标记对象为 reactive 生成的代理。
+ *
+ * @remarks
+ * - 使用 Symbol 避免与用户属性冲突。
+ * - 该标记由 Proxy handler 提供，不会真实写入用户对象。
+ */
+export const reactiveFlag = Symbol('isReactive')
+
+/**
+ * 访问 reactive Proxy 对应的原始对象。
+ *
+ * @remarks
+ * - 由 Proxy handler 拦截并返回 raw target。
+ * - 用于实现 `toRaw`，避免依赖私有缓存做反查。
+ */
+export const rawFlag = Symbol('raw')
+
+/**
  * 触发操作类型常量，与依赖注册时的行为保持一致。
  */
 export const triggerOpTypes = {

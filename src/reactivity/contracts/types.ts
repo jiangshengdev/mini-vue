@@ -1,3 +1,4 @@
+import type { rawFlag, reactiveFlag } from './constants.ts'
 import type { PlainObject } from '@/shared/index.ts'
 
 /**
@@ -60,4 +61,9 @@ export interface EffectOptions {
 /**
  * 支持响应式代理的原生目标类型，目前覆盖普通对象与数组。
  */
-export type ReactiveTarget = PlainObject | unknown[]
+export interface ReactiveProxyInternals {
+  readonly [reactiveFlag]?: true
+  readonly [rawFlag]?: PlainObject | unknown[]
+}
+
+export type ReactiveTarget = (PlainObject | unknown[]) & ReactiveProxyInternals

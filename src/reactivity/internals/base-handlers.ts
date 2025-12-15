@@ -1,6 +1,6 @@
 import { reactive } from '../reactive.ts'
 import type { ReactiveTarget } from '../contracts/index.ts'
-import { iterateDependencyKey, triggerOpTypes } from '../contracts/index.ts'
+import { iterateDependencyKey, rawFlag, reactiveFlag, triggerOpTypes } from '../contracts/index.ts'
 import { isRef } from '../ref/api.ts'
 import { withoutTracking } from './tracking.ts'
 import { track, trigger } from './operations.ts'
@@ -10,6 +10,15 @@ import { isArrayIndex, isObject } from '@/shared/index.ts'
  * 响应式读取逻辑：在取值时触发依赖收集，并对嵌套对象递归创建代理。
  */
 const mutableGet: ProxyHandler<ReactiveTarget>['get'] = (target, key, receiver) => {
+  /* 内部标记读取不应触发依赖收集。 */
+  if (key === reactiveFlag) {
+    return true
+  }
+
+  if (key === rawFlag) {
+    return target
+  }
+
   /* 使用 Reflect 读取原始值，保持与原生访问一致的 this 绑定与行为 */
   const rawValue = Reflect.get(target, key, receiver) as unknown
 

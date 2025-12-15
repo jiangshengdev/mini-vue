@@ -1,12 +1,14 @@
 /**
  * 直接使用 Vite 注入的 DEV 常量，便于编译期摇树。
  */
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const __DEV__ = import.meta.env.DEV
 
 /**
  * 内部专用的开发期开关：仅 Vitest 浏览器 runner 注入字符串 'true'。
  * 构建时通过 define 将其置为 undefined，以便剔除内部调试代码。
  */
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const __INTERNAL_DEV__ = import.meta.env.INTERNAL_DEV === 'true'
 
 /**

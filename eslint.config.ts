@@ -7,6 +7,11 @@ import eslintConfigPrettier from 'eslint-config-prettier/flat'
 import stylistic from '@stylistic/eslint-plugin'
 
 export default defineConfig([
+  {
+    linterOptions: {
+      reportUnusedDisableDirectives: 'off',
+    },
+  },
   stylistic.configs.recommended,
   {
     files: ['**/*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}'],

@@ -1,10 +1,11 @@
 /**
  * 对外统一导出响应式系统的核心接口。
  */
+export { toRaw } from './to-raw.ts'
 export { arrayUntrackedMutators, isArrayMutatorKey } from './array/index.ts'
 export { ReactiveEffect, effect, effectStack } from './effect.ts'
 export type { EffectHandle, EffectOptions, EffectScheduler } from './contracts/index.ts'
-export { reactive, isReactive, toRaw } from './reactive.ts'
+export { reactive, isReactive } from './reactive.ts'
 export { watch } from './watch/index.ts'
 export type { WatchSource, WatchCallback, WatchOptions, WatchStopHandle } from './watch/index.ts'
 export { computed, ref, isRef, unref, toRef } from './ref/index.ts'

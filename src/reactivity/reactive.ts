@@ -3,10 +3,11 @@
  */
 import { mutableHandlers } from './internals/index.ts'
 import type { ReactiveTarget } from './contracts/index.ts'
-import { rawFlag, reactiveFlag } from './contracts/index.ts'
+import { reactiveFlag } from './contracts/index.ts'
 import type { Reactive } from './types.ts'
+import { isSupportedTarget } from './to-raw.ts'
 import type { PlainObject } from '@/shared/index.ts'
-import { isObject, isPlainObject } from '@/shared/index.ts'
+import { isObject } from '@/shared/index.ts'
 
 /**
  * 封装原对象与代理实例之间的单向缓存。
@@ -40,14 +41,6 @@ class ReactiveCache {
 
 const reactiveCache = new ReactiveCache()
 const unsupportedTypeMessage = 'reactive 目前仅支持普通对象或数组'
-
-/**
- * 判断传入目标是否为当前响应式系统支持的对象类型。
- */
-function isSupportedTarget(target: unknown): target is ReactiveTarget {
-  /* 目前仅对普通对象与数组启用响应式代理；isPlainObject 内含对象判定。 */
-  return Array.isArray(target) || isPlainObject(target)
-}
 
 /**
  * 将普通对象或数组转换为响应式 Proxy。
@@ -109,24 +102,4 @@ export function isReactive(target: unknown): target is ReactiveTarget {
   }
 
   return (target as ReactiveTarget)[reactiveFlag] === true
-}
-
-/**
- * 获取响应式 Proxy 对应的原始对象。
- *
- * @public
- */
-export function toRaw<T>(target: T): T {
-  if (!isObject(target)) {
-    return target
-  }
-
-  if (!isSupportedTarget(target)) {
-    /* 非支持类型无代理缓存，直接返回原值。 */
-    return target
-  }
-
-  const raw = (target as ReactiveTarget)[rawFlag] as unknown
-
-  return (raw ?? target) as T
 }

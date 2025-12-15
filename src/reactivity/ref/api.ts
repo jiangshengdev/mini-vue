@@ -1,6 +1,7 @@
-import { isReactive, toRaw } from '../reactive.ts'
+import { isReactive } from '../reactive.ts'
 import { refFlag } from '../contracts/index.ts'
 import { withoutTracking } from '../internals/tracking.ts'
+import { toRaw } from '../to-raw.ts'
 import { ObjectRefImpl, RefImpl } from './impl.ts'
 import type { Ref } from './types.ts'
 import type { PlainObject } from '@/shared/index.ts'

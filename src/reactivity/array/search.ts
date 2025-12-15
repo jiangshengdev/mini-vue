@@ -1,6 +1,7 @@
 import type { ReactiveTarget } from '../contracts/index.ts'
-import { iterateDependencyKey, rawFlag } from '../contracts/index.ts'
+import { iterateDependencyKey } from '../contracts/index.ts'
 import { track } from '../internals/operations.ts'
+import { toRaw } from '../to-raw.ts'
 
 /**
  * 需要被特殊处理的数组“查询型”方法名集合。
@@ -28,23 +29,6 @@ const nativeArraySearchMethods = {
   lastIndexOf: ([] as unknown[]).lastIndexOf,
 } satisfies { [K in ArrayIdentitySearchKey]: ArrayIdentitySearchMethod<K> }
 
-/**
- * 读取响应式代理（若存在）对应的原始值。
- *
- * @remarks
- * - 不直接依赖 `toRaw`，避免与 `reactive.ts` 形成循环依赖。
- * - 对非 proxy 对象访问 `rawFlag` 会返回 `undefined`，自然回退到原值。
- */
-function toRawMaybe<T>(value: T): T {
-  if (value && typeof value === 'object') {
-    const raw = (value as { [rawFlag]?: unknown })[rawFlag]
-
-    return (raw ?? value) as T
-  }
-
-  return value
-}
-
 function createIdentitySearchWrapper<K extends ArrayIdentitySearchKey>(
   key: K,
 ): ArrayIdentitySearchMethod<K> {
@@ -52,7 +36,7 @@ function createIdentitySearchWrapper<K extends ArrayIdentitySearchKey>(
     this: unknown[],
     ...args: Parameters<unknown[][K]>
   ): ReturnType<unknown[][K]> {
-    const rawArray = toRawMaybe(this)
+    const rawArray = toRaw(this)
 
     // 查询行为关注数组元素集合的变化，使用 iterate 依赖统一收敛。
     track(rawArray as unknown as ReactiveTarget, iterateDependencyKey)
@@ -67,7 +51,7 @@ function createIdentitySearchWrapper<K extends ArrayIdentitySearchKey>(
         return method.call(
           rawArray,
           ...(args.map((arg) => {
-            return toRawMaybe(arg)
+            return toRaw(arg)
           }) as unknown as Parameters<unknown[][K]>),
         )
       }
@@ -79,7 +63,7 @@ function createIdentitySearchWrapper<K extends ArrayIdentitySearchKey>(
       return method.call(
         rawArray,
         ...(args.map((arg) => {
-          return toRawMaybe(arg)
+          return toRaw(arg)
         }) as unknown as Parameters<unknown[][K]>),
       )
     }
@@ -94,8 +78,6 @@ export const arraySearchWrappers = {
   lastIndexOf: createIdentitySearchWrapper('lastIndexOf'),
 } satisfies { [K in ArrayIdentitySearchKey]: ArrayIdentitySearchMethod<K> }
 
-export function isArraySearchKey(
-  key: PropertyKey,
-): key is keyof typeof arraySearchWrappers {
+export function isArraySearchKey(key: PropertyKey): key is keyof typeof arraySearchWrappers {
   return typeof key === 'string' && Object.hasOwn(arraySearchWrappers, key)
 }

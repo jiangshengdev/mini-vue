@@ -175,6 +175,12 @@ function createReadonlySetter<T>(): ComputedSetter<T> {
 /**
  * 对外暴露的 computed API，根据传参类型决定只读或可写实现。
  *
+ * 生命周期说明：
+ *
+ * - computed 内部会创建一个 `ReactiveEffect` 执行 getter，并在构造时通过 `recordEffectScope()` 登记到当前活跃的 `effectScope`。
+ * - 因此在 `scope.run(() => { ... })` 期间创建的 computed，会在 `scope.stop()` 时被统一 stop，自动断开与上游依赖的关联。
+ * - 与 Vue 3 公共 API 一致：computed 返回 `Ref<T>` 语义，不提供公开的 `stop()` 方法；需要手动管理生命周期时，请使用 `effectScope()` 托管。
+ *
  * @public
  */
 export function computed<T>(getter: ComputedGetter<T>): Ref<T>

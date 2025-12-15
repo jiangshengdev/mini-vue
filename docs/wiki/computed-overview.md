@@ -33,6 +33,17 @@
 - 下游依赖：`markDirty()` 只负责把 `needsRecompute` 置为真，并 `triggerEffects(dependencyBucket)`，让所有读取过 `.value` 的 effect 在下次调度时重新读取。
 - 由于脏标记具备短路判断，连续多次触发在下一次读取前只会触发一次下游通知。
 
+## 生命周期与 EffectScope 托管
+
+- `ComputedRefImpl` 内部会创建一个 `ReactiveEffect` 用于执行 getter，并在构造时调用 `recordEffectScope(effect)` 自动登记到当前活跃的 `effectScope`。
+- 因此，只要在 `scope.run(() => { ... })` 期间创建 computed，后续执行 `scope.stop()` 会同步停止 computed 的内部 effect，断开它与上游依赖的关联。
+- 需要注意：对外的 `computed()` 返回值是 `Ref<T>` 语义，本项目也与 Vue 3 保持一致——不提供公开的 `computed.stop()`。
+
+最推荐的资源释放方式：
+
+- **组件内创建**：computed 跟随组件卸载由组件 scope 统一清理。
+- **组件外创建**：用 `effectScope()` 包裹并在合适时机 `scope.stop()`。
+
 ## 使用与排错提示
 
 - 若发现 computed 永远不更新，优先确认 getter 中是否实际访问了响应式字段；只有被 track 到的依赖才会触发脏标记。

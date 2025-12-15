@@ -55,14 +55,17 @@
 - 下一步：引入 `toRaw`（或等价的代理还原能力），在 setter 中将 `newValue` 归一化为原始对象后再做判等与赋值，以保证 raw/proxy 代表同一实体时不会触发更新。
 - 测试建议：新增“ref 对象值在 raw 与 proxy 间切换赋值不应触发”的回归用例。
 
-## 7. `ComputedRefImpl` 未暴露内部 Effect 或停止方法，限制了手动生命周期管理（已验证）
+## 7. `ComputedRefImpl` 未暴露内部 Effect 或停止方法，限制了手动生命周期管理（已补充文档说明）
 
 - 位置：`src/reactivity/ref/computed.ts`
 - 现状：`ComputedRefImpl` 内部创建 `ReactiveEffect` 并通过 `recordEffectScope` 关联到当前作用域，但实现对外仅暴露 `Ref<T>` 接口（`effect` 为 private），也未提供 `stop()`。
 - 影响：在不使用 `EffectScope` 托管的场景（例如全局长期缓存、或手动创建但不在 `effectScope().run()` 内），用户无法主动停止该 computed 的依赖追踪关系；若 computed 被长生命周期对象持有，可能导致依赖链长期保留，增加内存泄漏风险。
 - 验证结论：成立。当前 API 层面无法拿到内部 effect，也无法调用 stop；且在无活跃 scope 时 `recordEffectScope` 不会记录该 effect。
-- 下一步：为 computed 增补手动停止能力（例如对外暴露 `stop()`，或暴露内部 effect 句柄/调试接口；具体 API 需结合对外导出策略决定）。
-- 测试建议：若新增 stop 能力，补充“stop 后 computed 不再参与追踪/触发”的用例；若暂不计划提供能力，应在文档中明确依赖 scope 托管的推荐用法。
+- 处理：已在 computed API 的 JSDoc 与 Wiki 中补充说明，明确推荐通过 `effectScope()` 托管生命周期；现阶段与 Vue 3 公共 API 对齐，不额外提供 `computed.stop()`。
+  - 文档：`docs/wiki/computed-overview.md`（“生命周期与 EffectScope 托管”）
+  - 源码注释：`src/reactivity/ref/computed.ts`（`computed` 导出函数 JSDoc）
+- 现有测试：`test/reactivity/effect-scope/lifecycle.test.ts` 已覆盖“`scope.stop()` 后 computed 不再触发下游 effect”。
+- 后续可选：若确实需要“单个 computed 可手动 stop”的能力，再评估新增公开类型（如 `ComputedRef`）或调试接口，并补充对应回归测试。
 
 ## 8. `ObjectRefImpl` 写入前读取旧值会执行 getter，导致写入阶段意外收集依赖（已修复）
 

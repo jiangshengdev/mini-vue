@@ -87,23 +87,23 @@
 - 修复：采用方向 A（最小改动）。当 `ReactiveEffect` 已 `stop()`（`active=false`）时，`registerCleanup()` 不再将 cleanup 入队，而是立即执行该 cleanup，避免将“子停止逻辑”登记到一个后续不会再被 `flushDependencies()` 消费的队列中。
 - 回归测试：`test/reactivity/effect/stop.test.ts` 新增“effect 执行中途 stop 后创建子 effect 不应导致子清理丢失”的用例。
 
-## 10. `EffectScope.stop()` 执行 cleanup 时不支持重入注册，可能遗漏清理（已验证）
+## 10. `EffectScope.stop()` 执行 cleanup 时不支持重入注册，可能遗漏清理（已修复，语义对齐 Vue）
 
 - 位置：`src/reactivity/effect-scope.ts`
-- 现状：`stop()` 会拷贝 `cleanups` 并清空原数组，只遍历一次快照；若 cleanup 执行期间又调用 `onScopeDispose()` / `scope.addCleanup()` 注册新的 cleanup，则这些新 cleanup 会进入已清空的数组，但本次 stop 不会再消费。
-- 影响：清理回调可能被遗漏，外部资源（定时器/订阅/监听等）无法释放，存在泄漏风险。
-- 验证结论：成立。
-- 下一步：明确 stop 语义并实现可预期策略：例如在 stop 中循环 drain `cleanups` 直到为空；或在 stop 期间直接禁止新增 cleanup（但需在文档中说明）。
-- 测试建议：建议在 `test/reactivity/effect-scope.lifecycle.test.ts` 增补“stop 时 cleanup 重入注册不会被执行”的复现用例。
+- 现状：`stop()` 在开头即将 `active` 置为 `false`，并仅执行 stop 开始时已登记的 `cleanups`（固定长度遍历后清空）。
+- 影响：cleanup 执行期间新增注册不会在本次 stop 被执行（与 Vue 官方一致）；不会再出现“遗漏但仍残留在队列里、造成不可预期清理时机”的问题。
+- 验证结论：成立（这属于语义选择）。
+- 修复：对齐 Vue 官方语义：stop 进入即 inactive + cleanup 固定长度遍历。
+- 回归测试：`test/reactivity/effect-scope/api.test.ts` 新增“stop 执行 cleanup 期间注册的新 cleanup 不会被执行”的用例。
 
-## 11. `EffectScope.stop()` 末尾才置 `active=false`，stop 期间仍可录入新 effect 导致泄漏（已验证）
+## 11. `EffectScope.stop()` 末尾才置 `active=false`，stop 期间仍可录入新 effect 导致泄漏（已修复，语义对齐 Vue）
 
 - 位置：`src/reactivity/effect-scope.ts`
-- 现状：`stop()` 在停止已有 effects、执行 cleanups、级联 stop 子 scope 后，才将 `active` 置为 `false`；因此 stop 期间仍可通过 `scope.run()` 创建 effect，并被 `recordEffect()` 记录进 `effects`。
-- 影响：由于停止 effects 的循环已结束，stop 期间新增的 effect 不会被 stop，后续仍会响应响应式更新，造成依赖链与内存泄漏风险。
+- 现状：`stop()` 进入后立刻将 `active` 置为 `false`，因此 stop 期间 `scope.run()` 不会再执行回调，也不会再收集新 effect。
+- 影响：避免 stop 执行过程中创建新 effect 但无法被 stop 的泄漏风险。
 - 验证结论：成立。
-- 下一步：调整 stop 时序（建议 stop 一开始就让 scope 不再收集：例如先置 `active=false` 或引入 `stopping` 状态并在 `recordEffect/addCleanup` 阻止录入）。
-- 测试建议：建议在 `test/reactivity/effect-scope.lifecycle.test.ts` 增补“stop 过程中仍可录入新 effect 且不会被 stop”的复现用例。
+- 修复：调整 stop 时序：stop 开始即 inactive。
+- 回归测试：`test/reactivity/effect-scope/api.test.ts` 新增“stop 期间 cleanup 内调用 scope.run 不会再创建新 effect”的用例。
 
 ## 12. `removeChildScope` 未重置子 scope 的 `positionInParent`，导致对象状态脏（已修复）
 

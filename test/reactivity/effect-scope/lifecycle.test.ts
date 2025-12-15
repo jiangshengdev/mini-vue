@@ -96,7 +96,7 @@ describe('effectScope 生命周期与清理', () => {
     expect(handler).toHaveBeenCalledTimes(1)
     const [error, context] = handler.mock.calls[0]
 
-    expect((error as Error).message).toBe('scope cleanup failed')
+    expect(error.message).toBe('scope cleanup failed')
     expect(context).toBe(errorContexts.effectScopeCleanup)
   })
 

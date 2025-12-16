@@ -54,8 +54,8 @@ export function performInitialRender<
   return {
     ok,
     nodes: mounted?.nodes ?? [],
-    teardown(): void {
-      mounted?.teardown()
+    teardown(skipRemove?: boolean): void {
+      mounted?.teardown(skipRemove)
     },
   }
 }

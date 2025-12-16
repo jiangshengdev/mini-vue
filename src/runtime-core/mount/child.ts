@@ -4,7 +4,7 @@ import { mountVirtualNode } from './virtual-node.ts'
 import type { MountedHandle } from './handle.ts'
 import type { RenderOutput } from '@/jsx-foundation/index.ts'
 import { isVirtualNode } from '@/jsx-foundation/index.ts'
-import { isNil } from '@/shared/index.ts'
+import { __DEV__, isNil } from '@/shared/index.ts'
 
 /**
  * 根据子节点类型生成宿主节点，统一处理数组、virtualNode 与原始值。
@@ -110,6 +110,9 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
   }
 
   /* 其他值（如对象）兜底转成字符串输出。 */
+  if (__DEV__ && typeof child === 'object') {
+    console.warn('[runtime-core] 检测到对象类型的子节点，已按字符串渲染：', child)
+  }
   const text = createText(String(child))
 
   appendChild(container, text)

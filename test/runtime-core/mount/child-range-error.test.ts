@@ -4,6 +4,8 @@ import { mountChild } from '@/runtime-core/mount/index.ts'
 
 type MockNode = { text?: string }
 type MockContainer = MockNode & { children: MockNode[] }
+// 超过常见的函数参数数量限制（约 65k）
+const MASSIVE_CHILD_COUNT = 70_000
 
 function createMockRendererOptions(): RendererOptions<MockNode, MockContainer, MockContainer> {
   return {
@@ -49,7 +51,7 @@ describe('runtime-core mountChild large arrays', () => {
   it('避免在超大子节点列表上触发 push 展开 RangeError', () => {
     const options = createMockRendererOptions()
     const container: MockContainer = { children: [] }
-    const massive = Array.from({ length: 70_000 }, (_, index) => index)
+    const massive = Array.from({ length: MASSIVE_CHILD_COUNT }, (_, index) => index)
 
     const mounted = mountChild(options, [massive, 'tail'], container)
 

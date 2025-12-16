@@ -1,0 +1,66 @@
+import { spawnSync } from 'node:child_process'
+import path from 'node:path'
+import process from 'node:process'
+import ts from 'typescript'
+
+interface RunAllOptions {
+  emptyMessage: string
+}
+
+function isRunnableScript(filePath: string): boolean {
+  if (!filePath.endsWith('.ts')) {
+    return false
+  }
+
+  const base = path.basename(filePath)
+
+  if (base === 'run.ts') {
+    return false
+  }
+
+  if (base.endsWith('.d.ts')) {
+    return false
+  }
+
+  return true
+}
+
+function listScripts(dirPath: string): string[] {
+  const files = ts.sys.readDirectory(dirPath, ['.ts'], undefined, ['**/*.ts'])
+
+  return files.filter(isRunnableScript).sort((a, b) => a.localeCompare(b))
+}
+
+function runScript(filePath: string): number {
+  const result = spawnSync('tsx', [filePath], { stdio: 'inherit' })
+
+  if (typeof result.status === 'number') {
+    return result.status
+  }
+
+  return 1
+}
+
+export function runAllScriptsInDir(dirPath: string, options: RunAllOptions): void {
+  const scripts = listScripts(dirPath)
+
+  if (scripts.length === 0) {
+    console.log(options.emptyMessage)
+
+    return
+  }
+
+  let hasFailure = false
+
+  for (const scriptPath of scripts) {
+    const exitCode = runScript(scriptPath)
+
+    if (exitCode !== 0) {
+      hasFailure = true
+    }
+  }
+
+  if (hasFailure) {
+    process.exitCode = 1
+  }
+}

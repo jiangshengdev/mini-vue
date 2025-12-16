@@ -33,7 +33,11 @@
   "scripts": {
     "build": "tsdown && pnpm run generate:jsx-shim",
     "generate:jsx-shim": "tsx scripts/generate-jsx-shim.ts",
-    "check:duplicate-import-export": "tsx scripts/check-duplicate-import-export.ts",
+    "check:duplicate-import-export": "tsx scripts/check/import/check-duplicate-import-export.ts",
+    "check:import-sorted": "tsx scripts/check/import/check-import-export-sorted.ts",
+    "check:src-import-boundary": "tsx scripts/check/import/check-src-import-boundary.ts",
+    "check:import": "tsx scripts/check/import/run.ts",
+    "check:all": "tsx scripts/check/run.ts",
     "dev": "tsdown --watch",
     "play": "vite",
     "play:build": "tsc && vite build",

@@ -6,7 +6,7 @@ import ts from 'typescript'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-const srcDir = path.resolve(__dirname, '../src')
+const srcDir = path.resolve(__dirname, '../../../src')
 
 type Category = 'type' | 'value'
 

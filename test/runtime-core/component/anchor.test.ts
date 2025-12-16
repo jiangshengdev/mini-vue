@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
-import type { ComponentInstance } from '@/runtime-core/component/context.ts'
-import { mountChildWithAnchor } from '@/runtime-core/component/anchor.ts'
-import type { RendererOptions } from '@/runtime-core/index.ts'
+import type { ComponentInstance, RendererOptions } from '@/runtime-core/index.ts'
+import { mountChildWithAnchor } from '@/runtime-core/index.ts'
 import type { SetupComponent } from '@/jsx-foundation/index.ts'
 import { effectScope } from '@/reactivity/index.ts'
 

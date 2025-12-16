@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { RendererOptions } from '@/runtime-core/index.ts'
-import { mountChild } from '@/runtime-core/mount/index.ts'
+import { mountChild } from '@/runtime-core/index.ts'
 
 interface MockNode {
   text?: string

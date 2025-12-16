@@ -78,14 +78,12 @@
 - 影响：对象等复杂值会被渲染为 `[object Object]`，通常并非用户期望；同时缺少开发环境下的告警/指引，排查成本较高。
 - 提示：在 dev 模式输出明确警告，或提供更合理的序列化策略。
 
-## 9. `createRenderer` 使用 WeakMap 缓存容器句柄，限制 HostElement 必须为对象（待修复）
+## 9. `createRenderer` 使用 WeakMap 缓存容器句柄，限制 HostElement 必须为对象（已修复）
 
 - 位置：`src/runtime-core/renderer.ts`
 - 现状：渲染器内部用 `WeakMap` 以容器作为 key 缓存挂载句柄；`WeakMap` 的 key 必须是对象。
 - 影响：若宿主环境将容器抽象为字符串/数字（例如终端渲染器、某些自定义渲染器），会在运行时报错 `Invalid value used as weak map key`，破坏“平台无关”的承诺。
-- 提示：
-  - 方案 A：约束类型（明确 HostElement 必须是 `object`）并在文档/类型层声明；
-  - 方案 B：对对象 key 用 `WeakMap`、对原始值 key 用 `Map`（需要额外的生命周期清理策略）。
+ - 修复：将 `HostElement` 类型约束为 `object`，并在运行期对非对象容器抛出明确错误提示，避免 WeakMap 报错。
 
 ## 10. `mount` 失败时应用状态可能处于“idle 但已缓存 container”的不一致态（待修复）
 

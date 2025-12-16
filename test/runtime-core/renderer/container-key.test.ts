@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
-import { createRenderer } from '@/runtime-core/renderer.ts'
 import type { RendererOptions } from '@/runtime-core/renderer.ts'
+import { createRenderer } from '@/runtime-core/renderer.ts'
 
 describe('runtime-core/renderer container key', () => {
   it('throws friendly error when container is not object', () => {

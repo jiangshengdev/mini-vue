@@ -2,8 +2,8 @@ import fs from 'node:fs'
 import path from 'node:path'
 import ts from 'typescript'
 import { resolveFromImportMeta } from '../_shared/paths.ts'
-import { getBoundaryDir, getPosition, readTsSourceFile, runSrcCheck } from '../_shared/ts-check.ts'
 import type { Position } from '../_shared/ts-check.ts'
+import { getBoundaryDir, getPosition, readTsSourceFile, runSrcCheck } from '../_shared/ts-check.ts'
 
 type Kind = 'import' | 'export'
 

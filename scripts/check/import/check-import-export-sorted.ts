@@ -1,7 +1,7 @@
 import ts from 'typescript'
 import { resolveFromImportMeta } from '../_shared/paths.ts'
-import { getPosition, readTsSourceFile, runSrcCheck } from '../_shared/ts-check.ts'
 import type { Position } from '../_shared/ts-check.ts'
+import { getPosition, readTsSourceFile, runSrcCheck } from '../_shared/ts-check.ts'
 
 type Kind = 'import' | 'export'
 

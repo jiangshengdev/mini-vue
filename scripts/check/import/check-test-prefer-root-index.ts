@@ -8,6 +8,12 @@ type Kind = 'import' | 'export'
 
 type Severity = 'error' | 'warn'
 
+interface NamedBindingItem {
+  imported: string
+  local: string
+  isTypeOnly: boolean
+}
+
 interface Finding {
   filePath: string
   kind: Kind
@@ -20,6 +26,20 @@ interface Finding {
 
 const testDir = resolveFromImportMeta(import.meta.url, '../../../test')
 const rootIndexFile = resolveFromImportMeta(import.meta.url, '../../../src/index.ts')
+
+function isTypeOnlyNode(node: unknown): boolean {
+  const maybe = node as { phaseModifier?: ts.SyntaxKind; isTypeOnly?: boolean } | undefined
+
+  if (!maybe) {
+    return false
+  }
+
+  if (maybe.phaseModifier !== undefined && maybe.phaseModifier !== null) {
+    return maybe.phaseModifier === ts.SyntaxKind.TypeKeyword
+  }
+
+  return Boolean(maybe.isTypeOnly)
+}
 
 function isRootIndexModule(module: string): boolean {
   return module === '@/index.ts'
@@ -54,45 +74,111 @@ function getExportedNamesFromRootIndex(): Set<string> {
   return names
 }
 
-function collectNamedImportsFromClause(namedBindings: ts.NamedImportBindings | undefined): {
+function collectNamedImportsFromClause(parameters: { importClause: ts.ImportClause | undefined }): {
   kind: 'named' | 'namespace' | 'none'
-  names: string[]
+  items: NamedBindingItem[]
 } {
+  const { importClause } = parameters
+  const namedBindings = importClause?.namedBindings
+
   if (!namedBindings) {
-    return { kind: 'none', names: [] }
+    return { kind: 'none', items: [] }
   }
 
   if (ts.isNamespaceImport(namedBindings)) {
-    return { kind: 'namespace', names: [] }
+    return { kind: 'namespace', items: [] }
   }
+
+  const isClauseTypeOnly = isTypeOnlyNode(importClause)
 
   return {
     kind: 'named',
-    names: namedBindings.elements.map((specifier) => {
-      return (specifier.propertyName ?? specifier.name).text
+    items: namedBindings.elements.map((specifier) => {
+      const imported = (specifier.propertyName ?? specifier.name).text
+      const local = specifier.name.text
+      const isTypeOnly = isClauseTypeOnly || isTypeOnlyNode(specifier)
+
+      return { imported, local, isTypeOnly }
     }),
   }
 }
 
-function collectNamedExportsFromClause(exportClause: ts.NamedExportBindings | undefined): {
+function collectNamedExportsFromClause(parameters: { exportDeclaration: ts.ExportDeclaration }): {
   kind: 'named' | 'namespace' | 'none'
   names: string[]
+  items: NamedBindingItem[]
 } {
+  const { exportDeclaration } = parameters
+  const { exportClause } = exportDeclaration
+
   if (!exportClause) {
-    return { kind: 'none', names: [] }
+    return { kind: 'none', names: [], items: [] }
   }
 
   if (ts.isNamespaceExport(exportClause)) {
-    return { kind: 'namespace', names: [] }
+    return { kind: 'namespace', names: [], items: [] }
   }
+
+  const isClauseTypeOnly = isTypeOnlyNode(exportDeclaration)
+
+  const items = exportClause.elements.map((specifier) => {
+    const imported = (specifier.propertyName ?? specifier.name).text
+    const local = specifier.name.text
+    const isTypeOnly = isClauseTypeOnly || isTypeOnlyNode(specifier)
+
+    return { imported, local, isTypeOnly }
+  })
 
   return {
     kind: 'named',
-    names: exportClause.elements.map((specifier) => {
-      // Export { a as b } 的对外名字是 b（specifier.name）
-      return specifier.name.text
+    names: items.map((item) => {
+      // Export { a as b } 的对外名字是 b（local）
+      return item.local
     }),
+    items,
   }
+}
+
+function formatNamedItem(item: NamedBindingItem): string {
+  if (item.imported === item.local) {
+    return item.imported
+  }
+
+  return `${item.imported} as ${item.local}`
+}
+
+function formatImportStatement(module: string, items: NamedBindingItem[]): string {
+  if (items.length === 0) {
+    return ''
+  }
+
+  const allTypeOnly = items.every((item) => {
+    return item.isTypeOnly
+  })
+
+  if (allTypeOnly) {
+    const body = items
+      .map((item) => {
+        return formatNamedItem({ ...item, isTypeOnly: true })
+      })
+      .join(', ')
+
+    return `import type { ${body} } from '${module}'`
+  }
+
+  const body = items
+    .map((item) => {
+      const printed = formatNamedItem(item)
+
+      if (item.isTypeOnly) {
+        return `type ${printed}`
+      }
+
+      return printed
+    })
+    .join(', ')
+
+  return `import { ${body} } from '${module}'`
 }
 
 function checkFile(parameters: {
@@ -117,8 +203,7 @@ function checkFile(parameters: {
       }
 
       const clause = statement.importClause
-      const namedBindings = clause?.namedBindings
-      const collected = collectNamedImportsFromClause(namedBindings)
+      const collected = collectNamedImportsFromClause({ importClause: clause })
 
       if (collected.kind === 'namespace') {
         findings.push({
@@ -137,29 +222,36 @@ function checkFile(parameters: {
         continue
       }
 
-      const shouldMove = collected.names.filter((name) => {
-        return rootExportNames.has(name)
+      const shouldMove = collected.items.filter((item) => {
+        return rootExportNames.has(item.imported)
       })
 
       if (shouldMove.length === 0) {
         continue
       }
 
-      const remain = collected.names.filter((name) => {
-        return !rootExportNames.has(name)
+      const remain = collected.items.filter((item) => {
+        return !rootExportNames.has(item.imported)
       })
+
+      const movedStatement = formatImportStatement('@/index.ts', shouldMove)
+      const remainStatement = formatImportStatement(module, remain)
 
       const suggestion =
         remain.length === 0
-          ? `将该导入改为：import { ${shouldMove.sort().join(', ')} } from '@/index.ts'`
-          : `建议拆分导入：\n- import { ${shouldMove.sort().join(', ')} } from '@/index.ts'\n- import { ${remain.sort().join(', ')} } from '${module}'`
+          ? `将该导入改为：${movedStatement}`
+          : `建议拆分导入：\n- ${movedStatement}\n- ${remainStatement}`
 
       findings.push({
         filePath: sourceFile.fileName,
         kind: 'import',
         module,
         position: getPosition(sourceFile, statement.moduleSpecifier),
-        names: shouldMove.sort(),
+        names: shouldMove
+          .map((item) => {
+            return item.imported
+          })
+          .sort(),
         severity: 'error',
         suggestion,
       })
@@ -178,7 +270,7 @@ function checkFile(parameters: {
         continue
       }
 
-      const collected = collectNamedExportsFromClause(statement.exportClause)
+      const collected = collectNamedExportsFromClause({ exportDeclaration: statement })
 
       if (collected.kind !== 'named') {
         continue

@@ -12,6 +12,11 @@ function isRunnableScript(filePath: string): boolean {
     return false
   }
 
+  // 约定：_shared 仅放置工具模块，不应作为独立检查脚本执行
+  if (filePath.split(path.sep).includes('_shared')) {
+    return false
+  }
+
   const base = path.basename(filePath)
 
   if (base === 'run.ts') {

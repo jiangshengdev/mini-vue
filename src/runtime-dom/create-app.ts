@@ -3,6 +3,7 @@
  */
 import { domRendererOptions } from './renderer-options.ts'
 import type { SetupComponent } from '@/jsx-foundation/index.ts'
+import { runtimeDomContainerNotFound } from '@/messages/index.ts'
 import type { AppInstance } from '@/runtime-core/index.ts'
 import { createAppInstance, createRenderer } from '@/runtime-core/index.ts'
 import type { PropsShape } from '@/shared/index.ts'
@@ -75,7 +76,7 @@ function mountDomApp(state: DomAppState, target: string | Element): void {
 
   /* 若用户未提供有效容器，立即报错避免静默失败。 */
   if (!container) {
-    throw new Error('createApp: 未找到可用的挂载容器', { cause: target })
+    throw new Error(runtimeDomContainerNotFound, { cause: target })
   }
 
   state.lastMountTarget = target

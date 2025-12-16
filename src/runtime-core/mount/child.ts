@@ -4,6 +4,7 @@ import type { MountedHandle } from './handle.ts'
 import { mountVirtualNode } from './virtual-node.ts'
 import type { RenderOutput } from '@/jsx-foundation/index.ts'
 import { isVirtualNode } from '@/jsx-foundation/index.ts'
+import { runtimeCoreObjectChildWarning } from '@/messages/index.ts'
 import { __DEV__, isNil } from '@/shared/index.ts'
 
 /**
@@ -117,7 +118,7 @@ export function mountChild<
 
   /* 其他值（如对象）兜底转成字符串输出。 */
   if (__DEV__ && typeof child === 'object') {
-    console.warn('[runtime-core] 检测到对象类型的子节点，已按字符串渲染：', child)
+    console.warn(runtimeCoreObjectChildWarning, child)
   }
 
   const text = createText(String(child))

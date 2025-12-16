@@ -3,6 +3,7 @@ import { screen, within } from '@testing-library/dom'
 import { createTestContainer } from '../../setup.ts'
 import type { SetupComponent } from '@/index.ts'
 import { createApp, reactive } from '@/index.ts'
+import { runtimeCoreAppAlreadyMounted, runtimeDomContainerNotFound } from '@/messages/index.ts'
 
 const App: SetupComponent = () => {
   return () => {
@@ -28,7 +29,7 @@ describe('runtime-dom createApp', () => {
 
     expect(() => {
       app.mount('#app[')
-    }).toThrowError('createApp: 未找到可用的挂载容器')
+    }).toThrowError(runtimeDomContainerNotFound)
   })
 
   it('支持直接传入容器', () => {
@@ -50,7 +51,7 @@ describe('runtime-dom createApp', () => {
     app.mount(host)
     expect(() => {
       app.mount(host)
-    }).toThrowError('当前应用已挂载')
+    }).toThrowError(runtimeCoreAppAlreadyMounted)
     app.unmount()
   })
 

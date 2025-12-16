@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { createTestContainer } from '../../setup.ts'
 import type { SetupComponent } from '@/index.ts'
 import { Fragment, reactive, render } from '@/index.ts'
+import { runtimeCoreObjectChildWarning } from '@/messages/index.ts'
 
 describe('runtime-dom basic rendering', () => {
   it('渲染基本元素与文本', () => {
@@ -128,7 +129,7 @@ describe('runtime-dom basic rendering', () => {
 
       expect(container).toHaveTextContent('[object Object]')
       expect(warnSpy).toHaveBeenCalledTimes(1)
-      expect(String(warnSpy.mock.calls[0]?.[0])).toContain('对象类型的子节点')
+      expect(warnSpy.mock.calls[0]?.[0]).toBe(runtimeCoreObjectChildWarning)
       expect(warnSpy.mock.calls[0]?.[1]).toBe(payload)
     } finally {
       warnSpy.mockRestore()

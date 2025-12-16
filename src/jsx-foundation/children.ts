@@ -1,5 +1,6 @@
 import { isVirtualNode } from './guards.ts'
 import type { VirtualNodeChild } from './types.ts'
+import { jsxUnsupportedChildWarning } from '@/messages/index.ts'
 import { __DEV__, isNil } from '@/shared/index.ts'
 
 /**
@@ -13,7 +14,7 @@ function warnUnsupportedChild(child: unknown): void {
     return
   }
 
-  console.warn('[jsx] 检测到无法渲染的 children，已被忽略：', child)
+  console.warn(jsxUnsupportedChildWarning, child)
 }
 
 /**

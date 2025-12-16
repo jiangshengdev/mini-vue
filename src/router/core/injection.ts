@@ -1,4 +1,5 @@
 import type { Router } from './types.ts'
+import { routerNotFound } from '@/messages/index.ts'
 import { inject } from '@/runtime-core/index.ts'
 import type { InjectionKey } from '@/shared/index.ts'
 
@@ -14,9 +15,7 @@ export function useRouter(): Router {
   const router = inject(routerInjectionKey)
 
   if (!router) {
-    throw new Error(
-      'useRouter: 未找到 router，请先在 createApp 后调用 app.use(router)，或为 RouterLink/RouterView 显式传入 router props',
-    )
+    throw new Error(routerNotFound)
   }
 
   return router

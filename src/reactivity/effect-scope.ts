@@ -1,4 +1,5 @@
 import type { EffectInstance } from './contracts/index.ts'
+import { reactivityScopeDisposeOutside } from '@/messages/index.ts'
 import { ContextStack, errorContexts, errorPhases, runSilent, runThrowing } from '@/shared/index.ts'
 
 /** 当前正在运行的 effect scope 栈，用于关联副作用与清理。 */
@@ -245,7 +246,7 @@ export function onScopeDispose(cleanup: () => void): void {
 
   /* 若无活跃 scope，说明调用栈不在托管上下文中，直接报错。 */
   if (!scope) {
-    throw new TypeError('onScopeDispose 仅能在活跃的 effect scope 中调用', { cause: scope })
+    throw new TypeError(reactivityScopeDisposeOutside, { cause: scope })
   }
 
   scope.addCleanup(cleanup)

@@ -3,6 +3,7 @@ import { createTestContainer } from '../../setup.ts'
 import type { ErrorHandler, SetupComponent } from '@/index.ts'
 import { setErrorHandler } from '@/index.ts'
 import { createVirtualNode } from '@/jsx-foundation/index.ts'
+import { runtimeCoreAsyncSetupNotSupported } from '@/messages/index.ts'
 import { mountComponent } from '@/runtime-core/index.ts'
 import { domRendererOptions } from '@/runtime-dom/index.ts'
 
@@ -75,7 +76,7 @@ describe('runtime-core mountComponent handle ok flag', () => {
 
     const [error] = handler.mock.calls[0] ?? []
 
-    expect(error.message).toContain('暂不支持异步 setup')
+    expect(error.message).toContain(runtimeCoreAsyncSetupNotSupported)
 
     setErrorHandler(undefined)
   })

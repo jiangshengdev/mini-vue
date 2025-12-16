@@ -2,6 +2,7 @@ import { setCurrentAppContext, unsetCurrentAppContext } from './app-context.ts'
 import type { RootRenderFunction } from './renderer.ts'
 import type { ElementProps, SetupComponent } from '@/jsx-foundation/index.ts'
 import { createVirtualNode } from '@/jsx-foundation/index.ts'
+import { runtimeCoreAppAlreadyMounted, runtimeCoreInvalidPlugin } from '@/messages/index.ts'
 import type {
   InjectionKey,
   InjectionToken,
@@ -90,7 +91,7 @@ function mountApp<HostElement extends WeakKey>(
 ): void {
   /* 已挂载时直接阻止重复操作，避免宿主状态错乱。 */
   if (state.status === appLifecycleStatus.mounted) {
-    throw new Error('createApp: 当前应用已挂载，不能重复执行 mount', { cause: state.container })
+    throw new Error(runtimeCoreAppAlreadyMounted, { cause: state.container })
   }
 
   /* 运行根组件获取最新子树，确保 props 变更生效。 */
@@ -199,7 +200,7 @@ export function createAppInstance<HostElement extends WeakKey>(
             return
           }
 
-          throw new TypeError('createApp.use: plugin 必须是函数或带 install(app) 的对象')
+          throw new TypeError(runtimeCoreInvalidPlugin)
         },
         {
           origin: errorContexts.appPluginUse,

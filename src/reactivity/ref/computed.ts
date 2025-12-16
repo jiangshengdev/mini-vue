@@ -4,6 +4,7 @@ import { recordEffectScope } from '../effect-scope.ts'
 import { ReactiveEffect } from '../effect.ts'
 import { trackEffect, triggerEffects } from '../internals/index.ts'
 import type { Ref } from './types.ts'
+import { reactivityComputedReadonly } from '@/messages/index.ts'
 import {
   __INTERNAL_DEV__,
   createDebugLogger,
@@ -37,9 +38,6 @@ export interface WritableComputedOptions<T> {
   /** 写入时自定义同步方式，可触发外部副作用。 */
   set: ComputedSetter<T>
 }
-
-/** 用于提示只读 computed 被误写入的错误信息。 */
-const readonlyComputedError = '当前 computed 为只读，若需要写入请传入 { get, set } 形式的配置'
 
 const debug = __INTERNAL_DEV__ ? createDebugLogger('computed') : null
 
@@ -168,7 +166,7 @@ class ComputedRefImpl<T> implements Ref<T> {
  */
 function createReadonlySetter<T>(): ComputedSetter<T> {
   return (newValue) => {
-    throw new TypeError(readonlyComputedError, { cause: newValue })
+    throw new TypeError(reactivityComputedReadonly, { cause: newValue })
   }
 }
 

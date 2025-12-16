@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { ErrorHandler } from '@/index.ts'
 import { setErrorHandler } from '@/index.ts'
+import { sharedRunnerNoPromise } from '@/messages/index.ts'
 import type { ErrorAfterHook } from '@/shared/index.ts'
 import {
   dispatchError,
@@ -231,7 +232,7 @@ describe('runtime-error-channel', () => {
           afterRun,
         },
       )
-    }).toThrowError(/Promise/)
+    }).toThrowError(sharedRunnerNoPromise)
 
     expect(handler).toHaveBeenCalledTimes(1)
 
@@ -243,7 +244,7 @@ describe('runtime-error-channel', () => {
 
     expect(context).toBe(errorContexts.effectRunner)
     expect(ensuredToken.error).toBeInstanceOf(TypeError)
-    expect(ensuredToken.error.message).toContain('Promise')
+    expect(ensuredToken.error.message).toBe(sharedRunnerNoPromise)
     expect(payload?.token).toBe(ensuredToken)
     expect(ensuredToken.notified).toBe(true)
   })

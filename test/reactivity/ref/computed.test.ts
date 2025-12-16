@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { ErrorHandler } from '@/index.ts'
 import { computed, effect, ref, setErrorHandler } from '@/index.ts'
+import { reactivityComputedReadonly } from '@/messages/index.ts'
 import { errorContexts } from '@/shared/index.ts'
 
 describe('computed', () => {
@@ -76,7 +77,7 @@ describe('computed', () => {
 
     expect(() => {
       readonlyComputed.value = 2
-    }).toThrow(TypeError)
+    }).toThrowError(new TypeError(reactivityComputedReadonly))
   })
 
   it('支持链式 computed 共享脏标记', () => {

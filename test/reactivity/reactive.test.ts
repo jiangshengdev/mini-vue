@@ -1,6 +1,7 @@
 import { describe, expect, expectTypeOf, it } from 'vitest'
 import type { Ref } from '@/index.ts'
 import { effect, isReactive, isRef, reactive, ref, toRaw } from '@/index.ts'
+import { reactivityUnsupportedType } from '@/messages/index.ts'
 import type { PlainObject } from '@/shared/index.ts'
 
 describe('reactive', () => {
@@ -164,7 +165,7 @@ describe('reactive', () => {
 
       expect(() => {
         return reactive(value)
-      }).toThrowError(new TypeError('reactive 目前仅支持普通对象或数组'))
+      }).toThrowError(new TypeError(reactivityUnsupportedType))
     }
   })
 

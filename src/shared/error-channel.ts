@@ -1,6 +1,7 @@
 import { handleError } from './error-handling.ts'
 import type { PlainObject } from './types.ts'
 import { isThenable } from './utils.ts'
+import { runtimeCoreAsyncSetupNotSupported, sharedRunnerNoPromise } from '@/messages/index.ts'
 
 /**
  * 框架内预设的错误上下文标签，标记异常来源位置。
@@ -243,8 +244,8 @@ function runWithChannel<T, P extends ErrorPhase>(
     if (isThenable(result)) {
       const message =
         options.origin === errorContexts.componentSetup
-          ? '暂不支持异步 setup：setup() 必须同步返回渲染函数（不要返回 Promise）'
-          : 'runWithChannel: runner does not support Promise or thenable return value'
+          ? runtimeCoreAsyncSetupNotSupported
+          : sharedRunnerNoPromise
 
       throw new TypeError(message, { cause: result })
     }

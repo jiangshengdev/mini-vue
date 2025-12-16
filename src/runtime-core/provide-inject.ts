@@ -1,4 +1,5 @@
 import { getCurrentInstance } from './component/context.ts'
+import { runtimeCoreInjectOutsideSetup, runtimeCoreProvideOutsideSetup } from '@/messages/index.ts'
 import type { InjectionToken } from '@/shared/index.ts'
 
 /**
@@ -18,7 +19,7 @@ export function provide(key: InjectionToken, value: unknown): void {
 
   /* 没有实例通常意味着在组件外调用（例如模块顶层或事件回调中）。 */
   if (!instance) {
-    throw new Error('provide: 只能在组件 setup 期间调用')
+    throw new Error(runtimeCoreProvideOutsideSetup)
   }
 
   /* 通过 provides 写入：后代组件将沿着原型链读取到该值。 */
@@ -44,7 +45,7 @@ export function inject<T>(key: InjectionToken<T>, defaultValue?: T): T | undefin
 
   /* 不在 setup 期间调用时直接抛错，避免读到不确定的上下文。 */
   if (!instance) {
-    throw new Error('inject: 只能在组件 setup 期间调用')
+    throw new Error(runtimeCoreInjectOutsideSetup)
   }
 
   const { provides } = instance

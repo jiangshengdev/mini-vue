@@ -6,6 +6,7 @@ import { reactiveFlag } from './contracts/index.ts'
 import { mutableHandlers } from './internals/index.ts'
 import { isSupportedTarget } from './to-raw.ts'
 import type { Reactive } from './types.ts'
+import { reactivityUnsupportedType } from '@/messages/index.ts'
 import type { PlainObject } from '@/shared/index.ts'
 import { isObject } from '@/shared/index.ts'
 
@@ -40,7 +41,6 @@ class ReactiveCache {
 }
 
 const reactiveCache = new ReactiveCache()
-const unsupportedTypeMessage = 'reactive 目前仅支持普通对象或数组'
 
 /**
  * 将普通对象或数组转换为响应式 Proxy。
@@ -70,7 +70,7 @@ export function reactive(target: unknown): unknown {
 
   /* 当前实现仅支持普通对象与数组，其它原生对象直接报错 */
   if (!isSupportedTarget(target)) {
-    throw new TypeError(unsupportedTypeMessage, { cause: target })
+    throw new TypeError(reactivityUnsupportedType, { cause: target })
   }
 
   const reactiveTarget = target as ReactiveTarget

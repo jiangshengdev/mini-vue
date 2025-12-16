@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
+import { runtimeCoreInvalidContainer } from '@/messages/index.ts'
 import type { RendererOptions } from '@/runtime-core/index.ts'
 import { createRenderer } from '@/runtime-core/index.ts'
 
@@ -27,6 +28,6 @@ describe('runtime-core/renderer container key', () => {
 
     expect(() => {
       renderer.render('text', 'container' as unknown as Record<string, unknown>)
-    }).toThrowError(/容器必须是 object（含函数）类型才能缓存挂载状态/)
+    }).toThrowError(runtimeCoreInvalidContainer)
   })
 })

@@ -1,6 +1,10 @@
 import type { ComponentInstance } from './context.ts'
 import { setCurrentInstance, unsetCurrentInstance } from './context.ts'
 import type { RenderFunction, SetupComponent } from '@/jsx-foundation/index.ts'
+import {
+  runtimeCoreAsyncSetupNotSupported,
+  runtimeCoreSetupMustReturnRender,
+} from '@/messages/index.ts'
 import { errorContexts, errorPhases, isThenable, runSilent } from '@/shared/index.ts'
 
 /**
@@ -66,12 +70,9 @@ function invokeSetup<
     /* Mini-vue runtime-core 目前仅支持同步 setup：返回 Promise 会导致挂载行为不可预测。 */
     runSilent(
       () => {
-        throw new TypeError(
-          '暂不支持异步 setup：setup() 必须同步返回渲染函数（不要返回 Promise）',
-          {
-            cause: render,
-          },
-        )
+        throw new TypeError(runtimeCoreAsyncSetupNotSupported, {
+          cause: render,
+        })
       },
       {
         origin: errorContexts.componentSetup,
@@ -86,7 +87,7 @@ function invokeSetup<
     /* `setup` 必须返回函数，非函数时透过错误通道上报。 */
     runSilent(
       () => {
-        throw new TypeError('组件必须返回渲染函数以托管本地状态', { cause: render })
+        throw new TypeError(runtimeCoreSetupMustReturnRender, { cause: render })
       },
       {
         origin: errorContexts.componentSetup,

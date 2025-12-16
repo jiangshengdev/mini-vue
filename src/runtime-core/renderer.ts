@@ -6,6 +6,7 @@ import type { MountedHandle } from './mount/index.ts'
 import { mountChild } from './mount/index.ts'
 import type { RenderOutput } from '@/jsx-foundation/index.ts'
 import { isVirtualNode } from '@/jsx-foundation/index.ts'
+import { runtimeCoreInvalidContainer } from '@/messages/index.ts'
 import type { PropsShape } from '@/shared/index.ts'
 
 /**
@@ -76,7 +77,7 @@ export function createRenderer<
     const isCallable = typeof container === 'function'
 
     if (!isObjectLike && !isCallable) {
-      throw new TypeError('createRenderer 容器必须是 object（含函数）类型才能缓存挂载状态')
+      throw new TypeError(runtimeCoreInvalidContainer)
     }
 
     return container

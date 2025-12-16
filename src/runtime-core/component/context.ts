@@ -1,8 +1,8 @@
 /**
  * 组件实例的共享定义与当前实例管理工具。
  */
-import type { MountedHandle } from '../mount'
 import type { AppContext } from '../create-app.ts'
+import type { MountedHandle } from '../mount'
 import type {
   ElementProps,
   RenderFunction,

@@ -1,7 +1,9 @@
 /**
  * 暴露核心响应式与 JSX 运行时能力，供外部统一引入。
  */
-export type { ElementRef, DomAppInstance } from '@/runtime-dom/index.ts'
+export type { ElementType, SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
+export { Fragment } from '@/jsx-foundation/index.ts'
+export { h, jsx, jsxDEV, jsxs } from '@/jsx-runtime/index.ts'
 export {
   computed,
   effect,
@@ -40,11 +42,9 @@ export type {
   RouterLinkProps,
   RouterViewProps,
 } from '@/router/index.ts'
-export { createApp, render } from '@/runtime-dom/index.ts'
 export { inject, provide } from '@/runtime-core/index.ts'
-export type { SetupComponent, ElementType, VirtualNode } from '@/jsx-foundation/index.ts'
-export { Fragment } from '@/jsx-foundation/index.ts'
-export { h, jsx, jsxs, jsxDEV } from '@/jsx-runtime/index.ts'
+export type { DomAppInstance, ElementRef } from '@/runtime-dom/index.ts'
+export { createApp, render } from '@/runtime-dom/index.ts'
 export type {
   ErrorContext,
   ErrorHandler,

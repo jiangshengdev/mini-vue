@@ -1,6 +1,6 @@
 import type { RendererOptions } from '../index.ts'
-import type { MountContext } from './context.ts'
 import { mountChild } from './child.ts'
+import type { MountContext } from './context.ts'
 import type { MountedHandle } from './handle.ts'
 import type { VirtualNodeChild } from '@/jsx-foundation/index.ts'
 

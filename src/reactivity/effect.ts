@@ -1,4 +1,3 @@
-import { recordEffectScope } from './effect-scope.ts'
 import type {
   DependencyBucket,
   EffectHandle,
@@ -6,6 +5,7 @@ import type {
   EffectOptions,
   EffectScheduler,
 } from './contracts/index.ts'
+import { recordEffectScope } from './effect-scope.ts'
 import type { PlainObject } from '@/shared/index.ts'
 import {
   __INTERNAL_DEV__,

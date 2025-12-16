@@ -1,5 +1,5 @@
-import type { Router } from '../core/types.ts'
 import { useRouter } from '../core/injection.ts'
+import type { Router } from '../core/types.ts'
 import type { SetupComponent } from '@/jsx-foundation/index.ts'
 
 /**

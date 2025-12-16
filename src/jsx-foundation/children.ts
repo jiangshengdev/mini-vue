@@ -1,5 +1,5 @@
-import type { VirtualNodeChild } from './types.ts'
 import { isVirtualNode } from './guards.ts'
+import type { VirtualNodeChild } from './types.ts'
 import { __DEV__, isNil } from '@/shared/index.ts'
 
 /**

@@ -1,4 +1,5 @@
 import { normalizeChildren } from './children.ts'
+import { virtualNodeFlag } from './constants.ts'
 import type {
   ComponentChildren,
   ElementProps,
@@ -7,7 +8,6 @@ import type {
   VirtualNode,
   VirtualNodeChild,
 } from './types.ts'
-import { virtualNodeFlag } from './constants.ts'
 import type { PropsShape, WithOptionalProp } from '@/shared/index.ts'
 
 /**

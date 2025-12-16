@@ -1,14 +1,8 @@
 /**
  * 对外统一导出响应式系统的核心接口。
  */
-export { toRaw } from './to-raw.ts'
 export { arrayUntrackedMutators, isArrayMutatorKey } from './array/index.ts'
-export { ReactiveEffect, effect, effectStack } from './effect.ts'
 export type { EffectHandle, EffectOptions, EffectScheduler } from './contracts/index.ts'
-export { reactive, isReactive } from './reactive.ts'
-export { watch } from './watch/index.ts'
-export type { WatchSource, WatchCallback, WatchOptions, WatchStopHandle } from './watch/index.ts'
-export { computed, ref, isRef, unref, toRef } from './ref/index.ts'
 export {
   effectScope,
   getCurrentScope,
@@ -17,4 +11,10 @@ export {
   recordScopeCleanup,
 } from './effect-scope.ts'
 export type { EffectScope } from './effect-scope.ts'
-export type { Ref, ComputedGetter, ComputedSetter, WritableComputedOptions } from './ref/index.ts'
+export { effect, effectStack, ReactiveEffect } from './effect.ts'
+export { isReactive, reactive } from './reactive.ts'
+export { computed, isRef, ref, toRef, unref } from './ref/index.ts'
+export type { ComputedGetter, ComputedSetter, Ref, WritableComputedOptions } from './ref/index.ts'
+export { toRaw } from './to-raw.ts'
+export { watch } from './watch/index.ts'
+export type { WatchCallback, WatchOptions, WatchSource, WatchStopHandle } from './watch/index.ts'

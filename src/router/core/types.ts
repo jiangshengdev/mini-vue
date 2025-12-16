@@ -1,6 +1,6 @@
 import type { SetupComponent } from '@/jsx-foundation/index.ts'
-import type { PluginInstallApp } from '@/shared/index.ts'
 import type { Ref } from '@/reactivity/index.ts'
+import type { PluginInstallApp } from '@/shared/index.ts'
 
 /**
  * 路由记录：定义原始 path 与对应组件的绑定关系。

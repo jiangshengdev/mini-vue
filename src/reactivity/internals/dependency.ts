@@ -1,7 +1,7 @@
 import type { DependencyBucket, EffectInstance } from '../contracts/index.ts'
 import { effectStack } from '../effect.ts'
-import { canTrack } from './tracking.ts'
 import { enqueueEffect } from './batch.ts'
+import { canTrack } from './tracking.ts'
 import type { PlainObject } from '@/shared/index.ts'
 
 /**

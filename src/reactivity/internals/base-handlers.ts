@@ -1,15 +1,15 @@
-import { reactive } from '../reactive.ts'
-import type { ReactiveTarget } from '../contracts/index.ts'
-import { iterateDependencyKey, rawFlag, reactiveFlag, triggerOpTypes } from '../contracts/index.ts'
-import { isRef } from '../ref/api.ts'
 import {
   arraySearchWrappers,
   arrayUntrackedMutators,
   isArrayMutatorKey,
   isArraySearchKey,
 } from '../array/index.ts'
-import { withoutTracking } from './tracking.ts'
+import type { ReactiveTarget } from '../contracts/index.ts'
+import { iterateDependencyKey, rawFlag, reactiveFlag, triggerOpTypes } from '../contracts/index.ts'
+import { reactive } from '../reactive.ts'
+import { isRef } from '../ref/api.ts'
 import { track, trigger } from './operations.ts'
+import { withoutTracking } from './tracking.ts'
 import { isArrayIndex, isObject } from '@/shared/index.ts'
 
 /**

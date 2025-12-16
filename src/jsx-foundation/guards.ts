@@ -1,5 +1,5 @@
-import type { VirtualNode } from './types.ts'
 import { virtualNodeFlag } from './constants.ts'
+import type { VirtualNode } from './types.ts'
 import { isObject } from '@/shared/index.ts'
 
 /**

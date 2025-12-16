@@ -1,6 +1,6 @@
+import { routerInjectionKey } from './injection.ts'
 import { normalizePath } from './paths.ts'
 import type { RouteLocation, Router, RouterConfig, RouteRecord } from './types.ts'
-import { routerInjectionKey } from './injection.ts'
 import type { Ref } from '@/reactivity/index.ts'
 import { ref } from '@/reactivity/index.ts'
 

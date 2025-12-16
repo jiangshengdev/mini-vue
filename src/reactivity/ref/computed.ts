@@ -1,8 +1,8 @@
-import { ReactiveEffect } from '../effect.ts'
-import { recordEffectScope } from '../effect-scope.ts'
-import { trackEffect, triggerEffects } from '../internals/index.ts'
 import type { DependencyBucket } from '../contracts/index.ts'
 import { refFlag } from '../contracts/index.ts'
+import { recordEffectScope } from '../effect-scope.ts'
+import { ReactiveEffect } from '../effect.ts'
+import { trackEffect, triggerEffects } from '../internals/index.ts'
 import type { Ref } from './types.ts'
 import {
   __INTERNAL_DEV__,

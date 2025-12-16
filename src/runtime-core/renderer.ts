@@ -1,9 +1,9 @@
 /**
  * 平台无关的渲染核心定义，通过注入宿主环境能力完成挂载流程。
  */
+import type { AppContext } from './create-app.ts'
 import type { MountedHandle } from './mount/index.ts'
 import { mountChild } from './mount/index.ts'
-import type { AppContext } from './create-app.ts'
 import type { RenderOutput } from '@/jsx-foundation/index.ts'
 import { isVirtualNode } from '@/jsx-foundation/index.ts'
 import type { PropsShape } from '@/shared/index.ts'

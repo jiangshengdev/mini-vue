@@ -19,7 +19,7 @@ export type {
   ErrorToken,
   ThrowingErrorRunOptions,
 } from './error-channel.ts'
-export type { PlainObject, PropsShape } from './types.ts'
+export type { PlainObject, PropsShape, WithOptionalProp } from './types.ts'
 export type { InjectionKey, InjectionToken } from './injection.ts'
 export type { PluginInstallApp } from './plugin.ts'
 export { isArrayIndex, isNil, isObject, isPlainObject } from './utils.ts'

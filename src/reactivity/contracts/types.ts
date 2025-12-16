@@ -66,4 +66,8 @@ export interface ReactiveProxyInternals {
   readonly [rawFlag]?: PlainObject | unknown[]
 }
 
-export type ReactiveTarget = (PlainObject | unknown[]) & ReactiveProxyInternals
+type ReactiveRawTarget = PlainObject | unknown[]
+
+type ReactiveTargetBase<T extends ReactiveRawTarget> = T & ReactiveProxyInternals
+
+export type ReactiveTarget = ReactiveTargetBase<ReactiveRawTarget>

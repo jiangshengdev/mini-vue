@@ -8,7 +8,7 @@ import type {
   VirtualNodeChild,
 } from './types.ts'
 import { virtualNodeFlag } from './constants.ts'
-import type { PropsShape } from '@/shared/index.ts'
+import type { PropsShape, WithOptionalProp } from '@/shared/index.ts'
 
 /**
  * JSX 片段组件，不创建额外节点，直接返回 children。
@@ -42,9 +42,11 @@ export function createVirtualNode<T extends ElementType>(
 
   if (rawProps) {
     const hasChildren = Object.hasOwn(rawProps, 'children')
-    const { children: rawChildren, ...restProps } = rawProps as PropsShape & {
-      children?: unknown
-    }
+    const { children: rawChildren, ...restProps } = rawProps as WithOptionalProp<
+      PropsShape,
+      'children',
+      unknown
+    >
 
     if (hasChildren) {
       /* 将 props.children 归一化为内部统一使用的 children 数组 */

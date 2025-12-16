@@ -5,7 +5,7 @@ import type {
   VirtualNode,
 } from '@/jsx-foundation/index.ts'
 import { createVirtualNode } from '@/jsx-foundation/index.ts'
-import type { PropsShape } from '@/shared/index.ts'
+import type { PropsShape, WithOptionalProp } from '@/shared/index.ts'
 
 /**
  * 记录剥离 key 后的 props 副本与归一化的 key 值。
@@ -29,9 +29,11 @@ function extractKeyedProps<T extends ElementType>(
     return { key: explicitKey }
   }
 
-  const { key: extractedKey, ...restProps } = props as PropsShape & {
-    key?: PropertyKey
-  }
+  const { key: extractedKey, ...restProps } = props as WithOptionalProp<
+    PropsShape,
+    'key',
+    PropertyKey
+  >
 
   /* 显式 key（jsx 第三个参数）优先，其次再尝试 props.key。 */
   const normalizedKey = explicitKey ?? (Object.hasOwn(props, 'key') ? extractedKey : undefined)

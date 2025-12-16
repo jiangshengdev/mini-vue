@@ -75,11 +75,11 @@ export type ErrorMeta = Readonly<PlainObject>
 /**
  * 触发错误上报时的配置项，控制来源标签与处理策略。
  */
-interface ErrorDispatchOptions {
+interface ErrorDispatchOptions<P extends ErrorPhase = ErrorPhase> {
   /** 标记异常发生的运行时上下文，用于日志聚合。 */
   readonly origin: ErrorContext
   /** 指示当前捕获处于同步还是异步阶段。 */
-  readonly handlerPhase: ErrorPhase
+  readonly handlerPhase: P
   /** 透传额外的业务数据，辅助错误定位。 */
   readonly meta?: ErrorMeta
   /** 允许在异步阶段关闭兜底重抛，避免重复噪声。 */
@@ -116,7 +116,8 @@ export type ErrorAfterHook = (token?: ErrorToken) => void
 /**
  * 运行带错误通道的回调时附带的配置项。
  */
-export interface ErrorRunOptions extends ErrorDispatchOptions {
+export interface ErrorRunOptions<P extends ErrorPhase = ErrorPhase>
+  extends ErrorDispatchOptions<P> {
   /** 调度前执行的 Hook，通常用于准备工作。 */
   readonly beforeRun?: ErrorBeforeHook
   /** 调度结束后的 Hook，可感知 token 结果。 */
@@ -126,9 +127,7 @@ export interface ErrorRunOptions extends ErrorDispatchOptions {
 /**
  * `runThrowing` 专用的配置项，强制要求同步阶段调度以避免双重抛错。
  */
-export type ThrowingErrorRunOptions = ErrorRunOptions & {
-  readonly handlerPhase: typeof errorPhases.sync
-}
+export type ThrowingErrorRunOptions = ErrorRunOptions<typeof errorPhases.sync>
 
 /**
  * 记录已通知的错误对象，避免在同一对象上重复上报。
@@ -245,10 +244,10 @@ function isThenable(value: unknown): value is PromiseLike<unknown> {
  * - 负责串联 before/after hook，保证无论成功与否都能观察到 token。
  * - 根据传播模式决定是否把规范化后的异常继续同步抛出。
  */
-function runWithChannel<T>(
+function runWithChannel<T, P extends ErrorPhase>(
   runner: () => T,
   propagate: ErrorMode,
-  options: ErrorRunOptions,
+  options: ErrorRunOptions<P>,
 ): T | undefined {
   /* 保存 dispatch token 以便 finally 阶段透出调度结果。 */
   let token: ErrorToken | undefined

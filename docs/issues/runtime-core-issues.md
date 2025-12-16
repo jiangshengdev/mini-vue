@@ -37,12 +37,16 @@
     - 首渲染抛错：`ok === false` 且 `nodes.length === 0`（仍返回句柄以确保可清理 scope/effect）
 - 测试：`test/runtime-core/component/mount-handle.test.tsx`
 
-## 4. 未显式拒绝异步 `setup`，错误提示不够准确（待修复）
+## 4. 未显式拒绝异步 `setup`，错误提示不够准确（已修复）
 
-- 位置：`src/runtime-core/component/setup.ts`
-- 现状：`invokeSetup` 直接执行 `instance.type(instance.props)` 并要求返回渲染函数；当组件 `setup` 返回 Promise 时，会落入 `typeof render !== 'function'` 分支并抛出通用错误“组件必须返回渲染函数...”。
-- 影响：对“异步 setup 不被支持”的场景缺乏明确报错，定位成本更高。
-- 提示：在 `invokeSetup` 中显式识别 Promise（或 thenable），并抛出更具体的错误（例如“当前实现不支持异步 setup”），避免误导为“没有返回 render function”。
+- 位置：
+  - `src/runtime-core/component/setup.ts`
+  - `src/shared/error-channel.ts`
+- 现状（修复前）：`invokeSetup` 通过 `runSilent` 同步执行 `instance.type(instance.props)` 并要求返回渲染函数；当组件 `setup` 返回 Promise 时，会在错误通道层被拒绝，但提示为通用的 runner 错误信息，无法直观指向“异步 setup 不支持”。
+- 修复：
+  - 错误通道在识别到 thenable 且 `origin === componentSetup` 时，改为抛出更准确的错误：`暂不支持异步 setup：setup() 必须同步返回渲染函数（不要返回 Promise）`。
+  - `setup` 入口同时引入 thenable 识别兜底，避免误落入“必须返回渲染函数”的通用分支。
+- 测试：`test/runtime-core/component/mount-handle.test.tsx`
 
 ## 5. `mountChildWithAnchor` 依赖宿主对 Fragment 插入语义的隐式契约，类型未约束（待修复）
 

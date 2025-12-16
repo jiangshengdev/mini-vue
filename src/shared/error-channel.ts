@@ -1,6 +1,6 @@
 import { handleError } from './error-handling.ts'
 import type { PlainObject } from './types.ts'
-import { isObject } from './utils.ts'
+import { isThenable } from './utils.ts'
 
 /**
  * 框架内预设的错误上下文标签，标记异常来源位置。
@@ -216,25 +216,6 @@ export function dispatchError(error: Error, dispatchOptions: ErrorDispatchOption
   )
 
   return token
-}
-
-/**
- * 判断 runner 的返回值是否为 Promise/thenable。
- *
- * @remarks
- * 错误通道只覆盖同步执行路径：一旦允许 thenable 返回，会导致异常可能在异步阶段漏报，
- * 且 finally 钩子会提前执行，从而破坏调用方对清理时序的预期。
- */
-function isThenable(value: unknown): value is PromiseLike<unknown> {
-  /* Promise/thenable 规范允许对象或携带 then 方法的函数，需兼容两者形态。 */
-  if (typeof value !== 'function' && !isObject(value)) {
-    return false
-  }
-
-  const candidate = value as { then?: unknown }
-  const maybeThen = candidate.then
-
-  return 'then' in candidate && typeof maybeThen === 'function'
 }
 
 /**

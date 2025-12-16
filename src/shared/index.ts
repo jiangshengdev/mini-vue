@@ -22,7 +22,7 @@ export type {
 export type { PlainObject, PropsShape, WithOptionalProp } from './types.ts'
 export type { InjectionKey, InjectionToken } from './injection.ts'
 export type { PluginInstallApp } from './plugin.ts'
-export { isArrayIndex, isNil, isObject, isPlainObject } from './utils.ts'
+export { isArrayIndex, isNil, isObject, isPlainObject, isThenable } from './utils.ts'
 export { ContextStack } from './context-stack.ts'
 export { __DEV__, __INTERNAL_DEV__, isDevDebugEnvironment } from './env.ts'
 export { createDebugLogger } from './debug.ts'

@@ -4,7 +4,7 @@ import { resolveFromImportMeta } from '../_shared/paths.ts'
 import type { Position } from '../_shared/ts-check.ts'
 import { getPosition, readTsSourceFile, runSrcCheck } from '../_shared/ts-check.ts'
 
-type Reason = 'non-relative' | 'outside-folder'
+type Reason = 'non-relative' | 'outside-folder' | 'subdir-non-index'
 
 interface Finding {
   filePath: string
@@ -39,6 +39,31 @@ function isAllowedIndexReExport(
 ): { ok: true } | { ok: false; reason: Reason } {
   const indexDir = path.dirname(indexFilePath)
 
+  function validateSubdirIndexOnly(resolved: string): { ok: true } | { ok: false; reason: Reason } {
+    const relative = path.relative(indexDir, resolved)
+
+    if (!relative) {
+      return { ok: true }
+    }
+
+    const parts = relative.split(path.sep).filter(Boolean)
+
+    // 允许：
+    // - 顶层文件：child.ts
+    // - 直接子目录本身：component（由 TS/打包器解析到 component/index.ts）
+    // - 直接子目录 index：component/index.ts
+    // 禁止：component/anchor.ts、component/sub/xxx.ts 等
+    if (parts.length <= 1) {
+      return { ok: true }
+    }
+
+    if (parts.length === 2 && (parts[1] === 'index.ts' || parts[1] === 'index.tsx')) {
+      return { ok: true }
+    }
+
+    return { ok: false, reason: 'subdir-non-index' }
+  }
+
   // 允许相对路径（含 "./..."、"../..."、"."），但最终解析路径必须仍在 index.ts 所在目录(含子目录)内。
   if (module.startsWith('.')) {
     const resolved = path.resolve(indexDir, module)
@@ -47,7 +72,7 @@ function isAllowedIndexReExport(
       return { ok: false, reason: 'outside-folder' }
     }
 
-    return { ok: true }
+    return validateSubdirIndexOnly(resolved)
   }
 
   // 允许 @/ alias，但同样必须落在 index.ts 所在目录(含子目录)内。
@@ -58,7 +83,7 @@ function isAllowedIndexReExport(
       return { ok: false, reason: 'outside-folder' }
     }
 
-    return { ok: true }
+    return validateSubdirIndexOnly(resolved)
   }
 
   // 其他：裸模块、绝对路径、node: 等，统一视为非法（index.ts 不应 re-export 外部模块）。
@@ -104,7 +129,9 @@ function formatFinding(finding: Finding): string {
   const hint =
     reason === 'outside-folder'
       ? 'index.ts 只能导出当前目录(含子目录)的内容；该导出解析后跳出了当前目录'
-      : 'index.ts 只能导出当前目录(含子目录)的内容（使用相对路径或 @/ alias 皆可）；禁止 re-export 外部模块'
+      : reason === 'subdir-non-index'
+        ? 'index.ts 从子目录导出时只能指向子目录的 index.ts（例如 "./component/index.ts" 或 "./component"）'
+        : 'index.ts 只能导出当前目录(含子目录)的内容（使用相对路径或 @/ alias 皆可）；禁止 re-export 外部模块'
 
   return `${filePath}:${position.line}:${position.column} invalid index.ts export: "${module}"; ${hint}`
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { isVirtualNode, virtualNodeFlag } from '@/jsx-foundation/index.ts'
-import { jsxDEV } from '@/jsx-runtime/index.ts'
+import { jsxDEV } from '@/index.ts'
 
 /**
  * 这些用例通过真实 jsx 语法触发 TS 的自动 jsx 转换，

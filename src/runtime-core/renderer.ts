@@ -13,7 +13,7 @@ import type { PlainObject, PropsShape } from '@/shared/index.ts'
  */
 export interface RendererOptions<
   HostNode,
-  HostElement extends HostNode,
+  HostElement extends HostNode & object,
   HostFragment extends HostNode,
 > {
   /** 根据标签名创建宿主元素节点。 */
@@ -24,7 +24,7 @@ export interface RendererOptions<
   createFragment(): HostFragment
   /** 将子节点插入到指定父节点末尾。 */
   appendChild(parent: HostElement | HostFragment, child: HostNode): void
-  /** 将子节点插入到指定父节点且位于锚点节点之前。 */
+  /** 将子节点插入到指定父节点且位于锚点节点之前（runtime-core 不会传入 HostFragment 作为 child）。 */
   insertBefore(parent: HostElement | HostFragment, child: HostNode, anchor?: HostNode): void
   /** 清空容器内容，在新一轮渲染前使用。 */
   clear(container: HostElement): void
@@ -38,13 +38,13 @@ export interface RendererOptions<
 }
 
 /** 根级渲染函数签名，负责将顶层子树挂载到容器。 */
-export type RootRenderFunction<HostElement> = (
+export type RootRenderFunction<HostElement extends object> = (
   virtualNode: RenderOutput,
   container: HostElement,
 ) => void
 
 /** 渲染器工厂返回值，包含渲染与清理能力。 */
-export interface Renderer<HostNode, HostElement extends HostNode> {
+export interface Renderer<HostNode, HostElement extends HostNode & object> {
   /**
    * 将 virtualNode 子树渲染到指定容器中。
    *
@@ -62,7 +62,7 @@ export interface Renderer<HostNode, HostElement extends HostNode> {
  */
 export function createRenderer<
   HostNode,
-  HostElement extends HostNode,
+  HostElement extends HostNode & object,
   HostFragment extends HostNode,
 >(options: RendererOptions<HostNode, HostElement, HostFragment>): Renderer<HostNode, HostElement> {
   const { clear } = options
@@ -72,6 +72,15 @@ export function createRenderer<
    * 将宿主容器断言为对象键，便于复用 WeakMap 存储。
    */
   function asContainerKey(container: HostElement): PlainObject {
+    const isObjectLike = typeof container === 'object' && container !== null
+    const isCallable = typeof container === 'function'
+
+    if (!isObjectLike && !isCallable) {
+      throw new TypeError(
+        'createRenderer 容器必须是 object（含函数）类型才能缓存挂载状态',
+      )
+    }
+
     return container as PlainObject
   }
 

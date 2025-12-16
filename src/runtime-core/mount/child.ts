@@ -39,7 +39,7 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
     const startAnchor = createText('')
     const endAnchor = createText('')
     const nodes: HostNode[] = [startAnchor]
-    const teardowns: Array<() => void> = []
+    const teardowns: Array<(skipRemove?: boolean) => void> = []
     let ok = true
 
     appendChild(container, startAnchor)
@@ -50,7 +50,9 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
 
       if (mounted) {
         ok &&= mounted.ok
-        nodes.push(...mounted.nodes)
+        for (const node of mounted.nodes) {
+          nodes.push(node)
+        }
         teardowns.push(mounted.teardown)
       }
     }
@@ -67,9 +69,13 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
        * @remarks
        * - 这里不直接 remove(nodes) 是为了保留子项各自的清理语义（effect/refs 等）。
        */
-      teardown(): void {
+      teardown(skipRemove?: boolean): void {
         for (const teardown of teardowns) {
-          teardown()
+          teardown(skipRemove)
+        }
+
+        if (skipRemove) {
+          return
         }
 
         remove(startAnchor)
@@ -88,7 +94,11 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
       ok: true,
       nodes: [text],
       /** 卸载文本节点：仅需从宿主树中移除即可。 */
-      teardown(): void {
+      teardown(skipRemove?: boolean): void {
+        if (skipRemove) {
+          return
+        }
+
         remove(text)
       },
     }
@@ -111,7 +121,11 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
     ok: true,
     nodes: [text],
     /** 卸载兜底文本节点：与普通文本路径保持一致。 */
-    teardown(): void {
+    teardown(skipRemove?: boolean): void {
+      if (skipRemove) {
+        return
+      }
+
       remove(text)
     },
   }

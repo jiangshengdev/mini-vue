@@ -90,22 +90,25 @@ function mountApp<HostElement>(state: AppState<HostElement>, target: HostElement
     throw new Error('createApp: 当前应用已挂载，不能重复执行 mount', { cause: state.container })
   }
 
-  /* 缓存容器以便后续执行 unmount。 */
-  state.container = target
-
   /* 运行根组件获取最新子树，确保 props 变更生效。 */
   const rootNode = createRootVirtualNode(state)
 
   /* 交由渲染器负责真正的 DOM 挂载，并让组件 effect 托管更新。 */
   setCurrentAppContext(state.appContext)
+  let renderSucceeded = false
 
   try {
     state.config.render(rootNode, target)
+    renderSucceeded = true
   } finally {
     unsetCurrentAppContext()
   }
 
-  state.status = appLifecycleStatus.mounted
+  /* 渲染成功后再缓存容器和状态，避免失败时留下“idle + container”的残留。 */
+  if (renderSucceeded) {
+    state.container = target
+    state.status = appLifecycleStatus.mounted
+  }
 }
 
 /**

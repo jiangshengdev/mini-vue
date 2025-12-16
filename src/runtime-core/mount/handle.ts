@@ -6,6 +6,10 @@ export interface MountedHandle<HostNode> {
   readonly ok: boolean
   /** 按插入顺序记录的宿主节点列表。 */
   readonly nodes: HostNode[]
-  /** 清理当前节点及其内部子树的能力。 */
-  teardown(): void
+  /**
+   * 清理当前节点及其内部子树的能力。
+   *
+   * @param skipRemove 当父级已移除宿主节点时传入，跳过 DOM remove 但保留逻辑清理。
+   */
+  teardown(skipRemove?: boolean): void
 }

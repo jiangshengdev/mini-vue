@@ -41,7 +41,7 @@ describe('runtime-dom component error isolation (nested)', () => {
     expect(container.querySelector('[data-testid="sibling"]')?.textContent).toBe('stay')
   })
 
-  it('嵌套子组件更新抛错仅卸载自身', () => {
+  it('嵌套子组件更新抛错会保留旧子树', () => {
     const container = createTestContainer()
     const handler = vi.fn<ErrorHandler>()
     const boom = new Error('nested update failed')
@@ -74,8 +74,11 @@ describe('runtime-dom component error isolation (nested)', () => {
 
     render(<Parent />, container)
 
-    expect(container.querySelector('[data-testid="faulty"]')?.textContent).toBe('fine')
-    expect(container.querySelector('[data-testid="sibling"]')?.textContent).toBe('stay')
+    const getFaulty = () => container.querySelector('[data-testid="faulty"]')
+    const getSibling = () => container.querySelector('[data-testid="sibling"]')
+
+    expect(getFaulty()?.textContent).toBe('fine')
+    expect(getSibling()?.textContent).toBe('stay')
     expect(handler).not.toHaveBeenCalled()
 
     state.count += 1
@@ -85,8 +88,8 @@ describe('runtime-dom component error isolation (nested)', () => {
 
     expect(error).toBe(boom)
     expect(context).toBe(errorContexts.effectRunner)
-    expect(container.querySelector('[data-testid="faulty"]')).toBeNull()
-    expect(container.querySelector('[data-testid="sibling"]')?.textContent).toBe('stay')
+    expect(getFaulty()?.textContent).toBe('fine')
+    expect(getSibling()?.textContent).toBe('stay')
   })
 
   it('数组 children 中某项 setup 抛错不影响其他项', () => {
@@ -116,7 +119,7 @@ describe('runtime-dom component error isolation (nested)', () => {
     expect(container.querySelector('[data-testid="ok"]')?.textContent).toBe('ok')
   })
 
-  it('数组 children 更新抛错仅移除对应项', () => {
+  it('数组 children 更新抛错会保留故障子树', () => {
     const container = createTestContainer()
     const handler = vi.fn<ErrorHandler>()
     const boom = new Error('list update failed')
@@ -144,9 +147,11 @@ describe('runtime-dom component error isolation (nested)', () => {
 
     render(<>{[<Faulty key="bad" />, <Ok key="ok" />]}</>, container)
 
-    expect(container.querySelector('[data-testid="faulty"]')?.textContent).toBe('fine')
+    const getFaulty = () => container.querySelector('[data-testid="faulty"]')
+    const getOk = () => container.querySelector('[data-testid="ok"]')
 
-    expect(container.querySelector('[data-testid="ok"]')?.textContent).toBe('ok')
+    expect(getFaulty()?.textContent).toBe('fine')
+    expect(getOk()?.textContent).toBe('ok')
     expect(handler).not.toHaveBeenCalled()
 
     state.count += 1
@@ -156,7 +161,7 @@ describe('runtime-dom component error isolation (nested)', () => {
 
     expect(error).toBe(boom)
     expect(context).toBe(errorContexts.effectRunner)
-    expect(container.querySelector('[data-testid="faulty"]')).toBeNull()
-    expect(container.querySelector('[data-testid="ok"]')?.textContent).toBe('ok')
+    expect(getFaulty()?.textContent).toBe('fine')
+    expect(getOk()?.textContent).toBe('ok')
   })
 })

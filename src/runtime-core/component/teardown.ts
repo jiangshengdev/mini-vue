@@ -11,14 +11,14 @@ export function teardownMountedSubtree<
   HostElement extends HostNode,
   HostFragment extends HostNode,
   T extends SetupComponent,
->(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): void {
+>(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>, skipRemove?: boolean): void {
   /* 无挂载记录时无需额外清理，直接返回。 */
   if (!instance.mountedHandle) {
     return
   }
 
   /* 释放宿主节点引用，旧 DOM 会被宿主实现回收。 */
-  instance.mountedHandle.teardown()
+  instance.mountedHandle.teardown(skipRemove)
   instance.mountedHandle = undefined
 }
 
@@ -33,12 +33,16 @@ export function teardownComponentInstance<
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
+  skipRemove?: boolean,
 ): void {
-  teardownMountedSubtree(instance)
+  teardownMountedSubtree(instance, skipRemove)
 
   /* 去除锚点占位符，避免容器残留空文本节点。 */
   if (instance.anchor) {
-    options.remove(instance.anchor)
+    if (!skipRemove) {
+      options.remove(instance.anchor)
+    }
+
     instance.anchor = undefined
   }
 

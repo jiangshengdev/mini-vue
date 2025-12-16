@@ -54,8 +54,8 @@ export function performInitialRender<
   return {
     ok,
     nodes: mounted?.nodes ?? [],
-    teardown(): void {
-      mounted?.teardown()
+    teardown(skipRemove?: boolean): void {
+      mounted?.teardown(skipRemove)
     },
   }
 }
@@ -79,7 +79,7 @@ function createRenderEffect<
       return subtree
     },
     (renderSchedulerJob) => {
-      /* 调度阶段需要先卸载旧子树，再执行 render 并挂载。 */
+      /* 调度阶段尝试生成新子树，成功后再替换旧挂载。 */
       rerenderComponent(options, instance, renderSchedulerJob)
     },
   )
@@ -90,7 +90,7 @@ function createRenderEffect<
 }
 
 /**
- * Rerender 时先卸载旧子树，再运行调度任务并重新挂载新子树。
+ * Rerender 时先尝试生成新子树，成功后再替换旧挂载，失败则保留旧子树。
  */
 function rerenderComponent<
   HostNode,
@@ -102,11 +102,10 @@ function rerenderComponent<
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
   renderSchedulerJob: () => void,
 ): void {
-  /* 依次保证 teardown → renderSchedulerJob → remount 的同步顺序。 */
-  teardownMountedSubtree(instance)
+  const prevSubTree = instance.subTree
   let rerenderFailed = false
 
-  /* 调度执行由 effect 决定，异常时标记失败并避免重新挂载。 */
+  /* 调度执行由 effect 决定，异常时标记失败并避免替换旧子树。 */
   runSilent(renderSchedulerJob, {
     origin: errorContexts.scheduler,
     handlerPhase: errorPhases.sync,
@@ -117,12 +116,13 @@ function rerenderComponent<
     },
   })
 
-  /* 调度失败时整棵组件树已经不可用，直接执行完整清理。 */
   if (rerenderFailed) {
-    teardownComponentInstance(options, instance)
+    instance.subTree = prevSubTree
 
     return
   }
+
+  teardownMountedSubtree(instance)
 
   mountLatestSubtree(options, instance)
 }

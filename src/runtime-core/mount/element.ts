@@ -39,14 +39,16 @@ export function mountElement<HostNode, HostElement extends HostNode, HostFragmen
     /**
      * 卸载元素：先卸载子树与 ref，再移除自身，保证清理顺序可预期。
      */
-    teardown(): void {
+    teardown(skipRemove?: boolean): void {
       for (const child of mountedHandles) {
-        child.teardown()
+        child.teardown(true)
       }
 
       assignElementRef(refBinding, undefined)
 
-      remove(element)
+      if (!skipRemove) {
+        remove(element)
+      }
     },
   }
 }

@@ -1,9 +1,8 @@
 import { access, mkdir, readFile, writeFile } from 'node:fs/promises'
-import { dirname, relative, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { relative, resolve } from 'node:path'
+import { resolveFromImportMeta } from './_shared/paths.ts'
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
-const projectRoot = resolve(__dirname, '..')
+const projectRoot = resolveFromImportMeta(import.meta.url, '..')
 const sourcePath = resolve(projectRoot, 'src/jsx-shim.d.ts')
 const targetDir = resolve(projectRoot, 'dist/jsx')
 const targetPath = resolve(targetDir, 'index.d.ts')

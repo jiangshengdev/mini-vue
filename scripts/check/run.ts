@@ -1,9 +1,6 @@
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
-
 import { runAllScriptsInDir } from './_shared/run-all.ts'
+import { resolveFromImportMeta } from './_shared/paths.ts'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+const checkDir = resolveFromImportMeta(import.meta.url, '.')
 
-runAllScriptsInDir(__dirname, { emptyMessage: 'No check scripts found.' })
+runAllScriptsInDir(checkDir, { emptyMessage: 'No check scripts found.' })

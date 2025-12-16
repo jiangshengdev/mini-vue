@@ -28,7 +28,13 @@ function isRunnableScript(filePath: string): boolean {
 function listScripts(dirPath: string): string[] {
   const files = ts.sys.readDirectory(dirPath, ['.ts'], undefined, ['**/*.ts'])
 
-  return files.filter(isRunnableScript).sort((a, b) => a.localeCompare(b))
+  return files
+    .filter((filePath) => {
+      return isRunnableScript(filePath)
+    })
+    .sort((a, b) => {
+      return a.localeCompare(b)
+    })
 }
 
 function runScript(filePath: string): number {

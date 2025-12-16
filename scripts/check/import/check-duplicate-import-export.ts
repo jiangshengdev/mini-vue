@@ -1,19 +1,11 @@
-import fs from 'node:fs'
-import path from 'node:path'
-import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 import ts from 'typescript'
+import { resolveFromImportMeta } from '../_shared/paths.ts'
+import { getPosition, readTsSourceFile, runSrcCheck } from '../_shared/ts-check.ts'
+import type { Position } from '../_shared/ts-check.ts'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-const srcDir = path.resolve(__dirname, '../../../src')
+const srcDir = resolveFromImportMeta(import.meta.url, '../../../src')
 
 type Category = 'type' | 'value'
-
-interface Position {
-  line: number
-  column: number
-}
 
 interface ModuleRecord {
   type?: Position
@@ -43,18 +35,6 @@ function isTypeOnlyNode(node?: { isTypeOnly?: boolean; phaseModifier?: ts.Syntax
   return Boolean(
     node && (node.isTypeOnly === true || node.phaseModifier === ts.SyntaxKind.TypeKeyword),
   )
-}
-
-function readSourceFile(filePath: string): ts.SourceFile | undefined {
-  const sourceText = fs.readFileSync(filePath, 'utf8')
-
-  return ts.createSourceFile(filePath, sourceText, ts.ScriptTarget.Latest, true)
-}
-
-function getPosition(sourceFile: ts.SourceFile, node: ts.Node): Position {
-  const { line, character } = sourceFile.getLineAndCharacterOfPosition(node.getStart())
-
-  return { line: line + 1, column: character + 1 }
 }
 
 function recordDuplicate(parameters: RecordDuplicateParameters): void {
@@ -215,11 +195,7 @@ function handleExport(
 }
 
 function checkFile(filePath: string, findings: Finding[]): void {
-  const sourceFile = readSourceFile(filePath)
-
-  if (!sourceFile) {
-    return
-  }
+  const sourceFile = readTsSourceFile(filePath)
 
   const importMap = new Map<string, ModuleRecord>()
   const exportMap = new Map<string, ModuleRecord>()
@@ -242,32 +218,9 @@ function formatFinding(finding: Finding): string {
   return `${filePath}:${current.line}:${current.column} duplicate ${kind} (${category}) of "${module}"; first at line ${previous.line}, column ${previous.column}`
 }
 
-function main(): void {
-  if (!fs.existsSync(srcDir)) {
-    console.error(`src directory not found at ${srcDir}`)
-    process.exitCode = 1
-
-    return
-  }
-
-  const files = ts.sys.readDirectory(srcDir, ['.ts', '.tsx'], undefined, ['**/*'])
-  const findings: Finding[] = []
-
-  for (const filePath of files) {
-    checkFile(filePath, findings)
-  }
-
-  if (findings.length > 0) {
-    for (const finding of findings) {
-      console.error(formatFinding(finding))
-    }
-
-    process.exitCode = 1
-
-    return
-  }
-
-  console.log('No duplicate import/export module specifiers found.')
-}
-
-main()
+runSrcCheck({
+  srcDir,
+  checkFile,
+  formatFinding,
+  successMessage: 'No duplicate import/export module specifiers found.',
+})

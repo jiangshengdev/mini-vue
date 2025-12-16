@@ -1,8 +1,9 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 import ts from 'typescript'
+import { resolveFromImportMeta } from '../_shared/paths.ts'
+import { getBoundaryDir, getPosition, readTsSourceFile, runSrcCheck } from '../_shared/ts-check.ts'
+import type { Position } from '../_shared/ts-check.ts'
 
 type Kind = 'import' | 'export'
 
@@ -12,11 +13,6 @@ type Reason =
   | 'cross-boundary-alias-too-deep'
   | 'cross-boundary-alias-missing'
   | 'cross-boundary-alias-target-not-found'
-
-interface Position {
-  line: number
-  column: number
-}
 
 interface Finding {
   filePath: string
@@ -28,39 +24,7 @@ interface Finding {
   reason: Reason
 }
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-
-const srcDir = path.resolve(__dirname, '../../../src')
-
-function readSourceFile(filePath: string): ts.SourceFile {
-  const sourceText = fs.readFileSync(filePath, 'utf8')
-
-  return ts.createSourceFile(filePath, sourceText, ts.ScriptTarget.Latest, true)
-}
-
-function getPosition(sourceFile: ts.SourceFile, node: ts.Node): Position {
-  const { line, character } = sourceFile.getLineAndCharacterOfPosition(node.getStart())
-
-  return { line: line + 1, column: character + 1 }
-}
-
-function getBoundaryDir(filePath: string): string | undefined {
-  const relative = path.relative(srcDir, filePath)
-
-  if (!relative || relative.startsWith('..')) {
-    return
-  }
-
-  const parts = relative.split(path.sep).filter(Boolean)
-
-  // src 顶层文件（例如 src/index.ts）不属于任何一级目录边界
-  if (parts.length < 2) {
-    return
-  }
-
-  return parts[0]
-}
+const srcDir = resolveFromImportMeta(import.meta.url, '../../../src')
 
 function resolveRelativeModule(fromFilePath: string, module: string): string | undefined {
   const baseDir = path.dirname(fromFilePath)
@@ -79,8 +43,6 @@ function resolveRelativeModule(fromFilePath: string, module: string): string | u
       return candidate
     }
   }
-
-  return
 }
 
 function getAliasTargetBoundary(module: string): string | undefined {
@@ -102,13 +64,14 @@ function isSingleLevelIndexAlias(module: string): boolean {
   return /^@\/[^/]+\/index\.ts$/.test(module)
 }
 
-function checkAliasSpecifier(
-  sourceFile: ts.SourceFile,
-  moduleSpecifier: ts.StringLiteral,
-  boundary: string,
-  kind: Kind,
-  findings: Finding[],
-): void {
+function checkAliasSpecifier(parameters: {
+  sourceFile: ts.SourceFile
+  moduleSpecifier: ts.StringLiteral
+  boundary: string
+  kind: Kind
+  findings: Finding[]
+}): void {
+  const { sourceFile, moduleSpecifier, boundary, kind, findings } = parameters
   const module = moduleSpecifier.text
 
   if (!module.startsWith('@/')) {
@@ -189,13 +152,14 @@ function checkAliasSpecifier(
   }
 }
 
-function checkRelativeSpecifier(
-  sourceFile: ts.SourceFile,
-  moduleSpecifier: ts.StringLiteral,
-  boundary: string,
-  kind: Kind,
-  findings: Finding[],
-): void {
+function checkRelativeSpecifier(parameters: {
+  sourceFile: ts.SourceFile
+  moduleSpecifier: ts.StringLiteral
+  boundary: string
+  kind: Kind
+  findings: Finding[]
+}): void {
+  const { sourceFile, moduleSpecifier, boundary, kind, findings } = parameters
   const module = moduleSpecifier.text
 
   if (!module.startsWith('./') && !module.startsWith('../')) {
@@ -208,7 +172,7 @@ function checkRelativeSpecifier(
     return
   }
 
-  const targetBoundary = getBoundaryDir(resolved)
+  const targetBoundary = getBoundaryDir({ srcDir, filePath: resolved })
 
   if (!targetBoundary) {
     return
@@ -229,54 +193,77 @@ function checkRelativeSpecifier(
   })
 }
 
-function handleModuleSpecifier(
-  sourceFile: ts.SourceFile,
-  moduleSpecifier: ts.Expression,
-  boundary: string,
-  kind: Kind,
-  findings: Finding[],
-): void {
+function handleModuleSpecifier(parameters: {
+  sourceFile: ts.SourceFile
+  moduleSpecifier: ts.Expression
+  boundary: string
+  kind: Kind
+  findings: Finding[]
+}): void {
+  const { sourceFile, moduleSpecifier, boundary, kind, findings } = parameters
+
   if (!ts.isStringLiteral(moduleSpecifier)) {
     return
   }
 
-  checkAliasSpecifier(sourceFile, moduleSpecifier, boundary, kind, findings)
-  checkRelativeSpecifier(sourceFile, moduleSpecifier, boundary, kind, findings)
+  checkAliasSpecifier({ sourceFile, moduleSpecifier, boundary, kind, findings })
+  checkRelativeSpecifier({ sourceFile, moduleSpecifier, boundary, kind, findings })
 }
 
 function checkFile(filePath: string, findings: Finding[]): void {
-  const boundary = getBoundaryDir(filePath)
+  const boundary = getBoundaryDir({ srcDir, filePath })
 
   if (!boundary) {
     return
   }
 
-  const sourceFile = readSourceFile(filePath)
+  const sourceFile = readTsSourceFile(filePath)
 
   for (const statement of sourceFile.statements) {
     if (ts.isImportDeclaration(statement) && statement.moduleSpecifier) {
-      handleModuleSpecifier(sourceFile, statement.moduleSpecifier, boundary, 'import', findings)
+      handleModuleSpecifier({
+        sourceFile,
+        moduleSpecifier: statement.moduleSpecifier,
+        boundary,
+        kind: 'import',
+        findings,
+      })
       continue
     }
 
     if (ts.isExportDeclaration(statement) && statement.moduleSpecifier) {
-      handleModuleSpecifier(sourceFile, statement.moduleSpecifier, boundary, 'export', findings)
+      handleModuleSpecifier({
+        sourceFile,
+        moduleSpecifier: statement.moduleSpecifier,
+        boundary,
+        kind: 'export',
+        findings,
+      })
     }
   }
 }
 
 function formatReason(finding: Finding): string {
   switch (finding.reason) {
-    case 'cross-boundary-relative':
+    case 'cross-boundary-relative': {
       return `跨一级目录禁止相对路径，改用 "@/${finding.targetBoundary}/index.ts"`
-    case 'cross-boundary-alias-too-deep':
+    }
+
+    case 'cross-boundary-alias-too-deep': {
       return `跨一级目录 alias 只能一层目录，改用 "@/${finding.targetBoundary}/index.ts"`
-    case 'cross-boundary-alias-not-index':
+    }
+
+    case 'cross-boundary-alias-not-index': {
       return `跨一级目录 alias 必须以 index.ts 结尾，改用 "@/${finding.targetBoundary}/index.ts"`
-    case 'cross-boundary-alias-missing':
+    }
+
+    case 'cross-boundary-alias-missing': {
       return `跨一级目录 alias 必须为 "@/${finding.targetBoundary}/index.ts"`
-    case 'cross-boundary-alias-target-not-found':
+    }
+
+    case 'cross-boundary-alias-target-not-found': {
       return `目标 "src/${finding.targetBoundary}/index.ts" 不存在`
+    }
   }
 }
 
@@ -286,35 +273,9 @@ function formatFinding(finding: Finding): string {
   return `${filePath}:${position.line}:${position.column} invalid ${kind} from src/${boundary} -> src/${targetBoundary}: "${module}"; ${formatReason(finding)}`
 }
 
-function main(): void {
-  if (!fs.existsSync(srcDir)) {
-    console.error(`src directory not found at ${srcDir}`)
-    process.exitCode = 1
-
-    return
-  }
-
-  const files = ts.sys
-    .readDirectory(srcDir, ['.ts', '.tsx'], undefined, ['**/*'])
-    .filter((filePath) => !filePath.endsWith('.d.ts'))
-
-  const findings: Finding[] = []
-
-  for (const filePath of files) {
-    checkFile(filePath, findings)
-  }
-
-  if (findings.length > 0) {
-    for (const finding of findings) {
-      console.error(formatFinding(finding))
-    }
-
-    process.exitCode = 1
-
-    return
-  }
-
-  console.log('No forbidden cross-boundary import style found.')
-}
-
-main()
+runSrcCheck({
+  srcDir,
+  checkFile,
+  formatFinding,
+  successMessage: 'No forbidden cross-boundary import style found.',
+})

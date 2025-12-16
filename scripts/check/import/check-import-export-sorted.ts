@@ -1,17 +1,11 @@
-import fs from 'node:fs'
-import path from 'node:path'
-import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 import ts from 'typescript'
+import { resolveFromImportMeta } from '../_shared/paths.ts'
+import { getPosition, readTsSourceFile, runSrcCheck } from '../_shared/ts-check.ts'
+import type { Position } from '../_shared/ts-check.ts'
 
 type Kind = 'import' | 'export'
 
 type Reason = 'module-specifier' | 'named-specifiers'
-
-interface Position {
-  line: number
-  column: number
-}
 
 interface Finding {
   filePath: string
@@ -21,22 +15,7 @@ interface Finding {
   message: string
 }
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-
-const srcDir = path.resolve(__dirname, '../../../src')
-
-function readSourceFile(filePath: string): ts.SourceFile {
-  const sourceText = fs.readFileSync(filePath, 'utf8')
-
-  return ts.createSourceFile(filePath, sourceText, ts.ScriptTarget.Latest, true)
-}
-
-function getPosition(sourceFile: ts.SourceFile, node: ts.Node): Position {
-  const { line, character } = sourceFile.getLineAndCharacterOfPosition(node.getStart())
-
-  return { line: line + 1, column: character + 1 }
-}
+const srcDir = resolveFromImportMeta(import.meta.url, '../../../src')
 
 function compareAlpha(a: string, b: string): number {
   return a.localeCompare(b, 'en')
@@ -107,7 +86,7 @@ function getNamedSpecifierDisplay(element: ts.ImportSpecifier | ts.ExportSpecifi
 function checkNamedSpecifiersSorted(parameters: {
   kind: Kind
   sourceFile: ts.SourceFile
-  elements: readonly (ts.ImportSpecifier | ts.ExportSpecifier)[]
+  elements: ReadonlyArray<ts.ImportSpecifier | ts.ExportSpecifier>
   findings: Finding[]
   context: string
 }): void {
@@ -170,7 +149,7 @@ function checkExportStatement(
   sourceFile: ts.SourceFile,
   findings: Finding[],
 ): void {
-  const exportClause = statement.exportClause
+  const { exportClause } = statement
 
   if (!exportClause || !ts.isNamedExports(exportClause)) {
     return
@@ -193,7 +172,7 @@ function checkExportStatement(
 }
 
 function checkFile(filePath: string, findings: Finding[]): void {
-  const sourceFile = readSourceFile(filePath)
+  const sourceFile = readTsSourceFile(filePath)
 
   const importModules: Array<{ module: string; node: ts.StringLiteral }> = []
   const exportModules: Array<{ module: string; node: ts.StringLiteral }> = []
@@ -222,7 +201,7 @@ function checkFile(filePath: string, findings: Finding[]): void {
     }
 
     if (ts.isExportDeclaration(statement)) {
-      // export { ... } without module specifier
+      // Export { ... } without module specifier
       checkExportStatement(statement, sourceFile, findings)
     }
   }
@@ -241,35 +220,9 @@ function checkFile(filePath: string, findings: Finding[]): void {
   })
 }
 
-function main(): void {
-  if (!fs.existsSync(srcDir)) {
-    console.error(`src directory not found at ${srcDir}`)
-    process.exitCode = 1
-
-    return
-  }
-
-  const files = ts.sys
-    .readDirectory(srcDir, ['.ts', '.tsx'], undefined, ['**/*'])
-    .filter((filePath) => !filePath.endsWith('.d.ts'))
-
-  const findings: Finding[] = []
-
-  for (const filePath of files) {
-    checkFile(filePath, findings)
-  }
-
-  if (findings.length > 0) {
-    for (const finding of findings) {
-      console.error(formatFinding(finding))
-    }
-
-    process.exitCode = 1
-
-    return
-  }
-
-  console.log('All import/export specifiers are sorted alphabetically.')
-}
-
-main()
+runSrcCheck({
+  srcDir,
+  checkFile,
+  formatFinding,
+  successMessage: 'All import/export specifiers are sorted alphabetically.',
+})

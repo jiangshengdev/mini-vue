@@ -72,9 +72,12 @@ export function createRenderer<
    * 将宿主容器断言为对象键，便于复用 WeakMap 存储。
    */
   function asContainerKey(container: HostElement): PlainObject {
-    if (container === null || (typeof container !== 'object' && typeof container !== 'function')) {
+    const isObjectLike = typeof container === 'object' && container !== null
+    const isCallable = typeof container === 'function'
+
+    if (!isObjectLike && !isCallable) {
       throw new TypeError(
-        'createRenderer 容器必须是 object 类型才能缓存挂载状态，请确保宿主容器为对象',
+        'createRenderer 容器必须是 object（含函数）类型才能缓存挂载状态',
       )
     }
 

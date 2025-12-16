@@ -15,6 +15,7 @@ export const HandlingUserInput: SetupComponent = () => {
 
   const notify = (event: Event): void => {
     event.preventDefault()
+    // eslint-disable-next-line no-alert
     alert('navigation was prevented.')
   }
 

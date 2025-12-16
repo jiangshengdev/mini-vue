@@ -25,6 +25,7 @@ export function isPlainObject(value: unknown): value is PlainObject {
 /**
  * 判断传入值是否为 null 或 undefined。
  */
+// eslint-disable-next-line @typescript-eslint/no-restricted-types
 export function isNil(value: unknown): value is null | undefined {
   /* 与 looseEqual 不同，这里只接受严格 null/undefined。 */
   return value === null || value === undefined

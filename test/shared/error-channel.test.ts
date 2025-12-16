@@ -158,6 +158,7 @@ describe('runtime-error-channel', () => {
     try {
       runThrowing(
         () => {
+          // eslint-disable-next-line @typescript-eslint/only-throw-error
           throw 'boom'
         },
         {
@@ -327,6 +328,7 @@ describe('runtime-error-channel', () => {
     expect(() => {
       runSilent(
         () => {
+          // eslint-disable-next-line @typescript-eslint/only-throw-error
           throw 1
         },
         {

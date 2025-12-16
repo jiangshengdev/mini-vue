@@ -4,6 +4,7 @@ import type { PlainObject } from '@/shared/index.ts'
 /**
  * 基础原始值类型：在类型层面保持原样，不参与深层解包。
  */
+// eslint-disable-next-line @typescript-eslint/no-restricted-types
 type Primitive = string | number | boolean | bigint | symbol | null | undefined
 
 /**

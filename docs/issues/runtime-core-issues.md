@@ -71,12 +71,10 @@
 - 影响：当单个子项返回的 `mounted.nodes` 数量非常大时，展开运算符可能触发 JS 引擎的参数数量/栈限制，导致 `RangeError`（表现为“Maximum call stack size exceeded”或类似错误），属于输入规模相关的稳定性风险。
 - 提示：应避免对潜在大数组使用展开运算符，改用循环或分段追加。
 
-## 8. `mountChild` 对象兜底渲染为 `[object Object]`，缺少开发期提示（待修复）
+## 8. `mountChild` 对象兜底渲染为 `[object Object]`，缺少开发期提示（已修复）
 
 - 位置：`src/runtime-core/mount/child.ts`
-- 现状：当 `child` 既不是 `VirtualNode`、也不是字符串/数字、也不是数组时，会走兜底逻辑 `String(child)` 创建文本节点。
-- 影响：对象等复杂值会被渲染为 `[object Object]`，通常并非用户期望；同时缺少开发环境下的告警/指引，排查成本较高。
-- 提示：在 dev 模式输出明确警告，或提供更合理的序列化策略。
+- 修复：在开发模式下检测到对象子节点兜底渲染时输出警告，指引用户修正渲染输出，兜底行为仍保持字符串化。
 
 ## 9. `createRenderer` 使用 WeakMap 缓存容器句柄，限制 HostElement 必须为对象（待修复）
 

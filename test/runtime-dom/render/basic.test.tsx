@@ -115,4 +115,25 @@ describe('runtime-dom basic rendering', () => {
     expect(renderSpy).toHaveBeenCalledTimes(2)
     expect(container.querySelector('[data-testid="next"]')?.textContent).toBe('next')
   })
+
+  it('对象子节点兜底渲染时在开发期给出警告', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
+      return undefined
+    })
+    const container = createTestContainer()
+    const payload = { foo: 'bar' }
+
+    try {
+      render(payload as unknown as never, container)
+
+      expect(container).toHaveTextContent('[object Object]')
+      expect(warnSpy).toHaveBeenCalledTimes(1)
+      const [message, received] = warnSpy.mock.calls[0]!
+
+      expect(String(message)).toContain('对象类型的子节点')
+      expect(received).toBe(payload)
+    } finally {
+      warnSpy.mockRestore()
+    }
+  })
 })

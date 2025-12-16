@@ -83,7 +83,7 @@
 - 位置：`src/runtime-core/renderer.ts`
 - 现状：渲染器内部用 `WeakMap` 以容器作为 key 缓存挂载句柄；`WeakMap` 的 key 必须是对象。
 - 影响：若宿主环境将容器抽象为字符串/数字（例如终端渲染器、某些自定义渲染器），会在运行时报错 `Invalid value used as weak map key`，破坏“平台无关”的承诺。
- - 修复：将 `HostElement` 类型约束为 `object`，并在运行期对非对象容器抛出明确错误提示，避免 WeakMap 报错。
+- 修复：将 `HostElement` 类型约束为 `object`，并在运行期对非对象容器抛出明确错误提示，避免 WeakMap 报错。
 
 ## 10. 挂载失败时应用状态可能处于“空闲但已缓存容器”的不一致态（已修复）
 

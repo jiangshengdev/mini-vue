@@ -78,8 +78,13 @@ describe('runtime-dom component error isolation (fragment)', () => {
 
     render(<Parent />, container)
 
-    const getFaulty = () => container.querySelector('[data-testid="faulty"]')
-    const getSibling = () => container.querySelector('[data-testid="sibling"]')
+    const getFaulty = () => {
+      return container.querySelector('[data-testid="faulty"]')
+    }
+
+    const getSibling = () => {
+      return container.querySelector('[data-testid="sibling"]')
+    }
 
     expect(getFaulty()?.textContent).toBe('a:0')
     expect(getSibling()?.textContent).toBe('b:0')
@@ -133,8 +138,13 @@ describe('runtime-dom component error isolation (fragment)', () => {
       container,
     )
 
-    const getFaulty = () => container.querySelector('[data-testid="faulty"]')
-    const getSibling = () => container.querySelector('[data-testid="sibling"]')
+    const getFaulty = () => {
+      return container.querySelector('[data-testid="faulty"]')
+    }
+
+    const getSibling = () => {
+      return container.querySelector('[data-testid="sibling"]')
+    }
 
     expect(getFaulty()?.textContent).toBe('a:0')
     expect(getSibling()?.textContent).toBe('b:0')

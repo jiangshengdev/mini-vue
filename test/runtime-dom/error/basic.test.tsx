@@ -144,8 +144,13 @@ describe('runtime-dom component error isolation (basic)', () => {
       container,
     )
 
-    const getFaulty = () => container.querySelector('[data-testid="faulty"]')
-    const getSibling = () => container.querySelector('[data-testid="sibling"]')
+    const getFaulty = () => {
+      return container.querySelector('[data-testid="faulty"]')
+    }
+
+    const getSibling = () => {
+      return container.querySelector('[data-testid="sibling"]')
+    }
 
     expect(getFaulty()?.textContent).toBe('fine')
     expect(getSibling()?.textContent).toBe('ok')

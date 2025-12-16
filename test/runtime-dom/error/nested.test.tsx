@@ -74,8 +74,13 @@ describe('runtime-dom component error isolation (nested)', () => {
 
     render(<Parent />, container)
 
-    const getFaulty = () => container.querySelector('[data-testid="faulty"]')
-    const getSibling = () => container.querySelector('[data-testid="sibling"]')
+    const getFaulty = () => {
+      return container.querySelector('[data-testid="faulty"]')
+    }
+
+    const getSibling = () => {
+      return container.querySelector('[data-testid="sibling"]')
+    }
 
     expect(getFaulty()?.textContent).toBe('fine')
     expect(getSibling()?.textContent).toBe('stay')
@@ -147,8 +152,13 @@ describe('runtime-dom component error isolation (nested)', () => {
 
     render(<>{[<Faulty key="bad" />, <Ok key="ok" />]}</>, container)
 
-    const getFaulty = () => container.querySelector('[data-testid="faulty"]')
-    const getOk = () => container.querySelector('[data-testid="ok"]')
+    const getFaulty = () => {
+      return container.querySelector('[data-testid="faulty"]')
+    }
+
+    const getOk = () => {
+      return container.querySelector('[data-testid="ok"]')
+    }
 
     expect(getFaulty()?.textContent).toBe('fine')
     expect(getOk()?.textContent).toBe('ok')

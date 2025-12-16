@@ -76,9 +76,7 @@ export function createRenderer<
     const isCallable = typeof container === 'function'
 
     if (!isObjectLike && !isCallable) {
-      throw new TypeError(
-        'createRenderer 容器必须是 object（含函数）类型才能缓存挂载状态',
-      )
+      throw new TypeError('createRenderer 容器必须是 object（含函数）类型才能缓存挂载状态')
     }
 
     return container as PlainObject

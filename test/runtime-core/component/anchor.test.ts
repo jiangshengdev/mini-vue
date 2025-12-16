@@ -5,7 +5,7 @@ import type { RendererOptions } from '@/runtime-core/index.ts'
 import type { SetupComponent } from '@/jsx-foundation/index.ts'
 import type { EffectScope } from '@/reactivity/index.ts'
 
-type TestNode = {
+interface TestNode {
   kind: 'element' | 'text' | 'fragment'
   children: TestNode[]
   parent?: TestNode
@@ -14,6 +14,7 @@ type TestNode = {
 }
 
 type TestElement = TestNode & { kind: 'element' }
+
 type TestFragment = TestNode & { kind: 'fragment' }
 
 describe('mountChildWithAnchor', () => {
@@ -22,10 +23,16 @@ describe('mountChildWithAnchor', () => {
     const container: TestElement = { kind: 'element', tag: 'root', children: [] }
     const instance: ComponentInstance<TestNode, TestElement, TestFragment, SetupComponent> = {
       provides: Object.create(null),
-      type: (() => () => null) as SetupComponent,
+      type: (() => {
+        return () => {
+          return null
+        }
+      }) as SetupComponent,
       container,
       props: {},
-      render: () => null,
+      render() {
+        return null
+      },
       scope: {} as EffectScope,
       shouldUseAnchor: true,
       cleanupTasks: [],
@@ -36,9 +43,14 @@ describe('mountChildWithAnchor', () => {
 
     expect(mounted?.nodes).toHaveLength(1)
     expect(insertBefore).toHaveBeenCalledTimes(1)
-    expect(insertBefore.mock.calls.some(([, child]) => child.kind === 'fragment')).toBe(false)
+    expect(
+      insertBefore.mock.calls.some(([, child]) => {
+        return child.kind === 'fragment'
+      }),
+    ).toBe(false)
     expect(container.children).toHaveLength(2)
     const [first, second] = container.children
+
     expect(first.text).toBe('child')
     expect(second).toBe(instance.anchor)
   })
@@ -112,7 +124,7 @@ function createHostOptions(): {
       removeFromParent(node)
     },
     patchProps(): void {
-      /* no-op for tests */
+      /* No-op for tests */
     },
   }
 

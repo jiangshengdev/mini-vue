@@ -50,9 +50,11 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
 
       if (mounted) {
         ok &&= mounted.ok
+
         for (const node of mounted.nodes) {
           nodes.push(node)
         }
+
         teardowns.push(mounted.teardown)
       }
     }
@@ -113,6 +115,7 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
   if (__DEV__ && typeof child === 'object') {
     console.warn('[runtime-core] 检测到对象类型的子节点，已按字符串渲染：', child)
   }
+
   const text = createText(String(child))
 
   appendChild(container, text)

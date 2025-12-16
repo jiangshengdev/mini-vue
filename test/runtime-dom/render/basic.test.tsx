@@ -128,7 +128,7 @@ describe('runtime-dom basic rendering', () => {
 
       expect(container).toHaveTextContent('[object Object]')
       expect(warnSpy).toHaveBeenCalledTimes(1)
-      const [message, received] = warnSpy.mock.calls[0]!
+      const [message, received] = warnSpy.mock.calls[0]
 
       expect(String(message)).toContain('对象类型的子节点')
       expect(received).toBe(payload)
@@ -142,7 +142,7 @@ describe('runtime-dom basic rendering', () => {
     const ElementCtor = container.ownerDocument.defaultView!.Element
     const originalRemove = ElementCtor.prototype.remove
     const removeSpy = vi.fn(function (this: InstanceType<typeof ElementCtor>) {
-      return originalRemove.call(this)
+      originalRemove.call(this)
     })
 
     // @ts-expect-error 覆盖原型以拦截 remove 调用
@@ -163,7 +163,7 @@ describe('runtime-dom basic rendering', () => {
       const removedNode = removeSpy.mock.instances[0]
 
       expect(removedNode).toBeInstanceOf(Element)
-      expect((removedNode as Element).dataset.testid).toBe('parent')
+      expect(removedNode.dataset.testid).toBe('parent')
     } finally {
       // @ts-expect-error 恢复原型方法
       ElementCtor.prototype.remove = originalRemove

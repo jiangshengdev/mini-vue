@@ -75,9 +75,17 @@ describe('runtime-dom fragment boundary', () => {
 
     render(<Parent />, container)
 
-    const getFaulty = () => container.querySelector('[data-testid="faulty"]')
-    const getStable = () => container.querySelector('[data-testid="stable"]')
-    const getTail = () => container.querySelector('[data-testid="tail"]')
+    const getFaulty = () => {
+      return container.querySelector('[data-testid="faulty"]')
+    }
+
+    const getStable = () => {
+      return container.querySelector('[data-testid="stable"]')
+    }
+
+    const getTail = () => {
+      return container.querySelector('[data-testid="tail"]')
+    }
 
     expect(handler).not.toHaveBeenCalled()
     expect(getFaulty()?.textContent).toBe('ok')

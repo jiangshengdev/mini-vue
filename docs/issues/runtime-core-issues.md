@@ -49,14 +49,15 @@
   - `setup` 入口同时引入 thenable 识别兜底，避免误落入“必须返回渲染函数”的通用分支。
 - 测试：`test/runtime-core/component/mount-handle.test.tsx`
 
-## 5. `mountChildWithAnchor` 依赖宿主对 Fragment 插入语义的隐式契约，类型未约束（待修复）
+## 5. `mountChildWithAnchor` 依赖宿主对 Fragment 插入语义的隐式契约，类型未约束（已修复）
 
 - 位置：`src/runtime-core/component/anchor.ts`、`src/runtime-core/renderer.ts`
 - 现状：当需要锚点时，`mountChildWithAnchor` 会创建 `HostFragment`，把子树挂载到 fragment 上，再调用 `options.insertBefore(container, fragment, anchor)`。
 - 影响：这要求宿主实现的 `insertBefore` 能“正确处理 fragment”：插入时应迁移 fragment 的子节点而不是插入 fragment 本身。该约束在 DOM 宿主下成立（`DocumentFragment` 的标准行为），但对其他宿主并非必然，且没有在 `RendererOptions` 的类型/注释层面强制或明确。
-- 提示：
-  - 明确 `insertBefore` 的语义约束（文档/类型注释）以覆盖 fragment 行为；或
-  - 在 runtime-core 层避免把 fragment 当作可插入节点，改为显式逐个插入 fragment 的 children（需要额外的宿主能力以遍历 fragment 内容）。
+- 修复：
+  - runtime-core 不再把 fragment 本身传给 `insertBefore`，改为收集子节点后逐个在锚点前插入，避免依赖宿主对 fragment 的特殊语义。
+  - `RendererOptions.insertBefore` 注释明确 runtime-core 不会传入 `HostFragment` 作为 child。
+- 测试：`test/runtime-core/component/anchor.test.ts`
 
 ## 6. `mountElement` 卸载阶段存在冗余 DOM remove（已修复）
 

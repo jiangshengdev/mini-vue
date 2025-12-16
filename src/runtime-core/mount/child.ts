@@ -50,7 +50,9 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
 
       if (mounted) {
         ok &&= mounted.ok
-        nodes.push(...mounted.nodes)
+        for (const node of mounted.nodes) {
+          nodes.push(node)
+        }
         teardowns.push(mounted.teardown)
       }
     }

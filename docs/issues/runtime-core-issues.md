@@ -64,12 +64,12 @@
 - 影响：在 DOM 宿主下，移除父元素即可把整棵子树从 DOM 树摘除；此时对子节点逐个执行 remove 会产生额外的 $O(N)$ DOM 操作开销（仍需要保留子 teardown 的“逻辑清理”语义，如 ref/effect 等）。
 - 提示：应区分“逻辑清理”与“DOM 摘除”，避免对子节点做重复的 DOM remove。
 
-## 7. `mountChild` 数组分支的 `push(...nodes)` 在超大列表下可能触发 RangeError（待修复）
+## 7. `mountChild` 数组分支的 `push(...nodes)` 在超大列表下可能触发 RangeError（已修复）
 
 - 位置：`src/runtime-core/mount/child.ts`
 - 现状：数组分支在收集子句柄节点时使用 `nodes.push(...mounted.nodes)`。
 - 影响：当单个子项返回的 `mounted.nodes` 数量非常大时，展开运算符可能触发 JS 引擎的参数数量/栈限制，导致 `RangeError`（表现为“Maximum call stack size exceeded”或类似错误），属于输入规模相关的稳定性风险。
-- 提示：应避免对潜在大数组使用展开运算符，改用循环或分段追加。
+- 修复：改为逐个 `push` 收集子节点，避免对潜在大数组使用展开运算符。
 
 ## 8. `mountChild` 对象兜底渲染为 `[object Object]`，缺少开发期提示（待修复）
 

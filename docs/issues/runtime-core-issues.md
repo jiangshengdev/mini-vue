@@ -9,12 +9,13 @@
   - DOM 也会被移除后重建，导致焦点、滚动位置、输入法组合态等瞬态状态丢失。
 - 提示：需要引入“子树 patch/复用”机制（而非全量 teardown/remount），至少应做到在同一组件实例下对新旧子树做差量更新。
 
-## 2. 更新流程在 render 成功前就卸载旧子树，失败时无法回滚（待修复）
+## 2. 更新流程在 render 成功前就卸载旧子树，失败时无法回滚（已修复）
 
 - 位置：`src/runtime-core/component/render-effect.ts`
 - 现状：`rerenderComponent` 在执行 `renderSchedulerJob` 生成新子树之前就卸载旧子树；若 `renderSchedulerJob` 抛错，会标记 `rerenderFailed` 并直接 `teardownComponentInstance`。
 - 影响：一旦更新渲染失败，旧 DOM 已经被移除且不会恢复，最终该组件会被完整清理（表现为组件区域直接消失），属于不可恢复的破坏性更新。
 - 提示：应当先尝试生成新子树（或至少确保 render 成功）后再替换挂载结果；若 render 失败，应保留旧子树与旧 DOM（或实现回滚策略）。
+- 修复：rerender 时先运行 render 生成新子树，成功后再 teardown 旧子树并挂载；render 抛错会保留旧子树与 DOM。
 
 ## 3. 首次渲染失败时 `mountComponent` 仍返回“空句柄”，可能误导调用方（已修复）
 

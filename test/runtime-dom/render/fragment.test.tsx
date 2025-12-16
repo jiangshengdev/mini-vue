@@ -37,7 +37,7 @@ describe('runtime-dom fragment boundary', () => {
     expect(container.querySelector('[data-testid="tail"]')?.textContent).toBe('tail')
   })
 
-  it('片段子组件故障清理后外部兄弟仍可更新', () => {
+  it('片段子组件故障时保留旧子树且外部兄弟仍可更新', () => {
     const container = createTestContainer()
     const handler = vi.fn<ErrorHandler>()
     const boom = new Error('fragment child failed')
@@ -75,10 +75,14 @@ describe('runtime-dom fragment boundary', () => {
 
     render(<Parent />, container)
 
+    const getFaulty = () => container.querySelector('[data-testid="faulty"]')
+    const getStable = () => container.querySelector('[data-testid="stable"]')
+    const getTail = () => container.querySelector('[data-testid="tail"]')
+
     expect(handler).not.toHaveBeenCalled()
-    expect(container.querySelector('[data-testid="faulty"]')?.textContent).toBe('ok')
-    expect(container.querySelector('[data-testid="stable"]')?.textContent).toBe('stable:0')
-    expect(container.querySelector('[data-testid="tail"]')?.textContent).toBe('tail:0')
+    expect(getFaulty()?.textContent).toBe('ok')
+    expect(getStable()?.textContent).toBe('stable:0')
+    expect(getTail()?.textContent).toBe('tail:0')
 
     state.fail = true
 
@@ -87,14 +91,14 @@ describe('runtime-dom fragment boundary', () => {
 
     expect(error).toBe(boom)
     expect(context).toBe(errorContexts.effectRunner)
-    expect(container.querySelector('[data-testid="faulty"]')).toBeNull()
-    expect(container.querySelector('[data-testid="stable"]')?.textContent).toBe('stable:0')
-    expect(container.querySelector('[data-testid="tail"]')?.textContent).toBe('tail:0')
+    expect(getFaulty()?.textContent).toBe('ok')
+    expect(getStable()?.textContent).toBe('stable:0')
+    expect(getTail()?.textContent).toBe('tail:0')
 
     state.stable += 1
     state.tail += 1
 
-    expect(container.querySelector('[data-testid="stable"]')?.textContent).toBe('stable:1')
-    expect(container.querySelector('[data-testid="tail"]')?.textContent).toBe('tail:1')
+    expect(getStable()?.textContent).toBe('stable:1')
+    expect(getTail()?.textContent).toBe('tail:1')
   })
 })

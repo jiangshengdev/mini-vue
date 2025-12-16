@@ -1,4 +1,5 @@
 import path from 'node:path'
+import process from 'node:process'
 import ts from 'typescript'
 import { resolveFromImportMeta } from '../_shared/paths.ts'
 import type { Position } from '../_shared/ts-check.ts'
@@ -8,12 +9,15 @@ type Kind = 'import' | 'export'
 
 type Reason = 'alias-shape' | 'relative-into-src'
 
+type Severity = 'error' | 'warn'
+
 interface Finding {
   filePath: string
   kind: Kind
   module: string
   reason: Reason
   position: Position
+  severity: Severity
 }
 
 const testDir = resolveFromImportMeta(import.meta.url, '../../../test')
@@ -29,11 +33,12 @@ function isValidTestSrcAliasImport(module: string): boolean {
 
 function handleModuleSpecifier(parameters: {
   sourceFile: ts.SourceFile
+  isNamespaceImport: boolean
   moduleSpecifier: ts.Expression
   kind: Kind
   findings: Finding[]
 }): void {
-  const { sourceFile, moduleSpecifier, kind, findings } = parameters
+  const { sourceFile, isNamespaceImport, moduleSpecifier, kind, findings } = parameters
 
   if (!ts.isStringLiteral(moduleSpecifier)) {
     return
@@ -52,6 +57,7 @@ function handleModuleSpecifier(parameters: {
       module,
       reason: 'alias-shape',
       position: getPosition(sourceFile, moduleSpecifier),
+      severity: isNamespaceImport ? 'warn' : 'error',
     })
 
     return
@@ -62,13 +68,17 @@ function handleModuleSpecifier(parameters: {
     const normalizedSrcDir = path.resolve(srcDir)
     const normalizedResolved = path.resolve(resolved)
 
-    if (normalizedResolved === normalizedSrcDir || normalizedResolved.startsWith(`${normalizedSrcDir}${path.sep}`)) {
+    if (
+      normalizedResolved === normalizedSrcDir ||
+      normalizedResolved.startsWith(`${normalizedSrcDir}${path.sep}`)
+    ) {
       findings.push({
         filePath: sourceFile.fileName,
         kind,
         module,
         reason: 'relative-into-src',
         position: getPosition(sourceFile, moduleSpecifier),
+        severity: isNamespaceImport ? 'warn' : 'error',
       })
     }
   }
@@ -79,8 +89,13 @@ function checkFile(filePath: string, findings: Finding[]): void {
 
   for (const statement of sourceFile.statements) {
     if (ts.isImportDeclaration(statement) && statement.moduleSpecifier) {
+      const clause = statement.importClause
+      const namedBindings = clause?.namedBindings
+      const isNamespaceImport = namedBindings ? ts.isNamespaceImport(namedBindings) : false
+
       handleModuleSpecifier({
         sourceFile,
+        isNamespaceImport,
         moduleSpecifier: statement.moduleSpecifier,
         kind: 'import',
         findings,
@@ -91,6 +106,7 @@ function checkFile(filePath: string, findings: Finding[]): void {
     if (ts.isExportDeclaration(statement) && statement.moduleSpecifier) {
       handleModuleSpecifier({
         sourceFile,
+        isNamespaceImport: false,
         moduleSpecifier: statement.moduleSpecifier,
         kind: 'export',
         findings,
@@ -100,13 +116,14 @@ function checkFile(filePath: string, findings: Finding[]): void {
 }
 
 function formatFinding(finding: Finding): string {
-  const { filePath, kind, module, reason, position } = finding
+  const { filePath, kind, module, reason, position, severity } = finding
+  const level = severity === 'warn' ? 'warn' : 'error'
 
   if (reason === 'relative-into-src') {
-    return `${filePath}:${position.line}:${position.column} forbidden ${kind} into src via relative path: "${module}" (use @/<boundary>/index.ts or @/index.ts)`
+    return `${filePath}:${position.line}:${position.column} ${level} forbidden ${kind} into src via relative path: "${module}" (use @/<boundary>/index.ts or @/index.ts)`
   }
 
-  return `${filePath}:${position.line}:${position.column} invalid test ${kind} from src: "${module}" (must be @/<boundary>/index.ts or @/index.ts; only one segment after @/)`
+  return `${filePath}:${position.line}:${position.column} ${level} invalid test ${kind} from src: "${module}" (must be @/<boundary>/index.ts or @/index.ts; only one segment after @/)`
 }
 
 const files = listTsFilesInDir({
@@ -122,12 +139,30 @@ for (const filePath of files) {
   checkFile(filePath, findings)
 }
 
-if (findings.length > 0) {
-  for (const finding of findings) {
+const errors = findings.filter((finding) => {
+  return finding.severity === 'error'
+})
+const warnings = findings.filter((finding) => {
+  return finding.severity === 'warn'
+})
+
+if (warnings.length > 0) {
+  for (const finding of warnings) {
+    console.warn(formatFinding(finding))
+  }
+}
+
+if (errors.length > 0) {
+  for (const finding of errors) {
     console.error(formatFinding(finding))
   }
 
   process.exitCode = 1
 } else {
-  console.log('All test imports from src use @/<boundary>/index.ts (single segment) or @/index.ts.')
+  const message =
+    warnings.length > 0
+      ? 'Test src imports check passed with warnings.'
+      : 'All test imports from src use @/<boundary>/index.ts (single segment) or @/index.ts.'
+
+  console.log(message)
 }

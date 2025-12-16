@@ -85,9 +85,10 @@
 - 影响：若宿主环境将容器抽象为字符串/数字（例如终端渲染器、某些自定义渲染器），会在运行时报错 `Invalid value used as weak map key`，破坏“平台无关”的承诺。
  - 修复：将 `HostElement` 类型约束为 `object`，并在运行期对非对象容器抛出明确错误提示，避免 WeakMap 报错。
 
-## 10. `mount` 失败时应用状态可能处于“idle 但已缓存 container”的不一致态（待修复）
+## 10. 挂载失败时应用状态可能处于“空闲但已缓存容器”的不一致态（已修复）
 
 - 位置：`src/runtime-core/create-app.ts`
-- 现状：`mountApp` 在调用渲染器前就写入 `state.container = target`；若 render 抛错，则 `state.status` 仍为 `idle`，但 container 已被缓存。
-- 影响：语义上状态不够一致，调试时可能困惑；但调用 `unmount()` 仍可清理容器，不属于必然的功能性错误。
-- 提示：render 失败时在 `catch`/`finally` 中回滚 `state.container`，或引入更细的生命周期状态（如 `mounting`）。
+- 修复：
+  - 仅在渲染成功后才写入 `state.container` 与状态字段，render 抛错时保持两者为初始值，状态保持一致。
+  - 失败后调用 `unmount()` 不会误触发宿主清理。
+- 测试：`test/runtime-core/app/mount-failure-state.test.tsx`

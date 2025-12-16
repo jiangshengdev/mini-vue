@@ -25,13 +25,13 @@ describe('mountChildWithAnchor', () => {
       provides: Object.create(null),
       type: (() => {
         return () => {
-          return null
+          return undefined
         }
       }) as SetupComponent,
       container,
       props: {},
       render() {
-        return null
+        return undefined
       },
       scope: {} as EffectScope,
       shouldUseAnchor: true,

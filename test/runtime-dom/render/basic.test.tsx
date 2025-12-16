@@ -145,7 +145,6 @@ describe('runtime-dom basic rendering', () => {
       originalRemove.call(this)
     })
 
-    // @ts-expect-error 覆盖原型以拦截 remove 调用
     ElementCtor.prototype.remove = removeSpy
 
     try {
@@ -157,15 +156,14 @@ describe('runtime-dom basic rendering', () => {
         container,
       )
 
-      render(null, container)
+      render(undefined, container)
 
       expect(removeSpy).toHaveBeenCalledTimes(1)
       const removedNode = removeSpy.mock.instances[0]
 
       expect(removedNode).toBeInstanceOf(Element)
-      expect(removedNode.dataset.testid).toBe('parent')
+      expect((removedNode as HTMLElement).dataset.testid).toBe('parent')
     } finally {
-      // @ts-expect-error 恢复原型方法
       ElementCtor.prototype.remove = originalRemove
     }
   })

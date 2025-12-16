@@ -60,7 +60,7 @@ describe('runtime-core mountChild large arrays', () => {
       return index
     })
 
-    const mounted = mountChild(options, [massive, 'tail'], container)
+    const mounted = mountChild(options, [massive as unknown as number, 'tail'], container)
 
     expect(mounted?.ok).toBe(true)
     expect(mounted?.nodes.length).toBeGreaterThan(massive.length)

@@ -1,6 +1,4 @@
 export { RouterLink, RouterView } from './components/index.ts'
 export type { RouterLinkProps, RouterViewProps } from './components/index.ts'
-export { createRouter } from './core/create-router.ts'
-export { routerInjectionKey, useRouter } from './core/injection.ts'
-export { normalizePath } from './core/paths.ts'
-export type { RouteLocation, Router, RouterConfig, RouteRecord } from './core/types.ts'
+export { createRouter, normalizePath, routerInjectionKey, useRouter } from './core/index.ts'
+export type { RouteLocation, Router, RouterConfig, RouteRecord } from './core/index.ts'

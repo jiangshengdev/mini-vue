@@ -39,7 +39,7 @@ playground/src/views/home.tsx:2:22
     - `resolved = styleValue ?? ''` 仍可能是对象（`object`）
     - 直接 `String(resolved)` 会把普通对象转成 `"[object Object]"`
 - 影响：
-  - 当用户误传 `style={{ color: { x: 1 } }}` 这类值时，最终会写入 `style="color:[object Object]"` 或通过 `setProperty` 写入 `"[object Object]"`，产生难排查的 UI 异常。
+  - 当用户误传 `style={ { color: { x: 1 } } }`（JSX 的“双层花括号”写法在本文中用空格断开以避免文档插值解析）这类值时，最终会写入 `style="color:[object Object]"` 或通过 `setProperty` 写入 `"[object Object]"`，产生难排查的 UI 异常。
   - lint 层面会阻止 CI 通过（当前即为阻塞项）。
 
 ### 建议（严格早失败）

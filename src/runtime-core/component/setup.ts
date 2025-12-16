@@ -1,7 +1,7 @@
 import type { ComponentInstance } from './context.ts'
 import { setCurrentInstance, unsetCurrentInstance } from './context.ts'
 import type { RenderFunction, SetupComponent } from '@/jsx-foundation/index.ts'
-import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
+import { errorContexts, errorPhases, isThenable, runSilent } from '@/shared/index.ts'
 
 /**
  * 初始化组件，创建 setup 阶段与渲染闭包。
@@ -59,6 +59,26 @@ function invokeSetup<
 
   if (setupFailed || !render) {
     /* `setup` 抛错或返回空值时静默失败，交给上层跳过挂载。 */
+    return undefined
+  }
+
+  if (isThenable(render)) {
+    /* Mini-vue runtime-core 目前仅支持同步 setup：返回 Promise 会导致挂载行为不可预测。 */
+    runSilent(
+      () => {
+        throw new TypeError(
+          '暂不支持异步 setup：setup() 必须同步返回渲染函数（不要返回 Promise）',
+          {
+            cause: render,
+          },
+        )
+      },
+      {
+        origin: errorContexts.componentSetup,
+        handlerPhase: errorPhases.sync,
+      },
+    )
+
     return undefined
   }
 

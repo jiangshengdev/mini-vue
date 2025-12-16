@@ -241,9 +241,12 @@ function runWithChannel<T, P extends ErrorPhase>(
 
     /* 明确拒绝 Promise/thenable runner，避免异步阶段漏报与提前清理。 */
     if (isThenable(result)) {
-      throw new TypeError(
-        'runWithChannel: runner does not support Promise or thenable return value',
-      )
+      const message =
+        options.origin === errorContexts.componentSetup
+          ? '暂不支持异步 setup：setup() 必须同步返回渲染函数（不要返回 Promise）'
+          : 'runWithChannel: runner does not support Promise or thenable return value'
+
+      throw new TypeError(message, { cause: result })
     }
 
     return result

@@ -53,4 +53,30 @@ describe('runtime-core mountComponent handle ok flag', () => {
 
     setErrorHandler(undefined)
   })
+
+  it('async setup 会被显式拒绝并上报准确错误', () => {
+    const container = createTestContainer()
+    const handler = vi.fn<ErrorHandler>()
+
+    setErrorHandler(handler)
+
+    const AsyncSetup = (async () => {
+      return () => {
+        return undefined
+      }
+    }) as unknown as SetupComponent
+
+    const vnode = createVirtualNode({ type: AsyncSetup })
+    const mounted = mountComponent(domRendererOptions, vnode, container)
+
+    expect(mounted).toBeUndefined()
+    expect(container.childNodes.length).toBe(0)
+    expect(handler).toHaveBeenCalled()
+
+    const [error] = handler.mock.calls[0] ?? []
+
+    expect(error.message).toContain('暂不支持异步 setup')
+
+    setErrorHandler(undefined)
+  })
 })

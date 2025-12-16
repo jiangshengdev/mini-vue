@@ -115,4 +115,37 @@ describe('runtime-dom basic rendering', () => {
     expect(renderSpy).toHaveBeenCalledTimes(2)
     expect(container.querySelector('[data-testid="next"]')?.textContent).toBe('next')
   })
+
+  it('卸载元素时不会对子节点重复调用 remove', () => {
+    const container = createTestContainer()
+    const ElementCtor = container.ownerDocument.defaultView!.Element
+    const originalRemove = ElementCtor.prototype.remove
+    const removeSpy = vi.fn(function (this: InstanceType<typeof ElementCtor>) {
+      return originalRemove.call(this)
+    })
+
+    // @ts-expect-error 覆盖原型以拦截 remove 调用
+    ElementCtor.prototype.remove = removeSpy
+
+    try {
+      render(
+        <div data-testid="parent">
+          <span data-testid="first" />
+          <span data-testid="second" />
+        </div>,
+        container,
+      )
+
+      render(null, container)
+
+      expect(removeSpy).toHaveBeenCalledTimes(1)
+      const removedNode = removeSpy.mock.instances[0]
+
+      expect(removedNode).toBeInstanceOf(Element)
+      expect((removedNode as Element).dataset.testid).toBe('parent')
+    } finally {
+      // @ts-expect-error 恢复原型方法
+      ElementCtor.prototype.remove = originalRemove
+    }
+  })
 })

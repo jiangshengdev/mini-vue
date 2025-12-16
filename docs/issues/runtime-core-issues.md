@@ -57,7 +57,7 @@
   - 明确 `insertBefore` 的语义约束（文档/类型注释）以覆盖 fragment 行为；或
   - 在 runtime-core 层避免把 fragment 当作可插入节点，改为显式逐个插入 fragment 的 children（需要额外的宿主能力以遍历 fragment 内容）。
 
-## 6. `mountElement` 卸载阶段存在冗余 DOM remove（待修复）
+## 6. `mountElement` 卸载阶段存在冗余 DOM remove（已修复）
 
 - 位置：`src/runtime-core/mount/element.ts`
 - 现状：`teardown` 中会先遍历 `mountedHandles` 并执行每个子句柄的 `teardown()`（子路径通常会调用宿主 `remove`），最后再对父元素本身执行一次 `remove(element)`。

@@ -24,7 +24,7 @@ export interface RendererOptions<
   createFragment(): HostFragment
   /** 将子节点插入到指定父节点末尾。 */
   appendChild(parent: HostElement | HostFragment, child: HostNode): void
-  /** 将子节点插入到指定父节点且位于锚点节点之前。 */
+  /** 将子节点插入到指定父节点且位于锚点节点之前（runtime-core 不会传入 HostFragment 作为 child）。 */
   insertBefore(parent: HostElement | HostFragment, child: HostNode, anchor?: HostNode): void
   /** 清空容器内容，在新一轮渲染前使用。 */
   clear(container: HostElement): void

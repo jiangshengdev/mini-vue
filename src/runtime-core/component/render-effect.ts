@@ -18,21 +18,25 @@ export function performInitialRender<
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
-): MountedHandle<HostNode> | undefined {
+): MountedHandle<HostNode> {
   /* 每个组件实例持有独立 effect，负责跟踪依赖并调度重渲染。 */
   instance.effect = createRenderEffect(options, instance)
 
+  let mounted: MountedHandle<HostNode> | undefined
+  let ok = true
+
   /* 首次 run() 会同步生成子树结果。 */
   /* 包裹错误通道：首渲染异常需清理实例但不中断兄弟挂载。 */
-  return runSilent(
+  runSilent(
     () => {
       const subtree = instance.effect!.run()
+
       /* 子树由通用 mountChild 继续挂载到宿主容器。 */
-      const mounted = mountChildWithAnchor(options, instance, subtree)
+      mounted = mountChildWithAnchor(options, instance, subtree)
 
       instance.mountedHandle = mounted
 
-      return mounted
+      ok &&= mounted?.ok ?? true
     },
     {
       origin: errorContexts.effectRunner,
@@ -40,11 +44,20 @@ export function performInitialRender<
       /* 与 Vue 类似：首渲染错误上报但不中断兄弟挂载。 */
       afterRun(token) {
         if (token?.error) {
+          ok = false
           teardownComponentInstance(options, instance)
         }
       },
     },
   )
+
+  return {
+    ok,
+    nodes: mounted?.nodes ?? [],
+    teardown(): void {
+      mounted?.teardown()
+    },
+  }
 }
 
 function createRenderEffect<

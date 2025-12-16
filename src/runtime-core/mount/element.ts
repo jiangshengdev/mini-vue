@@ -24,6 +24,9 @@ export function mountElement<HostNode, HostElement extends HostNode, HostFragmen
   patchProps(element, props)
   /* 子节点交给 mountChildren，保持与 virtualNode 定义一致。 */
   const mountedHandles = mountChildren(options, virtualNode.children, element, context)
+  const ok = mountedHandles.every((handle) => {
+    return handle.ok
+  })
   /* 最终把元素插入到父容器中完成挂载。 */
 
   appendChild(container, element)
@@ -31,6 +34,7 @@ export function mountElement<HostNode, HostElement extends HostNode, HostFragmen
   assignElementRef(refBinding, element)
 
   return {
+    ok,
     nodes: [element],
     /**
      * 卸载元素：先卸载子树与 ref，再移除自身，保证清理顺序可预期。

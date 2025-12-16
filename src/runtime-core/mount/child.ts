@@ -40,6 +40,7 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
     const endAnchor = createText('')
     const nodes: HostNode[] = [startAnchor]
     const teardowns: Array<() => void> = []
+    let ok = true
 
     appendChild(container, startAnchor)
 
@@ -48,6 +49,7 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
       const mounted = mountChild(options, item, container, { ...context, shouldUseAnchor: true })
 
       if (mounted) {
+        ok &&= mounted.ok
         nodes.push(...mounted.nodes)
         teardowns.push(mounted.teardown)
       }
@@ -57,6 +59,7 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
     nodes.push(endAnchor)
 
     return {
+      ok,
       nodes,
       /**
        * 先按“子项挂载顺序”执行 teardown，再移除边界锚点。
@@ -82,6 +85,7 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
     appendChild(container, text)
 
     return {
+      ok: true,
       nodes: [text],
       /** 卸载文本节点：仅需从宿主树中移除即可。 */
       teardown(): void {
@@ -101,6 +105,7 @@ export function mountChild<HostNode, HostElement extends HostNode, HostFragment 
   appendChild(container, text)
 
   return {
+    ok: true,
     nodes: [text],
     /** 卸载兜底文本节点：与普通文本路径保持一致。 */
     teardown(): void {

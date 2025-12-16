@@ -1,0 +1,56 @@
+import { describe, expect, it, vi } from 'vitest'
+import { createTestContainer } from '../../setup.ts'
+import type { ErrorHandler, SetupComponent } from '@/index.ts'
+import { setErrorHandler } from '@/index.ts'
+import { createVirtualNode } from '@/jsx-foundation/index.ts'
+import { mountComponent } from '@/runtime-core/index.ts'
+import { domRendererOptions } from '@/runtime-dom/index.ts'
+
+describe('runtime-core mountComponent handle ok flag', () => {
+  it('空渲染仍返回句柄且 ok=true', () => {
+    const container = createTestContainer()
+
+    const Empty: SetupComponent = () => {
+      return () => {
+        return undefined
+      }
+    }
+
+    const vnode = createVirtualNode({ type: Empty })
+    const mounted = mountComponent(domRendererOptions, vnode, container)
+
+    expect(mounted).toBeDefined()
+    expect(mounted?.ok).toBe(true)
+    expect(mounted?.nodes).toEqual([])
+    expect(container.childNodes.length).toBe(0)
+
+    mounted?.teardown()
+  })
+
+  it('首渲染抛错时仍返回句柄且 ok=false', () => {
+    const container = createTestContainer()
+    const handler = vi.fn<ErrorHandler>()
+
+    setErrorHandler(handler)
+
+    const boom = new Error('render failed')
+    const Faulty: SetupComponent = () => {
+      return () => {
+        throw boom
+      }
+    }
+
+    const vnode = createVirtualNode({ type: Faulty })
+    const mounted = mountComponent(domRendererOptions, vnode, container)
+
+    expect(mounted).toBeDefined()
+    expect(mounted?.ok).toBe(false)
+    expect(mounted?.nodes).toEqual([])
+    expect(container.childNodes.length).toBe(0)
+    expect(handler).toHaveBeenCalled()
+
+    mounted?.teardown()
+
+    setErrorHandler(undefined)
+  })
+})

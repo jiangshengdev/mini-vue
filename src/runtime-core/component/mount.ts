@@ -42,10 +42,11 @@ export function mountComponent<
   }
 
   /* 执行首次渲染并将子树挂载到宿主容器。 */
-  const mounted = performInitialRender(options, instance)
+  const initialRender = performInitialRender(options, instance)
 
   return {
-    nodes: (mounted?.nodes ?? []) as HostNode[],
+    ok: initialRender.ok,
+    nodes: initialRender.nodes as HostNode[],
     /**
      * 卸载组件：统一走实例 teardown，内部会 stop scope/effect 并清理已挂载子树。
      */

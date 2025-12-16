@@ -30,7 +30,8 @@
 
 ### `src` 顶层目录的导入边界
 
-在 `src` 目录内，每一个**一级目录**（例如 `src/reactivity`、`src/runtime-core`、`src/runtime-dom`、`src/router`、`src/shared`、`src/jsx-*`）都视为一个边界：
+在 `src` 目录内，每一个**一级目录**（例如 `src/reactivity`、`src/runtime-core`、`src/runtime-dom`、`src/router`、`src/shared`、
+`src/jsx-*`）都视为一个边界：
 
 - `@` **只**用于导入“当前一级目录之外”的内容。
 - 在同一个一级目录内部，禁止使用 `@/当前目录/...` 这种写法；必须使用 `./`、`../` 等相对路径。

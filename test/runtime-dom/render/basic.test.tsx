@@ -128,10 +128,8 @@ describe('runtime-dom basic rendering', () => {
 
       expect(container).toHaveTextContent('[object Object]')
       expect(warnSpy).toHaveBeenCalledTimes(1)
-      const [message, received] = warnSpy.mock.calls[0]
-
-      expect(String(message)).toContain('对象类型的子节点')
-      expect(received).toBe(payload)
+      expect(String(warnSpy.mock.calls[0]?.[0])).toContain('对象类型的子节点')
+      expect(warnSpy.mock.calls[0]?.[1]).toBe(payload)
     } finally {
       warnSpy.mockRestore()
     }
@@ -141,7 +139,7 @@ describe('runtime-dom basic rendering', () => {
     const container = createTestContainer()
     const ElementCtor = container.ownerDocument.defaultView!.Element
     const originalRemove = ElementCtor.prototype.remove
-    const removeSpy = vi.fn(function (this: InstanceType<typeof ElementCtor>) {
+    const removeSpy = vi.fn(function remove(this: InstanceType<typeof ElementCtor>) {
       originalRemove.call(this)
     })
 

@@ -102,7 +102,7 @@ function rerenderComponent<
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
   renderSchedulerJob: () => void,
 ): void {
-  const prevSubTree = instance.subTree
+  const previousSubTree = instance.subTree
   let rerenderFailed = false
 
   /* 调度执行由 effect 决定，异常时标记失败并避免替换旧子树。 */
@@ -117,7 +117,7 @@ function rerenderComponent<
   })
 
   if (rerenderFailed) {
-    instance.subTree = prevSubTree
+    instance.subTree = previousSubTree
 
     return
   }

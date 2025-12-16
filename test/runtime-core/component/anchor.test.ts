@@ -3,7 +3,7 @@ import type { ComponentInstance } from '@/runtime-core/component/context.ts'
 import { mountChildWithAnchor } from '@/runtime-core/component/anchor.ts'
 import type { RendererOptions } from '@/runtime-core/index.ts'
 import type { SetupComponent } from '@/jsx-foundation/index.ts'
-import type { EffectScope } from '@/reactivity/index.ts'
+import { effectScope } from '@/reactivity/index.ts'
 
 interface TestNode {
   kind: 'element' | 'text' | 'fragment'
@@ -21,19 +21,21 @@ describe('mountChildWithAnchor', () => {
   it('逐个插入 fragment 子节点，不要求宿主 insertBefore 处理 fragment', () => {
     const { options, insertBefore } = createHostOptions()
     const container: TestElement = { kind: 'element', tag: 'root', children: [] }
+    const component: SetupComponent = () => {
+      return () => {
+        return undefined
+      }
+    }
+
     const instance: ComponentInstance<TestNode, TestElement, TestFragment, SetupComponent> = {
-      provides: Object.create(null),
-      type: (() => {
-        return () => {
-          return undefined
-        }
-      }) as SetupComponent,
+      provides: {},
+      type: component,
       container,
       props: {},
       render() {
         return undefined
       },
-      scope: {} as EffectScope,
+      scope: effectScope(),
       shouldUseAnchor: true,
       cleanupTasks: [],
       setupContext: {},

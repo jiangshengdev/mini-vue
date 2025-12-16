@@ -9,7 +9,11 @@ import { isRef } from '@/reactivity/index.ts'
 /**
  * 创建宿主元素并同步 props 与 children。
  */
-export function mountElement<HostNode, HostElement extends HostNode, HostFragment extends HostNode>(
+export function mountElement<
+  HostNode,
+  HostElement extends HostNode & WeakKey,
+  HostFragment extends HostNode,
+>(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   virtualNode: VirtualNode<string>,
   container: HostElement | HostFragment,

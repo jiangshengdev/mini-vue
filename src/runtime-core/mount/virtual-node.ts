@@ -12,7 +12,7 @@ import { Fragment } from '@/jsx-foundation/index.ts'
  */
 export function mountVirtualNode<
   HostNode,
-  HostElement extends HostNode,
+  HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,

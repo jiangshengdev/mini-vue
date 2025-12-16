@@ -9,7 +9,7 @@ import type { RenderOutput, SetupComponent } from '@/jsx-foundation/index.ts'
  */
 export function mountChildWithAnchor<
   HostNode,
-  HostElement extends HostNode,
+  HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
   T extends SetupComponent,
 >(
@@ -55,7 +55,7 @@ export function mountChildWithAnchor<
  */
 function ensureComponentAnchor<
   HostNode,
-  HostElement extends HostNode,
+  HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
   T extends SetupComponent,
 >(

@@ -6,14 +6,14 @@ import { mountChild } from './mount/index.ts'
 import type { AppContext } from './create-app.ts'
 import type { RenderOutput } from '@/jsx-foundation/index.ts'
 import { isVirtualNode } from '@/jsx-foundation/index.ts'
-import type { PlainObject, PropsShape } from '@/shared/index.ts'
+import type { PropsShape } from '@/shared/index.ts'
 
 /**
  * 宿主环境需要提供的渲染原语集合。
  */
 export interface RendererOptions<
   HostNode,
-  HostElement extends HostNode & object,
+  HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
 > {
   /** 根据标签名创建宿主元素节点。 */
@@ -38,13 +38,13 @@ export interface RendererOptions<
 }
 
 /** 根级渲染函数签名，负责将顶层子树挂载到容器。 */
-export type RootRenderFunction<HostElement extends object> = (
+export type RootRenderFunction<HostElement extends WeakKey> = (
   virtualNode: RenderOutput,
   container: HostElement,
 ) => void
 
 /** 渲染器工厂返回值，包含渲染与清理能力。 */
-export interface Renderer<HostNode, HostElement extends HostNode & object> {
+export interface Renderer<HostNode, HostElement extends HostNode & WeakKey> {
   /**
    * 将 virtualNode 子树渲染到指定容器中。
    *
@@ -62,16 +62,16 @@ export interface Renderer<HostNode, HostElement extends HostNode & object> {
  */
 export function createRenderer<
   HostNode,
-  HostElement extends HostNode & object,
+  HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
 >(options: RendererOptions<HostNode, HostElement, HostFragment>): Renderer<HostNode, HostElement> {
   const { clear } = options
-  const mountedHandlesByContainer = new WeakMap<PlainObject, MountedHandle<HostNode>>()
+  const mountedHandlesByContainer = new WeakMap<WeakKey, MountedHandle<HostNode>>()
 
   /**
    * 将宿主容器断言为对象键，便于复用 WeakMap 存储。
    */
-  function asContainerKey(container: HostElement): PlainObject {
+  function asContainerKey(container: HostElement): WeakKey {
     const isObjectLike = typeof container === 'object' && container !== null
     const isCallable = typeof container === 'function'
 
@@ -79,7 +79,7 @@ export function createRenderer<
       throw new TypeError('createRenderer 容器必须是 object（含函数）类型才能缓存挂载状态')
     }
 
-    return container as PlainObject
+    return container
   }
 
   /**

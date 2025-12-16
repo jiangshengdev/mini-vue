@@ -24,7 +24,7 @@ type AppLifecycleStatus = (typeof appLifecycleStatus)[keyof typeof appLifecycleS
 /**
  * 宿主平台注入的渲染配置，提供渲染与清理能力。
  */
-export interface AppRuntimeConfig<HostElement> {
+export interface AppRuntimeConfig<HostElement extends WeakKey> {
   /** 将根子树挂载到目标容器的渲染函数。 */
   render: RootRenderFunction<HostElement>
   /** 卸载宿主容器中的子树，释放响应式副作用。 */
@@ -66,7 +66,7 @@ export interface AppInstance<HostElement> extends PluginInstallApp {
 /**
  * 应用内部状态记录，追踪当前容器与根组件信息。
  */
-interface AppState<HostElement> {
+interface AppState<HostElement extends WeakKey> {
   /** 标识应用当前是否已挂载。 */
   status: AppLifecycleStatus
   /** 最近一次挂载的宿主容器引用。 */
@@ -84,7 +84,10 @@ interface AppState<HostElement> {
 /**
  * 按当前状态执行一次挂载，负责生成子树并调度渲染。
  */
-function mountApp<HostElement>(state: AppState<HostElement>, target: HostElement): void {
+function mountApp<HostElement extends WeakKey>(
+  state: AppState<HostElement>,
+  target: HostElement,
+): void {
   /* 已挂载时直接阻止重复操作，避免宿主状态错乱。 */
   if (state.status === appLifecycleStatus.mounted) {
     throw new Error('createApp: 当前应用已挂载，不能重复执行 mount', { cause: state.container })
@@ -114,7 +117,7 @@ function mountApp<HostElement>(state: AppState<HostElement>, target: HostElement
 /**
  * 清理当前应用实例，释放宿主容器与内部状态。
  */
-function unmountApp<HostElement>(state: AppState<HostElement>): void {
+function unmountApp<HostElement extends WeakKey>(state: AppState<HostElement>): void {
   /* 没有容器代表尚未挂载，直接跳过。 */
   if (!state.container) {
     return
@@ -129,7 +132,7 @@ function unmountApp<HostElement>(state: AppState<HostElement>): void {
 /**
  * 通过最新状态生成根级 virtualNode，确保 props 是独立副本。
  */
-function createRootVirtualNode<HostElement>(state: AppState<HostElement>) {
+function createRootVirtualNode<HostElement extends WeakKey>(state: AppState<HostElement>) {
   const rawProps: ElementProps<SetupComponent> | undefined = state.initialRootProps
     ? { ...state.initialRootProps }
     : undefined
@@ -147,7 +150,7 @@ function createRootVirtualNode<HostElement>(state: AppState<HostElement>) {
 /**
  * 创建应用实例，封装 mount/unmount 生命周期与状态管理。
  */
-export function createAppInstance<HostElement>(
+export function createAppInstance<HostElement extends WeakKey>(
   config: AppRuntimeConfig<HostElement>,
   rootComponent: SetupComponent,
   initialRootProps?: PropsShape,

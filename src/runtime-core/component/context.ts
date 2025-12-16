@@ -27,7 +27,7 @@ export type Provides = PlainObject
  */
 export interface ComponentInstance<
   HostNode,
-  HostElement extends HostNode,
+  HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
   T extends SetupComponent,
 > {
@@ -66,7 +66,7 @@ export interface ComponentInstance<
 }
 
 /** 兼容任意宿主类型的组件实例别名，简化当前实例管理。 */
-export type UnknownComponentInstance = ComponentInstance<unknown, unknown, unknown, SetupComponent>
+export type UnknownComponentInstance = ComponentInstance<unknown, WeakKey, unknown, SetupComponent>
 
 /** 当前 setup 调用栈正在处理的实例引用。 */
 const instanceStack = new ContextStack<UnknownComponentInstance>()
@@ -76,7 +76,7 @@ const instanceStack = new ContextStack<UnknownComponentInstance>()
  */
 export function setCurrentInstance<
   HostNode,
-  HostElement extends HostNode,
+  HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
   T extends SetupComponent,
 >(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): void {

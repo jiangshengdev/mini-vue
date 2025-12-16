@@ -8,7 +8,7 @@ import { errorContexts, errorPhases, isThenable, runSilent } from '@/shared/inde
  */
 export function setupComponent<
   HostNode,
-  HostElement extends HostNode,
+  HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
   T extends SetupComponent,
 >(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): boolean {
@@ -27,7 +27,7 @@ export function setupComponent<
 
 function invokeSetup<
   HostNode,
-  HostElement extends HostNode,
+  HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
   T extends SetupComponent,
 >(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): RenderFunction | undefined {

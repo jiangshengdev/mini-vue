@@ -8,7 +8,7 @@ import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
  */
 export function teardownMountedSubtree<
   HostNode,
-  HostElement extends HostNode,
+  HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
   T extends SetupComponent,
 >(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>, skipRemove?: boolean): void {
@@ -27,7 +27,7 @@ export function teardownMountedSubtree<
  */
 export function teardownComponentInstance<
   HostNode,
-  HostElement extends HostNode,
+  HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
   T extends SetupComponent,
 >(

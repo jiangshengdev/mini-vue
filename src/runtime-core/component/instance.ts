@@ -10,7 +10,7 @@ import type { PlainObject } from '@/shared/index.ts'
  */
 export function createComponentInstance<
   HostNode,
-  HostElement extends HostNode,
+  HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
   T extends SetupComponent,
 >(
@@ -64,7 +64,7 @@ export function createComponentInstance<
  */
 export function attachInstanceToVirtualNode<
   HostNode,
-  HostElement extends HostNode,
+  HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
   T extends SetupComponent,
 >(

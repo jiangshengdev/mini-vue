@@ -12,7 +12,7 @@ import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
  */
 export function performInitialRender<
   HostNode,
-  HostElement extends HostNode,
+  HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
   T extends SetupComponent,
 >(
@@ -62,7 +62,7 @@ export function performInitialRender<
 
 function createRenderEffect<
   HostNode,
-  HostElement extends HostNode,
+  HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
   T extends SetupComponent,
 >(
@@ -94,7 +94,7 @@ function createRenderEffect<
  */
 function rerenderComponent<
   HostNode,
-  HostElement extends HostNode,
+  HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
   T extends SetupComponent,
 >(
@@ -132,7 +132,7 @@ function rerenderComponent<
  */
 function mountLatestSubtree<
   HostNode,
-  HostElement extends HostNode,
+  HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
   T extends SetupComponent,
 >(

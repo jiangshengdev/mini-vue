@@ -87,10 +87,10 @@
   - 方案 A：约束类型（明确 HostElement 必须是 `object`）并在文档/类型层声明；
   - 方案 B：对对象 key 用 `WeakMap`、对原始值 key 用 `Map`（需要额外的生命周期清理策略）。
 
-## 10. `mount` 失败时应用状态可能处于“idle 但已缓存 container”的不一致态（已修复）
+## 10. 挂载失败时应用状态可能处于“空闲但已缓存容器”的不一致态（已修复）
 
 - 位置：`src/runtime-core/create-app.ts`
 - 修复：
-  - 仅在渲染成功后才缓存容器，render 抛错时保持 `container` 未设置，状态保持一致。
+  - 仅在渲染成功后才写入 `state.container` 与状态字段，render 抛错时保持两者为初始值，状态保持一致。
   - 失败后调用 `unmount()` 不会误触发宿主清理。
 - 测试：`test/runtime-core/app/mount-failure-state.test.tsx`

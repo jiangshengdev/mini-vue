@@ -3,8 +3,8 @@ import { createTestContainer } from '../../setup.ts'
 import type { SetupComponent } from '@/index.ts'
 import { createAppInstance } from '@/runtime-core/index.ts'
 
-describe('runtime-core createAppInstance mount failure state', () => {
-  it('render 抛错时不会缓存容器，unmount 不会触发宿主清理', () => {
+describe('runtime-core createAppInstance mount failure state rollback', () => {
+  it('does not cache container or invoke host unmount when render throws', () => {
     const container = createTestContainer()
     const boom = new Error('render failed')
 

@@ -95,16 +95,20 @@ function mountApp<HostElement>(state: AppState<HostElement>, target: HostElement
 
   /* 交由渲染器负责真正的 DOM 挂载，并让组件 effect 托管更新。 */
   setCurrentAppContext(state.appContext)
+  let renderSucceeded = false
 
   try {
     state.config.render(rootNode, target)
-    /* 渲染成功后再缓存容器，确保失败时不会留下“idle + container”的残留状态。 */
-    state.container = target
+    renderSucceeded = true
   } finally {
     unsetCurrentAppContext()
   }
 
-  state.status = appLifecycleStatus.mounted
+  /* 渲染成功后再缓存容器和状态，避免失败时留下“idle + container”的残留。 */
+  if (renderSucceeded) {
+    state.container = target
+    state.status = appLifecycleStatus.mounted
+  }
 }
 
 /**

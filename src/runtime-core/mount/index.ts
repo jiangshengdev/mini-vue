@@ -1,4 +1,3 @@
-export { mountComponent } from '../component/index.ts'
 export { mountChild } from './child.ts'
 export { mountChildren } from './children.ts'
 export { mountElement } from './element.ts'

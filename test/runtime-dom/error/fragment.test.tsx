@@ -37,7 +37,7 @@ describe('runtime-dom component error isolation (fragment)', () => {
     expect(container.querySelector('[data-testid="sibling"]')?.textContent).toBe('ok')
   })
 
-  it('有故障的子组件移除后兄弟仍可响应更新', () => {
+  it('有故障的子组件保留旧视图且兄弟仍可响应更新', () => {
     const container = createTestContainer()
     const handler = vi.fn<ErrorHandler>()
     const boom = new Error('rerender failed')
@@ -78,18 +78,22 @@ describe('runtime-dom component error isolation (fragment)', () => {
 
     render(<Parent />, container)
 
-    expect(container.querySelector('[data-testid="faulty"]')?.textContent).toBe('a:0')
-    expect(container.querySelector('[data-testid="sibling"]')?.textContent).toBe('b:0')
+    const getFaulty = () => container.querySelector('[data-testid="faulty"]')
+    const getSibling = () => container.querySelector('[data-testid="sibling"]')
+
+    expect(getFaulty()?.textContent).toBe('a:0')
+    expect(getSibling()?.textContent).toBe('b:0')
 
     state.a += 1
 
     expect(handler).toHaveBeenCalledTimes(1)
-    expect(container.querySelector('[data-testid="faulty"]')).toBeNull()
-    expect(container.querySelector('[data-testid="sibling"]')?.textContent).toBe('b:0')
+    expect(getFaulty()?.textContent).toBe('a:0')
+    expect(getSibling()?.textContent).toBe('b:0')
 
     state.b += 1
 
-    expect(container.querySelector('[data-testid="sibling"]')?.textContent).toBe('b:1')
+    expect(getSibling()?.textContent).toBe('b:1')
+    expect(getFaulty()?.textContent).toBe('a:0')
     expect(handler).toHaveBeenCalledTimes(1)
   })
 
@@ -129,18 +133,22 @@ describe('runtime-dom component error isolation (fragment)', () => {
       container,
     )
 
-    expect(container.querySelector('[data-testid="faulty"]')?.textContent).toBe('a:0')
-    expect(container.querySelector('[data-testid="sibling"]')?.textContent).toBe('b:0')
+    const getFaulty = () => container.querySelector('[data-testid="faulty"]')
+    const getSibling = () => container.querySelector('[data-testid="sibling"]')
+
+    expect(getFaulty()?.textContent).toBe('a:0')
+    expect(getSibling()?.textContent).toBe('b:0')
 
     state.a += 1
 
     expect(handler).toHaveBeenCalledTimes(1)
-    expect(container.querySelector('[data-testid="faulty"]')).toBeNull()
-    expect(container.querySelector('[data-testid="sibling"]')?.textContent).toBe('b:0')
+    expect(getFaulty()?.textContent).toBe('a:0')
+    expect(getSibling()?.textContent).toBe('b:0')
 
     state.b += 1
 
-    expect(container.querySelector('[data-testid="sibling"]')?.textContent).toBe('b:1')
+    expect(getSibling()?.textContent).toBe('b:1')
+    expect(getFaulty()?.textContent).toBe('a:0')
     expect(handler).toHaveBeenCalledTimes(1)
   })
 })

@@ -110,7 +110,7 @@ describe('runtime-dom component error isolation (basic)', () => {
     expect(container.querySelector('[data-testid="sibling"]')?.textContent).toBe('ok')
   })
 
-  it('更新阶段抛错会卸载组件且不影响兄弟', () => {
+  it('更新阶段抛错会保留旧子树且不影响兄弟', () => {
     const container = createTestContainer()
     const handler = vi.fn<ErrorHandler>()
     const boom = new Error('update failed')
@@ -144,8 +144,11 @@ describe('runtime-dom component error isolation (basic)', () => {
       container,
     )
 
-    expect(container.querySelector('[data-testid="faulty"]')?.textContent).toBe('fine')
-    expect(container.querySelector('[data-testid="sibling"]')?.textContent).toBe('ok')
+    const getFaulty = () => container.querySelector('[data-testid="faulty"]')
+    const getSibling = () => container.querySelector('[data-testid="sibling"]')
+
+    expect(getFaulty()?.textContent).toBe('fine')
+    expect(getSibling()?.textContent).toBe('ok')
     expect(handler).not.toHaveBeenCalled()
 
     state.count += 1
@@ -155,13 +158,13 @@ describe('runtime-dom component error isolation (basic)', () => {
 
     expect(error).toBe(boom)
     expect(context).toBe(errorContexts.effectRunner)
-    expect(container.querySelector('[data-testid="faulty"]')).toBeNull()
-    expect(container.querySelector('[data-testid="sibling"]')?.textContent).toBe('ok')
+    expect(getFaulty()?.textContent).toBe('fine')
+    expect(getSibling()?.textContent).toBe('ok')
 
     state.count += 1
 
     expect(handler).toHaveBeenCalledTimes(1)
-    expect(container.querySelector('[data-testid="faulty"]')).toBeNull()
-    expect(container.querySelector('[data-testid="sibling"]')?.textContent).toBe('ok')
+    expect(getFaulty()?.textContent).toBe('fine')
+    expect(getSibling()?.textContent).toBe('ok')
   })
 })

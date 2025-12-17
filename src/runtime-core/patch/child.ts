@@ -96,6 +96,7 @@ function patchExisting<
       prev.children,
       next.children,
       container,
+      patchChild,
       runtimePrev.anchor ?? anchor,
       context,
     )
@@ -141,7 +142,7 @@ function patchElement<
   }
 
   options.patchProps(el, prev.props, next.props)
-  patchChildren(options, prev.children, next.children, el, anchor, context)
+  patchChildren(options, prev.children, next.children, el, patchChild, anchor, context)
 
   if (nextRef) {
     assignElementRef(nextRef, el)

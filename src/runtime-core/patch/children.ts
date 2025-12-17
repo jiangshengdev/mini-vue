@@ -4,8 +4,20 @@ import { asRuntimeVNode } from '../vnode.ts'
 import type { ContainerLike, PatchContext } from './context.ts'
 import { normalizeChildContext } from './context.ts'
 import { findNextAnchor, hasKeys, isSameVirtualNode, moveNodes, unmount } from './utils.ts'
-import { patchChild } from './child.ts'
 import type { VirtualNode, VirtualNodeChild } from '@/jsx-foundation/index.ts'
+
+type PatchChildFunction<
+  HostNode,
+  HostElement extends HostNode & WeakKey,
+  HostFragment extends HostNode,
+> = (
+  options: RendererOptions<HostNode, HostElement, HostFragment>,
+  prev: VirtualNode | undefined,
+  next: VirtualNode | undefined,
+  container: ContainerLike<HostNode, HostElement, HostFragment>,
+  anchor?: HostNode,
+  context?: PatchContext,
+) => void
 
 export function patchChildren<
   HostNode,
@@ -16,18 +28,19 @@ export function patchChildren<
   prevChildren: VirtualNodeChild[],
   nextChildren: VirtualNodeChild[],
   container: ContainerLike<HostNode, HostElement, HostFragment>,
+  patchChild: PatchChildFunction<HostNode, HostElement, HostFragment>,
   anchor?: HostNode,
   context?: PatchContext,
 ): void {
   const isKeyed = hasKeys(nextChildren) || hasKeys(prevChildren)
 
   if (isKeyed) {
-    patchKeyedChildren(options, prevChildren, nextChildren, container, anchor, context)
+    patchKeyedChildren(options, prevChildren, nextChildren, container, patchChild, anchor, context)
 
     return
   }
 
-  patchUnkeyedChildren(options, prevChildren, nextChildren, container, anchor, context)
+  patchUnkeyedChildren(options, prevChildren, nextChildren, container, patchChild, anchor, context)
 }
 
 function patchUnkeyedChildren<
@@ -39,6 +52,7 @@ function patchUnkeyedChildren<
   prevChildren: VirtualNodeChild[],
   nextChildren: VirtualNodeChild[],
   container: ContainerLike<HostNode, HostElement, HostFragment>,
+  patchChild: PatchChildFunction<HostNode, HostElement, HostFragment>,
   anchor?: HostNode,
   context?: PatchContext,
 ): void {
@@ -81,6 +95,7 @@ function patchKeyedChildren<
   prevChildren: VirtualNodeChild[],
   nextChildren: VirtualNodeChild[],
   container: ContainerLike<HostNode, HostElement, HostFragment>,
+  patchChild: PatchChildFunction<HostNode, HostElement, HostFragment>,
   anchor?: HostNode,
   context?: PatchContext,
 ): void {

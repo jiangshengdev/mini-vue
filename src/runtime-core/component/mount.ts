@@ -7,6 +7,7 @@ import { performInitialRender } from './render-effect.ts'
 import { setupComponent } from './setup.ts'
 import { teardownComponentInstance } from './teardown.ts'
 import type { SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
+import { asRuntimeVNode } from '../vnode.ts'
 
 /**
  * 执行函数组件并将返回的子树继续挂载到容器。
@@ -29,9 +30,12 @@ export function mountComponent<
     ...context,
     shouldUseAnchor,
   })
+  const runtime = asRuntimeVNode<HostNode, HostElement, HostFragment>(virtualNode)
 
   /* 让 virtualNode 拥有实例引用，方便调试或测试检索。 */
   attachInstanceToVirtualNode(virtualNode, instance)
+  runtime.component = instance as never
+  runtime.anchor = instance.anchor
   const setupSucceeded = setupComponent(instance)
 
   if (!setupSucceeded) {
@@ -43,6 +47,7 @@ export function mountComponent<
 
   /* 执行首次渲染并将子树挂载到宿主容器。 */
   const initialRender = performInitialRender(options, instance)
+  runtime.handle = initialRender
 
   return {
     ok: initialRender.ok,

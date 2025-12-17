@@ -34,63 +34,71 @@ function isEventProp(key: string): boolean {
 /**
  * 将 virtualNode 上的 props 映射到真实 DOM 元素上。
  */
-export function patchProps(element: Element, props?: PropsShape): void {
-  if (!props) {
-    return
-  }
+export function patchProps(element: Element, prevProps?: PropsShape, nextProps?: PropsShape): void {
+  const prev = prevProps ?? {}
+  const next = nextProps ?? {}
+  const keys = new Set([...Object.keys(prev), ...Object.keys(next)])
 
-  for (const [key, value] of Object.entries(props)) {
-    /* `ref` 由挂载流程统一处理，跳过。 */
-    if (key === 'ref' && isElementRef(value)) {
+  for (const key of keys) {
+    const prevValue = prev[key]
+    const nextValue = next[key]
+
+    if (key === 'ref' && (isElementRef(prevValue) || isElementRef(nextValue))) {
       continue
     }
 
-    /* `class`/`className` 统一走 `className`，归一化复杂写法。 */
     if (key === 'class' || key === 'className') {
-      element.className = normalizeClass(value)
+      if (isNil(nextValue) || nextValue === false) {
+        ;(element as HTMLElement).className = ''
+      } else {
+        ;(element as HTMLElement).className = normalizeClass(nextValue)
+      }
+
       continue
     }
 
-    /* `style` 允许字符串与对象写法，交给专门逻辑处理。 */
     if (key === 'style') {
-      applyStyle(element as HTMLElement, value)
+      applyStyle(element as HTMLElement, prevValue, nextValue)
       continue
     }
 
-    /* 事件 props 统一转为小写事件名并绑定监听器。 */
-    if (isEventProp(key) && typeof value === 'function') {
-      const eventName = key.slice(2).toLowerCase()
-
-      element.addEventListener(eventName, value as EventListener)
+    if (isEventProp(key)) {
+      patchEvent(element as HTMLElement, key.slice(2).toLowerCase(), prevValue, nextValue)
       continue
     }
 
-    /* 剩余场景一律按普通 DOM 属性写入或移除。 */
-    patchDomAttr(element, key, value)
+    patchDomAttr(element, key, nextValue)
   }
 }
 
 /**
  * 处理 style 属性，支持字符串和对象两种写法。
  */
-function applyStyle(element: HTMLElement, value: unknown): void {
-  /* 空值表示完全移除 style，避免残留样式。 */
-  if (isNil(value) || value === false) {
+function applyStyle(element: HTMLElement, prev: unknown, next: unknown): void {
+  if (isNil(next) || next === false) {
     element.removeAttribute('style')
 
     return
   }
 
-  /* 字符串形式直接透传给 style attribute。 */
-  if (typeof value === 'string') {
-    element.setAttribute('style', value)
+  if (typeof next === 'string') {
+    element.setAttribute('style', next)
 
     return
   }
 
-  /* 对象形式逐项设置：优先走属性写入，不支持的属性退回 setProperty。 */
-  if (isObject(value)) {
-    for (const [name, styleValue] of Object.entries(value as Record<string, unknown>)) {
+  if (isObject(next)) {
+    const nextStyle = next as Record<string, unknown>
+    const prevStyle = isObject(prev) ? (prev as Record<string, unknown>) : {}
+    let hasValue = false
+
+    for (const name of Object.keys(prevStyle)) {
+      if (!Object.hasOwn(nextStyle, name) || isNil(nextStyle[name])) {
+        setStyleValue(element, name, '')
+      }
+    }
+
+    for (const [name, styleValue] of Object.entries(nextStyle)) {
       if (isNil(styleValue)) {
         setStyleValue(element, name, '')
 
@@ -107,8 +115,12 @@ function applyStyle(element: HTMLElement, value: unknown): void {
 
       const stringValue: string = typeof styleValue === 'number' ? String(styleValue) : styleValue
 
-      /* 支持的内联属性直接赋值，可避免多余字符串拼接。 */
       setStyleValue(element, name, stringValue)
+      hasValue = true
+    }
+
+    if (!hasValue) {
+      element.removeAttribute('style')
     }
   }
 }
@@ -145,4 +157,48 @@ function patchDomAttr(element: Element, key: string, value: unknown): void {
 
 function isElementRef(value: unknown): value is ElementRef {
   return typeof value === 'function' || isRef<Element | undefined>(value)
+}
+
+type EventInvoker = ((event: Event) => void) & { value?: EventListener }
+
+const invokerCacheKey = '__miniVueInvokers__'
+
+function patchEvent(element: HTMLElement, eventName: string, prev: unknown, next: unknown): void {
+  const invokers = getInvokerMap(element)
+  const existing = invokers[eventName]
+
+  if (typeof next === 'function') {
+    if (existing) {
+      existing.value = next as EventListener
+    } else {
+      const invoker: EventInvoker = (event) => {
+        invoker.value?.(event)
+      }
+
+      invoker.value = next as EventListener
+      invokers[eventName] = invoker
+      element.addEventListener(eventName, invoker)
+    }
+
+    return
+  }
+
+  if (existing) {
+    element.removeEventListener(eventName, existing)
+    delete invokers[eventName]
+  }
+}
+
+function getInvokerMap(element: HTMLElement): Record<string, EventInvoker> {
+  const record = (element as HTMLElement & { [invokerCacheKey]?: Record<string, EventInvoker> })[invokerCacheKey]
+
+  if (record) {
+    return record
+  }
+
+  const next: Record<string, EventInvoker> = {}
+
+  ;(element as HTMLElement & { [invokerCacheKey]?: Record<string, EventInvoker> })[invokerCacheKey] = next
+
+  return next
 }

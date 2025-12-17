@@ -4,7 +4,8 @@
 import type { AppContext } from './create-app.ts'
 import type { MountedHandle } from './mount/index.ts'
 import { mountChild } from './mount/index.ts'
-import type { RenderOutput } from '@/jsx-foundation/index.ts'
+import { normalizeRenderOutput } from './normalize.ts'
+import type { RenderOutput, VirtualNode } from '@/jsx-foundation/index.ts'
 import { isVirtualNode } from '@/jsx-foundation/index.ts'
 import { runtimeCoreInvalidContainer } from '@/messages/index.ts'
 import type { PropsShape } from '@/shared/index.ts'
@@ -23,6 +24,8 @@ export interface RendererOptions<
   createText(text: string): HostNode
   /** 创建片段节点，承载一组子节点再整体插入。 */
   createFragment(): HostFragment
+  /** 设置文本节点内容，复用既有宿主节点。 */
+  setText(node: HostNode, text: string): void
   /** 将子节点插入到指定父节点末尾。 */
   appendChild(parent: HostElement | HostFragment, child: HostNode): void
   /** 将子节点插入到指定父节点且位于锚点节点之前（runtime-core 不会传入 HostFragment 作为 child）。 */
@@ -35,7 +38,7 @@ export interface RendererOptions<
    * 将 virtualNode props 映射到真实元素节点。
    * 传入 null 时代表没有任何 props 需要处理。
    */
-  patchProps(element: HostElement, props?: PropsShape): void
+  patchProps(element: HostElement, prevProps?: PropsShape, nextProps?: PropsShape): void
 }
 
 /** 根级渲染函数签名，负责将顶层子树挂载到容器。 */
@@ -103,12 +106,16 @@ export function createRenderer<
   function render(virtualNode: RenderOutput, container: HostElement): void {
     teardownContainer(container)
     clear(container)
-    const appContext = isVirtualNode(virtualNode)
-      ? (virtualNode as { appContext?: AppContext }).appContext
-      : undefined
-    const mounted = mountChild(options, virtualNode, container, {
-      appContext,
-    })
+    const normalized = normalizeRenderOutput(virtualNode)
+    const appContext =
+      (isVirtualNode(normalized) ? (normalized as { appContext?: AppContext }).appContext : undefined) ??
+      (isVirtualNode(virtualNode) ? (virtualNode as { appContext?: AppContext }).appContext : undefined)
+    const mounted =
+      normalized !== undefined
+        ? mountChild(options, normalized as never, container, {
+            appContext,
+          })
+        : undefined
 
     if (mounted) {
       mountedHandlesByContainer.set(asContainerKey(container), mounted)

@@ -2,7 +2,7 @@ import type { RendererOptions } from '../index.ts'
 import { mountChild } from '../mount/child.ts'
 import type { MountedHandle } from '../mount/handle.ts'
 import type { ComponentInstance } from './context.ts'
-import type { RenderOutput, SetupComponent } from '@/jsx-foundation/index.ts'
+import type { RenderOutput, SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
 
 /**
  * 处理需要锚点的组件子树挂载，避免与兄弟节点混淆。

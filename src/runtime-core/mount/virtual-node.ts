@@ -6,6 +6,7 @@ import { mountElement } from './element.ts'
 import type { MountedHandle } from './handle.ts'
 import type { SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
 import { Fragment } from '@/jsx-foundation/index.ts'
+import { asRuntimeVNode } from '../vnode.ts'
 
 /**
  * 将通用 virtualNode 分派给组件或元素挂载路径。
@@ -24,17 +25,45 @@ export function mountVirtualNode<
 
   /* Fragment 直接展开自身 children，不走组件路径。 */
   if (virtualNode.type === Fragment) {
-    return mountChild(options, virtualNode.children, container, { ...context, shouldUseAnchor })
+    const mounted = mountChild(options, virtualNode.children, container, { ...context, shouldUseAnchor })
+    const runtime = asRuntimeVNode<HostNode, HostElement, HostFragment>(virtualNode)
+
+    if (mounted) {
+      runtime.el = mounted.nodes[0]
+      runtime.anchor = mounted.nodes[mounted.nodes.length - 1]
+      runtime.handle = mounted
+      runtime.component = undefined
+    }
+
+    return mounted
   }
 
   /* 函数组件通过 mountComponent 执行并挂载其返回值。 */
   if (typeof virtualNode.type === 'function') {
-    return mountComponent(options, virtualNode as VirtualNode<SetupComponent>, container, {
+    const mounted = mountComponent(options, virtualNode as VirtualNode<SetupComponent>, container, {
       ...context,
       shouldUseAnchor,
     })
+
+    const runtime = asRuntimeVNode<HostNode, HostElement, HostFragment>(virtualNode)
+
+    if (mounted) {
+      runtime.handle = mounted
+      runtime.el = mounted.nodes[0]
+      runtime.anchor = mounted.nodes[mounted.nodes.length - 1]
+    }
+
+    return mounted
   }
 
   /* 普通标签名直接走元素挂载逻辑。 */
-  return mountElement(options, virtualNode as VirtualNode<string>, container, context)
+  const mounted = mountElement(options, virtualNode as VirtualNode<string>, container, context)
+  const runtime = asRuntimeVNode<HostNode, HostElement, HostFragment>(virtualNode)
+
+  runtime.el = mounted.nodes[0]
+  runtime.anchor = undefined
+  runtime.handle = mounted
+  runtime.component = undefined
+
+  return mounted
 }

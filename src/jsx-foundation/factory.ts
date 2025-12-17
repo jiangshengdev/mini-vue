@@ -1,5 +1,5 @@
 import { normalizeChildren } from './children.ts'
-import { virtualNodeFlag } from './constants.ts'
+import { Text, virtualNodeFlag } from './constants.ts'
 import type {
   ComponentChildren,
   ElementProps,
@@ -65,5 +65,20 @@ export function createVirtualNode<T extends ElementType>(
     props: props as ElementProps<T> | undefined,
     children,
     key,
+  }
+}
+
+/**
+ * 创建文本 virtualNode，供运行时统一处理文本子节点。
+ */
+export function createTextVirtualNode(content: string | number): VirtualNode<typeof Text> & {
+  text: string
+} {
+  return {
+    [virtualNodeFlag]: true,
+    type: Text,
+    props: undefined,
+    children: [],
+    text: String(content),
   }
 }

@@ -25,7 +25,7 @@ export function mountElement<
   const refBinding = resolveElementRefBinding<HostElement>(props?.ref)
 
   /* 在挂载前先写入属性与事件。 */
-  patchProps(element, props)
+  patchProps(element, undefined, props)
   /* 子节点交给 mountChildren，保持与 virtualNode 定义一致。 */
   const mountedHandles = mountChildren(options, virtualNode.children, element, context)
   const ok = mountedHandles.every((handle) => {
@@ -67,7 +67,7 @@ type ElementRefBinding<HostElement> =
 /**
  * 将组件传入的 ref 属性规整为函数或 Ref 对象，便于统一回写。
  */
-function resolveElementRefBinding<HostElement>(
+export function resolveElementRefBinding<HostElement>(
   candidate: unknown,
 ): ElementRefBinding<HostElement> | undefined {
   if (typeof candidate === 'function') {
@@ -84,7 +84,7 @@ function resolveElementRefBinding<HostElement>(
 /**
  * 在挂载或卸载阶段写回最新宿主元素，兼容函数 ref 与 Ref。
  */
-function assignElementRef<HostElement>(
+export function assignElementRef<HostElement>(
   target: ElementRefBinding<HostElement> | undefined,
   value: HostElement | undefined,
 ): void {

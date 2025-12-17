@@ -1,13 +1,13 @@
 # Router 模块问题记录
 
-## 1. `RouterLink` 无条件拦截点击，破坏新标签/新窗口等标准交互（已验证）
+## 1. `RouterLink` 无条件拦截点击，破坏新标签/新窗口等标准交互（已修复）
 
 - 位置：`src/router/components/router-link.tsx`
 - 现状：`handleClick` 只要拿到事件就会 `event.preventDefault()`，并无条件调用 `router.navigate(props.to)`；未检查 `Ctrl/Cmd/Shift/Alt` 等修饰键、鼠标中键、`target="_blank"`、或右键菜单等场景。
 - 影响：用户无法通过 `Cmd/Ctrl + Click` 在新标签打开链接，也无法按浏览器默认行为进行“新窗口打开/后台打开/下载”等交互，偏离 Web 标准体验。
 - 验证结论：成立。
-- 下一步（最简方案）：在拦截前增加条件判断，仅在“普通左键点击（`button === 0`）+ 无修饰键（`meta/ctrl/shift/alt` 全为 false）+ 非 `_blank` + 未被 `event.defaultPrevented` 拦截”的情况下才 `preventDefault` 并执行 SPA 导航；其余情况交给浏览器默认行为。
-- 测试建议：在 `test/router/**`（若暂无目录可新增）补充点击行为用例，覆盖 `metaKey/ctrlKey/shiftKey`、`button !== 0`、`target="_blank"` 等不应触发 `navigate` 的场景。
+- 修复：仅在“普通左键点击（`button === 0`）+ 无修饰键（`meta/ctrl/shift/alt` 全为 false）+ 非 `_blank` + 未被 `event.defaultPrevented` 拦截”的情况下才阻止默认并执行 SPA 导航；其余情况交给浏览器默认行为。
+- 测试：补充点击行为用例，覆盖修饰键/中键/`target="_blank"`/已被阻止默认等不应触发 `navigate` 的场景。
 
 ## 2. `navigate()` 在写入 history 前对路径归一化，导致 Query/Hash 丢失（已验证）
 

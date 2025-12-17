@@ -23,8 +23,20 @@ export const RouterLink: SetupComponent<RouterLinkProps> = (props) => {
   const resolvedRouter = props.router ?? useRouter()
 
   /* 点击时阻止默认跳转，转为 history 导航。 */
-  const handleClick = (event?: Event): void => {
-    if (event && typeof event.preventDefault === 'function') {
+  const handleClick = (event?: MouseEvent): void => {
+    if (event) {
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey ||
+        props.target?.toLowerCase() === '_blank'
+      ) {
+        return
+      }
+
       event.preventDefault()
     }
 

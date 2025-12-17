@@ -2,10 +2,11 @@
  * DOM 专用的属性打补丁逻辑，负责将 virtualNode props 应用到真实元素上。
  */
 import { normalizeClass } from './normalize-class.ts'
+import { runtimeDomInvalidStyleValue } from '@/messages/index.ts'
 import type { Ref } from '@/reactivity/index.ts'
 import { isRef } from '@/reactivity/index.ts'
 import type { PropsShape } from '@/shared/index.ts'
-import { isNil, isObject } from '@/shared/index.ts'
+import { __DEV__, isNil, isObject } from '@/shared/index.ts'
 
 /**
  * @beta
@@ -84,12 +85,22 @@ function applyStyle(element: HTMLElement, value: unknown): void {
     for (const [name, styleValue] of Object.entries(value as Record<string, unknown>)) {
       const resolved = styleValue ?? ''
 
+      if (resolved !== '' && typeof resolved !== 'string' && typeof resolved !== 'number') {
+        if (__DEV__) {
+          console.warn(runtimeDomInvalidStyleValue, name, resolved)
+        }
+
+        continue
+      }
+
+      const normalized = typeof resolved === 'number' ? String(resolved) : resolved
+
       /* 支持的内联属性直接赋值，可避免多余字符串拼接。 */
       if (Reflect.has(element.style, name)) {
-        ;(element.style as WritableStyle)[name] = String(resolved)
+        ;(element.style as WritableStyle)[name] = normalized
       } else {
         /* 非声明属性使用 setProperty，兼容 CSS 自定义变量等场景。 */
-        element.style.setProperty(name, String(resolved))
+        element.style.setProperty(name, normalized)
       }
     }
   }

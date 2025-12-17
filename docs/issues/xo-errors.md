@@ -27,7 +27,9 @@ playground/src/views/home.tsx:2:22
 
 ---
 
-## 1. `applyStyle` 对 `resolved` 直接 `String(...)`（2 处）
+## 1. `applyStyle` 对 `resolved` 直接 `String(...)`（2 处，已修复）
+
+- 状态：已收窄 style 值为字符串/数字，非法输入在 Dev 警告并忽略写入，警告文案集中到 `src/messages/index.ts`。
 
 - 位置：`src/runtime-dom/patch-props.ts`
   - `89:58`（`String(resolved)`）

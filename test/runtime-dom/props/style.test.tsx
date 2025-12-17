@@ -1,7 +1,8 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { within } from '@testing-library/dom'
 import { createTestContainer } from '../../setup.ts'
 import { render } from '@/index.ts'
+import { runtimeDomInvalidStyleValue } from '@/messages/index.ts'
 
 describe('runtime-dom style props', () => {
   it('字符串 style 可以直接写入', () => {
@@ -32,5 +33,26 @@ describe('runtime-dom style props', () => {
     const element = within(container).getByText('text')
 
     expect(element).toHaveStyle('--main-color: pink')
+  })
+
+  it('对象 style 忽略非字符串/数字值并在开发期警告', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
+      return undefined
+    })
+    const container = createTestContainer()
+    const payload = { x: 1 }
+
+    try {
+      render(<div style={{ color: payload as unknown as string }}>text</div>, container)
+
+      const element = within(container).getByText('text')
+
+      expect(element.getAttribute('style')).toBeNull()
+      expect(element.style.color).toBe('')
+      expect(warnSpy).toHaveBeenCalledTimes(1)
+      expect(warnSpy).toHaveBeenCalledWith(runtimeDomInvalidStyleValue, 'color', payload)
+    } finally {
+      warnSpy.mockRestore()
+    }
   })
 })

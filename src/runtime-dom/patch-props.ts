@@ -72,12 +72,6 @@ export function patchProps(
   prevProps?: PropsShape,
   nextProps?: PropsShape,
 ): void {
-  /* 兼容旧签名：若只传了 prevProps，视为 nextProps 使用。 */
-  if (prevProps !== undefined && nextProps === undefined) {
-    nextProps = prevProps
-    prevProps = undefined
-  }
-
   const prev = prevProps ?? {}
   const next = nextProps ?? {}
 

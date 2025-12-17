@@ -25,7 +25,7 @@ export function mountElement<
   const refBinding = resolveElementRefBinding<HostElement>(props?.ref)
 
   /* 在挂载前先写入属性与事件。 */
-  patchProps(element, props)
+  patchProps(element, undefined, props)
   /* 子节点交给 mountChildren，保持与 virtualNode 定义一致。 */
   const mountedHandles = mountChildren(options, virtualNode.children, element, context)
   const ok = mountedHandles.every((handle) => {

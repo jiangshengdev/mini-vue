@@ -1,13 +1,13 @@
 # Router 模块问题记录
 
-## 1. `RouterLink` 无条件拦截点击，破坏新标签/新窗口等标准交互（已验证）
+## 1. `RouterLink` 无条件拦截点击，破坏新标签/新窗口等标准交互（已修复）
 
 - 位置：`src/router/components/router-link.tsx`
 - 现状：`handleClick` 只要拿到事件就会 `event.preventDefault()`，并无条件调用 `router.navigate(props.to)`；未检查 `Ctrl/Cmd/Shift/Alt` 等修饰键、鼠标中键、`target="_blank"`、或右键菜单等场景。
 - 影响：用户无法通过 `Cmd/Ctrl + Click` 在新标签打开链接，也无法按浏览器默认行为进行“新窗口打开/后台打开/下载”等交互，偏离 Web 标准体验。
 - 验证结论：成立。
-- 下一步（最简方案）：在拦截前增加条件判断，仅在“普通左键点击（`button === 0`）+ 无修饰键（`meta/ctrl/shift/alt` 全为 false）+ 非 `_blank` + 未被 `event.defaultPrevented` 拦截”的情况下才 `preventDefault` 并执行 SPA 导航；其余情况交给浏览器默认行为。
-- 测试建议：在 `test/router/**`（若暂无目录可新增）补充点击行为用例，覆盖 `metaKey/ctrlKey/shiftKey`、`button !== 0`、`target="_blank"` 等不应触发 `navigate` 的场景。
+- 修复：仅在“普通左键点击（`button === 0`）+ 无修饰键（`meta/ctrl/shift/alt` 全为 false）+ 非 `_blank` + 未被 `event.defaultPrevented` 拦截”的情况下才阻止默认并执行 SPA 导航；其余情况交给浏览器默认行为。
+- 测试：补充点击行为用例，覆盖修饰键/中键/`target="_blank"`/已被阻止默认等不应触发 `navigate` 的场景。
 
 ## 2. `navigate()` 在写入 history 前对路径归一化，导致 Query/Hash 丢失（已修复）
 
@@ -27,14 +27,13 @@
 - 下一步（最简方案 A）：引入“视图深度”概念：通过注入一个深度计数（父 RouterView 提供 `depth + 1`），每一层 RouterView 渲染该深度对应的匹配记录；当该深度没有匹配记录时渲染空。
 - 测试建议：新增“路由组件包含 RouterView 不应递归崩溃”的回归用例（可用一个组件内部直接渲染 RouterView 的场景验证）。
 
-## 4. `normalizePath` 强制转小写且不可配置，可能破坏大小写敏感路径（已验证）
+## 4. `normalizePath` 强制转小写且不可配置，可能破坏大小写敏感路径（已修复）
 
 - 位置：`src/router/core/paths.ts`
 - 现状：`normalizePath` 最终会对路径执行 `toLowerCase()`。
 - 影响：对于大小写敏感的路径片段（例如某些 ID、资源路径、或后端区分大小写的路由规则），强制小写会破坏原始性；并且该行为目前不可配置。
 - 验证结论：成立。
-- 下一步（最简方案）：默认 `caseSensitive: true`，不对路径做 `toLowerCase()` 改写；大小写策略只作为匹配行为（或后续配置项）处理，不影响用户输入与地址栏显示。
-- 测试建议：补充大小写相关的匹配用例（大小写不同的 path 是否命中、地址栏是否保留原始输入）。
+- 修复：默认保持大小写敏感，不再在 `normalizePath` 中强制小写化路径；匹配策略不改写用户输入与地址栏显示。
 
 ## 5. 同一 `app` 安装多个 `router` 时会产生多层 `unmount` 包装（已验证，影响修正）
 

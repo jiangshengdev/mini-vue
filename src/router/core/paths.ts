@@ -14,9 +14,7 @@ function stripQueryAndHash(path: string): string {
   return path.slice(0, cutIndex)
 }
 
-/**
- * 规范化路由路径：去 query/hash，补前导斜杠，移除尾随斜杠并小写化。
- */
+/** 规范化路由路径：去 query/hash，补前导斜杠，移除尾随斜杠。 */
 export function normalizePath(path: string): string {
   if (!path) return '/'
   let normalized = stripQueryAndHash(path)
@@ -28,8 +26,6 @@ export function normalizePath(path: string): string {
   if (normalized.length > 1 && trailingSlashRe.test(normalized)) {
     normalized = normalized.replace(trailingSlashRe, '')
   }
-
-  normalized = normalized.toLowerCase()
 
   return normalized || '/'
 }

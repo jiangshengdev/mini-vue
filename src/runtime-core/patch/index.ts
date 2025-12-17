@@ -10,7 +10,46 @@ import { mountChild } from '../mount/child.ts'
 import type { MountContext } from '../mount/context.ts'
 import type { RenderOutput, VirtualNode } from '@/jsx-foundation/index.ts'
 import { isVirtualNode } from '@/jsx-foundation/index.ts'
+import type { Ref } from '@/reactivity/index.ts'
+import { isRef } from '@/reactivity/index.ts'
 import { isNil } from '@/shared/index.ts'
+
+/**
+ * 元素 ref 的统一抽象：支持回调 ref 与 `Ref` 容器两种写法。
+ */
+type ElementRef<T = unknown> = Ref<T | undefined> | ((value: T | undefined) => void)
+
+/**
+ * 将 props 中的 ref 属性规整为函数或 Ref 对象。
+ */
+function resolveElementRef<T = unknown>(candidate: unknown): ElementRef<T> | undefined {
+  if (typeof candidate === 'function') {
+    return candidate as (value: T | undefined) => void
+  }
+
+  if (isRef<T | undefined>(candidate)) {
+    return candidate
+  }
+
+  return undefined
+}
+
+/**
+ * 在挂载或卸载阶段写回最新宿主元素，兼容函数 ref 与 Ref。
+ */
+function assignElementRef<T>(target: ElementRef<T> | undefined, value: T | undefined): void {
+  if (!target) {
+    return
+  }
+
+  if (typeof target === 'function') {
+    target(value)
+
+    return
+  }
+
+  target.value = value
+}
 
 /**
  * 判断两个 VNode 是否为"相同类型"可复用节点。
@@ -323,6 +362,9 @@ function patchElement<
   /* 差量更新 props。 */
   options.patchProps(el, oldVNode.props, newVNode.props)
 
+  /* 处理 ref 更新。 */
+  const newRef = resolveElementRef(newVNode.props?.ref)
+
   /* patch children（调用 patchChildren，后续任务实现）。 */
   const oldChildren = oldVNode.children
   const newChildren = newVNode.children
@@ -364,6 +406,9 @@ function patchElement<
       for (const handle of newChildHandles) {
         handle?.teardown(true)
       }
+
+      /* 清理 ref。 */
+      assignElementRef(newRef, undefined)
 
       if (!skipRemove) {
         options.remove(el)

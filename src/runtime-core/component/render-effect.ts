@@ -1,8 +1,9 @@
 import type { RendererOptions } from '../index.ts'
 import type { MountedHandle } from '../mount/handle.ts'
+import { patchChild } from '../patch/index.ts'
 import { mountChildWithAnchor } from './anchor.ts'
 import type { ComponentInstance } from './context.ts'
-import { teardownComponentInstance, teardownMountedSubtree } from './teardown.ts'
+import { teardownComponentInstance } from './teardown.ts'
 import type { RenderOutput, SetupComponent } from '@/jsx-foundation/index.ts'
 import { ReactiveEffect, recordEffectScope } from '@/reactivity/index.ts'
 import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
@@ -90,7 +91,7 @@ function createRenderEffect<
 }
 
 /**
- * Rerender 时先尝试生成新子树，成功后再替换旧挂载，失败则保留旧子树。
+ * Rerender 时使用 patch 对比新旧子树，成功后更新挂载句柄，失败则保留旧子树。
  */
 function rerenderComponent<
   HostNode,
@@ -103,6 +104,7 @@ function rerenderComponent<
   renderSchedulerJob: () => void,
 ): void {
   const previousSubTree = instance.subTree
+  const previousHandle = instance.mountedHandle
   let rerenderFailed = false
 
   /* 调度执行由 effect 决定，异常时标记失败并避免替换旧子树。 */
@@ -122,25 +124,16 @@ function rerenderComponent<
     return
   }
 
-  teardownMountedSubtree(instance)
+  /* 使用 patch 对比新旧子树，复用既有 DOM 节点。 */
+  const newHandle = patchChild(
+    options,
+    previousSubTree,
+    instance.subTree,
+    instance.container as HostElement,
+    instance.anchor,
+    previousHandle,
+    { parent: instance },
+  )
 
-  mountLatestSubtree(options, instance)
-}
-
-/**
- * 将最新的子树结果重新挂载回容器并记录。
- */
-function mountLatestSubtree<
-  HostNode,
-  HostElement extends HostNode & WeakKey,
-  HostFragment extends HostNode,
-  T extends SetupComponent,
->(
-  options: RendererOptions<HostNode, HostElement, HostFragment>,
-  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
-): void {
-  /* 使用缓存的子树结果重新交给宿主挂载。 */
-  const mounted = mountChildWithAnchor(options, instance, instance.subTree)
-
-  instance.mountedHandle = mounted
+  instance.mountedHandle = newHandle
 }

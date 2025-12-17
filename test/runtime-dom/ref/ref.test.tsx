@@ -27,7 +27,7 @@ describe('runtime-dom ref 回调', () => {
     expect(refSpy).toHaveBeenLastCalledWith(undefined)
   })
 
-  it('组件重渲染与卸载都会清理 ref', () => {
+  it('组件重渲染时复用 DOM 节点，ref 保持引用', () => {
     const refSpy = vi.fn<(element: Element | undefined) => void>()
     const state = reactive({ label: 'first' })
 
@@ -59,12 +59,14 @@ describe('runtime-dom ref 回调', () => {
       name: 'second',
     })
 
-    expect(refSpy).toHaveBeenNthCalledWith(2, undefined)
-    expect(refSpy).toHaveBeenNthCalledWith(3, secondButton)
+    /* patch 复用 DOM 节点，ref 不会被重新调用。 */
+    expect(firstButton).toBe(secondButton)
+    expect(refSpy).toHaveBeenCalledTimes(1)
 
     app.unmount()
 
-    expect(refSpy).toHaveBeenNthCalledWith(4, undefined)
+    expect(refSpy).toHaveBeenCalledTimes(2)
+    expect(refSpy).toHaveBeenLastCalledWith(undefined)
     expect(container).toBeEmptyDOMElement()
   })
 

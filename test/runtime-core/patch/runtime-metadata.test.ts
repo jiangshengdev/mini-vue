@@ -30,7 +30,7 @@ describe('patchChild runtime metadata reuse', () => {
 
     const runtimePrevious = asRuntimeVNode<TestNode, TestElement, TestFragment>(previous)
 
-    patchChild(options, previous, next, container)
+    patchChild(options, previous, next, { container })
 
     const runtimeNext = asRuntimeVNode<TestNode, TestElement, TestFragment>(next)
 

@@ -11,7 +11,7 @@ export interface PatchContext {
   appContext?: unknown
 }
 
-export function normalizeMountContext(context?: PatchContext): MountContext {
+export function normalizeMountContext(context?: PatchContext | MountContext): MountContext {
   return {
     parent: context?.parent,
     appContext: context?.appContext as never,
@@ -20,7 +20,7 @@ export function normalizeMountContext(context?: PatchContext): MountContext {
 }
 
 export function normalizeChildContext(
-  context: PatchContext | undefined,
+  context: PatchContext | MountContext | undefined,
   index: number,
   total: number,
 ): MountContext {

@@ -1,117 +1,117 @@
-# VNode Diff / Patch — Tasks
+# Implementation Plan
 
-> 说明：任务按“可回退的小步”拆分，尽量每步都有可验证的测试。状态字段按 Kiro 习惯可后续更新为 in-progress/completed。
+- [ ] 1. 扩展 RendererOptions 并实现 setText
+  - [ ] 1.1 在 RendererOptions 接口中新增 setText 方法
+    - 文件：`src/runtime-core/renderer.ts`
+    - 添加 `setText(node: HostNode, text: string): void` 到接口定义
+    - _Requirements: 6.1_
+  - [ ] 1.2 在 runtime-dom 实现 setText
+    - 文件：`src/runtime-dom/renderer-options.ts`
+    - 实现：`setText(node) { (node as Text).nodeValue = text }`
+    - _Requirements: 6.2_
+  - [ ] 1.3 编写 setText property test
+    - **Property 1: 文本更新保持节点引用**
+    - **Validates: Requirements 1.2, 6.1**
 
-## Phase 0：准备与对齐
+- [ ] 2. 升级 patchProps 支持差量更新
+  - [ ] 2.1 修改 patchProps 签名为 (el, prevProps, nextProps)
+    - 文件：`src/runtime-core/renderer.ts`（接口）、`src/runtime-dom/patch-props.ts`（实现）
+    - mount 时调用 `patchProps(el, undefined, nextProps)`
+    - _Requirements: 2.4_
+  - [ ] 2.2 实现属性移除逻辑
+    - 文件：`src/runtime-dom/patch-props.ts`
+    - 遍历 prevProps，若 key 不在 nextProps 中则移除
+    - 处理 class/style 清空场景
+    - _Requirements: 2.2_
+  - [ ] 2.3 实现事件 invoker 缓存机制
+    - 文件：`src/runtime-dom/patch-props.ts`
+    - 为 element 维护 `eventName -> invoker` 缓存
+    - 更新时替换 invoker.value，移除时 removeEventListener
+    - _Requirements: 2.3_
+  - [ ] 2.4 编写 patchProps property tests
+    - **Property 3: Props 差量正确应用**
+    - **Property 4: 事件更新不叠加**
+    - **Validates: Requirements 2.1, 2.2, 2.3**
 
-- [ ] 0.1 复核现有 mount/unmount 边界语义
-  - 目标：明确 `mountChildWithAnchor`、数组 children start/end anchors、以及 `MountedHandle.teardown(skipRemove)` 的期望语义。
-  - 输出：在本 spec 的 design 中补充任何遗漏的边界约束（如：anchor 是否允许为 TextNode）。
+- [ ] 3. 引入 RuntimeVNode 与 el 映射
+  - [ ] 3.1 定义 RuntimeVNode 类型
+    - 文件：新建 `src/runtime-core/vnode.ts`
+    - 定义包含 el/anchor/component 的运行时结构
+    - 不修改 `src/jsx-foundation/types.ts`
+    - _Requirements: 1.1_
+  - [ ] 3.2 mount 时写入 el 引用
+    - 文件：`src/runtime-core/mount/child.ts`、`src/runtime-core/mount/element.ts`
+    - 文本 mount 后记录 TextNode 引用
+    - Element mount 后记录 Element 引用
+    - _Requirements: 1.1, 1.2_
 
-## Phase 1：宿主原语补齐（Text patch 前置）
+- [ ] 4. 实现 patchChild 入口（Text + Element）
+  - [ ] 4.1 创建 patchChild 函数
+    - 文件：新建 `src/runtime-core/patch/index.ts`
+    - 实现 same 判定（type + key）
+    - 实现 Text↔Text 分支：调用 setText
+    - 实现类型切换分支：unmount old + mount new
+    - _Requirements: 1.2, 1.3_
+  - [ ] 4.2 实现 Element patch 分支
+    - 调用 patchProps(el, old.props, new.props)
+    - 调用 patchChildren（Phase A）
+    - _Requirements: 2.1_
+  - [ ] 4.3 编写 patchChild property test
+    - **Property 2: 类型切换正确替换**
+    - **Validates: Requirements 1.3**
 
-- [ ] 1.1 扩展 `RendererOptions`：新增 `setText`
-  - 文件：`src/runtime-core/renderer.ts`
-  - 变更：在接口中增加 `setText(node, text)`。
-  - 验收：TypeScript 编译通过；runtime-dom renderer options 提供实现。
+- [ ] 5. Checkpoint - 确保所有测试通过
+  - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 1.2 DOM 宿主实现 `setText`
-  - 文件：`src/runtime-dom/renderer-options.ts`（或实际注入 options 的位置）
-  - 变更：对 Text 节点调用 `node.nodeValue = text` 或等价方式。
-  - 测试：新增/更新 runtime-dom 用例验证文本更新。
+- [ ] 6. 实现 patchChildren Phase A（无 key 索引对齐）
+  - [ ] 6.1 创建 patchChildren 函数
+    - 文件：新建 `src/runtime-core/patch/children.ts`
+    - patch 公共长度区间
+    - mount 新增尾部
+    - unmount 旧的尾部
+    - _Requirements: 3.1, 3.2, 3.3_
+  - [ ] 6.2 编写无 key children property test
+    - **Property 5: 无 key children 索引对齐复用**
+    - **Validates: Requirements 3.1**
 
-## Phase 2：props patch 语义升级（支持移除与事件更新）
+- [ ] 7. 实现 Fragment/数组 children 边界支持
+  - [ ] 7.1 为数组 children 维护 start/end anchors
+    - 文件：`src/runtime-core/mount/child.ts`
+    - 在 RuntimeVNode 上记录 anchor 引用
+    - _Requirements: 3.1_
+  - [ ] 7.2 在 patch 时复用 anchors 边界
+    - 文件：`src/runtime-core/patch/children.ts`
+    - 在边界内执行 children diff
+    - _Requirements: 3.1_
 
-- [ ] 2.1 升级 `patchProps` 签名为 `(el, prevProps, nextProps)`
-  - 文件：`src/runtime-core/renderer.ts`（接口）、`src/runtime-dom/patch-props.ts`（实现）、以及所有调用点（如 `mountElement`）。
-  - 变更：
-    - mount 时调用 `patchProps(el, undefined, nextProps)`。
-    - patch 时调用 `patchProps(el, prevProps, nextProps)`。
+- [ ] 8. 实现 patchChildren Phase B（keyed diff）
+  - [ ] 8.1 创建 patchKeyedChildren 函数
+    - 文件：新建 `src/runtime-core/patch/keyed-children.ts`
+    - 实现头部同步（从左到右）
+    - 实现尾部同步（从右到左）
+    - _Requirements: 4.1_
+  - [ ] 8.2 实现中间区间处理
+    - 建立 key → newIndex map
+    - 遍历 old 做匹配 patch / unmount
+    - 遍历 new mount 不存在的
+    - 从后往前 insertBefore 保证顺序
+    - _Requirements: 4.1, 4.2, 4.3, 4.4_
+  - [ ] 8.3 编写 keyed children property test
+    - **Property 6: Keyed children 顺序与复用**
+    - **Validates: Requirements 4.1, 4.4**
 
-- [ ] 2.2 runtime-dom：实现属性移除与 class/style 清空
-  - 文件：`src/runtime-dom/patch-props.ts`
-  - 验收：
-    - prev 有、next 无的 attr 被移除
-    - `style` 从对象/字符串变为空时能清空
-    - `class` 从有值变为空时能清空
+- [ ] 9. Checkpoint - 确保所有测试通过
+  - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 2.3 runtime-dom：事件更新不叠加（invoker 缓存）
-  - 文件：`src/runtime-dom/patch-props.ts`
-  - 建议实现：为 element 上的事件维护 `key -> invoker` 缓存；更新时只替换 invoker 内部引用；移除时 removeEventListener。
-  - 测试：
-    - 更新 onClick 后只触发最新 handler
-    - 多次更新不会累积多次触发
+- [ ] 10. 组件更新改用 patch
+  - [ ] 10.1 修改 render-effect 使用 patch
+    - 文件：`src/runtime-core/component/render-effect.ts`
+    - render 成功后：对 previousSubTree 与 instance.subTree 执行 patch
+    - 保留更新失败时的"回退 previousSubTree"逻辑
+    - _Requirements: 1.1, 5.1_
+  - [ ] 10.2 编写错误隔离 property test
+    - **Property 7: 错误隔离保持 DOM 状态**
+    - **Validates: Requirements 5.1**
 
-## Phase 3：引入 patch 入口（先 Text + Element）
-
-- [ ] 3.1 增加 runtime-core 内部“带宿主引用”的 vnode 运行时结构
-  - 文件：建议新增 `src/runtime-core/vnode.ts`（或放在 mount 子域内）
-  - 内容：定义 `RuntimeVNode`（包含 `el/anchor/component` 等运行时字段）。
-  - 验收：不修改 `src/jsx-foundation/types.ts` 的对外类型。
-
-- [ ] 3.2 `mount` 写入 `el`（Text 与 Element）
-  - 文件：`src/runtime-core/mount/child.ts`、`src/runtime-core/mount/element.ts`
-  - 变更：
-    - 文本 mount 后记录对应宿主节点引用
-    - Element mount 后记录宿主 element
-  - 说明：如果不想改 public vnode，可通过 runtime-core 侧 map/side-table 维护 vnode->node 的关联。
-
-- [ ] 3.3 新增 `patchChild`（Text/Element 分支）
-  - 文件：建议新增 `src/runtime-core/patch/index.ts`（或 `src/runtime-core/patch/child.ts`）
-  - 功能：
-    - Text↔Text：`setText`
-    - Element↔Element：`patchProps(prev,next)` + `patchChildren`（Phase A）
-    - 其他类型切换：replace（unmount old + mount next 到 anchor 前）
-  - 测试：
-    - 更新文本不重建 TextNode
-    - Element 更新 props 不重建 Element
-
-## Phase 4：children patch（无 key → 有 key）
-
-- [ ] 4.1 实现 `patchChildren` Phase A（索引对齐）
-  - 文件：`src/runtime-core/patch/children.ts`
-  - 验收：追加/截断正确，公共区间复用。
-  - 测试：覆盖追加/截断 + 嵌套 element。
-
-- [ ] 4.2 增加 Fragment/数组 children 的边界表示并支持 patch
-  - 文件：`src/runtime-core/mount/child.ts`（数组分支）与 patch 侧实现
-  - 目标：复用 start/end anchors，在边界内执行 children patch。
-  - 测试：兄弟节点顺序不被破坏。
-
-- [ ] 4.3 实现 keyed diff Phase B（头尾同步 + key map）
-  - 文件：`src/runtime-core/patch/keyed-children.ts`
-  - 验收：插入/删除/移动语义正确；稳定 key 下节点复用。
-  - 测试：
-    - 仅移动：节点引用不变
-    - 插入/删除：只影响对应节点
-
-- [ ] 4.4（可选）加入 LIS 优化减少移动
-  - 验收：同样语义下减少 `insertBefore` 次数（可用 spy 统计）。
-
-## Phase 5：组件更新改为 patch 子树
-
-- [ ] 5.1 在组件 rerender 中改用 patch
-  - 文件：`src/runtime-core/component/render-effect.ts`
-  - 变更：
-    - render 成功后：对 `previousSubTree` 与 `instance.subTree` 执行 patch，而不是 `teardownMountedSubtree + mountLatestSubtree`
-    - 保留更新失败时的“回退 previousSubTree”逻辑
-  - 测试：
-    - 子组件实例不重建（可用计数/引用断言）
-    - 更新失败不破坏旧 DOM（已有语义需保持）
-
-## Phase 6（可选）：root render 走 patch（取消 clear）
-
-- [ ] 6.1 renderer 保存 root vnode 并执行 patch
-  - 文件：`src/runtime-core/renderer.ts`
-  - 变更：
-    - `WeakMap<container, RootState>` 里存储 root vnode/handle
-    - render 时 `patch(oldRoot, newRoot)`，仅首次 mount 才 clear
-  - 测试：多次 `render()` 不会 clear 导致状态丢失。
-
-## 可选：Property-based tests（PBT）
-
-- [ ] P1 为“keyed diff 保序与复用”提取性质并引入 PBT（可选）
-  - 说明：如果引入 fast-check，会新增依赖；也可以先用随机生成的 example-based 测试替代。
-  - 性质示例：
-    - 对任意 key 列表变换，最终 DOM 顺序与新 children 顺序一致
-    - 对任意稳定 key 的纯移动，节点引用集合不变
+- [ ] 11. Final Checkpoint - 确保所有测试通过
+  - Ensure all tests pass, ask the user if questions arise.

@@ -31,11 +31,11 @@ export function restoreTracking(): void {
 /**
  * 在禁用依赖收集的上下文中执行函数。
  */
-export function withoutTracking<T>(fn: () => T): T {
+export function withoutTracking<T>(callback: () => T): T {
   pauseTracking()
 
   try {
-    return fn()
+    return callback()
   } finally {
     restoreTracking()
   }

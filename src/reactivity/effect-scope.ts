@@ -53,13 +53,13 @@ export class EffectScope {
    * @see {@link https://www.typescriptlang.org/docs/handbook/2/functions.html#unknown | unknown }
    * 回调内部抛出的异常会同步向上传播，并在传播前交给 setErrorHandler 处理。
    */
-  run<T>(fn: () => T): T | undefined {
+  run<T>(scopeCallback: () => T): T | undefined {
     /* `scope` 已停用时直接返回，避免在无效上下文中继续注册副作用。 */
     if (!this.active) {
       return undefined
     }
 
-    return runThrowing(fn, {
+    return runThrowing(scopeCallback, {
       origin: errorContexts.effectScopeRun,
       handlerPhase: errorPhases.sync,
       beforeRun: () => {

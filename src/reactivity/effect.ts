@@ -36,9 +36,9 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
   /**
    * 保存用户传入的副作用函数作为核心执行单元。
    */
-  private readonly fn: () => T
+  private readonly effectFn: () => T
 
-  private readonly fnName?: string
+  private readonly effectName?: string
 
   /**
    * 记录当前副作用绑定的依赖集合，方便统一清理。
@@ -55,14 +55,14 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
    */
   private innerActive = true
 
-  constructor(fn: () => T, scheduler?: EffectScheduler) {
+  constructor(effectFn: () => T, scheduler?: EffectScheduler) {
     /* 构造时记录调度器，使后续 trigger 能根据配置选择执行策略 */
-    this.fn = fn
+    this.effectFn = effectFn
 
     if (__INTERNAL_DEV__ && debug) {
-      const fnMock = fn as (() => T) & EffectFnMockLike
+      const effectFnMock = effectFn as (() => T) & EffectFnMockLike
 
-      this.fnName = fnMock.getMockName ? fnMock.getMockName() : fn.name
+      this.effectName = effectFnMock.getMockName ? effectFnMock.getMockName() : effectFn.name
     }
 
     this.scheduler = scheduler
@@ -85,11 +85,11 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
         () => {
           if (__INTERNAL_DEV__ && debug) {
             debug('run', shouldTrack ? '执行并收集依赖' : '执行但不收集依赖', {
-              fnName: this.fnName,
+              effectName: this.effectName,
             })
           }
 
-          return this.fn()
+          return this.effectFn()
         },
         {
           origin: errorContexts.effectRunner,
@@ -120,7 +120,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
     /* 运行前重置上一轮留下的依赖，确保收集结果保持最新 */
     if (__INTERNAL_DEV__ && debug) {
       debug('run', '执行前清理旧依赖', {
-        fnName: this.fnName,
+        effectName: this.effectName,
       })
     }
 
@@ -151,7 +151,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
    */
   recordDependency(dependencyBucket: DependencyBucket, debugInfo?: PlainObject): void {
     if (__INTERNAL_DEV__ && debug) {
-      debug('recordDependency', '记录依赖', { ...debugInfo, fnName: this.fnName })
+      debug('recordDependency', '记录依赖', { ...debugInfo, effectName: this.effectName })
     }
 
     this.dependencyBuckets.push(dependencyBucket)
@@ -227,11 +227,11 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
  * @see {@link https://www.typescriptlang.org/docs/handbook/2/functions.html#unknown | unknown }
  * 用户副作用执行时抛出的异常会同步传播，并在传播前经过 setErrorHandler。
  */
-export function effect<T>(fn: () => T, options: EffectOptions = {}): EffectHandle<T> {
+export function effect<T>(effectFn: () => T, options: EffectOptions = {}): EffectHandle<T> {
   /* 读取父级副作用，便于建立嵌套清理关系 */
   const parent = effectStack.current
   /* 每次调用都创建新的 ReactiveEffect 实例 */
-  const instance = new ReactiveEffect(fn, options.scheduler)
+  const instance = new ReactiveEffect(effectFn, options.scheduler)
 
   recordEffectScope(instance)
 

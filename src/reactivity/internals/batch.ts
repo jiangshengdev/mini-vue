@@ -41,16 +41,16 @@ export function endBatch(): void {
 }
 
 /**
- * 在批处理上下文中执行 fn，并在最外层退出时一次性刷新期间收集的副作用。
+ * 在批处理上下文中执行回调，并在最外层退出时一次性刷新期间收集的副作用。
  *
  * @remarks
  * - 通过 try/finally 确保异常情况下也能正确 endBatch，避免批处理状态泄漏。
  */
-export function runInBatch<T>(fn: () => T): T {
+export function runInBatch<T>(batchJob: () => T): T {
   startBatch()
 
   try {
-    return fn()
+    return batchJob()
   } finally {
     endBatch()
   }

@@ -3,7 +3,12 @@
  */
 import type { AppContext } from '../create-app.ts'
 import type { MountedHandle } from '../mount'
-import type { ElementProps, RenderFunction, SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
+import type {
+  ElementProps,
+  RenderFunction,
+  SetupComponent,
+  VirtualNode,
+} from '@/jsx-foundation/index.ts'
 import type { EffectScope, ReactiveEffect } from '@/reactivity/index.ts'
 import type { PlainObject } from '@/shared/index.ts'
 import { ContextStack } from '@/shared/index.ts'

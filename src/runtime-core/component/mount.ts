@@ -1,13 +1,14 @@
 import type { RendererOptions } from '../index.ts'
 import type { MountContext } from '../mount/context.ts'
 import type { MountedHandle } from '../mount/handle.ts'
+import { asRuntimeVNode } from '../vnode.ts'
+import type { ComponentInstance } from './context.ts'
 import { attachInstanceToVirtualNode, createComponentInstance } from './instance.ts'
 import { resolveComponentProps } from './props.ts'
 import { performInitialRender } from './render-effect.ts'
 import { setupComponent } from './setup.ts'
 import { teardownComponentInstance } from './teardown.ts'
 import type { SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
-import { asRuntimeVNode } from '../vnode.ts'
 
 /**
  * 执行函数组件并将返回的子树继续挂载到容器。
@@ -35,7 +36,10 @@ export function mountComponent<
   /* 让 virtualNode 拥有实例引用，方便调试或测试检索。 */
   attachInstanceToVirtualNode(virtualNode, instance)
   runtime.component = instance as never
-  runtime.anchor = instance.anchor
+  const { anchor } = instance
+
+  runtime.anchor = anchor === undefined ? undefined : (anchor as HostNode)
+
   const setupSucceeded = setupComponent(instance)
 
   if (!setupSucceeded) {
@@ -46,12 +50,16 @@ export function mountComponent<
   }
 
   /* 执行首次渲染并将子树挂载到宿主容器。 */
-  const initialRender = performInitialRender(options, instance)
+  const initialRender = performInitialRender<HostNode, HostElement, HostFragment, SetupComponent>(
+    options,
+    instance as ComponentInstance<HostNode, HostElement, HostFragment, SetupComponent>,
+  )
+
   runtime.handle = initialRender
 
   return {
     ok: initialRender.ok,
-    nodes: initialRender.nodes as HostNode[],
+    nodes: initialRender.nodes,
     /**
      * 卸载组件：统一走实例 teardown，内部会 stop scope/effect 并清理已挂载子树。
      */

@@ -19,7 +19,11 @@ export function normalizeMountContext(context?: PatchContext): MountContext {
   }
 }
 
-export function normalizeChildContext(context: PatchContext | undefined, index: number, total: number): MountContext {
+export function normalizeChildContext(
+  context: PatchContext | undefined,
+  index: number,
+  total: number,
+): MountContext {
   return {
     parent: context?.parent,
     appContext: context?.appContext as never,

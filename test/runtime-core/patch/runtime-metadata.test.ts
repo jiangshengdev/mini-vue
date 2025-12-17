@@ -1,11 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { mountChild } from '@/runtime-core/index.ts'
+import { asRuntimeVNode, mountChild, patchChild } from '@/runtime-core/index.ts'
 import type { RendererOptions } from '@/runtime-core/index.ts'
-import { patchChild } from '@/runtime-core/patch/index.ts'
-import { asRuntimeVNode } from '@/runtime-core/vnode.ts'
 import { createTextVirtualNode } from '@/jsx-foundation/index.ts'
 
-type TestNode = {
+interface TestNode {
   kind: 'element' | 'text' | 'fragment'
   children: TestNode[]
   parent?: TestNode
@@ -13,30 +11,34 @@ type TestNode = {
   tag?: string
 }
 
-type TestElement = TestNode & { kind: 'element' }
+interface TestElement extends TestNode {
+  kind: 'element'
+}
 
-type TestFragment = TestNode & { kind: 'fragment' }
+interface TestFragment extends TestNode {
+  kind: 'fragment'
+}
 
 describe('patchChild runtime metadata reuse', () => {
   it('reuses host bindings and handles when updating text nodes', () => {
     const { options, container } = createHostOptions()
-    const prev = createTextVirtualNode('before')
+    const previous = createTextVirtualNode('before')
     const next = createTextVirtualNode('after')
-    const mounted = mountChild(options, prev, container)
+    const mounted = mountChild(options, previous, container)
 
     expect(mounted?.nodes).toHaveLength(1)
 
-    const runtimePrev = asRuntimeVNode<TestNode, TestElement, TestFragment>(prev)
+    const runtimePrevious = asRuntimeVNode<TestNode, TestElement, TestFragment>(previous)
 
-    patchChild(options, prev, next, container)
+    patchChild(options, previous, next, container)
 
     const runtimeNext = asRuntimeVNode<TestNode, TestElement, TestFragment>(next)
 
-    expect(runtimeNext.el).toBe(runtimePrev.el)
-    expect(runtimeNext.handle).toBe(runtimePrev.handle)
-    expect(runtimeNext.anchor).toBe(runtimePrev.anchor)
+    expect(runtimeNext.el).toBe(runtimePrevious.el)
+    expect(runtimeNext.handle).toBe(runtimePrevious.handle)
+    expect(runtimeNext.anchor).toBe(runtimePrevious.anchor)
     expect(runtimeNext.component).toBeUndefined()
-    expect((runtimeNext.el as TestNode | undefined)?.text).toBe('after')
+    expect(runtimeNext.el?.text).toBe('after')
   })
 })
 
@@ -65,7 +67,11 @@ function createHostOptions(): {
     child.parent = parent
   }
 
-  const insertBefore = (parent: TestElement | TestFragment, child: TestNode, anchor?: TestNode): void => {
+  const insertBefore = (
+    parent: TestElement | TestFragment,
+    child: TestNode,
+    anchor?: TestNode,
+  ): void => {
     removeFromParent(child)
 
     if (!anchor) {
@@ -108,7 +114,7 @@ function createHostOptions(): {
       removeFromParent(node)
     },
     patchProps(): void {
-      /* no-op for tests */
+      /* No-op for tests */
     },
   }
 

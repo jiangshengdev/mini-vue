@@ -34,16 +34,20 @@ function isEventProp(key: string): boolean {
 /**
  * 将 virtualNode 上的 props 映射到真实 DOM 元素上。
  */
-export function patchProps(element: Element, prevProps?: PropsShape, nextProps?: PropsShape): void {
-  const prev = prevProps ?? {}
+export function patchProps(
+  element: Element,
+  previousProps?: PropsShape,
+  nextProps?: PropsShape,
+): void {
+  const previous = previousProps ?? {}
   const next = nextProps ?? {}
-  const keys = new Set([...Object.keys(prev), ...Object.keys(next)])
+  const keys = new Set([...Object.keys(previous), ...Object.keys(next)])
 
   for (const key of keys) {
-    const prevValue = prev[key]
+    const previousValue = previous[key]
     const nextValue = next[key]
 
-    if (key === 'ref' && (isElementRef(prevValue) || isElementRef(nextValue))) {
+    if (key === 'ref' && (isElementRef(previousValue) || isElementRef(nextValue))) {
       continue
     }
 
@@ -58,12 +62,12 @@ export function patchProps(element: Element, prevProps?: PropsShape, nextProps?:
     }
 
     if (key === 'style') {
-      applyStyle(element as HTMLElement, prevValue, nextValue)
+      applyStyle(element as HTMLElement, previousValue, nextValue)
       continue
     }
 
     if (isEventProp(key)) {
-      patchEvent(element as HTMLElement, key.slice(2).toLowerCase(), prevValue, nextValue)
+      patchEvent(element as HTMLElement, key.slice(2).toLowerCase(), previousValue, nextValue)
       continue
     }
 
@@ -74,7 +78,7 @@ export function patchProps(element: Element, prevProps?: PropsShape, nextProps?:
 /**
  * 处理 style 属性，支持字符串和对象两种写法。
  */
-function applyStyle(element: HTMLElement, prev: unknown, next: unknown): void {
+function applyStyle(element: HTMLElement, previous: unknown, next: unknown): void {
   if (isNil(next) || next === false) {
     element.removeAttribute('style')
 
@@ -89,10 +93,10 @@ function applyStyle(element: HTMLElement, prev: unknown, next: unknown): void {
 
   if (isObject(next)) {
     const nextStyle = next as Record<string, unknown>
-    const prevStyle = isObject(prev) ? (prev as Record<string, unknown>) : {}
+    const previousStyle = isObject(previous) ? (previous as Record<string, unknown>) : {}
     let hasValue = false
 
-    for (const name of Object.keys(prevStyle)) {
+    for (const name of Object.keys(previousStyle)) {
       if (!Object.hasOwn(nextStyle, name) || isNil(nextStyle[name])) {
         setStyleValue(element, name, '')
       }
@@ -163,7 +167,12 @@ type EventInvoker = ((event: Event) => void) & { value?: EventListener }
 
 const invokerCacheKey = '__miniVueInvokers__'
 
-function patchEvent(element: HTMLElement, eventName: string, prev: unknown, next: unknown): void {
+function patchEvent(
+  element: HTMLElement,
+  eventName: string,
+  _previous: unknown,
+  next: unknown,
+): void {
   const invokers = getInvokerMap(element)
   const existing = invokers[eventName]
 
@@ -185,12 +194,14 @@ function patchEvent(element: HTMLElement, eventName: string, prev: unknown, next
 
   if (existing) {
     element.removeEventListener(eventName, existing)
-    delete invokers[eventName]
+    Reflect.deleteProperty(invokers, eventName)
   }
 }
 
 function getInvokerMap(element: HTMLElement): Record<string, EventInvoker> {
-  const record = (element as HTMLElement & { [invokerCacheKey]?: Record<string, EventInvoker> })[invokerCacheKey]
+  const record = (element as HTMLElement & { [invokerCacheKey]?: Record<string, EventInvoker> })[
+    invokerCacheKey
+  ]
 
   if (record) {
     return record
@@ -198,7 +209,9 @@ function getInvokerMap(element: HTMLElement): Record<string, EventInvoker> {
 
   const next: Record<string, EventInvoker> = {}
 
-  ;(element as HTMLElement & { [invokerCacheKey]?: Record<string, EventInvoker> })[invokerCacheKey] = next
+  ;(element as HTMLElement & { [invokerCacheKey]?: Record<string, EventInvoker> })[
+    invokerCacheKey
+  ] = next
 
   return next
 }

@@ -1,12 +1,12 @@
 import { mountComponent } from '../component/index.ts'
 import type { RendererOptions } from '../index.ts'
+import { asRuntimeVNode } from '../vnode.ts'
 import { mountChild } from './child.ts'
 import type { MountContext } from './context.ts'
 import { mountElement } from './element.ts'
 import type { MountedHandle } from './handle.ts'
 import type { SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
 import { Fragment } from '@/jsx-foundation/index.ts'
-import { asRuntimeVNode } from '../vnode.ts'
 
 /**
  * 将通用 virtualNode 分派给组件或元素挂载路径。
@@ -25,12 +25,15 @@ export function mountVirtualNode<
 
   /* Fragment 直接展开自身 children，不走组件路径。 */
   if (virtualNode.type === Fragment) {
-    const mounted = mountChild(options, virtualNode.children, container, { ...context, shouldUseAnchor })
+    const mounted = mountChild(options, virtualNode.children, container, {
+      ...context,
+      shouldUseAnchor,
+    })
     const runtime = asRuntimeVNode<HostNode, HostElement, HostFragment>(virtualNode)
 
     if (mounted) {
       runtime.el = mounted.nodes[0]
-      runtime.anchor = mounted.nodes[mounted.nodes.length - 1]
+      runtime.anchor = mounted.nodes.at(-1)
       runtime.handle = mounted
       runtime.component = undefined
     }
@@ -50,7 +53,7 @@ export function mountVirtualNode<
     if (mounted) {
       runtime.handle = mounted
       runtime.el = mounted.nodes[0]
-      runtime.anchor = mounted.nodes[mounted.nodes.length - 1]
+      runtime.anchor = mounted.nodes.at(-1)
     }
 
     return mounted

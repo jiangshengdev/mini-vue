@@ -2,6 +2,7 @@ import type { ComponentInstance } from './component/context.ts'
 import type { MountedHandle } from './mount/handle.ts'
 import type { SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export interface RuntimeVNode<
   HostNode,
   HostElement extends HostNode & WeakKey,
@@ -13,6 +14,7 @@ export interface RuntimeVNode<
   handle?: MountedHandle<HostNode>
 }
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export function asRuntimeVNode<
   HostNode,
   HostElement extends HostNode & WeakKey = HostNode & WeakKey,

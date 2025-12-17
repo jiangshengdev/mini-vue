@@ -31,7 +31,9 @@ describe('runtime-dom attrs props', () => {
   })
 
   it('不支持的属性值会被忽略，并在开发期给出警告', () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {
+      return undefined
+    })
     const container = createTestContainer()
     const payload = { nested: true }
 
@@ -40,10 +42,7 @@ describe('runtime-dom attrs props', () => {
     const element = container.firstElementChild as HTMLDivElement
 
     expect(element.hasAttribute('title')).toBe(false)
-    expect(warn).toHaveBeenCalledWith(
-      runtimeDomUnsupportedAttrValue('title', 'object'),
-      payload,
-    )
+    expect(warn).toHaveBeenCalledWith(runtimeDomUnsupportedAttrValue('title', 'object'), payload)
 
     warn.mockRestore()
   })

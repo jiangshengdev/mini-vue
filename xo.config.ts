@@ -22,6 +22,7 @@ const xoConfig: FlatXoConfig = [
       'arrow-body-style': ['error', 'always'],
       'func-names': ['error', 'always'],
       'func-name-matching': ['error', 'never'],
+      'unicorn/no-abusive-eslint-disable': 'warn',
     },
   },
 ]

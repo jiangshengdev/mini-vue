@@ -116,25 +116,10 @@ export function mountChild<
     return mountVirtualNode(options, child, container, { ...context, shouldUseAnchor })
   }
 
-  /* 其他值（如对象）兜底转成字符串输出。 */
-  if (__DEV__ && typeof child === 'object') {
+  /* 其他不受支持值统一忽略：开发期警告以提示用户修正输出。 */
+  if (__DEV__) {
     console.warn(runtimeCoreObjectChildWarning, child)
   }
 
-  const text = createText(String(child))
-
-  appendChild(container, text)
-
-  return {
-    ok: true,
-    nodes: [text],
-    /** 卸载兜底文本节点：与普通文本路径保持一致。 */
-    teardown(skipRemove?: boolean): void {
-      if (skipRemove) {
-        return
-      }
-
-      remove(text)
-    },
-  }
+  return undefined
 }

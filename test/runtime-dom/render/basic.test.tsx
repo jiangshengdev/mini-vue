@@ -117,20 +117,33 @@ describe('runtime-dom basic rendering', () => {
     expect(container.querySelector('[data-testid="next"]')?.textContent).toBe('next')
   })
 
-  it('对象子节点兜底渲染时在开发期给出警告', () => {
+  it('不可渲染子节点在开发期警告并忽略渲染', () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
       return undefined
     })
     const container = createTestContainer()
-    const payload = { foo: 'bar' }
+
+    const payloads: unknown[] = [
+      { foo: 'bar' },
+      () => {
+        return undefined
+      },
+      Symbol('skip'),
+    ]
 
     try {
-      render(payload as unknown as never, container)
+      for (const payload of payloads) {
+        render(payload as never, container)
 
-      expect(container).toHaveTextContent('[object Object]')
-      expect(warnSpy).toHaveBeenCalledTimes(1)
-      expect(warnSpy.mock.calls[0]?.[0]).toBe(runtimeCoreObjectChildWarning)
-      expect(warnSpy.mock.calls[0]?.[1]).toBe(payload)
+        expect(container).toBeEmptyDOMElement()
+      }
+
+      expect(warnSpy).toHaveBeenCalledTimes(payloads.length)
+
+      for (const [index, payload] of payloads.entries()) {
+        expect(warnSpy.mock.calls[index]?.[0]).toBe(runtimeCoreObjectChildWarning)
+        expect(warnSpy.mock.calls[index]?.[1]).toBe(payload)
+      }
     } finally {
       warnSpy.mockRestore()
     }

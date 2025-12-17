@@ -22,5 +22,4 @@ export const runtimeCoreAsyncSetupNotSupported =
 export const runtimeCoreSetupMustReturnRender = '组件必须返回渲染函数以托管本地状态'
 
 /** 对象类型子节点的警告 */
-export const runtimeCoreObjectChildWarning =
-  '[runtime-core] 检测到对象类型的子节点，已按字符串渲染：'
+export const runtimeCoreObjectChildWarning = '[runtime-core] 检测到无法渲染的子节点，已被忽略：'

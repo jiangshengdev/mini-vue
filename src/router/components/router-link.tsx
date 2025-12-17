@@ -12,6 +12,8 @@ export interface RouterLinkProps extends PropsShape {
   to: string
   /** 路由器实例，负责执行导航。 */
   router?: Router
+  /** a 标签的 target。 */
+  target?: string
   /** 插入到链接内部的子节点。 */
   children?: ComponentChildren
 }
@@ -23,16 +25,18 @@ export const RouterLink: SetupComponent<RouterLinkProps> = (props) => {
   const resolvedRouter = props.router ?? useRouter()
 
   /* 点击时阻止默认跳转，转为 history 导航。 */
-  const handleClick = (event?: MouseEvent): void => {
+  const handleClick = (event?: Event): void => {
     if (event) {
       if (
         event.defaultPrevented ||
-        event.button !== 0 ||
-        event.metaKey ||
-        event.ctrlKey ||
-        event.shiftKey ||
-        event.altKey ||
         props.target?.toLowerCase() === '_blank'
+      ) {
+        return
+      }
+
+      if (
+        event instanceof MouseEvent &&
+        (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
       ) {
         return
       }

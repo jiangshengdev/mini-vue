@@ -99,7 +99,7 @@ function applyStyle(element: HTMLElement, value: unknown): void {
 
       if (typeof styleValue !== 'string' && typeof styleValue !== 'number') {
         if (__DEV__) {
-          console.warn(runtimeDomInvalidStyleValue, name, styleValue)
+          console.warn(runtimeDomInvalidStyleValue(name, typeof styleValue), styleValue)
         }
 
         continue

@@ -50,7 +50,10 @@ describe('runtime-dom style props', () => {
       expect(element.getAttribute('style')).toBeNull()
       expect(element.style.color).toBe('')
       expect(warnSpy).toHaveBeenCalledTimes(1)
-      expect(warnSpy).toHaveBeenCalledWith(runtimeDomInvalidStyleValue, 'color', payload)
+      expect(warnSpy).toHaveBeenCalledWith(
+        runtimeDomInvalidStyleValue('color', typeof payload),
+        payload,
+      )
     } finally {
       warnSpy.mockRestore()
     }

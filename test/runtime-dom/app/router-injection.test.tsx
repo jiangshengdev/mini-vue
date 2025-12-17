@@ -399,4 +399,73 @@ describe('runtime-dom: router injection', () => {
     app.unmount()
     router.stop()
   })
+
+  it('RouterView re-renders when navigating via RouterLink', async () => {
+    globalThis.history.replaceState(null, '', '/a')
+    const rendered = ref('')
+
+    const A: SetupComponent = () => {
+      rendered.value = 'a'
+
+      return () => {
+        return <div className="route-a">A</div>
+      }
+    }
+
+    const B: SetupComponent = () => {
+      rendered.value = 'b'
+
+      return () => {
+        return <div className="route-b">B</div>
+      }
+    }
+
+    const NotFound: SetupComponent = () => {
+      rendered.value = '404'
+
+      return () => {
+        return <div className="route-404">404</div>
+      }
+    }
+
+    const router = createRouter({
+      routes: [
+        { path: '/a', component: A },
+        { path: '/b', component: B },
+      ],
+      fallback: NotFound,
+    })
+
+    const Root: SetupComponent = () => {
+      return () => {
+        return (
+          <div>
+            <RouterLink to="/b">go</RouterLink>
+            <RouterView />
+          </div>
+        )
+      }
+    }
+
+    const app = createApp(Root)
+
+    app.use(router)
+    app.mount(createTestContainer())
+
+    expect(rendered.value).toBe('a')
+    expect(document.querySelector('.route-a')).toBeTruthy()
+
+    const anchor = document.querySelector('a')
+
+    expect(anchor).toBeTruthy()
+
+    anchor!.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
+    await Promise.resolve()
+
+    expect(rendered.value).toBe('b')
+    expect(document.querySelector('.route-b')).toBeTruthy()
+
+    app.unmount()
+    router.stop()
+  })
 })

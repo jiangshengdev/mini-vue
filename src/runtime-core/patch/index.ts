@@ -1,6 +1,7 @@
 /**
  * 子节点 patch 入口，根据新旧节点类型分派到对应处理逻辑。
  */
+import { patchChildren } from './children.ts'
 import { unmountChild } from './unmount.ts'
 import type { RendererOptions } from '../renderer.ts'
 import type { RuntimeVNode } from '../vnode.ts'
@@ -127,6 +128,11 @@ export function patchChild<
     return mountChildAt(options, newChild, container, anchor, context)
   }
 
+  /* 两者都是数组：patch 数组 children。 */
+  if (Array.isArray(oldChild) && Array.isArray(newChild)) {
+    return patchArrayChildren(options, oldChild, newChild, container, oldHandle, context)
+  }
+
   /* 类型切换（如 text→element 或 element→text）：卸载旧节点，挂载新节点。 */
   unmountChild(oldHandle)
 
@@ -161,6 +167,109 @@ function mountChildAt<
 
   /* 无锚点，直接挂载到容器末尾。 */
   return mountChild(options, child, container, context)
+}
+
+/**
+ * patch 两个数组 children。
+ *
+ * @remarks
+ * 数组 mount 时会创建 startAnchor 和 endAnchor 包裹内容。
+ * patch 时复用这些 anchors，在 endAnchor 之前执行 children diff。
+ */
+function patchArrayChildren<
+  HostNode,
+  HostElement extends HostNode & WeakKey,
+  HostFragment extends HostNode,
+>(
+  options: RendererOptions<HostNode, HostElement, HostFragment>,
+  oldChildren: RenderOutput[],
+  newChildren: RenderOutput[],
+  container: HostElement | HostFragment,
+  oldHandle: MountedHandle<HostNode> | undefined,
+  context?: MountContext,
+): MountedHandle<HostNode> | undefined {
+  const oldNodes = oldHandle?.nodes ?? []
+
+  /*
+   * 数组挂载时结构为 [startAnchor, ...childNodes, endAnchor]
+   * 我们需要复用 anchors 并在 endAnchor 前执行 patch。
+   */
+  if (oldNodes.length < 2) {
+    /* 没有有效的 anchor 结构，回退到卸载+重挂载。 */
+    unmountChild(oldHandle)
+
+    return mountChild(options, newChildren, container, context)
+  }
+
+  const startAnchor = oldNodes[0]
+  const endAnchor = oldNodes[oldNodes.length - 1]
+
+  /*
+   * 获取旧 children 的挂载句柄。
+   * 数组 mount 返回的 nodes 包含 anchors，但 teardowns 只包含 children 的 teardown。
+   * 我们需要从 oldHandle 中提取 children handles。
+   */
+  type ArrayHandleWithChildren = MountedHandle<HostNode> & {
+    _childHandles?: Array<MountedHandle<HostNode> | undefined>
+  }
+  const arrayHandle = oldHandle as ArrayHandleWithChildren
+  let oldChildHandles = arrayHandle._childHandles ?? []
+
+  /*
+   * 如果没有记录 childHandles，说明是首次 patch。
+   * 需要清除旧内容（anchors 之间的节点），然后重新挂载。
+   */
+  if (oldChildHandles.length === 0 && oldChildren.length > 0) {
+    /* 移除 anchors 之间的所有节点。 */
+    for (let i = 1; i < oldNodes.length - 1; i++) {
+      options.remove(oldNodes[i])
+    }
+
+    oldChildHandles = []
+  }
+
+  /* 执行 children patch，在 endAnchor 前挂载新节点。 */
+  const newChildHandles = patchChildren(
+    options,
+    oldChildHandles.length === 0 ? [] : oldChildren,
+    newChildren,
+    container as HostElement,
+    oldChildHandles,
+    endAnchor,
+    context,
+  )
+
+  /* 存储新的 childHandles。 */
+  arrayHandle._childHandles = newChildHandles
+
+  /* 收集所有节点（包括 anchors）。 */
+  const newNodes: HostNode[] = [startAnchor]
+
+  for (const handle of newChildHandles) {
+    if (handle) {
+      for (const node of handle.nodes) {
+        newNodes.push(node)
+      }
+    }
+  }
+
+  newNodes.push(endAnchor)
+
+  return {
+    ok: true,
+    nodes: newNodes,
+    _childHandles: newChildHandles,
+    teardown(skipRemove?: boolean): void {
+      for (const handle of newChildHandles) {
+        handle?.teardown(skipRemove)
+      }
+
+      if (!skipRemove) {
+        options.remove(startAnchor)
+        options.remove(endAnchor)
+      }
+    },
+  } as MountedHandle<HostNode>
 }
 
 /**
@@ -236,7 +345,7 @@ function patchElement<
   }
 
   /* 执行 children patch。 */
-  const newChildHandles = patchChildrenSimple(
+  const newChildHandles = patchChildren(
     options,
     oldChildHandles.length === 0 ? [] : oldChildren,
     newChildren,
@@ -261,51 +370,4 @@ function patchElement<
       }
     },
   }
-}
-
-/**
- * 简单的 children patch（按索引对齐，无 key）。
- * 后续任务 6 会完善为完整的 patchChildren。
- */
-function patchChildrenSimple<
-  HostNode,
-  HostElement extends HostNode & WeakKey,
-  HostFragment extends HostNode,
->(
-  options: RendererOptions<HostNode, HostElement, HostFragment>,
-  oldChildren: RenderOutput[],
-  newChildren: RenderOutput[],
-  container: HostElement,
-  oldHandles: Array<MountedHandle<HostNode> | undefined>,
-): Array<MountedHandle<HostNode> | undefined> {
-  const commonLength = Math.min(oldChildren.length, newChildren.length)
-  const newHandles: Array<MountedHandle<HostNode> | undefined> = []
-
-  /* 1. patch 公共区间。 */
-  for (let i = 0; i < commonLength; i++) {
-    const handle = patchChild(
-      options,
-      oldChildren[i],
-      newChildren[i],
-      container,
-      undefined,
-      oldHandles[i],
-    )
-
-    newHandles.push(handle)
-  }
-
-  /* 2. mount 新增尾部。 */
-  for (let i = commonLength; i < newChildren.length; i++) {
-    const handle = mountChild(options, newChildren[i], container)
-
-    newHandles.push(handle)
-  }
-
-  /* 3. unmount 旧的尾部。 */
-  for (let i = commonLength; i < oldChildren.length; i++) {
-    unmountChild(oldHandles[i])
-  }
-
-  return newHandles
 }

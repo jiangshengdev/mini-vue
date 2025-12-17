@@ -37,6 +37,8 @@ createApp(Counter).mount('#app')
 - `src/reactivity/**`：effect、ref、watch、effect scope，实现依赖收集与清理。
 - `src/runtime-core/**`：平台无关 renderer 与应用生命周期，禁止重复 mount。
 - `src/runtime-dom/**`：DOM 原语与 props 打补丁（class 归一化、style 对象/字符串、事件名小写、ref 由挂载层处理）。
+- `src/shared/**`：跨子域共享工具与错误通道（内部 runner + 对外 setErrorHandler）。
+- `src/messages/**`：按子域集中管理错误/警告文案，统一由 `src/messages/index.ts` 导出。
 - `src/jsx-foundation/**` 与 `src/jsx-runtime/**`：JSX vnode 构建与运行时入口。
 - `playground/**`：Vite 演示入口，参考 `playground/app.tsx`。
 - `test/**`：Vitest 覆盖 reactivity、runtime-dom、jsx-runtime；按模块分文件。
@@ -45,7 +47,8 @@ createApp(Counter).mount('#app')
 
 - TypeScript ESM，显式 `.ts` 导入，`moduleResolution: bundler`，`jsx: react-jsx`，`jsxImportSource: '@'`，别名 `@` -> `src`。
 - 新增功能优先放在现有子目录，小而专注；DOM 细节放 `runtime-dom`，通用逻辑留 `runtime-core`。
-- 扩展 DOM props 时同步完善 `patch-props.ts` 与 `test/runtime-dom/**`；包装用户回调时复用 `shared/runSilent` 或 `runThrowing`，确保错误经 `handleError` 路由。
+- 扩展 DOM props 时同步完善 `patch-props.ts` 与 `test/runtime-dom/**`；框架内部入口统一复用 `shared/runSilent` / `runThrowing`，对外暴露 `setErrorHandler` 供用户注册全局错误处理器。
+- 提交信息规范：见 [`.copilot-commit-message-instructions.md`](./.copilot-commit-message-instructions.md)。
 
 ## 许可证
 

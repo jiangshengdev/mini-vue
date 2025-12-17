@@ -16,6 +16,9 @@ export const domRendererOptions: RendererOptions<Node, Element, DocumentFragment
   createText(text): Text {
     return document.createTextNode(text)
   },
+  setText(node, text): void {
+    ;(node as Text).nodeValue = text
+  },
   /** 创建片段节点，用于批量插入 children。 */
   createFragment(): DocumentFragment {
     return document.createDocumentFragment()

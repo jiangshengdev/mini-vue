@@ -2,8 +2,9 @@ import type { RendererOptions } from '../index.ts'
 import type { MountContext } from './context.ts'
 import type { MountedHandle } from './handle.ts'
 import { mountVirtualNode } from './virtual-node.ts'
-import type { RenderOutput } from '@/jsx-foundation/index.ts'
-import { isVirtualNode } from '@/jsx-foundation/index.ts'
+import { asRuntimeVNode } from '../vnode.ts'
+import { Text, isVirtualNode } from '@/jsx-foundation/index.ts'
+import type { RenderOutput, VirtualNode } from '@/jsx-foundation/index.ts'
 import { runtimeCoreObjectChildWarning } from '@/messages/index.ts'
 import { __DEV__, isNil } from '@/shared/index.ts'
 
@@ -91,6 +92,37 @@ export function mountChild<
     }
   }
 
+  /* 标准 virtualNode 交给 mountVirtualNode 处理组件或元素。 */
+  if (isVirtualNode(child)) {
+    if (child.type === Text) {
+      const textNode = createText((child as VirtualNode<typeof Text> & { text?: string }).text ?? '')
+      const runtime = asRuntimeVNode<HostNode, HostElement, HostFragment>(child)
+
+      appendChild(container, textNode)
+
+      const handle: MountedHandle<HostNode> = {
+        ok: true,
+        nodes: [textNode],
+        teardown(skipRemove?: boolean): void {
+          if (skipRemove) {
+            return
+          }
+
+          remove(textNode)
+        },
+      }
+
+      runtime.el = textNode
+      runtime.handle = handle
+      runtime.anchor = undefined
+      runtime.component = undefined
+
+      return handle
+    }
+
+    return mountVirtualNode(options, child, container, { ...context, shouldUseAnchor })
+  }
+
   /* 原始文本类型直接创建文本节点。 */
   if (typeof child === 'string' || typeof child === 'number') {
     const text = createText(String(child))
@@ -109,11 +141,6 @@ export function mountChild<
         remove(text)
       },
     }
-  }
-
-  /* 标准 virtualNode 交给 mountVirtualNode 处理组件或元素。 */
-  if (isVirtualNode(child)) {
-    return mountVirtualNode(options, child, container, { ...context, shouldUseAnchor })
   }
 
   /* 其他不受支持值统一忽略：开发期警告以提示用户修正输出。 */

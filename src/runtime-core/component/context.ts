@@ -3,12 +3,7 @@
  */
 import type { AppContext } from '../create-app.ts'
 import type { MountedHandle } from '../mount'
-import type {
-  ElementProps,
-  RenderFunction,
-  RenderOutput,
-  SetupComponent,
-} from '@/jsx-foundation/index.ts'
+import type { ElementProps, RenderFunction, SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
 import type { EffectScope, ReactiveEffect } from '@/reactivity/index.ts'
 import type { PlainObject } from '@/shared/index.ts'
 import { ContextStack } from '@/shared/index.ts'
@@ -42,15 +37,15 @@ export interface ComponentInstance<
   /** 宿主容器或片段引用，挂载子树时作为根。 */
   readonly container: HostElement | HostFragment
   /** 组件接收到的 props 副本。 */
-  readonly props: ElementProps<T>
+  props: ElementProps<T>
   /** `setup` 返回的渲染闭包，每次 effect 执行都会调用。 */
   render: RenderFunction
   /** 组件独立的响应式副作用，驱动更新调度。 */
-  effect?: ReactiveEffect<RenderOutput>
+  effect?: ReactiveEffect<VirtualNode | undefined>
   /** 组件级 effect scope，托管所有 setup 内部副作用。 */
   scope: EffectScope
   /** 最近一次渲染生成的虚拟子树结果。 */
-  subTree?: RenderOutput
+  subTree?: VirtualNode
   /** 当前挂载到宿主的节点句柄，支持 teardown。 */
   mountedHandle?: MountedHandle<HostNode>
   /** 组件在父容器中的锚点节点，用于保持兄弟顺序。 */

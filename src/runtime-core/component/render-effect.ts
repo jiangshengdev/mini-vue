@@ -2,8 +2,11 @@ import type { RendererOptions } from '../index.ts'
 import type { MountedHandle } from '../mount/handle.ts'
 import { mountChildWithAnchor } from './anchor.ts'
 import type { ComponentInstance } from './context.ts'
-import { teardownComponentInstance, teardownMountedSubtree } from './teardown.ts'
-import type { RenderOutput, SetupComponent } from '@/jsx-foundation/index.ts'
+import { teardownComponentInstance } from './teardown.ts'
+import { normalizeRenderOutput } from '../normalize.ts'
+import { patchChild } from '../patch/index.ts'
+import { asRuntimeVNode } from '../vnode.ts'
+import type { SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
 import { ReactiveEffect, recordEffectScope } from '@/reactivity/index.ts'
 import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
 
@@ -68,11 +71,11 @@ function createRenderEffect<
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
-): ReactiveEffect<RenderOutput> {
-  const effect = new ReactiveEffect<RenderOutput>(
+): ReactiveEffect<VirtualNode | undefined> {
+  const effect = new ReactiveEffect<VirtualNode | undefined>(
     () => {
       /* 每次渲染时记录最新子树，供后续挂载或复用。 */
-      const subtree = instance.render()
+      const subtree = normalizeRenderOutput(instance.render())
 
       instance.subTree = subtree
 
@@ -122,15 +125,13 @@ function rerenderComponent<
     return
   }
 
-  teardownMountedSubtree(instance)
-
-  mountLatestSubtree(options, instance)
+  patchLatestSubtree(options, instance, previousSubTree)
 }
 
 /**
- * 将最新的子树结果重新挂载回容器并记录。
+ * 以 patch 方式更新组件子树，保持宿主节点复用。
  */
-function mountLatestSubtree<
+function patchLatestSubtree<
   HostNode,
   HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
@@ -138,9 +139,16 @@ function mountLatestSubtree<
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
+  previousSubTree: VirtualNode | undefined,
 ): void {
-  /* 使用缓存的子树结果重新交给宿主挂载。 */
-  const mounted = mountChildWithAnchor(options, instance, instance.subTree)
+  patchChild(options, previousSubTree, instance.subTree, instance.container, instance.anchor, {
+    parent: instance,
+    appContext: instance.appContext,
+  })
 
-  instance.mountedHandle = mounted
+  if (instance.subTree) {
+    instance.mountedHandle = asRuntimeVNode<HostNode, HostElement, HostFragment>(instance.subTree).handle
+  } else {
+    instance.mountedHandle = undefined
+  }
 }

@@ -1,4 +1,4 @@
-import type { virtualNodeFlag } from './constants.ts'
+import type { Text, virtualNodeFlag } from './constants.ts'
 import type { PropsShape } from '@/shared/index.ts'
 
 /**
@@ -60,7 +60,7 @@ export type FragmentType = (props: FragmentProps) => ComponentChildren
  *
  * @beta
  */
-export type ElementType = string | ComponentLike | FragmentType
+export type ElementType = string | ComponentLike | FragmentType | typeof Text
 
 /**
  * 推导给定元素类型对应的 props 形状。

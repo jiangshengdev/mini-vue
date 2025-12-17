@@ -1,9 +1,9 @@
 import { routerInjectionKey } from './injection.ts'
 import { getQueryAndHash, normalizePath } from './paths.ts'
 import type { RouteLocation, Router, RouterConfig, RouteRecord } from './types.ts'
+import { routerDuplicateInstallOnApp } from '@/messages/index.ts'
 import type { Ref } from '@/reactivity/index.ts'
 import { ref } from '@/reactivity/index.ts'
-import { routerDuplicateInstallOnApp } from '@/messages/index.ts'
 
 /**
  * Router 作为插件安装时，app 侧需要具备的最小能力子集。

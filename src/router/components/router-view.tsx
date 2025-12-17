@@ -9,7 +9,7 @@ const routerViewDepthKey: InjectionKey<number> = Symbol('router-view-depth')
 /** 路由匹配结果的注入 key，按需为子级 RouterView 复用。 */
 const routerViewMatchedKey: InjectionKey<SetupComponent[]> = Symbol('router-view-matched')
 /** RouterView 深度计数的默认起点，使首层深度从 0 开始。 */
-const INITIAL_ROUTER_VIEW_DEPTH = -1
+const initialRouterViewDepth = -1
 
 /**
  * RouterView 的 props，承载路由实例以获取当前视图。
@@ -25,7 +25,7 @@ export interface RouterViewProps {
 export const RouterView: SetupComponent<RouterViewProps> = (props) => {
   const router = props.router ?? useRouter()
   /* 以 -1 为起点，确保首层 RouterView 的深度从 0 开始累加。 */
-  const parentDepth = inject(routerViewDepthKey, INITIAL_ROUTER_VIEW_DEPTH)
+  const parentDepth = inject(routerViewDepthKey, initialRouterViewDepth)
   const depth = parentDepth + 1
   const parentMatched = inject(routerViewMatchedKey, undefined)
   const matchedComponents = parentMatched ?? router.currentRoute.value.matched
@@ -36,6 +36,7 @@ export const RouterView: SetupComponent<RouterViewProps> = (props) => {
   /* 渲染函数：读取 currentRoute 的组件并输出。 */
   return () => {
     const MatchedComponent = matchedComponents[depth]
+
     if (!MatchedComponent) return undefined
 
     return <MatchedComponent />

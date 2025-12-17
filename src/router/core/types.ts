@@ -15,14 +15,14 @@ export interface RouteRecord {
 /**
  * 标准化后的路由定位信息，供渲染消费。
  */
- export interface RouteLocation {
+export interface RouteLocation {
   /** 归一化后的路径值。 */
   path: string
   /** 当前路径对应的组件。 */
   component: SetupComponent
   /** 当前路径命中的组件链路（按 RouterView 深度对应）。 */
   matched: SetupComponent[]
- }
+}
 
 /**
  * 创建路由器的配置输入。

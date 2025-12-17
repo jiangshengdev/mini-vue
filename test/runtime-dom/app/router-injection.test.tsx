@@ -280,7 +280,9 @@ describe('runtime-dom: router injection', () => {
     expect(anchor).toBeTruthy()
 
     const dispatch = (init?: MouseEventInit): boolean => {
-      return anchor!.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, ...init }))
+      return anchor!.dispatchEvent(
+        new MouseEvent('click', { bubbles: true, cancelable: true, ...init }),
+      )
     }
 
     expect(dispatch({ metaKey: true })).toBe(true)
@@ -290,6 +292,7 @@ describe('runtime-dom: router injection', () => {
     expect(dispatch({ button: 1 })).toBe(true)
 
     const prevented = new MouseEvent('click', { bubbles: true, cancelable: true })
+
     prevented.preventDefault()
     expect(anchor!.dispatchEvent(prevented)).toBe(false)
 
@@ -338,7 +341,9 @@ describe('runtime-dom: router injection', () => {
 
     expect(anchor).toBeTruthy()
 
-    expect(anchor!.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))).toBe(true)
+    expect(
+      anchor!.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true })),
+    ).toBe(true)
     expect(navigateSpy).not.toHaveBeenCalled()
 
     app.unmount()

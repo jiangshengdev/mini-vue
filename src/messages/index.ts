@@ -15,5 +15,5 @@ export {
   runtimeCoreProvideOutsideSetup,
   runtimeCoreSetupMustReturnRender,
 } from './runtime-core.ts'
-export { runtimeDomContainerNotFound } from './runtime-dom.ts'
+export { runtimeDomContainerNotFound, runtimeDomUnsupportedAttrValue } from './runtime-dom.ts'
 export { sharedRunnerNoPromise } from './shared.ts'

@@ -1,5 +1,15 @@
-import { Fragment, createTextVirtualNode, createVirtualNode, isVirtualNode } from '@/jsx-foundation/index.ts'
-import type { ComponentChildren, FragmentProps, RenderOutput, VirtualNode } from '@/jsx-foundation/index.ts'
+import {
+  Fragment,
+  createTextVirtualNode,
+  createVirtualNode,
+  isVirtualNode,
+} from '@/jsx-foundation/index.ts'
+import type {
+  ComponentChildren,
+  FragmentProps,
+  RenderOutput,
+  VirtualNode,
+} from '@/jsx-foundation/index.ts'
 import { isNil } from '@/shared/index.ts'
 
 export type NormalizedRenderOutput = VirtualNode | RenderOutput | undefined

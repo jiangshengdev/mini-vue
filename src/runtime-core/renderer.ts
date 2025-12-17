@@ -108,8 +108,12 @@ export function createRenderer<
     clear(container)
     const normalized = normalizeRenderOutput(virtualNode)
     const appContext =
-      (isVirtualNode(normalized) ? (normalized as { appContext?: AppContext }).appContext : undefined) ??
-      (isVirtualNode(virtualNode) ? (virtualNode as { appContext?: AppContext }).appContext : undefined)
+      (isVirtualNode(normalized)
+        ? (normalized as { appContext?: AppContext }).appContext
+        : undefined) ??
+      (isVirtualNode(virtualNode)
+        ? (virtualNode as { appContext?: AppContext }).appContext
+        : undefined)
     const mounted =
       normalized !== undefined
         ? mountChild(options, normalized as never, container, {

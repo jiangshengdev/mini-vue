@@ -147,7 +147,9 @@ function patchLatestSubtree<
   })
 
   if (instance.subTree) {
-    instance.mountedHandle = asRuntimeVNode<HostNode, HostElement, HostFragment>(instance.subTree).handle
+    instance.mountedHandle = asRuntimeVNode<HostNode, HostElement, HostFragment>(
+      instance.subTree,
+    ).handle
   } else {
     instance.mountedHandle = undefined
   }

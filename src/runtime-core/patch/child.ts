@@ -79,7 +79,10 @@ function patchExisting<
     syncRuntimeMetadata(runtimePrev, runtimeNext, { component: undefined })
 
     if (runtimePrev.el) {
-      options.setText(runtimePrev.el, (next as VirtualNode<typeof Text> & { text?: string }).text ?? '')
+      options.setText(
+        runtimePrev.el,
+        (next as VirtualNode<typeof Text> & { text?: string }).text ?? '',
+      )
     }
 
     return

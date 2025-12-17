@@ -25,7 +25,10 @@ export function mountVirtualNode<
 
   /* Fragment 直接展开自身 children，不走组件路径。 */
   if (virtualNode.type === Fragment) {
-    const mounted = mountChild(options, virtualNode.children, container, { ...context, shouldUseAnchor })
+    const mounted = mountChild(options, virtualNode.children, container, {
+      ...context,
+      shouldUseAnchor,
+    })
     const runtime = asRuntimeVNode<HostNode, HostElement, HostFragment>(virtualNode)
 
     if (mounted) {

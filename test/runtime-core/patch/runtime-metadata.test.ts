@@ -65,7 +65,11 @@ function createHostOptions(): {
     child.parent = parent
   }
 
-  const insertBefore = (parent: TestElement | TestFragment, child: TestNode, anchor?: TestNode): void => {
+  const insertBefore = (
+    parent: TestElement | TestFragment,
+    child: TestNode,
+    anchor?: TestNode,
+  ): void => {
     removeFromParent(child)
 
     if (!anchor) {

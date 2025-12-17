@@ -190,7 +190,9 @@ function patchEvent(element: HTMLElement, eventName: string, prev: unknown, next
 }
 
 function getInvokerMap(element: HTMLElement): Record<string, EventInvoker> {
-  const record = (element as HTMLElement & { [invokerCacheKey]?: Record<string, EventInvoker> })[invokerCacheKey]
+  const record = (element as HTMLElement & { [invokerCacheKey]?: Record<string, EventInvoker> })[
+    invokerCacheKey
+  ]
 
   if (record) {
     return record
@@ -198,7 +200,9 @@ function getInvokerMap(element: HTMLElement): Record<string, EventInvoker> {
 
   const next: Record<string, EventInvoker> = {}
 
-  ;(element as HTMLElement & { [invokerCacheKey]?: Record<string, EventInvoker> })[invokerCacheKey] = next
+  ;(element as HTMLElement & { [invokerCacheKey]?: Record<string, EventInvoker> })[
+    invokerCacheKey
+  ] = next
 
   return next
 }

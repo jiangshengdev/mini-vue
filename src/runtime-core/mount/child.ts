@@ -95,7 +95,9 @@ export function mountChild<
   /* 标准 virtualNode 交给 mountVirtualNode 处理组件或元素。 */
   if (isVirtualNode(child)) {
     if (child.type === Text) {
-      const textNode = createText((child as VirtualNode<typeof Text> & { text?: string }).text ?? '')
+      const textNode = createText(
+        (child as VirtualNode<typeof Text> & { text?: string }).text ?? '',
+      )
       const runtime = asRuntimeVNode<HostNode, HostElement, HostFragment>(child)
 
       appendChild(container, textNode)

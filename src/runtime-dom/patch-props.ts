@@ -93,6 +93,17 @@ function applyStyle(element: HTMLElement, previous: unknown, next: unknown): voi
 
   if (isObject(next)) {
     const nextStyle = next as Record<string, unknown>
+    if (Object.values(nextStyle).every(isNil)) {
+      element.removeAttribute('style')
+
+      if (element.getAttribute('style') !== null) {
+        element.style.cssText = ''
+        element.removeAttribute('style')
+      }
+
+      return
+    }
+
     const previousStyle = isObject(previous) ? (previous as Record<string, unknown>) : {}
     let hasValue = false
 

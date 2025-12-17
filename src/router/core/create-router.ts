@@ -46,7 +46,11 @@ export function createRouter(config: RouterConfig): Router {
     const normalized = normalizePath(rawPath)
     const component = routeMap.get(normalized) ?? fallback
 
-    return { path: normalized, component }
+    /*
+     * 当前路由记录仅支持单层结构，matched 仅包含首层组件；
+     * 嵌套 RouterView 会在超出 matched 长度时渲染为空以避免递归。
+     */
+    return { path: normalized, component, matched: [component] }
   }
 
   /* 用当前地址初始化路由状态，确保首屏渲染一致。 */

@@ -146,6 +146,8 @@ describe('runtime-dom: router injection', () => {
       fallback: NotFound,
     })
 
+    expect(router.currentRoute.value.component).toBe(Home)
+
     const Root: SetupComponent = () => {
       return () => {
         return <RouterView />
@@ -201,6 +203,56 @@ describe('runtime-dom: router injection', () => {
     anchor!.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
 
     expect(navigateSpy).toHaveBeenCalledWith('/counter')
+
+    app.unmount()
+    router.stop()
+  })
+
+  it('RouterView inside route component does not recurse infinitely', () => {
+    globalThis.history.replaceState(null, '', '/')
+    const renderedNested = ref(false)
+
+    const Home: SetupComponent = () => {
+      renderedNested.value = true
+
+      return () => {
+        return (
+          <div className="home">
+            <RouterView />
+          </div>
+        )
+      }
+    }
+
+    const NotFound: SetupComponent = () => {
+      return () => {
+        return undefined
+      }
+    }
+
+    const router = createRouter({
+      routes: [{ path: '/', component: Home }],
+      fallback: NotFound,
+    })
+
+    expect(router.currentRoute.value.component).toBe(Home)
+
+    const Root: SetupComponent = () => {
+      return () => {
+        return <RouterView />
+      }
+    }
+
+    const app = createApp(Root)
+
+    app.use(router)
+
+    expect(() => {
+      app.mount(createTestContainer())
+    }).not.toThrow()
+
+    expect(renderedNested.value).toBe(true)
+    expect(document.querySelector('.home')).toBeTruthy()
 
     app.unmount()
     router.stop()

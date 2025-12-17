@@ -1,35 +1,40 @@
-# Copilot 使用指南
+# Copilot 编码指南（mini-vue）
 
-- 范围：本仓库是简化版 Vue 3 运行时，核心分为两块：`src/reactivity/**` 负责响应式（effect、ref、watch、effect scope），`src/runtime-core/**` 负责平台无关的渲染，`src/runtime-dom/**` 提供 DOM 宿主 glue。JSX 构建在 `src/jsx-foundation/**` 与 `src/jsx-runtime/**`，对外入口为 `src/index.ts`。
-- 架构
-  - `runtime-core/renderer.ts` 的 `createRenderer` 与宿主无关：按容器缓存已挂载句柄，并调用宿主 `RendererOptions` 完成创建/插入/移除/patchProps。
-  - `runtime-core/create-app.ts` 的 `createAppInstance` 包裹根组件并跟踪挂载状态，阻止重复 mount；`unmount` 通过宿主 hook 清空容器。
-  - DOM 侧在 `runtime-dom/create-app.ts` 处理字符串选择器解析、记录上次容器，并接入 Vite HMR：更新前卸载，更新后按原容器重挂。
-  - DOM 变更集中在 `runtime-dom/renderer-options.ts` 与 `patch-props.ts`：class 归一化，style 支持字符串或对象键，事件名转小写，布尔/`null`/`false` 移除属性，`ref` 由挂载层处理，`ElementRef` 可为回调或 `Ref`。
-  - 响应式围绕 `reactivity/effect.ts` 的 `ReactiveEffect`：利用 `effectStack` 收集依赖，支持调度器，`stop` 时清理依赖与嵌套 cleanup，并通过共享错误通道上报。
-  - 错误处理：`shared/error-handling.ts` 的 `setErrorHandler` 注册全局处理器覆盖 effect/watch/scope 错误；未处理的错误会用 `queueMicrotask` 异步重新抛出。
-- 约定
-  - TypeScript ESM，显式 `.ts` 导入，`moduleResolution: bundler`，`jsx: react-jsx`，`jsxImportSource: '@'`，别名 `@` 指向 `src`；新文件保持 strict，避免隐式 `any`。
-  - 对外导出集中在 `src/index.ts`，对用户可见 API 变更优先从此导入。
-  - DOM props：统一使用规范化的 `class`/`className`，对象 `style` 通过 `CSSStyleDeclaration` 赋值（不支持的键退回 `setProperty`），事件必须是 `onX` 函数。
-  - Effect/Scope：父 effect 停止时会清理子 effect；不要手动改依赖桶，使用已有 cleanup 注册机制。
-  - 组件/渲染：`createApp` 未 `unmount` 前禁止重复挂载；无壳 JSX 直接复用 `renderDomRoot`。
-- 工作流
-  - 安装：`pnpm install`（默认使用 pnpm）。
-  - 构建库：`pnpm build`（tsdown 打包 + 生成 JSX shim），开发监听：`pnpm dev`。
-  - Playground：`pnpm play`（Vite dev，走 `vite.config.ts` 别名），生产预览：`pnpm play:build` / `pnpm play:preview`。
-  - 测试：`pnpm test`（Vitest + jsdom，无超时，`test/setup.ts`），按模块分布在 `test/**`（reactivity、runtime-dom、jsx-runtime）。
-  - Lint：`pnpm lint` 跑 oxlint + eslint；类型检查：`pnpm typecheck`；格式化：`pnpm format`。
-  - API 报告：`pnpm api` 基于 `api-extractor.jsonc`，发布流程 `pnpm release`（bumpp + publish），`prepublishOnly` 会先构建。
-- 修改提示
-  - 优先在现有目录内拆小模块（`reactivity`、`runtime-core`、`runtime-dom`、`jsx-*`、`shared`）；平台无关逻辑留在 `runtime-core`，DOM 细节放 `runtime-dom`。
-  - 包装用户回调时保留 `handleError` 路由；新增执行入口用 `shared` 的 `runSilent`/`runThrowing`。
-  - 扩展 DOM 能力时保持 props 归一化与 HMR 行为，更新 `patch-props.ts` 并补充 `test/runtime-dom/**`。
-  - 新特性请在对应区域补测试（如响应式行为 -> `test/reactivity`，JSX 变更 -> `test/jsx-runtime`）。
+本仓库是简化版 Vue 3 运行时：响应式 + 平台无关渲染器 + DOM 宿主 glue + JSX 运行时。目标是让改动能快速落到正确分层与现有模式中。
 
-  - 文件删除约束
-    - 删除文件/目录必须使用命令行（例如 `rm` / `rm -r`）。
-    - 只能删除当前项目内部文件，且删除时只能使用相对路径（从仓库根目录起算），禁止使用绝对路径。
-    - 不存在可用的“删除文件”工具；不要尝试用任何删除工具/补丁去删文件（必定失败）。
+## 结构与数据流（先找这些文件）
 
-- 交流与输出：代码注释、日志输出（含 print/console）、对话回复均使用简体中文。
+- 对外入口：`src/index.ts`（所有用户可见 API 从这里导出）。
+- JSX 入口：`src/jsx-runtime.ts` / `src/jsx-dev-runtime.ts`，实现位于 `src/jsx-runtime/**` 与 `src/jsx-foundation/**`。
+- `src/jsx-foundation/**`：vnode 工厂与 children 归一化等基础能力。
+- `src/jsx-runtime/**`：`h`/`jsx`/`jsxs`/`jsxDEV` 等运行时封装。
+- `src/reactivity/**`：响应式系统（effect/ref/computed/watch/effectScope 等）。
+- `src/runtime-core/**`：平台无关渲染核心与组件/挂载流程。
+- `src/runtime-dom/**`：DOM 宿主 glue（createApp、renderer options、props 映射等）。
+- `src/router/**`：简化路由实现与组件（`RouterLink`/`RouterView`）。
+- `src/shared/**`：跨子域共享工具与错误通道（内部 runner + 对外 `setErrorHandler`）。
+- `src/messages/**`：按子域集中管理错误/警告文案，统一由 `src/messages/index.ts` 导出。
+- `test/**`：按子域组织的 Vitest 用例（reactivity/runtime-dom/runtime-core/jsx-runtime/shared 等），全局 setup 在 `test/setup.ts`。
+
+## 本项目特有约定（TS / 导入 / 边界）
+
+- TypeScript ESM：源码内部导入保持显式 `.ts` 扩展名（`allowImportingTsExtensions: true`）。
+- 路径别名：`@/* -> src/*`，`#/* -> playground/src/*`；`jsxImportSource: '@'`。
+- `src` 一级目录视为边界：在同一边界内部禁止用 `@/当前边界/...`，必须用相对路径（对应检查脚本：`scripts/check/import/check-src-import-boundary.ts`）。
+  - ✅ `src/reactivity/**` 内：`import { isNil } from '@/shared/index.ts'`
+  - ❌ `src/reactivity/**` 内：`import { reactive } from '@/reactivity/index.ts'`
+
+## 常用工作流（pnpm）
+
+- 安装：`pnpm install`
+- 开发：`pnpm play`（Vite playground） / `pnpm dev`（tsdown watch）
+- 测试：`pnpm test`；更推荐 `pnpm test:browser`；调试用 `pnpm test:inspect`
+- 构建：`pnpm build`（tsdown + 生成 JSX shim）
+
+## Agent 执行约束
+
+- 不要主动运行格式化/静态检查命令（`pnpm format`/`pnpm lint`/`pnpm typecheck`）；测试允许执行。
+- 生成/建议提交信息时，遵循提交规范：[`/.copilot-commit-message-instructions.md`](../.copilot-commit-message-instructions.md)
+- 删除文件/目录必须走命令行 `rm`/`rm -r`，且只能使用从仓库根目录起算的相对路径。
+- 代码注释、日志输出、对话回复统一使用简体中文。
+- 更完整的 Agent 约定见：[`src/AGENTS.md`](../src/AGENTS.md)

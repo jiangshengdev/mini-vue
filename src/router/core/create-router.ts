@@ -3,6 +3,7 @@ import { getQueryAndHash, normalizePath } from './paths.ts'
 import type { RouteLocation, Router, RouterConfig, RouteRecord } from './types.ts'
 import type { Ref } from '@/reactivity/index.ts'
 import { ref } from '@/reactivity/index.ts'
+import { routerDuplicateInstallOnApp } from '@/messages/index.ts'
 
 /**
  * Router 作为插件安装时，app 侧需要具备的最小能力子集。
@@ -16,6 +17,9 @@ type InstallableApp = Parameters<Router['install']>[0]
 /** 是否处于浏览器环境并支持 history/popstate 事件。 */
 const canUseWindowEvents =
   globalThis.window !== undefined && typeof window.addEventListener === 'function'
+
+/** 记录已安装任意 router 的 app，避免重复安装。 */
+const appsWithRouter = new WeakSet<InstallableApp>()
 
 /**
  * 读取当前浏览器路径；无 window 环境时退回根路径。
@@ -118,7 +122,11 @@ export function createRouter(config: RouterConfig): Router {
      * - 当所有安装该 router 的 app 都卸载后自动 stop。
      */
     install(app) {
-      /* 同一 app 多次 install 直接忽略，避免重复注入与计数错误。 */
+      if (appsWithRouter.has(app)) {
+        throw new Error(routerDuplicateInstallOnApp)
+      }
+
+      /* 防御重复 install：当前 router 已记录该 app 时直接忽略。 */
       if (installedApps.has(app)) {
         return
       }
@@ -127,6 +135,7 @@ export function createRouter(config: RouterConfig): Router {
       const isFirstInstall = installedApps.size === 0
 
       installedApps.add(app)
+      appsWithRouter.add(app)
 
       if (isFirstInstall) {
         start()

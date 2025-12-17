@@ -4,7 +4,7 @@ export {
   reactivityScopeDisposeOutside,
   reactivityUnsupportedType,
 } from './reactivity.ts'
-export { routerNotFound } from './router.ts'
+export { routerDuplicateInstallOnApp, routerNotFound } from './router.ts'
 export {
   runtimeCoreAppAlreadyMounted,
   runtimeCoreAsyncSetupNotSupported,

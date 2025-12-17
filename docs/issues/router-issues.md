@@ -35,11 +35,11 @@
 - 验证结论：成立。
 - 修复：默认保持大小写敏感，不再在 `normalizePath` 中强制小写化路径；匹配策略不改写用户输入与地址栏显示。
 
-## 5. 同一 `app` 安装多个 `router` 时会产生多层 `unmount` 包装（已验证，影响修正）
+## 5. 同一 `app` 安装多个 `router` 时会产生多层 `unmount` 包装（已修复）
 
 - 位置：`src/router/core/create-router.ts`
 - 现状：每个 router 在 `install` 时都会在满足条件时把 `app.unmount` 替换为包装函数。若同一个 `app` 依次 `use(routerA)`、`use(routerB)`，则 `routerB` 捕获的 `rawUnmount` 实际是 `routerA` 已包装过的版本，最终形成调用链：`routerB wrapper -> routerA wrapper -> 原始 unmount`。
 - 影响：不会导致“先安装的 router 清理逻辑失效”（两者的清理逻辑都会执行），但会导致 `unmount` 包装层数增长、逻辑耦合变复杂，也更难调试。
 - 验证结论：成立（会多层包装）；“导致前一个 router 清理逻辑失效”的结论不成立。
-- 下一步（最简方案 A）：不支持同一 `app` 安装多个 `router`；在第二次（及之后）`install` 时直接抛错，避免 `unmount` 产生多层包装。
-- 测试建议：新增“同一 app 重复安装 router 会抛错”的用例。
+- 修复：不支持同一 `app` 安装多个 `router`；在第二次（及之后）`install` 时直接抛错，避免 `unmount` 产生多层包装。
+- 测试：`test/runtime-dom/app/router-injection.test.tsx`

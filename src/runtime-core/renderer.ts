@@ -5,7 +5,7 @@ import type { AppContext } from './create-app.ts'
 import type { MountedHandle } from './mount/index.ts'
 import { mountChild } from './mount/index.ts'
 import { normalizeRenderOutput } from './normalize.ts'
-import type { RenderOutput, VirtualNode } from '@/jsx-foundation/index.ts'
+import type { RenderOutput } from '@/jsx-foundation/index.ts'
 import { isVirtualNode } from '@/jsx-foundation/index.ts'
 import { runtimeCoreInvalidContainer } from '@/messages/index.ts'
 import type { PropsShape } from '@/shared/index.ts'
@@ -38,7 +38,7 @@ export interface RendererOptions<
    * 将 virtualNode props 映射到真实元素节点。
    * 传入 null 时代表没有任何 props 需要处理。
    */
-  patchProps(element: HostElement, prevProps?: PropsShape, nextProps?: PropsShape): void
+  patchProps(element: HostElement, previousProps?: PropsShape, nextProps?: PropsShape): void
 }
 
 /** 根级渲染函数签名，负责将顶层子树挂载到容器。 */
@@ -79,11 +79,11 @@ export function createRenderer<
     const isObjectLike = typeof container === 'object' && container !== null
     const isCallable = typeof container === 'function'
 
-    if (!isObjectLike && !isCallable) {
-      throw new TypeError(runtimeCoreInvalidContainer)
+    if (isObjectLike || isCallable) {
+      return container
     }
 
-    return container
+    throw new TypeError(runtimeCoreInvalidContainer)
   }
 
   /**
@@ -92,12 +92,10 @@ export function createRenderer<
   function teardownContainer(container: HostElement): void {
     const mounted = mountedHandlesByContainer.get(asContainerKey(container))
 
-    if (!mounted) {
-      return
+    if (mounted) {
+      mounted.teardown()
+      mountedHandlesByContainer.delete(asContainerKey(container))
     }
-
-    mounted.teardown()
-    mountedHandlesByContainer.delete(asContainerKey(container))
   }
 
   /**
@@ -107,19 +105,20 @@ export function createRenderer<
     teardownContainer(container)
     clear(container)
     const normalized = normalizeRenderOutput(virtualNode)
-    const appContext =
-      (isVirtualNode(normalized)
-        ? (normalized as { appContext?: AppContext }).appContext
-        : undefined) ??
-      (isVirtualNode(virtualNode)
-        ? (virtualNode as { appContext?: AppContext }).appContext
-        : undefined)
-    const mounted =
-      normalized !== undefined
-        ? mountChild(options, normalized as never, container, {
-            appContext,
-          })
-        : undefined
+    const normalizedAppContext = isVirtualNode(normalized)
+      ? (normalized as { appContext?: AppContext }).appContext
+      : undefined
+    const rawAppContext = isVirtualNode(virtualNode)
+      ? (virtualNode as { appContext?: AppContext }).appContext
+      : undefined
+    const appContext = normalizedAppContext ?? rawAppContext
+    let mounted: MountedHandle<HostNode> | undefined
+
+    if (normalized !== undefined) {
+      mounted = mountChild(options, normalized as never, container, {
+        appContext,
+      })
+    }
 
     if (mounted) {
       mountedHandlesByContainer.set(asContainerKey(container), mounted)

@@ -1,11 +1,11 @@
 import { resolveComponentProps } from '../component/props.ts'
 import { assignElementRef, resolveElementRefBinding } from '../mount/element.ts'
-import type { RendererOptions } from '../renderer.ts'
 import { mountChild } from '../mount/index.ts'
+import type { RendererOptions } from '../renderer.ts'
 import { asRuntimeVNode } from '../vnode.ts'
+import { patchChildren } from './children.ts'
 import type { ContainerLike, PatchContext } from './context.ts'
 import { normalizeMountContext } from './context.ts'
-import { patchChildren } from './children.ts'
 import { isSameVirtualNode, moveNodes, syncRuntimeMetadata, unmount } from './utils.ts'
 import type { VirtualNode } from '@/jsx-foundation/index.ts'
 import { Fragment, Text } from '@/jsx-foundation/index.ts'
@@ -16,17 +16,17 @@ export function patchChild<
   HostFragment extends HostNode,
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
-  prev: VirtualNode | undefined,
+  previous: VirtualNode | undefined,
   next: VirtualNode | undefined,
   container: ContainerLike<HostNode, HostElement, HostFragment>,
   anchor?: HostNode,
   context?: PatchContext,
 ): void {
-  if (prev === next) {
+  if (previous === next) {
     return
   }
 
-  if (!prev) {
+  if (!previous) {
     if (!next) {
       return
     }
@@ -41,18 +41,18 @@ export function patchChild<
   }
 
   if (!next) {
-    unmount(options, prev)
+    unmount(options, previous)
 
     return
   }
 
-  if (isSameVirtualNode(prev, next)) {
-    patchExisting(options, prev, next, container, anchor, context)
+  if (isSameVirtualNode(previous, next)) {
+    patchExisting(options, previous, next, container, anchor, context)
 
     return
   }
 
-  unmount(options, prev)
+  unmount(options, previous)
   const mounted = mountChild(options, next, container, normalizeMountContext(context))
 
   if (mounted && anchor) {
@@ -66,21 +66,21 @@ function patchExisting<
   HostFragment extends HostNode,
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
-  prev: VirtualNode,
+  previous: VirtualNode,
   next: VirtualNode,
   container: ContainerLike<HostNode, HostElement, HostFragment>,
   anchor?: HostNode,
   context?: PatchContext,
 ): void {
   if (next.type === Text) {
-    const runtimePrev = asRuntimeVNode<HostNode, HostElement, HostFragment>(prev)
+    const runtimePrevious = asRuntimeVNode<HostNode, HostElement, HostFragment>(previous)
     const runtimeNext = asRuntimeVNode<HostNode, HostElement, HostFragment>(next)
 
-    syncRuntimeMetadata(runtimePrev, runtimeNext, { component: undefined })
+    syncRuntimeMetadata(runtimePrevious, runtimeNext, { component: undefined })
 
-    if (runtimePrev.el) {
+    if (runtimePrevious.el) {
       options.setText(
-        runtimePrev.el,
+        runtimePrevious.el,
         (next as VirtualNode<typeof Text> & { text?: string }).text ?? '',
       )
     }
@@ -89,18 +89,18 @@ function patchExisting<
   }
 
   if (next.type === Fragment) {
-    const runtimePrev = asRuntimeVNode<HostNode, HostElement, HostFragment>(prev)
+    const runtimePrevious = asRuntimeVNode<HostNode, HostElement, HostFragment>(previous)
     const runtimeNext = asRuntimeVNode<HostNode, HostElement, HostFragment>(next)
 
-    syncRuntimeMetadata(runtimePrev, runtimeNext, { component: undefined })
+    syncRuntimeMetadata(runtimePrevious, runtimeNext, { component: undefined })
 
     patchChildren(
       options,
-      prev.children,
+      previous.children,
       next.children,
       container,
       patchChild,
-      runtimePrev.anchor ?? anchor,
+      runtimePrevious.anchor ?? anchor,
       context,
     )
 
@@ -108,12 +108,12 @@ function patchExisting<
   }
 
   if (typeof next.type === 'function') {
-    patchComponent(options, prev, next, container, anchor, context)
+    patchComponent(options, previous, next, container, anchor, context)
 
     return
   }
 
-  patchElement(options, prev, next, container, anchor, context)
+  patchElement(options, previous, next, anchor, context)
 }
 
 function patchElement<
@@ -122,33 +122,32 @@ function patchElement<
   HostFragment extends HostNode,
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
-  prev: VirtualNode,
+  previous: VirtualNode,
   next: VirtualNode,
-  container: ContainerLike<HostNode, HostElement, HostFragment>,
   anchor: HostNode | undefined,
   context?: PatchContext,
 ): void {
-  const runtimePrev = asRuntimeVNode<HostNode, HostElement, HostFragment>(prev)
+  const runtimePrevious = asRuntimeVNode<HostNode, HostElement, HostFragment>(previous)
   const runtimeNext = asRuntimeVNode<HostNode, HostElement, HostFragment>(next)
-  const el = runtimePrev.el as HostElement
+  const element = runtimePrevious.el as HostElement
 
-  syncRuntimeMetadata(runtimePrev, runtimeNext, {
+  syncRuntimeMetadata(runtimePrevious, runtimeNext, {
     anchor: undefined,
     component: undefined,
   })
 
-  const prevRef = resolveElementRefBinding<HostElement>(prev.props?.ref)
+  const previousRef = resolveElementRefBinding<HostElement>(previous.props?.ref)
   const nextRef = resolveElementRefBinding<HostElement>(next.props?.ref)
 
-  if (prevRef) {
-    assignElementRef(prevRef, undefined)
+  if (previousRef) {
+    assignElementRef(previousRef, undefined)
   }
 
-  options.patchProps(el, prev.props, next.props)
-  patchChildren(options, prev.children, next.children, el, patchChild, anchor, context)
+  options.patchProps(element, previous.props, next.props)
+  patchChildren(options, previous.children, next.children, element, patchChild, anchor, context)
 
   if (nextRef) {
-    assignElementRef(nextRef, el)
+    assignElementRef(nextRef, element)
   }
 }
 
@@ -158,15 +157,15 @@ function patchComponent<
   HostFragment extends HostNode,
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
-  prev: VirtualNode,
+  previous: VirtualNode,
   next: VirtualNode,
   container: ContainerLike<HostNode, HostElement, HostFragment>,
   anchor: HostNode | undefined,
   context?: PatchContext,
 ): void {
-  const runtimePrev = asRuntimeVNode<HostNode, HostElement, HostFragment>(prev)
+  const runtimePrevious = asRuntimeVNode<HostNode, HostElement, HostFragment>(previous)
   const runtimeNext = asRuntimeVNode<HostNode, HostElement, HostFragment>(next)
-  const instance = runtimePrev.component
+  const instance = runtimePrevious.component
 
   if (!instance) {
     const mounted = mountChild(options, next, container, normalizeMountContext(context))
@@ -178,7 +177,7 @@ function patchComponent<
     return
   }
 
-  syncRuntimeMetadata(runtimePrev, runtimeNext, { component: instance })
+  syncRuntimeMetadata(runtimePrevious, runtimeNext, { component: instance })
   instance.props = resolveComponentProps(next as never)
   const runner = instance.effect?.run.bind(instance.effect)
 

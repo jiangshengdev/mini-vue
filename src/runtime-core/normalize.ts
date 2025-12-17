@@ -1,7 +1,7 @@
 import {
-  Fragment,
   createTextVirtualNode,
   createVirtualNode,
+  Fragment,
   isVirtualNode,
 } from '@/jsx-foundation/index.ts'
 import type {
@@ -12,7 +12,7 @@ import type {
 } from '@/jsx-foundation/index.ts'
 import { isNil } from '@/shared/index.ts'
 
-export type NormalizedRenderOutput = VirtualNode | RenderOutput | undefined
+export type NormalizedRenderOutput = VirtualNode | undefined
 
 /**
  * 将 render 返回的结果规整为 runtime-core 可消费的 VirtualNode。
@@ -23,38 +23,38 @@ export function normalizeRenderOutput(output: RenderOutput): NormalizedRenderOut
   }
 
   if (Array.isArray(output)) {
-    return normalizeVNodeForRuntime(
-      createVirtualNode({
-        type: Fragment,
-        rawProps: {
-          children: output as ComponentChildren,
-        } as FragmentProps,
-      }),
-    )
+    const fragmentVnode = createVirtualNode({
+      type: Fragment,
+      rawProps: {
+        children: output as ComponentChildren,
+      } satisfies FragmentProps,
+    })
+
+    return normalizeVnodeForRuntime(fragmentVnode)
   }
 
   if (isVirtualNode(output)) {
-    return normalizeVNodeForRuntime(output)
+    return normalizeVnodeForRuntime(output)
   }
 
   if (typeof output === 'string' || typeof output === 'number') {
     return createTextVirtualNode(output)
   }
 
-  return output
+  return undefined
 }
 
-function normalizeVNodeForRuntime(vnode: VirtualNode): VirtualNode {
+function normalizeVnodeForRuntime(vnode: VirtualNode): VirtualNode {
   const children = vnode.children.map((child) => {
     if (isVirtualNode(child)) {
-      return normalizeVNodeForRuntime(child)
+      return normalizeVnodeForRuntime(child)
     }
 
     if (typeof child === 'string' || typeof child === 'number') {
       return createTextVirtualNode(child)
     }
 
-    return child as never
+    return child
   })
 
   return {

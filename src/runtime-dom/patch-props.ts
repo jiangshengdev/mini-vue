@@ -16,6 +16,7 @@ export type ElementRef = ((element: Element | undefined) => void) | Ref<Element 
 /** 扩展原生 style 声明，允许对任意属性键执行写入。 */
 type WritableStyle = CSSStyleDeclaration & Record<string, string | undefined>
 
+/** 写入单个样式属性，兼容标准属性名与自定义属性名。 */
 function setStyleValue(element: HTMLElement, property: string, input: string): void {
   if (Reflect.has(element.style, property)) {
     ;(element.style as WritableStyle)[property] = input
@@ -179,6 +180,9 @@ type EventInvoker = ((event: Event) => void) & { value?: EventListener }
 
 const invokerCacheKey = '__miniVueInvokers__'
 
+/**
+ * 为事件绑定创建稳定的包装函数，保证增删逻辑复用同一引用。
+ */
 function patchEvent(
   element: HTMLElement,
   eventName: string,
@@ -210,6 +214,9 @@ function patchEvent(
   }
 }
 
+/**
+ * 获取或初始化当前元素的事件 invoker 映射，避免多次创建对象。
+ */
 function getInvokerMap(element: HTMLElement): Record<string, EventInvoker> {
   const record = (element as HTMLElement & { [invokerCacheKey]?: Record<string, EventInvoker> })[
     invokerCacheKey

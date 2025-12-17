@@ -250,7 +250,7 @@ function insertRemainingChildren<
     state.environment.anchor,
   )
 
-  for (let index = range.oldStart; index <= range.newEnd; index += 1) {
+  for (let index = range.newStart; index <= range.newEnd; index += 1) {
     const childEnvironment = createChildEnvironment(
       state.environment,
       index,

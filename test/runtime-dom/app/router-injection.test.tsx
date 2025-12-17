@@ -205,4 +205,105 @@ describe('runtime-dom: router injection', () => {
     app.unmount()
     router.stop()
   })
+
+  it('RouterLink keeps default behavior for modifier/middle clicks', () => {
+    const Home: SetupComponent = () => {
+      return () => {
+        return undefined
+      }
+    }
+
+    const NotFound: SetupComponent = () => {
+      return () => {
+        return undefined
+      }
+    }
+
+    const router = createRouter({
+      routes: [{ path: '/', component: Home }],
+      fallback: NotFound,
+    })
+
+    const navigateSpy = vi.spyOn(router, 'navigate')
+
+    const Root: SetupComponent = () => {
+      return () => {
+        return <RouterLink to="/counter">go</RouterLink>
+      }
+    }
+
+    const app = createApp(Root)
+
+    app.use(router)
+    app.mount(createTestContainer())
+
+    const anchor = document.querySelector('a')
+
+    expect(anchor).toBeTruthy()
+
+    const dispatch = (init?: MouseEventInit): boolean => {
+      return anchor!.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, ...init }))
+    }
+
+    expect(dispatch({ metaKey: true })).toBe(true)
+    expect(dispatch({ ctrlKey: true })).toBe(true)
+    expect(dispatch({ shiftKey: true })).toBe(true)
+    expect(dispatch({ altKey: true })).toBe(true)
+    expect(dispatch({ button: 1 })).toBe(true)
+
+    const prevented = new MouseEvent('click', { bubbles: true, cancelable: true })
+    prevented.preventDefault()
+    expect(anchor!.dispatchEvent(prevented)).toBe(false)
+
+    expect(navigateSpy).not.toHaveBeenCalled()
+
+    app.unmount()
+    router.stop()
+  })
+
+  it('RouterLink leaves target=_blank navigation to browser', () => {
+    const Home: SetupComponent = () => {
+      return () => {
+        return undefined
+      }
+    }
+
+    const NotFound: SetupComponent = () => {
+      return () => {
+        return undefined
+      }
+    }
+
+    const router = createRouter({
+      routes: [{ path: '/', component: Home }],
+      fallback: NotFound,
+    })
+
+    const navigateSpy = vi.spyOn(router, 'navigate')
+
+    const Root: SetupComponent = () => {
+      return () => {
+        return (
+          <RouterLink to="/counter" target="_blank">
+            go
+          </RouterLink>
+        )
+      }
+    }
+
+    const app = createApp(Root)
+
+    app.use(router)
+    app.mount(createTestContainer())
+
+    const anchor = document.querySelector('a')
+
+    expect(anchor).toBeTruthy()
+
+    expect(anchor!.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))).toBe(true)
+    expect(navigateSpy).not.toHaveBeenCalled()
+
+    app.unmount()
+    router.stop()
+  })
 })

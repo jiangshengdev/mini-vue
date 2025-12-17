@@ -2,7 +2,7 @@
  * DOM 专用的属性打补丁逻辑，负责将 virtualNode props 应用到真实元素上。
  */
 import { normalizeClass } from './normalize-class.ts'
-import { runtimeDomUnsupportedAttrValue } from '@/messages/index.ts'
+import { runtimeDomInvalidStyleValue, runtimeDomUnsupportedAttrValue } from '@/messages/index.ts'
 import type { Ref } from '@/reactivity/index.ts'
 import { isRef } from '@/reactivity/index.ts'
 import type { PropsShape } from '@/shared/index.ts'
@@ -15,6 +15,14 @@ export type ElementRef = ((element: Element | undefined) => void) | Ref<Element 
 
 /** 扩展原生 style 声明，允许对任意属性键执行写入。 */
 type WritableStyle = CSSStyleDeclaration & Record<string, string | undefined>
+
+function setStyleValue(element: HTMLElement, property: string, input: string): void {
+  if (Reflect.has(element.style, property)) {
+    ;(element.style as WritableStyle)[property] = input
+  } else {
+    element.style.setProperty(property, input)
+  }
+}
 
 /**
  * 检测 props key 是否表示事件绑定（如 onClick/oninput）。
@@ -83,15 +91,24 @@ function applyStyle(element: HTMLElement, value: unknown): void {
   /* 对象形式逐项设置：优先走属性写入，不支持的属性退回 setProperty。 */
   if (isObject(value)) {
     for (const [name, styleValue] of Object.entries(value as Record<string, unknown>)) {
-      const resolved = styleValue ?? ''
+      if (isNil(styleValue)) {
+        setStyleValue(element, name, '')
+
+        continue
+      }
+
+      if (typeof styleValue !== 'string' && typeof styleValue !== 'number') {
+        if (__DEV__) {
+          console.warn(runtimeDomInvalidStyleValue, name, styleValue)
+        }
+
+        continue
+      }
+
+      const stringValue: string = typeof styleValue === 'number' ? String(styleValue) : styleValue
 
       /* 支持的内联属性直接赋值，可避免多余字符串拼接。 */
-      if (Reflect.has(element.style, name)) {
-        ;(element.style as WritableStyle)[name] = String(resolved)
-      } else {
-        /* 非声明属性使用 setProperty，兼容 CSS 自定义变量等场景。 */
-        element.style.setProperty(name, String(resolved))
-      }
+      setStyleValue(element, name, stringValue)
     }
   }
 }

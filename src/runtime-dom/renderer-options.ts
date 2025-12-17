@@ -53,6 +53,12 @@ export const domRendererOptions: RendererOptions<Node, Element, DocumentFragment
   remove(node): void {
     ;(node as ChildNode).remove()
   },
+  /**
+   * 更新文本节点的内容，避免重新创建节点。
+   */
+  setText(node, text): void {
+    ;(node as Text).nodeValue = text
+  },
   /** DOM 属性打补丁逻辑，转发到专用实现。 */
   patchProps,
 }

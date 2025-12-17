@@ -32,10 +32,15 @@ export interface RendererOptions<
   /** 将宿主节点从其父容器中移除。 */
   remove(node: HostNode): void
   /**
-   * 将 virtualNode props 映射到真实元素节点。
-   * 传入 null 时代表没有任何 props 需要处理。
+   * 更新文本节点的文本内容。
    */
-  patchProps(element: HostElement, props?: PropsShape): void
+  setText(node: HostNode, text: string): void
+  /**
+   * 将 virtualNode props 差量映射到真实元素节点。
+   * mount 时 prevProps 为 undefined，表示全部应用 nextProps。
+   * update 时比对 prevProps 与 nextProps 的差异，添加/更新/移除对应属性。
+   */
+  patchProps(element: HostElement, prevProps?: PropsShape, nextProps?: PropsShape): void
 }
 
 /** 根级渲染函数签名，负责将顶层子树挂载到容器。 */

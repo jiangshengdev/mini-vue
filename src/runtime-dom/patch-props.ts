@@ -2,7 +2,7 @@
  * DOM 专用的属性打补丁逻辑，负责将 virtualNode props 应用到真实元素上。
  */
 import { normalizeClass } from './normalize-class.ts'
-import { runtimeDomInvalidStyleValue } from '@/messages/index.ts'
+import { runtimeDomInvalidStyleValue, runtimeDomUnsupportedAttrValue } from '@/messages/index.ts'
 import type { Ref } from '@/reactivity/index.ts'
 import { isRef } from '@/reactivity/index.ts'
 import type { PropsShape } from '@/shared/index.ts'
@@ -131,8 +131,16 @@ function patchDomAttr(element: Element, key: string, value: unknown): void {
     return
   }
 
-  /* 其他值一律字符串化后写入。 */
-  element.setAttribute(key, String(value))
+  /* 仅接受字符串或数字，其他类型直接忽略写入。 */
+  if (typeof value === 'string' || typeof value === 'number') {
+    element.setAttribute(key, String(value))
+
+    return
+  }
+
+  if (__DEV__) {
+    console.warn(runtimeDomUnsupportedAttrValue(key, typeof value), value)
+  }
 }
 
 function isElementRef(value: unknown): value is ElementRef {

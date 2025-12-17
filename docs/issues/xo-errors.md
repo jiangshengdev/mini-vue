@@ -65,6 +65,7 @@ playground/src/views/home.tsx:2:22
 
 ## 2. `patchDomAttr` 对 `value` 直接 `String(...)`（1 处）
 
+- 状态：已修复（仅接受字符串/数字，其他类型在 Dev 警告并跳过写入）
 - 位置：`src/runtime-dom/patch-props.ts`
   - `117:36`（`element.setAttribute(key, String(value))`）
 - 规则：`@typescript-eslint/no-base-to-string`

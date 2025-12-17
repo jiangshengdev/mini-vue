@@ -112,12 +112,11 @@ export function createRenderer<
       ? (virtualNode as { appContext?: AppContext }).appContext
       : undefined
     const appContext = normalizedAppContext ?? rawAppContext
+    const childToMount = (normalized ?? virtualNode) as RenderOutput | undefined
     let mounted: MountedHandle<HostNode> | undefined
 
-    if (normalized !== undefined) {
-      mounted = mountChild(options, normalized as never, container, {
-        appContext,
-      })
+    if (childToMount !== undefined) {
+      mounted = mountChild(options, childToMount as never, container, { appContext })
     }
 
     if (mounted) {

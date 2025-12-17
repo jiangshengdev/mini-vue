@@ -27,6 +27,20 @@ function getCurrentBrowserPath(): string {
 }
 
 /**
+ * 提取路径中的 query 与 hash 片段（若不存在则返回空字符串）。
+ */
+function extractQueryAndHash(path: string): string {
+  const hashIndex = path.indexOf('#')
+  const queryIndex = path.indexOf('?')
+  const cutIndex = Math.min(
+    hashIndex === -1 ? path.length : hashIndex,
+    queryIndex === -1 ? path.length : queryIndex,
+  )
+
+  return path.slice(cutIndex)
+}
+
+/**
  * 基于 history 的最小路由实现，封装路径匹配与状态同步。
  */
 export function createRouter(config: RouterConfig): Router {
@@ -90,16 +104,19 @@ export function createRouter(config: RouterConfig): Router {
    * 主动导航到目标路径，写入 history 并刷新 currentRoute。
    */
   const navigate = (path: string): void => {
-    const target = normalizePath(path)
-
-    /* 目标与当前一致时跳过，避免重复 pushState。 */
-    if (target === currentRoute.value.path) return
+    const normalizedPath = normalizePath(path)
+    const queryAndHash = extractQueryAndHash(path)
+    const historyTarget = `${normalizedPath}${queryAndHash}`
 
     if (canUseWindowEvents) {
-      globalThis.history.pushState(null, '', target)
+      const currentUrl = `${globalThis.location.pathname ?? ''}${globalThis.location.search ?? ''}${globalThis.location.hash ?? ''}`
+
+      if (historyTarget !== currentUrl) {
+        globalThis.history.pushState(null, '', historyTarget)
+      }
     }
 
-    currentRoute.value = matchRoute(target)
+    currentRoute.value = matchRoute(normalizedPath)
   }
 
   const router: Router = {

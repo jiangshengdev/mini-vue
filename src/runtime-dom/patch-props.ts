@@ -93,6 +93,18 @@ function applyStyle(element: HTMLElement, previous: unknown, next: unknown): voi
 
   if (isObject(next)) {
     const nextStyle = next as Record<string, unknown>
+    if (Object.values(nextStyle).every(isNil)) {
+      element.removeAttribute('style')
+
+      /* Playwright 浏览器下偶发保留空 style 特性，显式清空后再移除确保属性消失。 */
+      if (element.getAttribute('style') !== null) {
+        element.style.cssText = ''
+        element.removeAttribute('style')
+      }
+
+      return
+    }
+
     const previousStyle = isObject(previous) ? (previous as Record<string, unknown>) : {}
     let hasValue = false
 

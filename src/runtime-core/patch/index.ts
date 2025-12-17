@@ -5,6 +5,7 @@ import type { RendererOptions } from '../renderer.ts'
 import { resolveComponentProps } from '../component/props.ts'
 import type { ComponentInstance } from '../component/context.ts'
 import { asRuntimeVNode } from '../vnode.ts'
+import type { RuntimeVNode } from '../vnode.ts'
 import type { SetupComponent, VirtualNode, VirtualNodeChild } from '@/jsx-foundation/index.ts'
 import { Fragment, Text } from '@/jsx-foundation/index.ts'
 
@@ -83,10 +84,7 @@ function patchExisting<
     const runtimePrev = asRuntimeVNode<HostNode, HostElement, HostFragment>(prev)
     const runtimeNext = asRuntimeVNode<HostNode, HostElement, HostFragment>(next)
 
-    runtimeNext.el = runtimePrev.el
-    runtimeNext.handle = runtimePrev.handle
-    runtimeNext.anchor = runtimePrev.anchor
-    runtimeNext.component = undefined
+    syncRuntimeMetadata(runtimePrev, runtimeNext, { component: undefined })
 
     if (runtimePrev.el) {
       options.setText(runtimePrev.el, (next as VirtualNode<typeof Text> & { text?: string }).text ?? '')
@@ -99,10 +97,7 @@ function patchExisting<
     const runtimePrev = asRuntimeVNode<HostNode, HostElement, HostFragment>(prev)
     const runtimeNext = asRuntimeVNode<HostNode, HostElement, HostFragment>(next)
 
-    runtimeNext.el = runtimePrev.el
-    runtimeNext.anchor = runtimePrev.anchor
-    runtimeNext.handle = runtimePrev.handle
-    runtimeNext.component = undefined
+    syncRuntimeMetadata(runtimePrev, runtimeNext, { component: undefined })
 
     patchChildren(
       options,
@@ -141,10 +136,10 @@ function patchElement<
   const runtimeNext = asRuntimeVNode<HostNode, HostElement, HostFragment>(next)
   const el = runtimePrev.el as HostElement
 
-  runtimeNext.el = el
-  runtimeNext.anchor = undefined
-  runtimeNext.handle = runtimePrev.handle
-  runtimeNext.component = undefined
+  syncRuntimeMetadata(runtimePrev, runtimeNext, {
+    anchor: undefined,
+    component: undefined,
+  })
 
   const prevRef = resolveElementRefBinding<HostElement>(prev.props?.ref)
   const nextRef = resolveElementRefBinding<HostElement>(next.props?.ref)
@@ -187,10 +182,7 @@ function patchComponent<
     return
   }
 
-  runtimeNext.component = instance
-  runtimeNext.handle = runtimePrev.handle
-  runtimeNext.el = runtimePrev.el
-  runtimeNext.anchor = runtimePrev.anchor
+  syncRuntimeMetadata(runtimePrev, runtimeNext, { component: instance })
   instance.props = resolveComponentProps(next as never)
   const runner = instance.effect?.run.bind(instance.effect)
 
@@ -493,6 +485,26 @@ function hasKeys(children: VirtualNodeChild[]): boolean {
 
     return vnode?.key != null
   })
+}
+
+function syncRuntimeMetadata<
+  HostNode,
+  HostElement extends HostNode & WeakKey,
+  HostFragment extends HostNode,
+>(
+  runtimePrev: RuntimeVNode<HostNode, HostElement, HostFragment>,
+  runtimeNext: RuntimeVNode<HostNode, HostElement, HostFragment>,
+  overrides?: {
+    anchor?: HostNode | undefined
+    component?: RuntimeVNode<HostNode, HostElement, HostFragment>['component']
+  },
+): void {
+  runtimeNext.el = runtimePrev.el
+  runtimeNext.handle = runtimePrev.handle
+
+  runtimeNext.anchor = overrides && 'anchor' in overrides ? overrides.anchor : runtimePrev.anchor
+  runtimeNext.component =
+    overrides && 'component' in overrides ? overrides.component : runtimePrev.component
 }
 
 function normalizeMountContext(context?: PatchContext): MountContext {

@@ -1,9 +1,9 @@
 import type { RendererOptions } from '../index.ts'
+import { asRuntimeVNode } from '../vnode.ts'
 import type { MountContext } from './context.ts'
 import type { MountedHandle } from './handle.ts'
 import { mountVirtualNode } from './virtual-node.ts'
-import { asRuntimeVNode } from '../vnode.ts'
-import { Text, isVirtualNode } from '@/jsx-foundation/index.ts'
+import { isVirtualNode, Text } from '@/jsx-foundation/index.ts'
 import type { RenderOutput, VirtualNode } from '@/jsx-foundation/index.ts'
 import { runtimeCoreObjectChildWarning } from '@/messages/index.ts'
 import { __DEV__, isNil } from '@/shared/index.ts'
@@ -95,7 +95,9 @@ export function mountChild<
   /* 标准 virtualNode 交给 mountVirtualNode 处理组件或元素。 */
   if (isVirtualNode(child)) {
     if (child.type === Text) {
-      const textNode = createText((child as VirtualNode<typeof Text> & { text?: string }).text ?? '')
+      const textNode = createText(
+        (child as VirtualNode<typeof Text> & { text?: string }).text ?? '',
+      )
       const runtime = asRuntimeVNode<HostNode, HostElement, HostFragment>(child)
 
       appendChild(container, textNode)

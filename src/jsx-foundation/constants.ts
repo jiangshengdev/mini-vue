@@ -6,4 +6,5 @@ export const virtualNodeFlag = Symbol('isVirtualNode')
 /**
  * 特殊的文本节点类型标识。
  */
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Text = Symbol('Text')

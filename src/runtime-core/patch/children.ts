@@ -12,7 +12,7 @@ type PatchChildFunction<
   HostFragment extends HostNode,
 > = (
   options: RendererOptions<HostNode, HostElement, HostFragment>,
-  prev: VirtualNode | undefined,
+  previous: VirtualNode | undefined,
   next: VirtualNode | undefined,
   container: ContainerLike<HostNode, HostElement, HostFragment>,
   anchor?: HostNode,
@@ -25,22 +25,38 @@ export function patchChildren<
   HostFragment extends HostNode,
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
-  prevChildren: VirtualNodeChild[],
+  previousChildren: VirtualNodeChild[],
   nextChildren: VirtualNodeChild[],
   container: ContainerLike<HostNode, HostElement, HostFragment>,
   patchChild: PatchChildFunction<HostNode, HostElement, HostFragment>,
   anchor?: HostNode,
   context?: PatchContext,
 ): void {
-  const isKeyed = hasKeys(nextChildren) || hasKeys(prevChildren)
+  const isKeyed = hasKeys(nextChildren) || hasKeys(previousChildren)
 
   if (isKeyed) {
-    patchKeyedChildren(options, prevChildren, nextChildren, container, patchChild, anchor, context)
+    patchKeyedChildren(
+      options,
+      previousChildren,
+      nextChildren,
+      container,
+      patchChild,
+      anchor,
+      context,
+    )
 
     return
   }
 
-  patchUnkeyedChildren(options, prevChildren, nextChildren, container, patchChild, anchor, context)
+  patchUnkeyedChildren(
+    options,
+    previousChildren,
+    nextChildren,
+    container,
+    patchChild,
+    anchor,
+    context,
+  )
 }
 
 function patchUnkeyedChildren<
@@ -49,19 +65,19 @@ function patchUnkeyedChildren<
   HostFragment extends HostNode,
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
-  prevChildren: VirtualNodeChild[],
+  previousChildren: VirtualNodeChild[],
   nextChildren: VirtualNodeChild[],
   container: ContainerLike<HostNode, HostElement, HostFragment>,
   patchChild: PatchChildFunction<HostNode, HostElement, HostFragment>,
   anchor?: HostNode,
   context?: PatchContext,
 ): void {
-  const commonLength = Math.min(prevChildren.length, nextChildren.length)
+  const commonLength = Math.min(previousChildren.length, nextChildren.length)
 
   for (let index = 0; index < commonLength; index += 1) {
     patchChild(
       options,
-      prevChildren[index] as VirtualNode,
+      previousChildren[index] as VirtualNode,
       nextChildren[index] as VirtualNode,
       container,
       anchor,
@@ -69,19 +85,24 @@ function patchUnkeyedChildren<
     )
   }
 
-  if (nextChildren.length > prevChildren.length) {
+  if (nextChildren.length > previousChildren.length) {
     for (let index = commonLength; index < nextChildren.length; index += 1) {
       const next = nextChildren[index] as VirtualNode
       const nextAnchor = findNextAnchor(nextChildren, index + 1, anchor)
-      const mounted = mountChild(options, next, container, normalizeChildContext(context, index, nextChildren.length))
+      const mounted = mountChild(
+        options,
+        next,
+        container,
+        normalizeChildContext(context, index, nextChildren.length),
+      )
 
       if (mounted && nextAnchor) {
         moveNodes(options, mounted.nodes, container, nextAnchor)
       }
     }
-  } else if (prevChildren.length > nextChildren.length) {
-    for (let index = commonLength; index < prevChildren.length; index += 1) {
-      unmount(options, prevChildren[index] as VirtualNode)
+  } else if (previousChildren.length > nextChildren.length) {
+    for (let index = commonLength; index < previousChildren.length; index += 1) {
+      unmount(options, previousChildren[index] as VirtualNode)
     }
   }
 }
@@ -92,7 +113,7 @@ function patchKeyedChildren<
   HostFragment extends HostNode,
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
-  prevChildren: VirtualNodeChild[],
+  previousChildren: VirtualNodeChild[],
   nextChildren: VirtualNodeChild[],
   container: ContainerLike<HostNode, HostElement, HostFragment>,
   patchChild: PatchChildFunction<HostNode, HostElement, HostFragment>,
@@ -101,17 +122,20 @@ function patchKeyedChildren<
 ): void {
   let oldStart = 0
   let newStart = 0
-  let oldEnd = prevChildren.length - 1
+  let oldEnd = previousChildren.length - 1
   let newEnd = nextChildren.length - 1
 
   while (
     oldStart <= oldEnd &&
     newStart <= newEnd &&
-    isSameVirtualNode(prevChildren[oldStart] as VirtualNode, nextChildren[newStart] as VirtualNode)
+    isSameVirtualNode(
+      previousChildren[oldStart] as VirtualNode,
+      nextChildren[newStart] as VirtualNode,
+    )
   ) {
     patchChild(
       options,
-      prevChildren[oldStart] as VirtualNode,
+      previousChildren[oldStart] as VirtualNode,
       nextChildren[newStart] as VirtualNode,
       container,
       anchor,
@@ -124,11 +148,11 @@ function patchKeyedChildren<
   while (
     oldStart <= oldEnd &&
     newStart <= newEnd &&
-    isSameVirtualNode(prevChildren[oldEnd] as VirtualNode, nextChildren[newEnd] as VirtualNode)
+    isSameVirtualNode(previousChildren[oldEnd] as VirtualNode, nextChildren[newEnd] as VirtualNode)
   ) {
     patchChild(
       options,
-      prevChildren[oldEnd] as VirtualNode,
+      previousChildren[oldEnd] as VirtualNode,
       nextChildren[newEnd] as VirtualNode,
       container,
       anchor,
@@ -159,7 +183,7 @@ function patchKeyedChildren<
 
   if (newStart > newEnd) {
     for (let index = oldStart; index <= oldEnd; index += 1) {
-      unmount(options, prevChildren[index] as VirtualNode)
+      unmount(options, previousChildren[index] as VirtualNode)
     }
 
     return
@@ -167,28 +191,32 @@ function patchKeyedChildren<
 
   const keyToNewIndexMap = new Map<PropertyKey, number>()
   const toBePatched = newEnd - newStart + 1
-  const newIndexToOldIndexMap = new Array<number>(toBePatched).fill(0)
+  const newIndexToOldIndexMap = Array.from({ length: toBePatched }, () => {
+    return 0
+  })
 
   for (let index = newStart; index <= newEnd; index += 1) {
     const child = nextChildren[index] as VirtualNode
 
-    if (child.key != null) {
+    if (child.key !== undefined && child.key !== null) {
       keyToNewIndexMap.set(child.key, index)
     }
   }
 
   for (let index = oldStart; index <= oldEnd; index += 1) {
-    const prevChild = prevChildren[index] as VirtualNode
+    const previousChild = previousChildren[index] as VirtualNode
     const newIndex =
-      prevChild.key != null ? keyToNewIndexMap.get(prevChild.key) : findUnkeyedMatch(prevChild, nextChildren, newStart, newEnd)
+      previousChild.key !== undefined && previousChild.key !== null
+        ? keyToNewIndexMap.get(previousChild.key)
+        : findUnkeyedMatch(previousChild, nextChildren, newStart, newEnd)
 
     if (newIndex === undefined) {
-      unmount(options, prevChild)
+      unmount(options, previousChild)
     } else {
       newIndexToOldIndexMap[newIndex - newStart] = index + 1
       patchChild(
         options,
-        prevChild,
+        previousChild,
         nextChildren[newIndex] as VirtualNode,
         container,
         anchor,
@@ -214,8 +242,10 @@ function patchKeyedChildren<
         moveNodes(options, mounted.nodes, container, anchorNode)
       }
     } else {
-      const prevIndex = newIndexToOldIndexMap[index] - 1
-      const runtime = asRuntimeVNode<HostNode, HostElement, HostFragment>(prevChildren[prevIndex] as VirtualNode)
+      const previousIndex = newIndexToOldIndexMap[index] - 1
+      const runtime = asRuntimeVNode<HostNode, HostElement, HostFragment>(
+        previousChildren[previousIndex] as VirtualNode,
+      )
       const nodes = runtime.handle?.nodes ?? []
 
       for (const node of nodes) {
@@ -234,7 +264,10 @@ function findUnkeyedMatch(
   for (let index = start; index <= end; index += 1) {
     const candidate = list[index] as VirtualNode
 
-    if (candidate.key == null && isSameVirtualNode(candidate, target)) {
+    if (
+      (candidate.key === null || candidate.key === undefined) &&
+      isSameVirtualNode(candidate, target)
+    ) {
       return index
     }
   }

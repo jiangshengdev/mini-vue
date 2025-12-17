@@ -10,7 +10,7 @@ export function unmount<
   HostFragment extends HostNode,
 >(options: RendererOptions<HostNode, HostElement, HostFragment>, vnode: VirtualNode): void {
   const runtime = asRuntimeVNode<HostNode, HostElement, HostFragment>(vnode)
-  const handle = runtime.handle
+  const { handle } = runtime
 
   if (handle) {
     handle.teardown()
@@ -57,10 +57,10 @@ export function findNextAnchor<HostNode>(
 ): HostNode | undefined {
   for (let index = startIndex; index < children.length; index += 1) {
     const runtime = asRuntimeVNode<HostNode>(children[index] as VirtualNode)
-    const handle = runtime.handle
+    const { handle } = runtime
 
     if (handle?.nodes?.length) {
-      return handle.nodes[0] as HostNode
+      return handle.nodes[0]
     }
   }
 
@@ -71,7 +71,7 @@ export function hasKeys(children: VirtualNodeChild[]): boolean {
   return children.some((child) => {
     const vnode = child as VirtualNode
 
-    return vnode?.key != null
+    return vnode?.key !== undefined && vnode?.key !== null
   })
 }
 
@@ -80,17 +80,18 @@ export function syncRuntimeMetadata<
   HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
 >(
-  runtimePrev: RuntimeVNode<HostNode, HostElement, HostFragment>,
+  runtimePrevious: RuntimeVNode<HostNode, HostElement, HostFragment>,
   runtimeNext: RuntimeVNode<HostNode, HostElement, HostFragment>,
   overrides?: {
     anchor?: HostNode | undefined
     component?: RuntimeVNode<HostNode, HostElement, HostFragment>['component']
   },
 ): void {
-  runtimeNext.el = runtimePrev.el
-  runtimeNext.handle = runtimePrev.handle
+  runtimeNext.el = runtimePrevious.el
+  runtimeNext.handle = runtimePrevious.handle
 
-  runtimeNext.anchor = overrides && 'anchor' in overrides ? overrides.anchor : runtimePrev.anchor
+  runtimeNext.anchor =
+    overrides && 'anchor' in overrides ? overrides.anchor : runtimePrevious.anchor
   runtimeNext.component =
-    overrides && 'component' in overrides ? overrides.component : runtimePrev.component
+    overrides && 'component' in overrides ? overrides.component : runtimePrevious.component
 }

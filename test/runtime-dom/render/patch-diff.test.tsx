@@ -70,7 +70,7 @@ describe('runtime-dom patch/diff', () => {
     expect(firstClick).toHaveBeenCalledTimes(1)
     expect(button.className).toBe('')
     expect(button.getAttribute('style')).toBe(null)
-    expect(button.hasAttribute('data-id')).toBe(false)
+    expect(button.dataset.id).toBeUndefined()
   })
 
   it('keyed children 只移动不重建节点', () => {
@@ -99,7 +99,11 @@ describe('runtime-dom patch/diff', () => {
 
     const updatedNodes = [...container.querySelectorAll('li')]
 
-    expect(updatedNodes.map((node) => node.textContent)).toEqual(['c', 'a', 'b'])
+    expect(
+      updatedNodes.map((node) => {
+        return node.textContent
+      }),
+    ).toEqual(['c', 'a', 'b'])
     expect(updatedNodes[0]).toBe(initialNodes[2])
     expect(updatedNodes[1]).toBe(initialNodes[0])
     expect(updatedNodes[2]).toBe(initialNodes[1])

@@ -15,6 +15,7 @@ describe('runtime-core/renderer container key', () => {
       createFragment: vi.fn(() => {
         return {}
       }),
+      setText: vi.fn(),
       appendChild: vi.fn(),
       insertBefore: vi.fn(),
       clear: vi.fn(),

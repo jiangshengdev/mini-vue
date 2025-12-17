@@ -6,6 +6,8 @@ export { getCurrentInstance, mountChildWithAnchor, mountComponent } from './comp
 export { createAppInstance } from './create-app.ts'
 export type { AppInstance, AppRuntimeConfig } from './create-app.ts'
 export { mountChild } from './mount/index.ts'
+export { patchChild } from './patch/index.ts'
 export { inject, provide } from './provide-inject.ts'
 export { createRenderer } from './renderer.ts'
 export type { Renderer, RendererOptions, RootRenderFunction } from './renderer.ts'
+export { asRuntimeVNode } from './vnode.ts'

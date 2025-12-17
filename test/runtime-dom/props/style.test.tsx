@@ -36,14 +36,12 @@ describe('runtime-dom style props', () => {
   })
 
   it('对象 style 忽略非字符串/数字值并在开发期警告', () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
-      return undefined
-    })
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
     const container = createTestContainer()
-    const payload = { x: 1 }
+    const payload: unknown = { x: 1 }
 
     try {
-      render(<div style={{ color: payload as unknown as string }}>text</div>, container)
+      render(<div style={{ color: payload as string }}>text</div>, container)
 
       const element = within(container).getByText('text')
 

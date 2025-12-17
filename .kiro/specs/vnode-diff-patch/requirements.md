@@ -15,6 +15,7 @@
 以避免 focus/scroll 等状态丢失并提升性能。
 
 **验收标准（EARS）**
+
 - WHEN 同一组件实例发生响应式更新且新旧子树可复用
   THE SYSTEM SHALL 通过 patch 更新宿主树而不是卸载后重建。
 - WHEN 更新只改变文本内容
@@ -27,6 +28,7 @@
 以保证 DOM 属性、class/style、以及事件监听符合最新 render 结果。
 
 **验收标准（EARS）**
+
 - WHEN Element 的 props 从 prevProps 更新为 nextProps
   THE SYSTEM SHALL 添加或更新 nextProps 中的所有受支持字段。
 - WHEN prevProps 中存在但 nextProps 中缺失（或为 null/false）的字段
@@ -41,6 +43,7 @@
 以在常见场景获得基础性能提升。
 
 **验收标准（EARS）**
+
 - WHEN children 数组发生变化且不涉及 key 复用
   THE SYSTEM SHALL 按索引对齐 patch 公共区间，并正确处理新增与删除。
 
@@ -51,6 +54,7 @@
 以避免不必要的 DOM 重建并保证语义正确。
 
 **验收标准（EARS）**
+
 - WHEN 同层 children 提供稳定 key 且节点只是重新排序
   THE SYSTEM SHALL 复用既有宿主节点并通过插入移动保证最终顺序正确。
 - WHEN 新列表新增/删除带 key 的节点
@@ -63,6 +67,7 @@
 以避免更新失败导致整段 UI 消失。
 
 **验收标准（EARS）**
+
 - WHEN 组件更新 render 过程抛错
   THE SYSTEM SHALL 保留上一轮已挂载子树与宿主节点不被破坏。
 

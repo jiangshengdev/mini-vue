@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { createTestContainer } from '../../setup.ts'
 import type { SetupComponent } from '@/index.ts'
 import { createApp, createRouter, ref, RouterLink, RouterView } from '@/index.ts'
+import { routerDuplicateInstallOnApp } from '@/messages/index.ts'
 
 describe('runtime-dom: router injection', () => {
   it('router.install starts once and auto-stops on app.unmount', () => {
@@ -34,8 +35,6 @@ describe('runtime-dom: router injection', () => {
     const app = createApp(Root)
 
     app.use(router)
-    app.use(router)
-
     app.unmount()
 
     const popstateRemoveCalls = removeSpy.mock.calls.filter((call) => {
@@ -50,6 +49,43 @@ describe('runtime-dom: router injection', () => {
     }).length
 
     expect(popstateAddCountForRemovedHandler).toBe(1)
+  })
+
+  it('throws when installing multiple routers on the same app', () => {
+    const Home: SetupComponent = () => {
+      return () => {
+        return undefined
+      }
+    }
+
+    const NotFound: SetupComponent = () => {
+      return () => {
+        return undefined
+      }
+    }
+
+    const routerA = createRouter({
+      routes: [{ path: '/', component: Home }],
+      fallback: NotFound,
+    })
+    const routerB = createRouter({
+      routes: [{ path: '/', component: Home }],
+      fallback: NotFound,
+    })
+
+    const Root: SetupComponent = () => {
+      return () => {
+        return undefined
+      }
+    }
+
+    const app = createApp(Root)
+
+    app.use(routerA)
+
+    expect(() => {
+      app.use(routerB)
+    }).toThrowError(routerDuplicateInstallOnApp)
   })
 
   it('shared router only stops after last app unmount', () => {
@@ -203,6 +239,107 @@ describe('runtime-dom: router injection', () => {
     anchor!.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
 
     expect(navigateSpy).toHaveBeenCalledWith('/counter')
+
+    app.unmount()
+    router.stop()
+  })
+
+  it('RouterLink keeps default behavior for modifier/middle clicks', () => {
+    const Home: SetupComponent = () => {
+      return () => {
+        return undefined
+      }
+    }
+
+    const NotFound: SetupComponent = () => {
+      return () => {
+        return undefined
+      }
+    }
+
+    const router = createRouter({
+      routes: [{ path: '/', component: Home }],
+      fallback: NotFound,
+    })
+
+    const navigateSpy = vi.spyOn(router, 'navigate')
+
+    const Root: SetupComponent = () => {
+      return () => {
+        return <RouterLink to="/counter">go</RouterLink>
+      }
+    }
+
+    const app = createApp(Root)
+
+    app.use(router)
+    app.mount(createTestContainer())
+
+    const anchor = document.querySelector('a')
+
+    expect(anchor).toBeTruthy()
+
+    const dispatch = (init?: MouseEventInit): boolean => {
+      return anchor!.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, ...init }))
+    }
+
+    expect(dispatch({ metaKey: true })).toBe(true)
+    expect(dispatch({ ctrlKey: true })).toBe(true)
+    expect(dispatch({ shiftKey: true })).toBe(true)
+    expect(dispatch({ altKey: true })).toBe(true)
+    expect(dispatch({ button: 1 })).toBe(true)
+
+    const prevented = new MouseEvent('click', { bubbles: true, cancelable: true })
+    prevented.preventDefault()
+    expect(anchor!.dispatchEvent(prevented)).toBe(false)
+
+    expect(navigateSpy).not.toHaveBeenCalled()
+
+    app.unmount()
+    router.stop()
+  })
+
+  it('RouterLink leaves target=_blank navigation to browser', () => {
+    const Home: SetupComponent = () => {
+      return () => {
+        return undefined
+      }
+    }
+
+    const NotFound: SetupComponent = () => {
+      return () => {
+        return undefined
+      }
+    }
+
+    const router = createRouter({
+      routes: [{ path: '/', component: Home }],
+      fallback: NotFound,
+    })
+
+    const navigateSpy = vi.spyOn(router, 'navigate')
+
+    const Root: SetupComponent = () => {
+      return () => {
+        return (
+          <RouterLink to="/counter" target="_blank">
+            go
+          </RouterLink>
+        )
+      }
+    }
+
+    const app = createApp(Root)
+
+    app.use(router)
+    app.mount(createTestContainer())
+
+    const anchor = document.querySelector('a')
+
+    expect(anchor).toBeTruthy()
+
+    expect(anchor!.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))).toBe(true)
+    expect(navigateSpy).not.toHaveBeenCalled()
 
     app.unmount()
     router.stop()

@@ -6,8 +6,11 @@ import type { InjectionKey } from '@/shared/index.ts'
 
 /** RouterView 视图深度的注入 key，用于避免同组件递归渲染。 */
 const routerViewDepthKey: InjectionKey<number> = Symbol('router-view-depth')
+
 /** 路由匹配结果的注入 key，按需为子级 RouterView 复用。 */
-const routerViewMatchedKey: InjectionKey<SetupComponent[]> = Symbol('router-view-matched')
+type MatchedGetter = () => SetupComponent[]
+
+const routerViewMatchedKey: InjectionKey<MatchedGetter> = Symbol('router-view-matched')
 /** RouterView 深度计数的默认起点，使首层深度从 0 开始。 */
 const initialRouterViewDepth = -1
 
@@ -27,14 +30,19 @@ export const RouterView: SetupComponent<RouterViewProps> = (props) => {
   /* 以 -1 为起点，确保首层 RouterView 的深度从 0 开始累加。 */
   const parentDepth = inject(routerViewDepthKey, initialRouterViewDepth)
   const depth = parentDepth + 1
-  const parentMatched = inject(routerViewMatchedKey, undefined)
-  const matchedComponents = parentMatched ?? router.currentRoute.value.matched
+  const parentGetMatched = inject(routerViewMatchedKey, undefined)
+  const getMatched: MatchedGetter =
+    parentGetMatched ??
+    (() => {
+      return router.currentRoute.value.matched
+    })
 
   provide(routerViewDepthKey, depth)
-  provide(routerViewMatchedKey, matchedComponents)
+  provide(routerViewMatchedKey, getMatched)
 
   /* 渲染函数：读取 currentRoute 的组件并输出。 */
   return () => {
+    const matchedComponents = getMatched()
     const MatchedComponent = matchedComponents[depth]
 
     if (!MatchedComponent) return undefined

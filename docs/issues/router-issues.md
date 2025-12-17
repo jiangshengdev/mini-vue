@@ -18,13 +18,13 @@
 - 处理：将匹配用的规范化 `pathname` 与写入 history 的完整 URL 分离，`pushState` 保留 query/hash，`currentRoute` 仍只包含规范化的 pathname。
 - 测试：新增“navigate 保留 query/hash（地址栏不丢失）、currentRoute 仍仅含 pathname”的回归用例。
 
-## 3. `RouterView` 缺乏嵌套深度感知，可能触发同组件无限递归渲染（已验证）
+## 3. `RouterView` 缺乏嵌套深度感知，可能触发同组件无限递归渲染（已修复）
 
 - 位置：`src/router/components/router-view.tsx`
 - 现状：`RouterView` 直接渲染 `router.currentRoute.value.component`，没有根据嵌套路由层级/深度选择不同的匹配记录，也没有防止同一组件在同一路由层级重复渲染。
 - 影响：当路由组件自身（或其子树中）再次使用 `RouterView` 时，会再次渲染同一个组件，形成同步递归，通常导致栈溢出。
 - 验证结论：成立（在“路由组件内部包含 RouterView 且未切换到子路由记录”的用法下可稳定复现）。
-- 下一步（最简方案 A）：引入“视图深度”概念：通过注入一个深度计数（父 RouterView 提供 `depth + 1`），每一层 RouterView 渲染该深度对应的匹配记录；当该深度没有匹配记录时渲染空。
+- 处理：为 RouterView 注入视图深度，子级 RouterView 会渲染空节点，避免同一组件在同层级重复渲染导致递归。
 - 测试建议：新增“路由组件包含 RouterView 不应递归崩溃”的回归用例（可用一个组件内部直接渲染 RouterView 的场景验证）。
 
 ## 4. `normalizePath` 强制转小写且不可配置，可能破坏大小写敏感路径（已修复）

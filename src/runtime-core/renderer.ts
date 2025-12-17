@@ -5,7 +5,7 @@ import type { AppContext } from './create-app.ts'
 import type { MountedHandle } from './mount/index.ts'
 import { mountChild } from './mount/index.ts'
 import { normalizeRenderOutput } from './normalize.ts'
-import type { RenderOutput, VirtualNode } from '@/jsx-foundation/index.ts'
+import type { RenderOutput } from '@/jsx-foundation/index.ts'
 import { isVirtualNode } from '@/jsx-foundation/index.ts'
 import { runtimeCoreInvalidContainer } from '@/messages/index.ts'
 import type { PropsShape } from '@/shared/index.ts'
@@ -108,8 +108,12 @@ export function createRenderer<
     clear(container)
     const normalized = normalizeRenderOutput(virtualNode)
     const appContext =
-      (isVirtualNode(normalized) ? (normalized as { appContext?: AppContext }).appContext : undefined) ??
-      (isVirtualNode(virtualNode) ? (virtualNode as { appContext?: AppContext }).appContext : undefined)
+      (isVirtualNode(normalized)
+        ? (normalized as { appContext?: AppContext }).appContext
+        : undefined) ??
+      (isVirtualNode(virtualNode)
+        ? (virtualNode as { appContext?: AppContext }).appContext
+        : undefined)
     const mounted =
       normalized !== undefined
         ? mountChild(options, normalized as never, container, {

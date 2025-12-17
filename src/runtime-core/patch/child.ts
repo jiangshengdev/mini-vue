@@ -1,11 +1,11 @@
 import { resolveComponentProps } from '../component/props.ts'
 import { assignElementRef, resolveElementRefBinding } from '../mount/element.ts'
-import type { RendererOptions } from '../renderer.ts'
 import { mountChild } from '../mount/index.ts'
+import type { RendererOptions } from '../renderer.ts'
 import { asRuntimeVNode } from '../vnode.ts'
+import { patchChildren } from './children.ts'
 import type { ContainerLike, PatchContext } from './context.ts'
 import { normalizeMountContext } from './context.ts'
-import { patchChildren } from './children.ts'
 import { isSameVirtualNode, moveNodes, syncRuntimeMetadata, unmount } from './utils.ts'
 import type { VirtualNode } from '@/jsx-foundation/index.ts'
 import { Fragment, Text } from '@/jsx-foundation/index.ts'
@@ -79,7 +79,10 @@ function patchExisting<
     syncRuntimeMetadata(runtimePrev, runtimeNext, { component: undefined })
 
     if (runtimePrev.el) {
-      options.setText(runtimePrev.el, (next as VirtualNode<typeof Text> & { text?: string }).text ?? '')
+      options.setText(
+        runtimePrev.el,
+        (next as VirtualNode<typeof Text> & { text?: string }).text ?? '',
+      )
     }
 
     return
@@ -121,7 +124,7 @@ function patchElement<
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   prev: VirtualNode,
   next: VirtualNode,
-  container: ContainerLike<HostNode, HostElement, HostFragment>,
+  _container: ContainerLike<HostNode, HostElement, HostFragment>,
   anchor: HostNode | undefined,
   context?: PatchContext,
 ): void {

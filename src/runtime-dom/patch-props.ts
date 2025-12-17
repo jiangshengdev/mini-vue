@@ -163,7 +163,7 @@ type EventInvoker = ((event: Event) => void) & { value?: EventListener }
 
 const invokerCacheKey = '__miniVueInvokers__'
 
-function patchEvent(element: HTMLElement, eventName: string, prev: unknown, next: unknown): void {
+function patchEvent(element: HTMLElement, eventName: string, _prev: unknown, next: unknown): void {
   const invokers = getInvokerMap(element)
   const existing = invokers[eventName]
 
@@ -190,7 +190,9 @@ function patchEvent(element: HTMLElement, eventName: string, prev: unknown, next
 }
 
 function getInvokerMap(element: HTMLElement): Record<string, EventInvoker> {
-  const record = (element as HTMLElement & { [invokerCacheKey]?: Record<string, EventInvoker> })[invokerCacheKey]
+  const record = (element as HTMLElement & { [invokerCacheKey]?: Record<string, EventInvoker> })[
+    invokerCacheKey
+  ]
 
   if (record) {
     return record
@@ -198,7 +200,9 @@ function getInvokerMap(element: HTMLElement): Record<string, EventInvoker> {
 
   const next: Record<string, EventInvoker> = {}
 
-  ;(element as HTMLElement & { [invokerCacheKey]?: Record<string, EventInvoker> })[invokerCacheKey] = next
+  ;(element as HTMLElement & { [invokerCacheKey]?: Record<string, EventInvoker> })[
+    invokerCacheKey
+  ] = next
 
   return next
 }

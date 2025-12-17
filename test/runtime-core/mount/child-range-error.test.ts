@@ -22,6 +22,9 @@ function createMockRendererOptions(): RendererOptions<MockNode, MockContainer, M
     createFragment() {
       return { children: [] }
     },
+    setText(node, text) {
+      node.text = text
+    },
     appendChild(parent, child) {
       parent.children.push(child)
     },

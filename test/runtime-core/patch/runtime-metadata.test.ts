@@ -1,8 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { mountChild } from '@/runtime-core/index.ts'
+import { asRuntimeVNode, mountChild, patchChild } from '@/runtime-core/index.ts'
 import type { RendererOptions } from '@/runtime-core/index.ts'
-import { patchChild } from '@/runtime-core/patch/index.ts'
-import { asRuntimeVNode } from '@/runtime-core/vnode.ts'
 import { createTextVirtualNode } from '@/jsx-foundation/index.ts'
 
 type TestNode = {
@@ -65,7 +63,11 @@ function createHostOptions(): {
     child.parent = parent
   }
 
-  const insertBefore = (parent: TestElement | TestFragment, child: TestNode, anchor?: TestNode): void => {
+  const insertBefore = (
+    parent: TestElement | TestFragment,
+    child: TestNode,
+    anchor?: TestNode,
+  ): void => {
     removeFromParent(child)
 
     if (!anchor) {

@@ -112,6 +112,9 @@ function createHostOptions(): {
     createFragment(): TestFragment {
       return { kind: 'fragment', children: [] }
     },
+    setText(node, text): void {
+      node.text = text
+    },
     appendChild(parent, child): void {
       removeFromParent(child)
       parent.children.push(child)

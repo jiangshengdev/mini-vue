@@ -73,7 +73,12 @@ function patchUnkeyedChildren<
     for (let index = commonLength; index < nextChildren.length; index += 1) {
       const next = nextChildren[index] as VirtualNode
       const nextAnchor = findNextAnchor(nextChildren, index + 1, anchor)
-      const mounted = mountChild(options, next, container, normalizeChildContext(context, index, nextChildren.length))
+      const mounted = mountChild(
+        options,
+        next,
+        container,
+        normalizeChildContext(context, index, nextChildren.length),
+      )
 
       if (mounted && nextAnchor) {
         moveNodes(options, mounted.nodes, container, nextAnchor)
@@ -167,7 +172,8 @@ function patchKeyedChildren<
 
   const keyToNewIndexMap = new Map<PropertyKey, number>()
   const toBePatched = newEnd - newStart + 1
-  const newIndexToOldIndexMap = new Array<number>(toBePatched).fill(0)
+  // oxlint-disable-next-line eslint-plugin-unicorn/no-new-array
+  const newIndexToOldIndexMap: number[] = new Array<number>(toBePatched).fill(0)
 
   for (let index = newStart; index <= newEnd; index += 1) {
     const child = nextChildren[index] as VirtualNode
@@ -180,7 +186,9 @@ function patchKeyedChildren<
   for (let index = oldStart; index <= oldEnd; index += 1) {
     const prevChild = prevChildren[index] as VirtualNode
     const newIndex =
-      prevChild.key != null ? keyToNewIndexMap.get(prevChild.key) : findUnkeyedMatch(prevChild, nextChildren, newStart, newEnd)
+      prevChild.key != null
+        ? keyToNewIndexMap.get(prevChild.key)
+        : findUnkeyedMatch(prevChild, nextChildren, newStart, newEnd)
 
     if (newIndex === undefined) {
       unmount(options, prevChild)
@@ -215,7 +223,9 @@ function patchKeyedChildren<
       }
     } else {
       const prevIndex = newIndexToOldIndexMap[index] - 1
-      const runtime = asRuntimeVNode<HostNode, HostElement, HostFragment>(prevChildren[prevIndex] as VirtualNode)
+      const runtime = asRuntimeVNode<HostNode, HostElement, HostFragment>(
+        prevChildren[prevIndex] as VirtualNode,
+      )
       const nodes = runtime.handle?.nodes ?? []
 
       for (const node of nodes) {

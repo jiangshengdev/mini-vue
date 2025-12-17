@@ -35,7 +35,7 @@ describe('effect 错误处理', () => {
     expect(handler).toHaveBeenCalledTimes(1)
     const [error, context] = handler.mock.calls[0]
 
-    expect((error as Error).message).toBe('effect cleanup failed')
+    expect(error.message).toBe('effect cleanup failed')
     expect(context).toBe(errorContexts.effectCleanup)
   })
 

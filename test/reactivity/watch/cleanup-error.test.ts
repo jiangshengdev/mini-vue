@@ -120,7 +120,7 @@ describe('watch - cleanup 与错误', () => {
     expect(handler).toHaveBeenCalledTimes(1)
     let [error, context] = handler.mock.calls[0]
 
-    expect((error as Error).message).toBe('cleanup failed: 0')
+    expect(error.message).toBe('cleanup failed: 0')
     expect(context).toBe(errorContexts.watchCleanup)
 
     state.count = 2
@@ -128,7 +128,7 @@ describe('watch - cleanup 与错误', () => {
     expect(cleanupOrder).toEqual([0, 1])
     expect(handler).toHaveBeenCalledTimes(2)
     ;[error, context] = handler.mock.calls[1]
-    expect((error as Error).message).toBe('cleanup failed: 1')
+    expect(error.message).toBe('cleanup failed: 1')
     expect(context).toBe(errorContexts.watchCleanup)
 
     stop()
@@ -136,7 +136,7 @@ describe('watch - cleanup 与错误', () => {
     expect(cleanupOrder).toEqual([0, 1, 2])
     expect(handler).toHaveBeenCalledTimes(3)
     ;[error, context] = handler.mock.calls[2]
-    expect((error as Error).message).toBe('cleanup failed: 2')
+    expect(error.message).toBe('cleanup failed: 2')
     expect(context).toBe(errorContexts.watchCleanup)
   })
 })

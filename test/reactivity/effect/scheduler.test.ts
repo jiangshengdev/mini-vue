@@ -145,7 +145,7 @@ describe('effect 调度行为', () => {
     expect(handler).toHaveBeenCalledTimes(1)
     const [error, context] = handler.mock.calls[0]
 
-    expect((error as Error).message).toBe('scheduler failed')
+    expect(error.message).toBe('scheduler failed')
     expect(context).toBe(errorContexts.scheduler)
   })
 

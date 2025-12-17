@@ -15,6 +15,15 @@ function stripQueryAndHash(path: string): string {
 }
 
 /**
+ * 提取路径中的 query 与 hash 片段（若不存在则返回空字符串）。
+ */
+export function getQueryAndHash(path: string): string {
+  const pathname = stripQueryAndHash(path)
+
+  return path.slice(pathname.length)
+}
+
+/**
  * 规范化路由路径：去 query/hash，补前导斜杠，移除尾随斜杠并小写化。
  */
 export function normalizePath(path: string): string {

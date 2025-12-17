@@ -1,5 +1,5 @@
 import { routerInjectionKey } from './injection.ts'
-import { normalizePath } from './paths.ts'
+import { getQueryAndHash, normalizePath } from './paths.ts'
 import type { RouteLocation, Router, RouterConfig, RouteRecord } from './types.ts'
 import type { Ref } from '@/reactivity/index.ts'
 import { ref } from '@/reactivity/index.ts'
@@ -24,20 +24,6 @@ function getCurrentBrowserPath(): string {
   if (!canUseWindowEvents) return '/'
 
   return globalThis.location.pathname || '/'
-}
-
-/**
- * 提取路径中的 query 与 hash 片段（若不存在则返回空字符串）。
- */
-function extractQueryAndHash(path: string): string {
-  const hashIndex = path.indexOf('#')
-  const queryIndex = path.indexOf('?')
-  const cutIndex = Math.min(
-    hashIndex === -1 ? path.length : hashIndex,
-    queryIndex === -1 ? path.length : queryIndex,
-  )
-
-  return path.slice(cutIndex)
 }
 
 /**
@@ -105,7 +91,7 @@ export function createRouter(config: RouterConfig): Router {
    */
   const navigate = (path: string): void => {
     const normalizedPath = normalizePath(path)
-    const queryAndHash = extractQueryAndHash(path)
+    const queryAndHash = getQueryAndHash(path)
     const historyTarget = `${normalizedPath}${queryAndHash}`
 
     if (canUseWindowEvents) {

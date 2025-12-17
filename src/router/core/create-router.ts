@@ -1,5 +1,5 @@
 import { routerInjectionKey } from './injection.ts'
-import { normalizePath } from './paths.ts'
+import { getQueryAndHash, normalizePath } from './paths.ts'
 import type { RouteLocation, Router, RouterConfig, RouteRecord } from './types.ts'
 import type { Ref } from '@/reactivity/index.ts'
 import { ref } from '@/reactivity/index.ts'
@@ -90,16 +90,19 @@ export function createRouter(config: RouterConfig): Router {
    * 主动导航到目标路径，写入 history 并刷新 currentRoute。
    */
   const navigate = (path: string): void => {
-    const target = normalizePath(path)
-
-    /* 目标与当前一致时跳过，避免重复 pushState。 */
-    if (target === currentRoute.value.path) return
+    const normalizedPath = normalizePath(path)
+    const queryAndHash = getQueryAndHash(path)
+    const historyTarget = `${normalizedPath}${queryAndHash}`
 
     if (canUseWindowEvents) {
-      globalThis.history.pushState(null, '', target)
+      const currentUrl = `${globalThis.location.pathname ?? ''}${globalThis.location.search ?? ''}${globalThis.location.hash ?? ''}`
+
+      if (historyTarget !== currentUrl) {
+        globalThis.history.pushState(null, '', historyTarget)
+      }
     }
 
-    currentRoute.value = matchRoute(target)
+    currentRoute.value = matchRoute(normalizedPath)
   }
 
   const router: Router = {

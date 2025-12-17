@@ -9,17 +9,14 @@
 - 修复：仅在“普通左键点击（`button === 0`）+ 无修饰键（`meta/ctrl/shift/alt` 全为 false）+ 非 `_blank` + 未被 `event.defaultPrevented` 拦截”的情况下才阻止默认并执行 SPA 导航；其余情况交给浏览器默认行为。
 - 测试：补充点击行为用例，覆盖修饰键/中键/`target="_blank"`/已被阻止默认等不应触发 `navigate` 的场景。
 
-## 2. `navigate()` 在写入 history 前对路径归一化，导致 Query/Hash 丢失（已验证）
+## 2. `navigate()` 在写入 history 前对路径归一化，导致 Query/Hash 丢失（已修复）
 
 - 位置：`src/router/core/create-router.ts`、`src/router/core/paths.ts`
 - 现状：`navigate(path)` 会先执行 `normalizePath(path)` 得到 `target`，随后 `history.pushState(null, '', target)`；而 `normalizePath` 内部会剥离 `?query` 与 `#hash`。
 - 影响：导航到 `/search?q=vue#top` 时，地址栏最终只保留 `/search`，导致 URL 参数/哈希信息丢失；同时会影响“可分享链接/回放链接/刷新后恢复状态”等典型场景。
 - 验证结论：成立。
-- 下一步（最简方案，暂不支持路由态感知）：将“用于匹配的规范化路径”和“用于写入地址栏的完整 URL”分离：
-  - 匹配/缓存键仍只使用规范化后的 `pathname`（不包含 query/hash）。
-  - `history.pushState` 写入保留 query/hash 的完整 URL（至少保留用户输入的 `?query` 与 `#hash`）。
-  - `getCurrentBrowserPath()` 保持只读取 `location.pathname`（不拼接 `search/hash`），即当前路由态只反映 pathname。
-- 测试建议：新增“navigate 保留 query/hash（地址栏不丢失）”的回归用例；同时新增用例明确 `currentRoute` 不包含 query/hash（仅匹配 pathname）。
+- 处理：将匹配用的规范化 `pathname` 与写入 history 的完整 URL 分离，`pushState` 保留 query/hash，`currentRoute` 仍只包含规范化的 pathname。
+- 测试：新增“navigate 保留 query/hash（地址栏不丢失）、currentRoute 仍仅含 pathname”的回归用例。
 
 ## 3. `RouterView` 缺乏嵌套深度感知，可能触发同组件无限递归渲染（已验证）
 

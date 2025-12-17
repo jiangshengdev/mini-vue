@@ -36,7 +36,9 @@ describe('runtime-dom style props', () => {
   })
 
   it('对象 style 忽略非字符串/数字值并在开发期警告', () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
+      return undefined
+    })
     const container = createTestContainer()
     const payload: unknown = { x: 1 }
 

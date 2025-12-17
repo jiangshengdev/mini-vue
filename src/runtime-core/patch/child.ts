@@ -1,4 +1,5 @@
 import { resolveComponentProps } from '../component/props.ts'
+import type { MountContext } from '../mount/context.ts'
 import { assignElementRef, resolveElementRefBinding } from '../mount/element.ts'
 import { mountChild } from '../mount/index.ts'
 import type { RendererOptions } from '../renderer.ts'
@@ -18,9 +19,11 @@ export function patchChild<
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   previous: VirtualNode | undefined,
   next: VirtualNode | undefined,
-  container: ContainerLike<HostNode, HostElement, HostFragment>,
-  anchor?: HostNode,
-  context?: PatchContext,
+  environment: {
+    container: ContainerLike<HostNode, HostElement, HostFragment>
+    anchor?: HostNode
+    context?: PatchContext | MountContext
+  },
 ): void {
   if (previous === next) {
     return
@@ -31,10 +34,15 @@ export function patchChild<
       return
     }
 
-    const mounted = mountChild(options, next, container, normalizeMountContext(context))
+    const mounted = mountChild(
+      options,
+      next,
+      environment.container,
+      normalizeMountContext(environment.context),
+    )
 
-    if (mounted && anchor) {
-      moveNodes(options, mounted.nodes, container, anchor)
+    if (mounted && environment.anchor) {
+      moveNodes(options, mounted.nodes, environment.container, environment.anchor)
     }
 
     return
@@ -47,16 +55,21 @@ export function patchChild<
   }
 
   if (isSameVirtualNode(previous, next)) {
-    patchExisting(options, previous, next, container, anchor, context)
+    patchExisting(options, previous, next, environment)
 
     return
   }
 
   unmount(options, previous)
-  const mounted = mountChild(options, next, container, normalizeMountContext(context))
+  const mounted = mountChild(
+    options,
+    next,
+    environment.container,
+    normalizeMountContext(environment.context),
+  )
 
-  if (mounted && anchor) {
-    moveNodes(options, mounted.nodes, container, anchor)
+  if (mounted && environment.anchor) {
+    moveNodes(options, mounted.nodes, environment.container, environment.anchor)
   }
 }
 
@@ -68,9 +81,11 @@ function patchExisting<
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   previous: VirtualNode,
   next: VirtualNode,
-  container: ContainerLike<HostNode, HostElement, HostFragment>,
-  anchor?: HostNode,
-  context?: PatchContext,
+  environment: {
+    container: ContainerLike<HostNode, HostElement, HostFragment>
+    anchor?: HostNode
+    context?: PatchContext | MountContext
+  },
 ): void {
   if (next.type === Text) {
     const runtimePrevious = asRuntimeVNode<HostNode, HostElement, HostFragment>(previous)
@@ -94,26 +109,23 @@ function patchExisting<
 
     syncRuntimeMetadata(runtimePrevious, runtimeNext, { component: undefined })
 
-    patchChildren(
-      options,
-      previous.children,
-      next.children,
-      container,
+    patchChildren(options, previous.children, next.children, {
+      container: environment.container,
       patchChild,
-      runtimePrevious.anchor ?? anchor,
-      context,
-    )
+      anchor: runtimePrevious.anchor ?? environment.anchor,
+      context: environment.context,
+    })
 
     return
   }
 
   if (typeof next.type === 'function') {
-    patchComponent(options, previous, next, container, anchor, context)
+    patchComponent(options, previous, next, environment)
 
     return
   }
 
-  patchElement(options, previous, next, anchor, context)
+  patchElement(options, previous, next, environment)
 }
 
 function patchElement<
@@ -124,8 +136,7 @@ function patchElement<
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   previous: VirtualNode,
   next: VirtualNode,
-  anchor: HostNode | undefined,
-  context?: PatchContext,
+  environment: { anchor?: HostNode; context?: PatchContext | MountContext },
 ): void {
   const runtimePrevious = asRuntimeVNode<HostNode, HostElement, HostFragment>(previous)
   const runtimeNext = asRuntimeVNode<HostNode, HostElement, HostFragment>(next)
@@ -144,7 +155,12 @@ function patchElement<
   }
 
   options.patchProps(element, previous.props, next.props)
-  patchChildren(options, previous.children, next.children, element, patchChild, anchor, context)
+  patchChildren(options, previous.children, next.children, {
+    container: element,
+    patchChild,
+    anchor: environment.anchor,
+    context: environment.context,
+  })
 
   if (nextRef) {
     assignElementRef(nextRef, element)
@@ -159,19 +175,26 @@ function patchComponent<
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   previous: VirtualNode,
   next: VirtualNode,
-  container: ContainerLike<HostNode, HostElement, HostFragment>,
-  anchor: HostNode | undefined,
-  context?: PatchContext,
+  environment: {
+    container: ContainerLike<HostNode, HostElement, HostFragment>
+    anchor?: HostNode
+    context?: PatchContext | MountContext
+  },
 ): void {
   const runtimePrevious = asRuntimeVNode<HostNode, HostElement, HostFragment>(previous)
   const runtimeNext = asRuntimeVNode<HostNode, HostElement, HostFragment>(next)
   const instance = runtimePrevious.component
 
   if (!instance) {
-    const mounted = mountChild(options, next, container, normalizeMountContext(context))
+    const mounted = mountChild(
+      options,
+      next,
+      environment.container,
+      normalizeMountContext(environment.context),
+    )
 
-    if (mounted && anchor) {
-      moveNodes(options, mounted.nodes, container, anchor)
+    if (mounted && environment.anchor) {
+      moveNodes(options, mounted.nodes, environment.container, environment.anchor)
     }
 
     return
@@ -187,6 +210,6 @@ function patchComponent<
     const previousSubTree = instance.subTree
 
     runner()
-    patchChild(options, previousSubTree, instance.subTree, container, anchor, context)
+    patchChild(options, previousSubTree, instance.subTree, environment)
   }
 }

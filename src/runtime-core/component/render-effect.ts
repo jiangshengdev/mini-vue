@@ -141,9 +141,13 @@ function patchLatestSubtree<
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
   previousSubTree: VirtualNode | undefined,
 ): void {
-  patchChild(options, previousSubTree, instance.subTree, instance.container, instance.anchor, {
-    parent: instance,
-    appContext: instance.appContext,
+  patchChild(options, previousSubTree, instance.subTree, {
+    container: instance.container,
+    anchor: instance.anchor,
+    context: {
+      parent: instance,
+      appContext: instance.appContext,
+    },
   })
 
   if (instance.subTree) {

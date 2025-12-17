@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { createTestContainer } from '../../setup.ts'
 import type { SetupComponent } from '@/index.ts'
 import { createApp, createRouter, ref, RouterLink, RouterView } from '@/index.ts'
+import { routerDuplicateInstallOnApp } from '@/messages/index.ts'
 
 describe('runtime-dom: router injection', () => {
   it('router.install starts once and auto-stops on app.unmount', () => {
@@ -34,8 +35,6 @@ describe('runtime-dom: router injection', () => {
     const app = createApp(Root)
 
     app.use(router)
-    app.use(router)
-
     app.unmount()
 
     const popstateRemoveCalls = removeSpy.mock.calls.filter((call) => {
@@ -50,6 +49,43 @@ describe('runtime-dom: router injection', () => {
     }).length
 
     expect(popstateAddCountForRemovedHandler).toBe(1)
+  })
+
+  it('throws when installing multiple routers on the same app', () => {
+    const Home: SetupComponent = () => {
+      return () => {
+        return undefined
+      }
+    }
+
+    const NotFound: SetupComponent = () => {
+      return () => {
+        return undefined
+      }
+    }
+
+    const routerA = createRouter({
+      routes: [{ path: '/', component: Home }],
+      fallback: NotFound,
+    })
+    const routerB = createRouter({
+      routes: [{ path: '/', component: Home }],
+      fallback: NotFound,
+    })
+
+    const Root: SetupComponent = () => {
+      return () => {
+        return undefined
+      }
+    }
+
+    const app = createApp(Root)
+
+    app.use(routerA)
+
+    expect(() => {
+      app.use(routerB)
+    }).toThrowError(routerDuplicateInstallOnApp)
   })
 
   it('shared router only stops after last app unmount', () => {

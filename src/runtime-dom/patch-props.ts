@@ -1,5 +1,5 @@
 /**
- * DOM 专用的属性打补丁逻辑，负责将 virtualNode props 应用到真实元素上。
+ * DOM 专用的属性打补丁逻辑，负责将 `virtualNode` `props` 应用到真实元素上。
  */
 import { normalizeClass } from './normalize-class.ts'
 import { runtimeDomInvalidStyleValue, runtimeDomUnsupportedAttrValue } from '@/messages/index.ts'
@@ -13,7 +13,7 @@ import { __DEV__, isNil, isObject } from '@/shared/index.ts'
  */
 export type ElementRef = ((element: Element | undefined) => void) | Ref<Element | undefined>
 
-/** 扩展原生 style 声明，允许对任意属性键执行写入。 */
+/** 扩展原生 `style` 声明，允许对任意属性键执行写入。 */
 type WritableStyle = CSSStyleDeclaration & Record<string, string | undefined>
 
 /** 写入单个样式属性，兼容标准属性名与自定义属性名。 */
@@ -26,14 +26,14 @@ function setStyleValue(element: HTMLElement, property: string, input: string): v
 }
 
 /**
- * 检测 props key 是否表示事件绑定（如 onClick/oninput）。
+ * 检测 `props` key 是否表示事件绑定（如 `onClick`/`oninput`）。
  */
 function isEventProp(key: string): boolean {
   return key.startsWith('on') && key.length > 2
 }
 
 /**
- * 将 virtualNode 上的 props 映射到真实 DOM 元素上。
+ * 将 `virtualNode` 上的 `props` 映射到真实 DOM 元素上。
  */
 export function patchProps(
   element: Element,
@@ -42,16 +42,19 @@ export function patchProps(
 ): void {
   const previous = previousProps ?? {}
   const next = nextProps ?? {}
+  /* 同步遍历前后所有 `prop` `key`，确保新增与删除都被覆盖。 */
   const keys = new Set([...Object.keys(previous), ...Object.keys(next)])
 
   for (const key of keys) {
     const previousValue = previous[key]
     const nextValue = next[key]
 
+    /* `ref` 交由 `runtime-core` 处理，这里直接跳过保持职责单一。 */
     if (key === 'ref' && (isElementRef(previousValue) || isElementRef(nextValue))) {
       continue
     }
 
+    /* `class`/`className` 统一走归一化逻辑，`null`/`false` 时直接清空。 */
     if (key === 'class' || key === 'className') {
       if (isNil(nextValue) || nextValue === false) {
         ;(element as HTMLElement).className = ''
@@ -67,6 +70,7 @@ export function patchProps(
       continue
     }
 
+    /* 事件以 `onXxx` 开头，统一做小写映射后注册。 */
     if (isEventProp(key)) {
       patchEvent(element as HTMLElement, key.slice(2).toLowerCase(), previousValue, nextValue)
       continue
@@ -77,7 +81,7 @@ export function patchProps(
 }
 
 /**
- * 处理 style 属性，支持字符串和对象两种写法。
+ * 处理 `style` 属性，支持字符串和对象两种写法。
  */
 function applyStyle(element: HTMLElement, previous: unknown, next: unknown): void {
   if (isNil(next) || next === false) {
@@ -95,6 +99,7 @@ function applyStyle(element: HTMLElement, previous: unknown, next: unknown): voi
   if (isObject(next)) {
     const nextStyle = next as Record<string, unknown>
 
+    /* 所有属性都为 `null`/`undefined` 时移除整个 `style`，避免空标记残留。 */
     if (
       Object.values(nextStyle).every((item) => {
         return isNil(item)
@@ -102,7 +107,7 @@ function applyStyle(element: HTMLElement, previous: unknown, next: unknown): voi
     ) {
       element.removeAttribute('style')
 
-      /* Playwright 浏览器下偶发保留空 style 特性，显式清空后再移除确保属性消失。 */
+      /* Playwright 浏览器下偶发保留空 `style` 特性，显式清空后再移除确保属性消失。 */
       if (element.getAttribute('style') !== null) {
         element.style.cssText = ''
         element.removeAttribute('style')
@@ -114,12 +119,14 @@ function applyStyle(element: HTMLElement, previous: unknown, next: unknown): voi
     const previousStyle = isObject(previous) ? (previous as Record<string, unknown>) : {}
     let hasValue = false
 
+    /* 先处理删除：前一版本存在但当前已移除或置空的键需写入空字符串。 */
     for (const name of Object.keys(previousStyle)) {
       if (!Object.hasOwn(nextStyle, name) || isNil(nextStyle[name])) {
         setStyleValue(element, name, '')
       }
     }
 
+    /* 再处理新增/更新：仅接受 `string` 或 `number`，其他类型开发态发出警告。 */
     for (const [name, styleValue] of Object.entries(nextStyle)) {
       if (isNil(styleValue)) {
         setStyleValue(element, name, '')
@@ -141,6 +148,7 @@ function applyStyle(element: HTMLElement, previous: unknown, next: unknown): voi
       hasValue = true
     }
 
+    /* 对象写法未留下有效值时移除 `style` 特性，保持与空对象等价。 */
     if (!hasValue) {
       element.removeAttribute('style')
     }
@@ -158,14 +166,14 @@ function patchDomAttr(element: Element, key: string, value: unknown): void {
     return
   }
 
-  /* 布尔 true 直接写入空字符串，符合 HTML 布尔属性语义。 */
+  /* 布尔 `true` 直接写入空字符串，符合 HTML 布尔属性语义。 */
   if (value === true) {
     element.setAttribute(key, '')
 
     return
   }
 
-  /* 仅接受字符串或数字，其他类型直接忽略写入。 */
+  /* 仅接受 `string` 或 `number`，其他类型直接忽略写入。 */
   if (typeof value === 'string' || typeof value === 'number') {
     element.setAttribute(key, String(value))
 
@@ -177,6 +185,7 @@ function patchDomAttr(element: Element, key: string, value: unknown): void {
   }
 }
 
+/** 判断传入值是否为元素 `ref` 处理器或响应式 `ref`。 */
 function isElementRef(value: unknown): value is ElementRef {
   return typeof value === 'function' || isRef<Element | undefined>(value)
 }
@@ -198,9 +207,11 @@ function patchEvent(
   const existing = invokers[eventName]
 
   if (typeof next === 'function') {
+    /* 已有 `invoker` 时仅更新内部回调，保证事件引用稳定。 */
     if (existing) {
       existing.value = next as EventListener
     } else {
+      /* 首次绑定时创建包装 `invoker`，后续更新直接覆写 `value`。 */
       const invoker: EventInvoker = (event) => {
         invoker.value?.(event)
       }
@@ -213,6 +224,7 @@ function patchEvent(
     return
   }
 
+  /* 非 `function` 值代表需要移除事件监听。 */
   if (existing) {
     element.removeEventListener(eventName, existing)
     Reflect.deleteProperty(invokers, eventName)
@@ -220,7 +232,7 @@ function patchEvent(
 }
 
 /**
- * 获取或初始化当前元素的事件 invoker 映射，避免多次创建对象。
+ * 获取或初始化当前元素的事件 `invoker` 映射，避免多次创建对象。
  */
 function getInvokerMap(element: HTMLElement): Record<string, EventInvoker> {
   const record = (element as HTMLElement & { [invokerCacheKey]?: Record<string, EventInvoker> })[

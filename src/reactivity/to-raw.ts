@@ -10,7 +10,7 @@ export function isSupportedTarget(target: unknown): target is ReactiveTarget {
 }
 
 /**
- * 获取响应式 Proxy 对应的原始对象。
+ * 获取响应式 `Proxy` 对应的原始对象。
  *
  * @public
  */

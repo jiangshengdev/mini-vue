@@ -8,23 +8,23 @@ import { createVirtualNode } from '@/jsx-foundation/index.ts'
 import type { PropsShape, WithOptionalProp } from '@/shared/index.ts'
 
 /**
- * 记录剥离 key 后的 props 副本与归一化的 key 值。
+ * 记录剥离 `key` 后的 `props` 副本与归一化的 `key` 值。
  */
 interface NormalizedPropsResult<T extends ElementType> {
-  /** 组件最终使用的唯一 key，来源于 props 或显式参数。 */
+  /** 组件最终使用的唯一 `key`，来源于 `props` 或显式参数。 */
   key?: PropertyKey
-  /** 移除 key 字段后的 props 副本，若为空则省略。 */
+  /** 移除 `key` 字段后的 `props` 副本，若为空则省略。 */
   props?: ElementProps<T>
 }
 
 /**
- * 优先使用显式传入的 key，再回退到 props.key，并返回剩余 props。
+ * 优先使用显式传入的 `key`，再回退到 `props.key`，并返回剩余 `props`。
  */
 function extractKeyedProps<T extends ElementType>(
   props?: ElementProps<T>,
   explicitKey?: PropertyKey,
 ): NormalizedPropsResult<T> {
-  /* 未提供 props 时保持 key 的原始语义即可。 */
+  /* 未提供 `props` 时保持 `key` 的原始语义即可。 */
   if (!props) {
     return { key: explicitKey }
   }
@@ -35,10 +35,10 @@ function extractKeyedProps<T extends ElementType>(
     PropertyKey
   >
 
-  /* 显式 key（jsx 第三个参数）优先，其次再尝试 props.key。 */
-  /* 当 props 未显式声明 key 字段时，不读取解构出的 extractedKey，避免误用默认值。 */
+  /* 显式 `key`（`jsx` 第三个参数）优先，其次再尝试 `props.key`。 */
+  /* 当 `props` 未显式声明 `key` 字段时，不读取解构出的 `extractedKey`，避免误用默认值。 */
   const normalizedKey = explicitKey ?? (Object.hasOwn(props, 'key') ? extractedKey : undefined)
-  /* 仅在剥离 key 后仍有字段时返回 props，减少空对象创建。 */
+  /* 仅在剥离 `key` 后仍有字段时返回 `props`，减少空对象创建。 */
   const hasRestProps = Reflect.ownKeys(restProps).length > 0
 
   return {
@@ -48,17 +48,17 @@ function extractKeyedProps<T extends ElementType>(
 }
 
 /**
- * 低阶的 JSX 创建函数，直接封装到 createVirtualNode 调用。
+ * 低阶的 `JSX` 创建函数，直接封装到 `createVirtualNode` 调用。
  */
 export function buildVirtualNode<T extends ElementType>(
   type: T,
   props?: ElementProps<T>,
   key?: PropertyKey,
 ): VirtualNode<T> {
-  /* 统一抽取 key，避免 createVirtualNode 再次处理同一字段。 */
+  /* 统一抽取 `key`，避免 `createVirtualNode` 再次处理同一字段。 */
   const { key: resolvedKey, props: normalizedProps } = extractKeyedProps(props, key)
 
-  /* 将传入的 props 封装为 createVirtualNode 所需的参数结构 */
+  /* 将传入的 `props` 封装为 `createVirtualNode` 所需的参数结构 */
   return createVirtualNode({
     type,
     rawProps: normalizedProps,
@@ -67,7 +67,7 @@ export function buildVirtualNode<T extends ElementType>(
 }
 
 /**
- * 运行时友好的 h 函数，支持 props 与可变 children 参数。
+ * 运行时友好的 `h` 函数，支持 `props` 与可变 `children` 参数。
  *
  * @public
  */
@@ -76,13 +76,13 @@ export function h<T extends ElementType>(
   props?: ElementProps<T>,
   ...children: ComponentChildren[]
 ): VirtualNode<T> {
-  /* 没有额外 children 时直接透传 props，保留编译器注入的 children。 */
+  /* 没有额外 `children` 时直接透传 `props`，保留编译器注入的 `children`。 */
   if (children.length === 0) {
-    /* 该分支用于复刻 jsx 单子节点调用语义，不需重建 props。 */
+    /* 该分支用于复刻 `jsx` 单子节点调用语义，不需重建 `props`。 */
     return buildVirtualNode(type, props)
   }
 
-  /* 需要人为传入 children 时重新组装 props，并交由 buildVirtualNode 统一抽取 key。 */
+  /* 需要人为传入 `children` 时重新组装 `props`，并交由 `buildVirtualNode` 统一抽取 `key`。 */
   const emptyProps: ElementProps<T> = Object.create(null) as ElementProps<T>
   const propsWithChildren: ElementProps<T> = {
     ...(props ?? emptyProps),

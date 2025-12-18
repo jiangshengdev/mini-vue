@@ -48,7 +48,7 @@ export interface WatchOptions {
 /**
  * 建立响应式副作用并在数据变化时派发回调。
  * - 支持深度遍历与懒执行策略。
- * - 允许注册清理逻辑并与父 effect 生命周期同步。
+ * - 允许注册清理逻辑并与父 `effect` 生命周期同步。
  *
  * @public
  *
@@ -74,7 +74,7 @@ export function watch<T>(
     cleanup = fn
   }
 
-  /* 构建底层 effect，调度回调统一走 `runWatchJob` 以便复用逻辑。 */
+  /* 构建底层 `effect`，调度回调统一走 `runWatchJob` 以便复用逻辑。 */
   const runner = new ReactiveEffect(getter as () => T, () => {
     runWatchJob()
   })
@@ -90,7 +90,7 @@ export function watch<T>(
       return
     }
 
-    /* 通过 runner.run() 拿到最新值，确保依赖重新收集。 */
+    /* 通过 `runner.run()` 拿到最新值，确保依赖重新收集。 */
     const newValue = runner.run()
 
     /* 浅监听且值未变更时跳过回调，提高性能。 */
@@ -119,7 +119,7 @@ export function watch<T>(
   }
 
   /**
-   * 暴露给外部的停止函数，终止 effect 并运行末次清理。
+   * 暴露给外部的停止函数，终止 `effect` 并运行末次清理。
    */
   const stop: WatchStopHandle = () => {
     runner.stop()
@@ -128,7 +128,7 @@ export function watch<T>(
 
   recordScopeCleanup(stop)
 
-  /* 如存在父级 effect，则登记 stop 以便作用域销毁时统一清理。 */
+  /* 如存在父级 `effect`，则登记 `stop` 以便作用域销毁时统一清理。 */
   const parentEffect = effectStack.current
 
   if (parentEffect) {

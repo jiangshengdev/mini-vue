@@ -6,9 +6,9 @@ import { createChildEnvironment } from './children-environment.ts'
 import { findNextAnchor, moveNodes, unmount } from './utils.ts'
 
 /**
- * Unkeyed children diff：
- * - 先按索引 patch 公共长度。
- * - 新列表更长则追加 mount，并按“后继节点”计算插入锚点。
+ * `Unkeyed children diff`：
+ * - 先按索引 `patch` 公共长度。
+ * - 新列表更长则追加 `mount`，并按“后继节点”计算插入锚点。
  * - 旧列表更长则卸载多余节点。
  */
 export function patchUnkeyedChildren<
@@ -23,7 +23,7 @@ export function patchUnkeyedChildren<
 ): void {
   const commonLength = Math.min(previousChildren.length, nextChildren.length)
 
-  /* 公共部分逐个 patch：unkeyed 场景下“同索引”即认为是同位置节点。 */
+  /* 公共部分逐个 `patch`：`unkeyed` 场景下“同索引”即认为是同位置节点。 */
   for (let index = 0; index < commonLength; index += 1) {
     /* 使用 nextChildren.length 计算 shouldUseAnchor：只有不是最后一个兄弟时才需要锚点插入策略。 */
     const childEnvironment = createChildEnvironment(environment, index, nextChildren.length)
@@ -32,7 +32,7 @@ export function patchUnkeyedChildren<
   }
 
   if (nextChildren.length > previousChildren.length) {
-    /* 新增节点：逐个 mount，并使用“下一个已存在节点”作为插入锚点。 */
+    /* 新增节点：逐个 `mount`，并使用“下一个已存在节点”作为插入锚点。 */
     for (let index = commonLength; index < nextChildren.length; index += 1) {
       const next = nextChildren[index]
       /*

@@ -6,7 +6,7 @@ import { effectScope } from '@/reactivity/index.ts'
 import type { PlainObject } from '@/shared/index.ts'
 
 /**
- * 创建组件实例与关联的 effect 作用域。
+ * 创建组件实例与关联的 `effect` 作用域。
  */
 export function createComponentInstance<
   HostNode,
@@ -21,8 +21,8 @@ export function createComponentInstance<
 ): ComponentInstance<HostNode, HostElement, HostFragment, T> {
   /*
    * 挂载上下文从父到子逐层下传：
-   * - parent：用于组件树关系、provide/inject 的原型链继承。
-   * - appContext：用于“根级 provides”的稳定传播（组件外 app.provide 的入口）。
+   * - `parent`：用于组件树关系、`provide`/`inject` 的原型链继承。
+   * - `appContext`：用于“根级 `provides`”的稳定传播（组件外 `app.provide` 的入口）。
    */
   const parent = context?.parent
   const shouldUseAnchor = context?.shouldUseAnchor ?? false
@@ -30,14 +30,14 @@ export function createComponentInstance<
 
   /*
    * `provides` 采用原型链：
-   * - 优先继承父组件 provides
-   * - 否则继承 appContext.provides（root provides）
-   * - 再否则回退到空对象（支持无 createApp/render 的极简场景）
+   * - 优先继承父组件 `provides`
+   * - 否则继承 `appContext.provides`（root `provides`）
+   * - 再否则回退到空对象（支持无 `createApp`/`render` 的极简场景）
    */
   const providesSource: PlainObject =
     parent?.provides ?? appContext?.provides ?? (Object.create(null) as PlainObject)
 
-  /* `render`/`effect` 初始为空，由 setup 与 performInitialRender 回填。 */
+  /* `render`/`effect` 初始为空，由 `setup` 与 `performInitialRender` 回填。 */
   return {
     parent,
     appContext,
@@ -46,7 +46,7 @@ export function createComponentInstance<
     container,
     props,
     /**
-     * `setup` 阶段会把它替换为真实 render 闭包；这里提供占位实现以保持类型稳定。
+     * `setup` 阶段会把它替换为真实 `render` 闭包；这里提供占位实现以保持类型稳定。
      */
     render() {
       return undefined
@@ -60,7 +60,7 @@ export function createComponentInstance<
 }
 
 /**
- * 将实例回写到 virtualNode，方便测试或调试阶段访问。
+ * 将实例回写到 `virtualNode`，方便测试或调试阶段访问。
  */
 export function attachInstanceToVirtualNode<
   HostNode,
@@ -76,6 +76,6 @@ export function attachInstanceToVirtualNode<
     componentInstance?: ComponentInstance<HostNode, HostElement, HostFragment, T>
   }
 
-  /* 扩展 virtualNode 类型后写入实例引用，供外部消费。 */
+  /* 扩展 `virtualNode` 类型后写入实例引用，供外部消费。 */
   ;(virtualNode as VirtualNodeWithInstance).componentInstance = instance
 }

@@ -1,3 +1,12 @@
+/**
+ * 渲染输出归一化：
+ * 将 `render` 返回的多形态输出规整为 `runtime-core` 可稳定消费的 `vnode` 结构。
+ *
+ * @remarks
+ * - 数组输出会包裹为 `Fragment`，统一走 `children` 逻辑。
+ * - 文本（`string`/`number`）会转换为 `Text` `vnode`，避免 `mount`/`patch` 出现分叉实现。
+ * - 归一化后的 `children` 始终是 `vnode` 数组，便于 `patchChildren` 只处理一种形态。
+ */
 import type {
   ComponentChildren,
   ElementType,

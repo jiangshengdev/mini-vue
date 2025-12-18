@@ -7,7 +7,7 @@ import type { Ref } from '@/reactivity/index.ts'
 import { isRef } from '@/reactivity/index.ts'
 
 /**
- * 创建宿主元素并同步 props 与 children。
+ * 创建宿主元素并同步 `props` 与 `children`。
  */
 export function mountElement<
   HostNode,
@@ -26,7 +26,7 @@ export function mountElement<
 
   /* 在挂载前先写入属性与事件。 */
   patchProps(element, undefined, props)
-  /* 子节点交给 mountChildren，保持与 virtualNode 定义一致。 */
+  /* 子节点交给 `mountChildren`，保持与 `virtualNode` 定义一致。 */
   const mountedHandles = mountChildren(options, virtualNode.children, element, context)
   const ok = mountedHandles.every((handle) => {
     return handle.ok
@@ -41,7 +41,7 @@ export function mountElement<
     ok,
     nodes: [element],
     /**
-     * 卸载元素：先卸载子树与 ref，再移除自身，保证清理顺序可预期。
+     * 卸载元素：先卸载子树与 `ref`，再移除自身，保证清理顺序可预期。
      */
     teardown(skipRemove?: boolean): void {
       for (const child of mountedHandles) {
@@ -58,14 +58,14 @@ export function mountElement<
 }
 
 /**
- * 元素 ref 的统一抽象：支持回调 ref 与 `Ref` 容器两种写法。
+ * 元素 `ref` 的统一抽象：支持回调 `ref` 与 `Ref` 容器两种写法。
  */
 type ElementRefBinding<HostElement> =
   | Ref<HostElement | undefined>
   | ((value: HostElement | undefined) => void)
 
 /**
- * 将组件传入的 ref 属性规整为函数或 Ref 对象，便于统一回写。
+ * 将组件传入的 `ref` 属性规整为函数或 `Ref` 对象，便于统一回写。
  */
 export function resolveElementRefBinding<HostElement>(
   candidate: unknown,
@@ -82,7 +82,7 @@ export function resolveElementRefBinding<HostElement>(
 }
 
 /**
- * 在挂载或卸载阶段写回最新宿主元素，兼容函数 ref 与 Ref。
+ * 在挂载或卸载阶段写回最新宿主元素，兼容函数 `ref` 与 `Ref`。
  */
 export function assignElementRef<HostElement>(
   target: ElementRefBinding<HostElement> | undefined,

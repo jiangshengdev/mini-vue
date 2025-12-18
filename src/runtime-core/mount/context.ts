@@ -9,6 +9,6 @@ export interface MountContext {
   shouldUseAnchor?: boolean
   /** 当前挂载发生在哪个父组件实例下。 */
   parent?: UnknownComponentInstance
-  /** 当前挂载所属的应用上下文，用于 root provides 的稳定传播。 */
+  /** 当前挂载所属的应用上下文，用于 root `provides` 的稳定传播。 */
   appContext?: AppContext
 }

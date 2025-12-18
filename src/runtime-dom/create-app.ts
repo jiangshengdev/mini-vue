@@ -1,5 +1,5 @@
 /**
- * `runtime-dom` 负责整合 DOM 宿主的渲染器与应用创建逻辑。
+ * Runtime-dom（`runtime-dom`）负责整合 DOM 宿主的渲染器与应用创建逻辑。
  */
 import { domRendererOptions } from './renderer-options.ts'
 import type { SetupComponent } from '@/jsx-foundation/index.ts'
@@ -19,12 +19,12 @@ const { render: renderDomRootImpl, unmount: unmountContainer } = createRenderer(
 export const renderDomRoot = renderDomRootImpl
 
 /**
- * DOM 宿主应用内部状态，保存 runtime-core 返回的基础实例。
+ * DOM 宿主应用内部状态，保存 `runtime-core` 返回的基础实例。
  */
 interface DomAppState {
   /** `runtime-core` 的通用应用实例，用来执行真正的渲染逻辑。 */
   baseApp: AppInstance<Element>
-  /** 最近一次 mount 调用时的原始目标，字符串或节点。 */
+  /** 最近一次 `mount` 调用时的原始目标，字符串或节点。 */
   lastMountTarget?: string | Element
   /** 最近一次解析得到的真实容器节点。 */
   lastResolvedContainer?: Element
@@ -35,12 +35,12 @@ interface DomAppState {
 }
 
 /**
- * 记录 Vite HMR 生命周期的订阅状态，避免重复注册。
+ * 记录 Vite `HMR` 生命周期的订阅状态，避免重复注册。
  */
 interface DomAppHmrState {
-  /** 标识当前应用是否已经向 HMR 注册回调。 */
+  /** 标识当前应用是否已经向 `HMR` 注册回调。 */
   registered: boolean
-  /** HMR 更新完成后是否需要重新挂载 DOM 树。 */
+  /** `HMR` 更新完成后是否需要重新挂载 DOM 树。 */
   pendingRemount: boolean
 }
 
@@ -48,7 +48,7 @@ interface DomAppHmrState {
  * 根据字符串选择器或直接传入的节点解析出真实容器。
  */
 function resolveContainer(target: string | Element): Element | undefined {
-  /* 字符串容器走 querySelector，以支持常见挂载写法。 */
+  /* 字符串容器走 `querySelector`，以支持常见挂载写法。 */
   if (typeof target === 'string') {
     const resolved = runSilent(
       () => {
@@ -68,7 +68,7 @@ function resolveContainer(target: string | Element): Element | undefined {
 }
 
 /**
- * DOM 版本的 mount，负责解析容器并委托基础实例挂载。
+ * DOM 版本的 `mount`，负责解析容器并委托基础实例挂载。
  */
 function mountDomApp(state: DomAppState, target: string | Element): void {
   /* 统一将字符串选择器转换为真实节点，方便后续复用。 */
@@ -82,13 +82,13 @@ function mountDomApp(state: DomAppState, target: string | Element): void {
   state.lastMountTarget = target
   state.lastResolvedContainer = container
 
-  /* 将解析好的容器传递给 runtime-core 实例执行挂载。 */
+  /* 将解析好的容器传递给 `runtime-core` 实例执行挂载。 */
   state.baseApp.mount(container)
   state.isMounted = true
 }
 
 /**
- * DOM 版本的 unmount，直接复用基础实例的清理逻辑。
+ * DOM 版本的 `unmount`，直接复用基础实例的清理逻辑。
  */
 function unmountDomApp(state: DomAppState): void {
   state.baseApp.unmount()
@@ -96,10 +96,10 @@ function unmountDomApp(state: DomAppState): void {
 }
 
 /**
- * 在 HMR 场景下复用最近一次容器数据重新挂载。
+ * 在 `HMR` 场景下复用最近一次容器数据重新挂载。
  */
 function remountDomApp(state: DomAppState): void {
-  /* 优先复用上次解析出的真实容器，确保 remount 快速执行。 */
+  /* 优先复用上次解析出的真实容器，确保 `remount` 快速执行。 */
   let target: string | Element | undefined = state.lastResolvedContainer
 
   /* 断开连接后重新根据字符串选择器解析，保证挂载位置可恢复。 */
@@ -111,7 +111,7 @@ function remountDomApp(state: DomAppState): void {
     target = state.lastMountTarget
   }
 
-  /* 若清理过程中丢失真实节点，退回到原始 mount target。 */
+  /* 若清理过程中丢失真实节点，退回到原始 `mount` 目标。 */
   if (!target && state.lastMountTarget) {
     target = state.lastMountTarget
   }
@@ -126,12 +126,12 @@ function remountDomApp(state: DomAppState): void {
 }
 
 /**
- * 基于 DOM 宿主能力的 createApp，实现字符串选择器解析等平台逻辑。
+ * 基于 DOM 宿主能力的 `createApp`，实现字符串选择器解析等平台逻辑。
  *
  * @public
  */
 export interface DomAppInstance extends AppInstance<Element> {
-  /** 支持传入 CSS 选择器或真实节点的 mount 能力。 */
+  /** 支持传入 CSS 选择器或真实节点的 `mount` 能力。 */
   mount(target: string | Element): void
 }
 
@@ -141,7 +141,7 @@ export interface DomAppInstance extends AppInstance<Element> {
  * @public
  */
 export function createApp(rootComponent: SetupComponent, rootProps?: PropsShape): DomAppInstance {
-  /* 先创建 runtime-core 层的基础应用实例，统一托管渲染。 */
+  /* 先创建 `runtime-core` 层的基础应用实例，统一托管渲染。 */
   const state: DomAppState = {
     baseApp: createAppInstance(
       { render: renderDomRoot, unmount: unmountContainer },
@@ -153,12 +153,12 @@ export function createApp(rootComponent: SetupComponent, rootProps?: PropsShape)
 
   ensureDomHmrLifecycle(state)
 
-  /* 封装 DOM 版本 mount，让用户可以传入不同类型的容器。 */
+  /* 封装 DOM 版本 `mount`，让用户可以传入不同类型的容器。 */
   function mount(target: string | Element): void {
     mountDomApp(state, target)
   }
 
-  /* DOM 版本的 unmount 直接调用基础实例释放资源。 */
+  /* DOM 版本的 `unmount` 直接调用基础实例释放资源。 */
   function unmount(): void {
     unmountDomApp(state)
   }
@@ -171,16 +171,18 @@ export function createApp(rootComponent: SetupComponent, rootProps?: PropsShape)
 }
 
 /**
- * 注入针对 Vite 的 HMR 生命周期，确保热更新前后正确卸载/重建。
+ * 注入针对 Vite 的 `HMR` 生命周期，确保热更新前后正确卸载/重建。
  */
 function ensureDomHmrLifecycle(state: DomAppState): void {
   /* 仅在 Vite Dev 环境下存在 `import.meta.hot`。 */
   const { hot } = import.meta
 
+  /* 当 `HMR` 环境不存在时无需注册任何回调。 */
   if (!hot) {
     return
   }
 
+  /* 已注册过同一实例的回调时避免重复监听。 */
   if (state.hmr?.registered) {
     return
   }
@@ -193,7 +195,7 @@ function ensureDomHmrLifecycle(state: DomAppState): void {
 
   state.hmr = hmrState
 
-  /* HMR 即将替换模块时先记录当前容器并卸载，释放副作用。 */
+  /* 当 `HMR` 即将替换模块时先记录当前容器并卸载，释放副作用。 */
   const prepareRemount = () => {
     if (!state.isMounted) {
       return
@@ -213,12 +215,12 @@ function ensureDomHmrLifecycle(state: DomAppState): void {
     remountDomApp(state)
   }
 
-  /* 针对 Vite 的 before/after 钩子注册挂载/卸载逻辑。 */
+  /* 针对 Vite 的 `before/after` 钩子注册挂载/卸载逻辑。 */
   hot.on('vite:beforeUpdate', prepareRemount)
   hot.on('vite:beforeFullReload', prepareRemount)
   hot.on('vite:afterUpdate', remountIfNeeded)
 
-  /* Vite 触发 dispose 时若仍挂载，需要显式卸载容器。 */
+  /* Vite 触发 `dispose` 时若仍挂载，需要显式卸载容器。 */
   hot.dispose(() => {
     if (!state.isMounted) {
       return

@@ -13,7 +13,7 @@ export function trackEffect(dependencyBucket: DependencyBucket, debugInfo?: Plai
    *
    * @remarks
    * - 该分支主要用于屏蔽“写入前读旧值 / 创建期探测”这类读取带来的意外收集。
-   * - 这里不仅影响 reactive 的 track，也会影响 ref.value 等通过 trackEffect 收集的路径。
+   * - 这里不仅影响 `reactive` 的 `track`，也会影响 `ref.value` 等通过 `trackEffect` 收集的路径。
    */
   if (!canTrack()) {
     return
@@ -26,7 +26,7 @@ export function trackEffect(dependencyBucket: DependencyBucket, debugInfo?: Plai
     return
   }
 
-  /* 已停止的副作用不应重新进入依赖集合，防止死效果并阻断 stop 清理 */
+  /* 已停止的副作用不应重新进入依赖集合，防止死效果并阻断 `stop` 清理 */
   if (!currentEffect.active) {
     return
   }
@@ -42,7 +42,7 @@ export function trackEffect(dependencyBucket: DependencyBucket, debugInfo?: Plai
 }
 
 /**
- * 触发依赖集合中的副作用，按照快照顺序执行 run。
+ * 触发依赖集合中的副作用，按照快照顺序执行 `run`。
  */
 export function triggerEffects(dependencyBucket: DependencyBucket): void {
   /* 空集合无需触发，快速退出 */
@@ -70,6 +70,6 @@ function depSnapshot(dependencyBucket: DependencyBucket): DependencyBucket {
  * 判断副作用是否应在当前调度周期内运行。
  */
 function shouldRun(effect: EffectInstance): boolean {
-  /* 避免重复执行当前 effect，并确保目标 effect 尚未停止 */
+  /* 避免重复执行当前 `effect`，并确保目标 `effect` 尚未停止 */
   return effect !== effectStack.current && effect.active
 }

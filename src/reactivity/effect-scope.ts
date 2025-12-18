@@ -2,7 +2,7 @@ import type { EffectInstance } from './contracts/index.ts'
 import { reactivityScopeDisposeOutside } from '@/messages/index.ts'
 import { ContextStack, errorContexts, errorPhases, runSilent, runThrowing } from '@/shared/index.ts'
 
-/** 当前正在运行的 effect scope 栈，用于关联副作用与清理。 */
+/** 当前正在运行的 `effect scope` 栈，用于关联副作用与清理。 */
 const effectScopeStack = new ContextStack<EffectScope>()
 
 /**
@@ -11,34 +11,34 @@ const effectScopeStack = new ContextStack<EffectScope>()
  * @public
  */
 export class EffectScope {
-  /** 当前 scope 是否仍可用，stop 后将不再收集副作用。 */
+  /** 当前 `scope` 是否仍可用，`stop` 后将不再收集副作用。 */
   active = true
 
-  /** 是否与父 scope 断开自动关联，默认继承现有 scope。 */
+  /** 是否与父 `scope` 断开自动关联，默认继承现有 `scope`。 */
   private readonly detached: boolean
 
-  /** 父级 scope 引用，便于停止时同步移除子节点。 */
+  /** 父级 `scope` 引用，便于停止时同步移除子节点。 */
   private parent?: EffectScope
 
-  /** 子 scope 列表，stop 时需要级联销毁。 */
+  /** 子 `scope` 列表，`stop` 时需要级联销毁。 */
   private childScopes?: EffectScope[]
 
-  /** 当前 scope 在父 scope 中的索引，便于 O(1) 移除。 */
+  /** 当前 `scope` 在父 `scope` 中的索引，便于 `O(1)` 移除。 */
   private positionInParent?: number
 
-  /** 记录属于该 scope 的副作用实例。 */
+  /** 记录属于该 `scope` 的副作用实例。 */
   private readonly effects: EffectInstance[] = []
 
   /** 由用户注册的清理回调。 */
   private readonly cleanups: Array<() => void> = []
 
   /**
-   * 构造函数可选择与父 scope 自动关联，便于层级 stop 时级联处理。
+   * 构造函数可选择与父 `scope` 自动关联，便于层级 `stop` 时级联处理。
    */
   constructor(detached = false) {
     this.detached = detached
 
-    /* 非独立 scope 会挂到当前活跃 scope 下，复用其生命周期。 */
+    /* 非独立 `scope` 会挂到当前活跃 `scope` 下，复用其生命周期。 */
     const currentScope = effectScopeStack.current
 
     if (!detached && currentScope) {
@@ -47,7 +47,7 @@ export class EffectScope {
   }
 
   /**
-   * 在当前 scope 上下文中执行回调，使其创建的副作用被自动托管。
+   * 在当前 `scope` 上下文中执行回调，使其创建的副作用被自动托管。
    *
    * @throws
    * @see {@link https://www.typescriptlang.org/docs/handbook/2/functions.html#unknown | unknown }
@@ -63,33 +63,33 @@ export class EffectScope {
       origin: errorContexts.effectScopeRun,
       handlerPhase: errorPhases.sync,
       beforeRun: () => {
-        /* 切换全局活跃 scope，确保回调内部的所有副作用归属于当前 scope。 */
+        /* 切换全局活跃 `scope`，确保回调内部的所有副作用归属于当前 `scope`。 */
         effectScopeStack.push(this)
       },
       afterRun() {
-        /* 无论回调如何结束，都要恢复先前 scope，保持栈式嵌套关系。 */
+        /* 无论回调如何结束，都要恢复先前 `scope`，保持栈式嵌套关系。 */
         effectScopeStack.pop()
       },
     })
   }
 
   /**
-   * 记录一个副作用，等待 scope stop 时统一停止。
+   * 记录一个副作用，等待 `scope.stop` 时统一停止。
    */
   recordEffect(effect: EffectInstance): void {
-    /* 仅在 scope 仍活跃时登记副作用，避免 stop 之后再次触发清理。 */
+    /* 仅在 `scope` 仍活跃时登记副作用，避免 `stop` 之后再次触发清理。 */
     if (this.active) {
       this.effects.push(effect)
     }
   }
 
   /**
-   * 为 scope 注册一次性清理回调。
+   * 为 `scope` 注册一次性清理回调。
    */
   addCleanup(cleanup: () => void): void {
     /*
-     * 若 scope 已停止（含 stop 进行中），对齐 effect 的语义：不再入队，而是立刻执行。
-     * 这样可以避免“登记到永远不会再被 stop 消费的队列”造成资源无法释放。
+     * 若 `scope` 已停止（含 `stop` 进行中），对齐 `effect` 的语义：不再入队，而是立刻执行。
+     * 这样可以避免“登记到永远不会再被 `stop` 消费的队列”造成资源无法释放。
      */
     if (!this.active) {
       runSilent(cleanup, {
@@ -104,17 +104,17 @@ export class EffectScope {
   }
 
   /**
-   * 停用 scope，并停止所有副作用与递归销毁子 scope。
+   * 停用 `scope`，并停止所有副作用与递归销毁子 `scope`。
    */
   stop(fromParent = false): void {
     if (!this.active) {
       return
     }
 
-    /* 对齐 Vue：stop 一开始即标记为 inactive，避免 stop 期间继续收集副作用/cleanup。 */
+    /* 对齐 `Vue`：`stop` 一开始即标记为 inactive，避免 `stop` 期间继续收集副作用/cleanup。 */
     this.active = false
 
-    /* 逐个停止 scope 内缓存的副作用，释放依赖关系。 */
+    /* 逐个停止 `scope` 内缓存的副作用，释放依赖关系。 */
     for (const effect of this.effects) {
       runSilent(
         () => {
@@ -142,7 +142,7 @@ export class EffectScope {
     }
 
     if (this.childScopes) {
-      /* 通知所有子 scope 级联 stop，并告知它们来源于父级。 */
+      /* 通知所有子 `scope` 级联 `stop`，并告知它们来源于父级。 */
       for (const scope of this.childScopes) {
         runSilent(
           () => {
@@ -158,7 +158,7 @@ export class EffectScope {
       this.childScopes = undefined
     }
 
-    /* 非 detached scope 需要从父级移除，防止残留引用。 */
+    /* 非 detached `scope` 需要从父级移除，防止残留引用。 */
     if (!this.detached && this.parent && !fromParent) {
       this.parent.removeChildScope(this)
     }
@@ -167,11 +167,11 @@ export class EffectScope {
   }
 
   /**
-   * 记录子 scope，并缓存其在父级数组中的位置，方便快速删除。
+   * 记录子 `scope`，并缓存其在父级数组中的位置，方便快速删除。
    */
   private trackChildScope(scope: EffectScope): void {
     scope.parent = this
-    /* 记录当前 scope 在列表中的位置，方便 O(1) 交换删除。 */
+    /* 记录当前 `scope` 在列表中的位置，方便 `O(1)` 交换删除。 */
     scope.positionInParent = this.childScopes?.length ?? 0
 
     if (this.childScopes) {
@@ -182,7 +182,7 @@ export class EffectScope {
   }
 
   /**
-   * 将指定子 scope 从父级列表中移除，保持索引连续性。
+   * 将指定子 `scope` 从父级列表中移除，保持索引连续性。
    */
   private removeChildScope(scope: EffectScope): void {
     const { childScopes } = this

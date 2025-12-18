@@ -23,7 +23,7 @@ export function pauseTracking(): void {
   trackingStack.push(false)
 }
 
-/** 恢复依赖收集（与 pauseTracking 成对）。 */
+/** 恢复依赖收集（与 `pauseTracking` 成对）。 */
 export function restoreTracking(): void {
   trackingStack.pop()
 }

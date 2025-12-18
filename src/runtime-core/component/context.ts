@@ -13,8 +13,8 @@ import { ContextStack } from '@/shared/index.ts'
  * 组件实例的依赖注入容器类型。
  *
  * @remarks
- * - 运行期使用“对象 + 原型链”表达层级 provides。
- * - key 支持 `symbol`（推荐）与 `string`。
+ * - 运行期使用“对象 + 原型链”表达层级 `provides`。
+ * - `key` 支持 `symbol`（推荐）与 `string`。
  */
 export type Provides = PlainObject
 
@@ -29,25 +29,25 @@ export interface ComponentInstance<
 > {
   /** 父组件实例引用，用于依赖注入与上下文继承。 */
   parent?: UnknownComponentInstance
-  /** 应用级上下文（root provides 等），沿组件树结构稳定传播。 */
+  /** 应用级上下文（root `provides` 等），沿组件树结构稳定传播。 */
   appContext?: AppContext
-  /** 依赖注入容器，默认通过原型链继承父/应用级 provides。 */
+  /** 依赖注入容器，默认通过原型链继承父/应用级 `provides`。 */
   provides: Provides
   /** 组件定义本身，保存以便多次渲染重用。 */
   readonly type: T
   /** 宿主容器或片段引用，挂载子树时作为根。 */
   readonly container: HostElement | HostFragment
-  /** 组件接收到的 props 副本。 */
+  /** 组件接收到的 `props` 副本。 */
   props: ElementProps<T>
-  /** `setup` 返回的渲染闭包，每次 effect 执行都会调用。 */
+  /** `setup` 返回的渲染闭包，每次 `effect` 执行都会调用。 */
   render: RenderFunction
   /** 组件独立的响应式副作用，驱动更新调度。 */
   effect?: ReactiveEffect<NormalizedVirtualNode | undefined>
-  /** 组件级 effect scope，托管所有 setup 内部副作用。 */
+  /** 组件级 `effect scope`，托管所有 `setup` 内部副作用。 */
   scope: EffectScope
   /** 最近一次渲染生成的虚拟子树结果。 */
   subTree?: NormalizedVirtualNode
-  /** 当前挂载到宿主的节点句柄，支持 teardown。 */
+  /** 当前挂载到宿主的节点句柄，支持 `teardown`。 */
   mountedHandle?: MountedHandle<HostNode>
   /** 组件在父容器中的锚点节点，用于保持兄弟顺序。 */
   anchor?: HostNode
@@ -64,11 +64,11 @@ export interface ComponentInstance<
 /** 兼容任意宿主类型的组件实例别名，简化当前实例管理。 */
 export type UnknownComponentInstance = ComponentInstance<unknown, WeakKey, unknown, SetupComponent>
 
-/** 当前 setup 调用栈正在处理的实例引用。 */
+/** 当前 `setup` 调用栈正在处理的实例引用。 */
 const instanceStack = new ContextStack<UnknownComponentInstance>()
 
 /**
- * 设置当前运行中的组件实例，供 setup 期间访问。
+ * 设置当前运行中的组件实例，供 `setup` 期间访问。
  */
 export function setCurrentInstance<
   HostNode,

@@ -5,21 +5,22 @@ import { patchProps } from './patch-props.ts'
 import type { RendererOptions } from '@/runtime-core/index.ts'
 
 /**
- * DOM 宿主环境完整的渲染原语集合，供 renderer 复用。
+ * DOM 宿主环境完整的渲染原语集合，供 `renderer` 复用。
  */
 export const domRendererOptions: RendererOptions<Node, Element, DocumentFragment> = {
-  /** 创建指定标签的 HTMLElement。 */
+  /** 创建指定标签的 `HTMLElement`。 */
   createElement(type): HTMLElement {
     return document.createElement(type)
   },
-  /** 根据文本内容生成 Text 节点，承载字符串 children。 */
+  /** 根据文本内容生成 `Text` 节点，承载字符串 `children`。 */
   createText(text): Text {
     return document.createTextNode(text)
   },
+  /** 覆用现有文本节点，仅更新其内容避免重新创建节点。 */
   setText(node, text): void {
     ;(node as Text).nodeValue = text
   },
-  /** 创建片段节点，用于批量插入 children。 */
+  /** 创建片段节点，用于批量插入 `children`。 */
   createFragment(): DocumentFragment {
     return document.createDocumentFragment()
   },

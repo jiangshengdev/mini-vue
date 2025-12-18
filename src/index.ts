@@ -1,5 +1,5 @@
 /**
- * 暴露核心响应式与 JSX 运行时能力，供外部统一引入。
+ * 暴露核心响应式与 `JSX` 运行时能力，供外部统一引入。
  */
 export type { ElementType, SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
 export { Fragment } from '@/jsx-foundation/index.ts'

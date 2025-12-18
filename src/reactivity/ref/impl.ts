@@ -9,15 +9,19 @@ import type { PlainObject } from '@/shared/index.ts'
 import { isPlainObject } from '@/shared/index.ts'
 
 /**
- * RefImpl 负责封装普通值的响应式访问器，实现依赖收集与触发。
+ * `RefImpl` 负责封装普通值的响应式访问器，实现依赖收集与触发。
  */
 export class RefImpl<T> implements Ref<T> {
+  /** 当前 `Ref` 的依赖集合，用于收集/触发读取 `value` 的副作用。 */
   readonly dependencyBucket: DependencyBucket = new Set()
 
+  /** 通过 `refFlag` 标记当前对象为 `Ref` 实例，供 `isRef()` 类型守卫识别。 */
   readonly [refFlag] = true as const
 
+  /** 最近一次写入的原始值（已 `toRaw`），用于 `Object.is` 判等与避免重复触发。 */
   private rawValue: T
 
+  /** 供外部读取的内部值：若为对象/数组则会被转换为 `reactive` 代理。 */
   private innerValue: T
 
   /**
@@ -31,7 +35,7 @@ export class RefImpl<T> implements Ref<T> {
   }
 
   /**
-   * 访问 Ref 的值时进行依赖收集，并返回最新缓存的副本。
+   * 访问 `Ref` 的值时进行依赖收集，并返回最新缓存的副本。
    */
   get value(): T {
     /* 读取时登记当前副作用，保持追踪关系。 */
@@ -45,7 +49,7 @@ export class RefImpl<T> implements Ref<T> {
   }
 
   /**
-   * 写入 Ref 的值时同步更新原值与响应式副本，并调度依赖副作用。
+   * 写入 `Ref` 的值时同步更新原值与响应式副本，并调度依赖副作用。
    */
   set value(newValue: T) {
     const rawValue = toRaw(newValue)
@@ -63,15 +67,18 @@ export class RefImpl<T> implements Ref<T> {
 }
 
 /**
- * ObjectRefImpl 将对象属性包装成 Ref，与原始对象读写保持同步。
+ * `ObjectRefImpl` 将对象属性包装成 `Ref`，与原始对象读写保持同步。
  */
 export class ObjectRefImpl<T extends PlainObject, K extends keyof T> implements Ref<T[K]> {
   readonly [refFlag] = true as const
 
+  /** 被代理的目标对象，读写会直接落到 `target[key]`。 */
   private readonly target: T
 
+  /** 被代理的属性键，用于定位目标字段。 */
   private readonly key: K
 
+  /** 非响应式对象场景下的本地依赖集合，用于驱动 `value` 的手动触发。 */
   private readonly dependencyBucket?: DependencyBucket
 
   /**
@@ -87,13 +94,13 @@ export class ObjectRefImpl<T extends PlainObject, K extends keyof T> implements 
   }
 
   /**
-   * 读取属性 Ref 时实时返回对象上的当前值。
+   * 读取属性 `Ref` 时实时返回对象上的当前值。
    */
   get value(): T[K] {
     const value = this.target[this.key]
 
     if (this.dependencyBucket) {
-      /* 普通对象属性通过自身 dependencyBucket 追踪依赖。 */
+      /* 普通对象属性通过自身 `dependencyBucket` 追踪依赖。 */
       trackEffect(this.dependencyBucket, {
         source: 'object-ref',
         target: this.target,
@@ -101,12 +108,12 @@ export class ObjectRefImpl<T extends PlainObject, K extends keyof T> implements 
       })
     }
 
-    /* 不额外缓存值，直接透传原对象，确保和原始 getter 一致。 */
+    /* 不额外缓存值，直接透传原对象，确保和原始 `getter` 一致。 */
     return value
   }
 
   /**
-   * 写入属性 Ref 时同步赋值到原对象属性上。
+   * 写入属性 `Ref` 时同步赋值到原对象属性上。
    */
   set value(newValue: T[K]) {
     if (this.dependencyBucket) {
@@ -127,7 +134,7 @@ export class ObjectRefImpl<T extends PlainObject, K extends keyof T> implements 
 
       this.target[this.key] = newValue
 
-      /* 普通对象属性依赖由自身 dependencyBucket 驱动。 */
+      /* 普通对象属性依赖由自身 `dependencyBucket` 驱动。 */
       triggerEffects(this.dependencyBucket)
 
       return

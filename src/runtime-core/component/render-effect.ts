@@ -12,7 +12,7 @@ import { ReactiveEffect, recordEffectScope } from '@/reactivity/index.ts'
 import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
 
 /**
- * 运行组件 effect 并将首个结果挂载到容器。
+ * 运行组件 `effect` 并将首个结果挂载到容器。
  */
 export function performInitialRender<
   HostNode,
@@ -23,19 +23,19 @@ export function performInitialRender<
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
 ): MountedHandle<HostNode> {
-  /* 每个组件实例持有独立 effect，负责跟踪依赖并调度重渲染。 */
+  /* 每个组件实例持有独立 `effect`，负责跟踪依赖并调度重渲染。 */
   instance.effect = createRenderEffect(options, instance)
 
   let mounted: MountedHandle<HostNode> | undefined
   let ok = true
 
-  /* 首次 run() 会同步生成子树结果。 */
+  /* 首次 `run()` 会同步生成子树结果。 */
   /* 包裹错误通道：首渲染异常需清理实例但不中断兄弟挂载。 */
   runSilent(
     () => {
       const subtree = instance.effect!.run()
 
-      /* 子树由通用 mountChild 继续挂载到宿主容器。 */
+      /* 子树由通用 `mountChild` 继续挂载到宿主容器。 */
       mounted = mountChildWithAnchor(options, instance, subtree)
 
       instance.mountedHandle = mounted
@@ -109,7 +109,7 @@ function rerenderComponent<
   const previousSubTree = instance.subTree
   let rerenderFailed = false
 
-  /* 调度执行由 effect 决定，异常时标记失败并避免替换旧子树。 */
+  /* 调度执行由 `effect` 决定，异常时标记失败并避免替换旧子树。 */
   runSilent(renderSchedulerJob, {
     origin: errorContexts.scheduler,
     handlerPhase: errorPhases.sync,
@@ -130,7 +130,7 @@ function rerenderComponent<
 }
 
 /**
- * 以 patch 方式更新组件子树，保持宿主节点复用。
+ * 以 `patch` 方式更新组件子树，保持宿主节点复用。
  */
 function patchLatestSubtree<
   HostNode,

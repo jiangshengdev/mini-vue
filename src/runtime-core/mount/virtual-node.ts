@@ -9,7 +9,7 @@ import type { SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
 import { Fragment } from '@/jsx-foundation/index.ts'
 
 /**
- * 将通用 virtualNode 分派给组件或元素挂载路径。
+ * 将通用 `virtualNode` 分派给组件或元素挂载路径。
  */
 export function mountVirtualNode<
   HostNode,
@@ -23,7 +23,7 @@ export function mountVirtualNode<
 ): MountedHandle<HostNode> | undefined {
   const shouldUseAnchor = context?.shouldUseAnchor ?? false
 
-  /* Fragment 直接展开自身 children，不走组件路径。 */
+  /* `Fragment` 直接展开自身 `children`，不走组件路径。 */
   if (virtualNode.type === Fragment) {
     const mounted = mountChild(options, virtualNode.children, container, {
       ...context,
@@ -41,7 +41,7 @@ export function mountVirtualNode<
     return mounted
   }
 
-  /* 函数组件通过 mountComponent 执行并挂载其返回值。 */
+  /* 函数组件通过 `mountComponent` 执行并挂载其返回值。 */
   if (typeof virtualNode.type === 'function') {
     const mounted = mountComponent(options, virtualNode as VirtualNode<SetupComponent>, container, {
       ...context,

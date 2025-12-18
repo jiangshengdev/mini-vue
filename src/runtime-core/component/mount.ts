@@ -24,7 +24,7 @@ export function mountComponent<
   context?: MountContext,
 ): MountedHandle<HostNode> | undefined {
   const shouldUseAnchor = context?.shouldUseAnchor ?? false
-  /* 准备实例前先规整 props，以免 setup 阶段读到旧引用。 */
+  /* 准备实例前先规整 `props`，以免 `setup` 阶段读到旧引用。 */
   const props = resolveComponentProps(virtualNode)
   const component = virtualNode.type
   const instance = createComponentInstance(component, props, container, {
@@ -33,7 +33,7 @@ export function mountComponent<
   })
   const runtime = asRuntimeVNode<HostNode, HostElement, HostFragment>(virtualNode)
 
-  /* 让 virtualNode 拥有实例引用，方便调试或测试检索。 */
+  /* 让 `virtualNode` 拥有实例引用，方便调试或测试检索。 */
   attachInstanceToVirtualNode(virtualNode, instance)
   runtime.component = instance as never
   const { anchor } = instance
@@ -61,7 +61,7 @@ export function mountComponent<
     ok: initialRender.ok,
     nodes: initialRender.nodes,
     /**
-     * 卸载组件：统一走实例 teardown，内部会 stop scope/effect 并清理已挂载子树。
+     * 卸载组件：统一走实例 `teardown`，内部会 stop `scope`/`effect` 并清理已挂载子树。
      */
     teardown(skipRemove?: boolean): void {
       teardownComponentInstance(options, instance, skipRemove)

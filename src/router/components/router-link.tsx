@@ -5,7 +5,7 @@ import type { ComponentChildren, SetupComponent } from '@/jsx-foundation/index.t
 import type { PropsShape } from '@/shared/index.ts'
 
 /**
- * RouterLink 的 props 定义，描述目标路径与所属路由器。
+ * `RouterLink` 的 `props` 定义，描述目标路径与所属路由器。
  */
 export interface RouterLinkProps extends PropsShape {
   /** 需要导航到的目标路径。 */
@@ -44,7 +44,7 @@ export const RouterLink: SetupComponent<RouterLinkProps> = (props) => {
     resolvedRouter.navigate(props.to)
   }
 
-  /* 渲染标准 a 标签并挂载导航行为。 */
+  /* 渲染标准 `a` 标签并挂载导航行为。 */
   return () => {
     const { to, router: _router, children, ...rest } = props
 

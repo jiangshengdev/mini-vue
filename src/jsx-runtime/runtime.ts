@@ -2,7 +2,7 @@ import { buildVirtualNode } from './builder.ts'
 import type { ElementProps, ElementType, VirtualNode } from '@/jsx-foundation/index.ts'
 
 /**
- * 标准 JSX 运行时入口，对应生产环境编译产物中的 jsx 调用。
+ * 标准 `JSX` 运行时入口，对应生产环境编译产物中的 `jsx` 调用。
  *
  * @public
  */
@@ -15,15 +15,15 @@ export function jsx<T extends ElementType>(
 }
 
 /**
- * 多子节点版本的 jsx，当前实现与 jsx 等价。
+ * 多子节点版本的 `jsx`，当前实现与 `jsx` 等价。
  *
  * @public
  */
 export const jsxs = jsx
 
 /**
- * 开发环境使用的 jsx 版本，方便在编译阶段注入额外调试信息。
- * 这里实现上仍然复用 createJSXNode，保持行为一致。
+ * 开发环境使用的 `jsx` 版本，方便在编译阶段注入额外调试信息。
+ * 这里实现上仍然复用 `buildVirtualNode`，保持行为一致。
  *
  * @public
  */

@@ -8,7 +8,7 @@ import {
 import { errorContexts, errorPhases, isThenable, runSilent } from '@/shared/index.ts'
 
 /**
- * 初始化组件，创建 setup 阶段与渲染闭包。
+ * 初始化组件，创建 `setup` 阶段与渲染闭包。
  */
 export function setupComponent<
   HostNode,
@@ -16,7 +16,7 @@ export function setupComponent<
   HostFragment extends HostNode,
   T extends SetupComponent,
 >(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): boolean {
-  /* `setup` 返回的渲染闭包会成为 effect 调度的核心逻辑。 */
+  /* `setup` 返回的渲染闭包会成为 `effect` 调度的核心逻辑。 */
   const render = invokeSetup(instance)
 
   if (!render) {
@@ -37,7 +37,7 @@ function invokeSetup<
 >(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): RenderFunction | undefined {
   let setupFailed = false
 
-  /* 在组件专属 scope 内运行 setup，便于后续统一 stop。 */
+  /* 在组件专属 `scope` 内运行 `setup`，便于后续统一 `stop`。 */
   const render = instance.scope.run(() => {
     return runSilent(
       () => {
@@ -47,7 +47,7 @@ function invokeSetup<
         origin: errorContexts.componentSetup,
         handlerPhase: errorPhases.sync,
         beforeRun() {
-          /* 替换全局 currentInstance 以便 setup 内部通过 API 访问自身。 */
+          /* 替换全局 `currentInstance` 以便 `setup` 内部通过 `API` 访问自身。 */
           setCurrentInstance(instance)
         },
         afterRun(token) {
@@ -67,7 +67,7 @@ function invokeSetup<
   }
 
   if (isThenable(render)) {
-    /* Mini-vue runtime-core 目前仅支持同步 setup：返回 Promise 会导致挂载行为不可预测。 */
+    /* Mini-vue `runtime-core` 目前仅支持同步 `setup`：返回 `Promise` 会导致挂载行为不可预测。 */
     runSilent(
       () => {
         throw new TypeError(runtimeCoreAsyncSetupNotSupported, {
@@ -98,6 +98,6 @@ function invokeSetup<
     return undefined
   }
 
-  /* 始终返回函数，供 effect 每次执行时拿到最新子树。 */
+  /* 始终返回函数，供 `effect` 每次执行时拿到最新子树。 */
   return render
 }

@@ -10,7 +10,7 @@ import { isArrayIndex } from '@/shared/index.ts'
  */
 class DependencyRegistry {
   /**
-   * 使用 WeakMap 建立目标对象到属性依赖集合的索引结构。
+   * 使用 `WeakMap` 建立目标对象到属性依赖集合的索引结构。
    */
   private readonly targetMap = new WeakMap<ReactiveTarget, Map<PropertyKey, DependencyBucket>>()
 
@@ -26,7 +26,7 @@ class DependencyRegistry {
       return
     }
 
-    /* 没有活跃 effect 时无需创建依赖集合，直接退出节省内存。 */
+    /* 没有活跃 `effect` 时无需创建依赖集合，直接退出节省内存。 */
     const currentEffect = effectStack.current
 
     if (!currentEffect) {

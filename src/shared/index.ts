@@ -1,3 +1,6 @@
+/**
+ * 聚合 `shared` 层的基础能力与类型，作为各子域的统一入口。
+ */
 export { ContextStack } from './context-stack.ts'
 export { createDebugLogger } from './debug.ts'
 export type { DebugLogger } from './debug.ts'

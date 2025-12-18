@@ -1,7 +1,7 @@
 import { isNil, isObject } from '@/shared/index.ts'
 
 /**
- * 将 class 相关入参归一化为以空格分隔的字符串。
+ * 将 `class` 相关入参归一化为以空格分隔的字符串。
  */
 export function normalizeClass(value: unknown): string {
   const tokens: string[] = []
@@ -13,7 +13,7 @@ export function normalizeClass(value: unknown): string {
 }
 
 /**
- * 递归收集 class 值中的有效标记，支持字符串、数组与对象形式。
+ * 递归收集 `class` 值中的有效标记，支持字符串、数组与对象形式。
  */
 function collectClassTokens(source: unknown, tokens: string[]): void {
   /* 空值直接跳过，不参与渲染。 */

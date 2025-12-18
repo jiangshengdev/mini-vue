@@ -20,7 +20,11 @@ import {
 export const effectStack = new ContextStack<EffectInstance>()
 const debug = __INTERNAL_DEV__ ? createDebugLogger('effect') : null
 
+/**
+ * 用于兼容测试框架的 mock 函数命名接口，便于在开发态输出更可读的副作用名称。
+ */
 interface EffectFnMockLike {
+  /** 返回 mock 函数名（如 `jest.fn().mockName()`），不存在则回退到 `Function.name`。 */
   getMockName?: () => string
 }
 
@@ -38,6 +42,9 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
    */
   private readonly effectFn: () => T
 
+  /**
+   * 开发态用于调试输出的副作用名称，尽量从 mock 框架或函数名推导。
+   */
   private readonly effectName?: string
 
   /**

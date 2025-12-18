@@ -1,7 +1,7 @@
 import type { AppContext } from './create-app.ts'
 import { ContextStack } from '@/shared/index.ts'
 
-/** 当前正在执行的应用上下文栈，支持嵌套 render。 */
+/** 当前正在执行的应用上下文栈，支持嵌套 `render`。 */
 const appContextStack = new ContextStack<AppContext>()
 
 /**
@@ -9,7 +9,7 @@ const appContextStack = new ContextStack<AppContext>()
  *
  * @remarks
  * - 该上下文主要用于把应用级 provides 传入根组件创建链路。
- * - 允许嵌套（例如在一个渲染过程中触发另一次 render）。
+ * - 允许嵌套（例如在一个渲染过程中触发另一次 `render`）。
  */
 export function setCurrentAppContext(context: AppContext): void {
   appContextStack.push(context)

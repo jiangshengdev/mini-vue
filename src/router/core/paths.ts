@@ -1,7 +1,7 @@
 const trailingSlashRe = /\/+$/
 
 /**
- * 移除路径中的 query 与 hash 片段，保留纯路径部分。
+ * 移除路径中的 `query` 与 `hash` 片段，保留纯路径部分。
  */
 function stripQueryAndHash(path: string): string {
   const hashIndex = path.indexOf('#')
@@ -15,7 +15,7 @@ function stripQueryAndHash(path: string): string {
 }
 
 /**
- * 提取路径中的 query 与 hash 片段（若不存在则返回空字符串）。
+ * 提取路径中的 `query` 与 `hash` 片段（若不存在则返回空字符串）。
  */
 export function getQueryAndHash(path: string): string {
   const pathname = stripQueryAndHash(path)
@@ -23,7 +23,7 @@ export function getQueryAndHash(path: string): string {
   return path.slice(pathname.length)
 }
 
-/** 规范化路由路径：去 query/hash，补前导斜杠，移除尾随斜杠。 */
+/** 规范化路由路径：去 `query/hash`，补前导斜杠，移除尾随斜杠。 */
 export function normalizePath(path: string): string {
   if (!path) return '/'
   let normalized = stripQueryAndHash(path)

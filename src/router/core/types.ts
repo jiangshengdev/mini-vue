@@ -46,6 +46,6 @@ export interface Router {
   start: () => void
   /** 停止监听，适用于卸载阶段。 */
   stop: () => void
-  /** 作为应用插件安装到 app 上（对齐 vue-router 使用方式）。 */
+  /** 作为应用插件安装到 `app` 上（对齐 `vue-router` 使用方式）。 */
   install: (app: PluginInstallApp) => void
 }

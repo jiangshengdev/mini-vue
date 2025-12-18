@@ -1,5 +1,5 @@
 /**
- * 提供 reactive 工具函数，负责缓存并复用响应式 Proxy 实例。
+ * 提供 `reactive` 工具函数，负责缓存并复用响应式 `Proxy` 实例。
  */
 import type { ReactiveTarget } from './contracts/index.ts'
 import { reactiveFlag } from './contracts/index.ts'
@@ -15,12 +15,12 @@ import { isObject } from '@/shared/index.ts'
  */
 class ReactiveCache {
   /**
-   * 缓存原始对象到代理对象的映射，便于复用同一 Proxy。
+   * 缓存原始对象到代理对象的映射，便于复用同一 `Proxy`。
    */
   private readonly rawToReactive = new WeakMap<ReactiveTarget, ReactiveTarget>()
 
   /**
-   * 查找目标是否已被代理，避免重复创建 Proxy 实例。
+   * 查找目标是否已被代理，避免重复创建 `Proxy` 实例。
    */
   getCachedProxy(target: ReactiveTarget): ReactiveTarget | undefined {
     /* 原对象若命中缓存则复用已有代理。 */
@@ -31,7 +31,7 @@ class ReactiveCache {
    * 为给定对象创建新的响应式代理，并记录单向映射。
    */
   create(target: ReactiveTarget): ReactiveTarget {
-    /* 委托 mutableHandlers 处理 get/set 等拦截。 */
+    /* 委托 `mutableHandlers` 处理 `get/set` 等拦截。 */
     const proxy = new Proxy(target, mutableHandlers)
 
     this.rawToReactive.set(target, proxy)

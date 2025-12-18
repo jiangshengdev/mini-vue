@@ -6,6 +6,8 @@ import type { refFlag } from '../contracts/index.ts'
  * @public
  */
 export interface Ref<T = unknown> {
+  /** 通过 `refFlag` 标识当前对象为 `Ref`，用于类型守卫。 */
   readonly [refFlag]: true
+  /** 响应式值的读写入口。 */
   value: T
 }

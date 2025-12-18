@@ -17,13 +17,13 @@ export function teardownMountedSubtree<
     return
   }
 
-  /* 释放宿主节点引用，旧 DOM 会被宿主实现回收。 */
+  /* 释放宿主节点引用，旧 `DOM` 会被宿主实现回收。 */
   instance.mountedHandle.teardown(skipRemove)
   instance.mountedHandle = undefined
 }
 
 /**
- * 释放组件实例，确保子树、 effect 与自定义清理任务全部执行。
+ * 释放组件实例，确保子树、`effect` 与自定义清理任务全部执行。
  */
 export function teardownComponentInstance<
   HostNode,
@@ -46,7 +46,7 @@ export function teardownComponentInstance<
     instance.anchor = undefined
   }
 
-  /* 停止 scope 以统一回收所有 setup 内创建的副作用。 */
+  /* 停止 `scope` 以统一回收所有 `setup` 内创建的副作用。 */
   instance.scope.stop()
   instance.effect = undefined
 

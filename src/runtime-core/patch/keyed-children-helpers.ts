@@ -5,7 +5,7 @@ import type { IndexMaps, IndexRange, KeyedPatchState } from './types.ts'
 import { findNextAnchor, isSameVirtualNode, moveNodes, unmount } from './utils.ts'
 
 /**
- * 初始化 diff 区间，后续会被头尾同步逻辑收缩。
+ * 初始化 `diff` 区间，后续会被头尾同步逻辑收缩。
  */
 export function createIndexRange(previousLength: number, nextLength: number): IndexRange {
   return {
@@ -17,7 +17,7 @@ export function createIndexRange(previousLength: number, nextLength: number): In
 }
 
 /**
- * 从头部同步：只要两侧节点相同就持续 patch 并推进区间起点。
+ * 从头部同步：只要两侧节点相同就持续 `patch` 并推进区间起点。
  */
 export function syncFromStart<
   HostNode,
@@ -48,7 +48,7 @@ export function syncFromStart<
 }
 
 /**
- * 从尾部同步：只要两侧节点相同就持续 patch 并收缩区间终点。
+ * 从尾部同步：只要两侧节点相同就持续 `patch` 并收缩区间终点。
  */
 export function syncFromEnd<
   HostNode,
@@ -79,7 +79,7 @@ export function syncFromEnd<
 }
 
 /**
- * 旧列表已耗尽：将新列表剩余段依次 mount，并整体插入到同一个锚点之前。
+ * 旧列表已耗尽：将新列表剩余段依次 `mount`，并整体插入到同一个锚点之前。
  */
 export function insertRemainingChildren<
   HostNode,
@@ -93,9 +93,9 @@ export function insertRemainingChildren<
   )
 
   /*
-   * 这里使用同一个 insertAnchor：
+   * 这里使用同一个 `insertAnchor`：
    * - 旧侧已耗尽时，剩余新节点应整体插入到“尾部已对齐区间”的前面。
-   * - 逐个 mount 后再 move，可避免 mountChild 对插入位置的不同宿主实现差异。
+   * - 逐个 `mount` 后再 `move`，可避免 `mountChild` 对插入位置的不同宿主实现差异。
    */
   for (let index = range.newStart; index <= range.newEnd; index += 1) {
     const childEnvironment = createChildEnvironment(
@@ -130,7 +130,7 @@ export function removeRemainingChildren<
 }
 
 /**
- * 为 keyed diff 的中间段建立索引映射结构。
+ * 为 `keyed diff` 的中间段建立索引映射结构。
  */
 export function buildIndexMaps<
   HostNode,
@@ -139,12 +139,12 @@ export function buildIndexMaps<
 >(state: KeyedPatchState<HostNode, HostElement, HostFragment>, range: IndexRange): IndexMaps {
   const keyToNewIndexMap = new Map<PropertyKey, number>()
   const toBePatched = range.newEnd - range.newStart + 1
-  /* 使用 0 作为“没有可复用旧节点”的哨兵值，因此旧索引在写入时会 +1 编码。 */
+  /* 使用 0 作为“没有可复用旧节点”的哨兵值，因此旧索引在写入时会 `+1` 编码。 */
   const newIndexToOldIndexMap = Array.from({ length: toBePatched }, () => {
     return 0
   })
 
-  /* 先收集新列表中间段的 key 映射，便于旧节点通过 key 快速命中。 */
+  /* 先收集新列表中间段的 `key` 映射，便于旧节点通过 `key` 快速命中。 */
   for (let index = range.newStart; index <= range.newEnd; index += 1) {
     const child = state.nextChildren[index]
 
@@ -157,10 +157,10 @@ export function buildIndexMaps<
 }
 
 /**
- * 在指定区间内寻找“无 key 且同类型”的可复用节点。
+ * 在指定区间内寻找“无 `key` 且同类型”的可复用节点。
  *
  * @remarks
- * 这是 keyed diff 的兜底分支：当旧节点没有 key 时，允许通过类型匹配复用新列表中的无 key 节点。
+ * 这是 `keyed diff` 的兜底分支：当旧节点没有 `key` 时，允许通过类型匹配复用新列表中的无 `key` 节点。
  */
 export function findUnkeyedMatch(
   target: NormalizedVirtualNode,

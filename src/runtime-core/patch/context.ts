@@ -10,27 +10,27 @@ export type ContainerLike<HostNode, HostElement extends HostNode, HostFragment e
   | HostFragment
 
 /**
- * `patch` 阶段传递的上下文信息：保留父组件与 app 上下文。
+ * `patch` 阶段传递的上下文信息：保留父组件与 `app` 上下文。
  */
 export interface PatchContext {
-  /** 当前处理节点所属的父组件实例，用于 provide/inject 链。 */
+  /** 当前处理节点所属的父组件实例，用于 `provide`/`inject` 链。 */
   parent?: UnknownComponentInstance
-  /** 根级应用上下文（来自 createApp），用于传递 provides。 */
+  /** 根级应用上下文（来自 `createApp`），用于传递 `provides`。 */
   appContext?: AppContext
 }
 
-/** 将 patch 上下文规整为 mount 阶段所需的结构。 */
+/** 将 `patch` 上下文规整为 `mount` 阶段所需的结构。 */
 export function normalizeMountContext(context?: PatchContext | MountContext): MountContext {
   return {
     parent: context?.parent,
     appContext: context?.appContext,
-    /* 单节点 patch 的 mount 不需要依赖兄弟锚点策略，默认关闭 shouldUseAnchor。 */
+    /* 单节点 `patch` 的 `mount` 不需要依赖兄弟锚点策略，默认关闭 `shouldUseAnchor`。 */
     shouldUseAnchor: false,
   }
 }
 
 /**
- * 根据子节点位置补充 shouldUseAnchor，用于在同级批量插入时决定锚点策略。
+ * 根据子节点位置补充 `shouldUseAnchor`，用于在同级批量插入时决定锚点策略。
  */
 export function normalizeChildContext(
   context: PatchContext | MountContext | undefined,
@@ -41,8 +41,8 @@ export function normalizeChildContext(
     parent: context?.parent,
     appContext: context?.appContext,
     /*
-     * Children patch 中，若当前节点后面仍有兄弟节点，则后续插入/移动需要锚点保证相对顺序。
-     * 最后一个节点不需要 anchor（它天然落在末尾）。
+     * `children patch` 中，若当前节点后面仍有兄弟节点，则后续插入/移动需要锚点保证相对顺序。
+     * 最后一个节点不需要 `anchor`（它天然落在末尾）。
      */
     shouldUseAnchor: index < total - 1,
   }

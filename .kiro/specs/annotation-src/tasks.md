@@ -4,7 +4,7 @@
 
 ## Phase 0：准备与对齐（所有目录共用）
 
-- [ ] 0.1 阅读既有注释示例并抽取风格基线
+- [x] 0.1 阅读既有注释示例并抽取风格基线
   - 必读文件：`src/runtime-core/create-app.ts`、`src/runtime-core/renderer.ts`
   - 输出：确认注释语气/措辞、块注释与行注释的使用习惯、对“关键逻辑块”的划分粒度。
 
@@ -14,35 +14,35 @@
 
 ## Phase 1：按目录补全注释（每个目录一个任务）
 
-- [ ] 1.1 注释补全：`src/jsx-foundation/**`
+- [x] 1.1 注释补全：`src/jsx-foundation/**`
   - 重点：VNode 工厂、children 归一化、类型与边界假设。
   - 验收：工厂函数与关键归一化分支/循环均有前置中文注释。
 
-- [ ] 1.2 注释补全：`src/jsx-runtime/**`
+- [x] 1.2 注释补全：`src/jsx-runtime/**`
   - 重点：`jsx/jsxs/jsxDEV/h` 的职责差异、开发态信息处理与封装层次。
   - 验收：所有导出函数与内部关键分支均有前置中文注释。
 
-- [ ] 1.3 注释补全：`src/messages/**`
+- [x] 1.3 注释补全：`src/messages/**`
   - 重点：文案分层、导出策略、不同子域消息的组织方式。
   - 验收：索引聚合与各消息文件的职责清晰；避免重复性注释。
 
-- [ ] 1.4 注释补全：`src/reactivity/**`
+- [x] 1.4 注释补全：`src/reactivity/**`
   - 重点：依赖收集/触发、effect 生命周期、清理与嵌套 effect、ref/computed/watch 的时序。
   - 验收：关键算法路径（track/trigger、scheduler、cleanup、watch flush 策略等）均有前置中文注释。
 
-- [ ] 1.5 注释补全：`src/router/**`
+- [x] 1.5 注释补全：`src/router/**`
   - 重点：路径归一化、导航状态机、`RouterLink/RouterView` 渲染与依赖。
   - 验收：导航流程关键分支与组件渲染连接点均有前置中文注释。
 
-- [ ] 1.6 注释补全：`src/runtime-core/**`
+- [x] 1.6 注释补全：`src/runtime-core/**`
   - 重点：VNode/组件实例关系、mount/patch、provide/inject、错误处理通道。
   - 验收：组件挂载/更新的关键控制流（含异常回退路径）均有前置中文注释。
 
-- [ ] 1.7 注释补全：`src/runtime-dom/**`
+- [x] 1.7 注释补全：`src/runtime-dom/**`
   - 重点：DOM 宿主 glue、props 映射、事件与属性移除策略、class/style 归一化。
   - 验收：宿主契约与关键 DOM 操作策略均有前置中文注释。
 
-- [ ] 1.8 注释补全：`src/shared/**`
+- [x] 1.8 注释补全：`src/shared/**`
   - 重点：跨子域工具、错误通道、环境检测、注入/插件机制。
   - 验收：错误处理链路与注入机制的关键分支/依赖均有前置中文注释。
 

@@ -17,14 +17,14 @@ import type { IndexMaps, IndexRange, KeyedPatchState } from './types.ts'
 import { findNextAnchor, moveNodes, unmount } from './utils.ts'
 
 /**
- * Keyed children diff：支持基于 key 的复用与移动。
+ * Keyed `children diff`：支持基于 `key` 的复用与移动。
  *
  * @remarks
  * 算法步骤：
- * 1) 头尾同步：尽可能从两端消耗相同节点，缩小中间 diff 范围。
+ * 1) 头尾同步：尽可能从两端消耗相同节点，缩小中间 `diff` 范围。
  * 2) 处理纯新增/纯删除的剩余段。
- * 3) 为中间段建立索引映射并 patch 可复用节点。
- * 4) 倒序遍历新列表中间段：mount 新节点或将旧节点移动到正确位置。
+ * 3) 为中间段建立索引映射并 `patch` 可复用节点。
+ * 4) 倒序遍历新列表中间段：`mount` 新节点或将旧节点移动到正确位置。
  */
 export function patchKeyedChildren<
   HostNode,
@@ -44,11 +44,11 @@ export function patchKeyedChildren<
   }
   const range = createIndexRange(previousChildren.length, nextChildren.length)
 
-  /* 先从头尾尽量消费相同节点：这能减少后续 keyed 匹配与移动的工作量。 */
+  /* 先从头尾尽量消费相同节点：这能减少后续 `keyed` 匹配与移动的工作量。 */
   syncFromStart(state, range)
   syncFromEnd(state, range)
 
-  /* 头尾同步后若旧侧已耗尽，剩余只可能是新增：直接批量 mount。 */
+  /* 头尾同步后若旧侧已耗尽，剩余只可能是新增：直接批量 `mount`。 */
   if (range.oldStart > range.oldEnd) {
     insertRemainingChildren(state, range)
 
@@ -62,7 +62,7 @@ export function patchKeyedChildren<
     return
   }
 
-  /* 为中间段建立 key -> newIndex 与 newIndex -> oldIndex 的双向辅助结构。 */
+  /* 为中间段建立 `key -> newIndex` 与 `newIndex -> oldIndex` 的双向辅助结构。 */
   const maps = buildIndexMaps(state, range)
 
   /* 先遍历旧中间段做复用/卸载，并填充 newIndexToOldIndexMap。 */
@@ -74,7 +74,7 @@ export function patchKeyedChildren<
 /**
  * 遍历旧列表的中间段：
  * - 找不到对应新节点则卸载。
- * - 找到则 patch，并记录“新索引 -> 旧索引”的复用映射。
+ * - 找到则 `patch`，并记录“新索引 -> 旧索引”的复用映射。
  */
 function patchAlignedChildren<
   HostNode,
@@ -87,7 +87,7 @@ function patchAlignedChildren<
 ): void {
   for (let index = range.oldStart; index <= range.oldEnd; index += 1) {
     const previousChild = state.previousChildren[index]
-    /* 有 key 则优先通过映射定位，否则尝试在新列表中间段线性寻找可复用的无 key 节点。 */
+    /* 有 `key` 则优先通过映射定位，否则尝试在新列表中间段线性寻找可复用的无 `key` 节点。 */
     const newIndex =
       previousChild.key !== undefined && previousChild.key !== null
         ? maps.keyToNewIndexMap.get(previousChild.key)
@@ -97,7 +97,7 @@ function patchAlignedChildren<
       /* 旧节点在新列表中不存在：直接卸载，避免后续移动阶段误处理。 */
       unmount(state.options, previousChild)
     } else {
-      /* 记录新索引对应的旧索引（+1 编码），供后续倒序移动/挂载阶段判断是否需要 mount。 */
+      /* 记录新索引对应的旧索引（`+1` 编码），供后续倒序移动/挂载阶段判断是否需要 `mount`。 */
       maps.newIndexToOldIndexMap[newIndex - range.newStart] = index + 1
       const childEnvironment = createChildEnvironment(
         state.environment,
@@ -136,7 +136,7 @@ function moveOrMountChildren<
     const anchorNode = findNextAnchor(state.nextChildren, newIndex + 1, state.environment.anchor)
 
     if (maps.newIndexToOldIndexMap[index] === 0) {
-      /* 该新节点没有对应旧节点：执行 mount 并插入到 anchorNode 之前。 */
+      /* 该新节点没有对应旧节点：执行 `mount` 并插入到 `anchorNode` 之前。 */
       const childEnvironment = createChildEnvironment(
         state.environment,
         newIndex,
@@ -153,7 +153,7 @@ function moveOrMountChildren<
         moveNodes(state.options, mounted.nodes, state.environment.container, anchorNode)
       }
     } else {
-      /* 该新节点可复用旧节点：直接把旧节点的宿主 nodes 移动到 anchorNode 之前。 */
+      /* 该新节点可复用旧节点：直接把旧节点的宿主 `nodes` 移动到 `anchorNode` 之前。 */
       const previousIndex = maps.newIndexToOldIndexMap[index] - 1
       const nodes = getHostNodes<HostNode, HostElement, HostFragment>(
         state.previousChildren[previousIndex],

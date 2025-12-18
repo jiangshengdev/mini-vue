@@ -9,7 +9,7 @@ import { runtimeCoreObjectChildWarning } from '@/messages/index.ts'
 import { __DEV__, isNil } from '@/shared/index.ts'
 
 /**
- * 根据子节点类型生成宿主节点，统一处理数组、virtualNode 与原始值。
+ * 根据子节点类型生成宿主节点，统一处理数组、`virtualNode` 与原始值。
  */
 export function mountChild<
   HostNode,
@@ -30,7 +30,7 @@ export function mountChild<
     return undefined
   }
 
-  /* 数组/Fragment 子节点以锚点包裹，避免共享 DocumentFragment；单个或空数组则直接复用子节点策略。 */
+  /* 数组/`Fragment` 子节点以锚点包裹，避免共享 `DocumentFragment`；单个或空数组则直接复用子节点策略。 */
   if (Array.isArray(child)) {
     const childCount = child.length
 
@@ -50,7 +50,7 @@ export function mountChild<
 
     appendChild(container, startAnchor)
 
-    /* 子项始终视为有后续兄弟，以 endAnchor 充当边界。 */
+    /* 子项始终视为有后续兄弟，以 `endAnchor` 充当边界。 */
     for (const item of child) {
       const mounted = mountChild(options, item, container, { ...context, shouldUseAnchor: true })
 
@@ -72,10 +72,10 @@ export function mountChild<
       ok,
       nodes,
       /**
-       * 先按“子项挂载顺序”执行 teardown，再移除边界锚点。
+       * 先按“子项挂载顺序”执行 `teardown`，再移除边界锚点。
        *
        * @remarks
-       * - 这里不直接 remove(nodes) 是为了保留子项各自的清理语义（effect/refs 等）。
+       * - 这里不直接 `remove(nodes)` 是为了保留子项各自的清理语义（`effect`/`refs` 等）。
        */
       teardown(skipRemove?: boolean): void {
         for (const teardown of teardowns) {
@@ -92,7 +92,7 @@ export function mountChild<
     }
   }
 
-  /* 标准 virtualNode 交给 mountVirtualNode 处理组件或元素。 */
+  /* 标准 `virtualNode` 交给 `mountVirtualNode` 处理组件或元素。 */
   if (isVirtualNode(child)) {
     if (child.type === Text) {
       const textNode = createText(

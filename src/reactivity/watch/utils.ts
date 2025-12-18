@@ -29,10 +29,10 @@ export function resolveDeepOption(
 }
 
 /**
- * 按 deep 策略生成统一的 getter，供 effect 收集依赖。
+ * 按 `deep` 策略生成统一的 `getter`，供 `effect` 收集依赖。
  */
 export function createGetter<T>(source: WatchSource<T>, deep: boolean): () => T {
-  /* 函数源直接作为 getter 使用，保证懒读取。 */
+  /* 函数源直接作为 `getter` 使用，保证懒读取。 */
   if (typeof source === 'function') {
     if (!deep) {
       return source
@@ -43,7 +43,7 @@ export function createGetter<T>(source: WatchSource<T>, deep: boolean): () => T 
     }
   }
 
-  /* `ref` 源在深度模式下递归读取 value，确保嵌套字段被追踪。 */
+  /* `ref` 源在深度模式下递归读取 `value`，确保嵌套字段被追踪。 */
   if (isRef(source)) {
     return () => {
       if (deep) {
@@ -55,14 +55,14 @@ export function createGetter<T>(source: WatchSource<T>, deep: boolean): () => T 
   }
 
   if (isReactive(source)) {
-    /* 深度监听时通过 traverse 递归触发每个字段的依赖。 */
+    /* 深度监听时通过 `traverse` 递归触发每个字段的依赖。 */
     if (deep) {
       return () => {
         return traverse(source) as T
       }
     }
 
-    /* 浅监听仅返回原对象，沿用 Proxy 的依赖收集。 */
+    /* 浅监听仅返回原对象，沿用 `Proxy` 的依赖收集。 */
     return () => {
       return source as T
     }
@@ -89,14 +89,14 @@ function traverse<T>(target: T, seen = new Set<unknown>()): T {
 
   seen.add(target)
 
-  /* 遇到 ref 时继续深入其 target，保持与响应式对象一致。 */
+  /* 遇到 `ref` 时继续深入其 `value`，保持与响应式对象一致。 */
   if (isRef(target)) {
     traverse(target.value, seen)
 
     return target
   }
 
-  /* 仅遍历可枚举自有键，包含字符串与 Symbol。 */
+  /* 仅遍历可枚举自有键，包含字符串与 `Symbol`。 */
   for (const key of Reflect.ownKeys(target)) {
     if (Object.prototype.propertyIsEnumerable.call(target, key)) {
       traverse(target[key], seen)

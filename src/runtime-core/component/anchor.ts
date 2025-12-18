@@ -42,7 +42,7 @@ export function mountChildWithAnchor<
     parent: instance,
   })
 
-  /* 逐个插入 fragment 子节点，避免依赖宿主对 fragment 的特殊处理。 */
+  /* 逐个插入 `Fragment` 子节点，避免依赖宿主对 `Fragment` 的特殊处理。 */
   for (const node of mounted?.nodes ?? []) {
     options.insertBefore(instance.container, node, instance.anchor)
   }

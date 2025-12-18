@@ -28,15 +28,15 @@ export interface RendererOptions<
   setText(node: HostNode, text: string): void
   /** 将子节点插入到指定父节点末尾。 */
   appendChild(parent: HostElement | HostFragment, child: HostNode): void
-  /** 将子节点插入到指定父节点且位于锚点节点之前（runtime-core 不会传入 HostFragment 作为 child）。 */
+  /** 将子节点插入到指定父节点且位于锚点节点之前（`runtime-core` 不会传入 `HostFragment` 作为 `child`）。 */
   insertBefore(parent: HostElement | HostFragment, child: HostNode, anchor?: HostNode): void
   /** 清空容器内容，在新一轮渲染前使用。 */
   clear(container: HostElement): void
   /** 将宿主节点从其父容器中移除。 */
   remove(node: HostNode): void
   /**
-   * 将 virtualNode props 映射到真实元素节点。
-   * 传入 null 时代表没有任何 props 需要处理。
+   * 将 `virtualNode` `props` 映射到真实元素节点。
+   * 传入 `null` 时代表没有任何 `props` 需要处理。
    */
   patchProps(element: HostElement, previousProps?: PropsShape, nextProps?: PropsShape): void
 }
@@ -50,7 +50,7 @@ export type RootRenderFunction<HostElement extends WeakKey> = (
 /** 渲染器工厂返回值，包含渲染与清理能力。 */
 export interface Renderer<HostNode, HostElement extends HostNode & WeakKey> {
   /**
-   * 将 virtualNode 子树渲染到指定容器中。
+   * 将 `virtualNode` 子树渲染到指定容器中。
    *
    * @public
    */
@@ -73,7 +73,7 @@ export function createRenderer<
   const mountedHandlesByContainer = new WeakMap<WeakKey, MountedHandle<HostNode>>()
 
   /**
-   * 将宿主容器断言为对象键，便于复用 WeakMap 存储。
+   * 将宿主容器断言为对象键，便于复用 `WeakMap` 存储。
    */
   function asContainerKey(container: HostElement): WeakKey {
     const isObjectLike = typeof container === 'object' && container !== null
@@ -87,7 +87,7 @@ export function createRenderer<
   }
 
   /**
-   * 若容器曾挂载过子树，则执行 teardown 并移除缓存。
+   * 若容器曾挂载过子树，则执行 `teardown` 并移除缓存。
    */
   function teardownContainer(container: HostElement): void {
     const mounted = mountedHandlesByContainer.get(asContainerKey(container))
@@ -112,7 +112,7 @@ export function createRenderer<
       ? (virtualNode as { appContext?: AppContext }).appContext
       : undefined
     const appContext = normalizedAppContext ?? rawAppContext
-    /* `normalize` 返回 undefined 时保留原始输出，交由 mountChild 触发开发期警告。 */
+    /* `normalize` 返回 `undefined` 时保留原始输出，交由 `mountChild` 触发开发期警告。 */
     const outputToMount: RenderOutput | undefined = normalized ?? virtualNode
     let mounted: MountedHandle<HostNode> | undefined
 
@@ -126,7 +126,7 @@ export function createRenderer<
   }
 
   /**
-   * 卸载操作只负责清理缓存并复用宿主 clear 逻辑。
+   * 卸载操作只负责清理缓存并复用宿主 `clear` 逻辑。
    */
   function unmount(container: HostElement): void {
     teardownContainer(container)

@@ -24,6 +24,7 @@ export function normalizeMountContext(context?: PatchContext | MountContext): Mo
   return {
     parent: context?.parent,
     appContext: context?.appContext as never,
+    /* 单节点 patch 的 mount 不需要依赖兄弟锚点策略，默认关闭 shouldUseAnchor。 */
     shouldUseAnchor: false,
   }
 }
@@ -39,6 +40,10 @@ export function normalizeChildContext(
   return {
     parent: context?.parent,
     appContext: context?.appContext as never,
+    /*
+     * Children patch 中，若当前节点后面仍有兄弟节点，则后续插入/移动需要锚点保证相对顺序。
+     * 最后一个节点不需要 anchor（它天然落在末尾）。
+     */
     shouldUseAnchor: index < total - 1,
   }
 }

@@ -29,7 +29,11 @@ export type RenderFunction = () => RenderOutput
  */
 type ComponentPropsBase = PropsShape
 
+/**
+ * 片段组件的参数结构，当前仅透传 children 字段。
+ */
 export interface FragmentProps extends ComponentPropsBase {
+  /** 片段需要渲染的一组子节点，保持传入顺序与原样。 */
   children?: ComponentChildren
 }
 

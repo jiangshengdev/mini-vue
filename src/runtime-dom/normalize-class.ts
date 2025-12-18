@@ -8,6 +8,7 @@ export function normalizeClass(value: unknown): string {
 
   collectClassTokens(value, tokens)
 
+  /* 将所有合法标记用空格连接，并去除首尾空白，确保最终类名紧凑。 */
   return tokens.join(' ').trim()
 }
 

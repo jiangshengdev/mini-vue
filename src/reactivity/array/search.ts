@@ -29,6 +29,9 @@ const nativeArraySearchMethods = {
   lastIndexOf: ([] as unknown[]).lastIndexOf,
 } satisfies { [K in ArrayIdentitySearchKey]: ArrayIdentitySearchMethod<K> }
 
+/**
+ * 为 identity-sensitive 的数组查询方法创建包装，确保依赖收集与 raw/proxy 比较语义一致。
+ */
 function createIdentitySearchWrapper<K extends ArrayIdentitySearchKey>(
   key: K,
 ): ArrayIdentitySearchMethod<K> {
@@ -78,6 +81,9 @@ export const arraySearchWrappers = {
   lastIndexOf: createIdentitySearchWrapper('lastIndexOf'),
 } satisfies { [K in ArrayIdentitySearchKey]: ArrayIdentitySearchMethod<K> }
 
+/**
+ * 判断某个属性 key 是否为需要特殊包装的数组查询方法。
+ */
 export function isArraySearchKey(key: PropertyKey): key is keyof typeof arraySearchWrappers {
   return typeof key === 'string' && Object.hasOwn(arraySearchWrappers, key)
 }

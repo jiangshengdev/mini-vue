@@ -94,7 +94,12 @@ function applyStyle(element: HTMLElement, previous: unknown, next: unknown): voi
 
   if (isObject(next)) {
     const nextStyle = next as Record<string, unknown>
-    if (Object.values(nextStyle).every(isNil)) {
+
+    if (
+      Object.values(nextStyle).every((item) => {
+        return isNil(item)
+      })
+    ) {
       element.removeAttribute('style')
 
       /* Playwright 浏览器下偶发保留空 style 特性，显式清空后再移除确保属性消失。 */

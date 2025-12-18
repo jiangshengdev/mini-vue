@@ -112,7 +112,7 @@ export function createRenderer<
       ? (virtualNode as { appContext?: AppContext }).appContext
       : undefined
     const appContext = normalizedAppContext ?? rawAppContext
-    /* normalize 返回 undefined 时保留原始输出，交由 mountChild 触发开发期警告。 */
+    /* `normalize` 返回 undefined 时保留原始输出，交由 mountChild 触发开发期警告。 */
     const outputToMount: RenderOutput | undefined = normalized ?? virtualNode
     let mounted: MountedHandle<HostNode> | undefined
 

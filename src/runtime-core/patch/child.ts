@@ -25,10 +25,12 @@ export function patchChild<
     context?: PatchContext | MountContext
   },
 ): void {
+  /* 同一引用视为无变更，直接返回。 */
   if (previous === next) {
     return
   }
 
+  /* 仅存在新节点时走挂载路径（可能带 anchor 移动）。 */
   if (!previous) {
     if (!next) {
       return
@@ -48,12 +50,14 @@ export function patchChild<
     return
   }
 
+  /* 仅存在旧节点时直接卸载，释放资源。 */
   if (!next) {
     unmount(options, previous)
 
     return
   }
 
+  /* 同类型节点走 patch 分支，否则卸载旧节点再挂载新节点。 */
   if (isSameVirtualNode(previous, next)) {
     patchExisting(options, previous, next, environment)
 
@@ -87,6 +91,7 @@ function patchExisting<
     context?: PatchContext | MountContext
   },
 ): void {
+  /* 文本节点只需复用宿主节点并更新内容。 */
   if (next.type === Text) {
     const runtimePrevious = asRuntimeVNode<HostNode, HostElement, HostFragment>(previous)
     const runtimeNext = asRuntimeVNode<HostNode, HostElement, HostFragment>(next)
@@ -103,6 +108,7 @@ function patchExisting<
     return
   }
 
+  /* Fragment 仅 patch children，并继承原有锚点。 */
   if (next.type === Fragment) {
     const runtimePrevious = asRuntimeVNode<HostNode, HostElement, HostFragment>(previous)
     const runtimeNext = asRuntimeVNode<HostNode, HostElement, HostFragment>(next)
@@ -119,6 +125,7 @@ function patchExisting<
     return
   }
 
+  /* 组件与元素分别走专用更新路径。 */
   if (typeof next.type === 'function') {
     patchComponent(options, previous, next, environment)
 
@@ -167,6 +174,9 @@ function patchElement<
   }
 }
 
+/**
+ * 同类型组件 vnode 的更新逻辑：复用实例，触发 effect 或直接 patch 子树。
+ */
 function patchComponent<
   HostNode,
   HostElement extends HostNode & WeakKey,

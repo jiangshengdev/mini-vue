@@ -24,8 +24,11 @@ export function Fragment(props: FragmentProps): ComponentChildren {
  * `createVirtualNode` 所需的参数结构，描述 type、原始 props 与 key。
  */
 interface VirtualNodeInitOptions<T extends ElementType> {
+  /** 节点类型，可能是原生标签、组件或 Fragment。 */
   type: T
+  /** 调用方传入的原始 props，可能包含 children 字段。 */
   rawProps?: ElementProps<T>
+  /** 可选的稳定标识，用于 diff 过程中的节点追踪。 */
   key?: PropertyKey
 }
 
@@ -53,6 +56,7 @@ export function createVirtualNode<T extends ElementType>(
       children = normalizeChildren(rawChildren)
     }
 
+    // 仅在 children 之外仍有有效字段时才保留 props，避免生成空对象
     if (Reflect.ownKeys(restProps).length > 0) {
       props = restProps
     }

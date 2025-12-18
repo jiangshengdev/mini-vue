@@ -36,7 +36,9 @@ function extractKeyedProps<T extends ElementType>(
   >
 
   /* 显式 key（jsx 第三个参数）优先，其次再尝试 props.key。 */
+  /* 当 props 未显式声明 key 字段时，不读取解构出的 extractedKey，避免误用默认值。 */
   const normalizedKey = explicitKey ?? (Object.hasOwn(props, 'key') ? extractedKey : undefined)
+  /* 仅在剥离 key 后仍有字段时返回 props，减少空对象创建。 */
   const hasRestProps = Reflect.ownKeys(restProps).length > 0
 
   return {

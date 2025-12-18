@@ -1,12 +1,13 @@
 import type { RendererOptions } from '../index.ts'
 import type { MountedHandle } from '../mount/handle.ts'
+import type { NormalizedVirtualNode } from '../normalize.ts'
 import { normalizeRenderOutput } from '../normalize.ts'
 import { patchChild } from '../patch/index.ts'
 import { asRuntimeVNode } from '../vnode.ts'
 import { mountChildWithAnchor } from './anchor.ts'
 import type { ComponentInstance } from './context.ts'
 import { teardownComponentInstance } from './teardown.ts'
-import type { SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
+import type { SetupComponent } from '@/jsx-foundation/index.ts'
 import { ReactiveEffect, recordEffectScope } from '@/reactivity/index.ts'
 import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
 
@@ -71,8 +72,8 @@ function createRenderEffect<
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
-): ReactiveEffect<VirtualNode | undefined> {
-  const effect = new ReactiveEffect<VirtualNode | undefined>(
+): ReactiveEffect<NormalizedVirtualNode | undefined> {
+  const effect = new ReactiveEffect<NormalizedVirtualNode | undefined>(
     () => {
       /* 每次渲染时记录最新子树，供后续挂载或复用。 */
       const subtree = normalizeRenderOutput(instance.render())
@@ -139,7 +140,7 @@ function patchLatestSubtree<
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
-  previousSubTree: VirtualNode | undefined,
+  previousSubTree: NormalizedVirtualNode | undefined,
 ): void {
   patchChild(options, previousSubTree, instance.subTree, {
     container: instance.container,

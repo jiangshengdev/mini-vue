@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { asRuntimeVNode, mountChild, patchChild } from '@/runtime-core/index.ts'
 import type { RendererOptions } from '@/runtime-core/index.ts'
+import {
+  asRuntimeVNode,
+  mountChild,
+  normalizeRenderOutput,
+  patchChild,
+} from '@/runtime-core/index.ts'
 import { createTextVirtualNode } from '@/jsx-foundation/index.ts'
 
 interface TestNode {
@@ -22,8 +27,8 @@ interface TestFragment extends TestNode {
 describe('patchChild runtime metadata reuse', () => {
   it('reuses host bindings and handles when updating text nodes', () => {
     const { options, container } = createHostOptions()
-    const previous = createTextVirtualNode('before')
-    const next = createTextVirtualNode('after')
+    const previous = normalizeRenderOutput(createTextVirtualNode('before'))!
+    const next = normalizeRenderOutput(createTextVirtualNode('after'))!
     const mounted = mountChild(options, previous, container)
 
     expect(mounted?.nodes).toHaveLength(1)

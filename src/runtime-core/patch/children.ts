@@ -1,11 +1,11 @@
 import type { MountContext } from '../mount/context.ts'
 import { mountChild } from '../mount/index.ts'
+import type { NormalizedChildren, NormalizedVirtualNode } from '../normalize.ts'
 import type { RendererOptions } from '../renderer.ts'
-import { asRuntimeVNode } from '../vnode.ts'
 import type { ContainerLike, PatchContext } from './context.ts'
 import { normalizeChildContext } from './context.ts'
+import { getHostNodes } from './runtime-vnode.ts'
 import { findNextAnchor, hasKeys, isSameVirtualNode, moveNodes, unmount } from './utils.ts'
-import type { VirtualNode, VirtualNodeChild } from '@/jsx-foundation/index.ts'
 
 /**
  * 子节点 patch 回调签名：由 patchChildren 调用，用于复用单节点的 mount/patch/unmount 逻辑。
@@ -16,15 +16,15 @@ type PatchChildFunction<
   HostFragment extends HostNode,
 > = (
   options: RendererOptions<HostNode, HostElement, HostFragment>,
-  previous: VirtualNode | undefined,
-  next: VirtualNode | undefined,
-  environment: PatchChildEnvironment<HostNode, HostElement, HostFragment>,
+  previous: NormalizedVirtualNode | undefined,
+  next: NormalizedVirtualNode | undefined,
+  environment: PatchEnvironment<HostNode, HostElement, HostFragment>,
 ) => void
 
 /**
  * 单个子节点 patch 所需的环境信息。
  */
-interface PatchChildEnvironment<
+interface BasePatchEnvironment<
   HostNode,
   HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
@@ -38,13 +38,22 @@ interface PatchChildEnvironment<
 }
 
 /**
- * `patchChildren` 的调用环境：在 PatchChildEnvironment 基础上追加 patchChild 回调。
+ * 单个子节点 patch 所需的环境信息。
+ */
+export type PatchEnvironment<
+  HostNode,
+  HostElement extends HostNode & WeakKey,
+  HostFragment extends HostNode,
+> = BasePatchEnvironment<HostNode, HostElement, HostFragment>
+
+/**
+ * `patchChildren` 的调用环境：在 PatchEnvironment 基础上追加 patchChild 回调。
  */
 interface PatchChildrenContext<
   HostNode,
   HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
-> extends PatchChildEnvironment<HostNode, HostElement, HostFragment> {
+> extends PatchEnvironment<HostNode, HostElement, HostFragment> {
   /** 单节点 patch 实现（由调用方提供，常见为 patchChild）。 */
   patchChild: PatchChildFunction<HostNode, HostElement, HostFragment>
 }
@@ -72,13 +81,13 @@ interface KeyedPatchState<
   HostFragment extends HostNode,
 > {
   /** 渲染器宿主原语集合。 */
-  options: RendererOptions<HostNode, HostElement, HostFragment>
+  readonly options: RendererOptions<HostNode, HostElement, HostFragment>
   /** 旧 children 列表。 */
-  previousChildren: VirtualNodeChild[]
+  readonly previousChildren: NormalizedChildren
   /** 新 children 列表。 */
-  nextChildren: VirtualNodeChild[]
+  readonly nextChildren: NormalizedChildren
   /** 容器/锚点/上下文，以及单节点 patch 回调。 */
-  environment: PatchChildrenContext<HostNode, HostElement, HostFragment>
+  readonly environment: PatchChildrenContext<HostNode, HostElement, HostFragment>
 }
 
 /**
@@ -88,11 +97,11 @@ interface KeyedPatchState<
  */
 interface IndexMaps {
   /** `key` -> newIndex 的映射，仅收集有效 key。 */
-  keyToNewIndexMap: Map<PropertyKey, number>
+  readonly keyToNewIndexMap: Map<PropertyKey, number>
   /** `newIndex` 对应的 oldIndex（+1），用于区分“可复用”与“需要新建”。 */
-  newIndexToOldIndexMap: number[]
+  readonly newIndexToOldIndexMap: number[]
   /** 中间段待处理的新节点数量。 */
-  toBePatched: number
+  readonly toBePatched: number
 }
 
 /**
@@ -107,7 +116,7 @@ function createChildEnvironment<
   environment: PatchChildrenContext<HostNode, HostElement, HostFragment>,
   index: number,
   length: number,
-): PatchChildEnvironment<HostNode, HostElement, HostFragment> & {
+): PatchEnvironment<HostNode, HostElement, HostFragment> & {
   context: ReturnType<typeof normalizeChildContext>
 } {
   return {
@@ -128,8 +137,8 @@ export function patchChildren<
   HostFragment extends HostNode,
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
-  previousChildren: VirtualNodeChild[],
-  nextChildren: VirtualNodeChild[],
+  previousChildren: NormalizedChildren,
+  nextChildren: NormalizedChildren,
   environment: PatchChildrenContext<HostNode, HostElement, HostFragment>,
 ): void {
   /*
@@ -160,8 +169,8 @@ function patchUnkeyedChildren<
   HostFragment extends HostNode,
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
-  previousChildren: VirtualNodeChild[],
-  nextChildren: VirtualNodeChild[],
+  previousChildren: NormalizedChildren,
+  nextChildren: NormalizedChildren,
   environment: PatchChildrenContext<HostNode, HostElement, HostFragment>,
 ): void {
   const commonLength = Math.min(previousChildren.length, nextChildren.length)
@@ -171,18 +180,13 @@ function patchUnkeyedChildren<
     /* 使用 nextChildren.length 计算 shouldUseAnchor：只有不是最后一个兄弟时才需要锚点插入策略。 */
     const childEnvironment = createChildEnvironment(environment, index, nextChildren.length)
 
-    environment.patchChild(
-      options,
-      previousChildren[index] as VirtualNode,
-      nextChildren[index] as VirtualNode,
-      childEnvironment,
-    )
+    environment.patchChild(options, previousChildren[index], nextChildren[index], childEnvironment)
   }
 
   if (nextChildren.length > previousChildren.length) {
     /* 新增节点：逐个 mount，并使用“下一个已存在节点”作为插入锚点。 */
     for (let index = commonLength; index < nextChildren.length; index += 1) {
-      const next = nextChildren[index] as VirtualNode
+      const next = nextChildren[index]
       /*
        * 追加 mount 时需要一个“后继锚点”：
        * - 若后面还有已 mount 的节点，则插到它前面。
@@ -199,7 +203,7 @@ function patchUnkeyedChildren<
   } else if (previousChildren.length > nextChildren.length) {
     /* 移除节点：卸载旧列表超出部分。 */
     for (let index = commonLength; index < previousChildren.length; index += 1) {
-      unmount(options, previousChildren[index] as VirtualNode)
+      unmount(options, previousChildren[index])
     }
   }
 }
@@ -220,8 +224,8 @@ function patchKeyedChildren<
   HostFragment extends HostNode,
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
-  previousChildren: VirtualNodeChild[],
-  nextChildren: VirtualNodeChild[],
+  previousChildren: NormalizedChildren,
+  nextChildren: NormalizedChildren,
   environment: PatchChildrenContext<HostNode, HostElement, HostFragment>,
 ): void {
   const state: KeyedPatchState<HostNode, HostElement, HostFragment> = {
@@ -270,10 +274,7 @@ function syncFromStart<
   while (
     range.oldStart <= range.oldEnd &&
     range.newStart <= range.newEnd &&
-    isSameVirtualNode(
-      state.previousChildren[range.oldStart] as VirtualNode,
-      state.nextChildren[range.newStart] as VirtualNode,
-    )
+    isSameVirtualNode(state.previousChildren[range.oldStart], state.nextChildren[range.newStart])
   ) {
     const childEnvironment = createChildEnvironment(
       state.environment,
@@ -283,8 +284,8 @@ function syncFromStart<
 
     state.environment.patchChild(
       state.options,
-      state.previousChildren[range.oldStart] as VirtualNode,
-      state.nextChildren[range.newStart] as VirtualNode,
+      state.previousChildren[range.oldStart],
+      state.nextChildren[range.newStart],
       childEnvironment,
     )
     /* 头部已对齐，继续向中间推进。 */
@@ -304,10 +305,7 @@ function syncFromEnd<
   while (
     range.oldStart <= range.oldEnd &&
     range.newStart <= range.newEnd &&
-    isSameVirtualNode(
-      state.previousChildren[range.oldEnd] as VirtualNode,
-      state.nextChildren[range.newEnd] as VirtualNode,
-    )
+    isSameVirtualNode(state.previousChildren[range.oldEnd], state.nextChildren[range.newEnd])
   ) {
     const childEnvironment = createChildEnvironment(
       state.environment,
@@ -317,8 +315,8 @@ function syncFromEnd<
 
     state.environment.patchChild(
       state.options,
-      state.previousChildren[range.oldEnd] as VirtualNode,
-      state.nextChildren[range.newEnd] as VirtualNode,
+      state.previousChildren[range.oldEnd],
+      state.nextChildren[range.newEnd],
       childEnvironment,
     )
     /* 尾部已对齐，继续向中间收缩。 */
@@ -354,7 +352,7 @@ function insertRemainingChildren<
     )
     const mounted = mountChild(
       state.options,
-      state.nextChildren[index] as VirtualNode,
+      state.nextChildren[index],
       state.environment.container,
       childEnvironment.context,
     )
@@ -374,7 +372,7 @@ function removeRemainingChildren<
   HostFragment extends HostNode,
 >(state: KeyedPatchState<HostNode, HostElement, HostFragment>, range: IndexRange): void {
   for (let index = range.oldStart; index <= range.oldEnd; index += 1) {
-    unmount(state.options, state.previousChildren[index] as VirtualNode)
+    unmount(state.options, state.previousChildren[index])
   }
 }
 
@@ -395,7 +393,7 @@ function buildIndexMaps<
 
   /* 先收集新列表中间段的 key 映射，便于旧节点通过 key 快速命中。 */
   for (let index = range.newStart; index <= range.newEnd; index += 1) {
-    const child = state.nextChildren[index] as VirtualNode
+    const child = state.nextChildren[index]
 
     if (child.key !== undefined && child.key !== null) {
       keyToNewIndexMap.set(child.key, index)
@@ -420,7 +418,7 @@ function patchAlignedChildren<
   maps: IndexMaps,
 ): void {
   for (let index = range.oldStart; index <= range.oldEnd; index += 1) {
-    const previousChild = state.previousChildren[index] as VirtualNode
+    const previousChild = state.previousChildren[index]
     /* 有 key 则优先通过映射定位，否则尝试在新列表中间段线性寻找可复用的无 key 节点。 */
     const newIndex =
       previousChild.key !== undefined && previousChild.key !== null
@@ -442,7 +440,7 @@ function patchAlignedChildren<
       state.environment.patchChild(
         state.options,
         previousChild,
-        state.nextChildren[newIndex] as VirtualNode,
+        state.nextChildren[newIndex],
         childEnvironment,
       )
     }
@@ -466,7 +464,7 @@ function moveOrMountChildren<
 ): void {
   for (let index = maps.toBePatched - 1; index >= 0; index -= 1) {
     const newIndex = range.newStart + index
-    const nextChild = state.nextChildren[newIndex] as VirtualNode
+    const nextChild = state.nextChildren[newIndex]
     const anchorNode = findNextAnchor(state.nextChildren, newIndex + 1, state.environment.anchor)
 
     if (maps.newIndexToOldIndexMap[index] === 0) {
@@ -489,10 +487,9 @@ function moveOrMountChildren<
     } else {
       /* 该新节点可复用旧节点：直接把旧节点的宿主 nodes 移动到 anchorNode 之前。 */
       const previousIndex = maps.newIndexToOldIndexMap[index] - 1
-      const runtime = asRuntimeVNode<HostNode, HostElement, HostFragment>(
-        state.previousChildren[previousIndex] as VirtualNode,
+      const nodes = getHostNodes<HostNode, HostElement, HostFragment>(
+        state.previousChildren[previousIndex],
       )
-      const nodes = runtime.handle?.nodes ?? []
 
       /*
        * 直接移动宿主节点而不是重新 patch：
@@ -525,13 +522,13 @@ function createIndexRange(previousLength: number, nextLength: number): IndexRang
  * 这是 keyed diff 的兜底分支：当旧节点没有 key 时，允许通过类型匹配复用新列表中的无 key 节点。
  */
 function findUnkeyedMatch(
-  target: VirtualNode,
-  list: VirtualNodeChild[],
+  target: NormalizedVirtualNode,
+  list: NormalizedChildren,
   start: number,
   end: number,
 ): number | undefined {
   for (let index = start; index <= end; index += 1) {
-    const candidate = list[index] as VirtualNode
+    const candidate = list[index]
 
     if (
       (candidate.key === null || candidate.key === undefined) &&

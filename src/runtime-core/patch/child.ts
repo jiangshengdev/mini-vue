@@ -2,14 +2,16 @@ import { resolveComponentProps } from '../component/props.ts'
 import type { MountContext } from '../mount/context.ts'
 import { assignElementRef, resolveElementRefBinding } from '../mount/element.ts'
 import { mountChild } from '../mount/index.ts'
+import type { NormalizedVirtualNode } from '../normalize.ts'
 import type { RendererOptions } from '../renderer.ts'
-import { asRuntimeVNode } from '../vnode.ts'
 import { patchChildren } from './children.ts'
 import type { ContainerLike, PatchContext } from './context.ts'
 import { normalizeMountContext } from './context.ts'
+import { asRuntimeNormalizedVirtualNode } from './runtime-vnode.ts'
+import { isComponentVirtualNode, isTextVirtualNode } from './types.ts'
 import { isSameVirtualNode, moveNodes, syncRuntimeMetadata, unmount } from './utils.ts'
-import type { VirtualNode } from '@/jsx-foundation/index.ts'
-import { Fragment, Text } from '@/jsx-foundation/index.ts'
+import type { SetupComponent } from '@/jsx-foundation/index.ts'
+import { Fragment } from '@/jsx-foundation/index.ts'
 
 /**
  * 对单个子节点进行 patch：
@@ -22,8 +24,8 @@ export function patchChild<
   HostFragment extends HostNode,
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
-  previous: VirtualNode | undefined,
-  next: VirtualNode | undefined,
+  previous: NormalizedVirtualNode | undefined,
+  next: NormalizedVirtualNode | undefined,
   environment: {
     container: ContainerLike<HostNode, HostElement, HostFragment>
     anchor?: HostNode
@@ -94,8 +96,8 @@ function patchExisting<
   HostFragment extends HostNode,
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
-  previous: VirtualNode,
-  next: VirtualNode,
+  previous: NormalizedVirtualNode,
+  next: NormalizedVirtualNode,
   environment: {
     container: ContainerLike<HostNode, HostElement, HostFragment>
     anchor?: HostNode
@@ -103,19 +105,18 @@ function patchExisting<
   },
 ): void {
   /* Text 的宿主节点只有一个：复用旧 el，并仅更新文本内容即可。 */
-  if (next.type === Text) {
-    const runtimePrevious = asRuntimeVNode<HostNode, HostElement, HostFragment>(previous)
-    const runtimeNext = asRuntimeVNode<HostNode, HostElement, HostFragment>(next)
+  if (isTextVirtualNode(previous) && isTextVirtualNode(next)) {
+    const runtimePrevious = asRuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>(
+      previous,
+    )
+    const runtimeNext = asRuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>(next)
 
     /* 先同步 runtime 元数据，保证后续读取 next.el/handle 时语义一致。 */
     syncRuntimeMetadata(runtimePrevious, runtimeNext, { component: undefined })
 
     if (runtimePrevious.el) {
       /* 仅当旧 el 存在时才能 setText；否则说明旧节点未正确 mount（防御性不报错）。 */
-      options.setText(
-        runtimePrevious.el,
-        (next as VirtualNode<typeof Text> & { text?: string }).text ?? '',
-      )
+      options.setText(runtimePrevious.el, next.text ?? '')
     }
 
     return
@@ -123,8 +124,10 @@ function patchExisting<
 
   /* Fragment 自身不对应单一宿主 el：通过 handle.nodes 表示一段节点区间。 */
   if (next.type === Fragment) {
-    const runtimePrevious = asRuntimeVNode<HostNode, HostElement, HostFragment>(previous)
-    const runtimeNext = asRuntimeVNode<HostNode, HostElement, HostFragment>(next)
+    const runtimePrevious = asRuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>(
+      previous,
+    )
+    const runtimeNext = asRuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>(next)
 
     /* Fragment 不携带组件实例：同步宿主引用，但显式清空 component，避免误复用。 */
     syncRuntimeMetadata(runtimePrevious, runtimeNext, { component: undefined })
@@ -145,7 +148,7 @@ function patchExisting<
   }
 
   /* 组件与元素的更新能力不同：组件需要驱动 effect/子树，元素需要 patchProps/children/ref。 */
-  if (typeof next.type === 'function') {
+  if (isComponentVirtualNode(previous) && isComponentVirtualNode(next)) {
     patchComponent(options, previous, next, environment)
 
     return
@@ -163,12 +166,14 @@ function patchElement<
   HostFragment extends HostNode,
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
-  previous: VirtualNode,
-  next: VirtualNode,
+  previous: NormalizedVirtualNode,
+  next: NormalizedVirtualNode,
   environment: { anchor?: HostNode; context?: PatchContext | MountContext },
 ): void {
-  const runtimePrevious = asRuntimeVNode<HostNode, HostElement, HostFragment>(previous)
-  const runtimeNext = asRuntimeVNode<HostNode, HostElement, HostFragment>(next)
+  const runtimePrevious = asRuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>(
+    previous,
+  )
+  const runtimeNext = asRuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>(next)
   /* 元素节点必须已经拥有 el（由 mount 写入）；patch 阶段只做复用与更新。 */
   const element = runtimePrevious.el as HostElement
 
@@ -213,16 +218,18 @@ function patchComponent<
   HostFragment extends HostNode,
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
-  previous: VirtualNode,
-  next: VirtualNode,
+  previous: NormalizedVirtualNode<SetupComponent>,
+  next: NormalizedVirtualNode<SetupComponent>,
   environment: {
     container: ContainerLike<HostNode, HostElement, HostFragment>
     anchor?: HostNode
     context?: PatchContext | MountContext
   },
 ): void {
-  const runtimePrevious = asRuntimeVNode<HostNode, HostElement, HostFragment>(previous)
-  const runtimeNext = asRuntimeVNode<HostNode, HostElement, HostFragment>(next)
+  const runtimePrevious = asRuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>(
+    previous,
+  )
+  const runtimeNext = asRuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>(next)
   const instance = runtimePrevious.component
 
   /*
@@ -248,7 +255,7 @@ function patchComponent<
   /* 复用旧组件实例：同步宿主引用，并将 next 绑定到同一个 component 上。 */
   syncRuntimeMetadata(runtimePrevious, runtimeNext, { component: instance })
   /* 组件 props 需要走规范化流程（包含默认值/attrs 等策略），避免直接透传 raw props。 */
-  instance.props = resolveComponentProps(next as never)
+  instance.props = resolveComponentProps(next)
   /* `effect.run` 依赖实例化时的 this 语义，这里显式 bind 保持一致。 */
   const runner = instance.effect?.run.bind(instance.effect)
 

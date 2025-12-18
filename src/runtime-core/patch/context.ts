@@ -1,6 +1,6 @@
-import type { ComponentInstance } from '../component/context.ts'
+import type { UnknownComponentInstance } from '../component/context.ts'
+import type { AppContext } from '../create-app.ts'
 import type { MountContext } from '../mount/context.ts'
-import type { SetupComponent } from '@/jsx-foundation/index.ts'
 
 /**
  * `patch` 阶段可接受的宿主容器类型，兼容元素与片段。
@@ -14,16 +14,16 @@ export type ContainerLike<HostNode, HostElement extends HostNode, HostFragment e
  */
 export interface PatchContext {
   /** 当前处理节点所属的父组件实例，用于 provide/inject 链。 */
-  parent?: ComponentInstance<unknown, WeakKey, unknown, SetupComponent>
+  parent?: UnknownComponentInstance
   /** 根级应用上下文（来自 createApp），用于传递 provides。 */
-  appContext?: unknown
+  appContext?: AppContext
 }
 
 /** 将 patch 上下文规整为 mount 阶段所需的结构。 */
 export function normalizeMountContext(context?: PatchContext | MountContext): MountContext {
   return {
     parent: context?.parent,
-    appContext: context?.appContext as never,
+    appContext: context?.appContext,
     /* 单节点 patch 的 mount 不需要依赖兄弟锚点策略，默认关闭 shouldUseAnchor。 */
     shouldUseAnchor: false,
   }
@@ -39,7 +39,7 @@ export function normalizeChildContext(
 ): MountContext {
   return {
     parent: context?.parent,
-    appContext: context?.appContext as never,
+    appContext: context?.appContext,
     /*
      * Children patch 中，若当前节点后面仍有兄弟节点，则后续插入/移动需要锚点保证相对顺序。
      * 最后一个节点不需要 anchor（它天然落在末尾）。

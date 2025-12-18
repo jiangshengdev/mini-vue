@@ -1,8 +1,8 @@
+import type { NormalizedChildren, NormalizedVirtualNode } from '../normalize.ts'
 import type { RendererOptions } from '../renderer.ts'
-import { asRuntimeVNode } from '../vnode.ts'
-import type { RuntimeVNode } from '../vnode.ts'
+import type { RuntimeNormalizedVirtualNode } from './runtime-vnode.ts'
+import { asRuntimeNormalizedVirtualNode, getFirstHostNode } from './runtime-vnode.ts'
 import { Text } from '@/jsx-foundation/index.ts'
-import type { VirtualNode, VirtualNodeChild } from '@/jsx-foundation/index.ts'
 
 /**
  * 卸载一个已渲染的 vnode：
@@ -13,8 +13,11 @@ export function unmount<
   HostNode,
   HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
->(options: RendererOptions<HostNode, HostElement, HostFragment>, vnode: VirtualNode): void {
-  const runtime = asRuntimeVNode<HostNode, HostElement, HostFragment>(vnode)
+>(
+  options: RendererOptions<HostNode, HostElement, HostFragment>,
+  vnode: NormalizedVirtualNode,
+): void {
+  const runtime = asRuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>(vnode)
   const { handle } = runtime
 
   if (handle) {
@@ -37,7 +40,10 @@ export function unmount<
  * - Text 节点在 diff 中只要都是 Text 即可复用宿主节点。
  * - 其它节点需同时满足 type 与 key 相同。
  */
-export function isSameVirtualNode(a: VirtualNode | undefined, b: VirtualNode | undefined): boolean {
+export function isSameVirtualNode(
+  a: NormalizedVirtualNode | undefined,
+  b: NormalizedVirtualNode | undefined,
+): boolean {
   if (!a || !b) {
     return false
   }
@@ -77,17 +83,16 @@ export function moveNodes<
  * - 找不到时返回 fallback（通常来自父级传入的 anchor）。
  */
 export function findNextAnchor<HostNode>(
-  children: VirtualNodeChild[],
+  children: NormalizedChildren,
   startIndex: number,
   fallback: HostNode | undefined,
 ): HostNode | undefined {
   for (let index = startIndex; index < children.length; index += 1) {
-    const runtime = asRuntimeVNode<HostNode>(children[index] as VirtualNode)
-    const { handle } = runtime
+    const firstNode = getFirstHostNode<HostNode>(children[index])
 
-    if (handle?.nodes?.length) {
+    if (firstNode) {
       /* 取该 vnode 对应的首个宿主节点，作为后续插入的稳定锚点。 */
-      return handle.nodes[0]
+      return firstNode
     }
   }
 
@@ -97,12 +102,10 @@ export function findNextAnchor<HostNode>(
 /**
  * 判断 children 是否包含 key，用于决定 keyed/unkeyed 两套 diff 策略。
  */
-export function hasKeys(children: VirtualNodeChild[]): boolean {
+export function hasKeys(children: NormalizedChildren): boolean {
   return children.some((child) => {
-    const vnode = child as VirtualNode
-
     /* `key` 必须是“存在且非 null”：与 Vue 的 key 语义对齐，避免把 null 当成有效 key。 */
-    return vnode?.key !== undefined && vnode?.key !== null
+    return child.key !== undefined && child.key !== null
   })
 }
 
@@ -118,11 +121,11 @@ export function syncRuntimeMetadata<
   HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
 >(
-  runtimePrevious: RuntimeVNode<HostNode, HostElement, HostFragment>,
-  runtimeNext: RuntimeVNode<HostNode, HostElement, HostFragment>,
+  runtimePrevious: RuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>,
+  runtimeNext: RuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>,
   overrides?: {
     anchor?: HostNode | undefined
-    component?: RuntimeVNode<HostNode, HostElement, HostFragment>['component']
+    component?: RuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>['component']
   },
 ): void {
   /*

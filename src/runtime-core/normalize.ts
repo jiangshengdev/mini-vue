@@ -1,18 +1,28 @@
+import type {
+  ComponentChildren,
+  ElementType,
+  FragmentProps,
+  RenderOutput,
+  VirtualNode,
+} from '@/jsx-foundation/index.ts'
 import {
   createTextVirtualNode,
   createVirtualNode,
   Fragment,
   isVirtualNode,
 } from '@/jsx-foundation/index.ts'
-import type {
-  ComponentChildren,
-  FragmentProps,
-  RenderOutput,
-  VirtualNode,
-} from '@/jsx-foundation/index.ts'
 import { isNil } from '@/shared/index.ts'
 
-export type NormalizedRenderOutput = VirtualNode | undefined
+/** 归一化后的 virtualNode：children 已转为 vnode 数组（文本已转换为 Text vnode）。 */
+export interface NormalizedVirtualNode<T extends ElementType = ElementType> extends VirtualNode<T> {
+  children: NormalizedVirtualNode[]
+}
+
+/** Patch 阶段可假定的 children 形态：仅包含已归一化的 virtualNode。 */
+export type NormalizedChildren = NormalizedVirtualNode[]
+
+/** 组件 render 归一化后的输出形态：要么 vnode，要么空。 */
+export type NormalizedRenderOutput = NormalizedVirtualNode | undefined
 
 /**
  * 将 render 返回的结果规整为 runtime-core 可消费的 VirtualNode。
@@ -42,7 +52,7 @@ export function normalizeRenderOutput(output: RenderOutput): NormalizedRenderOut
 
   /* 原始文本输出转为 Text VirtualNode，便于统一渲染路径。 */
   if (typeof output === 'string' || typeof output === 'number') {
-    return createTextVirtualNode(output)
+    return normalizeVnodeForRuntime(createTextVirtualNode(output))
   }
 
   return undefined
@@ -51,20 +61,21 @@ export function normalizeRenderOutput(output: RenderOutput): NormalizedRenderOut
 /**
  * 深度规整 VirtualNode，确保 children 形态与 runtime 预期一致。
  */
-function normalizeVnodeForRuntime(vnode: VirtualNode): VirtualNode {
+function normalizeVnodeForRuntime(vnode: VirtualNode): NormalizedVirtualNode {
   /* 递归归一化子节点，统一 VirtualNode 与文本节点的表达方式。 */
-  const children = vnode.children.map((child) => {
+  const children: NormalizedChildren = []
+
+  for (const child of vnode.children) {
     if (isVirtualNode(child)) {
-      return normalizeVnodeForRuntime(child)
+      children.push(normalizeVnodeForRuntime(child))
+      continue
     }
 
     /* 文本子节点转为 Text VirtualNode，便于 diff 与挂载复用同一路径。 */
     if (typeof child === 'string' || typeof child === 'number') {
-      return createTextVirtualNode(child)
+      children.push(normalizeVnodeForRuntime(createTextVirtualNode(child)))
     }
-
-    return child
-  })
+  }
 
   return {
     ...vnode,

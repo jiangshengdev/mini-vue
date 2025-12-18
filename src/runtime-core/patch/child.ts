@@ -1,11 +1,10 @@
 import { resolveComponentProps } from '../component/props.ts'
-import type { MountContext } from '../mount/context.ts'
 import { assignElementRef, resolveElementRefBinding } from '../mount/element.ts'
 import { mountChild } from '../mount/index.ts'
 import type { NormalizedVirtualNode } from '../normalize.ts'
 import type { RendererOptions } from '../renderer.ts'
+import type { PatchEnvironment } from './children-environment.ts'
 import { patchChildren } from './children.ts'
-import type { ContainerLike, PatchContext } from './context.ts'
 import { normalizeMountContext } from './context.ts'
 import { asRuntimeNormalizedVirtualNode } from './runtime-vnode.ts'
 import { isComponentVirtualNode, isTextVirtualNode } from './types.ts'
@@ -26,11 +25,7 @@ export function patchChild<
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   previous: NormalizedVirtualNode | undefined,
   next: NormalizedVirtualNode | undefined,
-  environment: {
-    container: ContainerLike<HostNode, HostElement, HostFragment>
-    anchor?: HostNode
-    context?: PatchContext | MountContext
-  },
+  environment: PatchEnvironment<HostNode, HostElement, HostFragment>,
 ): void {
   /* 同一引用视为无变更：避免重复 patch 引发多余的 props/children 计算与宿主写入。 */
   if (previous === next) {
@@ -98,11 +93,7 @@ function patchExisting<
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   previous: NormalizedVirtualNode,
   next: NormalizedVirtualNode,
-  environment: {
-    container: ContainerLike<HostNode, HostElement, HostFragment>
-    anchor?: HostNode
-    context?: PatchContext | MountContext
-  },
+  environment: PatchEnvironment<HostNode, HostElement, HostFragment>,
 ): void {
   /* Text 的宿主节点只有一个：复用旧 el，并仅更新文本内容即可。 */
   if (isTextVirtualNode(previous) && isTextVirtualNode(next)) {
@@ -136,6 +127,7 @@ function patchExisting<
      * `children` 的 patch 需要一个稳定锚点：
      * - 优先使用旧 Fragment 自己记录的 anchor（表示片段结束位置）。
      * - 否则回退到父级传入的 anchor。
+     * - 显式注入 patchChild，避免 child.ts/children.ts 互相 import 造成循环，并便于替换/测试。
      */
     patchChildren(options, previous.children, next.children, {
       container: environment.container,
@@ -168,7 +160,7 @@ function patchElement<
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   previous: NormalizedVirtualNode,
   next: NormalizedVirtualNode,
-  environment: { anchor?: HostNode; context?: PatchContext | MountContext },
+  environment: Pick<PatchEnvironment<HostNode, HostElement, HostFragment>, 'anchor' | 'context'>,
 ): void {
   const runtimePrevious = asRuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>(
     previous,
@@ -220,11 +212,7 @@ function patchComponent<
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   previous: NormalizedVirtualNode<SetupComponent>,
   next: NormalizedVirtualNode<SetupComponent>,
-  environment: {
-    container: ContainerLike<HostNode, HostElement, HostFragment>
-    anchor?: HostNode
-    context?: PatchContext | MountContext
-  },
+  environment: PatchEnvironment<HostNode, HostElement, HostFragment>,
 ): void {
   const runtimePrevious = asRuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>(
     previous,

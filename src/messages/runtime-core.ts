@@ -23,3 +23,7 @@ export const runtimeCoreSetupMustReturnRender = '组件必须返回渲染函数�
 
 /** 对象类型子节点的警告（无法渲染时会被忽略） */
 export const runtimeCoreObjectChildWarning = '[runtime-core] 检测到无法渲染的子节点，已被忽略：'
+
+/** `patch` 阶段缺失宿主节点的调试警告 */
+export const runtimeCoreMissingHostNodes =
+  '[runtime-core] 当前 vnode 未记录宿主节点，无法进行移动或锚点解析：'

@@ -1,6 +1,7 @@
 import type { NormalizedVirtualNode } from '../normalize.ts'
 import type { RuntimeVNode } from '../vnode.ts'
 import { asRuntimeVNode } from '../vnode.ts'
+import { runtimeCoreMissingHostNodes } from '@/messages/index.ts'
 import { __DEV__ } from '@/shared/index.ts'
 
 /** 带运行时元数据的 `vnode`（`patch` 阶段只处理已 normalize 的 `vnode`）。 */
@@ -56,7 +57,7 @@ export function ensureHostNodes<
   const nodes = getHostNodes<HostNode, HostElement, HostFragment>(vnode)
 
   if (nodes.length === 0 && __DEV__) {
-    console.warn('[runtime-core] missing host nodes for vnode during move/anchor resolution', vnode)
+    console.warn(runtimeCoreMissingHostNodes, vnode)
   }
 
   return nodes

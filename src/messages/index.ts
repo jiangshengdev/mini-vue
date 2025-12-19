@@ -15,6 +15,7 @@ export {
   runtimeCoreInjectOutsideSetup,
   runtimeCoreInvalidContainer,
   runtimeCoreInvalidPlugin,
+  runtimeCoreMissingHostNodes,
   runtimeCoreObjectChildWarning,
   runtimeCoreProvideOutsideSetup,
   runtimeCoreSetupMustReturnRender,

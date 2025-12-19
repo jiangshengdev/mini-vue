@@ -1,9 +1,9 @@
-import { mountChild } from '../mount/index.ts'
 import type { NormalizedChildren } from '../normalize.ts'
 import type { RendererOptions } from '../renderer.ts'
 import type { PatchChildrenContext } from './children-environment.ts'
 import { createChildEnvironment } from './children-environment.ts'
-import { findNextAnchor, moveNodes, unmount } from './utils.ts'
+import { createPatchDriver } from './driver.ts'
+import { findNextAnchor } from './utils.ts'
 
 /**
  * `Unkeyed children diff`：
@@ -22,6 +22,7 @@ export function patchUnkeyedChildren<
   environment: PatchChildrenContext<HostNode, HostElement, HostFragment>,
 ): void {
   const commonLength = Math.min(previousChildren.length, nextChildren.length)
+  const driver = createPatchDriver(options, environment)
 
   /* 公共部分逐个 `patch`：`unkeyed` 场景下「同索引」即认为是同位置节点。 */
   for (let index = 0; index < commonLength; index += 1) {
@@ -42,16 +43,16 @@ export function patchUnkeyedChildren<
        */
       const nextAnchor = findNextAnchor(nextChildren, index + 1, environment.anchor)
       const childEnvironment = createChildEnvironment(environment, index, nextChildren.length)
-      const mounted = mountChild(options, next, environment.container, childEnvironment.context)
 
-      if (mounted && nextAnchor) {
-        moveNodes(options, mounted.nodes, environment.container, nextAnchor)
-      }
+      driver.mountNew(next, {
+        anchor: nextAnchor,
+        context: childEnvironment.context,
+      })
     }
   } else if (previousChildren.length > nextChildren.length) {
     /* 移除节点：卸载旧列表超出部分。 */
     for (let index = commonLength; index < previousChildren.length; index += 1) {
-      unmount(options, previousChildren[index])
+      driver.unmountOnly(previousChildren[index])
     }
   }
 }

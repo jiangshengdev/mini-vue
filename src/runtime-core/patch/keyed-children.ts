@@ -1,8 +1,8 @@
-import { mountChild } from '../mount/index.ts'
 import type { NormalizedChildren } from '../normalize.ts'
 import type { RendererOptions } from '../renderer.ts'
 import type { PatchChildrenContext } from './children-environment.ts'
 import { createChildEnvironment } from './children-environment.ts'
+import { createPatchDriver } from './driver.ts'
 import {
   buildIndexMaps,
   createIndexRange,
@@ -12,9 +12,9 @@ import {
   syncFromEnd,
   syncFromStart,
 } from './keyed-children-helpers.ts'
-import { getHostNodes } from './runtime-vnode.ts'
+import { ensureHostNodes } from './runtime-vnode.ts'
 import type { IndexMaps, IndexRange, KeyedPatchState } from './types.ts'
-import { findNextAnchor, moveNodes, unmount } from './utils.ts'
+import { findNextAnchor } from './utils.ts'
 
 /**
  * Keyed `children diff`：支持基于 `key` 的复用与移动。
@@ -36,11 +36,13 @@ export function patchKeyedChildren<
   nextChildren: NormalizedChildren,
   environment: PatchChildrenContext<HostNode, HostElement, HostFragment>,
 ): void {
+  const driver = createPatchDriver(options, environment)
   const state: KeyedPatchState<HostNode, HostElement, HostFragment> = {
     options,
     previousChildren,
     nextChildren,
     environment,
+    driver,
   }
   const range = createIndexRange(previousChildren.length, nextChildren.length)
 
@@ -95,7 +97,7 @@ function patchAlignedChildren<
 
     if (newIndex === undefined) {
       /* 旧节点在新列表中不存在：直接卸载，避免后续移动阶段误处理。 */
-      unmount(state.options, previousChild)
+      state.driver.unmountOnly(previousChild)
     } else {
       /* 记录新索引对应的旧索引（`+1` 编码），供后续倒序移动/挂载阶段判断是否需要 `mount`。 */
       maps.newIndexToOldIndexMap[newIndex - range.newStart] = index + 1
@@ -142,20 +144,15 @@ function moveOrMountChildren<
         newIndex,
         state.nextChildren.length,
       )
-      const mounted = mountChild(
-        state.options,
-        nextChild,
-        state.environment.container,
-        childEnvironment.context,
-      )
 
-      if (mounted && anchorNode) {
-        moveNodes(state.options, mounted.nodes, state.environment.container, anchorNode)
-      }
+      state.driver.mountNew(nextChild, {
+        anchor: anchorNode,
+        context: childEnvironment.context,
+      })
     } else {
       /* 该新节点可复用旧节点：直接把旧节点的宿主 `nodes` 移动到 `anchorNode` 之前。 */
       const previousIndex = maps.newIndexToOldIndexMap[index] - 1
-      const nodes = getHostNodes<HostNode, HostElement, HostFragment>(
+      const nodes = ensureHostNodes<HostNode, HostElement, HostFragment>(
         state.previousChildren[previousIndex],
       )
 
@@ -164,9 +161,7 @@ function moveOrMountChildren<
        * - patchAlignedChildren 已完成复用节点的内容更新。
        * - 这里仅负责把「已更新的旧节点」放到正确位置。
        */
-      for (const node of nodes) {
-        state.options.insertBefore(state.environment.container, node, anchorNode)
-      }
+      state.driver.moveNodesToAnchor(nodes, anchorNode)
     }
   }
 }

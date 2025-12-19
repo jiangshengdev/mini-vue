@@ -1,6 +1,7 @@
 import type { NormalizedVirtualNode } from '../normalize.ts'
 import type { RuntimeVNode } from '../vnode.ts'
 import { asRuntimeVNode } from '../vnode.ts'
+import { __DEV__ } from '@/shared/index.ts'
 
 /** 带运行时元数据的 `vnode`（`patch` 阶段只处理已 normalize 的 `vnode`）。 */
 export type RuntimeNormalizedVirtualNode<
@@ -42,4 +43,21 @@ export function getFirstHostNode<
   const nodes = getHostNodes<HostNode, HostElement, HostFragment>(vnode)
 
   return nodes.length > 0 ? nodes[0] : undefined
+}
+
+/**
+ * 防御性读取宿主节点：当 `handle` 缺失或未写入宿主引用时给出调试提示。
+ */
+export function ensureHostNodes<
+  HostNode,
+  HostElement extends HostNode & WeakKey,
+  HostFragment extends HostNode,
+>(vnode: NormalizedVirtualNode): HostNode[] {
+  const nodes = getHostNodes<HostNode, HostElement, HostFragment>(vnode)
+
+  if (nodes.length === 0 && __DEV__) {
+    console.warn('[runtime-core] missing host nodes for vnode during move/anchor resolution', vnode)
+  }
+
+  return nodes
 }

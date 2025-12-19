@@ -1,14 +1,14 @@
 import { resolveComponentProps } from '../component/props.ts'
 import { assignElementRef, resolveElementRefBinding } from '../mount/element.ts'
-import { mountChild } from '../mount/index.ts'
 import type { NormalizedVirtualNode } from '../normalize.ts'
 import type { RendererOptions } from '../renderer.ts'
 import type { PatchEnvironment } from './children-environment.ts'
 import { patchChildren } from './children.ts'
-import { normalizeMountContext } from './context.ts'
+import { mountAndInsert } from './insertion.ts'
 import { asRuntimeNormalizedVirtualNode } from './runtime-vnode.ts'
+import type { PatchResult } from './types.ts'
 import { isComponentVirtualNode, isTextVirtualNode } from './types.ts'
-import { isSameVirtualNode, moveNodes, syncRuntimeMetadata, unmount } from './utils.ts'
+import { isSameVirtualNode, syncRuntimeMetadata, unmount } from './utils.ts'
 import type { SetupComponent } from '@/jsx-foundation/index.ts'
 import { Fragment } from '@/jsx-foundation/index.ts'
 
@@ -26,59 +26,55 @@ export function patchChild<
   previous: NormalizedVirtualNode | undefined,
   next: NormalizedVirtualNode | undefined,
   environment: PatchEnvironment<HostNode, HostElement, HostFragment>,
-): void {
+): PatchResult<HostNode> {
   /* 同一引用视为无变更：避免重复 `patch` 引发多余的 `props`/`children` 计算与宿主写入。 */
   if (previous === next) {
-    return
+    return { ok: true }
   }
 
   /* 仅存在新节点：走 `mount` 路径，并在需要时用 `anchor` 修正插入位置。 */
   if (!previous) {
     if (!next) {
-      return
+      return { ok: true }
     }
 
-    /* `patch` 阶段复用 `mount` 能力：由 `mountChild` 负责创建宿主节点、建立 `handle` 与依赖副作用。 */
-    const mounted = mountChild(
-      options,
-      next,
-      environment.container,
-      normalizeMountContext(environment.context),
-    )
+    /* `patch` 阶段复用 `mount` 能力：由 `mountAndInsert` 负责创建宿主节点并一次性插入到锚点前。 */
+    const mounted = mountAndInsert(options, next, {
+      container: environment.container,
+      anchor: environment.anchor,
+      context: environment.context,
+    })
 
-    if (mounted && environment.anchor) {
-      /* `mountChild` 通常追加插入，若存在锚点则将新节点整体移动到锚点前。 */
-      moveNodes(options, mounted.nodes, environment.container, environment.anchor)
+    return {
+      ok: mounted?.ok,
+      usedAnchor: environment.anchor,
     }
-
-    return
   }
 
   /* 仅存在旧节点：直接卸载，释放宿主节点与组件/响应式副作用。 */
   if (!next) {
     unmount(options, previous)
 
-    return
+    return { ok: true }
   }
 
   /* 同节点（`type`/`key` 视角）可复用：走 `patch`；否则视为替换，先卸载再重新挂载。 */
   if (isSameVirtualNode(previous, next)) {
-    patchExisting(options, previous, next, environment)
-
-    return
+    return patchExisting(options, previous, next, environment)
   }
 
   /* 替换路径：旧节点 `teardown` 后再 `mount` 新节点，避免残留事件/副作用引用。 */
   unmount(options, previous)
-  const mounted = mountChild(
-    options,
-    next,
-    environment.container,
-    normalizeMountContext(environment.context),
-  )
 
-  if (mounted && environment.anchor) {
-    moveNodes(options, mounted.nodes, environment.container, environment.anchor)
+  const mounted = mountAndInsert(options, next, {
+    container: environment.container,
+    anchor: environment.anchor,
+    context: environment.context,
+  })
+
+  return {
+    ok: mounted?.ok,
+    usedAnchor: environment.anchor,
   }
 }
 
@@ -94,7 +90,7 @@ function patchExisting<
   previous: NormalizedVirtualNode,
   next: NormalizedVirtualNode,
   environment: PatchEnvironment<HostNode, HostElement, HostFragment>,
-): void {
+): PatchResult<HostNode> {
   /* `Text` 的宿主节点只有一个：复用旧 `el`，并仅更新文本内容即可。 */
   if (isTextVirtualNode(previous) && isTextVirtualNode(next)) {
     const runtimePrevious = asRuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>(
@@ -110,7 +106,7 @@ function patchExisting<
       options.setText(runtimePrevious.el, next.text ?? '')
     }
 
-    return
+    return { ok: true }
   }
 
   /* `Fragment` 自身不对应单一宿主 `el`：通过 `handle.nodes` 表示一段节点区间。 */
@@ -136,17 +132,15 @@ function patchExisting<
       context: environment.context,
     })
 
-    return
+    return { ok: true }
   }
 
   /* 组件与元素的更新能力不同：组件需要驱动 `effect`/子树，元素需要 `patchProps`/`children`/`ref`。 */
   if (isComponentVirtualNode(previous) && isComponentVirtualNode(next)) {
-    patchComponent(options, previous, next, environment)
-
-    return
+    return patchComponent(options, previous, next, environment)
   }
 
-  patchElement(options, previous, next, environment)
+  return patchElement(options, previous, next, environment)
 }
 
 /**
@@ -161,7 +155,7 @@ function patchElement<
   previous: NormalizedVirtualNode,
   next: NormalizedVirtualNode,
   environment: Pick<PatchEnvironment<HostNode, HostElement, HostFragment>, 'anchor' | 'context'>,
-): void {
+): PatchResult<HostNode> {
   const runtimePrevious = asRuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>(
     previous,
   )
@@ -199,6 +193,8 @@ function patchElement<
   if (nextRef) {
     assignElementRef(nextRef, element)
   }
+
+  return { ok: true }
 }
 
 /**
@@ -213,7 +209,7 @@ function patchComponent<
   previous: NormalizedVirtualNode<SetupComponent>,
   next: NormalizedVirtualNode<SetupComponent>,
   environment: PatchEnvironment<HostNode, HostElement, HostFragment>,
-): void {
+): PatchResult<HostNode> {
   const runtimePrevious = asRuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>(
     previous,
   )
@@ -226,18 +222,16 @@ function patchComponent<
    * - 若缺失则无法复用，只能退化为重新 `mount` 新 `vnode`。
    */
   if (!instance) {
-    const mounted = mountChild(
-      options,
-      next,
-      environment.container,
-      normalizeMountContext(environment.context),
-    )
+    const mounted = mountAndInsert(options, next, {
+      container: environment.container,
+      anchor: environment.anchor,
+      context: environment.context,
+    })
 
-    if (mounted && environment.anchor) {
-      moveNodes(options, mounted.nodes, environment.container, environment.anchor)
+    return {
+      ok: mounted?.ok,
+      usedAnchor: environment.anchor,
     }
-
-    return
   }
 
   /* 复用旧组件实例：同步宿主引用，并将 `next` 绑定到同一个 `component` 上。 */
@@ -259,6 +253,9 @@ function patchComponent<
     const previousSubTree = instance.subTree
 
     runner()
-    patchChild(options, previousSubTree, instance.subTree, environment)
+
+    return patchChild(options, previousSubTree, instance.subTree, environment)
   }
+
+  return { ok: true }
 }

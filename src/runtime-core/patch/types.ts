@@ -1,6 +1,7 @@
 import type { NormalizedChildren, NormalizedVirtualNode } from '../normalize.ts'
 import type { RendererOptions } from '../renderer.ts'
 import type { PatchChildrenContext } from './children-environment.ts'
+import type { PatchDriver } from './driver.ts'
 import type { SetupComponent } from '@/jsx-foundation/index.ts'
 import { Fragment, Text } from '@/jsx-foundation/index.ts'
 
@@ -50,6 +51,8 @@ export interface KeyedPatchState<
   readonly nextChildren: NormalizedChildren
   /** 容器/锚点/上下文，以及单节点 `patch` 回调。 */
   readonly environment: PatchChildrenContext<HostNode, HostElement, HostFragment>
+  /** 统一的宿主操作驱动，封装新增/替换/卸载/移动。 */
+  readonly driver: PatchDriver<HostNode, HostElement, HostFragment>
 }
 
 /**
@@ -64,4 +67,14 @@ export interface IndexMaps {
   readonly newIndexToOldIndexMap: number[]
   /** 中间段待处理的新节点数量。 */
   readonly toBePatched: number
+}
+
+/** `patch` 执行结果：用于向上游报告成功状态、移动与锚点使用情况。 */
+export interface PatchResult<HostNode = unknown> {
+  /** 子树是否成功（`ok` 概念沿用 `MountedHandle`）。 */
+  ok?: boolean
+  /** 是否发生过移动（用于调试/统计）。 */
+  moved?: boolean
+  /** 实际使用过的锚点（若有）。 */
+  usedAnchor?: HostNode
 }

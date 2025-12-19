@@ -20,10 +20,19 @@ export function mountChild<
   child: RenderOutput | undefined,
   container: HostElement | HostFragment,
   context?: MountContext,
+  anchor?: HostNode,
 ): MountedHandle<HostNode> | undefined {
   /* `shouldUseAnchor` 表示「当前节点之后是否还有兄弟」，用于决定是否需要占位锚点来保序。 */
   const shouldUseAnchor = context?.shouldUseAnchor ?? false
-  const { appendChild, createText, remove } = options
+  const { appendChild, insertBefore, createText, remove } = options
+  /* 有锚点时直接在最终位置插入，避免先 append 再移动。 */
+  const insert = (node: HostNode): void => {
+    if (anchor) {
+      insertBefore(container, node, anchor)
+    } else {
+      appendChild(container, node)
+    }
+  }
 
   /* `null`、`undefined`、布尔值不产生实际节点。 */
   if (isNil(child) || typeof child === 'boolean') {
@@ -39,7 +48,7 @@ export function mountChild<
     }
 
     if (childCount === 1) {
-      return mountChild(options, child[0], container, { ...context, shouldUseAnchor })
+      return mountChild(options, child[0], container, { ...context, shouldUseAnchor }, anchor)
     }
 
     const startAnchor = createText('')
@@ -48,11 +57,17 @@ export function mountChild<
     const teardowns: Array<(skipRemove?: boolean) => void> = []
     let ok = true
 
-    appendChild(container, startAnchor)
+    insert(startAnchor)
 
     /* 子项始终视为有后续兄弟，以 `endAnchor` 充当边界。 */
     for (const item of child) {
-      const mounted = mountChild(options, item, container, { ...context, shouldUseAnchor: true })
+      const mounted = mountChild(
+        options,
+        item,
+        container,
+        { ...context, shouldUseAnchor: true },
+        anchor,
+      )
 
       if (mounted) {
         ok &&= mounted.ok
@@ -65,7 +80,7 @@ export function mountChild<
       }
     }
 
-    appendChild(container, endAnchor)
+    insert(endAnchor)
     nodes.push(endAnchor)
 
     return {
@@ -100,7 +115,7 @@ export function mountChild<
       )
       const runtime = asRuntimeVNode<HostNode, HostElement, HostFragment>(child)
 
-      appendChild(container, textNode)
+      insert(textNode)
 
       const handle: MountedHandle<HostNode> = {
         ok: true,
@@ -122,14 +137,22 @@ export function mountChild<
       return handle
     }
 
-    return mountVirtualNode(options, child, container, { ...context, shouldUseAnchor })
+    const mounted = mountVirtualNode(options, child, container, { ...context, shouldUseAnchor })
+
+    if (mounted && anchor) {
+      for (const node of mounted.nodes) {
+        insertBefore(container, node, anchor)
+      }
+    }
+
+    return mounted
   }
 
   /* 原始文本类型直接创建文本节点。 */
   if (typeof child === 'string' || typeof child === 'number') {
     const text = createText(String(child))
 
-    appendChild(container, text)
+    insert(text)
 
     return {
       ok: true,

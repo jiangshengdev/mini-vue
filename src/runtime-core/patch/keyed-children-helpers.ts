@@ -1,8 +1,7 @@
-import { mountChild } from '../mount/index.ts'
 import type { NormalizedChildren, NormalizedVirtualNode } from '../normalize.ts'
 import { createChildEnvironment } from './children-environment.ts'
 import type { IndexMaps, IndexRange, KeyedPatchState } from './types.ts'
-import { findNextAnchor, isSameVirtualNode, moveNodes, unmount } from './utils.ts'
+import { findNextAnchor, isSameVirtualNode } from './utils.ts'
 
 /**
  * 初始化 `diff` 区间，后续会被头尾同步逻辑收缩。
@@ -103,16 +102,11 @@ export function insertRemainingChildren<
       index,
       state.nextChildren.length,
     )
-    const mounted = mountChild(
-      state.options,
-      state.nextChildren[index],
-      state.environment.container,
-      childEnvironment.context,
-    )
 
-    if (mounted && insertAnchor) {
-      moveNodes(state.options, mounted.nodes, state.environment.container, insertAnchor)
-    }
+    state.driver.mountNew(state.nextChildren[index], {
+      anchor: insertAnchor,
+      context: childEnvironment.context,
+    })
   }
 }
 
@@ -125,7 +119,7 @@ export function removeRemainingChildren<
   HostFragment extends HostNode,
 >(state: KeyedPatchState<HostNode, HostElement, HostFragment>, range: IndexRange): void {
   for (let index = range.oldStart; index <= range.oldEnd; index += 1) {
-    unmount(state.options, state.previousChildren[index])
+    state.driver.unmountOnly(state.previousChildren[index])
   }
 }
 

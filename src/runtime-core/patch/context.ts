@@ -24,8 +24,14 @@ export function normalizeMountContext(context?: PatchContext | MountContext): Mo
   return {
     parent: context?.parent,
     appContext: context?.appContext,
-    /* 单节点 `patch` 的 `mount` 不需要依赖兄弟锚点策略，默认关闭 `shouldUseAnchor`。 */
-    shouldUseAnchor: false,
+    /*
+     * 当调用方提供 `MountContext` 时保留其中的 `shouldUseAnchor`，否则回退为 `false`。
+     * 这样在 `patch` 阶段新增节点也能复用批量插入的锚点策略。
+     */
+    shouldUseAnchor:
+      (context as MountContext | undefined)?.shouldUseAnchor === undefined
+        ? false
+        : (context as MountContext).shouldUseAnchor,
   }
 }
 

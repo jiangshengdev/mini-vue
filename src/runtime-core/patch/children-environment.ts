@@ -3,6 +3,7 @@ import type { NormalizedVirtualNode } from '../normalize.ts'
 import type { RendererOptions } from '../renderer.ts'
 import type { ContainerLike, PatchContext } from './context.ts'
 import { normalizeChildContext } from './context.ts'
+import type { PatchResult } from './types.ts'
 
 /**
  * 子节点 `patch` 回调签名：由 `patchChildren` 调用，用于复用单节点的 `mount`/`patch`/`unmount` 逻辑。
@@ -16,7 +17,7 @@ export type PatchChildFunction<
   previous: NormalizedVirtualNode | undefined,
   next: NormalizedVirtualNode | undefined,
   environment: PatchEnvironment<HostNode, HostElement, HostFragment>,
-) => void
+) => PatchResult<HostNode> | void
 
 /**
  * 单个子节点 `patch` 所需的环境信息。

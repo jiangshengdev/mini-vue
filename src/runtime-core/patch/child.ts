@@ -181,11 +181,10 @@ function patchElement<
   /* `props` 与 `children` 的更新顺序保持与 `mount` 阶段一致：先属性再子树。 */
   /* `patchProps` 需要同时知道旧/新 `props`，用于移除旧属性与更新事件等。 */
   options.patchProps(element, previous.props, next.props)
-  /* `children` `patch` 的容器切换为当前元素本身；兄弟顺序由外层 `anchor` 决定。 */
+  /* `children` `patch` 的容器切换为当前元素本身，避免将父级锚点误传到内部子树。 */
   patchChildren(options, previous.children, next.children, {
     container: element,
     patchChild,
-    anchor: environment.anchor,
     context: environment.context,
   })
 

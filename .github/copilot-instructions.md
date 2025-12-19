@@ -38,3 +38,6 @@
 - 删除文件/目录必须走命令行 `rm`/`rm -r`，且只能使用从仓库根目录起算的相对路径。
 - 代码注释、日志输出、对话回复统一使用简体中文。
 - 更完整的 Agent 约定见：[`AGENTS.md`](../AGENTS.md)
+- Vitest 浏览器模式限制：
+  - 禁用阻塞线程的同步弹窗（`alert`/`confirm` 等）；Vitest 会默认 mock，推荐按需自定义 mock。
+  - 无法对 ESM 模块命名空间使用 `vi.spyOn`，请用 `vi.mock(path, { spy: true })` 并结合 `vi.mocked`；若需改写导出的可变值，请提供 setter 方法。

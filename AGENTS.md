@@ -28,3 +28,10 @@
 
 ## 其他
 - 更完整的 Agent 行为规范见 [`.github/copilot-instructions.md`](.github/copilot-instructions.md)；自动化/工具链细节请保持同步更新两份文档。
+- Vitest 浏览器模式限制：
+  - 禁用会阻塞线程的同步弹窗（`alert`/`confirm` 等）；Vitest 会提供默认 mock，建议用自定义 mock 保持可控。
+  - ESM 模块命名空间不可被 `vi.spyOn`，需要 `vi.mock(path, { spy: true })` 再通过 `vi.mocked` 调整实现；若要改写导出的可变值，请暴露 setter 方法。
+
+## 交流与输出
+
+- 代码注释、日志输出、对话内容统一使用 **简体中文**。

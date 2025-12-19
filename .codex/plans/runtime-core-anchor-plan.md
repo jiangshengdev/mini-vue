@@ -27,11 +27,11 @@ description: Fix runtime-core anchor/children ordering bugs and tests
 - 无对外 API 变更；可能需要让组件 handle/nodes 携带锚点或额外标记以便移动。
 
 ## Action items
-[ ] 调整组件锚点创建：在存在外部 anchor 时使用 insertBefore 放置占位符，并保证 anchor 写回实例。  
-[ ] 让组件 handle/nodes 包含锚点或更新路径同步 instance.anchor，使 keyed 移动时占位符随节点移动。  
-[ ] 更新 deriveChildContext 或 mount children 调用，确保父级带 anchor 时末尾子节点也能保留 shouldUseAnchor。  
-[ ] 补充覆盖 keyed/unkeyed + 组件 rerender 的锚点顺序用例，验证 mount/patch/move。  
-[ ] 回归现有 runtime-core 渲染/组件相关测试，确认无兼容性回归。  
+[x] 调整组件锚点创建：在存在外部 anchor 时保持占位符随节点一起移动，并保证 anchor 写回实例。  
+[x] 让组件 handle/nodes 包含锚点或更新路径同步 instance.anchor，使 keyed 移动时占位符随节点移动。  
+[x] 更新 deriveChildContext 或 mount children 调用，确保父级带 anchor 时末尾子节点也能保留 shouldUseAnchor。  
+[x] 补充覆盖 keyed/unkeyed + 组件 rerender 的锚点顺序用例，验证 mount/patch/move。  
+[x] 回归现有 runtime-core 渲染/组件相关测试，确认无兼容性回归。  
 
 ## Testing and validation
 - `pnpm run test`（至少覆盖 runtime-core 套件）。

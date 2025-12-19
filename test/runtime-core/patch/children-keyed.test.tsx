@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { createHostRenderer, normalize } from './test-utils.ts'
 import { asRuntimeVNode, mountChild, patchChild, patchChildren } from '@/runtime-core/index.ts'
+import { ref } from '@/reactivity/index.ts'
 
 describe('patchChildren 有 key diff', () => {
   it('移动可复用 keyed 节点且不重新挂载', () => {
@@ -16,8 +17,11 @@ describe('patchChildren 有 key diff', () => {
       normalize(<div key="c">c</div>),
     ]
 
-    for (const child of previousChildren) {
-      mountChild(host.options, child, { container: host.container })
+    for (const [index, child] of previousChildren.entries()) {
+      mountChild(host.options, child, {
+        container: host.container,
+        context: { shouldUseAnchor: index < previousChildren.length - 1 },
+      })
     }
 
     const previousRuntime = previousChildren.map((child) => {
@@ -110,5 +114,66 @@ describe('patchChildren 有 key diff', () => {
     expect(host.container.children[0]).toBe(firstRuntime.el)
     expect(host.container.children[1]).not.toBeUndefined()
     expect(host.container.children[1]).not.toBe(firstRuntime.el)
+  })
+
+  it('组件移动后 rerender 仍按锚点顺序插入', () => {
+    const host = createHostRenderer()
+    const createToggleComponent = (label: string) => {
+      const expanded = ref(false)
+
+      const Component = () => {
+        return () => {
+          return expanded.value
+            ? [<span>{`${label}-1`}</span>, <span>{`${label}-2`}</span>]
+            : <span>{label}</span>
+        }
+      }
+
+      return {
+        Component,
+        expand() {
+          expanded.value = true
+        },
+      }
+    }
+
+    const componentA = createToggleComponent('A')
+    const componentB = createToggleComponent('B')
+    const ComponentA = componentA.Component
+    const ComponentB = componentB.Component
+    const previousChildren = [normalize(<ComponentA key="a" />), normalize(<ComponentB key="b" />)]
+
+    for (const child of previousChildren) {
+      mountChild(host.options, child, { container: host.container })
+    }
+
+    host.resetCounts()
+
+    const nextChildren = [normalize(<ComponentB key="b" />), normalize(<ComponentA key="a" />)]
+
+    patchChildren(host.options, previousChildren, nextChildren, {
+      container: host.container,
+      patchChild,
+    })
+
+    const runtimeB = asRuntimeVNode(nextChildren[0])
+    const runtimeA = asRuntimeVNode(nextChildren[1])
+    const anchorA = runtimeA.component?.anchor
+
+    expect(host.container.children[0]).toBe(runtimeB.el)
+    expect(anchorA && host.container.children.at(-1)).toBe(anchorA)
+
+    componentA.expand()
+
+    const elementOrder = host.container.children
+      .filter((node) => {
+        return node.kind === 'element'
+      })
+      .map((node) => {
+        return node.children[0]?.text
+      })
+
+    expect(elementOrder).toEqual(['B', 'A-1', 'A-2'])
+    expect(anchorA && host.container.children.at(-1)).toBe(anchorA)
   })
 })

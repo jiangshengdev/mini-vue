@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { createHostRenderer, normalize } from './test-utils.ts'
 import { mountChild, patchChild, patchChildren } from '@/runtime-core/index.ts'
+import { ref } from '@/reactivity/index.ts'
 
 describe('patchChildren 无 key diff', () => {
   it('公共区间按派生锚点上下文 patch', () => {
@@ -54,8 +55,11 @@ describe('patchChildren 无 key diff', () => {
     const previousChildren = [normalize(<div>kept</div>), normalize(<p>drop</p>)]
     const nextChildren = [normalize(<div>kept</div>)]
 
-    for (const child of previousChildren) {
-      mountChild(host.options, child, { container: host.container })
+    for (const [index, child] of previousChildren.entries()) {
+      mountChild(host.options, child, {
+        container: host.container,
+        context: { shouldUseAnchor: index < previousChildren.length - 1 },
+      })
     }
 
     host.resetCounts()
@@ -71,5 +75,58 @@ describe('patchChildren 无 key diff', () => {
         return node.kind === 'element' ? node.tag : node.text
       }),
     ).toEqual(['div'])
+  })
+
+  it('组件 rerender 切换多节点时保持顺序', () => {
+    const host = createHostRenderer()
+    const createToggleComponent = (label: string) => {
+      const expanded = ref(false)
+
+      const Component = () => {
+        return () => {
+          return expanded.value
+            ? [<span>{`${label}-1`}</span>, <span>{`${label}-2`}</span>]
+            : <span>{label}</span>
+        }
+      }
+
+      return {
+        Component,
+        expand() {
+          expanded.value = true
+        },
+      }
+    }
+
+    const componentA = createToggleComponent('A')
+    const componentB = createToggleComponent('B')
+    const ComponentA = componentA.Component
+    const ComponentB = componentB.Component
+    const previousChildren = [normalize(<ComponentA />), normalize(<ComponentB />)]
+    const nextChildren = [normalize(<ComponentA />), normalize(<ComponentB />)]
+
+    patchChildren(host.options, [], previousChildren, {
+      container: host.container,
+      patchChild,
+    })
+
+    host.resetCounts()
+
+    patchChildren(host.options, previousChildren, nextChildren, {
+      container: host.container,
+      patchChild,
+    })
+
+    componentA.expand()
+
+    const elementOrder = host.container.children
+      .filter((node) => {
+        return node.kind === 'element'
+      })
+      .map((node) => {
+        return node.children[0]?.text
+      })
+
+    expect(elementOrder).toEqual(['A-1', 'A-2', 'B'])
   })
 })

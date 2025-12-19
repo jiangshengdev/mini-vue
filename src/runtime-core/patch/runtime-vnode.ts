@@ -54,10 +54,13 @@ export function ensureHostNodes<
   HostFragment extends HostNode,
 >(vnode: NormalizedVirtualNode): HostNode[] {
   const nodes = getHostNodes<HostNode, HostElement, HostFragment>(vnode)
+  const runtime = asRuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>(vnode)
+  const withAnchor =
+    runtime.anchor && !nodes.includes(runtime.anchor) ? [...nodes, runtime.anchor] : nodes
 
-  if (nodes.length === 0 && __DEV__) {
+  if (withAnchor.length === 0 && __DEV__) {
     console.warn('[runtime-core] missing host nodes for vnode during move/anchor resolution', vnode)
   }
 
-  return nodes
+  return withAnchor
 }

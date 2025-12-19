@@ -58,12 +58,16 @@ export function performInitialRender<
   return {
     ok,
     nodes: mounted?.nodes ?? [],
+    /** 首渲染返回句柄的清理方法：转调子树的 `teardown`，便于上层统一回收。 */
     teardown(skipRemove?: boolean): void {
       mounted?.teardown(skipRemove)
     },
   }
 }
 
+/**
+ * 创建组件渲染用的响应式 `effect`，负责产出子树并在依赖变更时调度更新。
+ */
 function createRenderEffect<
   HostNode,
   HostElement extends HostNode & WeakKey,

@@ -56,6 +56,7 @@ export function mountChild<
       const handle: MountedHandle<HostNode> = {
         ok: true,
         nodes: [textNode],
+        /** 卸载单文本 vnode：复用 `handle` 语义并在未跳过时移除宿主节点。 */
         teardown(skipRemove?: boolean): void {
           if (skipRemove) {
             return
@@ -115,6 +116,9 @@ export function mountChild<
   return undefined
 }
 
+/**
+ * 挂载数组子节点：为整体生成锚点区间，并逐个交给 `mountChild` 处理。
+ */
 function mountArrayChild<
   HostNode,
   HostElement extends HostNode & WeakKey,

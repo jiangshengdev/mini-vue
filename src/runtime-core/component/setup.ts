@@ -29,6 +29,9 @@ export function setupComponent<
   return true
 }
 
+/**
+ * 安全运行组件 `setup`：挂载当前实例上下文，收集错误并校验返回值。
+ */
 function invokeSetup<
   HostNode,
   HostElement extends HostNode & WeakKey,

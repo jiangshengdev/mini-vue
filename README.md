@@ -50,6 +50,11 @@ createApp(Counter).mount('#app')
 - 扩展 DOM props 时同步完善 `patch-props.ts` 与 `test/runtime-dom/**`；框架内部入口统一复用 `shared/runSilent` / `runThrowing`，对外暴露 `setErrorHandler` 供用户注册全局错误处理器。
 - 提交信息规范：见 [`.copilot-commit-message-instructions.md`](./.copilot-commit-message-instructions.md)。
 
+## 贡献指南
+
+- 仓库协作约定与日常命令：见 [`AGENTS.md`](./AGENTS.md)。
+- Copilot/Agent 使用补充规范：见 [`.github/copilot-instructions.md`](./.github/copilot-instructions.md)。
+
 ## 许可证
 
 MIT

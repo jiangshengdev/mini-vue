@@ -37,4 +37,4 @@
 - 生成/建议提交信息时，遵循提交规范：[`/.copilot-commit-message-instructions.md`](../.copilot-commit-message-instructions.md)
 - 删除文件/目录必须走命令行 `rm`/`rm -r`，且只能使用从仓库根目录起算的相对路径。
 - 代码注释、日志输出、对话回复统一使用简体中文。
-- 更完整的 Agent 约定见：[`src/AGENTS.md`](../src/AGENTS.md)
+- 更完整的 Agent 约定见：[`AGENTS.md`](../AGENTS.md)

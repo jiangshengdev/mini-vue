@@ -4,7 +4,7 @@ import type { NormalizedVirtualNode } from '../normalize.ts'
 import { normalizeRenderOutput } from '../normalize.ts'
 import { patchChild } from '../patch/index.ts'
 import { asRuntimeVNode } from '../vnode.ts'
-import { mountChildWithAnchor } from './anchor.ts'
+import { mountComponentSubtreeWithAnchors } from './anchor.ts'
 import type { ComponentInstance } from './context.ts'
 import { teardownComponentInstance } from './teardown.ts'
 import type { SetupComponent } from '@/jsx-foundation/index.ts'
@@ -36,7 +36,7 @@ export function performInitialRender<
       const subtree = instance.effect!.run()
 
       /* 子树由通用 `mountChild` 继续挂载到宿主容器。 */
-      mounted = mountChildWithAnchor(options, instance, subtree)
+      mounted = mountComponentSubtreeWithAnchors(options, instance, subtree)
 
       instance.mountedHandle = mounted
 

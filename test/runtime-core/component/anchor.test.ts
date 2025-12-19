@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { ComponentInstance, RendererOptions } from '@/runtime-core/index.ts'
-import { mountChildWithAnchor } from '@/runtime-core/index.ts'
+import { mountComponentSubtreeWithAnchors } from '@/runtime-core/index.ts'
 import type { SetupComponent } from '@/index.ts'
 import { effectScope } from '@/index.ts'
 
@@ -16,7 +16,7 @@ type TestElement = TestNode & { kind: 'element' }
 
 type TestFragment = TestNode & { kind: 'fragment' }
 
-describe('mountChildWithAnchor', () => {
+describe('mountComponentSubtreeWithAnchors', () => {
   it('逐个插入 fragment 子节点，不要求宿主 insertBefore 处理 fragment', () => {
     const { options, insertBefore } = createHostOptions()
     const container: TestElement = { kind: 'element', tag: 'root', children: [] }
@@ -40,7 +40,7 @@ describe('mountChildWithAnchor', () => {
       setupContext: {},
     }
 
-    const mounted = mountChildWithAnchor(options, instance, 'child')
+    const mounted = mountComponentSubtreeWithAnchors(options, instance, 'child')
 
     expect(mounted?.nodes).toHaveLength(3)
     expect(insertBefore).toHaveBeenCalledTimes(1)

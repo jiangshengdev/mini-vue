@@ -7,7 +7,7 @@ import type { RenderOutput, SetupComponent } from '@/jsx-foundation/index.ts'
 /**
  * 处理需要锚点的组件子树挂载，避免与兄弟节点混淆。
  */
-export function mountChildWithAnchor<
+export function mountComponentSubtreeWithAnchors<
   HostNode,
   HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,

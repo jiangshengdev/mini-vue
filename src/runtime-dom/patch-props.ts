@@ -192,7 +192,10 @@ function isElementRef(value: unknown): value is ElementRef {
 
 type EventInvoker = ((event: Event) => void) & { value?: EventListener }
 
-const invokerCacheKey = '__miniVueInvokers__'
+/** 事件处理器缓存键，挂在宿主元素上保存稳定的 invoker 映射。 */
+export const invokerCacheKey = Symbol('miniVueInvokers')
+
+type InvokerMap = Record<string, EventInvoker>
 
 /**
  * 为事件绑定创建稳定的包装函数，保证增删逻辑复用同一引用。
@@ -234,20 +237,16 @@ function patchEvent(
 /**
  * 获取或初始化当前元素的事件 `invoker` 映射，避免多次创建对象。
  */
-function getInvokerMap(element: HTMLElement): Record<string, EventInvoker> {
-  const record = (element as HTMLElement & { [invokerCacheKey]?: Record<string, EventInvoker> })[
-    invokerCacheKey
-  ]
+function getInvokerMap(element: HTMLElement): InvokerMap {
+  const record = (element as HTMLElement & { [invokerCacheKey]?: InvokerMap })[invokerCacheKey]
 
   if (record) {
     return record
   }
 
-  const next: Record<string, EventInvoker> = {}
+  const next: InvokerMap = {}
 
-  ;(element as HTMLElement & { [invokerCacheKey]?: Record<string, EventInvoker> })[
-    invokerCacheKey
-  ] = next
+  ;(element as HTMLElement & { [invokerCacheKey]?: InvokerMap })[invokerCacheKey] = next
 
   return next
 }

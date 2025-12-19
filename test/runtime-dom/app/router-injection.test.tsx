@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { createTestContainer } from '../../setup.ts'
 import type { SetupComponent } from '@/index.ts'
 import { createApp, createRouter, ref, RouterLink, RouterView } from '@/index.ts'
+import { invokerCacheKey } from '@/runtime-dom/index.ts'
 import { routerDuplicateInstallOnApp } from '@/messages/index.ts'
 
 describe('runtime-dom: router injection', () => {
@@ -275,27 +276,35 @@ describe('runtime-dom: router injection', () => {
     app.use(router)
     app.mount(createTestContainer())
 
-    const anchor = document.querySelector('a')
+    const anchor = document.querySelector('a') as HTMLAnchorElement & {
+      [invokerCacheKey]?: Record<string, (event: Event) => void>
+    }
 
     expect(anchor).toBeTruthy()
 
-    const dispatch = (init?: MouseEventInit): boolean => {
-      return anchor!.dispatchEvent(
-        new MouseEvent('click', { bubbles: true, cancelable: true, ...init }),
-      )
+    const clickInvoker = anchor[invokerCacheKey]?.click
+
+    const trigger = (init?: MouseEventInit, presetPrevented = false): MouseEvent => {
+      const event = new MouseEvent('click', { bubbles: true, cancelable: true, ...init })
+
+      if (presetPrevented) {
+        event.preventDefault()
+      }
+
+      clickInvoker?.(event)
+
+      return event
     }
 
-    expect(dispatch({ metaKey: true })).toBe(true)
-    expect(dispatch({ ctrlKey: true })).toBe(true)
-    expect(dispatch({ shiftKey: true })).toBe(true)
-    expect(dispatch({ altKey: true })).toBe(true)
-    expect(dispatch({ button: 1 })).toBe(true)
+    expect(trigger({ metaKey: true }).defaultPrevented).toBe(false)
+    expect(trigger({ ctrlKey: true }).defaultPrevented).toBe(false)
+    expect(trigger({ shiftKey: true }).defaultPrevented).toBe(false)
+    expect(trigger({ altKey: true }).defaultPrevented).toBe(false)
+    expect(trigger({ button: 1 }).defaultPrevented).toBe(false)
 
-    const prevented = new MouseEvent('click', { bubbles: true, cancelable: true })
+    const prevented = trigger({}, true)
 
-    prevented.preventDefault()
-    expect(anchor!.dispatchEvent(prevented)).toBe(false)
-
+    expect(prevented.defaultPrevented).toBe(true)
     expect(navigateSpy).not.toHaveBeenCalled()
 
     app.unmount()
@@ -337,13 +346,18 @@ describe('runtime-dom: router injection', () => {
     app.use(router)
     app.mount(createTestContainer())
 
-    const anchor = document.querySelector('a')
+    const anchor = document.querySelector('a') as HTMLAnchorElement & {
+      [invokerCacheKey]?: Record<string, (event: Event) => void>
+    }
 
     expect(anchor).toBeTruthy()
 
-    expect(
-      anchor!.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true })),
-    ).toBe(true)
+    const clickInvoker = anchor[invokerCacheKey]?.click
+    const event = new MouseEvent('click', { bubbles: true, cancelable: true })
+
+    clickInvoker?.(event)
+
+    expect(event.defaultPrevented).toBe(false)
     expect(navigateSpy).not.toHaveBeenCalled()
 
     app.unmount()

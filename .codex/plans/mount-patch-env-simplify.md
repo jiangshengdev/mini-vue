@@ -27,12 +27,12 @@ description: Flatten mount/patch environment types and clarify anchor/context pr
 - PatchContext 在入口处转换为 MountContext，移除 normalizeMountContext 重复包装。
 
 ## Action items
-[ ] 设计新的 ChildEnvironment/PatchChildrenContext 定义，确认名称与导出位置。
-[ ] 调整 mountAndInsert/mountChild/patchChild 等函数签名，使用统一环境类型。
-[ ] 更新 normalizeChildContext（或等效函数）以仅负责 shouldUseAnchor，删除冗余的 normalizeMountContext。
-[ ] 批量修改调用点（children diff、patch driver 等），保证编译通过。
-[ ] 自查行为：锚点选择、ref/props 顺序、Fragment 子树 patch 等逻辑未被改变。
-[ ] 运行现有测试或最小验证（若可）确保无回归。
+[x] 设计新的 ChildEnvironment/PatchChildrenContext 定义，确认名称与导出位置。
+[x] 调整 mountAndInsert/mountChild/patchChild 等函数签名，使用统一环境类型。
+[x] 更新 normalizeChildContext（或等效函数）以仅负责 shouldUseAnchor，删除冗余的 normalizeMountContext。
+[x] 批量修改调用点（children diff、patch driver 等），保证编译通过。
+[x] 自查行为：锚点选择、ref/props 顺序、Fragment 子树 patch 等逻辑未被改变。
+[x] 运行现有测试或最小验证（若可）确保无回归。
 
 ## Testing and validation
 - pnpm test 或现有脚本（如有）；至少进行类型检查 pnpm test:type / pnpm lint。（按仓库实际命令调整）

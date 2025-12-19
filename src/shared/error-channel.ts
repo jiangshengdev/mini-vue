@@ -136,7 +136,7 @@ export type ThrowingErrorRunOptions = ErrorRunOptions<typeof errorPhases.sync>
 let tickNotifiedErrors = new WeakSet<Error>()
 
 /**
- * 标记是否已安排过“本 tick 去重表重置”的 microtask，避免重复注册。
+ * 标记是否已安排过「本 tick 去重表重置」的 microtask，避免重复注册。
  */
 let isDedupeResetScheduled = false
 
@@ -144,7 +144,7 @@ let isDedupeResetScheduled = false
  * 在当前事件循环 tick 结束时重置去重表。
  *
  * @remarks
- * - 设计目标是“同一 tick 内同一 Error 对象只上报一次”，避免重复噪声。
+ * - 设计目标是「同一 tick 内同一 Error 对象只上报一次」，避免重复噪声。
  * - 采用 microtask 让重置尽可能靠近本轮同步逻辑尾部，同时不会阻塞当前调用栈。
  */
 function scheduleDedupeRegistryReset(): void {
@@ -220,7 +220,7 @@ export function dispatchError(error: Error, dispatchOptions: ErrorDispatchOption
 }
 
 /**
- * 统一封装“执行 runner + 捕获并上报异常”的同步入口。
+ * 统一封装「执行 runner + 捕获并上报异常」的同步入口。
  *
  * @remarks
  * - 负责串联 before/after hook，保证无论成功与否都能观察到 token。

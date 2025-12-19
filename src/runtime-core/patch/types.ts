@@ -24,7 +24,7 @@ export function isComponentVirtualNode(
   return typeof vnode.type === 'function' && vnode.type !== Fragment
 }
 
-/** 两组 `children` 的有效 `diff` 区间：通过头尾同步逐步收缩到“需要真正对比”的中间段。 */
+/** 两组 `children` 的有效 `diff` 区间：通过头尾同步逐步收缩到「需要真正对比」的中间段。 */
 export interface IndexRange {
   /** 旧 children 的起始索引（含）。 */
   oldStart: number
@@ -60,7 +60,7 @@ export interface KeyedPatchState<
 export interface IndexMaps {
   /** `key` -> newIndex 的映射，仅收集有效 key。 */
   readonly keyToNewIndexMap: Map<PropertyKey, number>
-  /** `newIndex` 对应的 oldIndex（+1），用于区分“可复用”与“需要新建”。 */
+  /** `newIndex` 对应的 oldIndex（+1），用于区分「可复用」与「需要新建」。 */
   readonly newIndexToOldIndexMap: number[]
   /** 中间段待处理的新节点数量。 */
   readonly toBePatched: number

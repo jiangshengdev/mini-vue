@@ -121,8 +121,8 @@ export class ObjectRefImpl<T extends PlainObject, K extends keyof T> implements 
        * 判等需要读取旧值，但旧值读取可能触发 getter。
        *
        * @remarks
-       * - 该读取发生在“写入流程”内部，不应把 getter 中的 reactive 读取收集为依赖。
-       * - 因此这里显式禁用依赖收集，避免出现“写入阶段意外收集”。
+       * - 该读取发生在「写入流程」内部，不应把 getter 中的 reactive 读取收集为依赖。
+       * - 因此这里显式禁用依赖收集，避免出现「写入阶段意外收集」。
        */
       const previousValue = withoutTracking(() => {
         return this.target[this.key]

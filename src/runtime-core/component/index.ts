@@ -1,5 +1,5 @@
 /**
- * Runtime-core 组件子域的出口文件，聚合“当前实例获取”与组件挂载相关能力。
+ * Runtime-core 组件子域的出口文件，聚合「当前实例获取」与组件挂载相关能力。
  */
 export { mountChildWithAnchor } from './anchor.ts'
 export { getCurrentInstance } from './context.ts'

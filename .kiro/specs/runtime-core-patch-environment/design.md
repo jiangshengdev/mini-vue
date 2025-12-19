@@ -8,7 +8,7 @@
 ## 2. 目标与原则
 
 - 子节点 patch 环境统一使用 `PatchEnvironment`（或其子集），避免手写匿名 shape。  
-- 允许 `patchChildren` 持续依赖外部注入的 `patchChild`，明确这是“避免循环依赖 + 便于替换”的约束，而非冗余参数。
+- 允许 `patchChildren` 持续依赖外部注入的 `patchChild`，明确这是「避免循环依赖 + 便于替换」的约束，而非冗余参数。
 
 ## 3. 方案
 

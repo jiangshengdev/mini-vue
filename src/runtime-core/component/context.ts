@@ -13,7 +13,7 @@ import { ContextStack } from '@/shared/index.ts'
  * 组件实例的依赖注入容器类型。
  *
  * @remarks
- * - 运行期使用“对象 + 原型链”表达层级 `provides`。
+ * - 运行期使用「对象 + 原型链」表达层级 `provides`。
  * - `key` 支持 `symbol`（推荐）与 `string`。
  */
 export type Provides = PlainObject

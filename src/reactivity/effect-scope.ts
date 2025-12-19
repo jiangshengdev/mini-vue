@@ -89,7 +89,7 @@ export class EffectScope {
   addCleanup(cleanup: () => void): void {
     /*
      * 若 `scope` 已停止（含 `stop` 进行中），对齐 `effect` 的语义：不再入队，而是立刻执行。
-     * 这样可以避免“登记到永远不会再被 `stop` 消费的队列”造成资源无法释放。
+     * 这样可以避免「登记到永远不会再被 `stop` 消费的队列」造成资源无法释放。
      */
     if (!this.active) {
       runSilent(cleanup, {

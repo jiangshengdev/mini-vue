@@ -1,6 +1,6 @@
 # VNode Diff / Patch — Tasks
 
-> 说明：任务按“可回退的小步”拆分，尽量每步都有可验证的测试。状态字段按 Kiro 习惯可后续更新为 in-progress/completed。
+> 说明：任务按「可回退的小步」拆分，尽量每步都有可验证的测试。状态字段按 Kiro 习惯可后续更新为 in-progress/completed。
 
 ## Phase 0：准备与对齐
 
@@ -44,7 +44,7 @@
 
 ## Phase 3：引入 patch 入口（先 Text + Element）
 
-- [ ] 3.1 增加 runtime-core 内部“带宿主引用”的 vnode 运行时结构
+- [ ] 3.1 增加 runtime-core 内部「带宿主引用」的 vnode 运行时结构
   - 文件：建议新增 `src/runtime-core/vnode.ts`（或放在 mount 子域内）
   - 内容：定义 `RuntimeVNode`（包含 `el/anchor/component` 等运行时字段）。
   - 验收：不修改 `src/jsx-foundation/types.ts` 的对外类型。
@@ -94,7 +94,7 @@
   - 文件：`src/runtime-core/component/render-effect.ts`
   - 变更：
     - render 成功后：对 `previousSubTree` 与 `instance.subTree` 执行 patch，而不是 `teardownMountedSubtree + mountLatestSubtree`
-    - 保留更新失败时的“回退 previousSubTree”逻辑
+    - 保留更新失败时的「回退 previousSubTree」逻辑
   - 测试：
     - 子组件实例不重建（可用计数/引用断言）
     - 更新失败不破坏旧 DOM（已有语义需保持）
@@ -110,7 +110,7 @@
 
 ## 可选：Property-based tests（PBT）
 
-- [ ] P1 为“keyed diff 保序与复用”提取性质并引入 PBT（可选）
+- [ ] P1 为「keyed diff 保序与复用」提取性质并引入 PBT（可选）
   - 说明：如果引入 fast-check，会新增依赖；也可以先用随机生成的 example-based 测试替代。
   - 性质示例：
     - 对任意 key 列表变换，最终 DOM 顺序与新 children 顺序一致

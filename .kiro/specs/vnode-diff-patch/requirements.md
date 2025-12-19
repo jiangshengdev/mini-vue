@@ -4,7 +4,7 @@
 
 当前组件更新会全量卸载并重新挂载子树，导致 DOM 抖动与状态丢失（focus/scroll/输入法组合态），并且复杂树的性能开销显著。
 
-本 spec 目标是引入最小可用的 VNode patch 能力，使“同一组件实例内的更新”能复用既有宿主节点并做增量更新；同时为后续 scheduler / nextTick 等能力留出接口，但不在本 spec 内实现这些能力。
+本 spec 目标是引入最小可用的 VNode patch 能力，使「同一组件实例内的更新」能复用既有宿主节点并做增量更新；同时为后续 scheduler / nextTick 等能力留出接口，但不在本 spec 内实现这些能力。
 
 ## 用户故事（User Stories）
 

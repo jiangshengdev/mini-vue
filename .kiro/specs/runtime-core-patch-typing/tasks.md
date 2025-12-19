@@ -1,6 +1,6 @@
 # runtime-core Patch 类型优化 — Tasks
 
-> 说明：按“先收敛不变量、再收紧类型、最后验证”的顺序拆分，便于逐步落地并随时回退。
+> 说明：按「先收敛不变量、再收紧类型、最后验证」的顺序拆分，便于逐步落地并随时回退。
 
 ## Phase 0：基线审计
 
@@ -9,7 +9,7 @@
 
 ## Phase 1：输入与上下文类型收敛
 
-- [x] 1.1 为 patch 入口定义“已归一化 children”类型别名，更新 `patchChild`/`patchChildren`/调用方签名，阻断非 vnode 输入。
+- [x] 1.1 为 patch 入口定义「已归一化 children」类型别名，更新 `patchChild`/`patchChildren`/调用方签名，阻断非 vnode 输入。
 - [x] 1.2 对齐 PatchContext 与 MountContext 的基础接口，移除 `normalizeMountContext`/`normalizeChildContext` 中的 `as never`。
 
 ## Phase 2：节点形态与 runtime 元数据建模

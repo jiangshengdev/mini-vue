@@ -48,7 +48,7 @@ export function createVirtualNode<T extends ElementType>(
   let children: VirtualNodeChild[] = []
 
   if (rawProps) {
-    /* `hasOwn` 能区分“未传入 `children`”与“显式传入 `undefined`/`null`”的差异 */
+    /* `hasOwn` 能区分「未传入 `children`」与「显式传入 `undefined`/`null`」的差异 */
     const hasChildren = Object.hasOwn(rawProps, 'children')
     const { children: rawChildren, ...restProps } = rawProps as WithOptionalProp<
       PropsShape,

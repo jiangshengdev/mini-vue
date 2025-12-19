@@ -4,7 +4,7 @@ import { track } from '../internals/operations.ts'
 import { toRaw } from '../to-raw.ts'
 
 /**
- * 需要被特殊处理的数组“查询型”方法名集合。
+ * 需要被特殊处理的数组「查询型」方法名集合。
  *
  * @remarks
  * - 这些方法会基于元素做相等性比较（identity-sensitive）。

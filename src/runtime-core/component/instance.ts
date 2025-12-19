@@ -22,7 +22,7 @@ export function createComponentInstance<
   /*
    * 挂载上下文从父到子逐层下传：
    * - `parent`：用于组件树关系、`provide`/`inject` 的原型链继承。
-   * - `appContext`：用于“根级 `provides`”的稳定传播（组件外 `app.provide` 的入口）。
+   * - `appContext`：用于「根级 `provides`」的稳定传播（组件外 `app.provide` 的入口）。
    */
   const parent = context?.parent
   const shouldUseAnchor = context?.shouldUseAnchor ?? false

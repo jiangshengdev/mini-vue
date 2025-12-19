@@ -20,7 +20,7 @@ class DependencyRegistry {
   track(target: ReactiveTarget, key: PropertyKey): void {
     /*
      * 当外层显式禁用依赖收集时（例如：写入阶段读取旧值、创建阶段探测属性），
-     * 这里必须短路，否则会把“探测读取”的依赖错误地记录到当前 effect。
+     * 这里必须短路，否则会把「探测读取」的依赖错误地记录到当前 effect。
      */
     if (!canTrack()) {
       return
@@ -79,7 +79,7 @@ class DependencyRegistry {
          * 数组索引替换会改变元素集合，依赖于 includes/indexOf 等查询结果的副作用需要重跑。
          *
          * @remarks
-         * - 这些查询方法在实现层面通常依赖“遍历/比较元素”，属于集合级别依赖。
+         * - 这些查询方法在实现层面通常依赖「遍历/比较元素」，属于集合级别依赖。
          * - 因此这里将索引 set 也视为结构性影响的一种，补齐 iterate 的触发。
          */
         addDep(depsMap.get(iterateDependencyKey))

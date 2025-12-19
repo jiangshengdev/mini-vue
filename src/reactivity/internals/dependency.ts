@@ -12,7 +12,7 @@ export function trackEffect(dependencyBucket: DependencyBucket, debugInfo?: Plai
    * 依赖收集被显式禁用时直接跳过。
    *
    * @remarks
-   * - 该分支主要用于屏蔽“写入前读旧值 / 创建期探测”这类读取带来的意外收集。
+   * - 该分支主要用于屏蔽「写入前读旧值 / 创建期探测」这类读取带来的意外收集。
    * - 这里不仅影响 `reactive` 的 `track`，也会影响 `ref.value` 等通过 `trackEffect` 收集的路径。
    */
   if (!canTrack()) {

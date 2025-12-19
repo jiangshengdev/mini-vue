@@ -18,8 +18,8 @@
 
 - 位置：`src/runtime-dom/create-app.ts`
 - 现状：`resolveContainer()` 在 `target` 为字符串时直接调用 `document.querySelector(target)`；当 `target` 是非法 CSS 选择器（如 `'#app['`）会抛出 `SyntaxError`，目前未捕获。
-- 影响：`createApp().mount(selector)` 会同步崩溃，且错误并非 “未找到容器” 的语义，导致定位成本较高。
-- 提示：对 `querySelector` 添加 try/catch（至少捕获 `SyntaxError`）并转换为更友好的错误信息或返回 `undefined` 走现有 “未找到容器” 分支。
+- 影响：`createApp().mount(selector)` 会同步崩溃，且错误并非 「未找到容器」 的语义，导致定位成本较高。
+- 提示：对 `querySelector` 添加 try/catch（至少捕获 `SyntaxError`）并转换为更友好的错误信息或返回 `undefined` 走现有 「未找到容器」 分支。
 
 ## 4. insertBefore 忽略 parent 且不兼容 anchor 为 null 的标准语义（已修复）
 

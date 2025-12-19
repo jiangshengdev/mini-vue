@@ -22,7 +22,7 @@ function warnUnsupportedChild(child: unknown): void {
  * 将任意形式的 `children` 归一化为扁平的 `VirtualNodeChild` 数组。
  *
  * @remarks
- * - 过滤掉 `null`/`undefined`/`boolean` 等“可忽略”值。
+ * - 过滤掉 `null`/`undefined`/`boolean` 等「可忽略」值。
  * - 递归展开数组 `children`，并保持原始顺序不变。
  */
 export function normalizeChildren(rawChildren: unknown): VirtualNodeChild[] {

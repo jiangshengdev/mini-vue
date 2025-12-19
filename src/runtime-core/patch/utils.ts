@@ -34,7 +34,7 @@ export function unmount<
 }
 
 /**
- * 判断两个 `vnode` 是否可视为“同一个节点”，用于决定走 `patch` 还是卸载重建。
+ * 判断两个 `vnode` 是否可视为「同一个节点」，用于决定走 `patch` 还是卸载重建。
  *
  * @remarks
  * - `Text` 节点在 `diff` 中只要都是 `Text` 即可复用宿主节点。
@@ -76,7 +76,7 @@ export function moveNodes<
 }
 
 /**
- * 从 `children` 的指定位置向后寻找“下一个可用锚点”。
+ * 从 `children` 的指定位置向后寻找「下一个可用锚点」。
  *
  * @remarks
  * - 这里使用 `runtime.handle.nodes[0]` 作为锚点，是因为一个 `vnode` 可能对应多宿主节点（如 `Fragment`）。
@@ -104,13 +104,13 @@ export function findNextAnchor<HostNode>(
  */
 export function hasKeys(children: NormalizedChildren): boolean {
   return children.some((child) => {
-    /* `key` 必须是“存在且非 `null`”：与 Vue 的 `key` 语义对齐，避免把 `null` 当成有效 `key`。 */
+    /* `key` 必须是「存在且非 `null`」：与 Vue 的 `key` 语义对齐，避免把 `null` 当成有效 `key`。 */
     return child.key !== undefined && child.key !== null
   })
 }
 
 /**
- * 在 `patch` 过程中同步 runtime 元数据，使“新 `vnode`”复用“旧 `vnode`”的宿主引用。
+ * 在 `patch` 过程中同步 runtime 元数据，使「新 `vnode`」复用「旧 `vnode`」的宿主引用。
  *
  * @remarks
  * - `el`/`handle` 会在 `mount` 时写入，`patch` 时必须继承以避免重复创建/丢失 `teardown` 能力。

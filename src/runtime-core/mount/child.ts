@@ -21,7 +21,7 @@ export function mountChild<
   container: HostElement | HostFragment,
   context?: MountContext,
 ): MountedHandle<HostNode> | undefined {
-  /* `shouldUseAnchor` 表示“当前节点之后是否还有兄弟”，用于决定是否需要占位锚点来保序。 */
+  /* `shouldUseAnchor` 表示「当前节点之后是否还有兄弟」，用于决定是否需要占位锚点来保序。 */
   const shouldUseAnchor = context?.shouldUseAnchor ?? false
   const { appendChild, createText, remove } = options
 
@@ -72,7 +72,7 @@ export function mountChild<
       ok,
       nodes,
       /**
-       * 先按“子项挂载顺序”执行 `teardown`，再移除边界锚点。
+       * 先按「子项挂载顺序」执行 `teardown`，再移除边界锚点。
        *
        * @remarks
        * - 这里不直接 `remove(nodes)` 是为了保留子项各自的清理语义（`effect`/`refs` 等）。

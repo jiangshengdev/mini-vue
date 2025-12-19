@@ -8,7 +8,7 @@ import type { PlainObject } from '@/shared/index.ts'
 type Primitive = string | number | boolean | bigint | symbol | null | undefined
 
 /**
- * 通用函数签名类型：用于识别“可调用值”，避免使用不安全的 `Function` 顶级类型。
+ * 通用函数签名类型：用于识别「可调用值」，避免使用不安全的 `Function` 顶级类型。
  */
 type UnknownFn = (...args: unknown[]) => unknown
 
@@ -21,7 +21,7 @@ type UnknownFn = (...args: unknown[]) => unknown
 type UnwrapBailTypes = Primitive | UnknownFn
 
 /**
- * Ref 解包入口：仅在“对象属性”场景对 Ref 进行解包。
+ * Ref 解包入口：仅在「对象属性」场景对 Ref 进行解包。
  *
  * @remarks
  * - `T` 为 Ref 时解包为其 `value` 的类型，并继续递归。
@@ -33,8 +33,8 @@ type UnwrapRef<T> = T extends Ref<infer V> ? UnwrapRefRecursive<V> : UnwrapRefRe
  * 递归解包逻辑：尽量对齐 reactive 的运行时读取行为。
  *
  * @remarks
- * - 遇到 `Ref` 直接 bail：使“数组索引上的 Ref 不自动解包”。
- * - 对象属性走 `UnwrapRef`：使“对象属性为 Ref 时会自动解包”。
+ * - 遇到 `Ref` 直接 bail：使「数组索引上的 Ref 不自动解包」。
+ * - 对象属性走 `UnwrapRef`：使「对象属性为 Ref 时会自动解包」。
  */
 type UnwrapRefRecursive<T> = T extends UnwrapBailTypes | Ref
   ? T

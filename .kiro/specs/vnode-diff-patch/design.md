@@ -5,15 +5,15 @@
 - 组件更新：`src/runtime-core/component/render-effect.ts` 在 rerender 时执行 `teardownMountedSubtree` 再重新挂载，导致 DOM/子组件实例重建。
 - 根渲染：`src/runtime-core/renderer.ts` 每次 render 先 clear 容器，无 root patch。
 - mount 模型：当前 mount 返回 `MountedHandle`（`nodes[] + teardown()`），但 VNode 本身不携带宿主节点引用。
-- DOM props：`src/runtime-dom/patch-props.ts` 当前实现只“写入 next”，无法可靠移除旧 props/解绑事件。
+- DOM props：`src/runtime-dom/patch-props.ts` 当前实现只「写入 next」，无法可靠移除旧 props/解绑事件。
 
 ## 2. 总体方案
 
 ### 2.1 关键原则
 
 - runtime-core 负责 diff/patch 与节点移动；宿主负责最小原语（create/insert/remove/patchProps/setText）。
-- JSX 的 `VirtualNode` 类型保持“平台无关、无宿主引用”；宿主引用由 runtime-core 内部的运行时结构维护。
-- 更新失败不破坏上一轮 DOM：仍遵循“先生成新子树，成功后再替换/patch”的顺序。
+- JSX 的 `VirtualNode` 类型保持「平台无关、无宿主引用」；宿主引用由 runtime-core 内部的运行时结构维护。
+- 更新失败不破坏上一轮 DOM：仍遵循「先生成新子树，成功后再替换/patch」的顺序。
 
 ### 2.2 渲染原语扩展（RendererOptions）
 
@@ -45,7 +45,7 @@
 
 新增 `patchChild(old, next, container, anchor?)` 作为统一入口：
 
-- same 判定：virtual node 以 `type + key`；Text 以“都是文本”。
+- same 判定：virtual node 以 `type + key`；Text 以「都是文本」。
 - 分派：Text / Element / Fragment(数组) / Component。
 
 #### Text patch
@@ -67,7 +67,7 @@
 
 - 复用组件实例，不再 teardown。
 - 将新 vnode props 更新到 instance，然后触发 rerender（effect 调度仍保持现状；scheduler 在另一个 spec）。
-- 子树从“卸载+重挂”改为 `patch(oldSubTree, newSubTree, container, anchor)`。
+- 子树从「卸载+重挂」改为 `patch(oldSubTree, newSubTree, container, anchor)`。
 
 ## 3. children diff 算法（Vue 3 风格）
 
@@ -89,12 +89,12 @@
 
 ## 4. 错误处理
 
-- 保持现有 rerender 的“先 run renderSchedulerJob 成功，再进行替换/patch”的顺序。
+- 保持现有 rerender 的「先 run renderSchedulerJob 成功，再进行替换/patch」的顺序。
 - render 抛错：恢复 `instance.subTree = previousSubTree` 并退出，不触碰已挂载 DOM。
 
 ## 5. 单元测试策略
 
-- 优先添加能证明“未重建”的断言：
+- 优先添加能证明「未重建」的断言：
   - TextNode/Element 引用不变
   - 事件监听不叠加
   - key 移动只移动不重建

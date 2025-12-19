@@ -94,7 +94,7 @@ export function insertRemainingChildren<
 
   /*
    * 这里使用同一个 `insertAnchor`：
-   * - 旧侧已耗尽时，剩余新节点应整体插入到“尾部已对齐区间”的前面。
+   * - 旧侧已耗尽时，剩余新节点应整体插入到「尾部已对齐区间」的前面。
    * - 逐个 `mount` 后再 `move`，可避免 `mountChild` 对插入位置的不同宿主实现差异。
    */
   for (let index = range.newStart; index <= range.newEnd; index += 1) {
@@ -139,7 +139,7 @@ export function buildIndexMaps<
 >(state: KeyedPatchState<HostNode, HostElement, HostFragment>, range: IndexRange): IndexMaps {
   const keyToNewIndexMap = new Map<PropertyKey, number>()
   const toBePatched = range.newEnd - range.newStart + 1
-  /* 使用 0 作为“没有可复用旧节点”的哨兵值，因此旧索引在写入时会 `+1` 编码。 */
+  /* 使用 0 作为「没有可复用旧节点」的哨兵值，因此旧索引在写入时会 `+1` 编码。 */
   const newIndexToOldIndexMap = Array.from({ length: toBePatched }, () => {
     return 0
   })
@@ -157,7 +157,7 @@ export function buildIndexMaps<
 }
 
 /**
- * 在指定区间内寻找“无 `key` 且同类型”的可复用节点。
+ * 在指定区间内寻找「无 `key` 且同类型」的可复用节点。
  *
  * @remarks
  * 这是 `keyed diff` 的兜底分支：当旧节点没有 `key` 时，允许通过类型匹配复用新列表中的无 `key` 节点。

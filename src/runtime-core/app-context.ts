@@ -5,7 +5,7 @@ import { ContextStack } from '@/shared/index.ts'
 const appContextStack = new ContextStack<AppContext>()
 
 /**
- * 设置“当前正在执行”的应用上下文。
+ * 设置「当前正在执行」的应用上下文。
  *
  * @remarks
  * - 该上下文主要用于把应用级 provides 传入根组件创建链路。

@@ -74,7 +74,7 @@ export function patchKeyedChildren<
 /**
  * 遍历旧列表的中间段：
  * - 找不到对应新节点则卸载。
- * - 找到则 `patch`，并记录“新索引 -> 旧索引”的复用映射。
+ * - 找到则 `patch`，并记录「新索引 -> 旧索引」的复用映射。
  */
 function patchAlignedChildren<
   HostNode,
@@ -119,7 +119,7 @@ function patchAlignedChildren<
  * 将新列表中间段的节点移动/挂载到正确位置。
  *
  * @remarks
- * 倒序遍历可以让每个节点都以“其后继节点”作为锚点插入，避免在同一轮移动中锚点失效。
+ * 倒序遍历可以让每个节点都以「其后继节点」作为锚点插入，避免在同一轮移动中锚点失效。
  */
 function moveOrMountChildren<
   HostNode,
@@ -162,7 +162,7 @@ function moveOrMountChildren<
       /*
        * 直接移动宿主节点而不是重新 patch：
        * - patchAlignedChildren 已完成复用节点的内容更新。
-       * - 这里仅负责把“已更新的旧节点”放到正确位置。
+       * - 这里仅负责把「已更新的旧节点」放到正确位置。
        */
       for (const node of nodes) {
         state.options.insertBefore(state.environment.container, node, anchorNode)

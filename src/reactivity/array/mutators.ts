@@ -2,7 +2,7 @@ import { runInBatch } from '../internals/batch.ts'
 import { withoutTracking } from '../internals/tracking.ts'
 
 /**
- * 需要被特殊处理的数组“变更型”方法名集合。
+ * 需要被特殊处理的数组「变更型」方法名集合。
  *
  * @remarks
  * - 这些方法会修改数组内容/长度。
@@ -47,7 +47,7 @@ const nativeMutators = {
 } satisfies { [K in ArrayMutatorKey]: ArrayMutatorMethod<K> }
 
 /**
- * 在“暂停依赖收集”的上下文中调用数组变更方法。
+ * 在「暂停依赖收集」的上下文中调用数组变更方法。
  *
  * @remarks
  * - 变更方法内部可能读取 length、遍历或触发 getter，这些读取不应被视为用户态依赖。
@@ -162,7 +162,7 @@ function fillUntracked(
  * 提供给响应式 Proxy 的数组 mutator 表。
  *
  * @remarks
- * - 仅覆盖“会改动数组”的方法，其他只读方法保持原生读取路径。
+ * - 仅覆盖「会改动数组」的方法，其他只读方法保持原生读取路径。
  * - 通过 `satisfies` 约束确保每个 key 的签名与原生完全一致。
  */
 export const arrayUntrackedMutators = {
@@ -178,7 +178,7 @@ export const arrayUntrackedMutators = {
 } satisfies { [K in ArrayMutatorKey]: ArrayMutatorMethod<K> }
 
 /**
- * 判断某个属性 key 是否为“需要无追踪包装”的数组变更方法。
+ * 判断某个属性 key 是否为「需要无追踪包装」的数组变更方法。
  *
  * @remarks
  * - 仅接受 string key；symbol 等场景直接返回 false。

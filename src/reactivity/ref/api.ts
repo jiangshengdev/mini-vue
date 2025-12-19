@@ -52,7 +52,7 @@ export function unref<T>(value: T | Ref<T>): T {
  */
 export function toRef<T extends PlainObject, K extends keyof T>(target: T, key: K): Ref<T[K]> {
   /*
-   * 创建阶段只做一次“是否为 `Ref`”的探测。
+   * 创建阶段只做一次「是否为 `Ref`」的探测。
    *
    * @remarks
    * - 使用 `rawTarget` 避免 `reactive` 对 `Ref` 的自动解包，保证能正确复用原 `Ref`。

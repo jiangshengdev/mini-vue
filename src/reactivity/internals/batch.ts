@@ -76,8 +76,8 @@ export function enqueueEffect(effect: EffectInstance): void {
  * 刷新当前批处理期间收集的 effects。
  *
  * @remarks
- * - 先“快照 + 清空”再执行，避免执行过程中新入队的 effect 被当前 flush 吞掉。
- * - 执行顺序以 Set 的插入顺序为准，符合“去重但稳定”的预期。
+ * - 先「快照 + 清空」再执行，避免执行过程中新入队的 effect 被当前 flush 吞掉。
+ * - 执行顺序以 Set 的插入顺序为准，符合「去重但稳定」的预期。
  */
 function flushPendingEffects(): void {
   if (!pendingEffects) {
@@ -101,7 +101,7 @@ function runEffect(effect: EffectInstance): void {
   const { scheduler } = effect
 
   if (scheduler) {
-    /* 统一给 scheduler 一个“可执行任务”，由其决定何时/如何运行。 */
+    /* 统一给 scheduler 一个「可执行任务」，由其决定何时/如何运行。 */
     const schedulerJob = () => {
       /* 即便 effect 已停止也要执行一次原函数，与 Vue 行为保持一致 */
       effect.run()

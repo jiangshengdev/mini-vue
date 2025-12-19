@@ -25,7 +25,7 @@ export function patchChildren<
   /*
    * 只要任一侧出现 `key`，就必须走 `keyed diff`：
    * - `keyed diff` 允许跨索引复用与移动。
-   * - `unkeyed diff` 只按索引对齐，不支持“同节点换位置”的语义。
+   * - `unkeyed diff` 只按索引对齐，不支持「同节点换位置」的语义。
    */
   const isKeyed = hasKeys(nextChildren) || hasKeys(previousChildren)
 

@@ -8,7 +8,7 @@
   - 列表渲染 N 项，改动 1 项需销毁重建 N 个 DOM 节点，性能随 UI 复杂度线性下降。
   - 丢失 DOM 状态（input focus、scroll position、CSS 动画中间态）。
   - 无法支持 `key` 属性优化列表项复用。
-- 决策：采用“Vue 3 风格”的 keyed children diff（头尾同步 fast path + key map，中间区间按需移动；LIS 作为可选优化），而不是把“纯双端 diff”当作完整方案。
+- 决策：采用「Vue 3 风格」的 keyed children diff（头尾同步 fast path + key map，中间区间按需移动；LIS 作为可选优化），而不是把「纯双端 diff」当作完整方案。
 - 详细设计稿：见 docs/issues/vnode-diff-plan.md
 
 ## 2. 异步调度器 Scheduler（优先级：高）

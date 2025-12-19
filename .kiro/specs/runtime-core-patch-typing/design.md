@@ -37,7 +37,7 @@
 
 ### 4.1 子节点输入收敛
 
-- 定义 patch 侧的“已归一化子节点”类型（仅 vnode），并用于 `patchChild`/`patchChildren` 签名。
+- 定义 patch 侧的「已归一化子节点」类型（仅 vnode），并用于 `patchChild`/`patchChildren` 签名。
 - 确认入口（如 mount/normalizeChildren）保证 children 为 vnode[]；如存在文本透传，补充类型守卫或转换以匹配真实行为。
 - 提供公共别名（如 `PatchableChildren`），避免调用方再接受 `VirtualNodeChild` 的宽泛输入。
 

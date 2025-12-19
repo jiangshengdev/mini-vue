@@ -8,7 +8,7 @@ export type VirtualNodeChild = VirtualNode | string | number
 
 /**
  * 组件接收到的 `children`，可以是单个、数组、布尔值或空。
- * 由于 lint 规则禁止在类型中显式声明 `null`，这里以 `undefined` 代表“空”，
+ * 由于 lint 规则禁止在类型中显式声明 `null`，这里以 `undefined` 代表「空」，
  * 运行时（`normalizeChildren`/`mountChild`）仍会照常处理 `null` 并视为可忽略节点。
  * 布尔值同样会在运行时被当作空节点忽略。
  */

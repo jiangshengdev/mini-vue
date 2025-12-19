@@ -14,7 +14,7 @@ import type { InjectionToken } from '@/shared/index.ts'
 export function provide<T>(key: InjectionToken<T>, value: T): void
 
 export function provide(key: InjectionToken, value: unknown): void {
-  /* 依赖注入容器位于“当前组件实例”上，因此必须处于 setup 执行窗口期。 */
+  /* 依赖注入容器位于「当前组件实例」上，因此必须处于 setup 执行窗口期。 */
   const instance = getCurrentInstance()
 
   /* 没有实例通常意味着在组件外调用（例如模块顶层或事件回调中）。 */
@@ -53,7 +53,7 @@ export function inject<T>(key: InjectionToken<T>, defaultValue?: T): T | undefin
   /*
    * 使用 `in` 而非 `hasOwnProperty`：
    * - 允许通过原型链继承父组件 / 应用级 provides。
-   * - 与 provides 的“层级链”语义保持一致。
+   * - 与 provides 的「层级链」语义保持一致。
    */
   if (key in provides) {
     return provides[key] as T

@@ -57,7 +57,7 @@ export interface AppInstance<HostElement> extends PluginInstallApp {
    * 在应用级提供依赖，供整个组件树通过 `inject()` 读取。
    *
    * @remarks
-   * - 这是“组件外”的依赖注入入口，适用于插件安装、路由安装等场景。
+   * - 这是「组件外」的依赖注入入口，适用于插件安装、路由安装等场景。
    * - 组件 `setup()` 内请使用 `provide()`/`inject()`，不要在组件外直接调用它们。
    */
   provide<T>(key: InjectionKey<T>, value: T): void
@@ -108,7 +108,7 @@ function mountApp<HostElement extends WeakKey>(
     unsetCurrentAppContext()
   }
 
-  /* 渲染成功后再缓存容器和状态，避免失败时留下“`idle` + `container`”的残留。 */
+  /* 渲染成功后再缓存容器和状态，避免失败时留下「`idle` + `container`」的残留。 */
   if (renderSucceeded) {
     state.container = target
     state.status = appLifecycleStatus.mounted

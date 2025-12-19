@@ -175,7 +175,7 @@ function patchElement<
     component: undefined,
   })
 
-  /* `ref` 支持多形态写法：这里先解析出统一的“可赋值绑定”。 */
+  /* `ref` 支持多形态写法：这里先解析出统一的「可赋值绑定」。 */
   const previousRef = resolveElementRefBinding<HostElement>(previous.props?.ref)
   const nextRef = resolveElementRefBinding<HostElement>(next.props?.ref)
 
@@ -252,7 +252,7 @@ function patchComponent<
    * 这里通过 `patchChild` 复用外层插入/锚点策略，确保组件更新不破坏兄弟节点顺序。
    */
   if (instance.effect?.scheduler && runner) {
-    /* 有调度器时只提交“运行任务”，由 `scheduler` 决定合并与执行时机。 */
+    /* 有调度器时只提交「运行任务」，由 `scheduler` 决定合并与执行时机。 */
     instance.effect.scheduler(runner)
   } else if (runner) {
     /* 无调度器时立刻执行：先缓存旧子树，再运行 `effect` 得到新子树，最后对比 `patch`。 */

@@ -26,7 +26,7 @@ const mutableGet: ProxyHandler<ReactiveTarget>['get'] = (target, key, receiver) 
   }
 
   /*
-   * 数组变更方法需要走“无依赖收集”的包装版本。
+   * 数组变更方法需要走「无依赖收集」的包装版本。
    *
    * @remarks
    * - 变更方法内部可能读取 length/索引等，这些读取属于实现细节，不应被 track 到用户 effect 上。
@@ -37,7 +37,7 @@ const mutableGet: ProxyHandler<ReactiveTarget>['get'] = (target, key, receiver) 
   }
 
   /*
-   * 数组查询方法需要走“对 raw/proxy 兼容”的包装版本。
+   * 数组查询方法需要走「对 raw/proxy 兼容」的包装版本。
    *
    * @remarks
    * - 直接调用原生 includes/indexOf/lastIndexOf 会读取代理数组元素并进行 identity 对比。
@@ -84,9 +84,9 @@ const mutableSet: ProxyHandler<ReactiveTarget>['set'] = (target, key, value, rec
    * 读取旧值仅用于后续的同值判断。
    *
    * @remarks
-   * - 该读取属于写入流程的一部分，不应被视为“用户读取”。
+   * - 该读取属于写入流程的一部分，不应被视为「用户读取」。
    * - 若通过 receiver 触发了访问器 getter，getter 内部的 reactive 读取可能会把依赖收集到当前 effect。
-   *   因此这里需要显式禁用依赖收集，避免出现“写入时意外建立依赖”。
+   *   因此这里需要显式禁用依赖收集，避免出现「写入时意外建立依赖」。
    */
   const previousValue = withoutTracking(() => {
     return Reflect.get(target, key, receiver) as unknown

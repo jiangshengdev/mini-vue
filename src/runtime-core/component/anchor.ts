@@ -28,10 +28,10 @@ export function mountChildWithAnchor<
     })
   }
 
-  /* 需要锚点时先保证容器内已有占位符，便于后续插入片段。 */
-  ensureComponentAnchor(options, instance)
+  /* 需要锚点时先准备首尾占位符，便于保持区间。 */
+  ensureComponentAnchors(options, instance)
 
-  if (!instance.anchor) {
+  if (!instance.startAnchor || !instance.endAnchor) {
     return mountChild<HostNode, HostElement, HostFragment>(options, child, {
       container: instance.container,
       context: {
@@ -41,7 +41,7 @@ export function mountChildWithAnchor<
     })
   }
 
-  /* 使用片段承载子树，整体插入到锚点之前以保持顺序。 */
+  /* 使用片段承载子树，整体插入到 endAnchor 之前以保持顺序。 */
   const fragment = options.createFragment()
   const mounted = mountChild<HostNode, HostElement, HostFragment>(options, child, {
     container: fragment,
@@ -53,16 +53,33 @@ export function mountChildWithAnchor<
 
   /* 逐个插入 `Fragment` 子节点，避免依赖宿主对 `Fragment` 的特殊处理。 */
   for (const node of mounted?.nodes ?? []) {
-    options.insertBefore(instance.container, node, instance.anchor)
+    options.insertBefore(instance.container, node, instance.endAnchor)
   }
 
-  return mounted
+  const nodes: HostNode[] = [instance.startAnchor, ...(mounted?.nodes ?? []), instance.endAnchor]
+
+  return {
+    ok: mounted?.ok ?? true,
+    nodes,
+    teardown(skipRemove?: boolean): void {
+      mounted?.teardown(skipRemove)
+
+      if (skipRemove) {
+        return
+      }
+
+      options.remove(instance.startAnchor as HostNode)
+      options.remove(instance.endAnchor as HostNode)
+      instance.startAnchor = undefined
+      instance.endAnchor = undefined
+    },
+  }
 }
 
 /**
- * 为需要锚点的组件创建空文本占位符，保证兄弟节点插入位置固定。
+ * 为需要锚点的组件创建首尾空文本占位符，保证兄弟节点插入位置固定。
  */
-function ensureComponentAnchor<
+function ensureComponentAnchors<
   HostNode,
   HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
@@ -72,13 +89,16 @@ function ensureComponentAnchor<
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
 ): void {
   /* 已经创建过锚点时复用旧节点，避免重复插入。 */
-  if (instance.anchor) {
+  if (instance.startAnchor && instance.endAnchor) {
     return
   }
 
-  const anchor = options.createText('')
+  const start = options.createText('')
+  const end = options.createText('')
 
-  options.appendChild(instance.container, anchor)
+  options.appendChild(instance.container, start)
+  options.appendChild(instance.container, end)
 
-  instance.anchor = anchor
+  instance.startAnchor = start
+  instance.endAnchor = end
 }

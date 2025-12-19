@@ -40,10 +40,10 @@ description: Align runtime-core anchor handling with Vue 3 fragment/Component an
 
 ## Action items
 [x] 对齐目标：梳理 Vue 3 在 Fragment/多根组件的锚点规则与移动策略，列出差异清单。  
-[ ] 设计方案：决定是否采用双锚点、是否将锚点纳入 handle.nodes，明确迁移步骤与兼容性。（草案：采用首尾锚+handle.nodes 携带）  
-[ ] 实现锚点写入/移动调整：更新 mount/patch/runtime-vnode，确保 keyed/unkeyed、组件 rerender 场景与 Vue 3 一致。  
-[ ] 更新/新增测试：覆盖 fragment/组件移动、空子树、无 key/有 key diff 与 rerender 的锚点顺序。  
-[ ] 回归测试与文档记录：跑 test/test:browser，并在计划/备注中记录与 Vue 3 的对齐点或残留差异。  
+[x] 设计方案：决定是否采用双锚点、是否将锚点纳入 handle.nodes，明确迁移步骤与兼容性。（草案：采用首尾锚+handle.nodes 携带）  
+[x] 实现锚点写入/移动调整：更新 mount/patch/runtime-vnode，确保 keyed/unkeyed、组件 rerender 场景与 Vue 3 一致。  
+[x] 更新/新增测试：覆盖 fragment/组件移动、空子树、无 key/有 key diff 与 rerender 的锚点顺序。  
+[x] 回归测试与文档记录：跑 test/test:browser，并在计划/备注中记录与 Vue 3 的对齐点或残留差异。  
 
 ## Testing and validation
 - `pnpm run test`、`pnpm run test:browser`

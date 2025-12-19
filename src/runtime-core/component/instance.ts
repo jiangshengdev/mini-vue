@@ -54,7 +54,8 @@ export function createComponentInstance<
     cleanupTasks: [],
     setupContext: {},
     scope: effectScope(true),
-    anchor: undefined,
+    startAnchor: undefined,
+    endAnchor: undefined,
     shouldUseAnchor,
   }
 }

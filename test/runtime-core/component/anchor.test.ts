@@ -42,18 +42,19 @@ describe('mountChildWithAnchor', () => {
 
     const mounted = mountChildWithAnchor(options, instance, 'child')
 
-    expect(mounted?.nodes).toHaveLength(1)
+    expect(mounted?.nodes).toHaveLength(3)
     expect(insertBefore).toHaveBeenCalledTimes(1)
     expect(
       insertBefore.mock.calls.some(([, child]) => {
         return child.kind === 'fragment'
       }),
     ).toBe(false)
-    expect(container.children).toHaveLength(2)
-    const [first, second] = container.children
+    expect(container.children).toHaveLength(3)
+    const [first, second, third] = container.children
 
-    expect(first.text).toBe('child')
-    expect(second).toBe(instance.anchor)
+    expect(first).toBe(instance.startAnchor)
+    expect(second.text).toBe('child')
+    expect(third).toBe(instance.endAnchor)
   })
 })
 

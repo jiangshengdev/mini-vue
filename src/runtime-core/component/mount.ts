@@ -36,9 +36,10 @@ export function mountComponent<
   /* 让 `virtualNode` 拥有实例引用，方便调试或测试检索。 */
   attachInstanceToVirtualNode(virtualNode, instance)
   runtime.component = instance as never
-  const { anchor } = instance
+  const { startAnchor, endAnchor } = instance
 
-  runtime.anchor = anchor === undefined ? undefined : (anchor as HostNode)
+  runtime.el = startAnchor as HostNode
+  runtime.anchor = endAnchor === undefined ? undefined : (endAnchor as HostNode)
 
   const setupSucceeded = setupComponent(instance)
 

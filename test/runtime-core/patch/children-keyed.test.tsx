@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { createHostRenderer, normalize } from './test-utils.ts'
 import { asRuntimeVNode, mountChild, patchChild, patchChildren } from '@/runtime-core/index.ts'
-import { ref } from '@/reactivity/index.ts'
+import { ref } from '@/index.ts'
 
 describe('patchChildren 有 key diff', () => {
   it('移动可复用 keyed 节点且不重新挂载', () => {
@@ -123,9 +123,11 @@ describe('patchChildren 有 key diff', () => {
 
       const Component = () => {
         return () => {
-          return expanded.value
-            ? [<span>{`${label}-1`}</span>, <span>{`${label}-2`}</span>]
-            : <span>{label}</span>
+          return expanded.value ? (
+            [<span>{`${label}-1`}</span>, <span>{`${label}-2`}</span>]
+          ) : (
+            <span>{label}</span>
+          )
         }
       }
 
@@ -158,7 +160,7 @@ describe('patchChildren 有 key diff', () => {
 
     const runtimeB = asRuntimeVNode(nextChildren[0])
     const runtimeA = asRuntimeVNode(nextChildren[1])
-    const anchorA = runtimeA.component?.anchor
+    const anchorA = runtimeA.component?.endAnchor
 
     expect(host.container.children[0]).toBe(runtimeB.el)
     expect(anchorA && host.container.children.at(-1)).toBe(anchorA)

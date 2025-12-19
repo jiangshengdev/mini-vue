@@ -38,12 +38,19 @@ export function teardownComponentInstance<
   teardownMountedSubtree(instance, skipRemove)
 
   /* 去除锚点占位符，避免容器残留空文本节点。 */
-  if (instance.anchor) {
+  if (instance.startAnchor ?? instance.endAnchor) {
     if (!skipRemove) {
-      options.remove(instance.anchor)
+      if (instance.startAnchor) {
+        options.remove(instance.startAnchor)
+      }
+
+      if (instance.endAnchor) {
+        options.remove(instance.endAnchor)
+      }
     }
 
-    instance.anchor = undefined
+    instance.startAnchor = undefined
+    instance.endAnchor = undefined
   }
 
   /* 停止 `scope` 以统一回收所有 `setup` 内创建的副作用。 */

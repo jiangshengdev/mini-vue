@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { createHostRenderer, normalize } from './test-utils.ts'
 import { mountChild, patchChild, patchChildren } from '@/runtime-core/index.ts'
-import { ref } from '@/reactivity/index.ts'
+import { ref } from '@/index.ts'
 
 describe('patchChildren 无 key diff', () => {
   it('公共区间按派生锚点上下文 patch', () => {
@@ -84,9 +84,11 @@ describe('patchChildren 无 key diff', () => {
 
       const Component = () => {
         return () => {
-          return expanded.value
-            ? [<span>{`${label}-1`}</span>, <span>{`${label}-2`}</span>]
-            : <span>{label}</span>
+          return expanded.value ? (
+            [<span>{`${label}-1`}</span>, <span>{`${label}-2`}</span>]
+          ) : (
+            <span>{label}</span>
+          )
         }
       }
 

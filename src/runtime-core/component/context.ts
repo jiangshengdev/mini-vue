@@ -49,8 +49,9 @@ export interface ComponentInstance<
   subTree?: NormalizedVirtualNode
   /** 当前挂载到宿主的节点句柄，支持 `teardown`。 */
   mountedHandle?: MountedHandle<HostNode>
-  /** 组件在父容器中的锚点节点，用于保持兄弟顺序。 */
-  anchor?: HostNode
+  /** 组件在父容器中的首尾锚点，用于保持兄弟顺序。 */
+  startAnchor?: HostNode
+  endAnchor?: HostNode
   /** 是否需要为组件维护锚点以保序。 */
   shouldUseAnchor: boolean
   /** 注册的外部清理任务，在卸载时逐一执行。 */

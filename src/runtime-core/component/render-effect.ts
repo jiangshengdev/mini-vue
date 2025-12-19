@@ -144,7 +144,7 @@ function patchLatestSubtree<
 ): void {
   patchChild(options, previousSubTree, instance.subTree, {
     container: instance.container,
-    anchor: instance.anchor,
+    anchor: instance.endAnchor,
     context: {
       parent: instance,
       appContext: instance.appContext,

@@ -117,7 +117,10 @@ export function createRenderer<
     let mounted: MountedHandle<HostNode> | undefined
 
     if (outputToMount !== undefined) {
-      mounted = mountChild(options, outputToMount, container, { appContext })
+      mounted = mountChild(options, outputToMount, {
+        container,
+        context: { appContext },
+      })
     }
 
     if (mounted) {

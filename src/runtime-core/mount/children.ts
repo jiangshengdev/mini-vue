@@ -1,6 +1,6 @@
+import type { MountContext } from '../environment.ts'
 import type { RendererOptions } from '../index.ts'
 import { mountChild } from './child.ts'
-import type { MountContext } from './context.ts'
 import type { MountedHandle } from './handle.ts'
 import type { VirtualNodeChild } from '@/jsx-foundation/index.ts'
 
@@ -24,10 +24,13 @@ export function mountChildren<
   /* 顺序遍历子节点，统一交由 `mountChild` 处理细分类型。 */
   for (const [index, child] of children.entries()) {
     /* 在存在后续兄弟时强制使用锚点，保持节点插入顺序。 */
-    const mounted = mountChild(options, child, container, {
-      shouldUseAnchor: index < children.length - 1,
-      parent,
-      appContext,
+    const mounted = mountChild(options, child, {
+      container,
+      context: {
+        shouldUseAnchor: index < children.length - 1,
+        parent,
+        appContext,
+      },
     })
 
     if (mounted) {

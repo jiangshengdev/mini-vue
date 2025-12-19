@@ -33,7 +33,10 @@ describe('patch insertion and diagnostics', () => {
     host.options.appendChild(host.container, anchor)
     host.resetCounts()
 
-    mountChild(host.options, createTextVirtualNode('hello'), host.container, undefined, anchor)
+    mountChild(host.options, createTextVirtualNode('hello'), {
+      container: host.container,
+      anchor,
+    })
 
     expect(host.counters.insertBefore).toBe(1)
     expect(host.counters.appendChild).toBe(0)

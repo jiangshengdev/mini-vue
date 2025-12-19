@@ -1,9 +1,9 @@
+import type { ChildEnvironment } from '../environment.ts'
 import type { RendererOptions } from '../index.ts'
 import { asRuntimeVNode } from '../vnode.ts'
-import type { MountContext } from './context.ts'
 import type { MountedHandle } from './handle.ts'
 import { mountVirtualNode } from './virtual-node.ts'
-import type { RenderOutput, VirtualNode } from '@/jsx-foundation/index.ts'
+import type { RenderOutput, VirtualNode, VirtualNodeChild } from '@/jsx-foundation/index.ts'
 import { isVirtualNode, Text } from '@/jsx-foundation/index.ts'
 import { runtimeCoreObjectChildWarning } from '@/messages/index.ts'
 import { __DEV__, isNil } from '@/shared/index.ts'
@@ -18,10 +18,9 @@ export function mountChild<
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   child: RenderOutput | undefined,
-  container: HostElement | HostFragment,
-  context?: MountContext,
-  anchor?: HostNode,
+  environment: ChildEnvironment<HostNode, HostElement, HostFragment>,
 ): MountedHandle<HostNode> | undefined {
+  const { container, context, anchor } = environment
   /* `shouldUseAnchor` 表示「当前节点之后是否还有兄弟」，用于决定是否需要占位锚点来保序。 */
   const shouldUseAnchor = context?.shouldUseAnchor ?? false
   const { appendChild, insertBefore, createText, remove } = options
@@ -41,70 +40,7 @@ export function mountChild<
 
   /* 数组/`Fragment` 子节点以锚点包裹，避免共享 `DocumentFragment`；单个或空数组则直接复用子节点策略。 */
   if (Array.isArray(child)) {
-    const childCount = child.length
-
-    if (childCount === 0) {
-      return undefined
-    }
-
-    if (childCount === 1) {
-      return mountChild(options, child[0], container, { ...context, shouldUseAnchor }, anchor)
-    }
-
-    const startAnchor = createText('')
-    const endAnchor = createText('')
-    const nodes: HostNode[] = [startAnchor]
-    const teardowns: Array<(skipRemove?: boolean) => void> = []
-    let ok = true
-
-    insert(startAnchor)
-
-    /* 子项始终视为有后续兄弟，以 `endAnchor` 充当边界。 */
-    for (const item of child) {
-      const mounted = mountChild(
-        options,
-        item,
-        container,
-        { ...context, shouldUseAnchor: true },
-        anchor,
-      )
-
-      if (mounted) {
-        ok &&= mounted.ok
-
-        for (const node of mounted.nodes) {
-          nodes.push(node)
-        }
-
-        teardowns.push(mounted.teardown)
-      }
-    }
-
-    insert(endAnchor)
-    nodes.push(endAnchor)
-
-    return {
-      ok,
-      nodes,
-      /**
-       * 先按「子项挂载顺序」执行 `teardown`，再移除边界锚点。
-       *
-       * @remarks
-       * - 这里不直接 `remove(nodes)` 是为了保留子项各自的清理语义（`effect`/`refs` 等）。
-       */
-      teardown(skipRemove?: boolean): void {
-        for (const teardown of teardowns) {
-          teardown(skipRemove)
-        }
-
-        if (skipRemove) {
-          return
-        }
-
-        remove(startAnchor)
-        remove(endAnchor)
-      },
-    }
+    return mountArrayChild(options, child as VirtualNodeChild[], environment)
   }
 
   /* 标准 `virtualNode` 交给 `mountVirtualNode` 处理组件或元素。 */
@@ -137,7 +73,10 @@ export function mountChild<
       return handle
     }
 
-    const mounted = mountVirtualNode(options, child, container, { ...context, shouldUseAnchor })
+    const mounted = mountVirtualNode(options, child, container, {
+      ...context,
+      shouldUseAnchor,
+    })
 
     if (mounted && anchor) {
       for (const node of mounted.nodes) {
@@ -174,4 +113,92 @@ export function mountChild<
   }
 
   return undefined
+}
+
+function mountArrayChild<
+  HostNode,
+  HostElement extends HostNode & WeakKey,
+  HostFragment extends HostNode,
+>(
+  options: RendererOptions<HostNode, HostElement, HostFragment>,
+  children: VirtualNodeChild[],
+  environment: ChildEnvironment<HostNode, HostElement, HostFragment>,
+): MountedHandle<HostNode> | undefined {
+  const { createText, remove } = options
+  const { container, context, anchor } = environment
+  const childCount = children.length
+
+  if (childCount === 0) {
+    return undefined
+  }
+
+  if (childCount === 1) {
+    return mountChild(options, children[0], {
+      container,
+      context: { ...context, shouldUseAnchor: context?.shouldUseAnchor ?? false },
+      anchor,
+    })
+  }
+
+  const startAnchor = createText('')
+  const endAnchor = createText('')
+  const nodes: HostNode[] = [startAnchor]
+  const teardowns: Array<(skipRemove?: boolean) => void> = []
+  let ok = true
+
+  /* 有锚点时直接在最终位置插入，避免先 append 再移动。 */
+  const insert = (node: HostNode): void => {
+    if (anchor) {
+      options.insertBefore(container, node, anchor)
+    } else {
+      options.appendChild(container, node)
+    }
+  }
+
+  insert(startAnchor)
+
+  /* 子项始终视为有后续兄弟，以 `endAnchor` 充当边界。 */
+  for (const item of children) {
+    const mounted = mountChild(options, item, {
+      container,
+      context: { ...context, shouldUseAnchor: true },
+      anchor,
+    })
+
+    if (mounted) {
+      ok &&= mounted.ok
+
+      for (const node of mounted.nodes) {
+        nodes.push(node)
+      }
+
+      teardowns.push(mounted.teardown)
+    }
+  }
+
+  insert(endAnchor)
+  nodes.push(endAnchor)
+
+  return {
+    ok,
+    nodes,
+    /**
+     * 先按「子项挂载顺序」执行 `teardown`，再移除边界锚点。
+     *
+     * @remarks
+     * - 这里不直接 `remove(nodes)` 是为了保留子项各自的清理语义（`effect`/`refs` 等）。
+     */
+    teardown(skipRemove?: boolean): void {
+      for (const teardown of teardowns) {
+        teardown(skipRemove)
+      }
+
+      if (skipRemove) {
+        return
+      }
+
+      remove(startAnchor)
+      remove(endAnchor)
+    },
+  }
 }

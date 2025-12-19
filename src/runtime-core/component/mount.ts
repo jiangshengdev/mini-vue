@@ -1,5 +1,5 @@
+import type { MountContext } from '../environment.ts'
 import type { RendererOptions } from '../index.ts'
-import type { MountContext } from '../mount/context.ts'
 import type { MountedHandle } from '../mount/handle.ts'
 import { asRuntimeVNode } from '../vnode.ts'
 import type { ComponentInstance } from './context.ts'

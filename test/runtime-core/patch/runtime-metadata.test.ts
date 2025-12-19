@@ -29,7 +29,7 @@ describe('patchChild runtime metadata reuse', () => {
     const { options, container } = createHostOptions()
     const previous = normalizeRenderOutput(createTextVirtualNode('before'))!
     const next = normalizeRenderOutput(createTextVirtualNode('after'))!
-    const mounted = mountChild(options, previous, container)
+    const mounted = mountChild(options, previous, { container })
 
     expect(mounted?.nodes).toHaveLength(1)
 

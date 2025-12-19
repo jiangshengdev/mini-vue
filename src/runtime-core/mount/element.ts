@@ -1,6 +1,6 @@
+import type { MountContext } from '../environment.ts'
 import type { RendererOptions } from '../index.ts'
 import { mountChildren } from './children.ts'
-import type { MountContext } from './context.ts'
 import type { MountedHandle } from './handle.ts'
 import type { VirtualNode } from '@/jsx-foundation/index.ts'
 import type { Ref } from '@/reactivity/index.ts'

@@ -1,5 +1,5 @@
 import { getCurrentAppContext } from '../app-context.ts'
-import type { MountContext } from '../mount/context.ts'
+import type { MountContext } from '../environment.ts'
 import type { ComponentInstance } from './context.ts'
 import type { ElementProps, SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
 import { effectScope } from '@/reactivity/index.ts'

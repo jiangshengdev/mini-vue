@@ -1,8 +1,7 @@
-import type { MountContext } from '../mount/context.ts'
+import type { ContainerLike, MountContext } from '../environment.ts'
 import type { NormalizedVirtualNode } from '../normalize.ts'
 import type { RendererOptions } from '../renderer.ts'
 import type { PatchChildrenContext } from './children-environment.ts'
-import type { ContainerLike, PatchContext } from './context.ts'
 import { mountAndInsert } from './insertion.ts'
 import type { PatchResult } from './types.ts'
 import { moveNodes, unmount } from './utils.ts'
@@ -14,12 +13,12 @@ export interface PatchDriver<
 > {
   readonly container: ContainerLike<HostNode, HostElement, HostFragment>
   readonly anchor?: HostNode
-  readonly context?: PatchContext | MountContext
+  readonly context?: MountContext
   mountNew(
     vnode: NormalizedVirtualNode,
     overrides?: {
       anchor?: HostNode
-      context?: PatchContext | MountContext
+      context?: MountContext
     },
   ): PatchResult<HostNode>
   replace(
@@ -27,7 +26,7 @@ export interface PatchDriver<
     next: NormalizedVirtualNode,
     overrides?: {
       anchor?: HostNode
-      context?: PatchContext | MountContext
+      context?: MountContext
     },
   ): PatchResult<HostNode>
   unmountOnly(vnode: NormalizedVirtualNode): PatchResult<HostNode>

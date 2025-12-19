@@ -19,9 +19,12 @@ export function mountChildWithAnchor<
 ): MountedHandle<HostNode> | undefined {
   /* 不需要锚点的组件直接复用容器尾部挂载策略。 */
   if (!instance.shouldUseAnchor) {
-    return mountChild<HostNode, HostElement, HostFragment>(options, child, instance.container, {
-      shouldUseAnchor: false,
-      parent: instance,
+    return mountChild<HostNode, HostElement, HostFragment>(options, child, {
+      container: instance.container,
+      context: {
+        shouldUseAnchor: false,
+        parent: instance,
+      },
     })
   }
 
@@ -29,17 +32,23 @@ export function mountChildWithAnchor<
   ensureComponentAnchor(options, instance)
 
   if (!instance.anchor) {
-    return mountChild<HostNode, HostElement, HostFragment>(options, child, instance.container, {
-      shouldUseAnchor: false,
-      parent: instance,
+    return mountChild<HostNode, HostElement, HostFragment>(options, child, {
+      container: instance.container,
+      context: {
+        shouldUseAnchor: false,
+        parent: instance,
+      },
     })
   }
 
   /* 使用片段承载子树，整体插入到锚点之前以保持顺序。 */
   const fragment = options.createFragment()
-  const mounted = mountChild<HostNode, HostElement, HostFragment>(options, child, fragment, {
-    shouldUseAnchor: false,
-    parent: instance,
+  const mounted = mountChild<HostNode, HostElement, HostFragment>(options, child, {
+    container: fragment,
+    context: {
+      shouldUseAnchor: false,
+      parent: instance,
+    },
   })
 
   /* 逐个插入 `Fragment` 子节点，避免依赖宿主对 `Fragment` 的特殊处理。 */

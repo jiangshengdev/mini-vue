@@ -1,8 +1,7 @@
-import type { MountContext } from '../mount/context.ts'
+import type { ChildEnvironment, MountContext } from '../environment.ts'
+import { deriveChildContext } from '../environment.ts'
 import type { NormalizedVirtualNode } from '../normalize.ts'
 import type { RendererOptions } from '../renderer.ts'
-import type { ContainerLike, PatchContext } from './context.ts'
-import { normalizeChildContext } from './context.ts'
 import type { PatchResult } from './types.ts'
 
 /**
@@ -22,27 +21,11 @@ export type PatchChildFunction<
 /**
  * 单个子节点 `patch` 所需的环境信息。
  */
-interface BasePatchEnvironment<
-  HostNode,
-  HostElement extends HostNode & WeakKey,
-  HostFragment extends HostNode,
-> {
-  /** 子节点将被插入的宿主容器（元素或片段）。 */
-  container: ContainerLike<HostNode, HostElement, HostFragment>
-  /** 插入锚点：用于将新挂载/移动的节点放到正确位置。 */
-  anchor?: HostNode
-  /** 父组件与 `appContext` 等上下文，向下透传到 `mount`/`patch`。 */
-  context?: PatchContext | MountContext
-}
-
-/**
- * 单个子节点 `patch` 所需的环境信息。
- */
 export type PatchEnvironment<
   HostNode,
   HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
-> = BasePatchEnvironment<HostNode, HostElement, HostFragment>
+> = ChildEnvironment<HostNode, HostElement, HostFragment>
 
 /**
  * `patchChildren` 的调用环境：在 `PatchEnvironment` 基础上追加 `patchChild` 回调。
@@ -58,7 +41,7 @@ export interface PatchChildrenContext<
 
 /**
  * 基于父环境为当前子节点派生环境：
- * - 通过 `normalizeChildContext` 计算 `shouldUseAnchor`，用于同级批量插入的锚点策略。
+ * - 根据位置计算 `shouldUseAnchor`，用于同级批量插入的锚点策略。
  */
 export function createChildEnvironment<
   HostNode,
@@ -68,12 +51,10 @@ export function createChildEnvironment<
   environment: PatchChildrenContext<HostNode, HostElement, HostFragment>,
   index: number,
   length: number,
-): PatchEnvironment<HostNode, HostElement, HostFragment> & {
-  context: ReturnType<typeof normalizeChildContext>
-} {
+): PatchEnvironment<HostNode, HostElement, HostFragment> & { context: MountContext } {
   return {
     container: environment.container,
     anchor: environment.anchor,
-    context: normalizeChildContext(environment.context, index, length),
+    context: deriveChildContext(environment.context, index, length),
   }
 }

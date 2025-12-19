@@ -13,7 +13,7 @@ export type InsertionEnvironment<
 /**
  * 在已知容器/锚点/上下文的前提下挂载单个 vnode，并直接插入到目标位置。
  */
-export function mountAndInsert<
+export function mountChildInEnvironment<
   HostNode,
   HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,

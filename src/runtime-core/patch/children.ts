@@ -1,6 +1,6 @@
 import type { NormalizedChildren } from '../normalize.ts'
 import type { RendererOptions } from '../renderer.ts'
-import type { PatchChildrenContext } from './children-environment.ts'
+import type { PatchChildrenEnvironment } from './children-environment.ts'
 import { patchKeyedChildren } from './keyed-children.ts'
 import { patchUnkeyedChildren } from './unkeyed-children.ts'
 import { hasKeys } from './utils.ts'
@@ -20,7 +20,7 @@ export function patchChildren<
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   previousChildren: NormalizedChildren,
   nextChildren: NormalizedChildren,
-  environment: PatchChildrenContext<HostNode, HostElement, HostFragment>,
+  environment: PatchChildrenEnvironment<HostNode, HostElement, HostFragment>,
 ): void {
   /*
    * 只要任一侧出现 `key`，就必须走 `keyed diff`：

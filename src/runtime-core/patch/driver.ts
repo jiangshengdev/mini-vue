@@ -1,8 +1,8 @@
 import type { ContainerLike, MountContext } from '../environment.ts'
 import type { NormalizedVirtualNode } from '../normalize.ts'
 import type { RendererOptions } from '../renderer.ts'
-import type { PatchChildrenContext } from './children-environment.ts'
-import { mountAndInsert } from './insertion.ts'
+import type { PatchChildrenEnvironment } from './children-environment.ts'
+import { mountChildInEnvironment } from './insertion.ts'
 import type { PatchResult } from './types.ts'
 import { moveNodes, unmount } from './utils.ts'
 
@@ -56,7 +56,7 @@ export function createPatchDriver<
   HostFragment extends HostNode,
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
-  environment: PatchChildrenContext<HostNode, HostElement, HostFragment>,
+  environment: PatchChildrenEnvironment<HostNode, HostElement, HostFragment>,
 ): PatchDriver<HostNode, HostElement, HostFragment> {
   const { container } = environment
 
@@ -66,7 +66,7 @@ export function createPatchDriver<
     context: environment.context,
     /** 在当前容器中挂载 `vnode`，允许覆盖锚点与上下文。 */
     mountNew(vnode, overrides) {
-      const mounted = mountAndInsert(options, vnode, {
+      const mounted = mountChildInEnvironment(options, vnode, {
         container,
         anchor: overrides?.anchor ?? environment.anchor,
         context: overrides?.context ?? environment.context,

@@ -30,7 +30,7 @@ export type PatchEnvironment<
 /**
  * `patchChildren` 的调用环境：在 `PatchEnvironment` 基础上追加 `patchChild` 回调。
  */
-export interface PatchChildrenContext<
+export interface PatchChildrenEnvironment<
   HostNode,
   HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
@@ -48,7 +48,7 @@ export function createChildEnvironment<
   HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
 >(
-  environment: PatchChildrenContext<HostNode, HostElement, HostFragment>,
+  environment: PatchChildrenEnvironment<HostNode, HostElement, HostFragment>,
   index: number,
   length: number,
 ): PatchEnvironment<HostNode, HostElement, HostFragment> & { context: MountContext } {

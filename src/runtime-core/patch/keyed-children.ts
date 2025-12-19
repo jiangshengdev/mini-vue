@@ -1,6 +1,6 @@
 import type { NormalizedChildren } from '../normalize.ts'
 import type { RendererOptions } from '../renderer.ts'
-import type { PatchChildrenContext } from './children-environment.ts'
+import type { PatchChildrenEnvironment } from './children-environment.ts'
 import { createChildEnvironment } from './children-environment.ts'
 import { createPatchDriver } from './driver.ts'
 import {
@@ -34,7 +34,7 @@ export function patchKeyedChildren<
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   previousChildren: NormalizedChildren,
   nextChildren: NormalizedChildren,
-  environment: PatchChildrenContext<HostNode, HostElement, HostFragment>,
+  environment: PatchChildrenEnvironment<HostNode, HostElement, HostFragment>,
 ): void {
   const driver = createPatchDriver(options, environment)
   const state: KeyedPatchState<HostNode, HostElement, HostFragment> = {
@@ -141,7 +141,7 @@ function moveOrMountChildren<
   range: IndexRange,
   maps: IndexMaps,
 ): void {
-  for (let index = maps.toBePatched - 1; index >= 0; index -= 1) {
+  for (let index = maps.middleSegmentCount - 1; index >= 0; index -= 1) {
     const newIndex = range.newStart + index
     const nextChild = state.nextChildren[newIndex]
     const anchorNode = findNextAnchor(state.nextChildren, newIndex + 1, state.environment.anchor)

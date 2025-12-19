@@ -4,7 +4,7 @@ import type { NormalizedVirtualNode } from '../normalize.ts'
 import type { RendererOptions } from '../renderer.ts'
 import type { PatchEnvironment } from './children-environment.ts'
 import { patchChildren } from './children.ts'
-import { mountAndInsert } from './insertion.ts'
+import { mountChildInEnvironment } from './insertion.ts'
 import { asRuntimeNormalizedVirtualNode } from './runtime-vnode.ts'
 import type { PatchResult } from './types.ts'
 import { isComponentVirtualNode, isTextVirtualNode } from './types.ts'
@@ -38,8 +38,8 @@ export function patchChild<
       return { ok: true }
     }
 
-    /* `patch` 阶段复用 `mount` 能力：由 `mountAndInsert` 负责创建宿主节点并一次性插入到锚点前。 */
-    const mounted = mountAndInsert(options, next, {
+    /* `patch` 阶段复用 `mount` 能力：由 `mountChildInEnvironment` 负责创建宿主节点并一次性插入到锚点前。 */
+    const mounted = mountChildInEnvironment(options, next, {
       container: environment.container,
       anchor: environment.anchor,
       context: environment.context,
@@ -66,7 +66,7 @@ export function patchChild<
   /* 替换路径：旧节点 `teardown` 后再 `mount` 新节点，避免残留事件/副作用引用。 */
   unmount(options, previous)
 
-  const mounted = mountAndInsert(options, next, {
+  const mounted = mountChildInEnvironment(options, next, {
     container: environment.container,
     anchor: environment.anchor,
     context: environment.context,
@@ -221,7 +221,7 @@ function patchComponent<
    * - 若缺失则无法复用，只能退化为重新 `mount` 新 `vnode`。
    */
   if (!instance) {
-    const mounted = mountAndInsert(options, next, {
+    const mounted = mountChildInEnvironment(options, next, {
       container: environment.container,
       anchor: environment.anchor,
       context: environment.context,

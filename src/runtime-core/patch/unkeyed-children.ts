@@ -1,6 +1,6 @@
 import type { NormalizedChildren } from '../normalize.ts'
 import type { RendererOptions } from '../renderer.ts'
-import type { PatchChildrenContext } from './children-environment.ts'
+import type { PatchChildrenEnvironment } from './children-environment.ts'
 import { createChildEnvironment } from './children-environment.ts'
 import { createPatchDriver } from './driver.ts'
 import { findNextAnchor } from './utils.ts'
@@ -19,7 +19,7 @@ export function patchUnkeyedChildren<
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   previousChildren: NormalizedChildren,
   nextChildren: NormalizedChildren,
-  environment: PatchChildrenContext<HostNode, HostElement, HostFragment>,
+  environment: PatchChildrenEnvironment<HostNode, HostElement, HostFragment>,
 ): void {
   const commonLength = Math.min(previousChildren.length, nextChildren.length)
   const driver = createPatchDriver(options, environment)

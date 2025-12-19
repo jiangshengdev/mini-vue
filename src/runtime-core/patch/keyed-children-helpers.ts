@@ -132,9 +132,9 @@ export function buildIndexMaps<
   HostFragment extends HostNode,
 >(state: KeyedPatchState<HostNode, HostElement, HostFragment>, range: IndexRange): IndexMaps {
   const keyToNewIndexMap = new Map<PropertyKey, number>()
-  const toBePatched = range.newEnd - range.newStart + 1
+  const middleSegmentCount = range.newEnd - range.newStart + 1
   /* 使用 0 作为「没有可复用旧节点」的哨兵值，因此旧索引在写入时会 `+1` 编码。 */
-  const newIndexToOldIndexMap = Array.from({ length: toBePatched }, () => {
+  const newIndexToOldIndexMap = Array.from({ length: middleSegmentCount }, () => {
     return 0
   })
 
@@ -147,7 +147,7 @@ export function buildIndexMaps<
     }
   }
 
-  return { keyToNewIndexMap, newIndexToOldIndexMap, toBePatched }
+  return { keyToNewIndexMap, newIndexToOldIndexMap, middleSegmentCount }
 }
 
 /**

@@ -7,7 +7,7 @@ export {
   mountComponentSubtreeWithAnchors,
   mountComponent,
 } from './component/index.ts'
-export type { AppInstance, AppRuntimeConfig } from './create-app.ts'
+export type { AppInstance, AppHostDriver } from './create-app.ts'
 export { createAppInstance } from './create-app.ts'
 export { mountChild } from './mount/index.ts'
 export type { NormalizedChildren, NormalizedVirtualNode } from './normalize.ts'

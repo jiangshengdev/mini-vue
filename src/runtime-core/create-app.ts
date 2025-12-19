@@ -25,7 +25,7 @@ type AppLifecycleStatus = (typeof appLifecycleStatus)[keyof typeof appLifecycleS
 /**
  * 宿主平台注入的渲染配置，提供渲染与清理能力。
  */
-export interface AppRuntimeConfig<HostElement extends WeakKey> {
+export interface AppHostDriver<HostElement extends WeakKey> {
   /** 将根子树挂载到目标容器的渲染函数。 */
   render: RootRenderFunction<HostElement>
   /** 卸载宿主容器中的子树，释放响应式副作用。 */
@@ -73,7 +73,7 @@ interface AppState<HostElement extends WeakKey> {
   /** 最近一次挂载的宿主容器引用。 */
   container: HostElement | undefined
   /** 宿主注入的渲染配置。 */
-  config: AppRuntimeConfig<HostElement>
+  config: AppHostDriver<HostElement>
   /** 根组件定义，用于生成顶层子树。 */
   rootComponent: SetupComponent
   /** 传入根组件的初始 `props`。 */
@@ -152,7 +152,7 @@ function createRootVirtualNode<HostElement extends WeakKey>(state: AppState<Host
  * 创建应用实例，封装 `mount`/`unmount` 生命周期与状态管理。
  */
 export function createAppInstance<HostElement extends WeakKey>(
-  config: AppRuntimeConfig<HostElement>,
+  config: AppHostDriver<HostElement>,
   rootComponent: SetupComponent,
   initialRootProps?: PropsShape,
 ): AppInstance<HostElement> {

@@ -4,10 +4,10 @@
 export type { ComponentInstance } from './component/index.ts'
 export {
   getCurrentInstance,
-  mountComponentSubtreeWithAnchors,
   mountComponent,
+  mountComponentSubtreeWithAnchors,
 } from './component/index.ts'
-export type { AppInstance, AppHostDriver } from './create-app.ts'
+export type { AppHostDriver, AppInstance } from './create-app.ts'
 export { createAppInstance } from './create-app.ts'
 export { mountChild } from './mount/index.ts'
 export type { NormalizedChildren, NormalizedVirtualNode } from './normalize.ts'

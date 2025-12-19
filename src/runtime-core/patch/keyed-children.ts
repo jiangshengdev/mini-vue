@@ -14,7 +14,7 @@ import {
 } from './keyed-children-helpers.ts'
 import { ensureHostNodes } from './runtime-vnode.ts'
 import type { IndexMaps, IndexRange, KeyedPatchState } from './types.ts'
-import { findNextAnchor } from './utils.ts'
+import { findNextAnchor, isSameVirtualNode } from './utils.ts'
 
 /**
  * Keyed `children diff`：支持基于 `key` 的复用与移动。
@@ -99,6 +99,15 @@ function patchAlignedChildren<
       /* 旧节点在新列表中不存在：直接卸载，避免后续移动阶段误处理。 */
       state.driver.unmountOnly(previousChild)
     } else {
+      const nextChild = state.nextChildren[newIndex]
+
+      if (!isSameVirtualNode(previousChild, nextChild)) {
+        /* Key 命中但类型不同：视为替换，卸载旧节点并让后续阶段按「需要 mount」处理。 */
+        state.driver.unmountOnly(previousChild)
+
+        continue
+      }
+
       /* 记录新索引对应的旧索引（`+1` 编码），供后续倒序移动/挂载阶段判断是否需要 `mount`。 */
       maps.newIndexToOldIndexMap[newIndex - range.newStart] = index + 1
       const childEnvironment = createChildEnvironment(

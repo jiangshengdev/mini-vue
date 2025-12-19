@@ -31,9 +31,13 @@ description: 使用 inspect.prompt 规则审查 src/runtime-core/patch 目录
 - 无；仅做审查与问题记录。
 
 ## Action items
-[ ] 阅读 inspect.prompt 规则，准备审查输出模板。
-[ ] 遍历 `src/runtime-core/patch` 文件并跟进显式导入，按规则记录潜在问题。
-[ ] 汇总发现，按严重度排序输出审查结论。
+[x] 阅读 inspect.prompt 规则，准备审查输出模板。
+[x] 遍历 `src/runtime-core/patch` 文件并跟进显式导入，按规则记录潜在问题。
+[x] 汇总发现，按严重度排序输出审查结论。
+
+## Findings
+- [Major] keyed children 中间段复用不校验 vnode 类型：`keyed-children.ts` 在 91-115 行记录 newIndex 后直接 `patchChild`，即使新旧 vnode 类型不同也当作复用，导致替换节点在移动阶段仍沿用旧宿主节点，出现插入锚点错误或顺序错乱。
+- [Major] `isSameVirtualNode` 对 `Text` 忽略 key：`utils.ts` 51 行认为任意 Text 都可复用，keyed diff 下不同 key 的文本节点会被错误复用，跳过卸载/插入与移动，破坏带 key 文本列表的顺序。
 
 ## Testing and validation
 - 无需测试；纯静态审查。

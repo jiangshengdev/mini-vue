@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { createHostRenderer, normalize } from './test-utils.ts'
 import { asRuntimeVNode, mountChild, patchChild, patchChildren } from '@/runtime-core/index.ts'
+import { createTextVirtualNode } from '@/jsx-foundation/index.ts'
 import { ref } from '@/index.ts'
 
 describe('patchChildren 有 key diff', () => {
@@ -84,6 +85,94 @@ describe('patchChildren 有 key diff', () => {
       }),
     ).toEqual(['div', 'div', 'i'])
     expect(host.container.children[2]).toBe(reusedUnkeyed)
+  })
+
+  it('同 key 不同类型视为替换并按锚点插入', () => {
+    const host = createHostRenderer()
+    const previousChildren = [normalize(<div key="a">old</div>), normalize(<div key="b">b</div>)]
+
+    for (const [index, child] of previousChildren.entries()) {
+      mountChild(host.options, child, {
+        container: host.container,
+        context: { shouldUseAnchor: index < previousChildren.length - 1 },
+      })
+    }
+
+    const previousRuntime = previousChildren.map((child) => {
+      return asRuntimeVNode(child)
+    })
+
+    host.resetCounts()
+
+    const nextChildren = [normalize(<span key="a">new</span>), normalize(<div key="b">b</div>)]
+
+    patchChildren(host.options, previousChildren, nextChildren, {
+      container: host.container,
+      patchChild,
+    })
+
+    const nextRuntime = nextChildren.map((child) => {
+      return asRuntimeVNode(child)
+    })
+
+    expect(host.counters.remove).toBe(1)
+    expect(host.counters.insertBefore).toBe(1)
+    expect(
+      host.container.children.map((node) => {
+        return node.kind === 'element' ? node.tag : node.text
+      }),
+    ).toEqual(['span', 'div'])
+    expect(nextRuntime[0].el).not.toBe(previousRuntime[0].el)
+    expect(nextRuntime[1].el).toBe(previousRuntime[1].el)
+  })
+
+  it('Text 节点 keyed diff 应按 key 移动而非忽略 key', () => {
+    const host = createHostRenderer()
+    const createKeyedText = (content: string, key: PropertyKey) => {
+      return { ...createTextVirtualNode(content), key }
+    }
+
+    const textA = createKeyedText('A', '1')
+    const textB = createKeyedText('B', '2')
+
+    const previousChildren = [normalize(textA), normalize(textB)]
+
+    for (const [index, child] of previousChildren.entries()) {
+      mountChild(host.options, child, {
+        container: host.container,
+        context: { shouldUseAnchor: index < previousChildren.length - 1 },
+      })
+    }
+
+    const previousRuntime = previousChildren.map((child) => {
+      return asRuntimeVNode(child)
+    })
+
+    host.resetCounts()
+
+    const nextTextB = createKeyedText('B', '2')
+    const nextTextA = createKeyedText('A', '1')
+
+    const nextChildren = [normalize(nextTextB), normalize(nextTextA)]
+
+    patchChildren(host.options, previousChildren, nextChildren, {
+      container: host.container,
+      patchChild,
+    })
+
+    const nextRuntime = nextChildren.map((child) => {
+      return asRuntimeVNode(child)
+    })
+
+    expect(
+      host.container.children.map((node) => {
+        return node.kind === 'text' ? node.text : node.tag
+      }),
+    ).toEqual(['B', 'A'])
+    expect(nextRuntime[0].el).toBe(previousRuntime[1].el)
+    expect(nextRuntime[1].el).toBe(previousRuntime[0].el)
+    expect(host.counters.remove).toBe(0)
+    expect(host.counters.insertBefore).toBe(1)
   })
 
   it('新列表重复 key 时额外节点需重挂并清理旧节点', () => {

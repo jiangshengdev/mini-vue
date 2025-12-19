@@ -49,8 +49,8 @@ export function isSameVirtualNode(
   }
 
   if (a.type === Text && b.type === Text) {
-    /* `Text` 不使用 `key` 区分：只要都是 `Text` 就认为可复用宿主文本节点。 */
-    return true
+    /* `Text` 节点也需要尊重 `key`：key 不同应视为不同节点。 */
+    return a.key === b.key
   }
 
   return a.type === b.type && a.key === b.key

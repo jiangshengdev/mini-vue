@@ -33,7 +33,7 @@ description: runtime-core patch 命名审计与重命名计划
 - src/runtime-core/patch/utils.ts
 
 ## Data model / API changes
-- 可能需要重命名导出类型/函数（如 `PatchChildrenContext`、`mountAndInsert` 等），需同步更新所有调用方
+- 已重命名：`PatchChildrenContext` -> `PatchChildrenEnvironment`、`mountAndInsert` -> `mountChildInEnvironment`、`IndexMaps.toBePatched` -> `middleSegmentCount`
 
 ## Naming findings
 - PatchChildrenContext（src/runtime-core/patch/children-environment.ts）名称与 `MountContext`/patch 环境混用，“Context” 容易与应用上下文混淆，且与 `PatchEnvironment` 命名风格不一致。
@@ -44,20 +44,19 @@ description: runtime-core patch 命名审计与重命名计划
   - 建议: pendingNewCount、middleSegmentCount
 
 ## Action items
-[ ] 确认命名调整范围与对外 API 影响，锁定需要重命名的符号
-[ ] 针对 `PatchChildrenContext`/`mountAndInsert`/`toBePatched` 更新命名并同步注释，确保含义一致
-[ ] 扫描 `src/runtime-core` 及其他子域引用，更新导入与类型使用
-[ ] 逐步跑相关单测（如 children diff、component patch）验证重命名未引入行为变更
-[ ] 补充命名变更的文档或内联注释（如存在对外暴露）
+[x] 确认命名调整范围与对外 API 影响，锁定需要重命名的符号
+[x] 针对 `PatchChildrenContext`/`mountAndInsert`/`toBePatched` 更新命名并同步注释，确保含义一致
+[x] 扫描 `src/runtime-core` 及其他子域引用，更新导入与类型使用
+[x] 逐步跑相关单测（如 children diff、component patch）验证重命名未引入行为变更
+[x] 补充命名变更的文档或内联注释（如存在对外暴露）
 
 ## Testing and validation
-- 预期执行：`pnpm run test`（重点关注 runtime-core 相关用例）
-- 若涉及 DOM/renderer 行为，按需补跑 `pnpm run test:browser`
+- 已执行：`pnpm run typecheck`（通过）
+- 待执行：`pnpm run test`（重点关注 runtime-core 相关用例）；若涉及 DOM/renderer 行为，按需补跑 `pnpm run test:browser`
 
 ## Risks and edge cases
 - 导出符号重命名可能影响外部 API 或其他子域导入，需要一次性更新避免编译/运行时失败
 - 重命名期间容易遗漏注释/日志中的旧名，需统一替换
 
 ## Open questions
-- 是否需要对 `PatchEnvironment` 类型别名也做一致性重命名？
-- `mountAndInsert` 是否存在“仅插入”用途，如有需保留 `insert` 语义？
+- 暂无（转向 `src/runtime-core/mount` 子域继续审计）

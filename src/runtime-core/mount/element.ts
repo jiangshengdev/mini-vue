@@ -1,6 +1,6 @@
 import type { MountContext } from '../environment.ts'
 import type { RendererOptions } from '../index.ts'
-import { mountChildren } from './children.ts'
+import { mountElementChildren } from './children.ts'
 import type { MountedHandle } from './handle.ts'
 import type { VirtualNode } from '@/jsx-foundation/index.ts'
 import type { Ref } from '@/reactivity/index.ts'
@@ -26,8 +26,8 @@ export function mountElement<
 
   /* 在挂载前先写入属性与事件。 */
   patchProps(element, undefined, props)
-  /* 子节点交给 `mountChildren`，保持与 `virtualNode` 定义一致。 */
-  const mountedHandles = mountChildren(options, virtualNode.children, element, context)
+  /* 子节点交给 `mountElementChildren`，保持与 `virtualNode` 定义一致。 */
+  const mountedHandles = mountElementChildren(options, virtualNode.children, element, context)
   const ok = mountedHandles.every((handle) => {
     return handle.ok
   })

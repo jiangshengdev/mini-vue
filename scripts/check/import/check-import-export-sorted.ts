@@ -226,5 +226,5 @@ runSrcCheck({
   srcDir,
   checkFile,
   formatFinding,
-  successMessage: '所有 import/export 说明符均已按字母顺序排序。',
+  successMessage: '✅ 所有 import/export 说明符均已按字母顺序排序。',
 })

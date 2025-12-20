@@ -278,5 +278,5 @@ runSrcCheck({
   srcDir,
   checkFile,
   formatFinding,
-  successMessage: '未发现禁止的跨边界导入风格。',
+  successMessage: '✅ 未发现禁止的跨边界导入风格。',
 })

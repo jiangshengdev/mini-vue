@@ -345,8 +345,8 @@ if (errors.length > 0) {
 } else {
   const message =
     warnings.length > 0
-      ? '测试导入 prefer-root-index 检查通过（有警告）。'
-      : '所有测试导入均优先使用 @/index.ts。'
+      ? '⚠️ 测试导入 prefer-root-index 检查通过（有警告）。'
+      : '✅ 所有测试导入均优先使用 @/index.ts。'
 
   console.log(message)
 }

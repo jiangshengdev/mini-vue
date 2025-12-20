@@ -162,8 +162,8 @@ if (errors.length > 0) {
 } else {
   const message =
     warnings.length > 0
-      ? '测试 src 导入检查通过（有警告）。'
-      : '所有测试从 src 的导入均使用 @/<boundary>/index.ts（单层）或 @/index.ts。'
+      ? '⚠️ 测试 src 导入检查通过（有警告）。'
+      : '✅ 所有测试从 src 的导入均使用 @/<boundary>/index.ts（单层）或 @/index.ts。'
 
   console.log(message)
 }

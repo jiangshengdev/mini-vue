@@ -108,5 +108,5 @@ runSrcCheck({
   srcDir,
   checkFile,
   formatFinding,
-  successMessage: '未发现禁止的 @/同边界 导入。',
+  successMessage: '✅ 未发现禁止的 @/同边界 导入。',
 })

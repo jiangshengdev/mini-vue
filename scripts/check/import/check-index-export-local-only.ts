@@ -140,5 +140,5 @@ runSrcCheck({
   srcDir,
   checkFile,
   formatFinding,
-  successMessage: '未发现非法的 index.ts 跨目录导出。',
+  successMessage: '✅ 未发现非法的 index.ts 跨目录导出。',
 })

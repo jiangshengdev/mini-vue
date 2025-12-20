@@ -224,5 +224,5 @@ runSrcCheck({
   srcDir,
   checkFile,
   formatFinding,
-  successMessage: '未发现重复的 import/export 模块说明符。',
+  successMessage: '✅ 未发现重复的 import/export 模块说明符。',
 })

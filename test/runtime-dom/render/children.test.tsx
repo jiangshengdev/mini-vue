@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { within } from '@testing-library/dom'
-import { createTestContainer, renderIntoNewContainer } from '../../helpers.ts'
+import { createTestContainer, renderIntoNewContainer } from '$/index.ts'
 import type { SetupComponent } from '@/index.ts'
 import { reactive, render } from '@/index.ts'
 

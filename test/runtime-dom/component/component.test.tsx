@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { within } from '@testing-library/dom'
-import { createTestContainer } from '../../helpers.ts'
+import { createTestContainer } from '$/index.ts'
 import type { ErrorHandler, SetupComponent } from '@/index.ts'
 import { reactive, render, setErrorHandler, watch } from '@/index.ts'
 import { getCurrentInstance } from '@/runtime-core/index.ts'

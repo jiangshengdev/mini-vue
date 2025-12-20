@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { createRenderlessComponent, createTestContainer } from '../../helpers.ts'
+import { createRenderlessComponent, createTestContainer } from '$/index.ts'
 import type { ErrorHandler, SetupComponent } from '@/index.ts'
 import { setErrorHandler } from '@/index.ts'
 import { createVirtualNode } from '@/jsx-foundation/index.ts'

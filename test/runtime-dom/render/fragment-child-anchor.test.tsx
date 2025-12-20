@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createTestContainer } from '../../helpers.ts'
+import { createTestContainer } from '$/index.ts'
 import type { SetupComponent } from '@/index.ts'
 import { reactive, render } from '@/index.ts'
 

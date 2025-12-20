@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import userEvent from '@testing-library/user-event'
-import { createTestContainer } from '../../helpers.ts'
+import { createTestContainer } from '$/index.ts'
 import type { SetupComponent } from '@/index.ts'
 import { reactive, render } from '@/index.ts'
 

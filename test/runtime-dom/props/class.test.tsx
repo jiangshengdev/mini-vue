@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { within } from '@testing-library/dom'
-import { renderIntoNewContainer } from '../../helpers.ts'
+import { renderIntoNewContainer } from '$/index.ts'
 
 describe('runtime-dom class 归一化', () => {
   it('字符串 class 直接写入', () => {

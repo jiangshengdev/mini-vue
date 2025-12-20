@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { within } from '@testing-library/dom'
 import userEvent from '@testing-library/user-event'
-import { createTestContainer, renderIntoNewContainer } from '../../helpers.ts'
+import { createTestContainer, renderIntoNewContainer } from '$/index.ts'
 import type { SetupComponent } from '@/index.ts'
 import { Fragment, reactive, render } from '@/index.ts'
 import { runtimeCoreObjectChildWarning } from '@/messages/index.ts'

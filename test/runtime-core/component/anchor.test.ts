@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { TestElement, TestFragment, TestNode } from '../patch/test-utils.ts'
 import { createHostRenderer } from '../patch/test-utils.ts'
-import { createRenderlessComponent } from '../../helpers.ts'
+import { createRenderlessComponent } from '$/index.ts'
 import type { ComponentInstance } from '@/runtime-core/index.ts'
 import { mountComponentSubtreeWithAnchors } from '@/runtime-core/index.ts'
 import type { SetupComponent } from '@/index.ts'

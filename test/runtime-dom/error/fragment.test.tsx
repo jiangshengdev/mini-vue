@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { createTestContainer, renderIntoNewContainer } from '../../helpers.ts'
+import { createTestContainer, renderIntoNewContainer } from '$/index.ts'
 import type { ErrorHandler, SetupComponent } from '@/index.ts'
 import { reactive, render, setErrorHandler } from '@/index.ts'
 import { errorContexts } from '@/shared/index.ts'

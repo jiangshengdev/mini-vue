@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { within } from '@testing-library/dom'
-import { renderIntoNewContainer } from '../../helpers.ts'
+import { renderIntoNewContainer } from '$/index.ts'
 import { render } from '@/index.ts'
 import { runtimeDomUnsupportedAttrValue } from '@/messages/index.ts'
 

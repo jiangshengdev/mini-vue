@@ -2,8 +2,8 @@
 
 ## 审查状态
 
-- **状态**: 已完成
-- **审查日期**: 2025-12-20
+- **状态**: 待审查
+- **审查日期**: -
 
 ## 审查范围
 
@@ -51,7 +51,7 @@
 
 ### Major
 
-- [Major] src/runtime-core/create-app.ts: `mountApp` 使用局部布尔标记记录渲染是否成功，`setCurrentAppContext` 在渲染前推入，但 `render` 抛错时只做 `finally` 弹栈，没有清理容器也不重置 `state.status`。随后调用 `unmount` 会因 `state.container` 仍为 `undefined` 直接返回，导致已经部分挂载的子树/副作用无法被清理。
+- 暂无
 
 ### Minor
 
@@ -60,6 +60,6 @@
 ## 统计
 
 - Critical: 0
-- Major: 1
+- Major: 0
 - Minor: 0
-- 总计: 1
+- 总计: 0

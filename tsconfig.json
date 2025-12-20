@@ -16,7 +16,8 @@
     "jsxImportSource": "@",
     "paths": {
       "@/*": ["./src/*"],
-      "#/*": ["./playground/src/*"]
+      "#/*": ["./playground/*"],
+      "$/*": ["./test/*"]
     },
     "noEmit": true,
 

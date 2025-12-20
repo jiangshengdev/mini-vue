@@ -12,7 +12,11 @@ export default defineConfig({
       },
       {
         find: '#',
-        replacement: fileURLToPath(new URL('playground/src', import.meta.url)),
+        replacement: fileURLToPath(new URL('playground', import.meta.url)),
+      },
+      {
+        find: '$',
+        replacement: fileURLToPath(new URL('test', import.meta.url)),
       },
     ],
   },

@@ -1,14 +1,11 @@
 import { describe, expect, it, vi } from 'vitest'
 import { within } from '@testing-library/dom'
-import { createTestContainer } from '../../setup.ts'
-import { render } from '@/index.ts'
+import { renderIntoNewContainer } from '../helpers.ts'
 import { runtimeDomInvalidStyleValue } from '@/messages/index.ts'
 
 describe('runtime-dom style props', () => {
   it('字符串 style 可以直接写入', () => {
-    const container = createTestContainer()
-
-    render(<div style="color: blue;">text</div>, container)
+    const container = renderIntoNewContainer(<div style="color: blue;">text</div>)
 
     const element = within(container).getByText('text')
 
@@ -16,9 +13,7 @@ describe('runtime-dom style props', () => {
   })
 
   it('对象 style 支持 camelCase 键名', () => {
-    const container = createTestContainer()
-
-    render(<div style={{ backgroundColor: 'red' }}>text</div>, container)
+    const container = renderIntoNewContainer(<div style={{ backgroundColor: 'red' }}>text</div>)
 
     const element = within(container).getByText('text')
 
@@ -26,9 +21,7 @@ describe('runtime-dom style props', () => {
   })
 
   it('对象 style 支持 CSS 变量兜底', () => {
-    const container = createTestContainer()
-
-    render(<div style={{ '--main-color': 'pink' }}>text</div>, container)
+    const container = renderIntoNewContainer(<div style={{ '--main-color': 'pink' }}>text</div>)
 
     const element = within(container).getByText('text')
 
@@ -39,11 +32,10 @@ describe('runtime-dom style props', () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
       return undefined
     })
-    const container = createTestContainer()
     const payload: unknown = { x: 1 }
 
     try {
-      render(<div style={{ color: payload as string }}>text</div>, container)
+      const container = renderIntoNewContainer(<div style={{ color: payload as string }}>text</div>)
 
       const element = within(container).getByText('text')
 

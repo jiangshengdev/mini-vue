@@ -1,14 +1,14 @@
 import { describe, expect, it, vi } from 'vitest'
 import { within } from '@testing-library/dom'
-import { createTestContainer } from '../../setup.ts'
+import { renderIntoNewContainer } from '../helpers.ts'
 import { render } from '@/index.ts'
 import { runtimeDomUnsupportedAttrValue } from '@/messages/index.ts'
 
 describe('runtime-dom attrs props', () => {
   it('布尔与普通属性会按语义写入', () => {
-    const container = createTestContainer()
-
-    render(<input id="username" type="checkbox" disabled aria-label="user" />, container)
+    const container = renderIntoNewContainer(
+      <input id="username" type="checkbox" disabled aria-label="user" />,
+    )
 
     const input = within(container).getByRole('checkbox')
 
@@ -19,9 +19,9 @@ describe('runtime-dom attrs props', () => {
   })
 
   it('假值属性不会出现在 DOM 上', () => {
-    const container = createTestContainer()
-
-    render(<input disabled={false} title={null} data-flag={undefined} />, container)
+    const container = renderIntoNewContainer(
+      <input disabled={false} title={null} data-flag={undefined} />,
+    )
 
     const input = container.firstElementChild as HTMLInputElement
 
@@ -34,10 +34,9 @@ describe('runtime-dom attrs props', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {
       return undefined
     })
-    const container = createTestContainer()
     const payload = { nested: true }
 
-    render(<div title={payload} />, container)
+    const container = renderIntoNewContainer(<div title={payload} />)
 
     const element = container.firstElementChild as HTMLDivElement
 
@@ -48,9 +47,7 @@ describe('runtime-dom attrs props', () => {
   })
 
   it('空值 style 会移除 style 属性', () => {
-    const container = createTestContainer()
-
-    render(<div style={null}>text</div>, container)
+    const container = renderIntoNewContainer(<div style={null}>text</div>)
     const first = within(container).getByText('text')
 
     expect(first.hasAttribute('style')).toBe(false)

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { within } from '@testing-library/dom'
+import { renderIntoNewContainer } from '../helpers.ts'
 import { createTestContainer } from '../../setup.ts'
 import type { SetupComponent } from '@/index.ts'
 import { reactive, render } from '@/index.ts'
@@ -16,9 +17,7 @@ describe('runtime-dom children 形态', () => {
       }
     }
 
-    const container = createTestContainer()
-
-    render(<Capture />, container)
+    const container = renderIntoNewContainer(<Capture />)
 
     expect(received).toHaveLength(1)
     expect(received[0]).toBeUndefined()
@@ -36,13 +35,10 @@ describe('runtime-dom children 形态', () => {
       }
     }
 
-    const container = createTestContainer()
-
-    render(
+    const container = renderIntoNewContainer(
       <Capture>
         <span>only</span>
       </Capture>,
-      container,
     )
 
     expect(received).toHaveLength(1)
@@ -67,14 +63,11 @@ describe('runtime-dom children 形态', () => {
       }
     }
 
-    const container = createTestContainer()
-
-    render(
+    const container = renderIntoNewContainer(
       <Capture>
         <span>first</span>
         <b>second</b>
       </Capture>,
-      container,
     )
 
     expect(received).toHaveLength(1)

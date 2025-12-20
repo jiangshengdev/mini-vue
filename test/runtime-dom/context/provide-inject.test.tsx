@@ -1,30 +1,18 @@
 import { describe, expect, it } from 'vitest'
+import { createHostWithApp, createRenderlessComponent } from '../helpers.ts'
 import { createTestContainer } from '../../setup.ts'
 import type { InjectionToken, SetupComponent } from '@/index.ts'
-import { createApp, inject, provide, ref, render } from '@/index.ts'
-
-function mountToFreshContainer(component: SetupComponent) {
-  const container = createTestContainer()
-  const app = createApp(component)
-
-  app.mount(container)
-
-  return { app, container }
-}
+import { inject, provide, ref, render } from '@/index.ts'
 
 describe('runtime-dom provide/inject', () => {
   it('在 setup 阶段从祖先 provide 注入值', () => {
     const injectedText = ref('')
 
-    const Child: SetupComponent = () => {
+    const Child = createRenderlessComponent(() => {
       const value = inject<string>('k')
 
       injectedText.value = value ?? ''
-
-      return () => {
-        return undefined
-      }
-    }
+    })
 
     const Parent: SetupComponent = () => {
       provide('k', 'v')
@@ -40,7 +28,9 @@ describe('runtime-dom provide/inject', () => {
       }
     }
 
-    const { app } = mountToFreshContainer(Root)
+    const { app, container } = createHostWithApp(Root)
+
+    app.mount(container)
 
     expect(injectedText.value).toBe('v')
 
@@ -50,13 +40,9 @@ describe('runtime-dom provide/inject', () => {
   it('注入 app.provide 提供的值', () => {
     const injectedText = ref('')
 
-    const Child: SetupComponent = () => {
+    const Child = createRenderlessComponent(() => {
       injectedText.value = inject<string>('k') ?? ''
-
-      return () => {
-        return undefined
-      }
-    }
+    })
 
     const Root: SetupComponent = () => {
       return () => {
@@ -64,8 +50,7 @@ describe('runtime-dom provide/inject', () => {
       }
     }
 
-    const container = createTestContainer()
-    const app = createApp(Root)
+    const { app, container } = createHostWithApp(Root)
 
     app.provide('k', 'v')
     app.mount(container)
@@ -78,13 +63,9 @@ describe('runtime-dom provide/inject', () => {
   it('key 缺失时返回 defaultValue', () => {
     const injectedText = ref('')
 
-    const Child: SetupComponent = () => {
+    const Child = createRenderlessComponent(() => {
       injectedText.value = inject('missing', 'fallback')
-
-      return () => {
-        return undefined
-      }
-    }
+    })
 
     const Root: SetupComponent = () => {
       return () => {
@@ -92,7 +73,9 @@ describe('runtime-dom provide/inject', () => {
       }
     }
 
-    const { app } = mountToFreshContainer(Root)
+    const { app, container } = createHostWithApp(Root)
+
+    app.mount(container)
 
     expect(injectedText.value).toBe('fallback')
 
@@ -102,13 +85,9 @@ describe('runtime-dom provide/inject', () => {
   it('直接渲染根 vnode 时从 vnode.appContext 注入值', () => {
     const injectedText = ref('')
 
-    const Child: SetupComponent = () => {
+    const Child = createRenderlessComponent(() => {
       injectedText.value = inject<string>('k') ?? ''
-
-      return () => {
-        return undefined
-      }
-    }
+    })
 
     const container = createTestContainer()
     const vnode = <Child />

@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { renderIntoNewContainer } from '../helpers.ts'
 import { createTestContainer } from '../../setup.ts'
 import type { ErrorHandler, SetupComponent } from '@/index.ts'
 import { reactive, render, setErrorHandler } from '@/index.ts'
@@ -10,7 +11,6 @@ describe('runtime-dom 组件错误隔离（嵌套）', () => {
   })
 
   it('嵌套子组件 setup 抛错不影响同级节点', () => {
-    const container = createTestContainer()
     const handler = vi.fn<ErrorHandler>()
     const boom = new Error('nested setup failed')
 
@@ -31,7 +31,7 @@ describe('runtime-dom 组件错误隔离（嵌套）', () => {
       }
     }
 
-    render(<Parent />, container)
+    const container = renderIntoNewContainer(<Parent />)
 
     expect(handler).toHaveBeenCalledTimes(1)
     const [error, context] = handler.mock.calls[0]
@@ -98,7 +98,6 @@ describe('runtime-dom 组件错误隔离（嵌套）', () => {
   })
 
   it('数组 children 中某项 setup 抛错不影响其他项', () => {
-    const container = createTestContainer()
     const handler = vi.fn<ErrorHandler>()
     const boom = new Error('list setup failed')
 
@@ -114,7 +113,7 @@ describe('runtime-dom 组件错误隔离（嵌套）', () => {
       }
     }
 
-    render(<>{[<Faulty key="bad" />, <Ok key="ok" />]}</>, container)
+    const container = renderIntoNewContainer(<>{[<Faulty key="bad" />, <Ok key="ok" />]}</>)
 
     expect(handler).toHaveBeenCalledTimes(1)
     const [error, context] = handler.mock.calls[0]

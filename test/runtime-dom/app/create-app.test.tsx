@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest'
 import { screen, within } from '@testing-library/dom'
-import { createTestContainer } from '../../setup.ts'
+import { createHostWithApp } from '../helpers.ts'
 import type { SetupComponent } from '@/index.ts'
-import { createApp, reactive } from '@/index.ts'
+import { reactive } from '@/index.ts'
 import { runtimeCoreAppAlreadyMounted, runtimeDomContainerNotFound } from '@/messages/index.ts'
 
 const App: SetupComponent = () => {
@@ -13,11 +13,9 @@ const App: SetupComponent = () => {
 
 describe('runtime-dom createApp', () => {
   it('支持通过选择器挂载', () => {
-    const host = createTestContainer()
+    const { app, container: host } = createHostWithApp(App)
 
     host.id = 'app'
-
-    const app = createApp(App)
 
     app.mount('#app')
 
@@ -25,7 +23,7 @@ describe('runtime-dom createApp', () => {
   })
 
   it('非法 CSS 选择器会按未找到容器处理', () => {
-    const app = createApp(App)
+    const { app } = createHostWithApp(App)
 
     expect(() => {
       app.mount('#app[')
@@ -33,8 +31,7 @@ describe('runtime-dom createApp', () => {
   })
 
   it('支持直接传入容器', () => {
-    const host = createTestContainer()
-    const app = createApp(App)
+    const { app, container: host } = createHostWithApp(App)
 
     app.mount(host)
     const view = within(host)
@@ -45,8 +42,7 @@ describe('runtime-dom createApp', () => {
   })
 
   it('重复挂载会抛异常', () => {
-    const host = createTestContainer()
-    const app = createApp(App)
+    const { app, container: host } = createHostWithApp(App)
 
     app.mount(host)
     expect(() => {
@@ -56,8 +52,7 @@ describe('runtime-dom createApp', () => {
   })
 
   it('卸载后可以重新挂载', () => {
-    const host = createTestContainer()
-    const app = createApp(App)
+    const { app, container: host } = createHostWithApp(App)
 
     app.mount(host)
     expect(within(host).getByText('Hello')).toHaveClass('hello')
@@ -81,8 +76,7 @@ describe('runtime-dom createApp', () => {
       }
     }
 
-    const host = createTestContainer()
-    const app = createApp(Root)
+    const { app, container: host } = createHostWithApp(Root)
 
     app.mount(host)
 
@@ -109,8 +103,7 @@ describe('runtime-dom createApp', () => {
       }
     }
 
-    const host = createTestContainer()
-    const app = createApp(Root)
+    const { app, container: host } = createHostWithApp(Root)
 
     app.mount(host)
 

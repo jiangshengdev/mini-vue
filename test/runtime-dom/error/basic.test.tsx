@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { renderIntoNewContainer } from '../helpers.ts'
 import { createTestContainer } from '../../setup.ts'
 import type { ErrorHandler, SetupComponent } from '@/index.ts'
 import { reactive, render, setErrorHandler } from '@/index.ts'
@@ -10,7 +11,6 @@ describe('runtime-dom 组件错误隔离（基础）', () => {
   })
 
   it('setup 抛错会通知错误处理器且跳过挂载', () => {
-    const container = createTestContainer()
     const handler = vi.fn<ErrorHandler>()
     const boom = new Error('setup failed')
 
@@ -20,7 +20,7 @@ describe('runtime-dom 组件错误隔离（基础）', () => {
       throw boom
     }
 
-    render(<Faulty />, container)
+    const container = renderIntoNewContainer(<Faulty />)
 
     expect(handler).toHaveBeenCalledTimes(1)
     const [error, context] = handler.mock.calls[0]
@@ -31,7 +31,6 @@ describe('runtime-dom 组件错误隔离（基础）', () => {
   })
 
   it('setup 抛错不影响兄弟挂载', () => {
-    const container = createTestContainer()
     const handler = vi.fn<ErrorHandler>()
     const boom = new Error('setup failed')
 
@@ -47,12 +46,11 @@ describe('runtime-dom 组件错误隔离（基础）', () => {
       }
     }
 
-    render(
+    const container = renderIntoNewContainer(
       <>
         <Faulty />
         <Sibling />
       </>,
-      container,
     )
 
     expect(handler).toHaveBeenCalledTimes(1)

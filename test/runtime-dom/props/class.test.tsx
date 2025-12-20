@@ -1,13 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { within } from '@testing-library/dom'
-import { createTestContainer } from '../../setup.ts'
-import { render } from '@/index.ts'
+import { renderIntoNewContainer } from '../helpers.ts'
 
 describe('runtime-dom class 归一化', () => {
   it('字符串 class 直接写入', () => {
-    const container = createTestContainer()
-
-    render(<div class="foo bar">text</div>, container)
+    const container = renderIntoNewContainer(<div class="foo bar">text</div>)
 
     const element = within(container).getByText('text')
 
@@ -15,9 +12,9 @@ describe('runtime-dom class 归一化', () => {
   })
 
   it('数组 class 会递归展开', () => {
-    const container = createTestContainer()
-
-    render(<div class={['foo', ['bar', undefined], 'baz']}>text</div>, container)
+    const container = renderIntoNewContainer(
+      <div class={['foo', ['bar', undefined], 'baz']}>text</div>,
+    )
 
     const element = within(container).getByText('text')
 
@@ -25,9 +22,9 @@ describe('runtime-dom class 归一化', () => {
   })
 
   it('对象 class 仅保留 truthy 键', () => {
-    const container = createTestContainer()
-
-    render(<div class={{ foo: true, bar: false, baz: 1, qux: 0 }}>text</div>, container)
+    const container = renderIntoNewContainer(
+      <div class={{ foo: true, bar: false, baz: 1, qux: 0 }}>text</div>,
+    )
 
     const element = within(container).getByText('text')
 
@@ -35,11 +32,8 @@ describe('runtime-dom class 归一化', () => {
   })
 
   it('混合数组与对象写法', () => {
-    const container = createTestContainer()
-
-    render(
+    const container = renderIntoNewContainer(
       <div class={['foo', { bar: true, baz: false }, ['qux', { quux: true }]]}>text</div>,
-      container,
     )
 
     const element = within(container).getByText('text')
@@ -48,9 +42,7 @@ describe('runtime-dom class 归一化', () => {
   })
 
   it('空值应输出空 className', () => {
-    const container = createTestContainer()
-
-    render(<div class={null}>text</div>, container)
+    const container = renderIntoNewContainer(<div class={null}>text</div>)
 
     const element = within(container).getByText('text')
 

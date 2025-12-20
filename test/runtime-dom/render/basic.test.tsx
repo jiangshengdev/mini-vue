@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { within } from '@testing-library/dom'
 import userEvent from '@testing-library/user-event'
+import { renderIntoNewContainer } from '../helpers.ts'
 import { createTestContainer } from '../../setup.ts'
 import type { SetupComponent } from '@/index.ts'
 import { Fragment, reactive, render } from '@/index.ts'
@@ -8,13 +9,10 @@ import { runtimeCoreObjectChildWarning } from '@/messages/index.ts'
 
 describe('runtime-dom 基础渲染', () => {
   it('渲染基本元素与文本', () => {
-    const container = createTestContainer()
-
-    render(
+    const container = renderIntoNewContainer(
       <div class="card">
         <span>hello</span>
       </div>,
-      container,
     )
 
     const card = within(container).getByText('hello')
@@ -24,7 +22,6 @@ describe('runtime-dom 基础渲染', () => {
   })
 
   it('绑定事件并响应', async () => {
-    const container = createTestContainer()
     const handleClick = vi.fn()
 
     interface ButtonProps {
@@ -42,7 +39,7 @@ describe('runtime-dom 基础渲染', () => {
       }
     }
 
-    render(<Button label="click" onClick={handleClick} />, container)
+    const container = renderIntoNewContainer(<Button label="click" onClick={handleClick} />)
 
     const button = within(container).getByRole('button', { name: 'click' })
     const user = userEvent.setup()
@@ -68,16 +65,13 @@ describe('runtime-dom 基础渲染', () => {
       }
     }
 
-    const container = createTestContainer()
-
-    render(
+    const container = renderIntoNewContainer(
       <Wrapper title="Hi">
         <Fragment>
           <p>first</p>
           <p>second</p>
         </Fragment>
       </Wrapper>,
-      container,
     )
 
     const view = within(container)

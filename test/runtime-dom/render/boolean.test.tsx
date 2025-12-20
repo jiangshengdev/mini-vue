@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { within } from '@testing-library/dom'
 import { createTestContainer } from '../../setup.ts'
+import { renderIntoNewContainer } from '../helpers.ts'
 import type { SetupComponent } from '@/index.ts'
 import { render } from '@/index.ts'
 
@@ -29,14 +30,11 @@ describe('runtime-dom 布尔子节点', () => {
   })
 
   it('布尔 true 作为子节点时忽略渲染', () => {
-    const container = createTestContainer()
-
-    render(
+    const container = renderIntoNewContainer(
       <div>
         {true}
         <span>keep</span>
       </div>,
-      container,
     )
 
     const view = within(container)
@@ -46,11 +44,8 @@ describe('runtime-dom 布尔子节点', () => {
   })
 
   it('数组 children 中的布尔值会被移除', () => {
-    const container = createTestContainer()
-
-    render(
+    const container = renderIntoNewContainer(
       <div>{[false, <span key="1">first</span>, true, <span key="2">second</span>]}</div>,
-      container,
     )
 
     const view = within(container)
@@ -62,9 +57,7 @@ describe('runtime-dom 布尔子节点', () => {
   })
 
   it('直接 render(false, container) 不应生成文本 false', () => {
-    const container = createTestContainer()
-
-    render(false, container)
+    const container = renderIntoNewContainer(false)
 
     expect(container).toBeEmptyDOMElement()
   })

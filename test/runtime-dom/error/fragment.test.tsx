@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { renderIntoNewContainer } from '../helpers.ts'
 import { createTestContainer } from '../../setup.ts'
 import type { ErrorHandler, SetupComponent } from '@/index.ts'
 import { reactive, render, setErrorHandler } from '@/index.ts'
@@ -10,7 +11,6 @@ describe('runtime-dom 组件错误隔离（fragment）', () => {
   })
 
   it('片段中首个组件 setup 失败会清理锚点且不挡住后续节点', () => {
-    const container = createTestContainer()
     const handler = vi.fn<ErrorHandler>()
     const boom = new Error('fragment setup failed')
 
@@ -20,12 +20,11 @@ describe('runtime-dom 组件错误隔离（fragment）', () => {
       throw boom
     }
 
-    render(
+    const container = renderIntoNewContainer(
       <>
         <Faulty />
         <div data-testid="sibling">ok</div>
       </>,
-      container,
     )
 
     expect(handler).toHaveBeenCalledTimes(1)

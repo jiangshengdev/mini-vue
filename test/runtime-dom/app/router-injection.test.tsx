@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
+import { createRenderlessComponent } from '../helpers.ts'
 import { createTestContainer } from '../../setup.ts'
 import type { SetupComponent } from '@/index.ts'
 import { createApp, createRouter, ref, RouterLink, RouterView } from '@/index.ts'
@@ -7,17 +8,9 @@ import { routerDuplicateInstallOnApp } from '@/messages/index.ts'
 
 type EventListenerCall = Parameters<typeof globalThis.removeEventListener>
 
-const createNoopComponent = (): SetupComponent => {
-  return () => {
-    return () => {
-      return undefined
-    }
-  }
-}
-
 const createSingleRouteRouter = (
   component: SetupComponent,
-  fallback: SetupComponent = createNoopComponent(),
+  fallback: SetupComponent = createRenderlessComponent(),
 ) => {
   return createRouter({
     routes: [{ path: '/', component }],
@@ -36,11 +29,11 @@ describe('runtime-dom router 注入', () => {
     const addSpy = vi.spyOn(globalThis, 'addEventListener')
     const removeSpy = vi.spyOn(globalThis, 'removeEventListener')
 
-    const Home = createNoopComponent()
-    const NotFound = createNoopComponent()
+    const Home = createRenderlessComponent()
+    const NotFound = createRenderlessComponent()
     const router = createSingleRouteRouter(Home, NotFound)
 
-    const Root = createNoopComponent()
+    const Root = createRenderlessComponent()
 
     const app = createApp(Root)
 
@@ -61,13 +54,13 @@ describe('runtime-dom router 注入', () => {
   })
 
   it('在同一 app 上安装多个 router 时抛错', () => {
-    const Home = createNoopComponent()
-    const NotFound = createNoopComponent()
+    const Home = createRenderlessComponent()
+    const NotFound = createRenderlessComponent()
 
     const routerA = createSingleRouteRouter(Home, NotFound)
     const routerB = createSingleRouteRouter(Home, NotFound)
 
-    const Root = createNoopComponent()
+    const Root = createRenderlessComponent()
 
     const app = createApp(Root)
 
@@ -82,11 +75,11 @@ describe('runtime-dom router 注入', () => {
     const addSpy = vi.spyOn(globalThis, 'addEventListener')
     const removeSpy = vi.spyOn(globalThis, 'removeEventListener')
 
-    const Home = createNoopComponent()
-    const NotFound = createNoopComponent()
+    const Home = createRenderlessComponent()
+    const NotFound = createRenderlessComponent()
     const router = createSingleRouteRouter(Home, NotFound)
 
-    const Root = createNoopComponent()
+    const Root = createRenderlessComponent()
 
     const appA = createApp(Root)
     const appB = createApp(Root)
@@ -169,8 +162,8 @@ describe('runtime-dom router 注入', () => {
   })
 
   it('RouterLink 点击时使用注入的 router', () => {
-    const Home = createNoopComponent()
-    const NotFound = createNoopComponent()
+    const Home = createRenderlessComponent()
+    const NotFound = createRenderlessComponent()
     const router = createSingleRouteRouter(Home, NotFound)
 
     const navigateSpy = vi.spyOn(router, 'navigate')
@@ -199,8 +192,8 @@ describe('runtime-dom router 注入', () => {
   })
 
   it('RouterLink 对修饰键/中键点击保持默认行为', () => {
-    const Home = createNoopComponent()
-    const NotFound = createNoopComponent()
+    const Home = createRenderlessComponent()
+    const NotFound = createRenderlessComponent()
     const router = createSingleRouteRouter(Home, NotFound)
 
     const navigateSpy = vi.spyOn(router, 'navigate')
@@ -252,8 +245,8 @@ describe('runtime-dom router 注入', () => {
   })
 
   it('RouterLink 将 target=_blank 导航交给浏览器处理', () => {
-    const Home = createNoopComponent()
-    const NotFound = createNoopComponent()
+    const Home = createRenderlessComponent()
+    const NotFound = createRenderlessComponent()
     const router = createSingleRouteRouter(Home, NotFound)
 
     const navigateSpy = vi.spyOn(router, 'navigate')

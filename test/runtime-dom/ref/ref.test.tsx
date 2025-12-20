@@ -1,19 +1,18 @@
 import { describe, expect, it, vi } from 'vitest'
 import { within } from '@testing-library/dom'
+import { renderIntoNewContainer } from '../helpers.ts'
 import { createTestContainer } from '../../setup.ts'
 import type { ElementRef, SetupComponent } from '@/index.ts'
 import { createApp, reactive, ref, render } from '@/index.ts'
 
 describe('runtime-dom ref 回调', () => {
   it('render 卸载时会以 undefined 调用 ref', () => {
-    const container = createTestContainer()
     const refSpy = vi.fn<(element: Element | undefined) => void>()
 
-    render(
+    const container = renderIntoNewContainer(
       <button type="button" ref={refSpy}>
         click
       </button>,
-      container,
     )
 
     const button = within(container).getByRole('button')
@@ -69,14 +68,12 @@ describe('runtime-dom ref 回调', () => {
   })
 
   it('render 支持响应式 ref 并在卸载时写回 undefined', () => {
-    const container = createTestContainer()
     const elementRef = ref<Element | undefined>(undefined)
 
-    render(
+    const container = renderIntoNewContainer(
       <button type="button" ref={elementRef}>
         click
       </button>,
-      container,
     )
 
     expect(elementRef.value).toBe(within(container).getByRole('button'))
@@ -87,14 +84,12 @@ describe('runtime-dom ref 回调', () => {
   })
 
   it('render 遇到非函数/Ref 的 ref 值时按普通属性处理', () => {
-    const container = createTestContainer()
     const invalidRef = 'plain' as unknown as ElementRef // 故意绕过类型以覆盖非 ElementRef 路径
 
-    render(
+    const container = renderIntoNewContainer(
       <button type="button" ref={invalidRef}>
         click
       </button>,
-      container,
     )
 
     expect(within(container).getByRole('button')).toHaveAttribute('ref', 'plain')

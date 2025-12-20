@@ -83,7 +83,7 @@ export function createRenderer<
       return container
     }
 
-    throw new TypeError(runtimeCoreInvalidContainer)
+    throw new TypeError(runtimeCoreInvalidContainer, { cause: container })
   }
 
   /**

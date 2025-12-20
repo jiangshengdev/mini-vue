@@ -129,7 +129,7 @@ export function createRouter(config: RouterConfig): Router {
      */
     install(app) {
       if (appsWithRouter.has(app)) {
-        throw new Error(routerDuplicateInstallOnApp)
+        throw new Error(routerDuplicateInstallOnApp, { cause: app })
       }
 
       /* 防御重复 install：当前 `router` 已记录该 `app` 时直接忽略。 */

@@ -21,7 +21,7 @@ export function provide(key: InjectionToken, value: unknown): void {
 
   /* 没有实例通常意味着在组件外调用（例如模块顶层或事件回调中）。 */
   if (!instance) {
-    throw new Error(runtimeCoreProvideOutsideSetup)
+    throw new Error(runtimeCoreProvideOutsideSetup, { cause: { currentInstance: instance } })
   }
 
   /* 通过 provides 写入：后代组件将沿着原型链读取到该值。 */
@@ -52,7 +52,7 @@ export function inject<T>(key: InjectionToken<T>, defaultValue?: T): T | undefin
 
   /* 不在 setup 期间调用时直接抛错，避免读到不确定的上下文。 */
   if (!instance) {
-    throw new Error(runtimeCoreInjectOutsideSetup)
+    throw new Error(runtimeCoreInjectOutsideSetup, { cause: { currentInstance: instance } })
   }
 
   const { provides } = instance

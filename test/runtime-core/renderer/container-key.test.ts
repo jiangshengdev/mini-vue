@@ -11,9 +11,17 @@ describe('runtime-core/renderer 容器键', () => {
       options,
     )
 
-    expect(() => {
+    let caught: unknown
+
+    try {
       renderer.render('text', 'container' as unknown as Record<string, unknown>)
-    }).toThrowError(runtimeCoreInvalidContainer)
+    } catch (error) {
+      caught = error
+    }
+
+    expect(caught).toBeInstanceOf(TypeError)
+    expect((caught as Error).message).toBe(runtimeCoreInvalidContainer)
+    expect((caught as Error & { cause: unknown }).cause).toBe('container')
   })
 })
 

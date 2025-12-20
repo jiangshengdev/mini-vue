@@ -17,7 +17,7 @@ export function useRouter(): Router {
   const router = inject(routerInjectionKey)
 
   if (!router) {
-    throw new Error(routerNotFound)
+    throw new Error(routerNotFound, { cause: routerInjectionKey })
   }
 
   return router

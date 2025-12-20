@@ -200,7 +200,7 @@ export function createAppInstance<HostElement extends WeakKey>(
             return
           }
 
-          throw new TypeError(runtimeCoreInvalidPlugin)
+          throw new TypeError(runtimeCoreInvalidPlugin, { cause: plugin })
         },
         {
           origin: errorContexts.appPluginUse,

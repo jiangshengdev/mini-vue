@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { asRuntimeVNode, mountChild, patchChild } from '@/runtime-core/index.ts'
-import { createTextVirtualNode } from '@/jsx-foundation/index.ts'
 import type { TestElement, TestFragment, TestNode } from './test-utils.ts'
 import { createHostRenderer, normalize } from './test-utils.ts'
+import { asRuntimeVNode, mountChild, patchChild } from '@/runtime-core/index.ts'
+import { createTextVirtualNode } from '@/jsx-foundation/index.ts'
 
 describe('patchChild 运行时元数据复用', () => {
   it('更新文本节点时复用宿主绑定和 handle', () => {

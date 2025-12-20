@@ -3,7 +3,7 @@ import { createTestContainer } from '../../setup.ts'
 import type { SetupComponent } from '@/index.ts'
 import { reactive, render } from '@/index.ts'
 
-describe('runtime-dom render: fragment child anchor', () => {
+describe('runtime-dom render: fragment 子节点锚点', () => {
   it('元素子树 patch 不应继承父级锚点', () => {
     const container = createTestContainer()
     const state = reactive({

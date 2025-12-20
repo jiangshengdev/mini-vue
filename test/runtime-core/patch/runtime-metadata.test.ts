@@ -24,8 +24,8 @@ interface TestFragment extends TestNode {
   kind: 'fragment'
 }
 
-describe('patchChild runtime metadata reuse', () => {
-  it('reuses host bindings and handles when updating text nodes', () => {
+describe('patchChild 运行时元数据复用', () => {
+  it('更新文本节点时复用宿主绑定和 handle', () => {
     const { options, container } = createHostOptions()
     const previous = normalizeRenderOutput(createTextVirtualNode('before'))!
     const next = normalizeRenderOutput(createTextVirtualNode('after'))!

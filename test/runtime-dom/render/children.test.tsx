@@ -4,7 +4,7 @@ import { createTestContainer } from '../../setup.ts'
 import type { SetupComponent } from '@/index.ts'
 import { reactive, render } from '@/index.ts'
 
-describe('runtime-dom children shape', () => {
+describe('runtime-dom children 形态', () => {
   it('无 children 时 props.children 为 undefined', () => {
     const received: unknown[] = []
 

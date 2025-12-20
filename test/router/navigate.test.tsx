@@ -2,13 +2,13 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { SetupComponent } from '@/index.ts'
 import { createRouter } from '@/index.ts'
 
-describe('router: navigate retains query and hash', () => {
+describe('router: navigate 保留 query 和 hash', () => {
   afterEach(() => {
     vi.restoreAllMocks()
     globalThis.history.replaceState(null, '', '/')
   })
 
-  it('pushes full URL while keeping normalized route path', () => {
+  it('推送完整 URL 同时保持规范化的路由 path', () => {
     const pushStateSpy = vi.spyOn(globalThis.history, 'pushState')
 
     const Search: SetupComponent = () => {

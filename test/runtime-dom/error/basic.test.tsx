@@ -4,7 +4,7 @@ import type { ErrorHandler, SetupComponent } from '@/index.ts'
 import { reactive, render, setErrorHandler } from '@/index.ts'
 import { errorContexts } from '@/shared/index.ts'
 
-describe('runtime-dom component error isolation (basic)', () => {
+describe('runtime-dom 组件错误隔离（基础）', () => {
   afterEach(() => {
     setErrorHandler(undefined)
   })

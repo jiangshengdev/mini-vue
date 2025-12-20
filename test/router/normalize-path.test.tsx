@@ -3,17 +3,17 @@ import type { SetupComponent } from '@/index.ts'
 import { createRouter } from '@/index.ts'
 import { normalizePath } from '@/router/index.ts'
 
-describe('router: normalizePath', () => {
+describe('router: normalizePath 路径规范化', () => {
   afterEach(() => {
     globalThis.history.pushState(null, '', '/')
   })
 
-  it('keeps path casing while stripping query and hash', () => {
+  it('保留路径大小写，同时去除 query 和 hash', () => {
     expect(normalizePath('/User/AbC?q=1#top')).toBe('/User/AbC')
     expect(normalizePath('User/AbC?foo=1')).toBe('/User/AbC')
   })
 
-  it('matches routes case-sensitively and preserves navigation casing', () => {
+  it('区分大小写匹配路由并保留导航时的大小写', () => {
     const Upper: SetupComponent = () => {
       return () => {
         return undefined

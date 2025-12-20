@@ -4,7 +4,7 @@ import { createTestContainer } from '../../setup.ts'
 import type { SetupComponent } from '@/index.ts'
 import { render } from '@/index.ts'
 
-describe('runtime-dom boolean children', () => {
+describe('runtime-dom 布尔子节点', () => {
   it('布尔子节点在 false 时不会渲染文本', () => {
     interface FlagProps {
       flag: boolean

@@ -4,7 +4,7 @@ import type { ErrorHandler, SetupComponent } from '@/index.ts'
 import { reactive, render, setErrorHandler } from '@/index.ts'
 import { errorContexts } from '@/shared/index.ts'
 
-describe('runtime-dom fragment boundary', () => {
+describe('runtime-dom fragment 边界', () => {
   afterEach(() => {
     setErrorHandler(undefined)
   })

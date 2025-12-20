@@ -6,7 +6,7 @@ import type { SetupComponent } from '@/index.ts'
 import { Fragment, reactive, render } from '@/index.ts'
 import { runtimeCoreObjectChildWarning } from '@/messages/index.ts'
 
-describe('runtime-dom basic rendering', () => {
+describe('runtime-dom 基础渲染', () => {
   it('渲染基本元素与文本', () => {
     const container = createTestContainer()
 

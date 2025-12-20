@@ -25,8 +25,8 @@ interface TestFragment extends TestNode {
   kind: 'fragment'
 }
 
-describe('patch insertion and diagnostics', () => {
-  it('mountChild inserts at anchor without extra append', () => {
+describe('patch 插入与诊断', () => {
+  it('mountChild 在 anchor 处插入，不额外调用 append', () => {
     const host = createHostOptionsWithSpies()
     const anchor = host.options.createText('anchor')
 
@@ -47,7 +47,7 @@ describe('patch insertion and diagnostics', () => {
     ).toEqual(['hello', 'anchor'])
   })
 
-  it('patchChild new node uses anchor single insert', () => {
+  it('patchChild 新节点使用 anchor 单次插入', () => {
     const host = createHostOptionsWithSpies()
     const anchor = host.options.createText('anchor')
 
@@ -71,7 +71,7 @@ describe('patch insertion and diagnostics', () => {
     ).toEqual(['patched', 'anchor'])
   })
 
-  it('ensureHostNodes warns in DEV when runtime nodes are missing', () => {
+  it('ensureHostNodes 在 DEV 模式下当运行时节点缺失时发出警告', () => {
     const vnode = normalizeRenderOutput(createTextVirtualNode('lonely'))!
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {
       return undefined

@@ -3,8 +3,8 @@ import { runtimeCoreInvalidContainer } from '@/messages/index.ts'
 import type { RendererOptions } from '@/runtime-core/index.ts'
 import { createRenderer } from '@/runtime-core/index.ts'
 
-describe('runtime-core/renderer container key', () => {
-  it('throws friendly error when container is not object', () => {
+describe('runtime-core/renderer 容器键', () => {
+  it('当 container 不是对象时抛出友好错误', () => {
     const options: RendererOptions<unknown, Record<string, unknown>, Record<string, unknown>> = {
       createElement: vi.fn(() => {
         return {}

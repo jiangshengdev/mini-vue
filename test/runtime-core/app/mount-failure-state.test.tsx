@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { createTestContainer, createRenderlessComponent } from '$/index.ts'
+import { createRenderlessComponent, createTestContainer } from '$/index.ts'
 import { createAppInstance } from '@/runtime-core/index.ts'
 
 describe('runtime-core createAppInstance mount 失败状态回滚', () => {

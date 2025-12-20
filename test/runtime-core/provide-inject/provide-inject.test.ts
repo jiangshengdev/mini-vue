@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { runtimeCoreInjectOutsideSetup, runtimeCoreProvideOutsideSetup } from '@/messages/index.ts'
-import { inject, provide } from '@/runtime-core/index.ts'
+import { inject, provide } from '@/index.ts'
 
 describe('runtime-core provide/inject 错误 cause', () => {
   it('provide 在组件外调用时暴露 currentInstance 上下文', () => {

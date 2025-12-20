@@ -5,80 +5,69 @@ import { createApp, createRouter, ref, RouterLink, RouterView } from '@/index.ts
 import { invokerCacheKey } from '@/runtime-dom/index.ts'
 import { routerDuplicateInstallOnApp } from '@/messages/index.ts'
 
+type EventListenerCall = Parameters<typeof globalThis.removeEventListener>
+
+const createNoopComponent = (): SetupComponent => {
+  return () => {
+    return () => {
+      return undefined
+    }
+  }
+}
+
+const createSingleRouteRouter = (
+  component: SetupComponent,
+  fallback: SetupComponent = createNoopComponent(),
+) => {
+  return createRouter({
+    routes: [{ path: '/', component }],
+    fallback,
+  })
+}
+
+const filterPopstateCalls = (calls: EventListenerCall[]) => {
+  return calls.filter(([event]) => {
+    return event === 'popstate'
+  })
+}
+
 describe('runtime-dom router 注入', () => {
   it('router.install 只启动一次且在 app.unmount 时自动停止', () => {
     const addSpy = vi.spyOn(globalThis, 'addEventListener')
     const removeSpy = vi.spyOn(globalThis, 'removeEventListener')
 
-    const Home: SetupComponent = () => {
-      return () => {
-        return undefined
-      }
-    }
+    const Home = createNoopComponent()
+    const NotFound = createNoopComponent()
+    const router = createSingleRouteRouter(Home, NotFound)
 
-    const NotFound: SetupComponent = () => {
-      return () => {
-        return undefined
-      }
-    }
-
-    const router = createRouter({
-      routes: [{ path: '/', component: Home }],
-      fallback: NotFound,
-    })
-
-    const Root: SetupComponent = () => {
-      return () => {
-        return undefined
-      }
-    }
+    const Root = createNoopComponent()
 
     const app = createApp(Root)
 
     app.use(router)
     app.unmount()
 
-    const popstateRemoveCalls = removeSpy.mock.calls.filter((call) => {
-      return call[0] === 'popstate'
-    })
+    const popstateRemoveCalls = filterPopstateCalls(removeSpy.mock.calls)
+    const popstateAddCalls = filterPopstateCalls(addSpy.mock.calls)
 
     expect(popstateRemoveCalls.length).toBe(1)
 
     const removedHandler = popstateRemoveCalls[0][1]
-    const popstateAddCountForRemovedHandler = addSpy.mock.calls.filter((call) => {
-      return call[0] === 'popstate' && call[1] === removedHandler
+    const popstateAddCountForRemovedHandler = popstateAddCalls.filter(([, handler]) => {
+      return handler === removedHandler
     }).length
 
     expect(popstateAddCountForRemovedHandler).toBe(1)
   })
 
   it('在同一 app 上安装多个 router 时抛错', () => {
-    const Home: SetupComponent = () => {
-      return () => {
-        return undefined
-      }
-    }
+    const Home = createNoopComponent()
+    const NotFound = createNoopComponent()
 
-    const NotFound: SetupComponent = () => {
-      return () => {
-        return undefined
-      }
-    }
+    const routerA = createSingleRouteRouter(Home, NotFound)
+    const routerB = createSingleRouteRouter(Home, NotFound)
 
-    const routerA = createRouter({
-      routes: [{ path: '/', component: Home }],
-      fallback: NotFound,
-    })
-    const routerB = createRouter({
-      routes: [{ path: '/', component: Home }],
-      fallback: NotFound,
-    })
-
-    const Root: SetupComponent = () => {
-      return () => {
-        return undefined
-      }
-    }
+    const Root = createNoopComponent()
 
     const app = createApp(Root)
 
@@ -93,28 +82,11 @@ describe('runtime-dom router 注入', () => {
     const addSpy = vi.spyOn(globalThis, 'addEventListener')
     const removeSpy = vi.spyOn(globalThis, 'removeEventListener')
 
-    const Home: SetupComponent = () => {
-      return () => {
-        return undefined
-      }
-    }
+    const Home = createNoopComponent()
+    const NotFound = createNoopComponent()
+    const router = createSingleRouteRouter(Home, NotFound)
 
-    const NotFound: SetupComponent = () => {
-      return () => {
-        return undefined
-      }
-    }
-
-    const router = createRouter({
-      routes: [{ path: '/', component: Home }],
-      fallback: NotFound,
-    })
-
-    const Root: SetupComponent = () => {
-      return () => {
-        return undefined
-      }
-    }
+    const Root = createNoopComponent()
 
     const appA = createApp(Root)
     const appB = createApp(Root)
@@ -123,20 +95,17 @@ describe('runtime-dom router 注入', () => {
     appB.use(router)
 
     appA.unmount()
-    const popstateRemoveCountAfterFirstUnmount = removeSpy.mock.calls.filter((call) => {
-      return call[0] === 'popstate'
-    }).length
+    const popstateRemoveCountAfterFirstUnmount = filterPopstateCalls(removeSpy.mock.calls).length
 
     appB.unmount()
 
-    const popstateRemoveCalls = removeSpy.mock.calls.filter((call) => {
-      return call[0] === 'popstate'
-    })
+    const popstateRemoveCalls = filterPopstateCalls(removeSpy.mock.calls)
+    const popstateAddCalls = filterPopstateCalls(addSpy.mock.calls)
     const newPopstateRemoveCalls = popstateRemoveCalls.slice(popstateRemoveCountAfterFirstUnmount)
 
     const routerRemoveCall = newPopstateRemoveCalls.find((removeCall) => {
-      return addSpy.mock.calls.some((addCall) => {
-        return addCall[0] === 'popstate' && addCall[1] === removeCall[1]
+      return popstateAddCalls.some((addCall) => {
+        return addCall[1] === removeCall[1]
       })
     })
 
@@ -178,10 +147,7 @@ describe('runtime-dom router 注入', () => {
       }
     }
 
-    const router = createRouter({
-      routes: [{ path: '/', component: Home }],
-      fallback: NotFound,
-    })
+    const router = createSingleRouteRouter(Home, NotFound)
 
     expect(router.currentRoute.value.component).toBe(Home)
 
@@ -203,22 +169,9 @@ describe('runtime-dom router 注入', () => {
   })
 
   it('RouterLink 点击时使用注入的 router', () => {
-    const Home: SetupComponent = () => {
-      return () => {
-        return undefined
-      }
-    }
-
-    const NotFound: SetupComponent = () => {
-      return () => {
-        return undefined
-      }
-    }
-
-    const router = createRouter({
-      routes: [{ path: '/', component: Home }],
-      fallback: NotFound,
-    })
+    const Home = createNoopComponent()
+    const NotFound = createNoopComponent()
+    const router = createSingleRouteRouter(Home, NotFound)
 
     const navigateSpy = vi.spyOn(router, 'navigate')
 
@@ -246,22 +199,9 @@ describe('runtime-dom router 注入', () => {
   })
 
   it('RouterLink 对修饰键/中键点击保持默认行为', () => {
-    const Home: SetupComponent = () => {
-      return () => {
-        return undefined
-      }
-    }
-
-    const NotFound: SetupComponent = () => {
-      return () => {
-        return undefined
-      }
-    }
-
-    const router = createRouter({
-      routes: [{ path: '/', component: Home }],
-      fallback: NotFound,
-    })
+    const Home = createNoopComponent()
+    const NotFound = createNoopComponent()
+    const router = createSingleRouteRouter(Home, NotFound)
 
     const navigateSpy = vi.spyOn(router, 'navigate')
 
@@ -312,22 +252,9 @@ describe('runtime-dom router 注入', () => {
   })
 
   it('RouterLink 将 target=_blank 导航交给浏览器处理', () => {
-    const Home: SetupComponent = () => {
-      return () => {
-        return undefined
-      }
-    }
-
-    const NotFound: SetupComponent = () => {
-      return () => {
-        return undefined
-      }
-    }
-
-    const router = createRouter({
-      routes: [{ path: '/', component: Home }],
-      fallback: NotFound,
-    })
+    const Home = createNoopComponent()
+    const NotFound = createNoopComponent()
+    const router = createSingleRouteRouter(Home, NotFound)
 
     const navigateSpy = vi.spyOn(router, 'navigate')
 
@@ -386,10 +313,7 @@ describe('runtime-dom router 注入', () => {
       }
     }
 
-    const router = createRouter({
-      routes: [{ path: '/', component: Home }],
-      fallback: NotFound,
-    })
+    const router = createSingleRouteRouter(Home, NotFound)
 
     expect(router.currentRoute.value.component).toBe(Home)
 

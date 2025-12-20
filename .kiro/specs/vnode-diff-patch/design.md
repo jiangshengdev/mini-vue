@@ -1,101 +1,243 @@
-# VNode Diff / Patch — Design
+# Design Document
 
-## 1. 现状与问题定位
+## Overview
 
-- 组件更新：`src/runtime-core/component/render-effect.ts` 在 rerender 时执行 `teardownMountedSubtree` 再重新挂载，导致 DOM/子组件实例重建。
-- 根渲染：`src/runtime-core/renderer.ts` 每次 render 先 clear 容器，无 root patch。
-- mount 模型：当前 mount 返回 `MountedHandle`（`nodes[] + teardown()`），但 VNode 本身不携带宿主节点引用。
-- DOM props：`src/runtime-dom/patch-props.ts` 当前实现只「写入 next」，无法可靠移除旧 props/解绑事件。
+本设计为 mini-vue 引入 VNode patch 能力，使组件更新能复用既有宿主节点并做增量更新，而非全量卸载重建。核心思路是：runtime-core 负责 diff/patch 与节点移动，宿主平台负责最小原语（create/insert/remove/patchProps/setText）。
 
-## 2. 总体方案
+## Architecture
 
-### 2.1 关键原则
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      runtime-core                            │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
+│  │ patchChild  │──│patchChildren│──│ keyed-children.ts   │  │
+│  │  (入口)     │  │ (children)  │  │ (头尾同步+key map)  │  │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
+│         │                │                    │              │
+│         ▼                ▼                    ▼              │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │              RuntimeVNode (el/anchor/component)      │    │
+│  └─────────────────────────────────────────────────────┘    │
+│         │                                                    │
+└─────────│────────────────────────────────────────────────────┘
+          │ RendererOptions
+          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                      runtime-dom                             │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
+│  │  setText    │  │ patchProps  │  │  invoker cache      │  │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+```
 
-- runtime-core 负责 diff/patch 与节点移动；宿主负责最小原语（create/insert/remove/patchProps/setText）。
-- JSX 的 `VirtualNode` 类型保持「平台无关、无宿主引用」；宿主引用由 runtime-core 内部的运行时结构维护。
-- 更新失败不破坏上一轮 DOM：仍遵循「先生成新子树，成功后再替换/patch」的顺序。
+## Components and Interfaces
 
-### 2.2 渲染原语扩展（RendererOptions）
+### RendererOptions 扩展
 
-在 `src/runtime-core/renderer.ts` 的 `RendererOptions` 扩展：
+```typescript
+interface RendererOptions<HostNode, HostElement> {
+  // 现有方法...
+  
+  // 新增：文本节点更新
+  setText(node: HostNode, text: string): void;
+  
+  // 升级签名：支持 prev/next 差量
+  patchProps(
+    element: HostElement,
+    prevProps: Record<string, unknown> | undefined,
+    nextProps: Record<string, unknown> | undefined
+  ): void;
+}
+```
 
-- `setText(node: HostNode, text: string): void`
-- `patchProps(element: HostElement, prevProps?: PropsShape, nextProps?: PropsShape): void`
+### RuntimeVNode 结构
 
-设计要点：
+```typescript
+// runtime-core 内部结构，不暴露到 jsx-foundation
+interface RuntimeVNode {
+  // 原始 VNode 字段...
+  
+  // 运行时字段
+  el?: HostNode | HostElement;      // Text/Element 的宿主节点引用
+  anchor?: HostNode;                 // Fragment/数组 children 的结束锚点
+  component?: ComponentInstance;     // 组件实例引用
+}
+```
 
-- `patchProps` 必须支持：
-  - 移除 prev 中有、next 中无（或 next 为 null/false）的属性
-  - `class/style` 覆盖与清空
-  - 事件监听更新/解绑（需要 invoker 缓存）
+### patchChild 入口
 
-### 2.3 runtime-core 的 vnode 运行时信息
+```typescript
+function patchChild(
+  oldVNode: RuntimeVNode,
+  newVNode: RuntimeVNode,
+  container: HostElement,
+  anchor?: HostNode
+): void {
+  // same 判定：type + key
+  if (isSameVNodeType(oldVNode, newVNode)) {
+    // 分派到具体 patch 逻辑
+    if (isText(oldVNode)) {
+      patchText(oldVNode, newVNode);
+    } else if (isElement(oldVNode)) {
+      patchElement(oldVNode, newVNode);
+    } else if (isComponent(oldVNode)) {
+      patchComponent(oldVNode, newVNode);
+    }
+  } else {
+    // 类型不同：replace
+    unmount(oldVNode);
+    mount(newVNode, container, anchor);
+  }
+}
+```
 
-引入 runtime-core 内部结构（建议命名 `RuntimeVNode` / `MountedVNode`）：
+### patchChildren 算法
 
-- `el: HostNode | HostElement`：Text/Element 的宿主节点引用
-- `anchor?: HostNode`：Fragment/数组 children 的结束锚点
-- `component?: ComponentInstance`：组件 vnode 的实例引用（用于复用实例）
+```typescript
+function patchChildren(
+  oldChildren: RuntimeVNode[],
+  newChildren: RuntimeVNode[],
+  container: HostElement,
+  anchor?: HostNode
+): void {
+  if (hasKey(newChildren)) {
+    patchKeyedChildren(oldChildren, newChildren, container, anchor);
+  } else {
+    patchUnkeyedChildren(oldChildren, newChildren, container, anchor);
+  }
+}
+```
 
-说明：
+## Data Models
 
-- 这些字段是 runtime-core 内部实现细节，不上浮到 `src/jsx-foundation/types.ts`。
+### Invoker Cache（事件缓存）
 
-### 2.4 patch 入口与分派
+```typescript
+// 存储在 element 上的事件 invoker 缓存
+interface EventInvoker {
+  value: EventListener;
+  attached: number;  // 绑定时间戳
+}
 
-新增 `patchChild(old, next, container, anchor?)` 作为统一入口：
+// element._vei = { onClick: invoker, onInput: invoker, ... }
+type EventInvokerCache = Record<string, EventInvoker | undefined>;
+```
 
-- same 判定：virtual node 以 `type + key`；Text 以「都是文本」。
-- 分派：Text / Element / Fragment(数组) / Component。
+### Children Diff 中间状态
 
-#### Text patch
+```typescript
+// keyed diff 的 key → index 映射
+type KeyToIndexMap = Map<string | number, number>;
 
-- 复用旧 TextNode：`setText(old.el, String(next))`。
+// newIndex → oldIndex 映射（用于 LIS 优化）
+type NewIndexToOldIndexMap = number[];
+```
 
-#### Element patch
+## Correctness Properties
 
-- 复用旧 element：`next.el = old.el`。
-- `options.patchProps(el, old.props, next.props)`。
-- children：走 `patchChildren(old.children, next.children, el)`。
+*A property is a characteristic or behavior that should hold true across all valid executions of a system—essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
 
-#### Fragment/数组 children patch
+### Property 1: 文本节点复用
 
-- 需要边界 anchors（start/end）限制更新范围。
-- 在边界内执行 children diff，并使用 `insertBefore` 进行移动/插入。
+*For any* 文本节点和任意新文本内容，当执行 patch 时，宿主节点引用应保持不变，且 nodeValue 应等于新文本内容。
 
-#### Component patch
+**Validates: Requirements 1.1, 1.2**
 
-- 复用组件实例，不再 teardown。
-- 将新 vnode props 更新到 instance，然后触发 rerender（effect 调度仍保持现状；scheduler 在另一个 spec）。
-- 子树从「卸载+重挂」改为 `patch(oldSubTree, newSubTree, container, anchor)`。
+### Property 2: 元素节点复用
 
-## 3. children diff 算法（Vue 3 风格）
+*For any* 同类型（tagName 相同）的元素节点，当执行 patch 时，宿主元素引用应保持不变。
 
-### 3.1 Phase A：无 key（按索引对齐）
+**Validates: Requirements 2.1, 2.2**
 
-- patch 公共长度区间
-- mount 新增尾部
-- unmount 旧的尾部
+### Property 3: Props 差量更新
 
-### 3.2 Phase B：有 key（头尾同步 + key map，中间区间移动）
+*For any* prevProps 和 nextProps 组合，patch 后元素应满足：
+- nextProps 中的所有字段都被正确应用
+- prevProps 中存在但 nextProps 中缺失（或为 null/false）的字段被移除
 
-- 头部同步（从左到右）
-- 尾部同步（从右到左）
-- 中间区间：建立 `key → newIndex`，遍历 old 做匹配 patch / unmount
-- 再遍历 new：mount 不存在的
-- 移动：
-  - 基础实现：从后往前 `insertBefore` 到正确 anchor（保证语义正确）
-  - 可选优化：对 newIndexToOldIndex 求 LIS，减少移动
+**Validates: Requirements 3.1, 3.2, 3.3, 3.4, 3.5**
 
-## 4. 错误处理
+### Property 4: 事件监听不叠加
 
-- 保持现有 rerender 的「先 run renderSchedulerJob 成功，再进行替换/patch」的顺序。
-- render 抛错：恢复 `instance.subTree = previousSubTree` 并退出，不触碰已挂载 DOM。
+*For any* 事件监听更新序列，触发事件时应只调用最新的 handler，且调用次数为 1。
 
-## 5. 单元测试策略
+**Validates: Requirements 4.1, 4.2**
 
-- 优先添加能证明「未重建」的断言：
-  - TextNode/Element 引用不变
-  - 事件监听不叠加
-  - key 移动只移动不重建
-- 以 `test/runtime-core/**` + `test/runtime-dom/**` 为主；必要时加少量集成用例。
+### Property 5: 无 key 子节点索引对齐
+
+*For any* 无 key 的 children 数组变化，patch 后应满足：
+- 公共区间内的节点引用保持不变
+- 最终 DOM 顺序与新 children 顺序一致
+- 新增节点被正确 mount，多余节点被正确 unmount
+
+**Validates: Requirements 5.1, 5.2, 5.3**
+
+### Property 6: Keyed diff 保序与复用
+
+*For any* 带 key 的 children 列表变换（包括重排、插入、删除），patch 后应满足：
+- 最终 DOM 顺序与新 children 顺序一致
+- 稳定 key 的节点引用集合不变
+- 仅新增的 key 对应新 mount 的节点
+- 仅删除的 key 对应被 unmount 的节点
+
+**Validates: Requirements 6.1, 6.2, 6.3, 6.4**
+
+### Property 7: 组件子树 patch 复用
+
+*For any* 组件响应式更新，patch 后应满足：
+- 子组件实例引用保持不变
+- 子树中可复用的节点引用保持不变
+
+**Validates: Requirements 7.1, 7.2**
+
+## Error Handling
+
+### 组件更新错误隔离
+
+- 保持现有 rerender 的「先 run renderSchedulerJob 成功，再进行替换/patch」的顺序
+- render 抛错时：恢复 `instance.subTree = previousSubTree` 并退出，不触碰已挂载 DOM
+- 错误通过现有的 error channel 上报，不影响兄弟组件
+
+### patch 过程错误
+
+- 单个节点 patch 失败不应影响兄弟节点
+- 保持 DOM 树的一致性状态
+
+## Testing Strategy
+
+### 测试框架
+
+- 使用 Vitest 作为测试框架
+- 使用 fast-check 进行 Property-Based Testing（可选）
+- 测试文件位于 `test/runtime-core/patch/` 和 `test/runtime-dom/`
+
+### 单元测试
+
+单元测试用于验证特定示例和边界情况：
+
+- setText 功能验证
+- patchProps 边界情况（class/style 清空、null/false 移除）
+- 事件监听移除（removeEventListener 调用验证）
+- 错误隔离场景
+- RuntimeVNode 结构验证
+
+### Property-Based Tests
+
+Property-Based Tests 用于验证通用属性，每个属性测试至少运行 100 次迭代：
+
+- **Property 1**: 文本节点复用 - 生成随机文本内容，验证节点引用不变
+- **Property 2**: 元素节点复用 - 生成随机 props 变化，验证元素引用不变
+- **Property 3**: Props 差量更新 - 生成随机 prevProps/nextProps，验证差量正确应用
+- **Property 4**: 事件监听不叠加 - 生成随机事件更新序列，验证只触发最新 handler
+- **Property 5**: 无 key 子节点索引对齐 - 生成随机列表变化，验证索引对齐和节点复用
+- **Property 6**: Keyed diff 保序与复用 - 生成随机 key 列表变换，验证顺序和复用
+- **Property 7**: 组件子树 patch 复用 - 生成随机组件更新，验证实例和节点复用
+
+### 测试标注格式
+
+每个 property test 必须包含注释标注：
+
+```typescript
+// Feature: vnode-diff-patch, Property 6: Keyed diff 保序与复用
+// Validates: Requirements 6.1, 6.2, 6.3, 6.4
+```

@@ -44,14 +44,14 @@ export function normalizeRenderOutput(output: RenderOutput): NormalizedRenderOut
 
   /* 数组输出包裹为 Fragment，交由后续 children 归一化处理。 */
   if (Array.isArray(output)) {
-    const fragmentVnode = createVirtualNode({
+    const fragmentVirtualNode = createVirtualNode({
       type: Fragment,
       rawProps: {
         children: output as ComponentChildren,
       } satisfies FragmentProps,
     })
 
-    return normalizeVirtualNodeForRuntime(fragmentVnode)
+    return normalizeVirtualNodeForRuntime(fragmentVirtualNode)
   }
 
   /* 已是 VirtualNode 时递归规整内部 children，保持形态一致。 */

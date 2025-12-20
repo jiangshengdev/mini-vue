@@ -8,6 +8,9 @@
   - 组件更新无法复用既有子树，子组件实例与其内部状态会被整体销毁并重建（如 `ref`、`reactive` 数据、effect/watch 等）。
   - DOM 也会被移除后重建，导致焦点、滚动位置、输入法组合态等瞬态状态丢失。
 - 提示：需要引入「子树 patch/复用」机制（而非全量 teardown/remount），至少应做到在同一组件实例下对新旧子树做差量更新。
+- 可能方案：
+  - 将 `render` 产出的新旧子树交给 `patchChildren`/`patchChild` 做 diff，组件实例内维护 `mountedHandle` 与 `subtree` 的引用以便复用宿主节点。
+  - 若短期无法引入完整 diff，可先实现「同类型节点复用」的简化策略：仅当 `type/key` 相同且 `render` 成功时复用旧子树并对 props/children 做 patch，避免直接 teardown。
 
 ## 2. 更新流程在 render 成功前就卸载旧子树，失败时无法回滚（已修复）
 
@@ -92,3 +95,12 @@
   - 仅在渲染成功后才写入 `state.container` 与状态字段，render 抛错时保持两者为初始值，状态保持一致。
   - 失败后调用 `unmount()` 不会误触发宿主清理。
 - 测试：`test/runtime-core/app/mount-failure-state.test.tsx`
+
+## 11. 渲染抛错时容器可能残留部分挂载内容且无法通过 `unmount` 清理（待确认）
+
+- 位置：`src/runtime-core/create-app.ts`（`mountApp`）
+- 现状：渲染开始前未记录容器引用，`render` 若在挂载中途抛错，`state.container` 仍为 `undefined`，`unmount()` 会直接返回。若宿主已经写入部分节点或注册事件，缺少后续清理路径。
+- 影响：容器可能残留部分 DOM/副作用，且应用实例认为自己未挂载，后续恢复需要手工处理。
+- 可能方案：
+  - 在调用 `render` 前先记录容器引用，并在 catch/finally 中对失败场景执行宿主级清理（例如调用 `config.unmount` 或记录失败状态后允许 `unmount` 生效）。
+  - 或在渲染失败时返回带 `ok=false` 的句柄并缓存到状态中，`unmount` 时无论成功/失败都尝试执行 teardown，确保容器被清空。

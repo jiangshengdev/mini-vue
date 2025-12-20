@@ -84,9 +84,9 @@
 | 目录                    | 重点关注                                                               |
 | ----------------------- | ---------------------------------------------------------------------- |
 | `src/reactivity/**`     | 响应式依赖追踪/触发、effect 生命周期、ref/computed/watch 的时序与清理  |
-| `src/runtime-core/**`   | VirtualNode/组件实例、mount/patch 流程、错误处理与边界                       |
+| `src/runtime-core/**`   | VirtualNode/组件实例、mount/patch 流程、错误处理与边界                 |
 | `src/runtime-dom/**`    | 宿主实现细节（DOM 属性/事件/类名合并），与 runtime-core options 的契约 |
-| `src/jsx-foundation/**` | VirtualNode 工厂、children 归一化、与 JSX runtime 的边界                     |
+| `src/jsx-foundation/**` | VirtualNode 工厂、children 归一化、与 JSX runtime 的边界               |
 | `src/jsx-runtime/**`    | `jsx/jsxs/jsxDEV/h` 等封装的语义差异与开发态处理                       |
 | `src/router/**`         | 路径归一化、导航状态、`RouterLink/RouterView` 的渲染时机与依赖         |
 | `src/shared/**`         | 跨域工具、错误通道、环境检测与注入机制                                 |

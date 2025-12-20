@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { createHostRenderer, normalize } from './test-utils.ts'
-import { asRuntimeVirtualNode, mountChild, patchChild, patchChildren } from '@/runtime-core/index.ts'
+import {
+  asRuntimeVirtualNode,
+  mountChild,
+  patchChild,
+  patchChildren,
+} from '@/runtime-core/index.ts'
 import { createTextVirtualNode } from '@/jsx-foundation/index.ts'
 import { ref } from '@/index.ts'
 

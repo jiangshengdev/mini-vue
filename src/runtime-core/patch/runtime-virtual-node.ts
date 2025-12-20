@@ -16,12 +16,12 @@ export function asRuntimeNormalizedVirtualNode<
   HostNode,
   HostElement extends HostNode & WeakKey = HostNode & WeakKey,
   HostFragment extends HostNode = HostNode,
->(virtualNode: NormalizedVirtualNode): RuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment> {
-  return asRuntimeVirtualNode<HostNode, HostElement, HostFragment>(virtualNode) as RuntimeNormalizedVirtualNode<
-    HostNode,
-    HostElement,
-    HostFragment
-  >
+>(
+  virtualNode: NormalizedVirtualNode,
+): RuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment> {
+  return asRuntimeVirtualNode<HostNode, HostElement, HostFragment>(
+    virtualNode,
+  ) as RuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>
 }
 
 /** 读取 `virtualNode` 对应的宿主节点集合（`Fragment`/组件/元素/文本统一）。 */

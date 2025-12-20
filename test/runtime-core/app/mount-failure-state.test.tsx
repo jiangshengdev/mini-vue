@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
-import { createTestContainer } from '../../setup.ts'
+import { createTestContainer, createRenderlessComponent } from '../../helpers.ts'
 import { createAppInstance } from '@/runtime-core/index.ts'
-import { createRenderlessComponent } from '../helpers.ts'
 
 describe('runtime-core createAppInstance mount 失败状态回滚', () => {
   it('render 抛错时不缓存 container 且不调用宿主 unmount', () => {

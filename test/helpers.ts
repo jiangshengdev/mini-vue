@@ -1,6 +1,25 @@
-import { createTestContainer } from '../setup.ts'
-import { createApp, render } from '@/index.ts'
 import type { SetupComponent } from '@/index.ts'
+import { createApp, render } from '@/index.ts'
+
+const mountedContainers = new Set<HTMLElement>()
+
+export function createTestContainer(): HTMLDivElement {
+  const element = document.createElement('div')
+
+  document.body.append(element)
+  mountedContainers.add(element)
+
+  return element
+}
+
+export function cleanupTestContainers(): void {
+  for (const element of mountedContainers) {
+    element.remove()
+  }
+
+  mountedContainers.clear()
+  document.body.innerHTML = ''
+}
 
 /** 创建不渲染内容的组件，用于触发 setup/生命周期但不产出 DOM。 */
 export function createRenderlessComponent(onSetup?: () => void): SetupComponent {

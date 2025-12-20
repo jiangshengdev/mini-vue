@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { screen, within } from '@testing-library/dom'
-import { createHostWithApp } from '../helpers.ts'
+import { createHostWithApp } from '../../helpers.ts'
 import type { SetupComponent } from '@/index.ts'
 import { reactive } from '@/index.ts'
 import { runtimeCoreAppAlreadyMounted, runtimeDomContainerNotFound } from '@/messages/index.ts'

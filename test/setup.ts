@@ -1,24 +1,9 @@
 import * as jestDom from '@testing-library/jest-dom/vitest'
 import { afterEach } from 'vitest'
+import { cleanupTestContainers } from './helpers.ts'
 
 void jestDom
 
-const mountedContainers = new Set<HTMLElement>()
-
-export function createTestContainer(): HTMLDivElement {
-  const element = document.createElement('div')
-
-  document.body.append(element)
-  mountedContainers.add(element)
-
-  return element
-}
-
 afterEach(() => {
-  for (const element of mountedContainers) {
-    element.remove()
-  }
-
-  mountedContainers.clear()
-  document.body.innerHTML = ''
+  cleanupTestContainers()
 })

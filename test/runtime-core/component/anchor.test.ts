@@ -5,7 +5,7 @@ import type { SetupComponent } from '@/index.ts'
 import { effectScope } from '@/index.ts'
 import type { TestElement, TestFragment, TestNode } from '../patch/test-utils.ts'
 import { createHostRenderer } from '../patch/test-utils.ts'
-import { createRenderlessComponent } from '../helpers.ts'
+import { createRenderlessComponent } from '../../helpers.ts'
 
 describe('mountComponentSubtreeWithAnchors', () => {
   it('逐个插入 fragment 子节点，不要求宿主 insertBefore 处理 fragment', () => {

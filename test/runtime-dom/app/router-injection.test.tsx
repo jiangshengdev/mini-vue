@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { createRenderlessComponent } from '../helpers.ts'
-import { createTestContainer } from '../../setup.ts'
+import { createRenderlessComponent, createTestContainer } from '../../helpers.ts'
 import type { SetupComponent } from '@/index.ts'
 import { createApp, createRouter, ref, RouterLink, RouterView } from '@/index.ts'
 import { invokerCacheKey } from '@/runtime-dom/index.ts'

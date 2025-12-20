@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createHostWithApp, createRenderlessComponent } from '../helpers.ts'
-import { createTestContainer } from '../../setup.ts'
+import { createHostWithApp, createRenderlessComponent, createTestContainer } from '../../helpers.ts'
 import type { InjectionToken, SetupComponent } from '@/index.ts'
 import { inject, provide, ref, render } from '@/index.ts'
 

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { createTestContainer } from '../../setup.ts'
-import type { SetupComponent } from '@/index.ts'
 import { createAppInstance } from '@/runtime-core/index.ts'
+import { createRenderlessComponent } from '../helpers.ts'
 
 describe('runtime-core createAppInstance mount 失败状态回滚', () => {
   it('render 抛错时不缓存 container 且不调用宿主 unmount', () => {
@@ -13,13 +13,7 @@ describe('runtime-core createAppInstance mount 失败状态回滚', () => {
     })
     const unmount = vi.fn()
 
-    const Root: SetupComponent = () => {
-      return () => {
-        return <div>root</div>
-      }
-    }
-
-    const app = createAppInstance({ render, unmount }, Root)
+    const app = createAppInstance({ render, unmount }, createRenderlessComponent())
 
     expect(() => {
       app.mount(container)

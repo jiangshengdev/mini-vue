@@ -1,30 +1,18 @@
 import { describe, expect, it, vi } from 'vitest'
-import type { ComponentInstance, RendererOptions } from '@/runtime-core/index.ts'
+import type { ComponentInstance } from '@/runtime-core/index.ts'
 import { mountComponentSubtreeWithAnchors } from '@/runtime-core/index.ts'
 import type { SetupComponent } from '@/index.ts'
 import { effectScope } from '@/index.ts'
-
-interface TestNode {
-  kind: 'element' | 'text' | 'fragment'
-  children: TestNode[]
-  parent?: TestNode
-  text?: string
-  tag?: string
-}
-
-type TestElement = TestNode & { kind: 'element' }
-
-type TestFragment = TestNode & { kind: 'fragment' }
+import type { TestElement, TestFragment, TestNode } from '../patch/test-utils.ts'
+import { createHostRenderer } from '../patch/test-utils.ts'
+import { createRenderlessComponent } from '../helpers.ts'
 
 describe('mountComponentSubtreeWithAnchors', () => {
   it('逐个插入 fragment 子节点，不要求宿主 insertBefore 处理 fragment', () => {
-    const { options, insertBefore } = createHostOptions()
+    const host = createHostRenderer()
+    const insertBefore = vi.spyOn(host.options, 'insertBefore')
     const container: TestElement = { kind: 'element', tag: 'root', children: [] }
-    const component: SetupComponent = () => {
-      return () => {
-        return undefined
-      }
-    }
+    const component = createRenderlessComponent()
 
     const instance: ComponentInstance<TestNode, TestElement, TestFragment, SetupComponent> = {
       provides: {},
@@ -40,7 +28,7 @@ describe('mountComponentSubtreeWithAnchors', () => {
       setupContext: {},
     }
 
-    const mounted = mountComponentSubtreeWithAnchors(options, instance, 'child')
+    const mounted = mountComponentSubtreeWithAnchors(host.options, instance, 'child')
 
     expect(mounted?.nodes).toHaveLength(3)
     expect(insertBefore).toHaveBeenCalledTimes(1)
@@ -55,85 +43,11 @@ describe('mountComponentSubtreeWithAnchors', () => {
     expect(first).toBe(instance.startAnchor)
     expect(second.text).toBe('child')
     expect(third).toBe(instance.endAnchor)
+
+    const passedChildren = insertBefore.mock.calls.map(([, child]) => {
+      return child
+    })
+
+    expect(passedChildren.every((child) => child.kind !== 'fragment')).toBe(true)
   })
 })
-
-function createHostOptions(): {
-  options: RendererOptions<TestNode, TestElement, TestFragment>
-  insertBefore: ReturnType<typeof vi.fn>
-} {
-  const removeFromParent = (node: TestNode): void => {
-    if (!node.parent) {
-      return
-    }
-
-    const siblings = node.parent.children
-    const index = siblings.indexOf(node)
-
-    if (index !== -1) {
-      siblings.splice(index, 1)
-    }
-
-    node.parent = undefined
-  }
-
-  const insertBefore = vi.fn(
-    (parent: TestElement | TestFragment, child: TestNode, anchor?: TestNode): void => {
-      if (child.kind === 'fragment') {
-        throw new Error('fragment insertion is not supported')
-      }
-
-      removeFromParent(child)
-
-      if (!anchor) {
-        parent.children.push(child)
-        child.parent = parent
-
-        return
-      }
-
-      const index = parent.children.indexOf(anchor)
-
-      if (index === -1) {
-        throw new Error('anchor not found in parent')
-      }
-
-      parent.children.splice(index, 0, child)
-      child.parent = parent
-    },
-  )
-
-  const options: RendererOptions<TestNode, TestElement, TestFragment> = {
-    createElement(type): TestElement {
-      return { kind: 'element', tag: type, children: [] }
-    },
-    createText(text): TestNode {
-      return { kind: 'text', text, children: [] }
-    },
-    createFragment(): TestFragment {
-      return { kind: 'fragment', children: [] }
-    },
-    setText(node, text): void {
-      if (node.kind === 'text') {
-        node.text = text
-      }
-    },
-    appendChild(parent, child): void {
-      removeFromParent(child)
-      parent.children.push(child)
-      child.parent = parent
-    },
-    insertBefore,
-    clear(container): void {
-      container.children = []
-    },
-    remove(node): void {
-      removeFromParent(node)
-    },
-    patchProps(): void {
-      /* No-op for tests */
-    },
-  }
-
-  return { options, insertBefore }
-}

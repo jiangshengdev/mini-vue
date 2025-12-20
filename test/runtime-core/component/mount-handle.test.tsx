@@ -6,18 +6,13 @@ import { createVirtualNode } from '@/jsx-foundation/index.ts'
 import { runtimeCoreAsyncSetupNotSupported } from '@/messages/index.ts'
 import { mountComponent } from '@/runtime-core/index.ts'
 import { domRendererOptions } from '@/runtime-dom/index.ts'
+import { createRenderlessComponent } from '../helpers.ts'
 
 describe('runtime-core mountComponent handle ok flag', () => {
   it('空渲染仍返回句柄且 ok=true', () => {
     const container = createTestContainer()
 
-    const Empty: SetupComponent = () => {
-      return () => {
-        return undefined
-      }
-    }
-
-    const vnode = createVirtualNode({ type: Empty })
+    const vnode = createVirtualNode({ type: createRenderlessComponent() })
     const mounted = mountComponent(domRendererOptions, vnode, container)
 
     expect(mounted).toBeDefined()

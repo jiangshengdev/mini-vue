@@ -11,8 +11,8 @@ describe('runtime-core mountComponent handle ok flag', () => {
   it('空渲染仍返回句柄且 ok=true', () => {
     const container = createTestContainer()
 
-    const vnode = createVirtualNode({ type: createRenderlessComponent() })
-    const mounted = mountComponent(domRendererOptions, vnode, container)
+    const virtualNode = createVirtualNode({ type: createRenderlessComponent() })
+    const mounted = mountComponent(domRendererOptions, virtualNode, container)
 
     expect(mounted).toBeDefined()
     expect(mounted?.ok).toBe(true)
@@ -35,8 +35,8 @@ describe('runtime-core mountComponent handle ok flag', () => {
       }
     }
 
-    const vnode = createVirtualNode({ type: Faulty })
-    const mounted = mountComponent(domRendererOptions, vnode, container)
+    const virtualNode = createVirtualNode({ type: Faulty })
+    const mounted = mountComponent(domRendererOptions, virtualNode, container)
 
     expect(mounted).toBeDefined()
     expect(mounted?.ok).toBe(false)
@@ -61,8 +61,8 @@ describe('runtime-core mountComponent handle ok flag', () => {
       }
     }) as unknown as SetupComponent
 
-    const vnode = createVirtualNode({ type: AsyncSetup })
-    const mounted = mountComponent(domRendererOptions, vnode, container)
+    const virtualNode = createVirtualNode({ type: AsyncSetup })
+    const mounted = mountComponent(domRendererOptions, virtualNode, container)
 
     expect(mounted).toBeUndefined()
     expect(container.childNodes.length).toBe(0)

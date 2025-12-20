@@ -18,7 +18,7 @@ type TestElement = TestNode
 type TestFragment = TestNode
 
 describe('patch typing', () => {
-  it('patchChild 参数接受归一化 vnode 或空值', () => {
+  it('patchChild 参数接受归一化 virtualNode 或空值', () => {
     type ParametersTuple = Parameters<typeof patchChild<TestNode, TestElement, TestFragment>>
 
     expectTypeOf<ParametersTuple[1]>().toEqualTypeOf<NormalizedVirtualNode | undefined>()

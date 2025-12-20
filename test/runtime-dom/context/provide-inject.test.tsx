@@ -81,24 +81,24 @@ describe('runtime-dom provide/inject', () => {
     app.unmount()
   })
 
-  it('直接渲染根 vnode 时从 vnode.appContext 注入值', () => {
+  it('直接渲染根 virtualNode 时从 virtualNode.appContext 注入值', () => {
     const injectedText = ref('')
 
-    /* 直接操作 vnode.appContext 模拟外部渲染场景，验证渲染入口也能透传 provide。 */
+    /* 直接操作 virtualNode.appContext 模拟外部渲染场景，验证渲染入口也能透传 provide。 */
     const Child = createRenderlessComponent(() => {
       injectedText.value = inject<string>('k') ?? ''
     })
 
     const container = createTestContainer()
-    const vnode = <Child />
+    const virtualNode = <Child />
 
-    ;(vnode as { appContext?: { provides: Record<InjectionToken, unknown> } }).appContext = {
+    ;(virtualNode as { appContext?: { provides: Record<InjectionToken, unknown> } }).appContext = {
       provides: {
         k: 'v',
       },
     }
 
-    render(vnode, container)
+    render(virtualNode, container)
 
     expect(injectedText.value).toBe('v')
 

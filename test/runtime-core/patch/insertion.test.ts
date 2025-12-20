@@ -72,12 +72,12 @@ describe('patch 插入与诊断', () => {
   })
 
   it('ensureHostNodes 在 DEV 模式下当运行时节点缺失时发出警告', () => {
-    const vnode = normalizeRenderOutput(createTextVirtualNode('lonely'))!
+    const virtualNode = normalizeRenderOutput(createTextVirtualNode('lonely'))!
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {
       return undefined
     })
 
-    ensureHostNodes<TestNode, TestElement, TestFragment>(vnode)
+    ensureHostNodes<TestNode, TestElement, TestFragment>(virtualNode)
 
     if (__DEV__) {
       expect(warn).toHaveBeenCalledOnce()

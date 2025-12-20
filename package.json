@@ -31,6 +31,7 @@
     "tag": "beta"
   },
   "scripts": {
+    "clean": "rm -rf dist etc temp docs/.vitepress/cache docs/.vitepress/dist .eslintcache",
     "build": "tsdown && pnpm run generate:jsx-shim",
     "generate:jsx-shim": "tsx scripts/generate-jsx-shim.ts",
     "check:cross-boundary-import-style": "tsx scripts/check/import/check-cross-boundary-import-style.ts",
@@ -58,7 +59,7 @@
     "format": "prettier docs playground scripts src test --write",
     "fmt": "prettier docs playground scripts src test --write --log-level silent",
     "typecheck": "tsc --noEmit",
-    "api": "api-extractor run --local --verbose -c api-extractor.jsonc",
+    "api": "mkdir -p etc && api-extractor run --local --verbose -c api-extractor.jsonc",
     "release": "bumpp && pnpm publish",
     "prepublishOnly": "pnpm run build",
     "docs:dev": "vitepress dev docs",

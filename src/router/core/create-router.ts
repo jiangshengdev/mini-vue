@@ -32,6 +32,8 @@ function getCurrentBrowserPath(): string {
 
 /**
  * 基于 `history` 的最小路由实现，封装路径匹配与状态同步。
+ *
+ * @beta
  */
 export function createRouter(config: RouterConfig): Router {
   const routeMap = new Map<string, RouteRecord['component']>()

@@ -3,6 +3,8 @@ import type { PlainObject } from '@/shared/index.ts'
 
 /**
  * 描述 effect 对应的外部可用接口。
+ *
+ * @beta
  */
 export interface EffectHandle<T = unknown> {
   /**
@@ -47,11 +49,15 @@ export type DependencyBucket = Set<EffectInstance>
 
 /**
  * `effect` 调度器接收一个可延迟执行的任务。
+ *
+ * @beta
  */
 export type EffectScheduler = (job: () => void) => void
 
 /**
  * `effect` 的可选配置，目前仅支持自定义调度器。
+ *
+ * @beta
  */
 export interface EffectOptions {
   /** 自定义调度行为，允许延迟或合并 effect 执行。 */

@@ -5,6 +5,8 @@ import type { InjectionToken } from '@/shared/index.ts'
 /**
  * 在当前组件实例上提供依赖，供后代组件通过 `inject()` 读取。
  *
+ * @public
+ *
  * @remarks
  * - 严格语义：只能在组件 `setup()` 执行期间调用。
  * - 组件外（如 `app.use()` 插件安装、`router.install()`）请改用 `app.provide()`。
@@ -29,6 +31,8 @@ export function provide(key: InjectionToken, value: unknown): void {
 /**
  * 从当前组件的注入上下文中读取依赖。
  *
+ * @public
+ *
  * @remarks
  * - 严格语义：只能在组件 `setup()` 执行期间调用。
  * - 若 key 不存在且未传 `defaultValue`，返回 `undefined`。
@@ -37,6 +41,9 @@ export function provide(key: InjectionToken, value: unknown): void {
  * @throws 当不存在当前组件实例时抛错（通常意味着不在 `setup()` 中调用）。
  */
 export function inject<T>(key: InjectionToken<T>): T | undefined
+/**
+ * @public
+ */
 export function inject<T>(key: InjectionToken<T>, defaultValue: T): T
 
 export function inject<T>(key: InjectionToken<T>, defaultValue?: T): T | undefined {

@@ -6,6 +6,8 @@ import type { PropsShape } from '@/shared/index.ts'
 
 /**
  * `RouterLink` 的 `props` 定义，描述目标路径与所属路由器。
+ *
+ * @beta
  */
 export interface RouterLinkProps extends PropsShape {
   /** 需要导航到的目标路径。 */
@@ -20,6 +22,8 @@ export interface RouterLinkProps extends PropsShape {
 
 /**
  * 轻量链接组件：拦截点击并通过路由器执行导航。
+ *
+ * @beta
  */
 export const RouterLink: SetupComponent<RouterLinkProps> = (props) => {
   const resolvedRouter = props.router ?? useRouter()

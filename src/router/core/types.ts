@@ -4,6 +4,8 @@ import type { PluginInstallApp } from '@/shared/index.ts'
 
 /**
  * 路由记录：定义原始 path 与对应组件的绑定关系。
+ *
+ * @beta
  */
 export interface RouteRecord {
   /** 需要匹配的路径，约定前导斜杠形式。 */
@@ -14,6 +16,8 @@ export interface RouteRecord {
 
 /**
  * 标准化后的路由定位信息，供渲染消费。
+ *
+ * @beta
  */
 export interface RouteLocation {
   /** 归一化后的路径值。 */
@@ -26,6 +30,8 @@ export interface RouteLocation {
 
 /**
  * 创建路由器的配置输入。
+ *
+ * @beta
  */
 export interface RouterConfig {
   /** 可供匹配的路由记录列表。 */
@@ -36,6 +42,8 @@ export interface RouterConfig {
 
 /**
  * 路由器公开 API，暴露当前路由状态与导航控制。
+ *
+ * @beta
  */
 export interface Router {
   /** 当前路由定位，供外部订阅渲染。 */

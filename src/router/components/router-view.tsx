@@ -16,6 +16,8 @@ const initialRouterViewDepth = -1
 
 /**
  * `RouterView` 的 `props`，承载路由实例以获取当前视图。
+ *
+ * @beta
  */
 export interface RouterViewProps {
   /** 提供 `currentRoute` 的路由器实例。 */
@@ -24,6 +26,8 @@ export interface RouterViewProps {
 
 /**
  * 动态渲染当前路由对应组件的占位容器。
+ *
+ * @beta
  */
 export const RouterView: SetupComponent<RouterViewProps> = (props) => {
   const router = props.router ?? useRouter()

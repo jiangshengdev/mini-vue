@@ -193,7 +193,7 @@ function isElementRef(value: unknown): value is ElementRef {
 type EventInvoker = ((event: Event) => void) & { value?: EventListener }
 
 /** 事件处理器缓存键，挂在宿主元素上保存稳定的 invoker 映射。 */
-export const invokerCacheKey = Symbol('miniVueInvokers')
+export const invokerCacheKey = Symbol('invokerCache')
 
 type InvokerMap = Record<string, EventInvoker>
 

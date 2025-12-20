@@ -40,15 +40,15 @@
 
 按以下顺序执行审核：
 
-| 序号 | 模块类型 | 模块路径 | 输出文件名 |
-|------|----------|----------|------------|
-| 1 | 文件夹 | `test/jsx-runtime/` | `jsx-runtime.md` |
-| 2 | 文件夹 | `test/reactivity/` | `reactivity.md` |
-| 3 | 文件夹 | `test/router/` | `router.md` |
-| 4 | 文件夹 | `test/runtime-core/` | `runtime-core.md` |
-| 5 | 文件夹 | `test/runtime-dom/` | `runtime-dom.md` |
-| 6 | 文件夹 | `test/shared/` | `shared.md` |
-| 7 | 顶级文件 | `test/helpers.ts`, `test/index.ts`, `test/setup.ts` | `top-level.md` |
+| 序号 | 模块类型 | 模块路径                                            | 输出文件名        |
+| ---- | -------- | --------------------------------------------------- | ----------------- |
+| 1    | 文件夹   | `test/jsx-runtime/`                                 | `jsx-runtime.md`  |
+| 2    | 文件夹   | `test/reactivity/`                                  | `reactivity.md`   |
+| 3    | 文件夹   | `test/router/`                                      | `router.md`       |
+| 4    | 文件夹   | `test/runtime-core/`                                | `runtime-core.md` |
+| 5    | 文件夹   | `test/runtime-dom/`                                 | `runtime-dom.md`  |
+| 6    | 文件夹   | `test/shared/`                                      | `shared.md`       |
+| 7    | 顶级文件 | `test/helpers.ts`, `test/index.ts`, `test/setup.ts` | `top-level.md`    |
 
 **注意**: 顶级文件（helpers.ts、index.ts、setup.ts）合并为一个模块进行审核，输出到单个报告文件。
 
@@ -57,16 +57,16 @@
 ```typescript
 interface ReviewRule {
   // 分析维度
-  dimensions: ['correctness', 'maintainability', 'defects'];
-  
+  dimensions: ['correctness', 'maintainability', 'defects']
+
   // 排除项
-  excludes: ['style', 'preference'];
-  
+  excludes: ['style', 'preference']
+
   // 严重程度
-  severityLevels: ['Critical', 'Major', 'Minor'];
-  
+  severityLevels: ['Critical', 'Major', 'Minor']
+
   // 每文件最大问题数
-  maxIssuesPerFile: 5;
+  maxIssuesPerFile: 5
 }
 ```
 
@@ -74,9 +74,9 @@ interface ReviewRule {
 
 ```typescript
 interface Issue {
-  severity: 'Critical' | 'Major' | 'Minor';
-  file: string;
-  description: string;
+  severity: 'Critical' | 'Major' | 'Minor'
+  file: string
+  description: string
 }
 
 // 输出格式: `- [${severity}] ${file}:${description}`
@@ -105,11 +105,11 @@ ${issueList}
 
 ## 统计摘要
 
-| 严重程度 | 数量 |
-|----------|------|
-| Critical | ${criticalCount} |
-| Major | ${majorCount} |
-| Minor | ${minorCount} |
+| 严重程度 | 数量              |
+| -------- | ----------------- |
+| Critical | ${criticalCount}  |
+| Major    | ${majorCount}     |
+| Minor    | ${minorCount}     |
 | **总计** | **${totalCount}** |
 ```
 
@@ -126,16 +126,17 @@ ${issueList}
 
 ## 问题统计
 
-| 严重程度 | 数量 | 占比 |
-|----------|------|------|
+| 严重程度 | 数量             | 占比                |
+| -------- | ---------------- | ------------------- |
 | Critical | ${criticalCount} | ${criticalPercent}% |
-| Major | ${majorCount} | ${majorPercent}% |
-| Minor | ${minorCount} | ${minorPercent}% |
+| Major    | ${majorCount}    | ${majorPercent}%    |
+| Minor    | ${minorCount}    | ${minorPercent}%    |
 
 ## 各模块统计
 
 | 模块 | Critical | Major | Minor | 总计 | 报告链接 |
-|------|----------|-------|-------|------|----------|
+| ---- | -------- | ----- | ----- | ---- | -------- |
+
 ${moduleStatsTable}
 
 ## Critical 问题快速索引
@@ -149,19 +150,20 @@ ${moduleReportLinks}
 
 ## Correctness Properties
 
-*A property is a characteristic or behavior that should hold true across all valid executions of a system-essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
+_A property is a characteristic or behavior that should hold true across all valid executions of a system-essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees._
 
 基于 prework 分析，以下是经过合并和精简后的可测试属性：
 
 ### Property 1: 模块报告生成完整性
 
-*For any* 审核执行，所有指定的 Test_Module 都应该在 `docs/reviews/` 目录下生成对应的 Module_Report 文件。
+_For any_ 审核执行，所有指定的 Test_Module 都应该在 `docs/reviews/` 目录下生成对应的 Module_Report 文件。
 
 **Validates: Requirements 2.1**
 
 ### Property 2: 报告格式规范性
 
-*For any* 生成的 Module_Report，其内容应满足以下条件：
+_For any_ 生成的 Module_Report，其内容应满足以下条件：
+
 - 文件为有效的 markdown 格式
 - 文件名与模块名对应（kebab-case）
 - 包含必需的章节：基本信息、审核文件列表、发现的问题、统计摘要
@@ -172,7 +174,8 @@ ${moduleReportLinks}
 
 ### Property 3: 问题输出规范性
 
-*For any* 生成的报告中的问题列表：
+_For any_ 生成的报告中的问题列表：
+
 - 每个文件的问题数量不超过 5 条
 - 问题仅陈述问题本身，不包含修复建议
 - 问题按严重程度从高到低排序
@@ -181,7 +184,8 @@ ${moduleReportLinks}
 
 ### Property 4: 汇总报告完整性
 
-*For any* 完成的审核流程，Summary_Report 应满足以下条件：
+_For any_ 完成的审核流程，Summary_Report 应满足以下条件：
+
 - 保存在 `docs/reviews/summary.md`
 - 包含所有模块的统计数据
 - 包含指向各 Module_Report 的有效链接
@@ -191,12 +195,12 @@ ${moduleReportLinks}
 
 ## Error Handling
 
-| 错误场景 | 处理方式 |
-|----------|----------|
-| 模块路径不存在 | 记录警告，跳过该模块，继续下一个 |
-| 文件读取失败 | 记录错误到报告，标记为无法审核 |
-| 报告写入失败 | 抛出错误，终止当前模块审核 |
-| import 分析失败 | 记录警告，仅审核当前文件 |
+| 错误场景        | 处理方式                         |
+| --------------- | -------------------------------- |
+| 模块路径不存在  | 记录警告，跳过该模块，继续下一个 |
+| 文件读取失败    | 记录错误到报告，标记为无法审核   |
+| 报告写入失败    | 抛出错误，终止当前模块审核       |
+| import 分析失败 | 记录警告，仅审核当前文件         |
 
 ## Testing Strategy
 

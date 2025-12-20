@@ -5,7 +5,6 @@ import type { SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
 /**
  * 运行时附加元信息的 `virtualNode`，便于挂载与 `diff` 阶段复用宿主节点。
  */
-
 export interface RuntimeVirtualNode<
   HostNode,
   HostElement extends HostNode & WeakKey,

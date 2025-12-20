@@ -9,5 +9,5 @@ export const virtualNodeFlag = Symbol('isVirtualNode')
  * @remarks
  * - `createTextVirtualNode` 会将字符串/数字 `children` 包装为该类型，便于渲染层统一处理。
  */
-
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Text = Symbol('Text')

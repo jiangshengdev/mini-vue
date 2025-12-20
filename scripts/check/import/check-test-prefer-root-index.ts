@@ -299,12 +299,13 @@ function checkFile(parameters: {
 
 function formatFinding(finding: Finding): string {
   const { filePath, kind, module, position, names, severity, suggestion } = finding
-  const level = severity === 'warn' ? 'warn' : 'error'
+  const level = severity === 'warn' ? '警告' : '错误'
+  const kindText = kind === 'import' ? '导入' : '导出'
 
   const details =
-    names.length > 0 ? `; ${kind} 包含可从 @/index.ts 导入的符号：${names.join(', ')}` : ''
+    names.length > 0 ? `; ${kindText}包含可从 @/index.ts 导入的符号：${names.join(', ')}` : ''
 
-  return `${filePath}:${position.line}:${position.column} ${level} test ${kind} should prefer "@/index.ts": "${module}"${details}\n  ${suggestion}`
+  return `${filePath}:${position.line}:${position.column} ${level} 测试${kindText}应优先使用 "@/index.ts": "${module}"${details}\n  ${suggestion}`
 }
 
 const rootExportNames = getExportedNamesFromRootIndex()
@@ -344,8 +345,8 @@ if (errors.length > 0) {
 } else {
   const message =
     warnings.length > 0
-      ? 'Test imports prefer-root-index check passed with warnings.'
-      : 'All test imports prefer @/index.ts when possible.'
+      ? '测试导入 prefer-root-index 检查通过（有警告）。'
+      : '所有测试导入均优先使用 @/index.ts。'
 
   console.log(message)
 }

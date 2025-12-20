@@ -269,13 +269,14 @@ function formatReason(finding: Finding): string {
 
 function formatFinding(finding: Finding): string {
   const { filePath, kind, module, position, boundary, targetBoundary } = finding
+  const kindText = kind === 'import' ? '导入' : '导出'
 
-  return `${filePath}:${position.line}:${position.column} invalid ${kind} from src/${boundary} -> src/${targetBoundary}: "${module}"; ${formatReason(finding)}`
+  return `${filePath}:${position.line}:${position.column} 非法${kindText} src/${boundary} -> src/${targetBoundary}: "${module}"; ${formatReason(finding)}`
 }
 
 runSrcCheck({
   srcDir,
   checkFile,
   formatFinding,
-  successMessage: 'No forbidden cross-boundary import style found.',
+  successMessage: '未发现禁止的跨边界导入风格。',
 })

@@ -117,13 +117,14 @@ function checkFile(filePath: string, findings: Finding[]): void {
 
 function formatFinding(finding: Finding): string {
   const { filePath, kind, module, reason, position, severity } = finding
-  const level = severity === 'warn' ? 'warn' : 'error'
+  const level = severity === 'warn' ? '警告' : '错误'
+  const kindText = kind === 'import' ? '导入' : '导出'
 
   if (reason === 'relative-into-src') {
-    return `${filePath}:${position.line}:${position.column} ${level} forbidden ${kind} into src via relative path: "${module}" (use @/<boundary>/index.ts or @/index.ts)`
+    return `${filePath}:${position.line}:${position.column} ${level} 禁止通过相对路径${kindText} src: "${module}"（请使用 @/<boundary>/index.ts 或 @/index.ts）`
   }
 
-  return `${filePath}:${position.line}:${position.column} ${level} invalid test ${kind} from src: "${module}" (must be @/<boundary>/index.ts or @/index.ts; only one segment after @/)`
+  return `${filePath}:${position.line}:${position.column} ${level} 非法的测试${kindText} src: "${module}"（必须为 @/<boundary>/index.ts 或 @/index.ts；@/ 后只能有一层目录）`
 }
 
 const files = listTsFilesInDir({
@@ -161,8 +162,8 @@ if (errors.length > 0) {
 } else {
   const message =
     warnings.length > 0
-      ? 'Test src imports check passed with warnings.'
-      : 'All test imports from src use @/<boundary>/index.ts (single segment) or @/index.ts.'
+      ? '测试 src 导入检查通过（有警告）。'
+      : '所有测试从 src 的导入均使用 @/<boundary>/index.ts（单层）或 @/index.ts。'
 
   console.log(message)
 }

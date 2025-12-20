@@ -128,17 +128,17 @@ function formatFinding(finding: Finding): string {
   const { filePath, module, position, reason } = finding
   const hint =
     reason === 'outside-folder'
-      ? 'index.ts 只能导出当前目录(含子目录)的内容；该导出解析后跳出了当前目录'
+      ? 'index.ts 只能导出当前目录（含子目录）的内容；该导出解析后跳出了当前目录'
       : reason === 'subdir-non-index'
         ? 'index.ts 从子目录导出时只能指向子目录的 index.ts（例如 "./component/index.ts" 或 "./component"）'
-        : 'index.ts 只能导出当前目录(含子目录)的内容（使用相对路径或 @/ alias 皆可）；禁止 re-export 外部模块'
+        : 'index.ts 只能导出当前目录（含子目录）的内容（使用相对路径或 @/ alias 皆可）；禁止 re-export 外部模块'
 
-  return `${filePath}:${position.line}:${position.column} invalid index.ts export: "${module}"; ${hint}`
+  return `${filePath}:${position.line}:${position.column} 非法 index.ts 导出: "${module}"; ${hint}`
 }
 
 runSrcCheck({
   srcDir,
   checkFile,
   formatFinding,
-  successMessage: 'No invalid index.ts cross-folder exports found.',
+  successMessage: '未发现非法的 index.ts 跨目录导出。',
 })

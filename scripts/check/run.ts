@@ -3,4 +3,4 @@ import { resolveFromImportMeta } from './_shared/paths.ts'
 
 const checkDir = resolveFromImportMeta(import.meta.url, '.')
 
-runAllScriptsInDir(checkDir, { emptyMessage: 'No check scripts found.' })
+runAllScriptsInDir(checkDir, { emptyMessage: '未找到检查脚本。' })

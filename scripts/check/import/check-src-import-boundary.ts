@@ -99,13 +99,14 @@ function checkFile(filePath: string, findings: Finding[]): void {
 
 function formatFinding(finding: Finding): string {
   const { filePath, kind, module, position, boundary } = finding
+  const kindText = kind === 'import' ? '导入' : '导出'
 
-  return `${filePath}:${position.line}:${position.column} forbidden ${kind} within src/${boundary}: "${module}" (use relative path)`
+  return `${filePath}:${position.line}:${position.column} src/${boundary} 内禁止的${kindText}: "${module}"（请使用相对路径）`
 }
 
 runSrcCheck({
   srcDir,
   checkFile,
   formatFinding,
-  successMessage: 'No forbidden @/same-boundary imports found.',
+  successMessage: '未发现禁止的 @/同边界 导入。',
 })

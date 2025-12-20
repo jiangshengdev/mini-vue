@@ -36,8 +36,10 @@ function compareNamePair(
 
 function formatFinding(finding: Finding): string {
   const { filePath, position, kind, reason, message } = finding
+  const kindText = kind === 'import' ? '导入' : '导出'
+  const reasonText = reason === 'module-specifier' ? '模块说明符' : '命名说明符'
 
-  return `${filePath}:${position.line}:${position.column} unsorted ${kind} (${reason}): ${message}`
+  return `${filePath}:${position.line}:${position.column} 未排序的${kindText}（${reasonText}）：${message}`
 }
 
 function checkModuleSpecifiersSorted(parameters: {
@@ -57,7 +59,7 @@ function checkModuleSpecifiersSorted(parameters: {
         kind,
         reason: 'module-specifier',
         position: getPosition(sourceFile, record.node),
-        message: `"${record.module}" should come before "${previousModule}"`,
+        message: `"${record.module}" 应排在 "${previousModule}" 之前`,
       })
     }
 
@@ -105,7 +107,7 @@ function checkNamedSpecifiersSorted(parameters: {
         kind,
         reason: 'named-specifiers',
         position: getPosition(sourceFile, element.name),
-        message: `${context}: "${display}" should come before "${previousDisplay}"`,
+        message: `${context}："${display}" 应排在 "${previousDisplay}" 之前`,
       })
     }
 
@@ -140,7 +142,7 @@ function checkImportStatement(
     sourceFile,
     elements: namedBindings.elements,
     findings,
-    context: `named imports from "${module}"`,
+    context: `从 "${module}" 的命名导入`,
   })
 }
 
@@ -160,14 +162,14 @@ function checkExportStatement(
       ? statement.moduleSpecifier.text
       : statement.moduleSpecifier.getText(sourceFile).slice(1, -1)
     : ''
-  const moduleText = module ? ` from "${module}"` : ''
+  const moduleText = module ? `（来自 "${module}"）` : ''
 
   checkNamedSpecifiersSorted({
     kind: 'export',
     sourceFile,
     elements: exportClause.elements,
     findings,
-    context: `named exports${moduleText}`,
+    context: `命名导出${moduleText}`,
   })
 }
 
@@ -224,5 +226,5 @@ runSrcCheck({
   srcDir,
   checkFile,
   formatFinding,
-  successMessage: 'All import/export specifiers are sorted alphabetically.',
+  successMessage: '所有 import/export 说明符均已按字母顺序排序。',
 })

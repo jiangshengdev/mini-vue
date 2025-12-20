@@ -214,13 +214,15 @@ function checkFile(filePath: string, findings: Finding[]): void {
 
 function formatFinding(finding: Finding): string {
   const { filePath, module, category, current, previous, kind } = finding
+  const kindText = kind === 'import' ? '导入' : '导出'
+  const categoryText = category === 'type' ? '类型' : '值'
 
-  return `${filePath}:${current.line}:${current.column} duplicate ${kind} (${category}) of "${module}"; first at line ${previous.line}, column ${previous.column}`
+  return `${filePath}:${current.line}:${current.column} 重复${kindText}（${categoryText}）"${module}"；首次出现于第 ${previous.line} 行第 ${previous.column} 列`
 }
 
 runSrcCheck({
   srcDir,
   checkFile,
   formatFinding,
-  successMessage: 'No duplicate import/export module specifiers found.',
+  successMessage: '未发现重复的 import/export 模块说明符。',
 })

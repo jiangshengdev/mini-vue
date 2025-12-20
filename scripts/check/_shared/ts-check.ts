@@ -72,7 +72,7 @@ export function runSrcCheck<Finding>(parameters: {
   const { srcDir, checkFile, formatFinding, successMessage, missingSrcMessage, filter } = parameters
 
   if (!fs.existsSync(srcDir)) {
-    console.error(missingSrcMessage ?? `src directory not found at ${srcDir}`)
+    console.error(missingSrcMessage ?? `未找到 src 目录：${srcDir}`)
     process.exitCode = 1
 
     return

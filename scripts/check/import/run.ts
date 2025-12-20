@@ -5,4 +5,4 @@ import { runAllScriptsInDir } from '../_shared/run-all.ts'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-runAllScriptsInDir(__dirname, { emptyMessage: 'No check/import scripts found.' })
+runAllScriptsInDir(__dirname, { emptyMessage: '未找到 check/import 检查脚本。' })

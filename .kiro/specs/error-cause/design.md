@@ -5,10 +5,12 @@
 本设计文档描述如何为 mini-vue 框架中缺少 `cause` 属性的错误添加该属性。通过分析现有代码，识别出以下需要添加 cause 的错误抛出点：
 
 **Router 模块：**
+
 - `src/router/core/injection.ts` - `useRouter()` 中的 `routerNotFound` 错误
 - `src/router/core/create-router.ts` - `install()` 中的 `routerDuplicateInstallOnApp` 错误
 
 **Runtime-Core 模块：**
+
 - `src/runtime-core/provide-inject.ts` - `provide()` 中的 `runtimeCoreProvideOutsideSetup` 错误
 - `src/runtime-core/provide-inject.ts` - `inject()` 中的 `runtimeCoreInjectOutsideSetup` 错误
 - `src/runtime-core/renderer.ts` - `asContainerKey()` 中的 `runtimeCoreInvalidContainer` 错误
@@ -24,16 +26,17 @@
 
 **需要添加 cause 的错误点：**
 
-| 错误位置 | 错误消息 | cause 建议 |
-|---------|---------|---------|
-| `useRouter()` | `routerNotFound` | 相关上下文信息 |
-| `router.install()` | `routerDuplicateInstallOnApp` | 相关上下文信息 |
-| `provide()` | `runtimeCoreProvideOutsideSetup` | 相关上下文信息 |
-| `inject()` | `runtimeCoreInjectOutsideSetup` | 相关上下文信息 |
-| `asContainerKey()` | `runtimeCoreInvalidContainer` | 相关上下文信息 |
-| `app.use()` | `runtimeCoreInvalidPlugin` | 相关上下文信息 |
+| 错误位置           | 错误消息                         | cause 建议     |
+| ------------------ | -------------------------------- | -------------- |
+| `useRouter()`      | `routerNotFound`                 | 相关上下文信息 |
+| `router.install()` | `routerDuplicateInstallOnApp`    | 相关上下文信息 |
+| `provide()`        | `runtimeCoreProvideOutsideSetup` | 相关上下文信息 |
+| `inject()`         | `runtimeCoreInjectOutsideSetup`  | 相关上下文信息 |
+| `asContainerKey()` | `runtimeCoreInvalidContainer`    | 相关上下文信息 |
+| `app.use()`        | `runtimeCoreInvalidPlugin`       | 相关上下文信息 |
 
 **cause 值选择原则：**
+
 - 优先选择导致错误的直接原因（如无效的输入值）
 - 或者选择能帮助定位问题的上下文对象
 - 实现者可根据具体场景灵活调整
@@ -62,13 +65,13 @@ new TypeError(message: string, options?: { cause?: unknown })
 
 ## Correctness Properties
 
-*A property is a characteristic or behavior that should hold true across all valid executions of a system-essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
+_A property is a characteristic or behavior that should hold true across all valid executions of a system-essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees._
 
 基于 prework 分析，本功能主要通过示例测试验证，因为每个错误点的 cause 值是特定的、可预测的。
 
 ### Property 1: 无效输入错误包含输入值作为 cause
 
-*For any* 因无效输入而抛出的错误（如无效插件、无效容器），该错误的 `cause` 属性 SHALL 等于导致错误的输入值。
+_For any_ 因无效输入而抛出的错误（如无效插件、无效容器），该错误的 `cause` 属性 SHALL 等于导致错误的输入值。
 
 **Validates: Requirements 2.1**
 
@@ -100,7 +103,7 @@ new TypeError(message: string, options?: { cause?: unknown })
 // 测试示例
 it('should include cause in error', () => {
   const invalidPlugin = 'not-a-plugin'
-  
+
   try {
     app.use(invalidPlugin as any)
   } catch (error) {

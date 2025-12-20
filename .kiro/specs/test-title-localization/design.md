@@ -9,6 +9,7 @@
 ### 方案选择
 
 考虑到：
+
 1. 测试标题的翻译需要理解上下文语义，自动翻译质量难以保证
 2. 需要中文化的测试文件数量有限（约 30+ 个文件）
 3. 项目已有大量中文标题可作为参考风格
@@ -61,6 +62,7 @@ test/
 - `normalize`、`DEV`、`AST` 等
 
 只翻译描述性文字，如：
+
 - "throws friendly error" → "抛出友好错误"
 - "inserts at anchor" → "在 anchor 处插入"
 - "reuses host bindings" → "复用宿主绑定"
@@ -78,23 +80,23 @@ test/
 
 ## Correctness Properties
 
-*A property is a characteristic or behavior that should hold true across all valid executions of a system-essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
+_A property is a characteristic or behavior that should hold true across all valid executions of a system-essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees._
 
 ### Property 1: 测试逻辑不变性
 
-*For any* 测试文件，中文化前后除了 `describe` 和 `it` 的标题字符串外，所有测试逻辑、断言、导入语句和辅助函数应保持完全相同。
+_For any_ 测试文件，中文化前后除了 `describe` 和 `it` 的标题字符串外，所有测试逻辑、断言、导入语句和辅助函数应保持完全相同。
 
 **Validates: Requirements 2.4, 3.3**
 
 ### Property 2: 代码格式保持性
 
-*For any* 修改后的测试文件，应保持原有的缩进风格（2 空格）、单引号字符串、以及代码结构。
+_For any_ 修改后的测试文件，应保持原有的缩进风格（2 空格）、单引号字符串、以及代码结构。
 
 **Validates: Requirements 3.1, 3.2**
 
 ### Property 3: 测试可执行性
 
-*For any* 中文化后的测试文件，执行 `pnpm test` 应能正常运行且所有测试通过。
+_For any_ 中文化后的测试文件，执行 `pnpm test` 应能正常运行且所有测试通过。
 
 **Validates: Requirements 2.4**
 

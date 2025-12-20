@@ -37,16 +37,16 @@
 ```typescript
 interface RendererOptions<HostNode, HostElement> {
   // 现有方法...
-  
+
   // 新增：文本节点更新
-  setText(node: HostNode, text: string): void;
-  
+  setText(node: HostNode, text: string): void
+
   // 升级签名：支持 prev/next 差量
   patchProps(
     element: HostElement,
     prevProps: Record<string, unknown> | undefined,
-    nextProps: Record<string, unknown> | undefined
-  ): void;
+    nextProps: Record<string, unknown> | undefined,
+  ): void
 }
 ```
 
@@ -56,11 +56,11 @@ interface RendererOptions<HostNode, HostElement> {
 // runtime-core 内部结构，不暴露到 jsx-foundation
 interface RuntimeVNode {
   // 原始 VNode 字段...
-  
+
   // 运行时字段
-  el?: HostNode | HostElement;      // Text/Element 的宿主节点引用
-  anchor?: HostNode;                 // Fragment/数组 children 的结束锚点
-  component?: ComponentInstance;     // 组件实例引用
+  el?: HostNode | HostElement // Text/Element 的宿主节点引用
+  anchor?: HostNode // Fragment/数组 children 的结束锚点
+  component?: ComponentInstance // 组件实例引用
 }
 ```
 
@@ -71,22 +71,22 @@ function patchChild(
   oldVNode: RuntimeVNode,
   newVNode: RuntimeVNode,
   container: HostElement,
-  anchor?: HostNode
+  anchor?: HostNode,
 ): void {
   // same 判定：type + key
   if (isSameVNodeType(oldVNode, newVNode)) {
     // 分派到具体 patch 逻辑
     if (isText(oldVNode)) {
-      patchText(oldVNode, newVNode);
+      patchText(oldVNode, newVNode)
     } else if (isElement(oldVNode)) {
-      patchElement(oldVNode, newVNode);
+      patchElement(oldVNode, newVNode)
     } else if (isComponent(oldVNode)) {
-      patchComponent(oldVNode, newVNode);
+      patchComponent(oldVNode, newVNode)
     }
   } else {
     // 类型不同：replace
-    unmount(oldVNode);
-    mount(newVNode, container, anchor);
+    unmount(oldVNode)
+    mount(newVNode, container, anchor)
   }
 }
 ```
@@ -98,12 +98,12 @@ function patchChildren(
   oldChildren: RuntimeVNode[],
   newChildren: RuntimeVNode[],
   container: HostElement,
-  anchor?: HostNode
+  anchor?: HostNode,
 ): void {
   if (hasKey(newChildren)) {
-    patchKeyedChildren(oldChildren, newChildren, container, anchor);
+    patchKeyedChildren(oldChildren, newChildren, container, anchor)
   } else {
-    patchUnkeyedChildren(oldChildren, newChildren, container, anchor);
+    patchUnkeyedChildren(oldChildren, newChildren, container, anchor)
   }
 }
 ```
@@ -115,43 +115,44 @@ function patchChildren(
 ```typescript
 // 存储在 element 上的事件 invoker 缓存
 interface EventInvoker {
-  value: EventListener;
-  attached: number;  // 绑定时间戳
+  value: EventListener
+  attached: number // 绑定时间戳
 }
 
 // element._vei = { onClick: invoker, onInput: invoker, ... }
-type EventInvokerCache = Record<string, EventInvoker | undefined>;
+type EventInvokerCache = Record<string, EventInvoker | undefined>
 ```
 
 ### Children Diff 中间状态
 
 ```typescript
 // keyed diff 的 key → index 映射
-type KeyToIndexMap = Map<string | number, number>;
+type KeyToIndexMap = Map<string | number, number>
 
 // newIndex → oldIndex 映射（用于 LIS 优化）
-type NewIndexToOldIndexMap = number[];
+type NewIndexToOldIndexMap = number[]
 ```
 
 ## Correctness Properties
 
-*A property is a characteristic or behavior that should hold true across all valid executions of a system—essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
+_A property is a characteristic or behavior that should hold true across all valid executions of a system—essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees._
 
 ### Property 1: 文本节点复用
 
-*For any* 文本节点和任意新文本内容，当执行 patch 时，宿主节点引用应保持不变，且 nodeValue 应等于新文本内容。
+_For any_ 文本节点和任意新文本内容，当执行 patch 时，宿主节点引用应保持不变，且 nodeValue 应等于新文本内容。
 
 **Validates: Requirements 1.1, 1.2**
 
 ### Property 2: 元素节点复用
 
-*For any* 同类型（tagName 相同）的元素节点，当执行 patch 时，宿主元素引用应保持不变。
+_For any_ 同类型（tagName 相同）的元素节点，当执行 patch 时，宿主元素引用应保持不变。
 
 **Validates: Requirements 2.1, 2.2**
 
 ### Property 3: Props 差量更新
 
-*For any* prevProps 和 nextProps 组合，patch 后元素应满足：
+_For any_ prevProps 和 nextProps 组合，patch 后元素应满足：
+
 - nextProps 中的所有字段都被正确应用
 - prevProps 中存在但 nextProps 中缺失（或为 null/false）的字段被移除
 
@@ -159,13 +160,14 @@ type NewIndexToOldIndexMap = number[];
 
 ### Property 4: 事件监听不叠加
 
-*For any* 事件监听更新序列，触发事件时应只调用最新的 handler，且调用次数为 1。
+_For any_ 事件监听更新序列，触发事件时应只调用最新的 handler，且调用次数为 1。
 
 **Validates: Requirements 4.1, 4.2**
 
 ### Property 5: 无 key 子节点索引对齐
 
-*For any* 无 key 的 children 数组变化，patch 后应满足：
+_For any_ 无 key 的 children 数组变化，patch 后应满足：
+
 - 公共区间内的节点引用保持不变
 - 最终 DOM 顺序与新 children 顺序一致
 - 新增节点被正确 mount，多余节点被正确 unmount
@@ -174,7 +176,8 @@ type NewIndexToOldIndexMap = number[];
 
 ### Property 6: Keyed diff 保序与复用
 
-*For any* 带 key 的 children 列表变换（包括重排、插入、删除），patch 后应满足：
+_For any_ 带 key 的 children 列表变换（包括重排、插入、删除），patch 后应满足：
+
 - 最终 DOM 顺序与新 children 顺序一致
 - 稳定 key 的节点引用集合不变
 - 仅新增的 key 对应新 mount 的节点
@@ -184,7 +187,8 @@ type NewIndexToOldIndexMap = number[];
 
 ### Property 7: 组件子树 patch 复用
 
-*For any* 组件响应式更新，patch 后应满足：
+_For any_ 组件响应式更新，patch 后应满足：
+
 - 子组件实例引用保持不变
 - 子树中可复用的节点引用保持不变
 

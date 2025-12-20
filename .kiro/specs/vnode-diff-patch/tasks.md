@@ -14,7 +14,7 @@
   - [x] 1.2 DOM 宿主实现 setText
     - 在 `src/runtime-dom/renderer-options.ts` 实现 `node.nodeValue = text`
     - _Requirements: 10.2_
-  - [x]* 1.3 编写 setText 单元测试
+  - [x]\* 1.3 编写 setText 单元测试
     - 验证文本内容更新正确
     - _Requirements: 10.2_
 
@@ -33,7 +33,7 @@
     - 更新时只替换 invoker 内部引用
     - 移除时调用 removeEventListener
     - _Requirements: 4.1, 4.2, 4.3_
-  - [x]* 2.4 编写 props patch 单元测试
+  - [x]\* 2.4 编写 props patch 单元测试
     - 测试属性移除、class/style 清空
     - 测试事件更新只触发最新 handler
     - _Requirements: 3.1, 3.2, 4.1_
@@ -55,7 +55,7 @@
     - Element↔Element：patchProps + patchChildren
     - 类型切换：replace（unmount + mount）
     - _Requirements: 1.1, 2.1_
-  - [x]* 3.4 编写 Text/Element patch 属性测试
+  - [x]\* 3.4 编写 Text/Element patch 属性测试
     - **Property 1: 文本节点复用**
     - **Property 2: 元素节点复用**
     - **Validates: Requirements 1.1, 1.2, 2.1, 2.2**
@@ -74,7 +74,7 @@
     - 复用 start/end anchors
     - 在边界内执行 children patch
     - _Requirements: 5.1_
-  - [x]* 5.3 编写无 key children patch 属性测试
+  - [x]\* 5.3 编写无 key children patch 属性测试
     - **Property 5: 无 key 子节点索引对齐**
     - **Validates: Requirements 5.1, 5.2, 5.3**
 
@@ -86,7 +86,7 @@
     - 中间区间：建立 key→newIndex，遍历 old 做匹配
     - 移动：从后往前 insertBefore
     - _Requirements: 6.1, 6.2, 6.3, 6.4_
-  - [x]* 6.2 编写 keyed diff 属性测试
+  - [x]\* 6.2 编写 keyed diff 属性测试
     - **Property 6: Keyed diff 保序与复用**
     - **Validates: Requirements 6.1, 6.2, 6.3, 6.4**
 
@@ -99,10 +99,10 @@
     - render 成功后对 previousSubTree 与新 subTree 执行 patch
     - 保留更新失败时的回退逻辑
     - _Requirements: 7.1, 8.1, 8.2_
-  - [x]* 8.2 编写组件子树 patch 属性测试
+  - [x]\* 8.2 编写组件子树 patch 属性测试
     - **Property 7: 组件子树 patch 复用**
     - **Validates: Requirements 7.1, 7.2**
-  - [x]* 8.3 编写错误隔离单元测试
+  - [x]\* 8.3 编写错误隔离单元测试
     - 更新失败不破坏旧 DOM
     - _Requirements: 8.1, 8.2_
 
@@ -110,11 +110,11 @@
   - 确保所有测试通过，如有问题请询问用户
 
 - [ ] 10. 可选优化
-  - [ ]* 10.1 加入 LIS 优化减少移动
+  - [ ]\* 10.1 加入 LIS 优化减少移动
     - 对 newIndexToOldIndex 求 LIS
     - 减少 insertBefore 调用次数
     - _Requirements: 6.1_
-  - [ ]* 10.2 root render 走 patch
+  - [ ]\* 10.2 root render 走 patch
     - 在 renderer 中保存 root vnode
     - render 时执行 patch，仅首次 mount 才 clear
     - _Requirements: 7.1_

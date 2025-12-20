@@ -50,12 +50,12 @@
 
 注释应回答「为什么/为了什么/依赖什么/边界是什么」，而不是复述代码表面语义：
 
-| 类别 | 说明 |
-|------|------|
-| 职责 | 函数/类型/类的目的与对外可见行为 |
-| 假设 | 输入约束、依赖前置条件、不变量 |
-| 调用关系 | 与上层/下层函数的连接点，数据流方向 |
-| 策略 | 分支选择原因、循环处理策略、回退路径 |
+| 类别     | 说明                                 |
+| -------- | ------------------------------------ |
+| 职责     | 函数/类型/类的目的与对外可见行为     |
+| 假设     | 输入约束、依赖前置条件、不变量       |
+| 调用关系 | 与上层/下层函数的连接点，数据流方向  |
+| 策略     | 分支选择原因、循环处理策略、回退路径 |
 
 #### 注释放哪里（结构化覆盖）
 
@@ -66,11 +66,11 @@
 
 #### 注释形态（推荐用法）
 
-| 场景 | 推荐形式 |
-|------|----------|
+| 场景                           | 推荐形式             |
+| ------------------------------ | -------------------- |
 | 导出函数 / 重要类型 / 大逻辑块 | `/** ... */`（多行） |
-| 函数体内部解释策略 | `/* ... */` 单段说明 |
-| 简单概述 | `// ...` 单行 |
+| 函数体内部解释策略             | `/* ... */` 单段说明 |
+| 简单概述                       | `// ...` 单行        |
 
 #### 约束
 
@@ -81,16 +81,16 @@
 
 ### 目录级关注点
 
-| 目录 | 重点关注 |
-|------|----------|
-| `src/reactivity/**` | 响应式依赖追踪/触发、effect 生命周期、ref/computed/watch 的时序与清理 |
-| `src/runtime-core/**` | VNode/组件实例、mount/patch 流程、错误处理与边界 |
-| `src/runtime-dom/**` | 宿主实现细节（DOM 属性/事件/类名合并），与 runtime-core options 的契约 |
-| `src/jsx-foundation/**` | VNode 工厂、children 归一化、与 JSX runtime 的边界 |
-| `src/jsx-runtime/**` | `jsx/jsxs/jsxDEV/h` 等封装的语义差异与开发态处理 |
-| `src/router/**` | 路径归一化、导航状态、`RouterLink/RouterView` 的渲染时机与依赖 |
-| `src/shared/**` | 跨域工具、错误通道、环境检测与注入机制 |
-| `src/messages/**` | 错误/警告文案的组织方式与对外导出约束 |
+| 目录                    | 重点关注                                                               |
+| ----------------------- | ---------------------------------------------------------------------- |
+| `src/reactivity/**`     | 响应式依赖追踪/触发、effect 生命周期、ref/computed/watch 的时序与清理  |
+| `src/runtime-core/**`   | VNode/组件实例、mount/patch 流程、错误处理与边界                       |
+| `src/runtime-dom/**`    | 宿主实现细节（DOM 属性/事件/类名合并），与 runtime-core options 的契约 |
+| `src/jsx-foundation/**` | VNode 工厂、children 归一化、与 JSX runtime 的边界                     |
+| `src/jsx-runtime/**`    | `jsx/jsxs/jsxDEV/h` 等封装的语义差异与开发态处理                       |
+| `src/router/**`         | 路径归一化、导航状态、`RouterLink/RouterView` 的渲染时机与依赖         |
+| `src/shared/**`         | 跨域工具、错误通道、环境检测与注入机制                                 |
+| `src/messages/**`       | 错误/警告文案的组织方式与对外导出约束                                  |
 
 ## Data Models
 
@@ -98,7 +98,7 @@
 
 ## Correctness Properties
 
-*A property is a characteristic or behavior that should hold true across all valid executions of a system—essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
+_A property is a characteristic or behavior that should hold true across all valid executions of a system—essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees._
 
 本 spec 的工作性质为「文档/注释补全」，不涉及可执行代码的功能实现，因此不适用 Property-Based Testing。
 

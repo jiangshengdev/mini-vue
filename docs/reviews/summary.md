@@ -4,15 +4,15 @@
 
 | 审查单元        | 状态   | Critical | Major | Minor | 总计 |
 | --------------- | ------ | -------- | ----- | ----- | ---- |
-| jsx-foundation  | 待审查 | 0        | 0     | 0     | 0    |
-| jsx-runtime     | 待审查 | 0        | 0     | 0     | 0    |
-| messages        | 待审查 | 0        | 0     | 0     | 0    |
-| reactivity      | 待审查 | 0        | 0     | 0     | 0    |
-| router          | 待审查 | 0        | 0     | 0     | 0    |
-| runtime-core    | 待审查 | 0        | 0     | 0     | 0    |
-| runtime-dom     | 待审查 | 0        | 0     | 0     | 0    |
-| shared          | 待审查 | 0        | 0     | 0     | 0    |
-| top-level-files | 待审查 | 0        | 0     | 0     | 0    |
+| jsx-foundation  | 已完成 | 0        | 0     | 0     | 0    |
+| jsx-runtime     | 已完成 | 0        | 0     | 0     | 0    |
+| messages        | 已完成 | 0        | 0     | 0     | 0    |
+| reactivity      | 已完成 | 0        | 0     | 0     | 0    |
+| router          | 已完成 | 0        | 0     | 0     | 0    |
+| runtime-core    | 已完成 | 0        | 0     | 0     | 0    |
+| runtime-dom     | 已完成 | 0        | 0     | 0     | 0    |
+| shared          | 已完成 | 0        | 0     | 0     | 0    |
+| top-level-files | 已完成 | 0        | 0     | 0     | 0    |
 
 ## 问题总览
 

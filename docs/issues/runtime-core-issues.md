@@ -104,3 +104,24 @@
 - 可能方案：
   - 在调用 `render` 前先记录容器引用，并在 catch/finally 中对失败场景执行宿主级清理（例如调用 `config.unmount` 或记录失败状态后允许 `unmount` 生效）。
   - 或在渲染失败时返回带 `ok=false` 的句柄并缓存到状态中，`unmount` 时无论成功/失败都尝试执行 teardown，确保容器被清空。
+
+## 12. 测试 Mock 内部文件路径（待优化）
+
+- 位置：`test/runtime-core/patch/child.test.tsx`
+- 现状：使用 `vi.mock('@/runtime-core/patch/children.ts', { spy: true })` mock 内部文件。
+- 影响：对内部目录结构的硬编码依赖。
+- 提示：降低对文件结构的耦合。
+
+## 13. 测试辅助函数重复定义（待优化）
+
+- 位置：`test/runtime-core/patch/insertion.test.ts`
+- 现状：文件内定义了 `createHostOptionsWithSpies` 辅助函数，其逻辑与 `patch/test-utils.ts` 中的 `createHostRenderer` 高度重复。
+- 影响：增加了维护成本，逻辑分散。
+- 提示：建议统一复用测试工具库 `test-utils.ts`。
+
+## 14. 测试白盒断言内部状态（待优化）
+
+- 位置：`test/runtime-core/provide-inject/provide-inject.test.ts`
+- 现状：断言错误 cause 中包含 `{ currentInstance: undefined }`。
+- 影响：`currentInstance` 是内部状态，测试其具体值属于白盒测试，若重构内部状态管理可能会导致测试误报。
+- 提示：应关注公开的错误行为或错误类型，而非内部状态快照。

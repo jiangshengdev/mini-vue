@@ -35,3 +35,17 @@
   - 语义上偏离标准 DOM `parent.insertBefore(child, anchor)`：当 `anchor` 并非 `parent` 的子节点时，`before` 行为不可控且可能抛错。
   - 也无法兼容更通用的渲染器约定：很多渲染器会允许 `anchor === null` 表示追加到末尾（此时当前实现会因访问 `null.before` 而抛错）。
 - 提示：优先使用 `parent.insertBefore(child, anchor)` 作为宿主实现；如未来要支持 `anchor === null`，可在宿主层分支到 `appendChild`。
+
+## 5. 测试访问组件实例私有属性（待优化）
+
+- 位置：`test/runtime-dom/component/component.test.tsx`
+- 现状：直接访问 `instance.cleanupTasks`。
+- 影响：这是组件实例的内部属性，属于白盒测试，增加了与内部实现细节的耦合。
+- 提示：应测试清理逻辑的副作用（如 spy 是否被调用），而非检查内部任务队列。
+
+## 6. 测试修改全局原型（待优化）
+
+- 位置：`test/runtime-dom/render/basic.test.tsx`
+- 现状：修改 `Element.prototype.remove` 原型方法进行 spy。
+- 影响：虽然在 `finally` 中恢复了，但在并发测试环境下修改全局对象原型存在风险，且可能干扰其他测试。
+- 提示：建议使用 `vi.spyOn` 针对特定实例或使用更安全的 mock 方式。

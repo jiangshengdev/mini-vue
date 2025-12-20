@@ -9,3 +9,10 @@
   - 构造 `href` 时保留附加片段，例如 `const href = normalizePath(to) + getQueryAndHash(to)`（可将 `getQueryAndHash` 导出供组件复用）。
   - 或使用 `new URL(to, location.href)` 解析，再手动规整 pathname，确保 query/hash 原样保留；最终 `href` 与 `navigate` 使用的实际路径保持一致。
   - 补充单测覆盖 `_blank`、Ctrl/Meta 点击等不拦截路径，验证包含 query/hash 的跳转结果。
+
+## 2. 测试通过 Mock 内部模块模拟 `inject`（待优化）
+
+- 位置：`test/router/core/error-cause.test.tsx`
+- 现状：使用 `vi.mock('@/runtime-core/index.ts', ...)` 来 mock `inject` 函数。
+- 影响：导致测试依赖于 `runtime-core` 的模块结构，增加了跨模块的隐式耦合。
+- 提示：建议考虑通过依赖注入（DI）或在测试配置层模拟注入失败，而非直接 Mock 底层模块导出。

@@ -2,8 +2,8 @@
 
 ## 审查状态
 
-- **状态**: 待审查
-- **审查日期**: -
+- **状态**: 已完成
+- **审查日期**: 2025-12-20
 
 ## 审查范围
 
@@ -25,7 +25,7 @@
 
 ### Major
 
-- 暂无
+- [Major] src/router/components/router-link.tsx: 渲染的 `href` 通过 `normalizePath` 去掉了 query/hash，仅保留纯路径。对于 `target=\"_blank\"` 或 Ctrl/Meta 点击（不拦截默认行为）会直接使用该 `href` 打开新标签，导致带查询或锚点的链接被错误截断，跳转地址与 `navigate` 行为不一致。
 
 ### Minor
 
@@ -34,6 +34,6 @@
 ## 统计
 
 - Critical: 0
-- Major: 0
+- Major: 1
 - Minor: 0
-- 总计: 0
+- 总计: 1

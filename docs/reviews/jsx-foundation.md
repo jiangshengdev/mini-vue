@@ -2,8 +2,8 @@
 
 ## 审查状态
 
-- **状态**: 待审查
-- **审查日期**: -
+- **状态**: 已完成
+- **审查日期**: 2025-12-20
 
 ## 审查范围
 
@@ -22,7 +22,7 @@
 
 ### Major
 
-- 暂无
+- [Major] src/jsx-foundation/types.ts: `ComponentChildren`/`RenderOutput` 类型排除了 `null`（只接受 `boolean | undefined` 为空值），但运行时 `normalizeRenderOutput`/`normalizeChildren` 会把 `null` 当作可忽略节点处理，组件常见的 `return null` 或 `children: null` 在严格类型下会直接报错，类型与运行时语义不一致。
 
 ### Minor
 
@@ -31,6 +31,6 @@
 ## 统计
 
 - Critical: 0
-- Major: 0
+- Major: 1
 - Minor: 0
-- 总计: 0
+- 总计: 1

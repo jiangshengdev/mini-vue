@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import type { TestElement, TestNode } from './test-utils.ts'
 import { createHostRenderer, normalize } from './test-utils.ts'
 import type { NormalizedVirtualNode } from '@/runtime-core/index.ts'
-import { asRuntimeVNode, mountChild, patchChild } from '@/runtime-core/index.ts'
+import { asRuntimeVirtualNode, mountChild, patchChild } from '@/runtime-core/index.ts'
 import type { SetupComponent } from '@/index.ts'
 import * as patchChildrenModule from '@/runtime-core/patch/children.ts'
 
@@ -54,8 +54,8 @@ describe('patchChild 元素/Fragment/组件 patch 行为', () => {
 
     patchChild(host.options, previous, next, { container: host.container })
 
-    const runtimePrevious = asRuntimeVNode<TestNode, TestElement, never>(previous)
-    const runtimeNext = asRuntimeVNode<TestNode, TestElement, never>(next)
+    const runtimePrevious = asRuntimeVirtualNode<TestNode, TestElement, never>(previous)
+    const runtimeNext = asRuntimeVirtualNode<TestNode, TestElement, never>(next)
 
     expect(runtimeNext.el).toBe(runtimePrevious.el)
     expect(host.counters.patchProps).toBe(1)
@@ -74,7 +74,7 @@ describe('patchChild 元素/Fragment/组件 patch 行为', () => {
 
     host.options.appendChild(host.container, parentAnchor)
     mountChild(host.options, previous, { container: host.container, anchor: parentAnchor })
-    const runtimePrevious = asRuntimeVNode<TestNode, TestElement, never>(previous)
+    const runtimePrevious = asRuntimeVirtualNode<TestNode, TestElement, never>(previous)
     const patchChildrenSpy = vi.mocked(patchChildrenModule.patchChildren)
 
     patchChildrenSpy.mockClear()

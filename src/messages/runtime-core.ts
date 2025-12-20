@@ -26,4 +26,4 @@ export const runtimeCoreObjectChildWarning = '[runtime-core] 检测到无法渲�
 
 /** `patch` 阶段缺失宿主节点的调试警告 */
 export const runtimeCoreMissingHostNodes =
-  '[runtime-core] 当前 vnode 未记录宿主节点，无法进行移动或锚点解析：'
+  '[runtime-core] 当前 virtualNode 未记录宿主节点，无法进行移动或锚点解析：'

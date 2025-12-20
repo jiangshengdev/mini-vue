@@ -1,7 +1,7 @@
 import type { MountContext } from '../environment.ts'
 import type { RendererOptions } from '../index.ts'
 import type { MountedHandle } from '../mount/handle.ts'
-import { asRuntimeVNode } from '../vnode.ts'
+import { asRuntimeVirtualNode } from '../virtual-node.ts'
 import type { ComponentInstance } from './context.ts'
 import { attachInstanceToVirtualNode, createComponentInstance } from './instance.ts'
 import { resolveComponentProps } from './props.ts'
@@ -31,7 +31,7 @@ export function mountComponent<
     ...context,
     shouldUseAnchor,
   })
-  const runtime = asRuntimeVNode<HostNode, HostElement, HostFragment>(virtualNode)
+  const runtime = asRuntimeVirtualNode<HostNode, HostElement, HostFragment>(virtualNode)
 
   /* 让 `virtualNode` 拥有实例引用，方便调试或测试检索。 */
   attachInstanceToVirtualNode(virtualNode, instance)

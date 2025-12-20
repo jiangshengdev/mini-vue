@@ -12,7 +12,7 @@ import {
   syncFromEnd,
   syncFromStart,
 } from './keyed-children-helpers.ts'
-import { ensureHostNodes } from './runtime-vnode.ts'
+import { ensureHostNodes } from './runtime-virtual-node.ts'
 import type { IndexMaps, IndexRange, KeyedPatchState } from './types.ts'
 import { findNextAnchor, isSameVirtualNode } from './utils.ts'
 

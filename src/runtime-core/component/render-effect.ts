@@ -3,7 +3,7 @@ import type { MountedHandle } from '../mount/handle.ts'
 import type { NormalizedVirtualNode } from '../normalize.ts'
 import { normalizeRenderOutput } from '../normalize.ts'
 import { patchChild } from '../patch/index.ts'
-import { asRuntimeVNode } from '../vnode.ts'
+import { asRuntimeVirtualNode } from '../virtual-node.ts'
 import { mountComponentSubtreeWithAnchors } from './anchor.ts'
 import type { ComponentInstance } from './context.ts'
 import { teardownComponentInstance } from './teardown.ts'
@@ -156,7 +156,7 @@ function patchLatestSubtree<
   })
 
   if (instance.subTree) {
-    instance.mountedHandle = asRuntimeVNode<HostNode, HostElement, HostFragment>(
+    instance.mountedHandle = asRuntimeVirtualNode<HostNode, HostElement, HostFragment>(
       instance.subTree,
     ).handle
   } else {

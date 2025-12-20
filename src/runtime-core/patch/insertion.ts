@@ -11,7 +11,7 @@ export type InsertionEnvironment<
 > = ChildEnvironment<HostNode, HostElement, HostFragment>
 
 /**
- * 在已知容器/锚点/上下文的前提下挂载单个 vnode，并直接插入到目标位置。
+ * 在已知容器/锚点/上下文的前提下挂载单个 virtualNode，并直接插入到目标位置。
  */
 export function mountChildInEnvironment<
   HostNode,
@@ -19,12 +19,12 @@ export function mountChildInEnvironment<
   HostFragment extends HostNode,
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
-  vnode: NormalizedVirtualNode | undefined,
+  virtualNode: NormalizedVirtualNode | undefined,
   environment: InsertionEnvironment<HostNode, HostElement, HostFragment>,
 ): MountedHandle<HostNode> | undefined {
-  if (!vnode) {
+  if (!virtualNode) {
     return undefined
   }
 
-  return mountChild(options, vnode, environment)
+  return mountChild(options, virtualNode, environment)
 }

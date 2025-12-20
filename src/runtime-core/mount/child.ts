@@ -1,6 +1,6 @@
 import type { ChildEnvironment } from '../environment.ts'
 import type { RendererOptions } from '../index.ts'
-import { asRuntimeVNode } from '../vnode.ts'
+import { asRuntimeVirtualNode } from '../virtual-node.ts'
 import type { MountedHandle } from './handle.ts'
 import { mountVirtualNode } from './virtual-node.ts'
 import type { RenderOutput, VirtualNode, VirtualNodeChild } from '@/jsx-foundation/index.ts'
@@ -49,7 +49,7 @@ export function mountChild<
       const textNode = createText(
         (child as VirtualNode<typeof Text> & { text?: string }).text ?? '',
       )
-      const runtime = asRuntimeVNode<HostNode, HostElement, HostFragment>(child)
+      const runtime = asRuntimeVirtualNode<HostNode, HostElement, HostFragment>(child)
 
       insert(textNode)
 

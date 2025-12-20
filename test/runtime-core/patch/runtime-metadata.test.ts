@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { TestElement, TestFragment, TestNode } from './test-utils.ts'
 import { createHostRenderer, normalize } from './test-utils.ts'
-import { asRuntimeVNode, mountChild, patchChild } from '@/runtime-core/index.ts'
+import { asRuntimeVirtualNode, mountChild, patchChild } from '@/runtime-core/index.ts'
 import { createTextVirtualNode } from '@/jsx-foundation/index.ts'
 
 describe('patchChild 运行时元数据复用', () => {
@@ -13,11 +13,11 @@ describe('patchChild 运行时元数据复用', () => {
 
     expect(mounted?.nodes).toHaveLength(1)
 
-    const runtimePrevious = asRuntimeVNode<TestNode, TestElement, TestFragment>(previous)
+    const runtimePrevious = asRuntimeVirtualNode<TestNode, TestElement, TestFragment>(previous)
 
     patchChild(host.options, previous, next, { container: host.container })
 
-    const runtimeNext = asRuntimeVNode<TestNode, TestElement, TestFragment>(next)
+    const runtimeNext = asRuntimeVirtualNode<TestNode, TestElement, TestFragment>(next)
 
     expect(runtimeNext.el).toBe(runtimePrevious.el)
     expect(runtimeNext.handle).toBe(runtimePrevious.handle)

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { createHostRenderer, normalize } from './test-utils.ts'
-import { asRuntimeVNode, mountChild, patchChild, patchChildren } from '@/runtime-core/index.ts'
+import { asRuntimeVirtualNode, mountChild, patchChild, patchChildren } from '@/runtime-core/index.ts'
 import { createTextVirtualNode } from '@/jsx-foundation/index.ts'
 import { ref } from '@/index.ts'
 
@@ -26,7 +26,7 @@ describe('patchChildren 有 key diff', () => {
     }
 
     const previousRuntime = previousChildren.map((child) => {
-      return asRuntimeVNode(child)
+      return asRuntimeVirtualNode(child)
     })
 
     host.resetCounts()
@@ -37,7 +37,7 @@ describe('patchChildren 有 key diff', () => {
     })
 
     const nextRuntime = nextChildren.map((child) => {
-      return asRuntimeVNode(child)
+      return asRuntimeVirtualNode(child)
     })
 
     expect(host.counters.appendChild).toBe(0)
@@ -68,7 +68,7 @@ describe('patchChildren 有 key diff', () => {
       mountChild(host.options, child, { container: host.container })
     }
 
-    const reusedUnkeyed = asRuntimeVNode(previousChildren[2]).el
+    const reusedUnkeyed = asRuntimeVirtualNode(previousChildren[2]).el
 
     host.resetCounts()
 
@@ -99,7 +99,7 @@ describe('patchChildren 有 key diff', () => {
     }
 
     const previousRuntime = previousChildren.map((child) => {
-      return asRuntimeVNode(child)
+      return asRuntimeVirtualNode(child)
     })
 
     host.resetCounts()
@@ -112,7 +112,7 @@ describe('patchChildren 有 key diff', () => {
     })
 
     const nextRuntime = nextChildren.map((child) => {
-      return asRuntimeVNode(child)
+      return asRuntimeVirtualNode(child)
     })
 
     expect(host.counters.remove).toBe(1)
@@ -145,7 +145,7 @@ describe('patchChildren 有 key diff', () => {
     }
 
     const previousRuntime = previousChildren.map((child) => {
-      return asRuntimeVNode(child)
+      return asRuntimeVirtualNode(child)
     })
 
     host.resetCounts()
@@ -161,7 +161,7 @@ describe('patchChildren 有 key diff', () => {
     })
 
     const nextRuntime = nextChildren.map((child) => {
-      return asRuntimeVNode(child)
+      return asRuntimeVirtualNode(child)
     })
 
     expect(
@@ -187,7 +187,7 @@ describe('patchChildren 有 key diff', () => {
       mountChild(host.options, child, { container: host.container })
     }
 
-    const firstRuntime = asRuntimeVNode(previousChildren[0])
+    const firstRuntime = asRuntimeVirtualNode(previousChildren[0])
 
     host.resetCounts()
 
@@ -247,8 +247,8 @@ describe('patchChildren 有 key diff', () => {
       patchChild,
     })
 
-    const runtimeB = asRuntimeVNode(nextChildren[0])
-    const runtimeA = asRuntimeVNode(nextChildren[1])
+    const runtimeB = asRuntimeVirtualNode(nextChildren[0])
+    const runtimeA = asRuntimeVirtualNode(nextChildren[1])
     const anchorA = runtimeA.component?.endAnchor
 
     expect(host.container.children[0]).toBe(runtimeB.el)

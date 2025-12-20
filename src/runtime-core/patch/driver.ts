@@ -19,10 +19,10 @@ export interface PatchDriver<
   /** 透传给子树的上下文（父组件、应用上下文等），保持与 `patchChild` 一致。 */
   readonly context?: MountContext
   /**
-   * 在容器中挂载全新的 `vnode`，可按需覆盖锚点与上下文。
+   * 在容器中挂载全新的 `virtualNode`，可按需覆盖锚点与上下文。
    */
   mountNew(
-    vnode: NormalizedVirtualNode,
+    virtualNode: NormalizedVirtualNode,
     overrides?: {
       anchor?: HostNode
       context?: MountContext
@@ -39,8 +39,8 @@ export interface PatchDriver<
       context?: MountContext
     },
   ): PatchResult<HostNode>
-  /** 仅卸载指定 `vnode`，不进行替换或重新挂载。 */
-  unmountOnly(vnode: NormalizedVirtualNode): PatchResult<HostNode>
+  /** 仅卸载指定 `virtualNode`，不进行替换或重新挂载。 */
+  unmountOnly(virtualNode: NormalizedVirtualNode): PatchResult<HostNode>
   /**
    * 将一组宿主节点移动到给定锚点之前，保持节点顺序。
    */
@@ -65,8 +65,8 @@ export function createPatchDriver<
     anchor: environment.anchor,
     context: environment.context,
     /** 在当前容器中挂载 `vnode`，允许覆盖锚点与上下文。 */
-    mountNew(vnode, overrides) {
-      const mounted = mountChildInEnvironment(options, vnode, {
+    mountNew(virtualNode, overrides) {
+      const mounted = mountChildInEnvironment(options, virtualNode, {
         container,
         anchor: overrides?.anchor ?? environment.anchor,
         context: overrides?.context ?? environment.context,
@@ -84,8 +84,8 @@ export function createPatchDriver<
       return this.mountNew(next, overrides)
     },
     /** 卸载节点但不触发重新挂载，供删除场景使用。 */
-    unmountOnly(vnode) {
-      unmount(options, vnode)
+    unmountOnly(virtualNode) {
+      unmount(options, virtualNode)
 
       return {
         ok: true,

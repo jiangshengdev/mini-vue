@@ -51,17 +51,17 @@ export function normalizeRenderOutput(output: RenderOutput): NormalizedRenderOut
       } satisfies FragmentProps,
     })
 
-    return normalizeVnodeForRuntime(fragmentVnode)
+    return normalizeVirtualNodeForRuntime(fragmentVnode)
   }
 
   /* 已是 VirtualNode 时递归规整内部 children，保持形态一致。 */
   if (isVirtualNode(output)) {
-    return normalizeVnodeForRuntime(output)
+    return normalizeVirtualNodeForRuntime(output)
   }
 
   /* 原始文本输出转为 Text VirtualNode，便于统一渲染路径。 */
   if (typeof output === 'string' || typeof output === 'number') {
-    return normalizeVnodeForRuntime(createTextVirtualNode(output))
+    return normalizeVirtualNodeForRuntime(createTextVirtualNode(output))
   }
 
   return undefined
@@ -70,24 +70,24 @@ export function normalizeRenderOutput(output: RenderOutput): NormalizedRenderOut
 /**
  * 深度规整 VirtualNode，确保 children 形态与 runtime 预期一致。
  */
-function normalizeVnodeForRuntime(vnode: VirtualNode): NormalizedVirtualNode {
+function normalizeVirtualNodeForRuntime(virtualNode: VirtualNode): NormalizedVirtualNode {
   /* 递归归一化子节点，统一 VirtualNode 与文本节点的表达方式。 */
   const children: NormalizedChildren = []
 
-  for (const child of vnode.children) {
+  for (const child of virtualNode.children) {
     if (isVirtualNode(child)) {
-      children.push(normalizeVnodeForRuntime(child))
+      children.push(normalizeVirtualNodeForRuntime(child))
       continue
     }
 
     /* 文本子节点转为 Text VirtualNode，便于 diff 与挂载复用同一路径。 */
     if (typeof child === 'string' || typeof child === 'number') {
-      children.push(normalizeVnodeForRuntime(createTextVirtualNode(child)))
+      children.push(normalizeVirtualNodeForRuntime(createTextVirtualNode(child)))
     }
   }
 
   return {
-    ...vnode,
+    ...virtualNode,
     children,
   }
 }

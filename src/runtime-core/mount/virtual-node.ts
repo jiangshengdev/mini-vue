@@ -1,7 +1,7 @@
 import { mountComponent } from '../component/index.ts'
 import type { MountContext } from '../environment.ts'
 import type { RendererOptions } from '../index.ts'
-import { asRuntimeVNode } from '../vnode.ts'
+import { asRuntimeVirtualNode } from '../virtual-node.ts'
 import { mountChild } from './child.ts'
 import { mountElement } from './element.ts'
 import type { MountedHandle } from './handle.ts'
@@ -32,7 +32,7 @@ export function mountVirtualNode<
         shouldUseAnchor,
       },
     })
-    const runtime = asRuntimeVNode<HostNode, HostElement, HostFragment>(virtualNode)
+    const runtime = asRuntimeVirtualNode<HostNode, HostElement, HostFragment>(virtualNode)
 
     if (mounted) {
       runtime.el = mounted.nodes[0]
@@ -51,7 +51,7 @@ export function mountVirtualNode<
       shouldUseAnchor,
     })
 
-    const runtime = asRuntimeVNode<HostNode, HostElement, HostFragment>(virtualNode)
+    const runtime = asRuntimeVirtualNode<HostNode, HostElement, HostFragment>(virtualNode)
 
     if (mounted) {
       runtime.handle = mounted
@@ -64,7 +64,7 @@ export function mountVirtualNode<
 
   /* 普通标签名直接走元素挂载逻辑。 */
   const mounted = mountElement(options, virtualNode as VirtualNode<string>, container, context)
-  const runtime = asRuntimeVNode<HostNode, HostElement, HostFragment>(virtualNode)
+  const runtime = asRuntimeVirtualNode<HostNode, HostElement, HostFragment>(virtualNode)
 
   runtime.el = mounted.nodes[0]
   runtime.anchor = undefined

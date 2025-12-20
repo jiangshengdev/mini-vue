@@ -40,7 +40,7 @@
 
 - [x] 3. 引入 patch 入口（Text + Element）
   - [x] 3.1 定义 RuntimeVNode 运行时结构
-    - 新增 `src/runtime-core/patch/runtime-vnode.ts`
+    - 新增 `src/runtime-core/patch/runtime-virtual-node.ts`
     - 包含 el/anchor/component 字段
     - 不修改 jsx-foundation 对外类型
     - _Requirements: 9.1, 9.2, 9.3, 9.4_

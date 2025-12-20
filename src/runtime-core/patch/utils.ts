@@ -1,11 +1,11 @@
 import type { NormalizedChildren, NormalizedVirtualNode } from '../normalize.ts'
 import type { RendererOptions } from '../renderer.ts'
-import type { RuntimeNormalizedVirtualNode } from './runtime-vnode.ts'
-import { asRuntimeNormalizedVirtualNode, getFirstHostNode } from './runtime-vnode.ts'
+import type { RuntimeNormalizedVirtualNode } from './runtime-virtual-node.ts'
+import { asRuntimeNormalizedVirtualNode, getFirstHostNode } from './runtime-virtual-node.ts'
 import { Text } from '@/jsx-foundation/index.ts'
 
 /**
- * 卸载一个已渲染的 `vnode`：
+ * 卸载一个已渲染的 `virtualNode`：
  * - 若存在 `mount` 阶段生成的 `handle`，则优先走 `handle.teardown()` 释放副作用与宿主节点。
  * - 否则退化为直接从宿主容器移除已记录的 `el`。
  */
@@ -15,9 +15,9 @@ export function unmount<
   HostFragment extends HostNode,
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
-  vnode: NormalizedVirtualNode,
+  virtualNode: NormalizedVirtualNode,
 ): void {
-  const runtime = asRuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>(vnode)
+  const runtime = asRuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>(virtualNode)
   const { handle } = runtime
 
   if (handle) {

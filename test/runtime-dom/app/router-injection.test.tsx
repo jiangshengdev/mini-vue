@@ -5,8 +5,8 @@ import { createApp, createRouter, ref, RouterLink, RouterView } from '@/index.ts
 import { invokerCacheKey } from '@/runtime-dom/index.ts'
 import { routerDuplicateInstallOnApp } from '@/messages/index.ts'
 
-describe('runtime-dom: router injection', () => {
-  it('router.install starts once and auto-stops on app.unmount', () => {
+describe('runtime-dom router 注入', () => {
+  it('router.install 只启动一次且在 app.unmount 时自动停止', () => {
     const addSpy = vi.spyOn(globalThis, 'addEventListener')
     const removeSpy = vi.spyOn(globalThis, 'removeEventListener')
 
@@ -52,7 +52,7 @@ describe('runtime-dom: router injection', () => {
     expect(popstateAddCountForRemovedHandler).toBe(1)
   })
 
-  it('throws when installing multiple routers on the same app', () => {
+  it('在同一 app 上安装多个 router 时抛错', () => {
     const Home: SetupComponent = () => {
       return () => {
         return undefined
@@ -89,7 +89,7 @@ describe('runtime-dom: router injection', () => {
     }).toThrowError(routerDuplicateInstallOnApp)
   })
 
-  it('shared router only stops after last app unmount', () => {
+  it('共享 router 仅在最后一个 app unmount 后停止', () => {
     const addSpy = vi.spyOn(globalThis, 'addEventListener')
     const removeSpy = vi.spyOn(globalThis, 'removeEventListener')
 
@@ -159,7 +159,7 @@ describe('runtime-dom: router injection', () => {
     expect(routerRemoveCount).toBe(1)
   })
 
-  it('RouterView works without router prop after plugin install', () => {
+  it('RouterView 在插件安装后无需 router prop 即可工作', () => {
     const rendered = ref('')
 
     const Home: SetupComponent = () => {
@@ -202,7 +202,7 @@ describe('runtime-dom: router injection', () => {
     router.stop()
   })
 
-  it('RouterLink uses injected router when clicking', () => {
+  it('RouterLink 点击时使用注入的 router', () => {
     const Home: SetupComponent = () => {
       return () => {
         return undefined
@@ -245,7 +245,7 @@ describe('runtime-dom: router injection', () => {
     router.stop()
   })
 
-  it('RouterLink keeps default behavior for modifier/middle clicks', () => {
+  it('RouterLink 对修饰键/中键点击保持默认行为', () => {
     const Home: SetupComponent = () => {
       return () => {
         return undefined
@@ -311,7 +311,7 @@ describe('runtime-dom: router injection', () => {
     router.stop()
   })
 
-  it('RouterLink leaves target=_blank navigation to browser', () => {
+  it('RouterLink 将 target=_blank 导航交给浏览器处理', () => {
     const Home: SetupComponent = () => {
       return () => {
         return undefined
@@ -364,7 +364,7 @@ describe('runtime-dom: router injection', () => {
     router.stop()
   })
 
-  it('RouterView inside route component does not recurse infinitely', () => {
+  it('路由组件内的 RouterView 不会无限递归', () => {
     globalThis.history.replaceState(null, '', '/')
     const renderedNested = ref(false)
 
@@ -414,7 +414,7 @@ describe('runtime-dom: router injection', () => {
     router.stop()
   })
 
-  it('RouterView re-renders when navigating via RouterLink', async () => {
+  it('通过 RouterLink 导航时 RouterView 会重新渲染', async () => {
     globalThis.history.replaceState(null, '', '/a')
     const rendered = ref('')
 

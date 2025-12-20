@@ -12,8 +12,8 @@ function mountToFreshContainer(component: SetupComponent) {
   return { app, container }
 }
 
-describe('runtime-dom: provide/inject', () => {
-  it('injects value from ancestor provides (setup phase)', () => {
+describe('runtime-dom provide/inject', () => {
+  it('在 setup 阶段从祖先 provide 注入值', () => {
     const injectedText = ref('')
 
     const Child: SetupComponent = () => {
@@ -47,7 +47,7 @@ describe('runtime-dom: provide/inject', () => {
     app.unmount()
   })
 
-  it('injects value provided by app.provide', () => {
+  it('注入 app.provide 提供的值', () => {
     const injectedText = ref('')
 
     const Child: SetupComponent = () => {
@@ -75,7 +75,7 @@ describe('runtime-dom: provide/inject', () => {
     app.unmount()
   })
 
-  it('returns defaultValue when key is missing', () => {
+  it('key 缺失时返回 defaultValue', () => {
     const injectedText = ref('')
 
     const Child: SetupComponent = () => {
@@ -99,7 +99,7 @@ describe('runtime-dom: provide/inject', () => {
     app.unmount()
   })
 
-  it('injects value from vnode.appContext when rendering root vnode directly', () => {
+  it('直接渲染根 vnode 时从 vnode.appContext 注入值', () => {
     const injectedText = ref('')
 
     const Child: SetupComponent = () => {

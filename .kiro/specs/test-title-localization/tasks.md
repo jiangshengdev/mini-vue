@@ -57,6 +57,25 @@
   - 运行 `pnpm test` 确保所有测试通过
   - 如有问题，检查是否意外修改了代码逻辑
 
+- [x] 8. 中文化 runtime-dom/app 测试标题
+  - [x] 8.1 中文化 `test/runtime-dom/app/router-injection.test.tsx`
+    - 将 describe 和 it 的英文标题翻译为中文
+    - _Requirements: 2.1, 2.2, 4.5_
+
+- [x] 9. 中文化 runtime-dom/context 测试标题
+  - [x] 9.1 中文化 `test/runtime-dom/context/provide-inject.test.tsx`
+    - 将 describe 和 it 的英文标题翻译为中文
+    - _Requirements: 2.1, 2.2, 4.5_
+
+- [x] 10. 中文化 runtime-core/app 测试标题
+  - [x] 10.1 中文化 `test/runtime-core/app/mount-failure-state.test.tsx`
+    - 将 describe 和 it 的英文标题翻译为中文
+    - _Requirements: 2.1, 2.2, 4.4_
+
+- [x] 11. 最终验证
+  - 运行 `pnpm test` 确保所有测试通过
+  - 运行 `pnpm exec vitest list` 确认所有标题已中文化
+
 ## Notes
 
 - 技术术语保持英文原样（render、mount、component、effect 等）

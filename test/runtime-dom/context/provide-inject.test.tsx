@@ -85,6 +85,7 @@ describe('runtime-dom provide/inject', () => {
   it('直接渲染根 vnode 时从 vnode.appContext 注入值', () => {
     const injectedText = ref('')
 
+    /* 直接操作 vnode.appContext 模拟外部渲染场景，验证渲染入口也能透传 provide。 */
     const Child = createRenderlessComponent(() => {
       injectedText.value = inject<string>('k') ?? ''
     })

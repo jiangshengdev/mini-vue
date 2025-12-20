@@ -8,6 +8,7 @@ import { routerDuplicateInstallOnApp } from '@/messages/index.ts'
 
 type EventListenerCall = Parameters<typeof globalThis.removeEventListener>
 
+/** 构造仅含一个根路由的 router，方便复用测试框架。 */
 const createSingleRouteRouter = (
   component: SetupComponent,
   fallback: SetupComponent = createRenderlessComponent(),
@@ -18,6 +19,7 @@ const createSingleRouteRouter = (
   })
 }
 
+/** 过滤出与 `popstate` 相关的监听调用，辅助比对 add/remove 对齐。 */
 const filterPopstateCalls = (calls: EventListenerCall[]) => {
   return calls.filter(([event]) => {
     return event === 'popstate'
@@ -96,6 +98,7 @@ describe('runtime-dom router 注入', () => {
     const popstateAddCalls = filterPopstateCalls(addSpy.mock.calls)
     const newPopstateRemoveCalls = popstateRemoveCalls.slice(popstateRemoveCountAfterFirstUnmount)
 
+    /* 仅在第二次卸载时应匹配到此前 add 的 handler，确保共享 router 延后清理。 */
     const routerRemoveCall = newPopstateRemoveCalls.find((removeCall) => {
       return popstateAddCalls.some((addCall) => {
         return addCall[1] === removeCall[1]

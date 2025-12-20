@@ -30,6 +30,7 @@ describe('runtime-dom ref 回调', () => {
     const refSpy = vi.fn<(element: Element | undefined) => void>()
     const state = reactive({ label: 'first' })
 
+    /* 通过响应式更新触发组件重渲染，观测旧 ref 的回调与新元素绑定顺序。 */
     const CounterButton: SetupComponent = () => {
       return () => {
         return (

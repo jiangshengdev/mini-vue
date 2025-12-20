@@ -117,6 +117,7 @@ describe('runtime-dom 基础渲染', () => {
     })
     const container = createTestContainer()
 
+    /* 构造多种非法 child 形态，逐个喂给 render 并比对 warning 与空容器。 */
     const payloads: unknown[] = [
       { foo: 'bar' },
       () => {

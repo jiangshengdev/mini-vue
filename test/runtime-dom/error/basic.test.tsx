@@ -76,6 +76,7 @@ describe('runtime-dom 组件错误隔离（基础）', () => {
 
     setErrorHandler(handler)
 
+    /* 读取响应式后抛错，确保 effect 停止且兄弟继续渲染。 */
     const Faulty: SetupComponent = () => {
       return () => {
         renderSpy()

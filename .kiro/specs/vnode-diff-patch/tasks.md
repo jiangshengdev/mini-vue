@@ -1,8 +1,8 @@
-# Implementation Plan: VNode Diff / Patch
+# Implementation Plan: VirtualNode Diff / Patch
 
 ## Overview
 
-本实现计划将 VNode patch 能力分阶段引入 mini-vue，从宿主原语补齐开始，逐步实现 Text/Element patch、children diff、组件子树 patch。每个阶段都有可验证的测试，确保增量进展。
+本实现计划将 VirtualNode patch 能力分阶段引入 mini-vue，从宿主原语补齐开始，逐步实现 Text/Element patch、children diff、组件子树 patch。每个阶段都有可验证的测试，确保增量进展。
 
 ## Tasks
 
@@ -39,7 +39,7 @@
     - _Requirements: 3.1, 3.2, 4.1_
 
 - [x] 3. 引入 patch 入口（Text + Element）
-  - [x] 3.1 定义 RuntimeVNode 运行时结构
+  - [x] 3.1 定义 RuntimeVirtualNode 运行时结构
     - 新增 `src/runtime-core/patch/runtime-virtual-node.ts`
     - 包含 el/anchor/component 字段
     - 不修改 jsx-foundation 对外类型
@@ -115,7 +115,7 @@
     - 减少 insertBefore 调用次数
     - _Requirements: 6.1_
   - [ ]\* 10.2 root render 走 patch
-    - 在 renderer 中保存 root vnode
+    - 在 renderer 中保存 root virtualNode
     - render 时执行 patch，仅首次 mount 才 clear
     - _Requirements: 7.1_
 

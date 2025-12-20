@@ -34,7 +34,7 @@ export function unmount<
 }
 
 /**
- * 判断两个 `vnode` 是否可视为「同一个节点」，用于决定走 `patch` 还是卸载重建。
+ * 判断两个 `virtualNode` 是否可视为「同一个节点」，用于决定走 `patch` 还是卸载重建。
  *
  * @remarks
  * - `Text` 节点在 `diff` 中只要都是 `Text` 即可复用宿主节点。
@@ -79,7 +79,7 @@ export function moveNodes<
  * 从 `children` 的指定位置向后寻找「下一个可用锚点」。
  *
  * @remarks
- * - 这里使用 `runtime.handle.nodes[0]` 作为锚点，是因为一个 `vnode` 可能对应多宿主节点（如 `Fragment`）。
+ * - 这里使用 `runtime.handle.nodes[0]` 作为锚点，是因为一个 `virtualNode` 可能对应多宿主节点（如 `Fragment`）。
  * - 找不到时返回 `fallback`（通常来自父级传入的 `anchor`）。
  */
 export function findNextAnchor<HostNode>(
@@ -91,7 +91,7 @@ export function findNextAnchor<HostNode>(
     const firstNode = getFirstHostNode<HostNode>(children[index])
 
     if (firstNode) {
-      /* 取该 `vnode` 对应的首个宿主节点，作为后续插入的稳定锚点。 */
+      /* 取该 `virtualNode` 对应的首个宿主节点，作为后续插入的稳定锚点。 */
       return firstNode
     }
   }
@@ -110,7 +110,7 @@ export function hasKeys(children: NormalizedChildren): boolean {
 }
 
 /**
- * 在 `patch` 过程中同步 runtime 元数据，使「新 `vnode`」复用「旧 `vnode`」的宿主引用。
+ * 在 `patch` 过程中同步 runtime 元数据，使「新 `virtualNode`」复用「旧 `virtualNode`」的宿主引用。
  *
  * @remarks
  * - `el`/`handle` 会在 `mount` 时写入，`patch` 时必须继承以避免重复创建/丢失 `teardown` 能力。

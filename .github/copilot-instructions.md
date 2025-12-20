@@ -6,7 +6,7 @@
 
 - 对外入口：`src/index.ts`（所有用户可见 API 从这里导出）。
 - JSX 入口：`src/jsx-runtime.ts` / `src/jsx-dev-runtime.ts`，实现位于 `src/jsx-runtime/**` 与 `src/jsx-foundation/**`。
-- `src/jsx-foundation/**`：vnode 工厂与 children 归一化等基础能力。
+- `src/jsx-foundation/**`：virtualNode 工厂与 children 归一化等基础能力。
 - `src/jsx-runtime/**`：`h`/`jsx`/`jsxs`/`jsxDEV` 等运行时封装。
 - `src/reactivity/**`：响应式系统（effect/ref/computed/watch/effectScope 等）。
 - `src/runtime-core/**`：平台无关渲染核心与组件/挂载流程。

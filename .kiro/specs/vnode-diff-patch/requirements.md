@@ -2,12 +2,12 @@
 
 ## Introduction
 
-当前 mini-vue 的组件更新会全量卸载并重新挂载子树，导致 DOM 抖动与状态丢失（focus/scroll/输入法组合态），并且复杂树的性能开销显著。本功能引入最小可用的 VNode patch 能力，使「同一组件实例内的更新」能复用既有宿主节点并做增量更新。
+当前 mini-vue 的组件更新会全量卸载并重新挂载子树，导致 DOM 抖动与状态丢失（focus/scroll/输入法组合态），并且复杂树的性能开销显著。本功能引入最小可用的 VirtualNode patch 能力，使「同一组件实例内的更新」能复用既有宿主节点并做增量更新。
 
 ## Glossary
 
-- **Patch_System**: 负责 VNode 差量更新的核心模块，位于 runtime-core 层
-- **Runtime_VNode**: 携带宿主节点引用的运行时 VNode 结构（el/anchor/component 等字段）
+- **Patch_System**: 负责 VirtualNode 差量更新的核心模块，位于 runtime-core 层
+- **Runtime_VirtualNode**: 携带宿主节点引用的运行时 VirtualNode 结构（el/anchor/component 等字段）
 - **Host_Node**: 宿主平台的节点抽象（如 DOM 中的 Node）
 - **Host_Element**: 宿主平台的元素抽象（如 DOM 中的 Element）
 - **Renderer_Options**: 宿主平台提供的渲染原语接口
@@ -33,7 +33,7 @@
 #### Acceptance Criteria
 
 1. WHEN 同一位置的 Element 类型（tagName）相同, THE Patch_System SHALL 复用既有 Host_Element 而非重建
-2. WHEN Element 被复用, THE Patch_System SHALL 将新 VNode 的 el 引用指向旧节点
+2. WHEN Element 被复用, THE Patch_System SHALL 将新 VirtualNode 的 el 引用指向旧节点
 
 ### Requirement 3: Props 差量更新
 
@@ -96,15 +96,15 @@
 1. WHEN 组件更新 render 过程抛错, THE Patch_System SHALL 保留上一轮已挂载子树
 2. WHEN 组件更新 render 过程抛错, THE Patch_System SHALL 保持宿主节点不被破坏
 
-### Requirement 9: 运行时 VNode 结构
+### Requirement 9: 运行时 VirtualNode 结构
 
 **User Story:** As a 框架维护者, I want runtime-core 内部维护宿主引用, so that patch 能访问既有节点而不污染公共类型。
 
 #### Acceptance Criteria
 
-1. THE Runtime_VNode SHALL 包含 el 字段存储 Host_Node 或 Host_Element 引用
-2. THE Runtime_VNode SHALL 包含 anchor 字段存储 Fragment/数组 children 的结束锚点
-3. THE Runtime_VNode SHALL 包含 component 字段存储组件实例引用
+1. THE Runtime_VirtualNode SHALL 包含 el 字段存储 Host_Node 或 Host_Element 引用
+2. THE Runtime_VirtualNode SHALL 包含 anchor 字段存储 Fragment/数组 children 的结束锚点
+3. THE Runtime_VirtualNode SHALL 包含 component 字段存储组件实例引用
 4. THE Patch_System SHALL 不修改 jsx-foundation 的对外类型定义
 
 ### Requirement 10: 渲染原语扩展

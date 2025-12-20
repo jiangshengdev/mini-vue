@@ -4,7 +4,7 @@ import { asRuntimeVirtualNode } from '../virtual-node.ts'
 import { runtimeCoreMissingHostNodes } from '@/messages/index.ts'
 import { __DEV__ } from '@/shared/index.ts'
 
-/** 带运行时元数据的 `vnode`（`patch` 阶段只处理已 normalize 的 `vnode`）。 */
+/** 带运行时元数据的 `virtualNode`（`patch` 阶段只处理已 normalize 的 `virtualNode`）。 */
 export type RuntimeNormalizedVirtualNode<
   HostNode,
   HostElement extends HostNode & WeakKey = HostNode & WeakKey,

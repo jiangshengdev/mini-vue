@@ -2,7 +2,7 @@
 
 ## Overview
 
-本设计为 mini-vue 引入 VNode patch 能力，使组件更新能复用既有宿主节点并做增量更新，而非全量卸载重建。核心思路是：runtime-core 负责 diff/patch 与节点移动，宿主平台负责最小原语（create/insert/remove/patchProps/setText）。
+本设计为 mini-vue 引入 VirtualNode patch 能力，使组件更新能复用既有宿主节点并做增量更新，而非全量卸载重建。核心思路是：runtime-core 负责 diff/patch 与节点移动，宿主平台负责最小原语（create/insert/remove/patchProps/setText）。
 
 ## Architecture
 
@@ -16,7 +16,7 @@
 │         │                │                    │              │
 │         ▼                ▼                    ▼              │
 │  ┌─────────────────────────────────────────────────────┐    │
-│  │              RuntimeVNode (el/anchor/component)      │    │
+│  │              RuntimeVirtualNode (el/anchor/component)      │    │
 │  └─────────────────────────────────────────────────────┘    │
 │         │                                                    │
 └─────────│────────────────────────────────────────────────────┘
@@ -50,12 +50,12 @@ interface RendererOptions<HostNode, HostElement> {
 }
 ```
 
-### RuntimeVNode 结构
+### RuntimeVirtualNode 结构
 
 ```typescript
 // runtime-core 内部结构，不暴露到 jsx-foundation
-interface RuntimeVNode {
-  // 原始 VNode 字段...
+interface RuntimeVirtualNode {
+  // 原始 VirtualNode 字段...
 
   // 运行时字段
   el?: HostNode | HostElement // Text/Element 的宿主节点引用
@@ -68,25 +68,25 @@ interface RuntimeVNode {
 
 ```typescript
 function patchChild(
-  oldVNode: RuntimeVNode,
-  newVNode: RuntimeVNode,
+  oldVirtualNode: RuntimeVirtualNode,
+  newVirtualNode: RuntimeVirtualNode,
   container: HostElement,
   anchor?: HostNode,
 ): void {
   // same 判定：type + key
-  if (isSameVNodeType(oldVNode, newVNode)) {
+  if (isSameVirtualNodeType(oldVirtualNode, newVirtualNode)) {
     // 分派到具体 patch 逻辑
-    if (isText(oldVNode)) {
-      patchText(oldVNode, newVNode)
-    } else if (isElement(oldVNode)) {
-      patchElement(oldVNode, newVNode)
-    } else if (isComponent(oldVNode)) {
-      patchComponent(oldVNode, newVNode)
+    if (isText(oldVirtualNode)) {
+      patchText(oldVirtualNode, newVirtualNode)
+    } else if (isElement(oldVirtualNode)) {
+      patchElement(oldVirtualNode, newVirtualNode)
+    } else if (isComponent(oldVirtualNode)) {
+      patchComponent(oldVirtualNode, newVirtualNode)
     }
   } else {
     // 类型不同：replace
-    unmount(oldVNode)
-    mount(newVNode, container, anchor)
+    unmount(oldVirtualNode)
+    mount(newVirtualNode, container, anchor)
   }
 }
 ```
@@ -95,8 +95,8 @@ function patchChild(
 
 ```typescript
 function patchChildren(
-  oldChildren: RuntimeVNode[],
-  newChildren: RuntimeVNode[],
+  oldChildren: RuntimeVirtualNode[],
+  newChildren: RuntimeVirtualNode[],
   container: HostElement,
   anchor?: HostNode,
 ): void {
@@ -223,7 +223,7 @@ _For any_ 组件响应式更新，patch 后应满足：
 - patchProps 边界情况（class/style 清空、null/false 移除）
 - 事件监听移除（removeEventListener 调用验证）
 - 错误隔离场景
-- RuntimeVNode 结构验证
+- RuntimeVirtualNode 结构验证
 
 ### Property-Based Tests
 
@@ -242,6 +242,6 @@ Property-Based Tests 用于验证通用属性，每个属性测试至少运行 1
 每个 property test 必须包含注释标注：
 
 ```typescript
-// Feature: vnode-diff-patch, Property 6: Keyed diff 保序与复用
+// Feature: virtualNode-diff-patch, Property 6: Keyed diff 保序与复用
 // Validates: Requirements 6.1, 6.2, 6.3, 6.4
 ```

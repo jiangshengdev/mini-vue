@@ -15,9 +15,9 @@ export interface RuntimeVirtualNode<
   el?: HostNode
   /** `Fragment` 的尾锚点或子节点范围末尾，用于批量插入时定位。 */
   anchor?: HostNode
-  /** 若为组件 `vnode`，指向其组件实例，便于后续更新与卸载。 */
+  /** 若为组件 `virtualNode`，指向其组件实例，便于后续更新与卸载。 */
   component?: ComponentInstance<HostNode, HostElement, HostFragment, SetupComponent>
-  /** 当前 `vnode` 的挂载句柄，封装节点集合与 `teardown` 能力。 */
+  /** 当前 `virtualNode` 的挂载句柄，封装节点集合与 `teardown` 能力。 */
   handle?: MountedHandle<HostNode>
 }
 

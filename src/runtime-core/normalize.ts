@@ -1,11 +1,11 @@
 /**
  * 渲染输出归一化：
- * 将 `render` 返回的多形态输出规整为 `runtime-core` 可稳定消费的 `vnode` 结构。
+ * 将 `render` 返回的多形态输出规整为 `runtime-core` 可稳定消费的 `virtualNode` 结构。
  *
  * @remarks
  * - 数组输出会包裹为 `Fragment`，统一走 `children` 逻辑。
- * - 文本（`string`/`number`）会转换为 `Text` `vnode`，避免 `mount`/`patch` 出现分叉实现。
- * - 归一化后的 `children` 始终是 `vnode` 数组，便于 `patchChildren` 只处理一种形态。
+ * - 文本（`string`/`number`）会转换为 `Text` `virtualNode`，避免 `mount`/`patch` 出现分叉实现。
+ * - 归一化后的 `children` 始终是 `virtualNode` 数组，便于 `patchChildren` 只处理一种形态。
  */
 import type {
   ComponentChildren,
@@ -22,7 +22,7 @@ import {
 } from '@/jsx-foundation/index.ts'
 import { isNil } from '@/shared/index.ts'
 
-/** 归一化后的 virtualNode：children 已转为 vnode 数组（文本已转换为 Text vnode）。 */
+/** 归一化后的 virtualNode：children 已转为 virtualNode 数组（文本已转换为 Text virtualNode）。 */
 export interface NormalizedVirtualNode<T extends ElementType = ElementType> extends VirtualNode<T> {
   children: NormalizedVirtualNode[]
 }
@@ -30,7 +30,7 @@ export interface NormalizedVirtualNode<T extends ElementType = ElementType> exte
 /** Patch 阶段可假定的 children 形态：仅包含已归一化的 virtualNode。 */
 export type NormalizedChildren = NormalizedVirtualNode[]
 
-/** 组件 render 归一化后的输出形态：要么 vnode，要么空。 */
+/** 组件 render 归一化后的输出形态：要么 virtualNode，要么空。 */
 export type NormalizedRenderOutput = NormalizedVirtualNode | undefined
 
 /**

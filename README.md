@@ -6,7 +6,7 @@
 
 - 响应式：`reactive`/`ref`/`computed`/`watch`/`effectScope`，以 `ReactiveEffect` 与依赖桶驱动，错误经共享 error channel 统一上报。
 - 渲染：`runtime-core/createRenderer` 平台无关，按容器缓存挂载句柄；`runtime-dom` 注入真实 DOM 原语并处理 props 归一化。
-- JSX：`jsx-foundation` 提供 vnode 工厂，`jsx-runtime`/`jsx-dev-runtime` 支持 `h`/`jsx`/`jsxs`/`jsxDEV`，对外入口 `src/index.ts`。
+- JSX：`jsx-foundation` 提供 virtualNode 工厂，`jsx-runtime`/`jsx-dev-runtime` 支持 `h`/`jsx`/`jsxs`/`jsxDEV`，对外入口 `src/index.ts`。
 - HMR：DOM 侧在 `runtime-dom/create-app.ts` 对接 Vite HMR，更新前卸载，更新后按上次容器重挂。
 
 ## 快速开始
@@ -39,7 +39,7 @@ createApp(Counter).mount('#app')
 - `src/runtime-dom/**`：DOM 原语与 props 打补丁（class 归一化、style 对象/字符串、事件名小写、ref 由挂载层处理）。
 - `src/shared/**`：跨子域共享工具与错误通道（内部 runner + 对外 setErrorHandler）。
 - `src/messages/**`：按子域集中管理错误/警告文案，统一由 `src/messages/index.ts` 导出。
-- `src/jsx-foundation/**` 与 `src/jsx-runtime/**`：JSX vnode 构建与运行时入口。
+- `src/jsx-foundation/**` 与 `src/jsx-runtime/**`：JSX virtualNode 构建与运行时入口。
 - `playground/**`：Vite 演示入口，参考 `playground/app.tsx`。
 - `test/**`：Vitest 覆盖 reactivity、runtime-dom、jsx-runtime；按模块分文件。
 

@@ -197,7 +197,7 @@ function patchElement<
 }
 
 /**
- * 同类型组件 `vnode` 的更新逻辑：复用实例，触发 `effect` 或直接 `patch` 子树。
+ * 同类型组件 `virtualNode` 的更新逻辑：复用实例，触发 `effect` 或直接 `patch` 子树。
  */
 function patchComponent<
   HostNode,
@@ -218,7 +218,7 @@ function patchComponent<
   /*
    * 组件更新依赖 `runtime.component`：
    * - 正常情况下 `mount` 会写入实例。
-   * - 若缺失则无法复用，只能退化为重新 `mount` 新 `vnode`。
+   * - 若缺失则无法复用，只能退化为重新 `mount` 新 `virtualNode`。
    */
   if (!instance) {
     const mounted = mountChildInEnvironment(options, next, {

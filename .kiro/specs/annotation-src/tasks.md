@@ -19,7 +19,7 @@
 
 - [x] 2. 注释补全：jsx-foundation
   - [x] 2.1 为 `src/jsx-foundation/**` 补充注释
-    - 重点：VNode 工厂、children 归一化、类型与边界假设
+    - 重点：VirtualNode 工厂、children 归一化、类型与边界假设
     - 验收：工厂函数与关键归一化分支/循环均有前置中文注释
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 2.1, 2.2, 3.1, 3.2_
 
@@ -49,7 +49,7 @@
 
 - [x] 7. 注释补全：runtime-core
   - [x] 7.1 为 `src/runtime-core/**` 补充注释
-    - 重点：VNode/组件实例关系、mount/patch、provide/inject、错误处理通道
+    - 重点：VirtualNode/组件实例关系、mount/patch、provide/inject、错误处理通道
     - 验收：组件挂载/更新的关键控制流（含异常回退路径）均有前置中文注释
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 2.1, 2.2, 2.3, 3.1, 3.2_
 

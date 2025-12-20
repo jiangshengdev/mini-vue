@@ -56,7 +56,7 @@ export function mountChild<
       const handle: MountedHandle<HostNode> = {
         ok: true,
         nodes: [textNode],
-        /** 卸载单文本 vnode：复用 `handle` 语义并在未跳过时移除宿主节点。 */
+        /** 卸载单文本 virtualNode：复用 `handle` 语义并在未跳过时移除宿主节点。 */
         teardown(skipRemove?: boolean): void {
           if (skipRemove) {
             return

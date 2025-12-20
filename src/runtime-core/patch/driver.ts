@@ -64,7 +64,7 @@ export function createPatchDriver<
     container,
     anchor: environment.anchor,
     context: environment.context,
-    /** 在当前容器中挂载 `vnode`，允许覆盖锚点与上下文。 */
+    /** 在当前容器中挂载 `virtualNode`，允许覆盖锚点与上下文。 */
     mountNew(virtualNode, overrides) {
       const mounted = mountChildInEnvironment(options, virtualNode, {
         container,

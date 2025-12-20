@@ -1,6 +1,6 @@
 # 下一阶段功能规划
 
-## 1. VNode Diff / Patch（优先级：高）
+## 1. VirtualNode Diff / Patch（优先级：高）
 
 - 位置：`src/runtime-core/component/render-effect.ts`、`src/runtime-core/mount/`
 - 现状：`rerenderComponent` 每次更新执行 `teardownMountedSubtree → mountLatestSubtree` 全量重建，无任何节点复用逻辑。
@@ -9,7 +9,7 @@
   - 丢失 DOM 状态（input focus、scroll position、CSS 动画中间态）。
   - 无法支持 `key` 属性优化列表项复用。
 - 决策：采用「Vue 3 风格」的 keyed children diff（头尾同步 fast path + key map，中间区间按需移动；LIS 作为可选优化），而不是把「纯双端 diff」当作完整方案。
-- 详细设计稿：见 docs/issues/vnode-diff-plan.md
+- 详细设计稿：见 docs/issues/virtualNode-diff-plan.md
 
 ## 2. 异步调度器 Scheduler（优先级：高）
 

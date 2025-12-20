@@ -1,6 +1,56 @@
 # JSX Foundation 模块问题记录
 
-## 1. `ComponentChildren` 不接受 `null` 导致类型/运行时不一致（待修复）
+## 1. `createTextVirtualNode` 返回类型与 VirtualNode 接口定义不一致（待修复）
+
+### 问题描述
+
+`src/jsx-foundation/factory.ts` 中的 `createTextVirtualNode` 函数返回的对象包含 `text` 属性：
+
+```typescript
+export function createTextVirtualNode(content: string | number): VirtualNode<typeof Text> & {
+  text: string
+} {
+  return {
+    // ...
+    text: String(content),
+  }
+}
+```
+
+然而，核心接口 `VirtualNode` (`src/jsx-foundation/types.ts`) 中并没有定义 `text` 属性。
+
+这导致在 `src/runtime-core/mount/child.ts` 等运行时代码中，无法直接访问 `child.text`，必须使用类型断言 `(child as VirtualNode<typeof Text> & { text?: string })`，这增加了维护成本并降低了类型安全性。
+
+### 影响范围
+
+- `src/jsx-foundation/types.ts`
+- `src/jsx-foundation/factory.ts`
+- `src/runtime-core/mount/child.ts`
+
+### 建议修复方案
+
+在 `VirtualNode` 接口中添加可选的 `text` 属性：
+
+```typescript
+export interface VirtualNode<T extends ElementType = ElementType> {
+  // ... 其他属性
+  readonly key?: PropertyKey
+  /** 文本节点专属的内容字段，普通元素/组件为空 */
+  readonly text?: string
+}
+```
+
+实施此修改后，可以移除运行时代码中的相关类型断言。
+
+### 状态
+
+🔴 **待修复**
+
+代码已回退，目前代码库中仍存在此类型不一致问题。
+
+---
+
+## 2. `ComponentChildren` 不接受 `null` 导致类型/运行时不一致（待修复）
 
 - 位置：`src/jsx-foundation/types.ts`（`ComponentChildren`、`RenderOutput`）
 - 现状：类型仅允许 `boolean | undefined` 表示空值，显式的 `null` 被排除；但运行时的 `normalizeChildren` / `normalizeRenderOutput` 会把 `null` 视为可忽略节点并正常处理。

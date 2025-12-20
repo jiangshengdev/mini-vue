@@ -5,7 +5,7 @@ import type { SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
 /**
  * 运行时附加元信息的 `virtualNode`，便于挂载与 `diff` 阶段复用宿主节点。
  */
-// eslint-disable-next-line @typescript-eslint/naming-convention
+
 export interface RuntimeVNode<
   HostNode,
   HostElement extends HostNode & WeakKey,
@@ -24,7 +24,7 @@ export interface RuntimeVNode<
 /**
  * 将普通 `virtualNode` 断言为运行时增强形态，供挂载路径写入元信息。
  */
-// eslint-disable-next-line @typescript-eslint/naming-convention
+
 export function asRuntimeVNode<
   HostNode,
   HostElement extends HostNode & WeakKey = HostNode & WeakKey,

@@ -2,7 +2,9 @@
 agent: agent
 ---
 
-You are the annotation agent. Your entire job is to add descriptive, logic-focused code comments to the files explicitly provided by the user.
+## 角色定位
+
+你是注释代理。你的全部工作就是为用户明确提供的文件添加描述性的、以逻辑为核心的代码注释。
 
 ## 任务目标
 

@@ -1,13 +1,13 @@
 import type { SetupComponent } from '@/index.ts'
-import { ref } from '@/index.ts'
+import { state } from '@/index.ts'
 
 export const FormBindings: SetupComponent = () => {
-  const text = ref('Edit me')
-  const checked = ref(true)
-  const checkedNames = ref<string[]>(['Jack'])
-  const picked = ref('One')
-  const selected = ref('A')
-  const multiSelected = ref<string[]>(['A'])
+  const text = state('Edit me')
+  const checked = state(true)
+  const checkedNames = state<string[]>(['Jack'])
+  const picked = state('One')
+  const selected = state('A')
+  const multiSelected = state<string[]>(['A'])
 
   const updateText = (event: Event): void => {
     const { target } = event
@@ -16,7 +16,7 @@ export const FormBindings: SetupComponent = () => {
       return
     }
 
-    text.value = (target as HTMLInputElement).value
+    text.set((target as HTMLInputElement).value)
   }
 
   const updateChecked = (event: Event): void => {
@@ -26,7 +26,7 @@ export const FormBindings: SetupComponent = () => {
       return
     }
 
-    checked.value = (target as HTMLInputElement).checked
+    checked.set((target as HTMLInputElement).checked)
   }
 
   const updateCheckedNames = (event: Event): void => {
@@ -40,16 +40,18 @@ export const FormBindings: SetupComponent = () => {
     const { value } = input
 
     if (input.checked) {
-      if (!checkedNames.value.includes(value)) {
-        checkedNames.value.push(value)
+      if (!checkedNames.get().includes(value)) {
+        checkedNames.get().push(value)
       }
 
       return
     }
 
-    checkedNames.value = checkedNames.value.filter((name) => {
-      return name !== value
-    })
+    checkedNames.set(
+      checkedNames.get().filter((name) => {
+        return name !== value
+      }),
+    )
   }
 
   const updatePicked = (event: Event): void => {
@@ -59,7 +61,7 @@ export const FormBindings: SetupComponent = () => {
       return
     }
 
-    picked.value = (target as HTMLInputElement).value
+    picked.set((target as HTMLInputElement).value)
   }
 
   const updateSelected = (event: Event): void => {
@@ -69,7 +71,7 @@ export const FormBindings: SetupComponent = () => {
       return
     }
 
-    selected.value = (target as HTMLSelectElement).value
+    selected.set((target as HTMLSelectElement).value)
   }
 
   const updateMultiSelected = (event: Event): void => {
@@ -81,9 +83,11 @@ export const FormBindings: SetupComponent = () => {
 
     const select = target as HTMLSelectElement
 
-    multiSelected.value = [...select.selectedOptions].map((option) => {
-      return option.value
-    })
+    multiSelected.set(
+      [...select.selectedOptions].map((option) => {
+        return option.value
+      }),
+    )
   }
 
   return () => {
@@ -96,14 +100,14 @@ export const FormBindings: SetupComponent = () => {
 
         <div>
           <h3>Text Input</h3>
-          <input value={text.value} onInput={updateText} />
-          <p>{text.value}</p>
+          <input value={text.get()} onInput={updateText} />
+          <p>{text.get()}</p>
         </div>
 
         <div>
           <h3>Checkbox</h3>
-          <input type="checkbox" id="checkbox" checked={checked.value} onInput={updateChecked} />
-          <label for="checkbox">Checked: {String(checked.value)}</label>
+          <input type="checkbox" id="checkbox" checked={checked.get()} onInput={updateChecked} />
+          <label for="checkbox">Checked: {String(checked.get())}</label>
         </div>
 
         <div>
@@ -112,7 +116,7 @@ export const FormBindings: SetupComponent = () => {
             type="checkbox"
             id="jack"
             value="Jack"
-            checked={checkedNames.value.includes('Jack')}
+            checked={checkedNames.get().includes('Jack')}
             onInput={updateCheckedNames}
           />
           <label for="jack">Jack</label>
@@ -120,7 +124,7 @@ export const FormBindings: SetupComponent = () => {
             type="checkbox"
             id="john"
             value="John"
-            checked={checkedNames.value.includes('John')}
+            checked={checkedNames.get().includes('John')}
             onInput={updateCheckedNames}
           />
           <label for="john">John</label>
@@ -128,11 +132,11 @@ export const FormBindings: SetupComponent = () => {
             type="checkbox"
             id="mike"
             value="Mike"
-            checked={checkedNames.value.includes('Mike')}
+            checked={checkedNames.get().includes('Mike')}
             onInput={updateCheckedNames}
           />
           <label for="mike">Mike</label>
-          <p>Checked names: {checkedNames.value.join(', ') || 'None'}</p>
+          <p>Checked names: {checkedNames.get().join(', ') || 'None'}</p>
         </div>
 
         <div>
@@ -141,7 +145,7 @@ export const FormBindings: SetupComponent = () => {
             type="radio"
             id="one"
             value="One"
-            checked={picked.value === 'One'}
+            checked={picked.get() === 'One'}
             onInput={updatePicked}
           />
           <label for="one">One</label>
@@ -150,16 +154,16 @@ export const FormBindings: SetupComponent = () => {
             type="radio"
             id="two"
             value="Two"
-            checked={picked.value === 'Two'}
+            checked={picked.get() === 'Two'}
             onInput={updatePicked}
           />
           <label for="two">Two</label>
-          <p>Picked: {picked.value}</p>
+          <p>Picked: {picked.get()}</p>
         </div>
 
         <div>
           <h3>Select</h3>
-          <select value={selected.value} onInput={updateSelected}>
+          <select value={selected.get()} onInput={updateSelected}>
             <option disabled value="">
               Please select one
             </option>
@@ -167,13 +171,13 @@ export const FormBindings: SetupComponent = () => {
             <option value="B">B</option>
             <option value="C">C</option>
           </select>
-          <p>Selected: {selected.value}</p>
+          <p>Selected: {selected.get()}</p>
         </div>
 
         <div>
           <h3>Multi Select</h3>
           <select
-            value={multiSelected.value}
+            value={multiSelected.get()}
             multiple
             style={{ width: '100px' }}
             onInput={updateMultiSelected}
@@ -182,7 +186,7 @@ export const FormBindings: SetupComponent = () => {
             <option value="B">B</option>
             <option value="C">C</option>
           </select>
-          <p>Selected: {multiSelected.value.join(', ') || 'None'}</p>
+          <p>Selected: {multiSelected.get().join(', ') || 'None'}</p>
         </div>
       </section>
     )

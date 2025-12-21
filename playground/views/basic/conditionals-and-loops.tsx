@@ -1,38 +1,38 @@
 import type { SetupComponent } from '@/index.ts'
-import { ref } from '@/index.ts'
+import { state } from '@/index.ts'
 
 export const ConditionalsAndLoops: SetupComponent = () => {
-  const show = ref(true)
-  const list = ref<number[]>([1, 2, 3])
+  const show = state(true)
+  const list = state<number[]>([1, 2, 3])
 
   const toggleShow = (): void => {
-    show.value = !show.value
+    show.set(!show.get())
   }
 
   const pushNumber = (): void => {
-    list.value.push(list.value.length + 1)
+    list.get().push(list.get().length + 1)
   }
 
   const popNumber = (): void => {
-    list.value.pop()
+    list.get().pop()
   }
 
   const reverseList = (): void => {
-    list.value.reverse()
+    list.get().reverse()
   }
 
   const renderList = () => {
-    if (show.value && list.value.length > 0) {
+    if (show.get() && list.get().length > 0) {
       return (
         <ul>
-          {list.value.map((item) => {
+          {list.get().map((item) => {
             return <li key={item}>{item}</li>
           })}
         </ul>
       )
     }
 
-    if (list.value.length > 0) {
+    if (list.get().length > 0) {
       return <p>List is not empty, but hidden.</p>
     }
 

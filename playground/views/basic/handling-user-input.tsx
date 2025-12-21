@@ -1,16 +1,16 @@
 import styles from './handling-user-input.module.css'
 import type { SetupComponent } from '@/index.ts'
-import { ref } from '@/index.ts'
+import { state } from '@/index.ts'
 
 export const HandlingUserInput: SetupComponent = () => {
-  const message = ref('Hello World!')
+  const message = state('Hello World!')
 
   const reverseMessage = (): void => {
-    message.value = [...message.value].reverse().join('')
+    message.set([...message.get()].reverse().join(''))
   }
 
   const appendExclamation = (): void => {
-    message.value += '!'
+    message.set(`${message.get()}!`)
   }
 
   const notify = (event: Event): void => {
@@ -23,7 +23,7 @@ export const HandlingUserInput: SetupComponent = () => {
     return (
       <section class="card">
         <h2>Handling User Input</h2>
-        <h1>{message.value}</h1>
+        <h1>{message.get()}</h1>
         <button type="button" class={styles.item} onClick={reverseMessage}>
           Reverse Message
         </button>

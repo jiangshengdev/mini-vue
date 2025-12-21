@@ -163,7 +163,7 @@ export const FormBindings: SetupComponent = () => {
 
         <div>
           <h3>Select</h3>
-          <select value={selected.get()} onInput={updateSelected}>
+          <select value={selected.get()} onChange={updateSelected}>
             <option disabled value="">
               Please select one
             </option>
@@ -176,15 +176,16 @@ export const FormBindings: SetupComponent = () => {
 
         <div>
           <h3>Multi Select</h3>
-          <select
-            value={multiSelected.get()}
-            multiple
-            style={{ width: '100px' }}
-            onInput={updateMultiSelected}
-          >
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="C">C</option>
+          <select multiple style={{ width: '100px' }} onChange={updateMultiSelected}>
+            <option value="A" selected={multiSelected.get().includes('A')}>
+              A
+            </option>
+            <option value="B" selected={multiSelected.get().includes('B')}>
+              B
+            </option>
+            <option value="C" selected={multiSelected.get().includes('C')}>
+              C
+            </option>
           </select>
           <p>Selected: {multiSelected.get().join(', ') || 'None'}</p>
         </div>

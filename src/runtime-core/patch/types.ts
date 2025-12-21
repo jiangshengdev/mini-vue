@@ -5,8 +5,8 @@ import type { PatchDriver } from './driver.ts'
 import type { SetupComponent } from '@/jsx-foundation/index.ts'
 import { Fragment, Text } from '@/jsx-foundation/index.ts'
 
-/** 具名的文本 `virtualNode` 形态，补充可选 `text` 字段以匹配运行时数据。 */
-export type NormalizedTextVirtualNode = NormalizedVirtualNode<typeof Text> & { text?: string }
+/** 具名的文本 `virtualNode` 形态，方便在 patch 流程中窄化。 */
+export type NormalizedTextVirtualNode = NormalizedVirtualNode<typeof Text>
 
 /** 判断当前 `virtualNode` 是否为文本节点。 */
 export function isTextVirtualNode(

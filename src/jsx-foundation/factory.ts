@@ -80,9 +80,7 @@ export function createVirtualNode<T extends ElementType>(
 /**
  * 创建文本 `virtualNode`，将原始字符串/数字包装为统一的渲染节点。
  */
-export function createTextVirtualNode(content: string | number): VirtualNode<typeof Text> & {
-  text: string
-} {
+export function createTextVirtualNode(content: string | number): VirtualNode<typeof Text> {
   return {
     [virtualNodeFlag]: true,
     type: Text,

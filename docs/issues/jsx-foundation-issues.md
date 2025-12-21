@@ -1,6 +1,6 @@
 # JSX Foundation 模块问题记录
 
-## 1. `createTextVirtualNode` 返回类型与 VirtualNode 接口定义不一致（待修复）
+## 1. `createTextVirtualNode` 返回类型与 VirtualNode 接口定义不一致（已修复）
 
 ### 问题描述
 
@@ -44,9 +44,10 @@ export interface VirtualNode<T extends ElementType = ElementType> {
 
 ### 状态
 
-🔴 **待修复**
+🟢 **已修复**
 
-代码已回退，目前代码库中仍存在此类型不一致问题。
+- 为 `VirtualNode` 增补可选 `text` 字段。
+- `mountChild` 直接复用 `child.text`，移除类型断言。
 
 ---
 

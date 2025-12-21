@@ -104,4 +104,6 @@ export interface VirtualNode<T extends ElementType = ElementType> {
   readonly children: VirtualNodeChild[]
   /** 可选的 diff `key`，用于稳定节点身份 */
   readonly key?: PropertyKey
+  /** 文本节点的内容，仅在 `type` 为 `Text` 时存在 */
+  readonly text?: string
 }

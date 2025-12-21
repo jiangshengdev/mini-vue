@@ -89,6 +89,20 @@
   - [x]\* 6.2 编写 keyed diff 属性测试
     - **Property 6: Keyed diff 保序与复用**
     - **Validates: Requirements 6.1, 6.2, 6.3, 6.4**
+  - [x] 6.3 编写 keyed diff 正向单元测试（调试用）
+    - 在 `test/runtime-core/patch/children-keyed.test.tsx` 添加简单正向用例
+    - 测试场景：5-10 个元素的列表变换
+    - 用例 1：头部插入单个元素 [B,C,D] → [A,B,C,D]
+    - 用例 2：尾部插入单个元素 [A,B,C] → [A,B,C,D]
+    - 用例 3：中间插入单个元素 [A,C,D] → [A,B,C,D]
+    - 用例 4：头部删除单个元素 [A,B,C,D] → [B,C,D]
+    - 用例 5：尾部删除单个元素 [A,B,C,D] → [A,B,C]
+    - 用例 6：中间删除单个元素 [A,B,C,D] → [A,C,D]
+    - 用例 7：相邻元素交换 [A,B,C,D] → [A,C,B,D]
+    - 用例 8：首尾元素交换 [A,B,C,D] → [D,B,C,A]
+    - 用例 9：完全逆序 [A,B,C,D] → [D,C,B,A]
+    - 每个用例验证：DOM 顺序正确、节点引用复用
+    - _Requirements: 6.1, 6.2, 6.3, 6.4_
 
 - [x] 7. Checkpoint - Children patch 验证
   - 确保所有测试通过，如有问题请询问用户

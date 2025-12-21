@@ -1,0 +1,24 @@
+# JSX v-model 设计计划
+
+为 JSX 增加 `v-model` 语法糖：在无编译期的前提下，把 `<input v-model={x}>` 等转换为对应的 DOM property + 事件绑定，覆盖常见表单元素，简化表单绑定样板，不支持修饰符。
+
+## Scope
+
+- In: 设计/实现 v-model JSX 语法糖的转换策略，按元素类型生成 value/checked + 事件；调整运行时或辅助层支持该转换；增补类型声明；新增测试/Playground 验证。
+- Out: 模板编译器、修饰符支持、组件的 `modelValue` 协议改动、其他指令语法。
+
+## Action items
+
+[ ] 梳理现状：确认 JSX 运行时入口（`src/jsx-runtime`）与虚拟节点构建路径，找出可插入 v-model 转换的层。
+[ ] 设计转换规则：按元素类型（text/textarea、checkbox、radio、select 单/多选）决定 property（value/checked）与事件（input/change），定义 v-model prop 形态。
+[ ] 实现转换入口：在 jsx-runtime/builder 或虚拟节点创建前拦截 props，识别 `v-model`，生成等价的 value/checked + handler，移除原始 `v-model`。
+[ ] 补充类型：在 `src/jsx-shim.d.ts` 等声明中为 `v-model` 增加签名，覆盖 IntrinsicElements 中表单标签。
+[ ] 更新示例：改造 `playground/views/basic/form-bindings.tsx` 使用 `v-model` 语法糖，验证体验简化。
+[ ] 添加测试/验证：在 `test/runtime-dom/props` 或新用例覆盖各元素的 v-model 行为，手动跑 playground 或 `pnpm run test` 检查。
+[ ] 风险检查：确认属性写入限制不再告警，事件绑定/解绑稳健，数组/对象值处理与 Vue 行为一致。
+
+## Open questions
+
+- `v-model` 在 JSX 中的书写格式是否只接受 `v-model` 单一 prop，还是允许对象形态（如包含修饰符/自定义 handler）？
+- 是否需要对非原生表单元素（自定义组件）自动透传，还是仅限原生控件？
+- 是否需提供松散相等（looseEqual）匹配数字/对象值，以完全贴合 Vue 官方行为？

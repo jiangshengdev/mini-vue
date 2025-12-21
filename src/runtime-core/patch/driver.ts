@@ -93,14 +93,18 @@ export function createPatchDriver<
     },
     /**
      * 将节点序列搬移到锚点位置：
-     * - 无锚点时视为无需移动。
+     * - 无锚点时追加到容器末尾。
      * - 有锚点时按原顺序插入，保持兄弟顺序不变。
      */
     moveNodesToAnchor(nodes, anchor = environment.anchor) {
       if (!anchor) {
+        for (const node of nodes) {
+          options.appendChild(container, node)
+        }
+
         return {
           ok: true,
-          moved: false,
+          moved: true,
           usedAnchor: anchor,
         }
       }

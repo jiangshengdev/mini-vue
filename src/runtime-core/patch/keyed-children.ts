@@ -12,6 +12,7 @@ import {
   syncFromEnd,
   syncFromStart,
 } from './keyed-children-helpers.ts'
+import { computeLongestIncreasingSubsequence } from './longest-increasing-subsequence.ts'
 import { getHostNodesSafely } from './runtime-virtual-node.ts'
 import type { IndexMaps, IndexRange, KeyedPatchContext } from './types.ts'
 import { findNextAnchor, isSameVirtualNode } from './utils.ts'
@@ -69,8 +70,13 @@ export function patchKeyedChildren<
 
   /* 先遍历旧中间段做复用/卸载，并填充 newIndexToOldIndexMap。 */
   patchAlignedChildren(state, range, maps)
+  /* 计算最长递增子序列：用来判定哪些复用节点可以保持相对顺序而无需移动。 */
+  const increasingSubsequenceIndexes = computeLongestIncreasingSubsequence(
+    maps.newIndexToOldIndexMap,
+  )
+
   /* 再倒序遍历新中间段，将节点 mount/移动到正确位置。 */
-  moveOrMountChildren(state, range, maps)
+  moveOrMountChildren(state, range, maps, increasingSubsequenceIndexes)
 }
 
 /**
@@ -140,7 +146,11 @@ function moveOrMountChildren<
   context: KeyedPatchContext<HostNode, HostElement, HostFragment>,
   range: IndexRange,
   maps: IndexMaps,
+  increasingSubsequenceIndexes: number[],
 ): void {
+  /* 指向 LIS 末尾的游标，倒序扫描时逐步后移。 */
+  let subsequencePointer = increasingSubsequenceIndexes.length - 1
+
   for (let index = maps.middleSegmentCount - 1; index >= 0; index -= 1) {
     const newIndex = range.newStart + index
     const nextChild = context.nextChildren[newIndex]
@@ -149,8 +159,9 @@ function moveOrMountChildren<
       newIndex + 1,
       context.environment.anchor,
     )
+    const mappedValue = maps.newIndexToOldIndexMap[index]
 
-    if (maps.newIndexToOldIndexMap[index] === 0) {
+    if (mappedValue === 0) {
       /* 该新节点没有对应旧节点：执行 `mount` 并插入到 `anchorNode` 之前。 */
       const childEnvironment = createChildEnvironment(
         context.environment,
@@ -163,8 +174,14 @@ function moveOrMountChildren<
         context: childEnvironment.context,
       })
     } else {
+      /* 在最长递增子序列中的节点保持相对顺序，无需移动。 */
+      if (subsequencePointer >= 0 && increasingSubsequenceIndexes[subsequencePointer] === index) {
+        subsequencePointer -= 1
+        continue
+      }
+
       /* 该新节点可复用旧节点：直接把旧节点的宿主 `nodes` 移动到 `anchorNode` 之前。 */
-      const previousIndex = maps.newIndexToOldIndexMap[index] - 1
+      const previousIndex = mappedValue - 1
       const nodes = getHostNodesSafely<HostNode, HostElement, HostFragment>(
         context.previousChildren[previousIndex],
       )

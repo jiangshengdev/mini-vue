@@ -6,15 +6,15 @@
  * Validates: Requirements 6.1, 6.2, 6.3, 6.4
  */
 import { describe, expect, it } from 'vitest'
-import { createHostRenderer, normalize } from './test-utils.ts'
 import type { HostRenderer } from './test-utils.ts'
+import { createHostRenderer, normalize } from './test-utils.ts'
+import type { NormalizedVirtualNode } from '@/runtime-core/index.ts'
 import {
   asRuntimeVirtualNode,
   mountChild,
   patchChild,
   patchChildren,
 } from '@/runtime-core/index.ts'
-import type { NormalizedVirtualNode } from '@/runtime-core/index.ts'
 
 /**
  * 辅助函数：挂载 children 列表并返回运行时节点

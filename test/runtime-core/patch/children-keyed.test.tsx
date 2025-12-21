@@ -180,6 +180,54 @@ describe('patchChildren 有 key diff', () => {
     expect(host.counters.insertBefore).toBe(1)
   })
 
+  it('使用最长递增子序列优化减少移动次数', () => {
+    const host = createHostRenderer()
+    const previousChildren = [
+      normalize(<div key="a">A</div>),
+      normalize(<div key="b">B</div>),
+      normalize(<div key="c">C</div>),
+      normalize(<div key="d">D</div>),
+    ]
+    const nextChildren = [
+      normalize(<div key="d">D</div>),
+      normalize(<div key="a">A</div>),
+      normalize(<div key="b">B</div>),
+      normalize(<div key="c">C</div>),
+    ]
+
+    for (const child of previousChildren) {
+      mountChild(host.options, child, { container: host.container })
+    }
+
+    const previousRuntime = previousChildren.map((child) => {
+      return asRuntimeVirtualNode(child)
+    })
+
+    host.resetCounts()
+
+    patchChildren(host.options, previousChildren, nextChildren, {
+      container: host.container,
+      patchChild,
+    })
+
+    const nextRuntime = nextChildren.map((child) => {
+      return asRuntimeVirtualNode(child)
+    })
+
+    expect(
+      host.container.children.map((node) => {
+        return node.kind === 'element' ? node.tag : node.text
+      }),
+    ).toEqual(['div', 'div', 'div', 'div'])
+    expect(nextRuntime[0].el).toBe(previousRuntime[3].el)
+    expect(nextRuntime[1].el).toBe(previousRuntime[0].el)
+    expect(nextRuntime[2].el).toBe(previousRuntime[1].el)
+    expect(nextRuntime[3].el).toBe(previousRuntime[2].el)
+    expect(host.counters.appendChild).toBe(0)
+    expect(host.counters.remove).toBe(0)
+    expect(host.counters.insertBefore).toBe(1)
+  })
+
   it('新列表重复 key 时额外节点需重挂并清理旧节点', () => {
     const host = createHostRenderer()
     const previousChildren = [normalize(<div key="a">a</div>), normalize(<div key="b">b</div>)]

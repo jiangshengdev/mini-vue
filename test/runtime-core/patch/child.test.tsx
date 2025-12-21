@@ -69,8 +69,8 @@ describe('patchChild 元素/Fragment/组件 patch 行为', () => {
   it('Fragment 子节点 patch 应优先使用片段锚点而非父级锚点', () => {
     const host = createHostRenderer()
     const parentAnchor = host.options.createText('parent-anchor')
-    const previous = normalize(<>left right</>)
-    const next = normalize(<>left updated</>)
+    const previous = normalize(['left', 'right'])
+    const next = normalize(['left', 'updated'])
 
     host.options.appendChild(host.container, parentAnchor)
     mountChild(host.options, previous, { container: host.container, anchor: parentAnchor })

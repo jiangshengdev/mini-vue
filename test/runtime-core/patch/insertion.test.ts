@@ -71,7 +71,7 @@ describe('patch 插入与诊断', () => {
     ).toEqual(['patched', 'anchor'])
   })
 
-  it('ensureHostNodes 在 DEV 模式下当运行时节点缺失时发出警告', () => {
+  it('getHostNodesSafely 在 DEV 模式下当运行时节点缺失时发出警告', () => {
     const virtualNode = normalizeRenderOutput(createTextVirtualNode('lonely'))!
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {
       return undefined

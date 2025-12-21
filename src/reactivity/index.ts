@@ -13,8 +13,14 @@ export {
 export type { EffectScope } from './effect-scope.ts'
 export { effect, effectStack, ReactiveEffect } from './effect.ts'
 export { isReactive, reactive } from './reactive.ts'
-export { computed, isRef, ref, toRef, unref } from './ref/index.ts'
-export type { ComputedGetter, ComputedSetter, Ref, WritableComputedOptions } from './ref/index.ts'
+export { computed, isRef, ref, state, toRef, unref } from './ref/index.ts'
+export type {
+  ComputedGetter,
+  ComputedSetter,
+  Ref,
+  State,
+  WritableComputedOptions,
+} from './ref/index.ts'
 export { toRaw } from './to-raw.ts'
 export { watch } from './watch/index.ts'
 export type { WatchCallback, WatchOptions, WatchSource, WatchStopHandle } from './watch/index.ts'

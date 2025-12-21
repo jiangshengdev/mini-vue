@@ -1,5 +1,9 @@
 # Runtime Core 模块问题记录
 
+## 本轮审查补充
+
+- 本轮审查未发现新的 runtime-core 问题；现有条目仍然适用，如需新增议题请按问题模板补充并附可能方案。
+
 ## 1. 组件更新采用「卸载后重挂」导致状态丢失（待修复）
 
 - 位置：`src/runtime-core/component/render-effect.ts`

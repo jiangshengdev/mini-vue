@@ -49,3 +49,13 @@
 - 现状：修改 `Element.prototype.remove` 原型方法进行 spy。
 - 影响：虽然在 `finally` 中恢复了，但在并发测试环境下修改全局对象原型存在风险，且可能干扰其他测试。
 - 提示：建议使用 `vi.spyOn` 针对特定实例或使用更安全的 mock 方式。
+
+## 7. 无 DOM/SSR 环境下 import 即抛错（待修复）
+
+- 位置：`src/runtime-dom/create-app.ts`
+- 现状：模块加载阶段直接依赖 `document`、`import.meta.hot` 与 DOM 原语；在 SSR、Node 或无 DOM 的测试环境中仅 import 模块就会抛 `ReferenceError`/`TypeError`，无法按需降级或延迟加载。
+- 影响：阻塞 SSR 构建与无 DOM 环境的单元测试，破坏「平台检测后按需启用」的预期。
+- 可能方案：
+  - 在模块顶层增加环境探测，若不存在 `document` 则提前导出 no-op 的 `render/createApp` 或抛出明确错误，并延迟访问 DOM 对象到运行时。
+  - 将 DOM 依赖收敛到运行时分支，例如在 `mount` 过程中再执行 `document.querySelector`，并用条件判断包装 `import.meta.hot`。
+  - 为无 DOM 环境提供可注入的宿主实现（如通过参数传入自定义 renderer），避免硬编码全局 DOM。

@@ -74,3 +74,12 @@ export interface VirtualNode<T extends ElementType = ElementType> {
 - 现状：测试用例 '支持省略 props 直接传入可变 children' 显式断言 `expect(virtualNode.key).toBeUndefined()`。
 - 影响：虽然目前行为正确，但这过度依赖了 `h` 函数如何处理 `undefined` props 的内部实现。
 - 提示：测试应关注外部行为（如 `key` 是否起作用），尽量减少对非公开属性状态的直接断言。
+
+## 5. 组件类型被限定为 `(props: never)`，导致 ElementType 无法接受正常组件（待修复）
+
+- 位置：`src/jsx-foundation/types.ts`
+- 现状：`ComponentLike` 定义为 `(props: never) => RenderFunction`，`ElementType` 因此只接受该签名，正常的函数组件或 `SetupComponent<P>` 都会在 TSX 中报类型错误，`h`/`jsx` 无法与组件联动。
+- 影响：组件类型在类型层面完全不可用，外部使用 TSX 传入组件会直接类型报错，阻断基础用法。
+- 可能方案：
+  - 将 `ComponentLike` 改为与 `SetupComponent` 对齐的签名（如 `<P = PropsShape>(props: PropsWithChildren<P>) => RenderFunction`），或直接复用 `SetupComponent`。
+  - 调整 `ElementType`/`ElementProps` 推导链，确保组件 props 能按实际签名推导，配合 `jsx-shim`/顶层导出同步更新。

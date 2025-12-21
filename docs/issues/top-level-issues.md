@@ -16,11 +16,9 @@
   - 待 `jsx-foundation` 修正后同步更新入口导出；或在入口侧重新导出修正后的类型别名，避免引入错误定义。
   - 补充类型测试覆盖入口导出，确保组件/JSX 类型可用。
 
-## 3. JSX shim 对内置标签属性约束过于宽松（待优化）
+## 3. JSX shim 对内置标签属性约束过于宽松（已优化，仍可细化）
 
 - 位置：`src/jsx-shim.d.ts`
-- 现状：`IntrinsicElements = Record<string, PropsShape>`，未按 `ElementType` 推导原生标签 props，等效于对所有标签开放任意属性。
-- 影响：TSX 中原生标签缺乏属性校验，类型提示基本失效。
-- 可能方案：
-  - 参考 React/Vue 的 JSX 定义，为常用标签提供更精确的属性表，或至少引入「字符串标签 → 任意属性」与「组件类型 → 组件 props」的区分。
-  - 与 `ElementProps`/运行时支持保持一致，避免 shim 与实际可用 props 出现分叉。
+- 现状：`IntrinsicElements` 已切换为基于 DOM lib 的标签映射，事件也按 `HTMLElementEventMap` 提供了具体签名，并保留字符串索引兼容自定义属性；为简化 Hover，已将 HTML 与 SVG 标签拆分，SVG 侧排除了与 HTML 重名的标签。
+- 影响：VSCode/TSX 能补全原生属性和事件，Hover 复杂度降低；但被排除的 SVG 重名标签（如 `a`、`title` 等）现在使用 HTML 版本的属性定义，SVG 侧的严格性缺失。
+- 后续改进：可为重名标签补充 SVG 专用别名或 JSDoc 说明，或提供可配置的 SVG 严格模式以恢复精确属性提示。

@@ -20,7 +20,7 @@ describe('runtime-dom attrs props', () => {
 
   it('假值属性不会出现在 DOM 上', () => {
     const container = renderIntoNewContainer(
-      <input disabled={false} title={null} data-flag={undefined} />,
+      <input disabled={false} title={undefined} data-flag={undefined} />,
     )
 
     const input = container.firstElementChild as HTMLInputElement
@@ -47,7 +47,7 @@ describe('runtime-dom attrs props', () => {
   })
 
   it('空值 style 会移除 style 属性', () => {
-    const container = renderIntoNewContainer(<div style={null}>text</div>)
+    const container = renderIntoNewContainer(<div style={undefined}>text</div>)
     const first = within(container).getByText('text')
 
     expect(first.hasAttribute('style')).toBe(false)

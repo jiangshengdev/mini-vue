@@ -2,6 +2,62 @@ import type { ElementType as VirtualNodeType, VirtualNode } from '@/jsx-foundati
 import type { ElementRef } from '@/runtime-dom/index.ts'
 import type { PropsShape } from '@/shared/index.ts'
 
+/** JSX 属性接受的宽松取值集合，交由运行时做最终处理。 */
+type AttributeValue<T> =
+  | T
+  | string
+  | number
+  | boolean
+  | string[]
+  | number[]
+  | boolean[]
+  | Record<string, unknown>
+  | undefined
+
+/** `style` 在 JSX 场景下允许的写法汇总。 */
+type StyleProp = Partial<CSSStyleDeclaration> | Record<string, string | number> | string | boolean
+
+/**
+ * 将元素实例字段映射为可写属性，排除 `children` 与 `style` 以便上层重载。
+ */
+type ElementPropsMap<E extends Element = Element> = Omit<
+  { [K in keyof E]?: AttributeValue<E[K]> },
+  'children' | 'style'
+>
+
+/** 单个事件属性的取值，支持标准回调与宽松原始值。 */
+type EventPropValue<K extends keyof HTMLElementEventMap> =
+  | ((event: HTMLElementEventMap[K]) => void)
+  | AttributeValue<HTMLElementEventMap[K]>
+
+/** DOM 事件名到 `onXxx` prop 的映射。 */
+type NativeEventProps = {
+  [K in keyof HTMLElementEventMap as `on${Capitalize<K>}`]?: EventPropValue<K>
+}
+
+/**
+ * 内置元素在 JSX 中的属性定义，组合基础属性、`style`/`children` 与事件映射。
+ */
+type NativeElementProps<E extends Element = Element> = PropsShape &
+  ElementPropsMap<E> & {
+    children?: unknown
+    style?: StyleProp
+  } & NativeEventProps
+
+/** HTML 标签到属性定义的映射。 */
+type HtmlIntrinsicElements = {
+  [K in keyof HTMLElementTagNameMap]: NativeElementProps<HTMLElementTagNameMap[K]>
+}
+
+/**
+ * SVG 标签到属性定义的映射，排除与 HTML 重名的标签以避免属性类型交叉。
+ */
+type SvgIntrinsicElements = {
+  [K in Exclude<keyof SVGElementTagNameMap, keyof HTMLElementTagNameMap>]: NativeElementProps<
+    SVGElementTagNameMap[K]
+  >
+}
+
 /**
  * 为 TypeScript 提供 mini-vue `JSX` 环境下的类型声明。
  */
@@ -15,20 +71,23 @@ declare global {
 
     /** 标记 `children` 对应的 `props` 键名，供 TS 推导使用。 */
     interface ElementChildrenAttribute {
+      /** 用于指示 `children` 在 props 中的字段名。 */
       children: unknown
     }
 
     /** `JSX` 内置属性，当前仅支持 `key`。 */
     interface IntrinsicAttributes {
+      /** Diff 使用的稳定标识。 */
       key?: PropertyKey
+      /** 透传宿主元素引用的 ref。 */
       ref?: ElementRef
     }
 
     /**
-     * 内置标签（如 `div`、`span`）的属性约束，
-     * 这里统一允许任意键值对，具体由运行时处理。
+     * 基于 DOM lib 为内置标签提供更精确的属性提示，
+     * 同时保留字符串索引以兼容自定义属性。
      */
-    type IntrinsicElements = Record<string, PropsShape>
+    type IntrinsicElements = HtmlIntrinsicElements & SvgIntrinsicElements
   }
 }
 

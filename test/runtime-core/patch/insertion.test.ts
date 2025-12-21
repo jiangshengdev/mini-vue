@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { RendererOptions } from '@/runtime-core/index.ts'
 import {
-  ensureHostNodes,
+  getHostNodesSafely,
   mountChild,
   normalizeRenderOutput,
   patchChild,
@@ -77,7 +77,7 @@ describe('patch 插入与诊断', () => {
       return undefined
     })
 
-    ensureHostNodes<TestNode, TestElement, TestFragment>(virtualNode)
+    getHostNodesSafely<TestNode, TestElement, TestFragment>(virtualNode)
 
     if (__DEV__) {
       expect(warn).toHaveBeenCalledOnce()

@@ -1,6 +1,6 @@
 import type { NormalizedChildren, NormalizedVirtualNode } from '../normalize.ts'
 import { createChildEnvironment } from './children-environment.ts'
-import type { IndexMaps, IndexRange, KeyedPatchState } from './types.ts'
+import type { IndexMaps, IndexRange, KeyedPatchContext } from './types.ts'
 import { findNextAnchor, isSameVirtualNode } from './utils.ts'
 
 /**
@@ -22,22 +22,25 @@ export function syncFromStart<
   HostNode,
   HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
->(state: KeyedPatchState<HostNode, HostElement, HostFragment>, range: IndexRange): void {
+>(context: KeyedPatchContext<HostNode, HostElement, HostFragment>, range: IndexRange): void {
   while (
     range.oldStart <= range.oldEnd &&
     range.newStart <= range.newEnd &&
-    isSameVirtualNode(state.previousChildren[range.oldStart], state.nextChildren[range.newStart])
+    isSameVirtualNode(
+      context.previousChildren[range.oldStart],
+      context.nextChildren[range.newStart],
+    )
   ) {
     const childEnvironment = createChildEnvironment(
-      state.environment,
+      context.environment,
       range.newStart,
-      state.nextChildren.length,
+      context.nextChildren.length,
     )
 
-    state.environment.patchChild(
-      state.options,
-      state.previousChildren[range.oldStart],
-      state.nextChildren[range.newStart],
+    context.environment.patchChild(
+      context.options,
+      context.previousChildren[range.oldStart],
+      context.nextChildren[range.newStart],
       childEnvironment,
     )
     /* 头部已对齐，继续向中间推进。 */
@@ -53,22 +56,22 @@ export function syncFromEnd<
   HostNode,
   HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
->(state: KeyedPatchState<HostNode, HostElement, HostFragment>, range: IndexRange): void {
+>(context: KeyedPatchContext<HostNode, HostElement, HostFragment>, range: IndexRange): void {
   while (
     range.oldStart <= range.oldEnd &&
     range.newStart <= range.newEnd &&
-    isSameVirtualNode(state.previousChildren[range.oldEnd], state.nextChildren[range.newEnd])
+    isSameVirtualNode(context.previousChildren[range.oldEnd], context.nextChildren[range.newEnd])
   ) {
     const childEnvironment = createChildEnvironment(
-      state.environment,
+      context.environment,
       range.newEnd,
-      state.nextChildren.length,
+      context.nextChildren.length,
     )
 
-    state.environment.patchChild(
-      state.options,
-      state.previousChildren[range.oldEnd],
-      state.nextChildren[range.newEnd],
+    context.environment.patchChild(
+      context.options,
+      context.previousChildren[range.oldEnd],
+      context.nextChildren[range.newEnd],
       childEnvironment,
     )
     /* 尾部已对齐，继续向中间收缩。 */
@@ -84,11 +87,11 @@ export function insertRemainingChildren<
   HostNode,
   HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
->(state: KeyedPatchState<HostNode, HostElement, HostFragment>, range: IndexRange): void {
+>(context: KeyedPatchContext<HostNode, HostElement, HostFragment>, range: IndexRange): void {
   const insertAnchor = findNextAnchor(
-    state.nextChildren,
+    context.nextChildren,
     range.newEnd + 1,
-    state.environment.anchor,
+    context.environment.anchor,
   )
 
   /*
@@ -98,12 +101,12 @@ export function insertRemainingChildren<
    */
   for (let index = range.newStart; index <= range.newEnd; index += 1) {
     const childEnvironment = createChildEnvironment(
-      state.environment,
+      context.environment,
       index,
-      state.nextChildren.length,
+      context.nextChildren.length,
     )
 
-    state.driver.mountNew(state.nextChildren[index], {
+    context.driver.mountNew(context.nextChildren[index], {
       anchor: insertAnchor,
       context: childEnvironment.context,
     })
@@ -117,9 +120,9 @@ export function removeRemainingChildren<
   HostNode,
   HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
->(state: KeyedPatchState<HostNode, HostElement, HostFragment>, range: IndexRange): void {
+>(context: KeyedPatchContext<HostNode, HostElement, HostFragment>, range: IndexRange): void {
   for (let index = range.oldStart; index <= range.oldEnd; index += 1) {
-    state.driver.unmountOnly(state.previousChildren[index])
+    context.driver.unmountOnly(context.previousChildren[index])
   }
 }
 
@@ -130,7 +133,7 @@ export function buildIndexMaps<
   HostNode,
   HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
->(state: KeyedPatchState<HostNode, HostElement, HostFragment>, range: IndexRange): IndexMaps {
+>(context: KeyedPatchContext<HostNode, HostElement, HostFragment>, range: IndexRange): IndexMaps {
   const keyToNewIndexMap = new Map<PropertyKey, number>()
   const middleSegmentCount = range.newEnd - range.newStart + 1
   /* 使用 0 作为「没有可复用旧节点」的哨兵值，因此旧索引在写入时会 `+1` 编码。 */
@@ -140,7 +143,7 @@ export function buildIndexMaps<
 
   /* 先收集新列表中间段的 `key` 映射，便于旧节点通过 `key` 快速命中。 */
   for (let index = range.newStart; index <= range.newEnd; index += 1) {
-    const child = state.nextChildren[index]
+    const child = context.nextChildren[index]
 
     if (child.key !== undefined && child.key !== null) {
       keyToNewIndexMap.set(child.key, index)

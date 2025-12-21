@@ -49,7 +49,7 @@ export function getFirstHostNode<
 /**
  * 防御性读取宿主节点：当 `handle` 缺失或未写入宿主引用时给出调试提示。
  */
-export function ensureHostNodes<
+export function getHostNodesSafely<
   HostNode,
   HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,

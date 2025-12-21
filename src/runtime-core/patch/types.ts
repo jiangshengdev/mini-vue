@@ -38,7 +38,7 @@ export interface IndexRange {
 }
 
 /** `keyed diff` 过程中的只读输入集合，避免函数间传参过长。 */
-export interface KeyedPatchState<
+export interface KeyedPatchContext<
   HostNode,
   HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,

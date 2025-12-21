@@ -12,8 +12,8 @@ import {
   syncFromEnd,
   syncFromStart,
 } from './keyed-children-helpers.ts'
-import { ensureHostNodes } from './runtime-virtual-node.ts'
-import type { IndexMaps, IndexRange, KeyedPatchState } from './types.ts'
+import { getHostNodesSafely } from './runtime-virtual-node.ts'
+import type { IndexMaps, IndexRange, KeyedPatchContext } from './types.ts'
 import { findNextAnchor, isSameVirtualNode } from './utils.ts'
 
 /**
@@ -37,7 +37,7 @@ export function patchKeyedChildren<
   environment: PatchChildrenEnvironment<HostNode, HostElement, HostFragment>,
 ): void {
   const driver = createPatchDriver(options, environment)
-  const state: KeyedPatchState<HostNode, HostElement, HostFragment> = {
+  const state: KeyedPatchContext<HostNode, HostElement, HostFragment> = {
     options,
     previousChildren,
     nextChildren,
@@ -83,27 +83,27 @@ function patchAlignedChildren<
   HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
 >(
-  state: KeyedPatchState<HostNode, HostElement, HostFragment>,
+  context: KeyedPatchContext<HostNode, HostElement, HostFragment>,
   range: IndexRange,
   maps: IndexMaps,
 ): void {
   for (let index = range.oldStart; index <= range.oldEnd; index += 1) {
-    const previousChild = state.previousChildren[index]
+    const previousChild = context.previousChildren[index]
     /* 有 `key` 则优先通过映射定位，否则尝试在新列表中间段线性寻找可复用的无 `key` 节点。 */
     const newIndex =
       previousChild.key !== undefined && previousChild.key !== null
         ? maps.keyToNewIndexMap.get(previousChild.key)
-        : findUnkeyedMatch(previousChild, state.nextChildren, range.newStart, range.newEnd)
+        : findUnkeyedMatch(previousChild, context.nextChildren, range.newStart, range.newEnd)
 
     if (newIndex === undefined) {
       /* 旧节点在新列表中不存在：直接卸载，避免后续移动阶段误处理。 */
-      state.driver.unmountOnly(previousChild)
+      context.driver.unmountOnly(previousChild)
     } else {
-      const nextChild = state.nextChildren[newIndex]
+      const nextChild = context.nextChildren[newIndex]
 
       if (!isSameVirtualNode(previousChild, nextChild)) {
         /* Key 命中但类型不同：视为替换，卸载旧节点并让后续阶段按「需要 mount」处理。 */
-        state.driver.unmountOnly(previousChild)
+        context.driver.unmountOnly(previousChild)
 
         continue
       }
@@ -111,15 +111,15 @@ function patchAlignedChildren<
       /* 记录新索引对应的旧索引（`+1` 编码），供后续倒序移动/挂载阶段判断是否需要 `mount`。 */
       maps.newIndexToOldIndexMap[newIndex - range.newStart] = index + 1
       const childEnvironment = createChildEnvironment(
-        state.environment,
+        context.environment,
         newIndex,
-        state.nextChildren.length,
+        context.nextChildren.length,
       )
 
-      state.environment.patchChild(
-        state.options,
+      context.environment.patchChild(
+        context.options,
         previousChild,
-        state.nextChildren[newIndex],
+        context.nextChildren[newIndex],
         childEnvironment,
       )
     }
@@ -137,32 +137,36 @@ function moveOrMountChildren<
   HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
 >(
-  state: KeyedPatchState<HostNode, HostElement, HostFragment>,
+  context: KeyedPatchContext<HostNode, HostElement, HostFragment>,
   range: IndexRange,
   maps: IndexMaps,
 ): void {
   for (let index = maps.middleSegmentCount - 1; index >= 0; index -= 1) {
     const newIndex = range.newStart + index
-    const nextChild = state.nextChildren[newIndex]
-    const anchorNode = findNextAnchor(state.nextChildren, newIndex + 1, state.environment.anchor)
+    const nextChild = context.nextChildren[newIndex]
+    const anchorNode = findNextAnchor(
+      context.nextChildren,
+      newIndex + 1,
+      context.environment.anchor,
+    )
 
     if (maps.newIndexToOldIndexMap[index] === 0) {
       /* 该新节点没有对应旧节点：执行 `mount` 并插入到 `anchorNode` 之前。 */
       const childEnvironment = createChildEnvironment(
-        state.environment,
+        context.environment,
         newIndex,
-        state.nextChildren.length,
+        context.nextChildren.length,
       )
 
-      state.driver.mountNew(nextChild, {
+      context.driver.mountNew(nextChild, {
         anchor: anchorNode,
         context: childEnvironment.context,
       })
     } else {
       /* 该新节点可复用旧节点：直接把旧节点的宿主 `nodes` 移动到 `anchorNode` 之前。 */
       const previousIndex = maps.newIndexToOldIndexMap[index] - 1
-      const nodes = ensureHostNodes<HostNode, HostElement, HostFragment>(
-        state.previousChildren[previousIndex],
+      const nodes = getHostNodesSafely<HostNode, HostElement, HostFragment>(
+        context.previousChildren[previousIndex],
       )
 
       /*
@@ -170,7 +174,7 @@ function moveOrMountChildren<
        * - patchAlignedChildren 已完成复用节点的内容更新。
        * - 这里仅负责把「已更新的旧节点」放到正确位置。
        */
-      state.driver.moveNodesToAnchor(nodes, anchorNode)
+      context.driver.moveNodesToAnchor(nodes, anchorNode)
     }
   }
 }

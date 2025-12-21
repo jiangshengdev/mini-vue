@@ -4,12 +4,6 @@ import { mountChild } from '../mount/index.ts'
 import type { NormalizedVirtualNode } from '../normalize.ts'
 import type { RendererOptions } from '../renderer.ts'
 
-export type InsertionEnvironment<
-  HostNode,
-  HostElement extends HostNode & WeakKey,
-  HostFragment extends HostNode,
-> = ChildEnvironment<HostNode, HostElement, HostFragment>
-
 /**
  * 在已知容器/锚点/上下文的前提下挂载单个 virtualNode，并直接插入到目标位置。
  */
@@ -20,7 +14,7 @@ export function mountChildInEnvironment<
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   virtualNode: NormalizedVirtualNode | undefined,
-  environment: InsertionEnvironment<HostNode, HostElement, HostFragment>,
+  environment: ChildEnvironment<HostNode, HostElement, HostFragment>,
 ): MountedHandle<HostNode> | undefined {
   if (!virtualNode) {
     return undefined

@@ -7,13 +7,19 @@ import { __DEV__, isNil } from '@/shared/index.ts'
 export function patchDomAttr(element: Element, key: string, value: unknown): void {
   /* `null`/`false` 都表示属性应被移除。 */
   if (isNil(value) || value === false) {
-    element.removeAttribute(key)
+    if (element.hasAttribute(key)) {
+      element.removeAttribute(key)
+    }
 
     return
   }
 
   /* 布尔 `true` 直接写入空字符串，符合 HTML 布尔属性语义。 */
   if (value === true) {
+    if (element.getAttribute(key) === '') {
+      return
+    }
+
     element.setAttribute(key, '')
 
     return
@@ -21,7 +27,13 @@ export function patchDomAttr(element: Element, key: string, value: unknown): voi
 
   /* 仅接受 `string` 或 `number`，其他类型直接忽略写入。 */
   if (typeof value === 'string' || typeof value === 'number') {
-    element.setAttribute(key, String(value))
+    const normalized = String(value)
+
+    if (element.getAttribute(key) === normalized) {
+      return
+    }
+
+    element.setAttribute(key, normalized)
 
     return
   }

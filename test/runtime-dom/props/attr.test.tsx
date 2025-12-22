@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { within } from '@testing-library/dom'
-import { renderIntoNewContainer } from '$/index.ts'
+import { createTestContainer, renderIntoNewContainer } from '$/index.ts'
 import { render } from '@/index.ts'
 import { runtimeDomUnsupportedAttrValue } from '@/messages/index.ts'
 
@@ -56,5 +56,23 @@ describe('runtime-dom attrs props', () => {
     const second = within(container).getByText('text')
 
     expect(second.hasAttribute('style')).toBe(false)
+  })
+
+  it('相同 attr 更新不会重复写入 DOM', () => {
+    const container = createTestContainer()
+
+    render(<div id="keep">text</div>, container)
+
+    const element = within(container).getByText('text')
+    const setSpy = vi.spyOn(element, 'setAttribute')
+    const removeSpy = vi.spyOn(element, 'removeAttribute')
+
+    render(<div id="keep">text</div>, container)
+
+    expect(setSpy).not.toHaveBeenCalled()
+    expect(removeSpy).not.toHaveBeenCalled()
+
+    setSpy.mockRestore()
+    removeSpy.mockRestore()
   })
 })

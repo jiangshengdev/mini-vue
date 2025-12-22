@@ -32,12 +32,19 @@ function setStyleValue(element: HTMLElement, property: string, input: string): v
 function applyStyle(element: HTMLElement, previous: unknown, next: unknown): void {
   /* 传入空值或 `false` 时移除整段内联样式。 */
   if (isNil(next) || next === false) {
-    element.removeAttribute('style')
+    if (element.hasAttribute('style')) {
+      element.removeAttribute('style')
+    }
 
     return
   }
 
   if (typeof next === 'string') {
+    /* 字符串内联样式未变时跳过写入。 */
+    if (element.getAttribute('style') === next) {
+      return
+    }
+
     element.setAttribute('style', next)
 
     return
@@ -64,12 +71,15 @@ function applyStyle(element: HTMLElement, previous: unknown, next: unknown): voi
     }
 
     const previousStyle = isObject(previous) ? (previous as Record<string, unknown>) : {}
+    const styleDeclaration = element.style
     let hasValue = false
 
     /* 先处理删除：前一版本存在但当前已移除或置空的键需写入空字符串。 */
     for (const name of Object.keys(previousStyle)) {
       if (!Object.hasOwn(nextStyle, name) || isNil(nextStyle[name])) {
-        setStyleValue(element, name, '')
+        if (getStyleValue(element, name) !== '') {
+          setStyleValue(element, name, '')
+        }
       }
     }
 
@@ -91,12 +101,19 @@ function applyStyle(element: HTMLElement, previous: unknown, next: unknown): voi
 
       const stringValue: string = typeof styleValue === 'number' ? String(styleValue) : styleValue
 
+      if (getStyleValue(element, name) === stringValue) {
+        /* DOM 已是目标值时避免重复写入，但仍需标记存在有效样式。 */
+        hasValue = true
+
+        continue
+      }
+
       setStyleValue(element, name, stringValue)
       hasValue = true
     }
 
     /* 对象写法未留下有效值时移除 `style` 特性，保持与空对象等价。 */
-    if (!hasValue) {
+    if (!hasValue && element.hasAttribute('style')) {
       element.removeAttribute('style')
     }
   }
@@ -104,3 +121,12 @@ function applyStyle(element: HTMLElement, previous: unknown, next: unknown): voi
 
 /** 扩展原生 `style` 声明，允许对任意属性键执行写入。 */
 type WritableStyle = CSSStyleDeclaration & Record<string, string | undefined>
+
+/** 读取当前元素的内联样式值，兼容 camelCase 与自定义属性名。 */
+function getStyleValue(element: HTMLElement, property: string): string {
+  if (Reflect.has(element.style, property)) {
+    return (element.style as WritableStyle)[property] ?? ''
+  }
+
+  return element.style.getPropertyValue(property)
+}

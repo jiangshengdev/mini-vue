@@ -30,7 +30,7 @@ export function patchProps(
     }
 
     /* `class` 相关键统一映射到 `className` 字段。 */
-    if (handleClassProp(element, key, nextValue)) {
+    if (handleClassProp(element, key, previousValue, nextValue)) {
       continue
     }
 

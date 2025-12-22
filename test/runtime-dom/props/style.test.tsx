@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { within } from '@testing-library/dom'
-import { renderIntoNewContainer } from '$/index.ts'
+import { createTestContainer, renderIntoNewContainer } from '$/index.ts'
+import { render } from '@/index.ts'
 import { runtimeDomInvalidStyleValue } from '@/messages/index.ts'
 
 describe('runtime-dom style props', () => {
@@ -49,5 +50,23 @@ describe('runtime-dom style props', () => {
     } finally {
       warnSpy.mockRestore()
     }
+  })
+
+  it('相同 style 对象更新不会重复写入 DOM', () => {
+    const container = createTestContainer()
+
+    render(<div style={{ color: 'red', fontSize: '12px' }}>text</div>, container)
+
+    const element = within(container).getByText('text')
+    const setColor = vi.spyOn(element.style, 'color', 'set')
+    const setFontSize = vi.spyOn(element.style, 'fontSize', 'set')
+
+    render(<div style={{ color: 'red', fontSize: '12px' }}>text</div>, container)
+
+    expect(setColor).not.toHaveBeenCalled()
+    expect(setFontSize).not.toHaveBeenCalled()
+
+    setColor.mockRestore()
+    setFontSize.mockRestore()
   })
 })

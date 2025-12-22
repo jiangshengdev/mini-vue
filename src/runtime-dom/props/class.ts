@@ -1,12 +1,24 @@
 import { isNil, isObject } from '@/shared/index.ts'
 
 /** 统一处理 `class`/`className`。 */
-export function handleClassProp(element: Element, key: string, value: unknown): boolean {
+export function handleClassProp(
+  element: Element,
+  key: string,
+  _previous: unknown,
+  next: unknown,
+): boolean {
   if (key !== 'class' && key !== 'className') {
     return false
   }
 
-  ;(element as HTMLElement).className = isNil(value) || value === false ? '' : normalizeClass(value)
+  const nextClassName = isNil(next) || next === false ? '' : normalizeClass(next)
+
+  /* class 未变化时避免重复写入 DOM。 */
+  if ((element as HTMLElement).className === nextClassName) {
+    return true
+  }
+
+  ;(element as HTMLElement).className = nextClassName
 
   return true
 }

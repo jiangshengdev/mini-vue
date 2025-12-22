@@ -33,6 +33,10 @@ function patchEvent(
   if (typeof next === 'function') {
     /* 已有 `invoker` 时仅更新内部回调，保证事件引用稳定。 */
     if (existing) {
+      if (existing.value === next) {
+        return
+      }
+
       existing.value = next as EventListener
     } else {
       /* 首次绑定时创建包装 `invoker`，后续更新直接覆写 `value`。 */

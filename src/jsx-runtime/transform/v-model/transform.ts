@@ -2,7 +2,7 @@ import { applyCheckboxModelBinding } from './checkbox.ts'
 import { applyRadioModelBinding } from './radio.ts'
 import { applySelectMultipleModelBinding } from './select-multiple.ts'
 import { applySelectSingleModelBinding } from './select-single.ts'
-import { applyTextLikeModelBinding } from './textlike.ts'
+import { applyTextlikeModelBinding } from './textlike.ts'
 import { warnConflictProps, warnNonFormElement } from './warn.ts'
 import type { ElementProps, ElementType } from '@/jsx-foundation/index.ts'
 import type { PropsShape } from '@/shared/index.ts'
@@ -34,7 +34,7 @@ export function transformModelBindingProps<T extends ElementType>(
     return { props: props as ElementProps<T> }
   }
 
-  const modelBinding = props['v-model']
+  const model = props['v-model']
   const nextProps: PropsShape = { ...props }
 
   Reflect.deleteProperty(nextProps, 'v-model')
@@ -51,18 +51,18 @@ export function transformModelBindingProps<T extends ElementType>(
       const inputType = typeof nextProps.type === 'string' ? nextProps.type.toLowerCase() : ''
 
       if (inputType === 'checkbox') {
-        applyCheckboxModelBinding(modelBinding, nextProps, trackConflict)
+        applyCheckboxModelBinding(model, nextProps, trackConflict)
       } else if (inputType === 'radio') {
-        applyRadioModelBinding(modelBinding, nextProps, trackConflict)
+        applyRadioModelBinding(model, nextProps, trackConflict)
       } else {
-        applyTextLikeModelBinding(modelBinding, nextProps, trackConflict, 'onInput')
+        applyTextlikeModelBinding(model, nextProps, trackConflict, 'onInput')
       }
 
       break
     }
 
     case 'textarea': {
-      applyTextLikeModelBinding(modelBinding, nextProps, trackConflict, 'onInput')
+      applyTextlikeModelBinding(model, nextProps, trackConflict, 'onInput')
       break
     }
 
@@ -70,9 +70,9 @@ export function transformModelBindingProps<T extends ElementType>(
       const multiple = Boolean(nextProps.multiple)
 
       if (multiple) {
-        applySelectMultipleModelBinding(modelBinding, nextProps, trackConflict)
+        applySelectMultipleModelBinding(model, nextProps, trackConflict)
       } else {
-        applySelectSingleModelBinding(modelBinding, nextProps, trackConflict)
+        applySelectSingleModelBinding(model, nextProps, trackConflict)
       }
 
       break

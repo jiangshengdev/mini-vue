@@ -4,15 +4,15 @@ import type { PropsShape } from '@/shared/index.ts'
 type TrackConflict = (key: string) => void
 
 export function applyRadioModelBinding(
-  modelBinding: unknown,
+  model: unknown,
   props: PropsShape,
   trackConflict: TrackConflict,
 ): void {
-  const controlValue = Object.hasOwn(props, 'value') ? props.value : 'on'
-  const modelValue = readModelValue(modelBinding)
+  const boundValue = Object.hasOwn(props, 'value') ? props.value : 'on'
+  const modelValue = readModelValue(model)
 
   trackConflict('checked')
-  props.checked = modelValue === controlValue
+  props.checked = modelValue === boundValue
 
   trackConflict('onChange')
 
@@ -23,6 +23,6 @@ export function applyRadioModelBinding(
       return
     }
 
-    setModelValue(modelBinding, controlValue)
+    setModelValue(model, boundValue)
   }
 }

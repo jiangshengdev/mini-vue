@@ -4,11 +4,11 @@ import type { PropsShape } from '@/shared/index.ts'
 type TrackConflict = (key: string) => void
 
 export function applySelectMultipleModelBinding(
-  modelBinding: unknown,
+  model: unknown,
   props: PropsShape,
   trackConflict: TrackConflict,
 ): void {
-  const modelValue = readModelValue(modelBinding)
+  const modelValue = readModelValue(model)
 
   trackConflict('value')
   props.value = modelValue
@@ -28,6 +28,6 @@ export function applySelectMultipleModelBinding(
       return option.value
     })
 
-    setModelValue(modelBinding, selectedValues)
+    setModelValue(model, selectedValues)
   }
 }

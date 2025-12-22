@@ -4,12 +4,12 @@ import type { PropsShape } from '@/shared/index.ts'
 type TrackConflict = (key: string) => void
 
 export function applySelectSingleModelBinding(
-  modelBinding: unknown,
+  model: unknown,
   props: PropsShape,
   trackConflict: TrackConflict,
 ): void {
   trackConflict('value')
-  props.value = readModelValue(modelBinding)
+  props.value = readModelValue(model)
 
   trackConflict('onChange')
 
@@ -22,6 +22,6 @@ export function applySelectSingleModelBinding(
 
     const select = target as HTMLSelectElement
 
-    setModelValue(modelBinding, select.value)
+    setModelValue(model, select.value)
   }
 }

@@ -36,7 +36,7 @@ describe('runtime-dom attrs props', () => {
     })
     const payload = { nested: true }
 
-    const container = renderIntoNewContainer(<div title={payload} />)
+    const container = renderIntoNewContainer(<div title={payload as unknown as string} />)
 
     const element = container.firstElementChild as HTMLDivElement
 

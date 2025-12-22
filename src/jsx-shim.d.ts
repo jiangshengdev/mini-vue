@@ -3,26 +3,20 @@ import type { ElementRef } from '@/runtime-dom/index.ts'
 import type { PropsShape } from '@/shared/index.ts'
 
 /** JSX 属性接受的宽松取值集合，交由运行时做最终处理。 */
-type AttributeValue<T> =
-  | T
-  | string
-  | number
-  | boolean
-  | string[]
-  | number[]
-  | boolean[]
-  | Record<string, unknown>
-  | undefined
+type AttributeValue<T> = T | string | number | boolean | undefined
 
 /** `style` 在 JSX 场景下允许的写法汇总。 */
 type StyleProp = Partial<CSSStyleDeclaration> | Record<string, string | number> | string | boolean
+
+/** `class`/`className` 允许的宽松写法，具体归一化由运行时处理。 */
+type ClassProp = unknown
 
 /**
  * 将元素实例字段映射为可写属性，排除 `children` 与 `style` 以便上层重载。
  */
 type ElementPropsMap<E extends Element = Element> = Omit<
   { [K in keyof E]?: AttributeValue<E[K]> },
-  'children' | 'style'
+  'children' | 'style' | 'class' | 'className'
 >
 
 /** 单个事件属性的取值，支持标准回调与宽松原始值。 */
@@ -42,6 +36,8 @@ type NativeElementProps<E extends Element = Element> = PropsShape &
   ElementPropsMap<E> & {
     children?: unknown
     style?: StyleProp
+    class?: ClassProp
+    className?: ClassProp
   } & NativeEventProps
 
 /** HTML 标签到属性定义的映射。 */

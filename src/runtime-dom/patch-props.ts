@@ -235,11 +235,15 @@ function applySelectValue(element: HTMLSelectElement, value: unknown): void {
     return
   }
 
-  const options = [...element.options]
+  const normalizedValues = [...values]
 
-  for (const option of options) {
-    option.selected = values.includes(option.value)
-  }
+  queueMicrotask(() => {
+    const options = [...element.options]
+
+    for (const option of options) {
+      option.selected = normalizedValues.includes(option.value)
+    }
+  })
 }
 
 /** 判断传入值是否为元素 `ref` 处理器或响应式 `ref`。 */

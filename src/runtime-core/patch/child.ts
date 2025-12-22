@@ -101,6 +101,11 @@ function patchExisting<
     /* 先同步 runtime 元数据，保证后续读取 `next.el`/`handle` 时语义一致。 */
     syncRuntimeMetadata(runtimePrevious, runtimeNext, { component: undefined })
 
+    /* 文本未变更时避免重复写入宿主节点。 */
+    if (previous.text === next.text) {
+      return { ok: true }
+    }
+
     if (runtimePrevious.el) {
       /* 仅当旧 `el` 存在时才能 `setText`；否则说明旧节点未正确 `mount`（防御性不报错）。 */
       options.setText(runtimePrevious.el, next.text ?? '')

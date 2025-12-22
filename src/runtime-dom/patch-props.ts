@@ -49,66 +49,87 @@ export function patchProps(
     const previousValue = previous[key]
     const nextValue = next[key]
 
-    /* `ref` 交由 `runtime-core` 处理，这里直接跳过保持职责单一。 */
-    if (key === 'ref' && (isElementRef(previousValue) || isElementRef(nextValue))) {
-      continue
-    }
-
-    /* `class`/`className` 统一走归一化逻辑，`null`/`false` 时直接清空。 */
-    if (key === 'class' || key === 'className') {
-      if (isNil(nextValue) || nextValue === false) {
-        ;(element as HTMLElement).className = ''
-      } else {
-        ;(element as HTMLElement).className = normalizeClass(nextValue)
-      }
-
-      continue
-    }
-
-    if (key === 'style') {
-      applyStyle(element as HTMLElement, previousValue, nextValue)
-      continue
-    }
-
-    /* 多选 `select` 允许数组值，直接写 DOM property 控制选中项。 */
-    if (
-      key === 'value' &&
-      element instanceof HTMLSelectElement &&
-      Array.isArray(nextValue ?? previousValue)
-    ) {
-      applySelectValue(element, nextValue)
-      continue
-    }
-
-    /* 受控表单：`value`/`checked` 应写 DOM property，确保 UI 同步。 */
-    if (key === 'value' && element instanceof HTMLInputElement) {
-      element.value = isNil(nextValue) ? '' : (nextValue as string)
-      continue
-    }
-
-    if (key === 'value' && element instanceof HTMLTextAreaElement) {
-      element.value = isNil(nextValue) ? '' : (nextValue as string)
-      continue
-    }
-
-    if (key === 'value' && element instanceof HTMLSelectElement) {
-      element.value = isNil(nextValue) ? '' : (nextValue as string)
-      continue
-    }
-
-    if (key === 'checked' && element instanceof HTMLInputElement) {
-      element.checked = Boolean(nextValue)
-      continue
-    }
-
-    /* 事件以 `onXxx` 开头，统一做小写映射后注册。 */
-    if (isEventProp(key)) {
-      patchEvent(element as HTMLElement, key.slice(2).toLowerCase(), previousValue, nextValue)
-      continue
-    }
+    if (handleRefProp(key, previousValue, nextValue)) continue
+    if (handleClassProp(element, key, nextValue)) continue
+    if (handleStyleProp(element, key, previousValue, nextValue)) continue
+    if (handleFormValueProp(element, key, previousValue, nextValue)) continue
+    if (handleEventProp(element, key, previousValue, nextValue)) continue
 
     patchDomAttr(element, key, nextValue)
   }
+}
+
+/** `ref` 由上层处理，这里直接跳过。 */
+function handleRefProp(key: string, previous: unknown, next: unknown): boolean {
+  return key === 'ref' && (isElementRef(previous) || isElementRef(next))
+}
+
+/** 统一处理 `class`/`className`。 */
+function handleClassProp(element: Element, key: string, value: unknown): boolean {
+  if (key !== 'class' && key !== 'className') return false
+  ;(element as HTMLElement).className = isNil(value) || value === false ? '' : normalizeClass(value)
+
+  return true
+}
+
+/** 处理内联样式字符串/对象。 */
+function handleStyleProp(element: Element, key: string, previous: unknown, next: unknown): boolean {
+  if (key !== 'style') return false
+
+  applyStyle(element as HTMLElement, previous, next)
+
+  return true
+}
+
+/** 处理受控表单的 `value`/`checked`。 */
+function handleFormValueProp(
+  element: Element,
+  key: string,
+  previous: unknown,
+  next: unknown,
+): boolean {
+  /* 多选 `select` 允许数组值，直接写 DOM property 控制选中项。 */
+  if (key === 'value' && element instanceof HTMLSelectElement && Array.isArray(next ?? previous)) {
+    applySelectValue(element, next)
+
+    return true
+  }
+
+  /* 受控表单：`value`/`checked` 应写 DOM property，确保 UI 同步。 */
+  if (key === 'value' && element instanceof HTMLInputElement) {
+    element.value = isNil(next) ? '' : (next as string)
+
+    return true
+  }
+
+  if (key === 'value' && element instanceof HTMLTextAreaElement) {
+    element.value = isNil(next) ? '' : (next as string)
+
+    return true
+  }
+
+  if (key === 'value' && element instanceof HTMLSelectElement) {
+    element.value = isNil(next) ? '' : (next as string)
+
+    return true
+  }
+
+  if (key === 'checked' && element instanceof HTMLInputElement) {
+    element.checked = Boolean(next)
+
+    return true
+  }
+
+  return false
+}
+
+/** 处理 `onXxx` 事件绑定。 */
+function handleEventProp(element: Element, key: string, previous: unknown, next: unknown): boolean {
+  if (!isEventProp(key)) return false
+
+  patchEvent(element as HTMLElement, key.slice(2).toLowerCase(), previous, next)
+
+  return true
 }
 
 /**

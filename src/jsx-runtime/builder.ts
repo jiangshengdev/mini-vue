@@ -1,3 +1,4 @@
+import { transformModelBindingProps } from './transform/index.ts'
 import type {
   ComponentChildren,
   ElementProps,
@@ -5,7 +6,6 @@ import type {
   VirtualNode,
 } from '@/jsx-foundation/index.ts'
 import { createVirtualNode } from '@/jsx-foundation/index.ts'
-import { transformVModelProps } from '@/jsx-runtime/transform/index.ts'
 import type { PropsShape, WithOptionalProp } from '@/shared/index.ts'
 
 /**
@@ -58,7 +58,7 @@ export function buildVirtualNode<T extends ElementType>(
 ): VirtualNode<T> {
   /* 统一抽取 `key`，避免 `createVirtualNode` 再次处理同一字段。 */
   const { key: resolvedKey, props: normalizedProps } = extractKeyedProps(props, key)
-  const { props: transformedProps } = transformVModelProps(type, normalizedProps)
+  const { props: transformedProps } = transformModelBindingProps(type, normalizedProps)
 
   /* 将传入的 `props` 封装为 `createVirtualNode` 所需的参数结构 */
   return createVirtualNode({

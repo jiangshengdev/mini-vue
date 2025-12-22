@@ -3,7 +3,7 @@ import type { PropsShape } from '@/shared/index.ts'
 
 type TrackConflict = (key: string) => void
 
-export function applySelectMultipleVModel(
+export function applySelectMultipleModelBinding(
   model: unknown,
   props: PropsShape,
   trackConflict: TrackConflict,

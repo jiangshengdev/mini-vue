@@ -1,4 +1,4 @@
-import { jsxVModelReadonlyTarget } from '@/messages/index.ts'
+import { jsxModelBindingReadonlyTarget } from '@/messages/index.ts'
 import { isRef } from '@/reactivity/index.ts'
 import { __DEV__ } from '@/shared/index.ts'
 
@@ -14,6 +14,6 @@ export function setModelValue(model: unknown, value: unknown): void {
   }
 
   if (__DEV__) {
-    console.warn(jsxVModelReadonlyTarget, model)
+    console.warn(jsxModelBindingReadonlyTarget, model)
   }
 }

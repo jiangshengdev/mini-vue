@@ -3,10 +3,10 @@
  * 通过单一入口避免各处随意引用子模块路径，便于后续维护与 tree-shaking。
  */
 export {
-  jsxModelBindingConflictWarning,
-  jsxModelBindingNonFormWarning,
-  jsxModelBindingReadonlyTarget,
   jsxUnsupportedChildWarning,
+  jsxVModelConflictWarning,
+  jsxVModelNonFormWarning,
+  jsxVModelReadonlyTarget,
 } from './jsx.ts'
 export {
   reactivityComputedReadonly,

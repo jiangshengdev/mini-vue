@@ -200,17 +200,7 @@ function patchDomAttr(element: Element, key: string, value: unknown): void {
  */
 function applySelectValue(element: HTMLSelectElement, value: unknown): void {
   if (!Array.isArray(value)) {
-    if (isNil(value)) {
-      element.value = ''
-    } else if (typeof value === 'string' || typeof value === 'number') {
-      element.value = String(value)
-    } else {
-      if (__DEV__) {
-        console.warn(runtimeDomUnsupportedAttrValue('value', typeof value), value)
-      }
-
-      element.value = ''
-    }
+    element.value = value == null ? '' : String(value)
 
     return
   }
@@ -218,19 +208,7 @@ function applySelectValue(element: HTMLSelectElement, value: unknown): void {
   const values = value as unknown[]
 
   if (!element.multiple) {
-    const first = values[0]
-
-    if (isNil(first)) {
-      element.value = ''
-    } else if (typeof first === 'string' || typeof first === 'number') {
-      element.value = String(first)
-    } else {
-      if (__DEV__) {
-        console.warn(runtimeDomUnsupportedAttrValue('value', typeof first), first)
-      }
-
-      element.value = ''
-    }
+    element.value = values.length > 0 ? String(values[0]) : ''
 
     return
   }

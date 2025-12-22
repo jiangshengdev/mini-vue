@@ -8,7 +8,7 @@ export const jsxUnsupportedChildWarning = '[jsx] 检测到无法渲染的 childr
  *
  * @param type - 当前元素类型
  */
-export const jsxModelBindingNonFormWarning = (type: string) => {
+export const jsxVModelNonFormWarning = (type: string) => {
   return `[jsx] v-model 仅支持表单元素，在 <${type}> 上已被忽略`
 }
 
@@ -18,10 +18,9 @@ export const jsxModelBindingNonFormWarning = (type: string) => {
  * @param type - 当前元素类型
  * @param keys - 被覆盖的属性名列表
  */
-export const jsxModelBindingConflictWarning = (type: string, keys: string[]) => {
+export const jsxVModelConflictWarning = (type: string, keys: string[]) => {
   return `[jsx] v-model 将覆盖 <${type}> 上显式传入的属性：${keys.join(', ')}`
 }
 
 /** `v-model` 目标不可写时的警告。 */
-export const jsxModelBindingReadonlyTarget =
-  '[jsx] v-model 需要可写的 ref，当前值不可写，已忽略更新'
+export const jsxVModelReadonlyTarget = '[jsx] v-model 需要可写的 ref，当前值不可写，已忽略更新'

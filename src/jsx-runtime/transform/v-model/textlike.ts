@@ -3,7 +3,7 @@ import type { PropsShape } from '@/shared/index.ts'
 
 type TrackConflict = (key: string) => void
 
-export function applyTextlikeModelBinding(
+export function applyTextlikeVModel(
   model: unknown,
   props: PropsShape,
   trackConflict: TrackConflict,

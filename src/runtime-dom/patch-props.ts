@@ -80,6 +80,27 @@ export function patchProps(
       continue
     }
 
+    /* 受控表单：`value`/`checked` 应写 DOM property，确保 UI 同步。 */
+    if (key === 'value' && element instanceof HTMLInputElement) {
+      ;(element as HTMLInputElement).value = isNil(nextValue) ? '' : (nextValue as string)
+      continue
+    }
+
+    if (key === 'value' && element instanceof HTMLTextAreaElement) {
+      ;(element as HTMLTextAreaElement).value = isNil(nextValue) ? '' : (nextValue as string)
+      continue
+    }
+
+    if (key === 'value' && element instanceof HTMLSelectElement) {
+      ;(element as HTMLSelectElement).value = isNil(nextValue) ? '' : (nextValue as string)
+      continue
+    }
+
+    if (key === 'checked' && element instanceof HTMLInputElement) {
+      ;(element as HTMLInputElement).checked = Boolean(nextValue)
+      continue
+    }
+
     /* 事件以 `onXxx` 开头，统一做小写映射后注册。 */
     if (isEventProp(key)) {
       patchEvent(element as HTMLElement, key.slice(2).toLowerCase(), previousValue, nextValue)

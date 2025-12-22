@@ -123,12 +123,12 @@
 - [x] 9. Final checkpoint - 全量验证
   - 确保所有测试通过，如有问题请询问用户
 
-- [ ] 10. 可选优化
-  - [ ]\* 10.1 加入 LIS 优化减少移动
+- [x] 10. 可选优化
+  - [x]\* 10.1 加入 LIS 优化减少移动
     - 对 newIndexToOldIndex 求 LIS
     - 减少 insertBefore 调用次数
     - _Requirements: 6.1_
-  - [ ]\* 10.2 root render 走 patch
+  - [x]\* 10.2 root render 走 patch
     - 在 renderer 中保存 root virtualNode
     - render 时执行 patch，仅首次 mount 才 clear
     - _Requirements: 7.1_

@@ -129,3 +129,20 @@
 - 现状：断言错误 cause 中包含 `{ currentInstance: undefined }`。
 - 影响：`currentInstance` 是内部状态，测试其具体值属于白盒测试，若重构内部状态管理可能会导致测试误报。
 - 提示：应关注公开的错误行为或错误类型，而非内部状态快照。
+
+## 15. keyed diff 对重复 key/逆序场景会残留多余节点（待修复）
+
+- 位置：
+  - `src/runtime-core/patch/keyed-children.ts`（`patchAlignedChildren`）
+  - `src/runtime-core/patch/keyed-children-helpers.ts`（`findUnkeyedMatch`）
+- 复现：在 keyed children 中出现重复 key 或含无 key 节点的全量逆序，例如：
+  - `prev = [<div key="a" />, <div />, <div />]`
+  - `next = [<div />, <div />, <div key="a" />]`
+  或新列表含重复 key：`prev = [<div key="a" />, <div key="b" />]` → `next = [<div key="a" />, <div key="a" />]`。
+- 影响：多余的旧节点未卸载且新节点被重复挂载，最终 DOM/宿主列表会多出一个元素，导致界面渲染错误。
+- 原因：
+  - `patchAlignedChildren` 在命中 `newIndex` 时未检查 `newIndexToOldIndexMap` 是否已占用，重复 key 会覆盖映射且不卸载早先命中的旧节点。
+  - `findUnkeyedMatch` 在兜底匹配无 key 节点时也未跳过已占用的新索引，导致同一新节点被多个旧节点重复复用。
+- 修复思路：
+  - 在写入 `newIndexToOldIndexMap` 前先判断该槽位是否已填充，已占用时应卸载当前旧节点（DEV 可输出重复 key 警告）。
+  - `findUnkeyedMatch` 应跳过 `newIndexToOldIndexMap[...] !== 0` 的索引，避免无 key 兜底命中已复用的新节点。

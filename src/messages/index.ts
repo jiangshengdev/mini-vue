@@ -2,7 +2,12 @@
  * 消息文案集中出口，统一对子域错误/警告进行命名与对外导出。
  * 通过单一入口避免各处随意引用子模块路径，便于后续维护与 tree-shaking。
  */
-export { jsxUnsupportedChildWarning } from './jsx.ts'
+export {
+  jsxUnsupportedChildWarning,
+  jsxVModelConflictWarning,
+  jsxVModelNonFormWarning,
+  jsxVModelReadonlyTarget,
+} from './jsx.ts'
 export {
   reactivityComputedReadonly,
   reactivityScopeDisposeOutside,

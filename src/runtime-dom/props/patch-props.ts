@@ -50,6 +50,6 @@ export function patchProps(
     }
 
     /* 其余普通属性直接映射到 DOM attribute。 */
-    patchDomAttr(element, key, nextValue)
+    patchDomAttr(element, key, previousValue, nextValue)
   }
 }

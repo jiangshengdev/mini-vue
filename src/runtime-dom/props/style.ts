@@ -32,16 +32,18 @@ function setStyleValue(element: HTMLElement, property: string, input: string): v
 function applyStyle(element: HTMLElement, previous: unknown, next: unknown): void {
   /* 传入空值或 `false` 时移除整段内联样式。 */
   if (isNil(next) || next === false) {
-    if (element.hasAttribute('style')) {
-      element.removeAttribute('style')
+    if (isNil(previous) || previous === false) {
+      return
     }
+
+    element.removeAttribute('style')
 
     return
   }
 
   if (typeof next === 'string') {
-    /* 字符串内联样式未变时跳过写入。 */
-    if (element.getAttribute('style') === next) {
+    /* 字符串内联样式未变时跳过写入（不读取 DOM）。 */
+    if (typeof previous === 'string' && previous === next) {
       return
     }
 
@@ -52,6 +54,7 @@ function applyStyle(element: HTMLElement, previous: unknown, next: unknown): voi
 
   if (isObject(next)) {
     const nextStyle = next as Record<string, unknown>
+    const previousStyle = isObject(previous) ? (previous as Record<string, unknown>) : {}
 
     /* 所有属性都为 `null`/`undefined` 时移除整个 `style`，避免空标记残留。 */
     if (
@@ -59,6 +62,10 @@ function applyStyle(element: HTMLElement, previous: unknown, next: unknown): voi
         return isNil(item)
       })
     ) {
+      if (Object.keys(previousStyle).length === 0) {
+        return
+      }
+
       element.removeAttribute('style')
 
       /* Playwright 浏览器下偶发保留空 `style` 特性，显式清空后再移除确保属性消失。 */
@@ -70,63 +77,75 @@ function applyStyle(element: HTMLElement, previous: unknown, next: unknown): voi
       return
     }
 
-    const previousStyle = isObject(previous) ? (previous as Record<string, unknown>) : {}
-    const styleDeclaration = element.style
-    let hasValue = false
+    patchStyleObject(element, previousStyle, nextStyle)
+  }
+}
 
-    /* 先处理删除：前一版本存在但当前已移除或置空的键需写入空字符串。 */
-    for (const name of Object.keys(previousStyle)) {
-      if (!Object.hasOwn(nextStyle, name) || isNil(nextStyle[name])) {
-        if (getStyleValue(element, name) !== '') {
-          setStyleValue(element, name, '')
-        }
-      }
+function patchStyleObject(
+  element: HTMLElement,
+  previousStyle: Record<string, unknown>,
+  nextStyle: Record<string, unknown>,
+): void {
+  const keysToRemove = new Set<string>()
+  const entriesToSet: Array<[string, string]> = []
+
+  /* 先找出需要删除的键。 */
+  for (const name of Object.keys(previousStyle)) {
+    if (!Object.hasOwn(nextStyle, name) || isNil(nextStyle[name])) {
+      keysToRemove.add(name)
+    }
+  }
+
+  /* 再收集需要写入的键，基于 props 判等跳过。 */
+  for (const [name, styleValue] of Object.entries(nextStyle)) {
+    if (isNil(styleValue)) {
+      keysToRemove.add(name)
+
+      continue
     }
 
-    /* 再处理新增/更新：仅接受 `string` 或 `number`，其他类型开发态发出警告。 */
-    for (const [name, styleValue] of Object.entries(nextStyle)) {
-      if (isNil(styleValue)) {
-        setStyleValue(element, name, '')
-
-        continue
+    if (typeof styleValue !== 'string' && typeof styleValue !== 'number') {
+      if (__DEV__) {
+        console.warn(runtimeDomInvalidStyleValue(name, typeof styleValue), styleValue)
       }
 
-      if (typeof styleValue !== 'string' && typeof styleValue !== 'number') {
-        if (__DEV__) {
-          console.warn(runtimeDomInvalidStyleValue(name, typeof styleValue), styleValue)
-        }
-
-        continue
-      }
-
-      const stringValue: string = typeof styleValue === 'number' ? String(styleValue) : styleValue
-
-      if (getStyleValue(element, name) === stringValue) {
-        /* DOM 已是目标值时避免重复写入，但仍需标记存在有效样式。 */
-        hasValue = true
-
-        continue
-      }
-
-      setStyleValue(element, name, stringValue)
-      hasValue = true
+      continue
     }
 
-    /* 对象写法未留下有效值时移除 `style` 特性，保持与空对象等价。 */
-    if (!hasValue && element.hasAttribute('style')) {
-      element.removeAttribute('style')
+    const normalized = typeof styleValue === 'number' ? String(styleValue) : styleValue
+    const previousRaw = previousStyle[name]
+    const previousNormalized =
+      typeof previousRaw === 'string' || typeof previousRaw === 'number'
+        ? String(previousRaw)
+        : undefined
+
+    if (previousNormalized === normalized) {
+      continue
     }
+
+    entriesToSet.push([name, normalized])
+  }
+
+  if (keysToRemove.size === 0 && entriesToSet.length === 0) {
+    return
+  }
+
+  for (const name of keysToRemove) {
+    setStyleValue(element, name, '')
+  }
+
+  let hasValue = false
+
+  for (const [name, value] of entriesToSet) {
+    setStyleValue(element, name, value)
+    hasValue = true
+  }
+
+  /* 对象写法未留下有效值时移除 `style` 特性，保持与空对象等价。 */
+  if (!hasValue) {
+    element.removeAttribute('style')
   }
 }
 
 /** 扩展原生 `style` 声明，允许对任意属性键执行写入。 */
 type WritableStyle = CSSStyleDeclaration & Record<string, string | undefined>
-
-/** 读取当前元素的内联样式值，兼容 camelCase 与自定义属性名。 */
-function getStyleValue(element: HTMLElement, property: string): string {
-  if (Reflect.has(element.style, property)) {
-    return (element.style as WritableStyle)[property] ?? ''
-  }
-
-  return element.style.getPropertyValue(property)
-}

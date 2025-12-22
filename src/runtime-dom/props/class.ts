@@ -4,23 +4,32 @@ import { isNil, isObject } from '@/shared/index.ts'
 export function handleClassProp(
   element: Element,
   key: string,
-  _previous: unknown,
+  previous: unknown,
   next: unknown,
 ): boolean {
   if (key !== 'class' && key !== 'className') {
     return false
   }
 
-  const nextClassName = isNil(next) || next === false ? '' : normalizeClass(next)
+  const previousClassName = normalizeClassProp(previous)
+  const nextClassName = normalizeClassProp(next)
 
-  /* class 未变化时避免重复写入 DOM。 */
-  if ((element as HTMLElement).className === nextClassName) {
+  /* 仅基于 props 判等，不读取 DOM。 */
+  if (previousClassName === nextClassName) {
     return true
   }
 
   ;(element as HTMLElement).className = nextClassName
 
   return true
+}
+
+function normalizeClassProp(value: unknown): string {
+  if (isNil(value) || value === false) {
+    return ''
+  }
+
+  return normalizeClass(value)
 }
 
 /**

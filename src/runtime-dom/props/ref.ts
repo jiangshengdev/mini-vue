@@ -12,6 +12,6 @@ function isElementRef(value: unknown): value is ElementRef {
 }
 
 /** `ref` 由上层处理，这里直接跳过。 */
-export function handleRefProp(key: string, previous: unknown, next: unknown): boolean {
+export function ignoreRefProp(key: string, previous: unknown, next: unknown): boolean {
   return key === 'ref' && (isElementRef(previous) || isElementRef(next))
 }

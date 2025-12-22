@@ -2,7 +2,7 @@ import { runtimeDomUnsupportedAttrValue } from '@/messages/index.ts'
 import { __DEV__, isNil } from '@/shared/index.ts'
 
 /** 处理受控表单的 `value`/`checked`。 */
-export function handleFormValueProp(
+export function handleFormStateProp(
   element: Element,
   key: string,
   previous: unknown,

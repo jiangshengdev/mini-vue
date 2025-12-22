@@ -4,8 +4,8 @@
 import { patchDomAttr } from './attr.ts'
 import { handleClassProp } from './class.ts'
 import { handleEventProp } from './event.ts'
-import { handleFormValueProp } from './form.ts'
-import { handleRefProp } from './ref.ts'
+import { handleFormStateProp } from './form.ts'
+import { ignoreRefProp } from './ref.ts'
 import { handleStyleProp } from './style.ts'
 import type { PropsShape } from '@/shared/index.ts'
 
@@ -23,7 +23,7 @@ export function patchProps(
     const previousValue = previous[key]
     const nextValue = next[key]
 
-    if (handleRefProp(key, previousValue, nextValue)) {
+    if (ignoreRefProp(key, previousValue, nextValue)) {
       continue
     }
 
@@ -35,7 +35,7 @@ export function patchProps(
       continue
     }
 
-    if (handleFormValueProp(element, key, previousValue, nextValue)) {
+    if (handleFormStateProp(element, key, previousValue, nextValue)) {
       continue
     }
 

@@ -4,17 +4,11 @@
 
 - 本轮审查未发现新的 runtime-core 问题；现有条目仍然适用，如需新增议题请按问题模板补充并附可能方案。
 
-## 1. 组件更新采用「卸载后重挂」导致状态丢失（待修复）
+## 1. 组件更新采用「卸载后重挂」导致状态丢失（已修复）
 
 - 位置：`src/runtime-core/component/render-effect.ts`
-- 现状：`rerenderComponent` 每次更新都先执行 `teardownMountedSubtree(instance)`，然后重新运行调度任务生成子树，最后再 `mountLatestSubtree` 把最新子树重新挂载。
-- 影响：
-  - 组件更新无法复用既有子树，子组件实例与其内部状态会被整体销毁并重建（如 `ref`、`reactive` 数据、effect/watch 等）。
-  - DOM 也会被移除后重建，导致焦点、滚动位置、输入法组合态等瞬态状态丢失。
-- 提示：需要引入「子树 patch/复用」机制（而非全量 teardown/remount），至少应做到在同一组件实例下对新旧子树做差量更新。
-- 可能方案：
-  - 将 `render` 产出的新旧子树交给 `patchChildren`/`patchChild` 做 diff，组件实例内维护 `mountedHandle` 与 `subtree` 的引用以便复用宿主节点。
-  - 若短期无法引入完整 diff，可先实现「同类型节点复用」的简化策略：仅当 `type/key` 相同且 `render` 成功时复用旧子树并对 props/children 做 patch，避免直接 teardown。
+- 修复：组件 `effect` 记录最新子树后，`rerenderComponent` 直接通过 `patchChild` 对新旧子树做 diff 并更新 `mountedHandle`，不再在更新前执行 teardown/remount；调度失败会回滚到旧子树，成功则复用已有宿主节点与子组件实例。
+- 结果：组件更新可复用子树与 DOM，子组件状态、焦点/滚动等宿主态不再因重挂而丢失。
 
 ## 2. 更新流程在 render 成功前就卸载旧子树，失败时无法回滚（已修复）
 
@@ -130,19 +124,10 @@
 - 影响：`currentInstance` 是内部状态，测试其具体值属于白盒测试，若重构内部状态管理可能会导致测试误报。
 - 提示：应关注公开的错误行为或错误类型，而非内部状态快照。
 
-## 15. keyed diff 对重复 key/逆序场景会残留多余节点（待修复）
+## 15. keyed diff 对重复 key/逆序场景会残留多余节点（已修复）
 
 - 位置：
   - `src/runtime-core/patch/keyed-children.ts`（`patchAlignedChildren`）
   - `src/runtime-core/patch/keyed-children-helpers.ts`（`findUnkeyedMatch`）
-- 复现：在 keyed children 中出现重复 key 或含无 key 节点的全量逆序，例如：
-  - `prev = [<div key="a" />, <div />, <div />]`
-  - `next = [<div />, <div />, <div key="a" />]`
-    或新列表含重复 key：`prev = [<div key="a" />, <div key="b" />]` → `next = [<div key="a" />, <div key="a" />]`。
-- 影响：多余的旧节点未卸载且新节点被重复挂载，最终 DOM/宿主列表会多出一个元素，导致界面渲染错误。
-- 原因：
-  - `patchAlignedChildren` 在命中 `newIndex` 时未检查 `newIndexToOldIndexMap` 是否已占用，重复 key 会覆盖映射且不卸载早先命中的旧节点。
-  - `findUnkeyedMatch` 在兜底匹配无 key 节点时也未跳过已占用的新索引，导致同一新节点被多个旧节点重复复用。
-- 修复思路：
-  - 在写入 `newIndexToOldIndexMap` 前先判断该槽位是否已填充，已占用时应卸载当前旧节点（DEV 可输出重复 key 警告）。
-  - `findUnkeyedMatch` 应跳过 `newIndexToOldIndexMap[...] !== 0` 的索引，避免无 key 兜底命中已复用的新节点。
+- 修复：`patchAlignedChildren` 写入 `newIndexToOldIndexMap` 前会检查占用，重复命中时卸载当前旧节点；`findUnkeyedMatch` 兜底复用无 key 节点时跳过已占用的新索引，避免同一新节点被多次复用，最终移动阶段按正确映射插入/复用。
+- 回归验证：`test/runtime-core/patch/children-keyed.test.tsx`、`test/runtime-core/patch/children-keyed-regression.test.tsx` 覆盖重复 key 及逆序场景，确认不会残留额外宿主节点。

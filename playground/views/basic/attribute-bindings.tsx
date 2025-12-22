@@ -20,9 +20,7 @@ export const AttributeBindings: SetupComponent = () => {
       <section class="card">
         <h2>属性绑定</h2>
         <p>
-          <span title={message.get()}>
-            鼠标悬停几秒查看动态绑定的 title 属性！
-          </span>
+          <span title={message.get()}>鼠标悬停几秒查看动态绑定的 title 属性！</span>
         </p>
         <p class={isRed.get() ? styles.red : undefined} onClick={toggleRed}>
           这里应该是红色……点击切换颜色。

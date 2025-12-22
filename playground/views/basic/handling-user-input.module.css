@@ -2,3 +2,7 @@
   display: block;
   margin-bottom: 1em;
 }
+
+.message {
+  word-break: break-all;
+}

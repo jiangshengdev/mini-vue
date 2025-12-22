@@ -10,7 +10,7 @@ export const HandlingUserInput: SetupComponent = () => {
   }
 
   const appendExclamation = (): void => {
-    message.set(`${message.get()}!`)
+    message.set(`${message.get()}！`)
   }
 
   const notify = (event: Event): void => {
@@ -23,12 +23,12 @@ export const HandlingUserInput: SetupComponent = () => {
     return (
       <section class="card">
         <h2>处理用户输入</h2>
-        <h1>{message.get()}</h1>
+        <h1 class={styles.message}>{message.get()}</h1>
         <button type="button" class={styles.item} onClick={reverseMessage}>
           反转消息
         </button>
         <button type="button" class={styles.item} onClick={appendExclamation}>
-          追加 "!"
+          追加 "！"
         </button>
         <a href="https://vuejs.org" class={styles.item} onClick={notify}>
           带 e.preventDefault() 的链接

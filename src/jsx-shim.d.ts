@@ -9,12 +9,12 @@ type AttributeValue<T> = T | string | number | boolean | undefined
 type StyleProp = Partial<CSSStyleDeclaration> | Record<string, string | number> | string | boolean
 
 /** `class`/`className` 允许的宽松写法，具体归一化由运行时处理。 */
-type ClassProp = unknown
+type ClassValue = unknown
 
 /**
  * 将元素实例字段映射为可写属性，排除 `children` 与 `style` 以便上层重载。
  */
-type ElementPropsMap<E extends Element = Element> = Omit<
+type ElementFieldsMap<E extends Element = Element> = Omit<
   { [K in keyof E]?: AttributeValue<E[K]> },
   'children' | 'style' | 'class' | 'className'
 >
@@ -33,11 +33,11 @@ type NativeEventProps = {
  * 内置元素在 JSX 中的属性定义，组合基础属性、`style`/`children` 与事件映射。
  */
 type NativeElementProps<E extends Element = Element> = PropsShape &
-  ElementPropsMap<E> & {
+  ElementFieldsMap<E> & {
     children?: unknown
     style?: StyleProp
-    class?: ClassProp
-    className?: ClassProp
+    class?: ClassValue
+    className?: ClassValue
   } & NativeEventProps
 
 /** HTML 标签到属性定义的映射。 */

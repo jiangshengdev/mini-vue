@@ -10,11 +10,9 @@ export const Counter: SetupComponent = () => {
 
   return () => {
     return (
-      <>
-        <button type="button" onClick={increment}>
-          计数：{count.get()}
-        </button>
-      </>
+      <button type="button" onClick={increment}>
+        计数：{count.get()}
+      </button>
     )
   }
 }

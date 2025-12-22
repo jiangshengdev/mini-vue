@@ -4,7 +4,7 @@ import type { Ref } from '@/reactivity/index.ts'
 import type { PropsShape } from '@/shared/index.ts'
 
 /** `v-model` 仅支持可写 `Ref` 作为绑定目标。 */
-type ModelBinding = Ref
+type ModelBinding = Ref<unknown>
 
 /** JSX 属性接受的宽松取值集合，交由运行时做最终处理。 */
 type AttributeValue<T> = T | string | number | boolean | undefined

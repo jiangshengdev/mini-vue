@@ -235,13 +235,13 @@ function applySelectValue(element: HTMLSelectElement, value: unknown): void {
     return
   }
 
-  const normalizedValues = new Set(values)
+  const normalizedValues = [...values]
 
   queueMicrotask(() => {
     const options = [...element.options]
 
     for (const option of options) {
-      option.selected = normalizedValues.has(option.value)
+      option.selected = normalizedValues.includes(option.value)
     }
   })
 }

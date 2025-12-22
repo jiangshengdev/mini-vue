@@ -5,15 +5,15 @@ import { ref } from '@/index.ts'
 
 export const SimpleComponent: SetupComponent = () => {
   const groceryList = ref<Todo[]>([
-    { id: 0, text: 'Vegetables' },
-    { id: 1, text: 'Cheese' },
-    { id: 2, text: 'Whatever else humans are supposed to eat' },
+    { id: 0, text: '蔬菜' },
+    { id: 1, text: '奶酪' },
+    { id: 2, text: '人类应该吃的其他东西' },
   ])
 
   return () => {
     return (
       <section class="card">
-        <h2>Simple Component</h2>
+        <h2>简单组件</h2>
         <ol>
           {groceryList.value.map((item) => {
             return <TodoItem key={item.id} todo={item} />

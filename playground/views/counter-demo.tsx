@@ -5,7 +5,7 @@ export const CounterDemo: SetupComponent = () => {
   return () => {
     return (
       <div class="card">
-        <h2>Counter Demo</h2>
+        <h2>计数器示例</h2>
         <Counter />
       </div>
     )

@@ -33,28 +33,28 @@ export const ConditionalsAndLoops: SetupComponent = () => {
     }
 
     if (list.get().length > 0) {
-      return <p>List is not empty, but hidden.</p>
+      return <p>列表非空，但已隐藏。</p>
     }
 
-    return <p>List is empty.</p>
+    return <p>列表为空。</p>
   }
 
   return () => {
     return (
       <section class="card">
-        <h2>Conditionals and Loops</h2>
+        <h2>条件与循环</h2>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
           <button type="button" onClick={toggleShow}>
-            Toggle List
+            切换列表
           </button>
           <button type="button" onClick={pushNumber}>
-            Push Number
+            追加数字
           </button>
           <button type="button" onClick={popNumber}>
-            Pop Number
+            移除数字
           </button>
           <button type="button" onClick={reverseList}>
-            Reverse List
+            反转列表
           </button>
         </div>
         {renderList()}

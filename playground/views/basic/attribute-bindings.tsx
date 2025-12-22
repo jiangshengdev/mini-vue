@@ -3,7 +3,7 @@ import type { SetupComponent } from '@/index.ts'
 import { state } from '@/index.ts'
 
 export const AttributeBindings: SetupComponent = () => {
-  const message = state('Hello World!')
+  const message = state('你好，世界！')
   const isRed = state(true)
   const color = state('green')
 
@@ -18,17 +18,17 @@ export const AttributeBindings: SetupComponent = () => {
   return () => {
     return (
       <section class="card">
-        <h2>Attribute Bindings</h2>
+        <h2>属性绑定</h2>
         <p>
           <span title={message.get()}>
-            Hover your mouse over me for a few seconds to see my dynamically bound title!
+            鼠标悬停几秒查看动态绑定的 title 属性！
           </span>
         </p>
         <p class={isRed.get() ? styles.red : undefined} onClick={toggleRed}>
-          This should be red... but click me to toggle it.
+          这里应该是红色……点击切换颜色。
         </p>
         <p style={{ color: color.get() }} onClick={toggleColor}>
-          This should be green, and should toggle between green and blue on click.
+          这里应该是绿色，点击后在 green 和 blue 之间切换。
         </p>
       </section>
     )

@@ -2,10 +2,10 @@ import type { SetupComponent } from '@/index.ts'
 import { state } from '@/index.ts'
 
 export const FormBindings: SetupComponent = () => {
-  const text = state('Edit me')
+  const text = state('编辑我')
   const checked = state(true)
   const checkedNames = state<string[]>(['Jack'])
-  const picked = state('One')
+  const picked = state('选项一')
   const selected = state('A')
   const multiSelected = state<string[]>(['A'])
 
@@ -15,62 +15,62 @@ export const FormBindings: SetupComponent = () => {
         class="card"
         style={{ display: 'flex', flexDirection: 'column', gap: '1rem', textAlign: 'left' }}
       >
-        <h2>Form Bindings</h2>
+        <h2>表单绑定</h2>
 
         <div>
-          <h3>Text Input</h3>
+          <h3>文本输入</h3>
           <input v-model={text} />
-          <p>{text.get()}</p>
+          <p>当前值：{text.get()}</p>
         </div>
 
         <div>
-          <h3>Checkbox</h3>
+          <h3>复选框</h3>
           <input type="checkbox" id="checkbox" v-model={checked} />
-          <label for="checkbox">Checked: {String(checked.get())}</label>
+          <label for="checkbox">已勾选：{String(checked.get())}</label>
         </div>
 
         <div>
-          <h3>Multi Checkbox</h3>
+          <h3>多选框</h3>
           <input type="checkbox" id="jack" value="Jack" v-model={checkedNames} />
           <label for="jack">Jack</label>
           <input type="checkbox" id="john" value="John" v-model={checkedNames} />
           <label for="john">John</label>
           <input type="checkbox" id="mike" value="Mike" v-model={checkedNames} />
           <label for="mike">Mike</label>
-          <p>Checked names: {checkedNames.get().join(', ') || 'None'}</p>
+          <p>已勾选姓名：{checkedNames.get().join(', ') || '无'}</p>
         </div>
 
         <div>
-          <h3>Radio</h3>
-          <input type="radio" id="one" value="One" v-model={picked} />
-          <label for="one">One</label>
+          <h3>单选框</h3>
+          <input type="radio" id="one" value="选项一" v-model={picked} />
+          <label for="one">选项一</label>
           <br />
-          <input type="radio" id="two" value="Two" v-model={picked} />
-          <label for="two">Two</label>
-          <p>Picked: {picked.get()}</p>
+          <input type="radio" id="two" value="选项二" v-model={picked} />
+          <label for="two">选项二</label>
+          <p>已选择：{picked.get()}</p>
         </div>
 
         <div>
-          <h3>Select</h3>
+          <h3>下拉选择</h3>
           <select v-model={selected}>
             <option disabled value="">
-              Please select one
+              请选择一项
             </option>
             <option value="A">A</option>
             <option value="B">B</option>
             <option value="C">C</option>
           </select>
-          <p>Selected: {selected.get()}</p>
+          <p>已选择：{selected.get()}</p>
         </div>
 
         <div>
-          <h3>Multi Select</h3>
+          <h3>多选下拉</h3>
           <select multiple style={{ width: '100px' }} v-model={multiSelected}>
             <option value="A">A</option>
             <option value="B">B</option>
             <option value="C">C</option>
           </select>
-          <p>Selected: {multiSelected.get().join(', ') || 'None'}</p>
+          <p>已选择：{multiSelected.get().join(', ') || '无'}</p>
         </div>
       </section>
     )

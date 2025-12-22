@@ -3,7 +3,7 @@ import type { SetupComponent } from '@/index.ts'
 import { state } from '@/index.ts'
 
 export const HandlingUserInput: SetupComponent = () => {
-  const message = state('Hello World!')
+  const message = state('你好，世界！')
 
   const reverseMessage = (): void => {
     message.set([...message.get()].reverse().join(''))
@@ -16,22 +16,22 @@ export const HandlingUserInput: SetupComponent = () => {
   const notify = (event: Event): void => {
     event.preventDefault()
     // eslint-disable-next-line no-alert
-    alert('navigation was prevented.')
+    alert('导航已被阻止。')
   }
 
   return () => {
     return (
       <section class="card">
-        <h2>Handling User Input</h2>
+        <h2>处理用户输入</h2>
         <h1>{message.get()}</h1>
         <button type="button" class={styles.item} onClick={reverseMessage}>
-          Reverse Message
+          反转消息
         </button>
         <button type="button" class={styles.item} onClick={appendExclamation}>
-          Append "!"
+          追加 "!"
         </button>
         <a href="https://vuejs.org" class={styles.item} onClick={notify}>
-          A link with e.preventDefault()
+          带 e.preventDefault() 的链接
         </a>
       </section>
     )

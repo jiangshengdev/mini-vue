@@ -12,7 +12,7 @@ export const Counter: SetupComponent = () => {
     return (
       <>
         <button type="button" onClick={increment}>
-          count is {count.get()}
+          计数：{count.get()}
         </button>
       </>
     )

@@ -9,7 +9,7 @@
   - 待 `jsx-foundation` 修正组件类型定义后同步升级依赖类型；或在 `jsx-runtime` 内部定义/覆盖更宽松的 `ElementType`/`ElementProps`，避免被错误定义绑死。
   - 增加类型测试覆盖 JSX 场景（含函数组件、SetupComponent），确保入口导出与 shim 定义一致。
 
-## 2. 多选 select 初始选中态未按模型值同步（已修复）
+## 2. 多选 select 初始选中态未按模型值同步
 
 - 位置：`src/jsx-runtime/transform/v-model/select-multiple.ts`
 - 现状：转换时仅设置 `props.value = modelValue`，未遍历 `selectedOptions` 或逐项设置 `option.selected`，DOM 多选控件不会根据数组值恢复初始选中态。
@@ -18,7 +18,7 @@
   - 在 `onRender`/绑定阶段遍历 `options`，按模型数组严格等于匹配设置 `option.selected`，或手动同步 `selectedOptions`。
   - 调整事件处理保持严格等于，增补对应用例覆盖初始化与变更。
 
-## 3. 非 ref 绑定目标无法写回模型（待设计）
+## 3. 非 ref 绑定目标无法写回模型
 
 - 位置：`src/jsx-runtime/transform/v-model/model.ts`
 - 现状：`setModelValue` 仅在目标为 `ref` 时写回；非 `ref` 情况只发出 `console.warn` 且不更新值，导致绑定普通变量时 UI 与数据永远不同步。

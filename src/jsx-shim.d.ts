@@ -1,10 +1,6 @@
 import type { ElementType as VirtualNodeType, VirtualNode } from '@/jsx-foundation/index.ts'
 import type { ElementRef } from '@/runtime-dom/index.ts'
-import type { Ref } from '@/reactivity/index.ts'
 import type { PropsShape } from '@/shared/index.ts'
-
-/** `v-model` 仅支持可写 `Ref` 作为绑定目标。 */
-type ModelBinding = Ref<unknown>
 
 /** JSX 属性接受的宽松取值集合，交由运行时做最终处理。 */
 type AttributeValue<T> = T | string | number | boolean | undefined
@@ -47,10 +43,6 @@ type NativeElementProps<E extends Element = Element> = PropsShape &
 /** HTML 标签到属性定义的映射。 */
 type HtmlIntrinsicElements = {
   [K in keyof HTMLElementTagNameMap]: NativeElementProps<HTMLElementTagNameMap[K]>
-} & {
-  input: NativeElementProps<HTMLInputElement> & { 'v-model'?: ModelBinding }
-  textarea: NativeElementProps<HTMLTextAreaElement> & { 'v-model'?: ModelBinding }
-  select: NativeElementProps<HTMLSelectElement> & { 'v-model'?: ModelBinding }
 }
 
 /**

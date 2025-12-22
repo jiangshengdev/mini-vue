@@ -3,14 +3,14 @@ import type { PropsShape } from '@/shared/index.ts'
 
 type TrackConflict = (key: string) => void
 
-export function applyTextlikeModelBinding(
-  model: unknown,
+export function applyTextLikeModelBinding(
+  modelBinding: unknown,
   props: PropsShape,
   trackConflict: TrackConflict,
   eventName: 'onInput' | 'onChange',
 ): void {
   trackConflict('value')
-  props.value = readModelValue(model)
+  props.value = readModelValue(modelBinding)
 
   trackConflict(eventName)
 
@@ -23,6 +23,6 @@ export function applyTextlikeModelBinding(
 
     const input = target as HTMLInputElement | HTMLTextAreaElement
 
-    setModelValue(model, input.value)
+    setModelValue(modelBinding, input.value)
   }
 }

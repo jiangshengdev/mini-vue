@@ -4,6 +4,7 @@
 
 ## 转换入口与范围
 
+- 进展：转换入口已接入 `src/jsx-runtime/builder.ts`，按下述规则在运行时生效。
 - 入口：`src/jsx-runtime/builder.ts`，在抽取 `key`/`children` 前对 `rawProps` 调用 `transformModelBindingProps(type, rawProps)`。
 - 适用：原生表单标签（`input`/`textarea`/`select`/`option`），其他标签如出现 `v-model` 在 Dev 环境 `warn`。
 - 行为：将 `v-model` 转换为对应的 DOM property + 事件（`value/checked` + `onInput/onChange`），移除原始 `v-model` 字段。

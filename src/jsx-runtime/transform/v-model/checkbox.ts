@@ -4,15 +4,15 @@ import type { PropsShape } from '@/shared/index.ts'
 type TrackConflict = (key: string) => void
 
 export function applyCheckboxModelBinding(
-  model: unknown,
+  modelBinding: unknown,
   props: PropsShape,
   trackConflict: TrackConflict,
 ): void {
-  const boundValue = Object.hasOwn(props, 'value') ? props.value : 'on'
-  const modelValue = readModelValue(model)
+  const controlValue = Object.hasOwn(props, 'value') ? props.value : 'on'
+  const modelValue = readModelValue(modelBinding)
 
   if (Array.isArray(modelValue)) {
-    const isChecked = modelValue.includes(boundValue)
+    const isChecked = modelValue.includes(controlValue)
 
     trackConflict('checked')
     props.checked = isChecked
@@ -27,28 +27,28 @@ export function applyCheckboxModelBinding(
       }
 
       const input = target as HTMLInputElement
-      const current = readModelValue(model)
+      const current = readModelValue(modelBinding)
 
       if (!Array.isArray(current)) {
-        setModelValue(model, input.checked ? [boundValue] : [])
+        setModelValue(modelBinding, input.checked ? [controlValue] : [])
 
         return
       }
 
       if (input.checked) {
-        if (current.includes(boundValue)) {
+        if (current.includes(controlValue)) {
           return
         }
 
         const currentArray = current as unknown[]
-        const updated = [...currentArray, boundValue] as unknown[]
+        const updated = [...currentArray, controlValue] as unknown[]
 
-        setModelValue(model, updated)
+        setModelValue(modelBinding, updated)
       } else {
         setModelValue(
-          model,
+          modelBinding,
           current.filter((item) => {
-            return item !== boundValue
+            return item !== controlValue
           }),
         )
       }
@@ -71,6 +71,6 @@ export function applyCheckboxModelBinding(
 
     const input = target as HTMLInputElement
 
-    setModelValue(model, input.checked)
+    setModelValue(modelBinding, input.checked)
   }
 }

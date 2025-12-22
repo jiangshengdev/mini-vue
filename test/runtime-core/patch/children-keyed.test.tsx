@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import type { TestNode } from './test-utils.ts'
 import { createHostRenderer, normalize } from './test-utils.ts'
 import {
   asRuntimeVirtualNode,
@@ -6,8 +7,20 @@ import {
   patchChild,
   patchChildren,
 } from '@/runtime-core/index.ts'
+import { Fragment, ref } from '@/index.ts'
 import { createTextVirtualNode } from '@/jsx-foundation/index.ts'
-import { ref } from '@/index.ts'
+
+function collectLeafTexts(node: TestNode, output: string[]): void {
+  if (node.kind === 'text') {
+    output.push(node.text ?? '')
+
+    return
+  }
+
+  for (const child of node.children) {
+    collectLeafTexts(child, output)
+  }
+}
 
 describe('patchChildren 有 key diff', () => {
   it('移动可复用 keyed 节点且不重新挂载', () => {
@@ -54,6 +67,119 @@ describe('patchChildren 有 key diff', () => {
     ])
     expect(nextRuntime[0].el).toBe(previousRuntime[1].el)
     expect(nextRuntime[1].el).toBe(previousRuntime[0].el)
+  })
+
+  it('Fragment keyed 顺序不变时不应触发移动', () => {
+    const host = createHostRenderer()
+    const previousChildren = [
+      normalize(
+        <Fragment key="a">
+          <span>A1</span>
+          <span>A2</span>
+        </Fragment>,
+      ),
+      normalize(
+        <Fragment key="b">
+          <span>B1</span>
+        </Fragment>,
+      ),
+    ]
+
+    for (const child of previousChildren) {
+      mountChild(host.options, child, { container: host.container })
+    }
+
+    const initialOrder: string[] = []
+
+    for (const node of host.container.children) {
+      collectLeafTexts(node, initialOrder)
+    }
+
+    host.resetCounts()
+
+    const nextChildren = [
+      normalize(
+        <Fragment key="a">
+          <span>A1</span>
+          <span>A2</span>
+        </Fragment>,
+      ),
+      normalize(
+        <Fragment key="b">
+          <span>B1</span>
+        </Fragment>,
+      ),
+    ]
+
+    patchChildren(host.options, previousChildren, nextChildren, {
+      container: host.container,
+      patchChild,
+    })
+
+    const nextOrder: string[] = []
+
+    for (const node of host.container.children) {
+      collectLeafTexts(node, nextOrder)
+    }
+
+    expect(nextOrder.filter(Boolean)).toEqual(initialOrder.filter(Boolean))
+    expect(host.counters.insertBefore).toBe(0)
+    expect(host.counters.appendChild).toBe(0)
+    expect(host.counters.remove).toBe(0)
+  })
+
+  it('Fragment keyed 重新排序仅移动必要节点', () => {
+    const host = createHostRenderer()
+    const previousChildren = [
+      normalize(
+        <Fragment key="a">
+          <span>A1</span>
+          <span>A2</span>
+        </Fragment>,
+      ),
+      normalize(
+        <Fragment key="b">
+          <span>B1</span>
+        </Fragment>,
+      ),
+    ]
+
+    for (const child of previousChildren) {
+      mountChild(host.options, child, { container: host.container })
+    }
+
+    host.resetCounts()
+
+    const nextChildren = [
+      normalize(
+        <Fragment key="b">
+          <span>B1</span>
+        </Fragment>,
+      ),
+      normalize(
+        <Fragment key="a">
+          <span>A1</span>
+          <span>A2</span>
+        </Fragment>,
+      ),
+    ]
+
+    patchChildren(host.options, previousChildren, nextChildren, {
+      container: host.container,
+      patchChild,
+    })
+
+    const nextOrder: string[] = []
+
+    for (const node of host.container.children) {
+      collectLeafTexts(node, nextOrder)
+    }
+
+    expect(nextOrder.filter(Boolean)).toEqual(['B1', 'A1', 'A2'])
+    /* Fragment B 仅包含一个宿主节点，移动一次即可到位。 */
+    expect(host.counters.insertBefore).toBe(1)
+    expect(host.counters.appendChild).toBe(0)
+    expect(host.counters.remove).toBe(0)
   })
 
   it('混合 keyed 与无 key 节点：卸载缺失并挂载新增 key', () => {

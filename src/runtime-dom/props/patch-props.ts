@@ -23,11 +23,25 @@ export function patchProps(
     const previousValue = previous[key]
     const nextValue = next[key]
 
-    if (handleRefProp(key, previousValue, nextValue)) continue
-    if (handleClassProp(element, key, nextValue)) continue
-    if (handleStyleProp(element, key, previousValue, nextValue)) continue
-    if (handleFormValueProp(element, key, previousValue, nextValue)) continue
-    if (handleEventProp(element, key, previousValue, nextValue)) continue
+    if (handleRefProp(key, previousValue, nextValue)) {
+      continue
+    }
+
+    if (handleClassProp(element, key, nextValue)) {
+      continue
+    }
+
+    if (handleStyleProp(element, key, previousValue, nextValue)) {
+      continue
+    }
+
+    if (handleFormValueProp(element, key, previousValue, nextValue)) {
+      continue
+    }
+
+    if (handleEventProp(element, key, previousValue, nextValue)) {
+      continue
+    }
 
     patchDomAttr(element, key, nextValue)
   }

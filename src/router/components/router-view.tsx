@@ -49,7 +49,9 @@ export const RouterView: SetupComponent<RouterViewProps> = (props) => {
     const matchedComponents = getMatched()
     const MatchedComponent = matchedComponents[depth]
 
-    if (!MatchedComponent) return undefined
+    if (!MatchedComponent) {
+      return undefined
+    }
 
     return <MatchedComponent />
   }

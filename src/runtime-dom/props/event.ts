@@ -8,7 +8,9 @@ export function handleEventProp(
   previous: unknown,
   next: unknown,
 ): boolean {
-  if (!isEventProp(key)) return false
+  if (!isEventProp(key)) {
+    return false
+  }
 
   patchEvent(element as HTMLElement, key.slice(2).toLowerCase(), previous, next)
 

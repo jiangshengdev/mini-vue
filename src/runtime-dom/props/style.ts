@@ -8,7 +8,9 @@ export function handleStyleProp(
   previous: unknown,
   next: unknown,
 ): boolean {
-  if (key !== 'style') return false
+  if (key !== 'style') {
+    return false
+  }
 
   applyStyle(element as HTMLElement, previous, next)
 

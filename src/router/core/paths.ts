@@ -25,7 +25,10 @@ export function getQueryAndHash(path: string): string {
 
 /** 规范化路由路径：去 `query/hash`，补前导斜杠，移除尾随斜杠。 */
 export function normalizePath(path: string): string {
-  if (!path) return '/'
+  if (!path) {
+    return '/'
+  }
+
   let normalized = stripQueryAndHash(path)
 
   if (!normalized.startsWith('/')) {

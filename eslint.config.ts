@@ -73,4 +73,9 @@ export default defineConfig([
   },
   ...pluginOxlint.configs['flat/recommended'],
   eslintConfigPrettier,
+  {
+    rules: {
+      curly: 'error',
+    },
+  },
 ])

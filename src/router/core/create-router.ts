@@ -25,7 +25,9 @@ const appsWithRouter = new WeakSet<InstallableApp>()
  * 读取当前浏览器路径；无 `window` 环境时退回根路径。
  */
 function getCurrentBrowserPath(): string {
-  if (!canUseWindowEvents) return '/'
+  if (!canUseWindowEvents) {
+    return '/'
+  }
 
   return globalThis.location.pathname || '/'
 }
@@ -79,7 +81,10 @@ export function createRouter(config: RouterConfig): Router {
    */
   const start = (): void => {
     /* 无浏览器环境或已监听时直接返回，避免重复绑定。 */
-    if (!canUseWindowEvents || listening) return
+    if (!canUseWindowEvents || listening) {
+      return
+    }
+
     globalThis.addEventListener('popstate', onPopState)
     listening = true
     /* 同步一次当前路径，防止在初始化前已有 `pushState` 调用。 */
@@ -91,7 +96,10 @@ export function createRouter(config: RouterConfig): Router {
    */
   const stop = (): void => {
     /* 若未启动或不在浏览器中则无需处理。 */
-    if (!canUseWindowEvents || !listening) return
+    if (!canUseWindowEvents || !listening) {
+      return
+    }
+
     globalThis.removeEventListener('popstate', onPopState)
     listening = false
   }

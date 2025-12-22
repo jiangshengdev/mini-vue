@@ -2,7 +2,10 @@ import { isNil, isObject } from '@/shared/index.ts'
 
 /** 统一处理 `class`/`className`。 */
 export function handleClassProp(element: Element, key: string, value: unknown): boolean {
-  if (key !== 'class' && key !== 'className') return false
+  if (key !== 'class' && key !== 'className') {
+    return false
+  }
+
   ;(element as HTMLElement).className = isNil(value) || value === false ? '' : normalizeClass(value)
 
   return true

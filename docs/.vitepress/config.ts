@@ -30,8 +30,13 @@ function buildSidebar() {
   const sections = []
 
   const compareSidebarEntries = (a: { name: string }, b: { name: string }) => {
-    if (a.name === 'index.md') return -1
-    if (b.name === 'index.md') return 1
+    if (a.name === 'index.md') {
+      return -1
+    }
+
+    if (b.name === 'index.md') {
+      return 1
+    }
 
     return a.name.localeCompare(b.name)
   }

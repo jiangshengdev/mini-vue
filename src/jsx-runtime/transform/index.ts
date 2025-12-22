@@ -1,1 +1,1 @@
-export { transformVModelProps, readModelValue, setModelValue } from './v-model/index.ts'
+export { readModelValue, setModelValue, transformModelBindingProps } from './v-model/index.ts'

@@ -3,7 +3,7 @@ import type { PropsShape } from '@/shared/index.ts'
 
 type TrackConflict = (key: string) => void
 
-export function applyRadioVModel(
+export function applyRadioModelBinding(
   model: unknown,
   props: PropsShape,
   trackConflict: TrackConflict,

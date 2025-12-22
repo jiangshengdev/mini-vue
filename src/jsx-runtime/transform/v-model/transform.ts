@@ -1,14 +1,13 @@
-
-import { applyCheckboxVModel } from './checkbox.ts'
-import { applyRadioVModel } from './radio.ts'
-import { applySelectMultipleVModel } from './select-multiple.ts'
-import { applySelectSingleVModel } from './select-single.ts'
-import { applyTextlikeVModel } from './textlike.ts'
+import { applyCheckboxModelBinding } from './checkbox.ts'
+import { applyRadioModelBinding } from './radio.ts'
+import { applySelectMultipleModelBinding } from './select-multiple.ts'
+import { applySelectSingleModelBinding } from './select-single.ts'
+import { applyTextlikeModelBinding } from './textlike.ts'
 import { warnConflictProps, warnNonFormElement } from './warn.ts'
-import type { PropsShape } from '@/shared/index.ts'
 import type { ElementProps, ElementType } from '@/jsx-foundation/index.ts'
+import type { PropsShape } from '@/shared/index.ts'
 
-type PropsWithVModel = PropsShape & { 'v-model'?: unknown }
+type PropsWithModelBinding = PropsShape & { 'v-model'?: unknown }
 
 interface TransformResult<T extends ElementType> {
   props?: ElementProps<T>
@@ -21,7 +20,7 @@ interface TransformResult<T extends ElementType> {
  * - 默认使用严格等于判断。
  * - 非表单元素出现 `v-model` 会在 Dev 下告警并移除该字段。
  */
-export function transformVModelProps<T extends ElementType>(
+export function transformModelBindingProps<T extends ElementType>(
   type: T,
   rawProps?: ElementProps<T>,
 ): TransformResult<T> {
@@ -29,7 +28,7 @@ export function transformVModelProps<T extends ElementType>(
     return { props: rawProps }
   }
 
-  const props = rawProps as PropsWithVModel
+  const props = rawProps as PropsWithModelBinding
 
   if (!Object.hasOwn(props, 'v-model')) {
     return { props: props as ElementProps<T> }
@@ -52,18 +51,18 @@ export function transformVModelProps<T extends ElementType>(
       const inputType = typeof nextProps.type === 'string' ? nextProps.type.toLowerCase() : ''
 
       if (inputType === 'checkbox') {
-        applyCheckboxVModel(model, nextProps, trackConflict)
+        applyCheckboxModelBinding(model, nextProps, trackConflict)
       } else if (inputType === 'radio') {
-        applyRadioVModel(model, nextProps, trackConflict)
+        applyRadioModelBinding(model, nextProps, trackConflict)
       } else {
-        applyTextlikeVModel(model, nextProps, trackConflict, 'onInput')
+        applyTextlikeModelBinding(model, nextProps, trackConflict, 'onInput')
       }
 
       break
     }
 
     case 'textarea': {
-      applyTextlikeVModel(model, nextProps, trackConflict, 'onInput')
+      applyTextlikeModelBinding(model, nextProps, trackConflict, 'onInput')
       break
     }
 
@@ -71,9 +70,9 @@ export function transformVModelProps<T extends ElementType>(
       const multiple = Boolean(nextProps.multiple)
 
       if (multiple) {
-        applySelectMultipleVModel(model, nextProps, trackConflict)
+        applySelectMultipleModelBinding(model, nextProps, trackConflict)
       } else {
-        applySelectSingleVModel(model, nextProps, trackConflict)
+        applySelectSingleModelBinding(model, nextProps, trackConflict)
       }
 
       break

@@ -3,7 +3,7 @@ import type { PropsShape } from '@/shared/index.ts'
 
 type TrackConflict = (key: string) => void
 
-export function applySelectSingleVModel(
+export function applySelectSingleModelBinding(
   model: unknown,
   props: PropsShape,
   trackConflict: TrackConflict,

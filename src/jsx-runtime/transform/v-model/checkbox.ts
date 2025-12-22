@@ -3,7 +3,7 @@ import type { PropsShape } from '@/shared/index.ts'
 
 type TrackConflict = (key: string) => void
 
-export function applyCheckboxVModel(
+export function applyCheckboxModelBinding(
   model: unknown,
   props: PropsShape,
   trackConflict: TrackConflict,
@@ -40,7 +40,10 @@ export function applyCheckboxVModel(
           return
         }
 
-        setModelValue(model, [...current, boundValue])
+        const currentArray = current as unknown[]
+        const updated = [...currentArray, boundValue] as unknown[]
+
+        setModelValue(model, updated)
       } else {
         setModelValue(
           model,

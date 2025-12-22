@@ -22,7 +22,7 @@ export const AttributeBindings: SetupComponent = () => {
         <p>
           <span title={message.get()}>鼠标悬停几秒查看动态绑定的 title 属性！</span>
         </p>
-        <p class={isRed.get() ? styles.red : undefined} onClick={toggleRed}>
+        <p class={{ [styles.red]: isRed.get() }} onClick={toggleRed}>
           这里应该是红色……点击切换颜色。
         </p>
         <p style={{ color: color.get() }} onClick={toggleColor}>

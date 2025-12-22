@@ -12,7 +12,7 @@
 
 ## 2. SVG 元素写入 className 会抛出异常（待修复）
 
-- 位置：`src/runtime-dom/patch-props.ts`
+- 位置：`src/runtime-dom/props/index.ts`
 - 现状：`class`/`className` 分支直接对 `element.className` 赋字符串；但在 SVG 元素上该属性为只读 `SVGAnimatedString`。
 - 影响：带有 `class` 属性的 `<svg>` 节点在 patch 阶段会触发 `TypeError`，导致整次渲染失败，无法继续创建后续 DOM。
 - 提示：需要在处理 SVG 元素时改用 `setAttribute('class', ...)` 等通用路径，或基于 `ownerSVGElement` 判断写入方式。

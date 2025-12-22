@@ -1,5 +1,5 @@
 export { createApp, renderDomRoot as render } from './create-app.ts'
 export type { DomAppInstance } from './create-app.ts'
-export { invokerCacheKey } from './patch-props.ts'
-export type { ElementRef } from './patch-props.ts'
+export { invokerCacheKey } from './props/index.ts'
+export type { ElementRef } from './props/index.ts'
 export { domRendererOptions } from './renderer-options.ts'

@@ -1,9 +1,17 @@
 import { isNil, isObject } from '@/shared/index.ts'
 
+/** 统一处理 `class`/`className`。 */
+export function handleClassProp(element: Element, key: string, value: unknown): boolean {
+  if (key !== 'class' && key !== 'className') return false
+  ;(element as HTMLElement).className = isNil(value) || value === false ? '' : normalizeClass(value)
+
+  return true
+}
+
 /**
  * 将 `class` 相关入参归一化为以空格分隔的字符串。
  */
-export function normalizeClass(value: unknown): string {
+function normalizeClass(value: unknown): string {
   const tokens: string[] = []
 
   collectClassTokens(value, tokens)

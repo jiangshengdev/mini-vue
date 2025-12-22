@@ -1,7 +1,7 @@
 /**
  * DOM 宿主环境的渲染原语实现。
  */
-import { patchProps } from './patch-props.ts'
+import { patchProps } from './props/index.ts'
 import type { RendererOptions } from '@/runtime-core/index.ts'
 
 /**

@@ -47,7 +47,7 @@ createApp(Counter).mount('#app')
 
 - TypeScript ESM，显式 `.ts` 导入，`moduleResolution: bundler`，`jsx: react-jsx`，`jsxImportSource: '@'`，别名 `@` -> `src`。
 - 新增功能优先放在现有子目录，小而专注；DOM 细节放 `runtime-dom`，通用逻辑留 `runtime-core`。
-- 扩展 DOM props 时同步完善 `patch-props.ts` 与 `test/runtime-dom/**`；框架内部入口统一复用 `shared/runSilent` / `runThrowing`，对外暴露 `setErrorHandler` 供用户注册全局错误处理器。
+- 扩展 DOM props 时同步完善 `src/runtime-dom/props/index.ts` 与 `test/runtime-dom/**`；框架内部入口统一复用 `shared/runSilent` / `runThrowing`，对外暴露 `setErrorHandler` 供用户注册全局错误处理器。
 - 提交信息规范：见 [`.copilot-commit-message-instructions.md`](./.copilot-commit-message-instructions.md)。
 
 ## 贡献指南

@@ -30,6 +30,7 @@ function setStyleValue(element: HTMLElement, property: string, input: string): v
  * 处理 `style` 属性，支持字符串和对象两种写法。
  */
 function applyStyle(element: HTMLElement, previous: unknown, next: unknown): void {
+  /* 传入空值或 `false` 时移除整段内联样式。 */
   if (isNil(next) || next === false) {
     element.removeAttribute('style')
 

@@ -26,6 +26,7 @@ function patchEvent(
   _previous: unknown,
   next: unknown,
 ): void {
+  /* 为当前元素取出或初始化 `invoker` 缓存，保证事件处理引用可复用。 */
   const invokers = getInvokerMap(element)
   const existing = invokers[eventName]
 

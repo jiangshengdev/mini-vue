@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { within } from '@testing-library/dom'
 import userEvent from '@testing-library/user-event'
 import { renderIntoNewContainer } from '$/index.ts'
-import type { SetupComponent } from '@/index.ts'
+import type { Ref, SetupComponent } from '@/index.ts'
 import { ref } from '@/index.ts'
 import {
   jsxModelBindingConflictWarning,
@@ -21,7 +21,7 @@ describe('runtime-dom JSX v-model', () => {
     }
 
     const container = renderIntoNewContainer(<InputBinder />)
-    const input = within(container).getByLabelText('text') as HTMLInputElement
+    const input = within(container).getByLabelText<HTMLInputElement>('text')
     const user = userEvent.setup()
 
     expect(input.value).toBe('hello')
@@ -50,7 +50,7 @@ describe('runtime-dom JSX v-model', () => {
     }
 
     const container = renderIntoNewContainer(<CheckboxBinder />)
-    const input = within(container).getByLabelText('flag') as HTMLInputElement
+    const input = within(container).getByLabelText<HTMLInputElement>('flag')
     const user = userEvent.setup()
 
     expect(input.checked).toBe(true)
@@ -80,8 +80,8 @@ describe('runtime-dom JSX v-model', () => {
 
     const container = renderIntoNewContainer(<CheckboxGroup />)
     const view = within(container)
-    const jack = view.getByLabelText('Jack') as HTMLInputElement
-    const john = view.getByLabelText('John') as HTMLInputElement
+    const jack = view.getByLabelText<HTMLInputElement>('Jack')
+    const john = view.getByLabelText<HTMLInputElement>('John')
     const user = userEvent.setup()
 
     expect(jack.checked).toBe(false)
@@ -112,8 +112,8 @@ describe('runtime-dom JSX v-model', () => {
 
     const container = renderIntoNewContainer(<RadioGroup />)
     const view = within(container)
-    const radioA = view.getByLabelText('A') as HTMLInputElement
-    const radioB = view.getByLabelText('B') as HTMLInputElement
+    const radioA = view.getByLabelText<HTMLInputElement>('A')
+    const radioB = view.getByLabelText<HTMLInputElement>('B')
     const user = userEvent.setup()
 
     expect(radioA.checked).toBe(true)
@@ -143,7 +143,7 @@ describe('runtime-dom JSX v-model', () => {
 
     const container = renderIntoNewContainer(<SelectBinder />)
 
-    const select = within(container).getByLabelText('single') as HTMLSelectElement
+    const select = within(container).getByLabelText<HTMLSelectElement>('single')
 
     await Promise.resolve()
 
@@ -178,18 +178,25 @@ describe('runtime-dom JSX v-model', () => {
 
     const container = renderIntoNewContainer(<SelectBinder />)
 
-    const select = within(container).getByLabelText('multi') as HTMLSelectElement
-    const user = userEvent.setup()
+    const select = within(container).getByLabelText<HTMLSelectElement>('multi')
 
     await Promise.resolve()
 
-    expect([...select.selectedOptions].map((option) => option.value)).toEqual(['a'])
+    expect(
+      [...select.selectedOptions].map((option) => {
+        return option.value
+      }),
+    ).toEqual(['a'])
 
     selected.value = ['b', 'c']
 
     await Promise.resolve()
 
-    expect([...select.selectedOptions].map((option) => option.value)).toEqual(['b', 'c'])
+    expect(
+      [...select.selectedOptions].map((option) => {
+        return option.value
+      }),
+    ).toEqual(['b', 'c'])
 
     for (const option of select.options) {
       option.selected = option.value === 'a' || option.value === 'c'
@@ -215,12 +222,17 @@ describe('runtime-dom JSX v-model', () => {
     warn.mockClear()
 
     renderIntoNewContainer(
-      <input aria-label="conflict" v-model={text} value="raw" onInput={() => undefined} />,
+      <input
+        aria-label="conflict"
+        v-model={text}
+        value="raw"
+        onInput={() => {
+          return undefined
+        }}
+      />,
     )
 
-    expect(warn).toHaveBeenCalledWith(
-      jsxModelBindingConflictWarning('input', ['value', 'onInput']),
-    )
+    expect(warn).toHaveBeenCalledWith(jsxModelBindingConflictWarning('input', ['value', 'onInput']))
 
     warn.mockRestore()
   })
@@ -229,8 +241,10 @@ describe('runtime-dom JSX v-model', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {
       return undefined
     })
-    const container = renderIntoNewContainer(<input aria-label="readonly" v-model={'fixed'} />)
-    const input = within(container).getByLabelText('readonly') as HTMLInputElement
+    const container = renderIntoNewContainer(
+      <input aria-label="readonly" v-model={'fixed' as unknown as Ref} />,
+    )
+    const input = within(container).getByLabelText<HTMLInputElement>('readonly')
 
     input.value = 'next'
     input.dispatchEvent(new Event('input'))

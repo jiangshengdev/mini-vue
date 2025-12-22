@@ -5,7 +5,7 @@ import { __DEV__, isNil } from '@/shared/index.ts'
 export function handleFormStateProp(
   element: Element,
   key: string,
-  previous: unknown,
+  _previous: unknown,
   next: unknown,
 ): boolean {
   /* 受控表单：`value`/`checked` 应写 DOM property，确保 UI 同步。 */

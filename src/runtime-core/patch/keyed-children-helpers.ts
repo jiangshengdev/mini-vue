@@ -162,14 +162,20 @@ export function buildIndexMaps<
 export function findUnkeyedMatch(
   target: NormalizedVirtualNode,
   list: NormalizedChildren,
-  start: number,
-  end: number,
+  context: {
+    start: number
+    end: number
+    maps: IndexMaps
+    range: IndexRange
+  },
 ): number | undefined {
-  for (let index = start; index <= end; index += 1) {
+  for (let index = context.start; index <= context.end; index += 1) {
     const candidate = list[index]
+    const mapped = context.maps.newIndexToOldIndexMap[index - context.range.newStart]
 
     if (
       (candidate.key === null || candidate.key === undefined) &&
+      mapped === 0 &&
       isSameVirtualNode(candidate, target)
     ) {
       return index

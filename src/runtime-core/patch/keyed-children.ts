@@ -96,16 +96,26 @@ function patchAlignedChildren<
   for (let index = range.oldStart; index <= range.oldEnd; index += 1) {
     const previousChild = context.previousChildren[index]
     /* 有 `key` 则优先通过映射定位，否则尝试在新列表中间段线性寻找可复用的无 `key` 节点。 */
-    const newIndex =
-      previousChild.key !== undefined && previousChild.key !== null
-        ? maps.keyToNewIndexMap.get(previousChild.key)
-        : findUnkeyedMatch(previousChild, context.nextChildren, range.newStart, range.newEnd)
+    let newIndex: number | undefined
+
+    if (previousChild.key !== undefined && previousChild.key !== null) {
+      newIndex = maps.keyToNewIndexMap.get(previousChild.key)
+    } else {
+      newIndex = findUnkeyedMatch(previousChild, context.nextChildren, {
+        start: range.newStart,
+        end: range.newEnd,
+        maps,
+        range,
+      })
+    }
 
     if (newIndex === undefined) {
       /* 旧节点在新列表中不存在：直接卸载，避免后续移动阶段误处理。 */
       context.driver.unmountOnly(previousChild)
     } else {
       const nextChild = context.nextChildren[newIndex]
+      const newIndexOffset = newIndex - range.newStart
+      const mapped = maps.newIndexToOldIndexMap[newIndexOffset]
 
       if (!isSameVirtualNode(previousChild, nextChild)) {
         /* Key 命中但类型不同：视为替换，卸载旧节点并让后续阶段按「需要 mount」处理。 */
@@ -114,8 +124,15 @@ function patchAlignedChildren<
         continue
       }
 
+      /* 新索引已被占用：说明存在重复命中（重复 key 或兜底无 key 复用），当前旧节点应卸载。 */
+      if (mapped !== 0) {
+        context.driver.unmountOnly(previousChild)
+
+        continue
+      }
+
       /* 记录新索引对应的旧索引（`+1` 编码），供后续倒序移动/挂载阶段判断是否需要 `mount`。 */
-      maps.newIndexToOldIndexMap[newIndex - range.newStart] = index + 1
+      maps.newIndexToOldIndexMap[newIndexOffset] = index + 1
       const childEnvironment = createChildEnvironment(
         context.environment,
         newIndex,

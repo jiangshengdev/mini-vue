@@ -138,7 +138,7 @@
 - 复现：在 keyed children 中出现重复 key 或含无 key 节点的全量逆序，例如：
   - `prev = [<div key="a" />, <div />, <div />]`
   - `next = [<div />, <div />, <div key="a" />]`
-  或新列表含重复 key：`prev = [<div key="a" />, <div key="b" />]` → `next = [<div key="a" />, <div key="a" />]`。
+    或新列表含重复 key：`prev = [<div key="a" />, <div key="b" />]` → `next = [<div key="a" />, <div key="a" />]`。
 - 影响：多余的旧节点未卸载且新节点被重复挂载，最终 DOM/宿主列表会多出一个元素，导致界面渲染错误。
 - 原因：
   - `patchAlignedChildren` 在命中 `newIndex` 时未检查 `newIndexToOldIndexMap` 是否已占用，重复 key 会覆盖映射且不卸载早先命中的旧节点。

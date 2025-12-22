@@ -70,16 +70,6 @@ export function patchProps(
       continue
     }
 
-    /* 多选 `select` 允许数组值，直接写 DOM property 控制选中项。 */
-    if (
-      key === 'value' &&
-      element instanceof HTMLSelectElement &&
-      Array.isArray(nextValue ?? previousValue)
-    ) {
-      applySelectValue(element, nextValue)
-      continue
-    }
-
     /* 事件以 `onXxx` 开头，统一做小写映射后注册。 */
     if (isEventProp(key)) {
       patchEvent(element as HTMLElement, key.slice(2).toLowerCase(), previousValue, nextValue)
@@ -192,31 +182,6 @@ function patchDomAttr(element: Element, key: string, value: unknown): void {
 
   if (__DEV__) {
     console.warn(runtimeDomUnsupportedAttrValue(key, typeof value), value)
-  }
-}
-
-/**
- * 为多选 `select` 应用数组值，按严格等于匹配选中项。
- */
-function applySelectValue(element: HTMLSelectElement, value: unknown): void {
-  if (!Array.isArray(value)) {
-    element.value = value == null ? '' : String(value)
-
-    return
-  }
-
-  const values = value as unknown[]
-
-  if (!element.multiple) {
-    element.value = values.length > 0 ? String(values[0]) : ''
-
-    return
-  }
-
-  const options = [...element.options]
-
-  for (const option of options) {
-    option.selected = values.includes(option.value)
   }
 }
 

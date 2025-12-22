@@ -14,8 +14,8 @@
 - [x] 实现转换入口：在 jsx-runtime/builder 或虚拟节点创建前拦截 props，识别 `v-model`，生成等价的 value/checked + handler，移除原始 `v-model`；默认使用严格等于判定（不做松散相等）。
 - [x] 补充类型：在 `src/jsx-shim.d.ts` 等声明中为 `v-model` 增加签名，覆盖 IntrinsicElements 中表单标签（单一 prop），组件侧继续使用 `modelValue/onUpdate:modelValue`。
 - [x] 更新示例：改造 `playground/views/basic/form-bindings.tsx` 使用 `v-model` 语法糖，验证体验简化。
-- [ ] 添加测试/验证：在 `test/runtime-dom/props` 或新用例覆盖各元素的 v-model 行为，手动跑 playground 或 `pnpm run test` 检查。
-- [ ] 风险检查：确认属性写入限制不再告警，事件绑定/解绑稳健，数组/对象值处理与严格等价预期一致。
+- [x] 添加测试/验证：`test/runtime-dom/props/v-model.test.tsx` 覆盖文本、checkbox（布尔/数组）、radio、select 单/多选及告警行为。
+- [x] 风险检查：验证了非表单/冲突属性/只读目标的告警路径，受控属性写入与事件派发符合预期。
 
 ## Open questions
 

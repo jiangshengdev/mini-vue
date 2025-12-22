@@ -8,13 +8,6 @@ export function handleFormStateProp(
   previous: unknown,
   next: unknown,
 ): boolean {
-  /* 多选 `select` 允许数组值，直接写 DOM property 控制选中项。 */
-  if (key === 'value' && element instanceof HTMLSelectElement && Array.isArray(next ?? previous)) {
-    applySelectValue(element, next)
-
-    return true
-  }
-
   /* 受控表单：`value`/`checked` 应写 DOM property，确保 UI 同步。 */
   if (key === 'value' && element instanceof HTMLInputElement) {
     element.value = isNil(next) ? '' : (next as string)
@@ -29,7 +22,7 @@ export function handleFormStateProp(
   }
 
   if (key === 'value' && element instanceof HTMLSelectElement) {
-    element.value = isNil(next) ? '' : (next as string)
+    applySelectValue(element, next)
 
     return true
   }
@@ -47,19 +40,36 @@ export function handleFormStateProp(
  * 为多选 `select` 应用数组值，按严格等于匹配选中项。
  */
 function applySelectValue(element: HTMLSelectElement, value: unknown): void {
-  if (!Array.isArray(value)) {
-    /* 非数组输入走单值兜底流程，兼容普通 `select` 的写法。 */
-    if (isNil(value)) {
-      element.value = ''
-    } else if (typeof value === 'string' || typeof value === 'number') {
-      element.value = String(value)
+  const applySingleValue = (next: unknown) => {
+    let normalized = ''
+
+    if (isNil(next)) {
+      normalized = ''
+    } else if (typeof next === 'string' || typeof next === 'number') {
+      normalized = String(next)
     } else {
       if (__DEV__) {
-        console.warn(runtimeDomUnsupportedAttrValue('value', typeof value), value)
+        console.warn(runtimeDomUnsupportedAttrValue('value', typeof next), next)
       }
 
-      element.value = ''
+      normalized = ''
     }
+
+    element.value = normalized
+
+    if (element.multiple) {
+      const options = [...element.options]
+
+      for (const option of options) {
+        option.selected = normalized !== '' && option.value === normalized
+      }
+    }
+  }
+
+  if (!Array.isArray(value)) {
+    queueMicrotask(() => {
+      applySingleValue(value)
+    })
 
     return
   }
@@ -70,17 +80,9 @@ function applySelectValue(element: HTMLSelectElement, value: unknown): void {
   if (!element.multiple) {
     const first = values[0]
 
-    if (isNil(first)) {
-      element.value = ''
-    } else if (typeof first === 'string' || typeof first === 'number') {
-      element.value = String(first)
-    } else {
-      if (__DEV__) {
-        console.warn(runtimeDomUnsupportedAttrValue('value', typeof first), first)
-      }
-
-      element.value = ''
-    }
+    queueMicrotask(() => {
+      applySingleValue(first)
+    })
 
     return
   }

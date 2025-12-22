@@ -2,9 +2,11 @@
  * 平台无关的渲染核心定义，通过注入宿主环境能力完成挂载流程。
  */
 import type { AppContext } from './create-app.ts'
-import type { MountedHandle } from './mount/index.ts'
 import { mountChild } from './mount/index.ts'
+import type { NormalizedVirtualNode } from './normalize.ts'
 import { normalizeRenderOutput } from './normalize.ts'
+import { mountChildInEnvironment, patchChild } from './patch/index.ts'
+import { unmount as unmountVirtualNode } from './patch/utils.ts'
 import type { RenderOutput } from '@/jsx-foundation/index.ts'
 import { isVirtualNode } from '@/jsx-foundation/index.ts'
 import { runtimeCoreInvalidContainer } from '@/messages/index.ts'
@@ -70,7 +72,12 @@ export function createRenderer<
   HostFragment extends HostNode,
 >(options: RendererOptions<HostNode, HostElement, HostFragment>): Renderer<HostNode, HostElement> {
   const { clear } = options
-  const mountedHandlesByContainer = new WeakMap<WeakKey, MountedHandle<HostNode>>()
+
+  interface RootRenderState {
+    vnode?: NormalizedVirtualNode
+  }
+
+  const rootRenderStateByContainer = new WeakMap<WeakKey, RootRenderState>()
 
   /**
    * 将宿主容器断言为对象键，便于复用 `WeakMap` 存储。
@@ -87,23 +94,12 @@ export function createRenderer<
   }
 
   /**
-   * 若容器曾挂载过子树，则执行 `teardown` 并移除缓存。
-   */
-  function teardownContainer(container: HostElement): void {
-    const mounted = mountedHandlesByContainer.get(asContainerKey(container))
-
-    if (mounted) {
-      mounted.teardown()
-      mountedHandlesByContainer.delete(asContainerKey(container))
-    }
-  }
-
-  /**
    * 根渲染函数会先清空容器，再挂载整棵子树。
    */
   function render(virtualNode: RenderOutput, container: HostElement): void {
-    teardownContainer(container)
-    clear(container)
+    const containerKey = asContainerKey(container)
+    const previousState = rootRenderStateByContainer.get(containerKey)
+    const previous = previousState?.vnode
     const normalized = normalizeRenderOutput(virtualNode)
     const normalizedAppContext = isVirtualNode(normalized)
       ? (normalized as { appContext?: AppContext }).appContext
@@ -112,19 +108,40 @@ export function createRenderer<
       ? (virtualNode as { appContext?: AppContext }).appContext
       : undefined
     const appContext = normalizedAppContext ?? rawAppContext
-    /* `normalize` 返回 `undefined` 时保留原始输出，交由 `mountChild` 触发开发期警告。 */
-    const outputToMount: RenderOutput | undefined = normalized ?? virtualNode
-    let mounted: MountedHandle<HostNode> | undefined
+    const context = { appContext }
 
-    if (outputToMount !== undefined) {
-      mounted = mountChild(options, outputToMount, {
-        container,
-        context: { appContext },
-      })
+    /* 首次渲染：清空容器并挂载新子树。 */
+    if (!previous) {
+      clear(container)
+
+      if (!normalized) {
+        /* 保留原有行为：不可渲染输出仍交给 `mountChild` 触发开发期警告。 */
+        mountChild(options, virtualNode, { container, context })
+        rootRenderStateByContainer.delete(containerKey)
+
+        return
+      }
+
+      mountChildInEnvironment(options, normalized, { container, context })
+      rootRenderStateByContainer.set(containerKey, { vnode: normalized })
+
+      return
     }
 
-    if (mounted) {
-      mountedHandlesByContainer.set(asContainerKey(container), mounted)
+    /* 后续渲染：复用 `patch` 更新根子树，避免整棵重建。 */
+    patchChild(options, previous, normalized, {
+      container,
+      context,
+    })
+
+    if (normalized) {
+      rootRenderStateByContainer.set(containerKey, { vnode: normalized })
+    } else {
+      /* `render(undefined)` 等价于卸载：清理缓存并保持容器空白。 */
+      rootRenderStateByContainer.delete(containerKey)
+      clear(container)
+      /* 仍保留对不可渲染输出的警告能力。 */
+      mountChild(options, virtualNode, { container, context })
     }
   }
 
@@ -132,7 +149,14 @@ export function createRenderer<
    * 卸载操作只负责清理缓存并复用宿主 `clear` 逻辑。
    */
   function unmount(container: HostElement): void {
-    teardownContainer(container)
+    const containerKey = asContainerKey(container)
+    const previous = rootRenderStateByContainer.get(containerKey)?.vnode
+
+    if (previous) {
+      unmountVirtualNode(options, previous)
+      rootRenderStateByContainer.delete(containerKey)
+    }
+
     clear(container)
   }
 

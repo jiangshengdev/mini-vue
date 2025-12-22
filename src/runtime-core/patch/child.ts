@@ -9,7 +9,7 @@ import { asRuntimeNormalizedVirtualNode } from './runtime-virtual-node.ts'
 import type { PatchResult } from './types.ts'
 import { isComponentVirtualNode, isTextVirtualNode } from './types.ts'
 import { isSameVirtualNode, syncRuntimeMetadata, unmount } from './utils.ts'
-import type { SetupComponent } from '@/jsx-foundation/index.ts'
+import type { ElementProps, SetupComponent } from '@/jsx-foundation/index.ts'
 import { Fragment } from '@/jsx-foundation/index.ts'
 
 /**
@@ -236,7 +236,9 @@ function patchComponent<
   /* 复用旧组件实例：同步宿主引用，并将 `next` 绑定到同一个 `component` 上。 */
   syncRuntimeMetadata(runtimePrevious, runtimeNext, { component: instance })
   /* 组件 `props` 需要走规范化流程（包含默认值/`attrs` 等策略），避免直接透传 raw `props`。 */
-  instance.props = resolveComponentProps(next)
+  const nextProps = resolveComponentProps(next)
+
+  syncComponentProps(instance.props, nextProps)
   /* `effect.run` 依赖实例化时的 `this` 语义，这里显式 `bind` 保持一致。 */
   const runner = instance.effect?.run.bind(instance.effect)
 
@@ -257,4 +259,20 @@ function patchComponent<
   }
 
   return { ok: true }
+}
+
+/**
+ * 组件 props 变更时保持引用不变，便于渲染闭包捕获的 `props` 能读取最新值。
+ */
+function syncComponentProps(
+  target: ElementProps<SetupComponent>,
+  nextProps: ElementProps<SetupComponent>,
+): void {
+  for (const key of Object.keys(target)) {
+    if (!(key in nextProps)) {
+      Reflect.deleteProperty(target, key)
+    }
+  }
+
+  Object.assign(target, nextProps)
 }

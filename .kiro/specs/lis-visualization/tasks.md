@@ -17,26 +17,26 @@
     - 定义 NavigatorState、StepNavigator 接口
     - _Requirements: 1.1, 1.2, 1.3, 1.4_
 
-- [-] 2. 实现追踪函数
+- [x] 2. 实现追踪函数
   - [x] 2.1 实现 traceLIS 函数
     - 复用 LIS 算法逻辑，在每次迭代时记录步骤
     - 捕获 sequence 和 predecessors 的深拷贝
     - 记录操作类型（append/replace/skip）
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4_
 
-  - [ ]\* 2.2 编写属性测试：追踪结果与原始算法一致
+  - [x]\* 2.2 编写属性测试：追踪结果与原始算法一致
     - **Property 1: 追踪结果与原始算法一致**
     - **Validates: Requirements 3.2, 7.3**
 
-  - [ ]\* 2.3 编写属性测试：步骤数量等于输入长度
+  - [x]\* 2.3 编写属性测试：步骤数量等于输入长度
     - **Property 2: 步骤数量等于输入长度**
     - **Validates: Requirements 1.1**
 
-  - [ ]\* 2.4 编写属性测试：操作类型正确性
+  - [x]\* 2.4 编写属性测试：操作类型正确性
     - **Property 3: 操作类型正确性**
     - **Validates: Requirements 1.2, 1.3, 1.4**
 
-  - [ ]\* 2.5 编写属性测试：深拷贝隔离
+  - [x]\* 2.5 编写属性测试：深拷贝隔离
     - **Property 5: 深拷贝隔离**
     - **Validates: Requirements 2.1, 2.2**
 
@@ -46,11 +46,11 @@
     - 管理当前步骤索引和边界状态
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7_
 
-  - [ ]\* 3.2 编写属性测试：导航操作正确性
+  - [x]\* 3.2 编写属性测试：导航操作正确性
     - **Property 8: 导航操作正确性**
     - **Validates: Requirements 4.1, 4.2, 4.3, 4.4**
 
-  - [ ]\* 3.3 编写属性测试：边界状态指示
+  - [x]\* 3.3 编写属性测试：边界状态指示
     - **Property 9: 边界状态指示**
     - **Validates: Requirements 4.5, 4.6, 4.7**
 

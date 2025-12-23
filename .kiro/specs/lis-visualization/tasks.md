@@ -83,17 +83,17 @@
     - 输入变化时重新计算追踪
     - _Requirements: 6.1, 6.2, 6.3_
 
-- [ ] 6. 实现主页面和路由
-  - [ ] 6.1 实现 LISVisualization 主页面组件
+- [x] 6. 实现主页面和路由
+  - [x] 6.1 实现 LISVisualization 主页面组件
     - 组合所有子组件
     - 管理响应式状态
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
 
-  - [ ] 6.2 添加路由配置
+  - [x] 6.2 添加路由配置
     - 在 playground/router/ 中添加 /lis-visualization 路由
     - _Requirements: 7.2_
 
-  - [ ] 6.3 添加样式
+  - [x] 6.3 添加样式
     - 创建 visualization.module.css
     - 实现动画过渡效果
     - _Requirements: 5.5_

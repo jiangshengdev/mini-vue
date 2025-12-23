@@ -26,15 +26,13 @@ export const ArrayDisplay: SetupComponent<ArrayDisplayProps> = (props) => {
   }
 
   return () => {
-    const { input, currentIndex, result, showResult } = props
-
     return (
       <div class={styles.arrayDisplay}>
         <h3 class={styles.sectionTitle}>输入数组</h3>
         <div class={styles.arrayContainer}>
-          {input.map((value, index) => {
-            const isCurrent = index === currentIndex
-            const isInResult = showResult && result.includes(index)
+          {props.input.map((value, index) => {
+            const isCurrent = index === props.currentIndex
+            const isInResult = props.showResult && props.result.includes(index)
 
             const cellClasses = [
               styles.arrayCell,

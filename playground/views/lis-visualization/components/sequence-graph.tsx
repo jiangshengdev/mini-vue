@@ -36,22 +36,21 @@ function buildAllChains(sequence: number[], predecessors: number[]): number[][] 
 
 export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
   return () => {
-    const { input, sequence, predecessors } = props
-    const chains = buildAllChains(sequence, predecessors)
+    const chains = buildAllChains(props.sequence, props.predecessors)
 
     return (
       <div class={styles.sequenceGraph}>
         {/* Sequence State */}
         <div class={styles.sequenceSection}>
           <h3 class={styles.sectionTitle}>
-            Sequence State: [{sequence.join(', ')}] → values: [
-            {sequence.map((idx) => input[idx]).join(', ')}]
+            Sequence State: [{props.sequence.join(', ')}] → values: [
+            {props.sequence.map((idx) => props.input[idx]).join(', ')}]
           </h3>
         </div>
 
         {/* Predecessors */}
         <div class={styles.predecessorsSection}>
-          <h3 class={styles.sectionTitle}>Predecessors: [{predecessors.join(', ')}]</h3>
+          <h3 class={styles.sectionTitle}>Predecessors: [{props.predecessors.join(', ')}]</h3>
         </div>
 
         {/* Chain View */}
@@ -67,9 +66,9 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
                   {chain.map((nodeIndex, i) => (
                     <>
                       <div key={nodeIndex} class={styles.chainNode}>
-                        <span class={styles.nodeValue}>{input[nodeIndex]}</span>
+                        <span class={styles.nodeValue}>{props.input[nodeIndex]}</span>
                         <span class={styles.nodeInfo}>idx:{nodeIndex}</span>
-                        <span class={styles.nodeInfo}>pred:{predecessors[nodeIndex]}</span>
+                        <span class={styles.nodeInfo}>pred:{props.predecessors[nodeIndex]}</span>
                       </div>
                       {i < chain.length - 1 && <span class={styles.chainArrow}>←</span>}
                     </>

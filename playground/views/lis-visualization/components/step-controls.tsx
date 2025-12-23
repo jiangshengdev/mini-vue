@@ -40,70 +40,57 @@ export const StepControls: SetupComponent<StepControlsProps> = (props) => {
   }
 
   return () => {
-    const {
-      currentStep,
-      totalSteps,
-      canGoBack,
-      canGoForward,
-      isPlaying,
-      speed,
-      onPrev,
-      onNext,
-      onReset,
-      onTogglePlay,
-    } = props
-
     return (
       <div class={styles.stepControls}>
         <div class={styles.controlsRow}>
           <button
             type="button"
             class={styles.controlButton}
-            onClick={onPrev}
-            disabled={!canGoBack}
+            onClick={props.onPrev}
+            disabled={!props.canGoBack}
             title="上一步 (←)"
           >
             ◀ Prev
           </button>
 
           <span class={styles.stepIndicator}>
-            Step {currentStep + 1} / {totalSteps}
+            Step {props.currentStep + 1} / {props.totalSteps}
           </span>
 
           <button
             type="button"
             class={styles.controlButton}
-            onClick={onNext}
-            disabled={!canGoForward}
+            onClick={props.onNext}
+            disabled={!props.canGoForward}
             title="下一步 (→)"
           >
             Next ▶
           </button>
 
-          <button type="button" class={styles.controlButton} onClick={onReset} title="重置 (Home)">
+          <button type="button" class={styles.controlButton} onClick={props.onReset} title="重置 (Home)">
             ⟲ Reset
           </button>
 
           <button
             type="button"
-            class={`${styles.controlButton} ${isPlaying ? styles.playing : ''}`}
-            onClick={onTogglePlay}
+            class={`${styles.controlButton} ${props.isPlaying ? styles.playing : ''}`}
+            onClick={props.onTogglePlay}
             title="自动播放/暂停 (Space)"
           >
-            {isPlaying ? '⏸ Pause' : '▶ Auto'}
+            {props.isPlaying ? '⏸ Pause' : '▶ Auto'}
           </button>
         </div>
 
         <div class={styles.speedControl}>
           <label class={styles.speedLabel}>
-            速度: {speed}ms
+            速度: {props.speed}ms
             <input
               type="range"
               class={styles.speedSlider}
               min="100"
               max="2000"
               step="100"
-              value={speed}
+              value={props.speed}
               onInput={handleSpeedChange}
             />
           </label>

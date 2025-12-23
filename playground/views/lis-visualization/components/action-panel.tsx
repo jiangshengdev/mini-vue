@@ -51,9 +51,7 @@ function getActionClass(action: StepAction): string {
 
 export const ActionPanel: SetupComponent<ActionPanelProps> = (props) => {
   return () => {
-    const { action, currentValue } = props
-
-    if (!action || currentValue === null) {
+    if (!props.action || props.currentValue === null) {
       return (
         <div class={styles.actionPanel}>
           <h3 class={styles.sectionTitle}>Action</h3>
@@ -62,14 +60,14 @@ export const ActionPanel: SetupComponent<ActionPanelProps> = (props) => {
       )
     }
 
-    const description = getActionDescription(action, currentValue)
-    const actionClass = getActionClass(action)
+    const description = getActionDescription(props.action, props.currentValue)
+    const actionClass = getActionClass(props.action)
 
     return (
       <div class={styles.actionPanel}>
         <h3 class={styles.sectionTitle}>Action</h3>
         <div class={`${styles.actionContent} ${actionClass}`}>
-          <span class={styles.actionType}>{action.type.toUpperCase()}</span>
+          <span class={styles.actionType}>{props.action.type.toUpperCase()}</span>
           <span class={styles.actionDescription}>{description}</span>
         </div>
       </div>

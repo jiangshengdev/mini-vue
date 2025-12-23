@@ -40,8 +40,8 @@
     - **Property 5: 深拷贝隔离**
     - **Validates: Requirements 2.1, 2.2**
 
-- [ ] 3. 实现步骤导航器
-  - [ ] 3.1 实现 createStepNavigator 函数
+- [x] 3. 实现步骤导航器
+  - [x] 3.1 实现 createStepNavigator 函数
     - 实现 getState、getCurrentStep、next、prev、goTo、reset 方法
     - 管理当前步骤索引和边界状态
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7_
@@ -54,11 +54,11 @@
     - **Property 9: 边界状态指示**
     - **Validates: Requirements 4.5, 4.6, 4.7**
 
-- [ ] 4. Checkpoint - 核心逻辑验证
+- [x] 4. Checkpoint - 核心逻辑验证
   - 确保所有测试通过，ask the user if questions arise.
 
-- [ ] 5. 实现 UI 组件
-  - [ ] 5.1 实现 ArrayDisplay 组件
+- [-] 5. 实现 UI 组件
+  - [-] 5.1 实现 ArrayDisplay 组件
     - 显示输入数组，高亮当前处理的索引
     - 支持点击元素跳转到对应步骤
     - _Requirements: 5.1, 5.2_

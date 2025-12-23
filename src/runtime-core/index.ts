@@ -13,7 +13,12 @@ export { mountChild } from './mount/index.ts'
 export type { NormalizedChildren, NormalizedVirtualNode } from './normalize.ts'
 export { normalizeRenderOutput } from './normalize.ts'
 export type { PatchEnvironment } from './patch/index.ts'
-export { getHostNodesSafely, patchChild, patchChildren } from './patch/index.ts'
+export {
+  computeLongestIncreasingSubsequence,
+  getHostNodesSafely,
+  patchChild,
+  patchChildren,
+} from './patch/index.ts'
 export { inject, provide } from './provide-inject.ts'
 export { createRenderer } from './renderer.ts'
 export type { Renderer, RendererOptions, RootRenderFunction } from './renderer.ts'

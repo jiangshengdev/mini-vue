@@ -80,12 +80,12 @@ describe('createStepNavigator', () => {
       expect(step?.stepIndex).toBe(0)
     })
 
-    it('空步骤列表时应该返回 null', () => {
+    it('空步骤列表时应该返回 undefined', () => {
       const trace = createMockTrace(0)
       const navigator = createStepNavigator(trace)
       const step = navigator.getCurrentStep()
 
-      expect(step).toBeNull()
+      expect(step).toBeUndefined()
     })
   })
 
@@ -101,14 +101,14 @@ describe('createStepNavigator', () => {
       expect(navigator.getState().currentStep).toBe(1)
     })
 
-    it('在最后一步时应该返回 null 且不改变状态', () => {
+    it('在最后一步时应该返回 undefined 且不改变状态', () => {
       const trace = createMockTrace(2)
       const navigator = createStepNavigator(trace)
 
       navigator.goTo(1) // 跳转到最后一步
       const step = navigator.next()
 
-      expect(step).toBeNull()
+      expect(step).toBeUndefined()
       expect(navigator.getState().currentStep).toBe(1)
     })
   })
@@ -126,13 +126,13 @@ describe('createStepNavigator', () => {
       expect(navigator.getState().currentStep).toBe(1)
     })
 
-    it('在第一步时应该返回 null 且不改变状态', () => {
+    it('在第一步时应该返回 undefined 且不改变状态', () => {
       const trace = createMockTrace(3)
       const navigator = createStepNavigator(trace)
 
       const step = navigator.prev()
 
-      expect(step).toBeNull()
+      expect(step).toBeUndefined()
       expect(navigator.getState().currentStep).toBe(0)
     })
   })
@@ -149,25 +149,25 @@ describe('createStepNavigator', () => {
       expect(navigator.getState().currentStep).toBe(3)
     })
 
-    it('无效索引（负数）时应该返回 null 且不改变状态', () => {
+    it('无效索引（负数）时应该返回 undefined 且不改变状态', () => {
       const trace = createMockTrace(3)
       const navigator = createStepNavigator(trace)
 
       navigator.goTo(1)
       const step = navigator.goTo(-1)
 
-      expect(step).toBeNull()
+      expect(step).toBeUndefined()
       expect(navigator.getState().currentStep).toBe(1)
     })
 
-    it('无效索引（超出范围）时应该返回 null 且不改变状态', () => {
+    it('无效索引（超出范围）时应该返回 undefined 且不改变状态', () => {
       const trace = createMockTrace(3)
       const navigator = createStepNavigator(trace)
 
       navigator.goTo(1)
       const step = navigator.goTo(10)
 
-      expect(step).toBeNull()
+      expect(step).toBeUndefined()
       expect(navigator.getState().currentStep).toBe(1)
     })
   })

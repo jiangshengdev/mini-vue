@@ -25,7 +25,7 @@ export function traceLongestIncreasingSubsequence(indexes: number[]): TraceResul
     const currentValue = indexes[currentIndex]
 
     /* 确定本次迭代的操作类型 */
-    const action = determineAction(indexes, sequence, currentIndex, currentValue, predecessors)
+    const action = determineAction({ indexes, currentIndex, currentValue }, sequence, predecessors)
 
     /* 记录当前步骤的快照（深拷贝 sequence 和 predecessors） */
     steps.push({
@@ -50,21 +50,31 @@ export function traceLongestIncreasingSubsequence(indexes: number[]): TraceResul
 
 /**
  * 确定当前迭代的操作类型，并更新序列和前驱数组。
+ */
+interface DetermineActionContext {
+  /** 输入数组 */
+  indexes: number[]
+  /** 当前处理的索引 */
+  currentIndex: number
+  /** 当前索引对应的值 */
+  currentValue: number
+}
+
+/**
+ * 确定当前迭代的操作类型，并更新序列和前驱数组。
  *
- * @param indexes - 输入数组
+ * @param context - 当前迭代上下文
  * @param sequence - 当前递增序列（会被修改）
- * @param currentIndex - 当前处理的索引
- * @param currentValue - 当前索引对应的值
  * @param predecessors - 前驱数组（会被修改）
  * @returns 本次迭代的操作类型
  */
 function determineAction(
-  indexes: number[],
+  context: DetermineActionContext,
   sequence: number[],
-  currentIndex: number,
-  currentValue: number,
   predecessors: number[],
 ): StepAction {
+  const { indexes, currentIndex, currentValue } = context
+
   /* 忽略标记为缺失的占位符 */
   if (currentValue === -1) {
     return { type: 'skip', index: currentIndex }

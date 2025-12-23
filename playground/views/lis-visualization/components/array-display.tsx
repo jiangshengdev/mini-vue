@@ -4,8 +4,8 @@
  * 显示输入数组，高亮当前处理的索引，支持点击元素跳转到对应步骤
  */
 
-import type { SetupComponent } from '@/index.ts'
 import styles from '../styles/visualization.module.css'
+import type { SetupComponent } from '@/index.ts'
 
 export interface ArrayDisplayProps {
   /** 输入数组 */
@@ -21,8 +21,10 @@ export interface ArrayDisplayProps {
 }
 
 export const ArrayDisplay: SetupComponent<ArrayDisplayProps> = (props) => {
-  const handleClick = (index: number) => () => {
-    props.onIndexClick(index)
+  const handleClick = (index: number) => {
+    return () => {
+      props.onIndexClick(index)
+    }
   }
 
   return () => {

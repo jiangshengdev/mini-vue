@@ -4,8 +4,8 @@
  * 实现 Prev/Next/Reset/Auto 按钮和速度滑块
  */
 
-import type { SetupComponent } from '@/index.ts'
 import styles from '../styles/visualization.module.css'
+import type { SetupComponent } from '@/index.ts'
 
 export interface StepControlsProps {
   /** 当前步骤索引 */

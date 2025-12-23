@@ -3,7 +3,6 @@
  */
 
 import { describe, expect, it } from 'vitest'
-
 import { createStepNavigator } from '../navigator'
 import type { TraceResult, VisualizationStep } from '../types'
 
@@ -20,12 +19,16 @@ function createMockTrace(stepCount: number): TraceResult {
       currentValue: i,
       action: { type: 'append', index: i },
       sequence: [i],
-      predecessors: Array.from({ length: stepCount }, () => -1),
+      predecessors: Array.from({ length: stepCount }, () => {
+        return -1
+      }),
     })
   }
 
   return {
-    input: Array.from({ length: stepCount }, (_, i) => i),
+    input: Array.from({ length: stepCount }, (_, i) => {
+      return i
+    }),
     steps,
     result: [0],
   }

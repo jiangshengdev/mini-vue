@@ -6,10 +6,8 @@
 
 import { fc, test } from '@fast-check/vitest'
 import { describe, expect } from 'vitest'
-
-import { computeLongestIncreasingSubsequence } from '@/runtime-core/patch/longest-increasing-subsequence'
-
 import { traceLIS } from '../trace'
+import { computeLongestIncreasingSubsequence } from '@/runtime-core/patch/longest-increasing-subsequence'
 
 /**
  * 生成有效的 LIS 输入数组（包含 -1 哨兵值）
@@ -77,7 +75,7 @@ describe('traceLIS 属性测试', () => {
         expect(step.action.index).toBe(step.currentIndex)
       } else if (step.action.type === 'replace') {
         expect(step.action.index).toBe(step.currentIndex)
-        /* replace 操作的 position 应该在有效范围内 */
+        /* Replace 操作的 position 应该在有效范围内 */
         expect(step.action.position).toBeGreaterThanOrEqual(0)
       }
     }

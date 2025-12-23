@@ -13,45 +13,47 @@ import type { NavigatorState, StepNavigator, TraceResult, VisualizationStep } fr
 export function createStepNavigator(trace: TraceResult): StepNavigator {
   let currentStepIndex = 0
 
-  const getState = (): NavigatorState => ({
-    currentStep: currentStepIndex,
-    totalSteps: trace.steps.length,
-    canGoBack: currentStepIndex > 0,
-    canGoForward: currentStepIndex < trace.steps.length - 1,
-  })
-
-  const getCurrentStep = (): VisualizationStep | null => {
-    return trace.steps[currentStepIndex] ?? null
+  const getState = (): NavigatorState => {
+    return {
+      currentStep: currentStepIndex,
+      totalSteps: trace.steps.length,
+      canGoBack: currentStepIndex > 0,
+      canGoForward: currentStepIndex < trace.steps.length - 1,
+    }
   }
 
-  const next = (): VisualizationStep | null => {
+  const getCurrentStep = (): VisualizationStep | undefined => {
+    return trace.steps[currentStepIndex]
+  }
+
+  const next = (): VisualizationStep | undefined => {
     if (currentStepIndex < trace.steps.length - 1) {
       currentStepIndex++
 
       return getCurrentStep()
     }
 
-    return null
+    return undefined
   }
 
-  const prev = (): VisualizationStep | null => {
+  const previous = (): VisualizationStep | undefined => {
     if (currentStepIndex > 0) {
       currentStepIndex--
 
       return getCurrentStep()
     }
 
-    return null
+    return undefined
   }
 
-  const goTo = (stepIndex: number): VisualizationStep | null => {
+  const goTo = (stepIndex: number): VisualizationStep | undefined => {
     if (stepIndex >= 0 && stepIndex < trace.steps.length) {
       currentStepIndex = stepIndex
 
       return getCurrentStep()
     }
 
-    return null
+    return undefined
   }
 
   const reset = (): void => {
@@ -62,7 +64,7 @@ export function createStepNavigator(trace: TraceResult): StepNavigator {
     getState,
     getCurrentStep,
     next,
-    prev,
+    prev: previous,
     goTo,
     reset,
   }

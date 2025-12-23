@@ -4,8 +4,8 @@
  * 显示 Sequence State、Predecessors 数组和 Chain View
  */
 
-import type { SetupComponent } from '@/index.ts'
 import styles from '../styles/visualization.module.css'
+import type { SetupComponent } from '@/index.ts'
 
 export interface SequenceGraphProps {
   /** 输入数组 */
@@ -31,7 +31,9 @@ function buildChain(startIndex: number, predecessors: number[]): number[] {
 
 /** 获取当前时刻的所有链表 */
 function buildAllChains(sequence: number[], predecessors: number[]): number[][] {
-  return sequence.map((index) => buildChain(index, predecessors))
+  return sequence.map((index) => {
+    return buildChain(index, predecessors)
+  })
 }
 
 export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
@@ -44,7 +46,12 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
         <div class={styles.sequenceSection}>
           <h3 class={styles.sectionTitle}>
             Sequence State: [{props.sequence.join(', ')}] → values: [
-            {props.sequence.map((idx) => props.input[idx]).join(', ')}]
+            {props.sequence
+              .map((idx) => {
+                return props.input[idx]
+              })
+              .join(', ')}
+            ]
           </h3>
         </div>
 
@@ -57,35 +64,37 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
         <div class={styles.chainView}>
           <h3 class={styles.sectionTitle}>Chain View（当前时刻）</h3>
           <div class={styles.chainsContainer}>
-            {chains.map((chain, chainIndex) => (
-              <div key={chainIndex} class={styles.chain}>
-                <span class={styles.chainLabel}>
-                  Chain {chainIndex + 1} (length: {chain.length}):
-                </span>
-                <div class={styles.chainNodes}>
-                  {chain.flatMap((nodeIndex, i) => {
-                    const node = (
-                      <div key={`node-${nodeIndex}`} class={styles.chainNode}>
-                        <span class={styles.nodeValue}>{props.input[nodeIndex]}</span>
-                        <span class={styles.nodeInfo}>idx:{nodeIndex}</span>
-                        <span class={styles.nodeInfo}>pred:{props.predecessors[nodeIndex]}</span>
-                      </div>
-                    )
+            {chains.map((chain, chainIndex) => {
+              return (
+                <div key={chainIndex} class={styles.chain}>
+                  <span class={styles.chainLabel}>
+                    Chain {chainIndex + 1} (length: {chain.length}):
+                  </span>
+                  <div class={styles.chainNodes}>
+                    {chain.flatMap((nodeIndex, i) => {
+                      const node = (
+                        <div key={`node-${nodeIndex}`} class={styles.chainNode}>
+                          <span class={styles.nodeValue}>{props.input[nodeIndex]}</span>
+                          <span class={styles.nodeInfo}>idx:{nodeIndex}</span>
+                          <span class={styles.nodeInfo}>pred:{props.predecessors[nodeIndex]}</span>
+                        </div>
+                      )
 
-                    if (i < chain.length - 1) {
-                      return [
-                        node,
-                        <span key={`arrow-${nodeIndex}`} class={styles.chainArrow}>
-                          ←
-                        </span>,
-                      ]
-                    }
+                      if (i < chain.length - 1) {
+                        return [
+                          node,
+                          <span key={`arrow-${nodeIndex}`} class={styles.chainArrow}>
+                            ←
+                          </span>,
+                        ]
+                      }
 
-                    return [node]
-                  })}
+                      return [node]
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
             {chains.length === 0 && <div class={styles.emptyChain}>（空序列）</div>}
           </div>
         </div>

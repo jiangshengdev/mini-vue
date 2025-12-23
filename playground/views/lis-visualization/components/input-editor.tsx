@@ -4,9 +4,9 @@
  * 允许用户编辑输入数组，输入变化时重新计算追踪
  */
 
+import styles from '../styles/visualization.module.css'
 import type { SetupComponent } from '@/index.ts'
 import { state } from '@/index.ts'
-import styles from '../styles/visualization.module.css'
 
 export interface InputEditorProps {
   /** 当前输入数组 */
@@ -30,13 +30,13 @@ function parseInput(
   const numbers: number[] = []
 
   for (const part of parts) {
-    const num = Number(part)
+    const number_ = Number(part)
 
-    if (Number.isNaN(num)) {
+    if (Number.isNaN(number_)) {
       return { success: false, error: `无效的数字: "${part}"` }
     }
 
-    numbers.push(num)
+    numbers.push(number_)
   }
 
   return { success: true, data: numbers }
@@ -44,18 +44,18 @@ function parseInput(
 
 export const InputEditor: SetupComponent<InputEditorProps> = (props) => {
   const inputText = state(props.input.join(', '))
-  const error = state<string | null>(null)
+  const error = state<string | undefined>(undefined)
 
   const handleInput = (event: Event) => {
     const target = event.target as HTMLInputElement
-    const value = target.value
+    const { value } = target
 
     inputText.set(value)
 
     const result = parseInput(value)
 
     if (result.success) {
-      error.set(null)
+      error.set(undefined)
       props.onInputChange(result.data)
     } else {
       error.set(result.error)

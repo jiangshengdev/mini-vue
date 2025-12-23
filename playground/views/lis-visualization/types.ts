@@ -51,13 +51,13 @@ export interface StepNavigator {
   /** 获取当前导航状态 */
   getState(): NavigatorState
   /** 获取当前步骤数据 */
-  getCurrentStep(): VisualizationStep | null
+  getCurrentStep(): VisualizationStep | undefined
   /** 前进到下一步 */
-  next(): VisualizationStep | null
+  next(): VisualizationStep | undefined
   /** 后退到上一步 */
-  prev(): VisualizationStep | null
+  prev(): VisualizationStep | undefined
   /** 跳转到指定步骤 */
-  goTo(stepIndex: number): VisualizationStep | null
+  goTo(stepIndex: number): VisualizationStep | undefined
   /** 重置到初始状态 */
   reset(): void
 }

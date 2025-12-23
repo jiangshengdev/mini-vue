@@ -4,15 +4,15 @@
  * 显示当前操作类型和详情
  */
 
-import type { SetupComponent } from '@/index.ts'
 import type { StepAction } from '../types'
 import styles from '../styles/visualization.module.css'
+import type { SetupComponent } from '@/index.ts'
 
 export interface ActionPanelProps {
   /** 当前操作 */
-  action: StepAction | null
+  action: StepAction | undefined
   /** 当前处理的值 */
-  currentValue: number | null
+  currentValue: number | undefined
 }
 
 /** 根据操作类型生成描述文本 */
@@ -51,7 +51,7 @@ function getActionClass(action: StepAction): string {
 
 export const ActionPanel: SetupComponent<ActionPanelProps> = (props) => {
   return () => {
-    if (!props.action || props.currentValue === null) {
+    if (!props.action || props.currentValue === undefined) {
       return (
         <div class={styles.actionPanel}>
           <h3 class={styles.sectionTitle}>Action</h3>

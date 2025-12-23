@@ -6,7 +6,6 @@
 
 import { fc, test } from '@fast-check/vitest'
 import { describe, expect } from 'vitest'
-
 import { createStepNavigator } from '../navigator'
 import type { TraceResult, VisualizationStep } from '../types'
 
@@ -23,12 +22,16 @@ function createMockTrace(stepCount: number): TraceResult {
       currentValue: i,
       action: { type: 'append', index: i },
       sequence: [i],
-      predecessors: Array.from({ length: stepCount }, () => -1),
+      predecessors: Array.from({ length: stepCount }, () => {
+        return -1
+      }),
     })
   }
 
   return {
-    input: Array.from({ length: stepCount }, (_, i) => i),
+    input: Array.from({ length: stepCount }, (_, i) => {
+      return i
+    }),
     steps,
     result: [0],
   }
@@ -42,8 +45,9 @@ const stepCountArbitrary = fc.integer({ min: 1, max: 50 })
 /**
  * 生成有效的步骤索引（相对于步骤数量）
  */
-const validStepIndexArbitrary = (totalSteps: number) =>
-  fc.integer({ min: 0, max: Math.max(0, totalSteps - 1) })
+const validStepIndexArbitrary = (totalSteps: number) => {
+  return fc.integer({ min: 0, max: Math.max(0, totalSteps - 1) })
+}
 
 describe('StepNavigator 属性测试', () => {
   /**
@@ -109,9 +113,9 @@ describe('StepNavigator 属性测试', () => {
 
   test.prop(
     [
-      stepCountArbitrary.chain((count) =>
-        fc.tuple(fc.constant(count), validStepIndexArbitrary(count)),
-      ),
+      stepCountArbitrary.chain((count) => {
+        return fc.tuple(fc.constant(count), validStepIndexArbitrary(count))
+      }),
     ],
     { numRuns: 100 },
   )('Property 8: 导航操作正确性 - goTo(n) 设置步骤', ([stepCount, targetStep]) => {
@@ -200,9 +204,9 @@ describe('StepNavigator 边界状态属性测试', () => {
 
   test.prop(
     [
-      stepCountArbitrary.chain((count) =>
-        fc.tuple(fc.constant(count), validStepIndexArbitrary(count)),
-      ),
+      stepCountArbitrary.chain((count) => {
+        return fc.tuple(fc.constant(count), validStepIndexArbitrary(count))
+      }),
     ],
     { numRuns: 100 },
   )('Property 9: 边界状态指示 - 任意位置的边界状态一致性', ([stepCount, currentStep]) => {

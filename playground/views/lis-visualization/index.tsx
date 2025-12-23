@@ -4,13 +4,12 @@
  * 组合所有子组件，管理响应式状态
  */
 
-import type { SetupComponent } from '@/index.ts'
-import { onScopeDispose, state } from '@/index.ts'
-
 import { ActionPanel, ArrayDisplay, InputEditor, SequenceGraph, StepControls } from './components'
 import { createStepNavigator } from './navigator'
 import styles from './styles/visualization.module.css'
 import { traceLIS } from './trace'
+import { onScopeDispose, state } from '@/index.ts'
+import type { SetupComponent } from '@/index.ts'
 
 /** 默认输入数组 */
 const DEFAULT_INPUT = [2, 1, 3, 0, 4]
@@ -36,12 +35,12 @@ export const LISVisualization: SetupComponent = () => {
   }
 
   /* 自动播放定时器 */
-  let playTimer: ReturnType<typeof setInterval> | null = null
+  let playTimer: ReturnType<typeof setInterval> | undefined
 
   const stopAutoPlay = () => {
     if (playTimer) {
       clearInterval(playTimer)
-      playTimer = null
+      playTimer = undefined
     }
 
     isPlaying.set(false)
@@ -68,7 +67,7 @@ export const LISVisualization: SetupComponent = () => {
     resetNavigator()
   }
 
-  const handlePrev = () => {
+  const handlePrevious = () => {
     navigator.prev()
     navigatorVersion.set(navigatorVersion.get() + 1)
   }
@@ -114,7 +113,7 @@ export const LISVisualization: SetupComponent = () => {
     // 导航快捷键
     if (key === 'ArrowLeft') {
       event.preventDefault()
-      handlePrev()
+      handlePrevious()
 
       return
     }
@@ -177,12 +176,12 @@ export const LISVisualization: SetupComponent = () => {
   }
 
   /* 注册键盘事件监听 */
-  window.addEventListener('keydown', handleKeyDown)
+  globalThis.addEventListener('keydown', handleKeyDown)
 
   /* 清理函数 */
   onScopeDispose(() => {
     stopAutoPlay()
-    window.removeEventListener('keydown', handleKeyDown)
+    globalThis.removeEventListener('keydown', handleKeyDown)
   })
 
   return () => {
@@ -230,7 +229,7 @@ export const LISVisualization: SetupComponent = () => {
             predecessors={step?.predecessors ?? []}
           />
 
-          <ActionPanel action={step?.action ?? null} currentValue={step?.currentValue ?? null} />
+          <ActionPanel action={step?.action} currentValue={step?.currentValue} />
         </main>
 
         <footer class={styles.footer}>
@@ -241,7 +240,7 @@ export const LISVisualization: SetupComponent = () => {
             canGoForward={navState.canGoForward}
             isPlaying={isPlaying.get()}
             speed={speed.get()}
-            onPrev={handlePrev}
+            onPrev={handlePrevious}
             onNext={handleNext}
             onReset={handleReset}
             onTogglePlay={handleTogglePlay}

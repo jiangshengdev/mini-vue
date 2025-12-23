@@ -8,7 +8,7 @@ describe('runtime-core 组件 props 响应式', () => {
   it('props 为浅只读响应式，依赖追踪随父级更新', () => {
     const host = createHostRenderer()
     const renderer = createRenderer(host.options)
-    const msg = ref('foo')
+    const message = ref('foo')
     let observed: string | undefined
 
     const Child: SetupComponent<{ msg: string }> = (props) => {
@@ -16,17 +16,21 @@ describe('runtime-core 组件 props 响应式', () => {
         observed = props.msg
       })
 
-      return () => <div>{props.msg}</div>
+      return () => {
+        return <div>{props.msg}</div>
+      }
     }
 
     const Parent: SetupComponent = () => {
-      return () => <Child msg={msg.value} />
+      return () => {
+        return <Child msg={message.value} />
+      }
     }
 
     renderer.render(<Parent />, host.container)
 
     expect(observed).toBe('foo')
-    msg.value = 'bar'
+    message.value = 'bar'
 
     expect(observed).toBe('bar')
     expect(host.container.children[0]?.children[0]?.text).toBe('bar')
@@ -36,7 +40,7 @@ describe('runtime-core 组件 props 响应式', () => {
     const host = createHostRenderer()
     const renderer = createRenderer(host.options)
     const nested = { foo: 'bar' }
-    const msg = ref('foo')
+    const message = ref('foo')
     let receivedProps: { msg: string; nested: { foo: string } } | undefined
     let nestedReactive = true
     let nestedEffectRuns = 0
@@ -50,11 +54,15 @@ describe('runtime-core 组件 props 响应式', () => {
         void props.nested.foo
       })
 
-      return () => <div>{props.msg}</div>
+      return () => {
+        return <div>{props.msg}</div>
+      }
     }
 
     const Parent: SetupComponent = () => {
-      return () => <Child msg={msg.value} nested={nested} />
+      return () => {
+        return <Child msg={message.value} nested={nested} />
+      }
     }
 
     renderer.render(<Parent />, host.container)
@@ -68,7 +76,7 @@ describe('runtime-core 组件 props 响应式', () => {
     nested.foo = 'baz'
     expect(nestedEffectRuns).toBe(1)
 
-    msg.value = 'bar'
+    message.value = 'bar'
     expect(receivedProps?.msg).toBe('bar')
   })
 })

@@ -136,9 +136,9 @@ export function buildIndexMaps<
 >(context: KeyedPatchContext<HostNode, HostElement, HostFragment>, range: IndexRange): IndexMaps {
   const keyToNewIndexMap = new Map<PropertyKey, number>()
   const middleSegmentCount = range.newEnd - range.newStart + 1
-  /* 使用 0 作为「没有可复用旧节点」的哨兵值，因此旧索引在写入时会 `+1` 编码。 */
+  /* 使用 -1 作为「没有可复用旧节点」的哨兵值，旧索引可直接存储无需偏移。 */
   const newIndexToOldIndexMap = Array.from({ length: middleSegmentCount }, () => {
-    return 0
+    return -1
   })
 
   /* 先收集新列表中间段的 `key` 映射，便于旧节点通过 `key` 快速命中。 */
@@ -175,7 +175,7 @@ export function findUnkeyedMatch(
 
     if (
       (candidate.key === null || candidate.key === undefined) &&
-      mapped === 0 &&
+      mapped === -1 &&
       isSameVirtualNode(candidate, target)
     ) {
       return index

@@ -125,14 +125,14 @@ function patchAlignedChildren<
       }
 
       /* 新索引已被占用：说明存在重复命中（重复 key 或兜底无 key 复用），当前旧节点应卸载。 */
-      if (mapped !== 0) {
+      if (mapped !== -1) {
         context.driver.unmountOnly(previousChild)
 
         continue
       }
 
-      /* 记录新索引对应的旧索引（`+1` 编码），供后续倒序移动/挂载阶段判断是否需要 `mount`。 */
-      maps.newIndexToOldIndexMap[newIndexOffset] = index + 1
+      /* 记录新索引对应的旧索引，供后续倒序移动/挂载阶段判断是否需要 `mount`。 */
+      maps.newIndexToOldIndexMap[newIndexOffset] = index
       const childEnvironment = createChildEnvironment(
         context.environment,
         newIndex,
@@ -178,7 +178,7 @@ function moveOrMountChildren<
     )
     const mappedValue = maps.newIndexToOldIndexMap[index]
 
-    if (mappedValue === 0) {
+    if (mappedValue === -1) {
       /* 该新节点没有对应旧节点：执行 `mount` 并插入到 `anchorNode` 之前。 */
       const childEnvironment = createChildEnvironment(
         context.environment,
@@ -198,7 +198,7 @@ function moveOrMountChildren<
       }
 
       /* 该新节点可复用旧节点：直接把旧节点的宿主 `nodes` 移动到 `anchorNode` 之前。 */
-      const previousIndex = mappedValue - 1
+      const previousIndex = mappedValue
       const nodes = getHostNodesSafely<HostNode, HostElement, HostFragment>(
         context.previousChildren[previousIndex],
       )

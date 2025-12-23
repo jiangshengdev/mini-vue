@@ -2,7 +2,7 @@
  * 计算数组的最长递增子序列（Longest Increasing Subsequence），返回元素所在的索引列表。
  *
  * @remarks
- * - 仅考虑值非 0 的位置，0 作为缺失哨兵会被跳过。
+ * - 仅考虑值非 -1 的位置，-1 作为缺失哨兵会被跳过。
  * - 时间复杂度 O(n log n)，空间复杂度 O(n)。
  */
 export function computeLongestIncreasingSubsequence(indexes: number[]): number[] {
@@ -35,7 +35,7 @@ function createSequenceState(length: number): LongestIncreasingSubsequenceState 
  * 扫描输入列表，按递增子序列规则构建序列与前驱映射。
  *
  * @remarks
- * - 遇到哨兵 0 直接跳过，保持“未匹配”语义。
+ * - 遇到哨兵 -1 直接跳过，保持“未匹配”语义。
  * - 比当前序列尾部更大的值直接追加，否则通过二分找到替换位。
  */
 function buildIncreasingSequence(
@@ -46,7 +46,7 @@ function buildIncreasingSequence(
     const currentValue = indexes[currentIndex]
 
     /* 忽略标记为缺失的占位符，避免影响序列单调性。 */
-    if (currentValue === 0) {
+    if (currentValue === -1) {
       continue
     }
 

@@ -58,12 +58,12 @@ export interface KeyedPatchContext<
 /**
  * `keyed diff` 的辅助索引结构：
  * - `keyToNewIndexMap` 用于 O(1) 找到 `key` 在新列表的位置。
- * - `newIndexToOldIndexMap` 记录新索引对应的旧索引（`+1` 编码），`0` 代表需要 `mount`。
+ * - `newIndexToOldIndexMap` 记录新索引对应的旧索引，`-1` 代表需要 `mount`。
  */
 export interface IndexMaps {
   /** `key` -> newIndex 的映射，仅收集有效 key。 */
   readonly keyToNewIndexMap: Map<PropertyKey, number>
-  /** `newIndex` 对应的 oldIndex（+1），用于区分「可复用」与「需要新建」。 */
+  /** `newIndex` 对应的 oldIndex，`-1` 为未复用哨兵。 */
   readonly newIndexToOldIndexMap: number[]
   /** 中间段待处理的新节点数量。 */
   readonly middleSegmentCount: number

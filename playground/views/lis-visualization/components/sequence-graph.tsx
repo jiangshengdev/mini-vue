@@ -60,7 +60,9 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
           <div class={styles.chainsContainer}>
             {chains.map((chain, chainIndex) => (
               <div key={chainIndex} class={styles.chain}>
-                <span class={styles.chainLabel}>Chain {chainIndex + 1} (length: {chain.length}):</span>
+                <span class={styles.chainLabel}>
+                  Chain {chainIndex + 1} (length: {chain.length}):
+                </span>
                 <div class={styles.chainNodes}>
                   {chain.map((nodeIndex, i) => (
                     <>

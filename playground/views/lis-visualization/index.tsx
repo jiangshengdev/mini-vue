@@ -7,13 +7,7 @@
 import type { SetupComponent } from '@/index.ts'
 import { onScopeDispose, state } from '@/index.ts'
 
-import {
-  ActionPanel,
-  ArrayDisplay,
-  InputEditor,
-  SequenceGraph,
-  StepControls,
-} from './components'
+import { ActionPanel, ArrayDisplay, InputEditor, SequenceGraph, StepControls } from './components'
 import { createStepNavigator } from './navigator'
 import styles from './styles/visualization.module.css'
 import { traceLIS } from './trace'
@@ -115,40 +109,70 @@ export const LISVisualization: SetupComponent = () => {
 
   /* 键盘快捷键处理 */
   const handleKeyDown = (event: KeyboardEvent) => {
-    switch (event.key) {
-      case 'ArrowLeft': {
-        event.preventDefault()
-        handlePrev()
-        break
-      }
+    const { key } = event
 
-      case 'ArrowRight': {
-        event.preventDefault()
-        handleNext()
-        break
-      }
+    // 导航快捷键
+    if (key === 'ArrowLeft') {
+      event.preventDefault()
+      handlePrev()
 
-      case 'Home': {
-        event.preventDefault()
-        handleReset()
-        break
-      }
+      return
+    }
 
-      case 'End': {
-        event.preventDefault()
-        stopAutoPlay()
-        const navState = navigator.getState()
+    if (key === 'ArrowRight') {
+      event.preventDefault()
+      handleNext()
 
-        navigator.goTo(navState.totalSteps - 1)
-        navigatorVersion.set(navigatorVersion.get() + 1)
-        break
-      }
+      return
+    }
 
-      case ' ': {
-        event.preventDefault()
-        handleTogglePlay()
-        break
-      }
+    if (key === 'Home') {
+      event.preventDefault()
+      handleReset()
+
+      return
+    }
+
+    if (key === 'End') {
+      event.preventDefault()
+      stopAutoPlay()
+
+      const navState = navigator.getState()
+
+      navigator.goTo(navState.totalSteps - 1)
+      navigatorVersion.set(navigatorVersion.get() + 1)
+
+      return
+    }
+
+    // 播放控制
+    if (key === ' ') {
+      event.preventDefault()
+      handleTogglePlay()
+
+      return
+    }
+
+    // 速度控制：+ 或 = 加速
+    if (key === '+' || key === '=') {
+      event.preventDefault()
+
+      const currentSpeed = speed.get()
+      const newSpeed = Math.max(100, currentSpeed - 100)
+
+      handleSpeedChange(newSpeed)
+
+      return
+    }
+
+    // 速度控制：- 或 _ 减速
+    if (key === '-' || key === '_') {
+      event.preventDefault()
+
+      const currentSpeed = speed.get()
+      const newSpeed = Math.min(2000, currentSpeed + 100)
+
+      handleSpeedChange(newSpeed)
     }
   }
 

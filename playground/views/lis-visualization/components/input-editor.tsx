@@ -16,7 +16,9 @@ export interface InputEditorProps {
 }
 
 /** 解析输入字符串为数字数组 */
-function parseInput(value: string): { success: true; data: number[] } | { success: false; error: string } {
+function parseInput(
+  value: string,
+): { success: true; data: number[] } | { success: false; error: string } {
   const trimmed = value.trim()
 
   if (!trimmed) {

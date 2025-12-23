@@ -80,12 +80,7 @@ export const StepControls: SetupComponent<StepControlsProps> = (props) => {
             Next ▶
           </button>
 
-          <button
-            type="button"
-            class={styles.controlButton}
-            onClick={onReset}
-            title="重置 (Home)"
-          >
+          <button type="button" class={styles.controlButton} onClick={onReset} title="重置 (Home)">
             ⟲ Reset
           </button>
 

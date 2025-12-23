@@ -12,6 +12,9 @@ export const App: SetupComponent = () => {
           <RouterLink class="nav-link" to="/counter">
             计数器
           </RouterLink>
+          <RouterLink class="nav-link" to="/lis-visualization">
+            LIS 可视化
+          </RouterLink>
           <div class="nav-group">
             <RouterLink class="nav-link" to="/basic">
               基础示例

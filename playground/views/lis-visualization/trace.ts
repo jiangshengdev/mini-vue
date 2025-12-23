@@ -10,7 +10,7 @@ import type { StepAction, TraceResult, VisualizationStep } from './types'
  * @param indexes - 输入数组（新偏移 -> 旧索引映射）
  * @returns 包含所有步骤和最终结果的追踪数据
  */
-export function traceLIS(indexes: number[]): TraceResult {
+export function traceLongestIncreasingSubsequence(indexes: number[]): TraceResult {
   /* 收集所有可视化步骤 */
   const steps: VisualizationStep[] = []
 

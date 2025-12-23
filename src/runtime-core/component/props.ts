@@ -33,7 +33,7 @@ export interface ComponentPropsState<T extends SetupComponent> {
 export function createComponentPropsState<T extends SetupComponent>(
   resolvedProps: ElementProps<T>,
 ): ComponentPropsState<T> {
-  const propsSource = shallowReactive(resolvedProps) as ElementProps<T>
+  const propsSource = shallowReactive(resolvedProps)
   const props = shallowReadonly(resolvedProps) as ElementProps<T>
 
   return { props, propsSource }

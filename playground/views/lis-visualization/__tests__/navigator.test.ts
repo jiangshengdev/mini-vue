@@ -3,8 +3,8 @@
  */
 
 import { describe, expect, it } from 'vitest'
-import { createStepNavigator } from '../navigator'
-import type { TraceResult, VisualizationStep } from '../types'
+import { createStepNavigator } from '../navigator.ts'
+import type { TraceResult, VisualizationStep } from '../types.ts'
 
 /**
  * 创建测试用的追踪结果

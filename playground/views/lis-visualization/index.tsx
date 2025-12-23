@@ -4,19 +4,25 @@
  * 组合所有子组件，管理响应式状态
  */
 
-import { ActionPanel, ArrayDisplay, InputEditor, SequenceGraph, StepControls } from './components'
-import { createStepNavigator } from './navigator'
+import {
+  ActionPanel,
+  ArrayDisplay,
+  InputEditor,
+  SequenceGraph,
+  StepControls,
+} from './components/index.ts'
+import { createStepNavigator } from './navigator.ts'
 import styles from './styles/visualization.module.css'
-import { traceLIS } from './trace'
+import { traceLongestIncreasingSubsequence } from './trace.ts'
 import { onScopeDispose, state } from '@/index.ts'
 import type { SetupComponent } from '@/index.ts'
 
 /** 默认输入数组 */
-const DEFAULT_INPUT = [2, 1, 3, 0, 4]
+const defaultInput = [2, 1, 3, 0, 4]
 
-export const LISVisualization: SetupComponent = () => {
+export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
   /* 响应式状态 */
-  const input = state(DEFAULT_INPUT)
+  const input = state(defaultInput)
   const isPlaying = state(false)
   const speed = state(500)
 
@@ -24,12 +30,12 @@ export const LISVisualization: SetupComponent = () => {
   const navigatorVersion = state(0)
 
   /* 追踪结果和导航器（非响应式，手动管理） */
-  let trace = traceLIS(input.get())
+  let trace = traceLongestIncreasingSubsequence(input.get())
   let navigator = createStepNavigator(trace)
 
   /* 重新计算追踪和导航器 */
   const resetNavigator = () => {
-    trace = traceLIS(input.get())
+    trace = traceLongestIncreasingSubsequence(input.get())
     navigator = createStepNavigator(trace)
     navigatorVersion.set(navigatorVersion.get() + 1)
   }
@@ -252,4 +258,4 @@ export const LISVisualization: SetupComponent = () => {
   }
 }
 
-export default LISVisualization
+export default LongestIncreasingSubsequenceVisualization

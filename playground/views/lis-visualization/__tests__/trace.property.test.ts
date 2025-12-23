@@ -6,8 +6,8 @@
 
 import { fc, test } from '@fast-check/vitest'
 import { describe, expect } from 'vitest'
-import { traceLIS } from '../trace'
-import { computeLongestIncreasingSubsequence } from '@/runtime-core/patch/longest-increasing-subsequence'
+import { traceLongestIncreasingSubsequence } from '../trace.ts'
+import { computeLongestIncreasingSubsequence } from '@/runtime-core/patch/longest-increasing-subsequence.ts'
 
 /**
  * 生成有效的 LIS 输入数组（包含 -1 哨兵值）
@@ -29,7 +29,7 @@ describe('traceLIS 属性测试', () => {
   test.prop([lisInputArbitrary], { numRuns: 100 })(
     'Property 1: 追踪结果与原始算法一致',
     (input) => {
-      const traceResult = traceLIS(input)
+      const traceResult = traceLongestIncreasingSubsequence(input)
       const originalResult = computeLongestIncreasingSubsequence(input)
 
       expect(traceResult.result).toEqual(originalResult)
@@ -44,7 +44,7 @@ describe('traceLIS 属性测试', () => {
    * 每个输入元素都会产生一个对应的步骤。
    */
   test.prop([lisInputArbitrary], { numRuns: 100 })('Property 2: 步骤数量等于输入长度', (input) => {
-    const traceResult = traceLIS(input)
+    const traceResult = traceLongestIncreasingSubsequence(input)
 
     expect(traceResult.steps.length).toBe(input.length)
   })
@@ -59,7 +59,7 @@ describe('traceLIS 属性测试', () => {
    * - 当值替换序列中的位置时，action.type 应该是 "replace"
    */
   test.prop([lisInputArbitrary], { numRuns: 100 })('Property 3: 操作类型正确性', (input) => {
-    const traceResult = traceLIS(input)
+    const traceResult = traceLongestIncreasingSubsequence(input)
 
     for (const step of traceResult.steps) {
       /* 当值为 -1 时，操作类型必须是 skip */
@@ -91,7 +91,7 @@ describe('traceLIS 属性测试', () => {
   test.prop([fc.array(fc.integer({ min: 0, max: 100 }), { minLength: 2, maxLength: 50 })], {
     numRuns: 100,
   })('Property 5: 深拷贝隔离', (input) => {
-    const traceResult = traceLIS(input)
+    const traceResult = traceLongestIncreasingSubsequence(input)
 
     /* 至少需要两个步骤才能验证隔离性 */
     if (traceResult.steps.length < 2) {

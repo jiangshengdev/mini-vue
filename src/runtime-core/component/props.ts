@@ -25,7 +25,9 @@ export function resolveComponentProps<T extends SetupComponent>(
 /**
  * 为组件创建独立的浅响应式 props 容器，并暴露只读代理给 `setup`。
  */
-export function createComponentPropsState<T extends SetupComponent>(resolvedProps: ElementProps<T>): {
+export function createComponentPropsState<T extends SetupComponent>(
+  resolvedProps: ElementProps<T>,
+): {
   props: ElementProps<T>
   propsSource: ElementProps<T>
 } {

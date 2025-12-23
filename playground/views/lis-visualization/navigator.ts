@@ -11,7 +11,6 @@ import type { NavigatorState, StepNavigator, TraceResult, VisualizationStep } fr
  * @returns 导航器实例
  */
 export function createStepNavigator(trace: TraceResult): StepNavigator {
-  // TODO: 实现导航器逻辑
   let currentStepIndex = 0
 
   const getState = (): NavigatorState => ({

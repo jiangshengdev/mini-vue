@@ -45,14 +45,11 @@ describe('traceLIS 属性测试', () => {
    * 对于任意输入数组，追踪结果的步骤数量应该等于输入数组的长度。
    * 每个输入元素都会产生一个对应的步骤。
    */
-  test.prop([lisInputArbitrary], { numRuns: 100 })(
-    'Property 2: 步骤数量等于输入长度',
-    (input) => {
-      const traceResult = traceLIS(input)
+  test.prop([lisInputArbitrary], { numRuns: 100 })('Property 2: 步骤数量等于输入长度', (input) => {
+    const traceResult = traceLIS(input)
 
-      expect(traceResult.steps.length).toBe(input.length)
-    },
-  )
+    expect(traceResult.steps.length).toBe(input.length)
+  })
 
   /**
    * Feature: lis-visualization, Property 3: 操作类型正确性
@@ -63,31 +60,28 @@ describe('traceLIS 属性测试', () => {
    * - 当值被追加到序列末尾时，action.type 应该是 "append"
    * - 当值替换序列中的位置时，action.type 应该是 "replace"
    */
-  test.prop([lisInputArbitrary], { numRuns: 100 })(
-    'Property 3: 操作类型正确性',
-    (input) => {
-      const traceResult = traceLIS(input)
+  test.prop([lisInputArbitrary], { numRuns: 100 })('Property 3: 操作类型正确性', (input) => {
+    const traceResult = traceLIS(input)
 
-      for (const step of traceResult.steps) {
-        /* 当值为 -1 时，操作类型必须是 skip */
-        if (step.currentValue === -1) {
-          expect(step.action.type).toBe('skip')
-        }
-
-        /* 验证操作类型只能是三种之一 */
-        expect(['append', 'replace', 'skip']).toContain(step.action.type)
-
-        /* 验证 action 中的 index 与 currentIndex 一致 */
-        if (step.action.type === 'append' || step.action.type === 'skip') {
-          expect(step.action.index).toBe(step.currentIndex)
-        } else if (step.action.type === 'replace') {
-          expect(step.action.index).toBe(step.currentIndex)
-          /* replace 操作的 position 应该在有效范围内 */
-          expect(step.action.position).toBeGreaterThanOrEqual(0)
-        }
+    for (const step of traceResult.steps) {
+      /* 当值为 -1 时，操作类型必须是 skip */
+      if (step.currentValue === -1) {
+        expect(step.action.type).toBe('skip')
       }
-    },
-  )
+
+      /* 验证操作类型只能是三种之一 */
+      expect(['append', 'replace', 'skip']).toContain(step.action.type)
+
+      /* 验证 action 中的 index 与 currentIndex 一致 */
+      if (step.action.type === 'append' || step.action.type === 'skip') {
+        expect(step.action.index).toBe(step.currentIndex)
+      } else if (step.action.type === 'replace') {
+        expect(step.action.index).toBe(step.currentIndex)
+        /* replace 操作的 position 应该在有效范围内 */
+        expect(step.action.position).toBeGreaterThanOrEqual(0)
+      }
+    }
+  })
 
   /**
    * Feature: lis-visualization, Property 5: 深拷贝隔离
@@ -96,10 +90,9 @@ describe('traceLIS 属性测试', () => {
    * 对于任意追踪结果，修改一个步骤的 sequence 或 predecessors 数组
    * 不应影响其他步骤的数据。每个步骤的状态快照应该是独立的。
    */
-  test.prop(
-    [fc.array(fc.integer({ min: 0, max: 100 }), { minLength: 2, maxLength: 50 })],
-    { numRuns: 100 },
-  )('Property 5: 深拷贝隔离', (input) => {
+  test.prop([fc.array(fc.integer({ min: 0, max: 100 }), { minLength: 2, maxLength: 50 })], {
+    numRuns: 100,
+  })('Property 5: 深拷贝隔离', (input) => {
     const traceResult = traceLIS(input)
 
     /* 至少需要两个步骤才能验证隔离性 */
@@ -120,4 +113,3 @@ describe('traceLIS 属性测试', () => {
     expect(traceResult.steps[1].predecessors).toEqual(step1PredecessorsOriginal)
   })
 })
-

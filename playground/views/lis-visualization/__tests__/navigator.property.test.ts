@@ -65,6 +65,7 @@ describe('StepNavigator 属性测试', () => {
       /* 从第一步开始，连续调用 next() */
       for (let i = 0; i < stepCount - 1; i++) {
         const beforeStep = navigator.getState().currentStep
+
         navigator.next()
         const afterStep = navigator.getState().currentStep
 
@@ -73,6 +74,7 @@ describe('StepNavigator 属性测试', () => {
 
       /* 在最后一步时，next() 不应改变状态 */
       const lastStep = navigator.getState().currentStep
+
       navigator.next()
       expect(navigator.getState().currentStep).toBe(lastStep)
     },
@@ -90,6 +92,7 @@ describe('StepNavigator 属性测试', () => {
       /* 从最后一步开始，连续调用 prev() */
       for (let i = stepCount - 1; i > 0; i--) {
         const beforeStep = navigator.getState().currentStep
+
         navigator.prev()
         const afterStep = navigator.getState().currentStep
 
@@ -98,13 +101,18 @@ describe('StepNavigator 属性测试', () => {
 
       /* 在第一步时，prev() 不应改变状态 */
       const firstStep = navigator.getState().currentStep
+
       navigator.prev()
       expect(navigator.getState().currentStep).toBe(firstStep)
     },
   )
 
   test.prop(
-    [stepCountArbitrary.chain((count) => fc.tuple(fc.constant(count), validStepIndexArbitrary(count)))],
+    [
+      stepCountArbitrary.chain((count) =>
+        fc.tuple(fc.constant(count), validStepIndexArbitrary(count)),
+      ),
+    ],
     { numRuns: 100 },
   )('Property 8: 导航操作正确性 - goTo(n) 设置步骤', ([stepCount, targetStep]) => {
     const trace = createMockTrace(stepCount)
@@ -131,7 +139,6 @@ describe('StepNavigator 属性测试', () => {
     },
   )
 })
-
 
 describe('StepNavigator 边界状态属性测试', () => {
   /**
@@ -173,25 +180,30 @@ describe('StepNavigator 边界状态属性测试', () => {
     },
   )
 
+  test.prop([fc.integer({ min: 3, max: 50 })], { numRuns: 100 })(
+    'Property 9: 边界状态指示 - 中间步骤时两个方向都可用',
+    (stepCount) => {
+      const trace = createMockTrace(stepCount)
+      const navigator = createStepNavigator(trace)
+
+      /* 跳转到中间位置 */
+      const middleStep = Math.floor(stepCount / 2)
+
+      navigator.goTo(middleStep)
+      const state = navigator.getState()
+
+      /* 中间位置应该两个方向都可以导航 */
+      expect(state.canGoBack).toBe(true)
+      expect(state.canGoForward).toBe(true)
+    },
+  )
+
   test.prop(
-    [fc.integer({ min: 3, max: 50 })],
-    { numRuns: 100 },
-  )('Property 9: 边界状态指示 - 中间步骤时两个方向都可用', (stepCount) => {
-    const trace = createMockTrace(stepCount)
-    const navigator = createStepNavigator(trace)
-
-    /* 跳转到中间位置 */
-    const middleStep = Math.floor(stepCount / 2)
-    navigator.goTo(middleStep)
-    const state = navigator.getState()
-
-    /* 中间位置应该两个方向都可以导航 */
-    expect(state.canGoBack).toBe(true)
-    expect(state.canGoForward).toBe(true)
-  })
-
-  test.prop(
-    [stepCountArbitrary.chain((count) => fc.tuple(fc.constant(count), validStepIndexArbitrary(count)))],
+    [
+      stepCountArbitrary.chain((count) =>
+        fc.tuple(fc.constant(count), validStepIndexArbitrary(count)),
+      ),
+    ],
     { numRuns: 100 },
   )('Property 9: 边界状态指示 - 任意位置的边界状态一致性', ([stepCount, currentStep]) => {
     const trace = createMockTrace(stepCount)

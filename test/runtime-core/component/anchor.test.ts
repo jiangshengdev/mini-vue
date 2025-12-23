@@ -19,6 +19,7 @@ describe('mountComponentSubtreeWithAnchors', () => {
       type: component,
       container,
       props: {},
+      propsSource: {},
       render() {
         return undefined
       },

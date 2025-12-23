@@ -11,9 +11,10 @@ import { track, trigger } from './operations.ts'
 import { withoutTracking } from './tracking.ts'
 import { isArrayIndex, isObject } from '@/shared/index.ts'
 
-const createShallowGetter =
-  (isReadonly: boolean): ProxyHandler<ReactiveTarget>['get'] =>
-  (target, key, receiver) => {
+type ShallowGetter = ProxyHandler<ReactiveTarget>['get']
+
+function createShallowGetter(isReadonly: boolean): ShallowGetter {
+  return (target, key, receiver) => {
     if (key === reactiveFlag) {
       return !isReadonly
     }
@@ -48,6 +49,7 @@ const createShallowGetter =
 
     return rawValue
   }
+}
 
 const shallowSet: ProxyHandler<ReactiveTarget>['set'] = (target, key, value, receiver) => {
   const targetIsArray = Array.isArray(target)

@@ -73,7 +73,12 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
                     )
 
                     if (i < chain.length - 1) {
-                      return [node, <span key={`arrow-${nodeIndex}`} class={styles.chainArrow}>←</span>]
+                      return [
+                        node,
+                        <span key={`arrow-${nodeIndex}`} class={styles.chainArrow}>
+                          ←
+                        </span>,
+                      ]
                     }
 
                     return [node]

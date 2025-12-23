@@ -6,13 +6,13 @@
 
 ## Tasks
 
-- [ ] 1. 项目结构和类型定义
-  - [ ] 1.1 创建 `playground/views/lis-visualization/` 目录结构
+- [x] 1. 项目结构和类型定义
+  - [x] 1.1 创建 `playground/views/lis-visualization/` 目录结构
     - 创建 types.ts、trace.ts、navigator.ts 文件
     - 创建 components/ 和 styles/ 子目录
     - _Requirements: 7.2_
 
-  - [ ] 1.2 定义核心类型
+  - [x] 1.2 定义核心类型
     - 定义 StepAction、VisualizationStep、TraceResult 类型
     - 定义 NavigatorState、StepNavigator 接口
     - _Requirements: 1.1, 1.2, 1.3, 1.4_

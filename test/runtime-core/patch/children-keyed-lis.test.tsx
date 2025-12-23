@@ -190,4 +190,32 @@ describe('patchChildren keyed diff - LIS 优化', () => {
     expect(host.counters.remove).toBe(0)
     expect(host.counters.insertBefore + host.counters.appendChild).toBe(2)
   })
+
+  it('LIS 位置不连续时只移动非 LIS 节点', () => {
+    const host = createHostRenderer()
+    const previousChildren = createKeyedDivs(['A', 'B', 'C', 'D', 'E'])
+    const previousRuntime = mountAll(host, previousChildren)
+
+    host.resetCounts()
+
+    /* 映射为 [4,0,3,1,2]，LIS 偏移为 [1,3,4]，跳过了偏移 2（D）。 */
+    const nextChildren = createKeyedDivs(['E', 'A', 'D', 'B', 'C'])
+
+    patchChildren(host.options, previousChildren, nextChildren, {
+      container: host.container,
+      patchChild,
+    })
+
+    const nextRuntime = nextChildren.map((child) => {
+      return asRuntimeVirtualNode(child)
+    })
+
+    expect(getOrder(host)).toEqual(['E', 'A', 'D', 'B', 'C'])
+    /* E、D 需要移动，其余节点保持相对顺序。 */
+    expect(nextRuntime[0].el).toBe(previousRuntime[4].el)
+    expect(nextRuntime[2].el).toBe(previousRuntime[3].el)
+    expect(host.counters.remove).toBe(0)
+    expect(host.counters.insertBefore).toBe(2)
+    expect(host.counters.appendChild).toBe(0)
+  })
 })

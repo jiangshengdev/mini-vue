@@ -25,12 +25,14 @@ export function resolveComponentProps<T extends SetupComponent>(
 /**
  * 为组件创建独立的浅响应式 props 容器，并暴露只读代理给 `setup`。
  */
-export function createComponentPropsState<T extends SetupComponent>(
-  resolvedProps: ElementProps<T>,
-): {
+export interface ComponentPropsState<T extends SetupComponent> {
   props: ElementProps<T>
   propsSource: ElementProps<T>
-} {
+}
+
+export function createComponentPropsState<T extends SetupComponent>(
+  resolvedProps: ElementProps<T>,
+): ComponentPropsState<T> {
   const propsSource = shallowReactive(resolvedProps) as ElementProps<T>
   const props = shallowReadonly(resolvedProps) as ElementProps<T>
 

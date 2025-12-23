@@ -1,7 +1,8 @@
 import { getCurrentAppContext } from '../app-context.ts'
 import type { MountContext } from '../environment.ts'
 import type { ComponentInstance } from './context.ts'
-import type { ElementProps, SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
+import type { ComponentPropsState } from './props.ts'
+import type { SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
 import { effectScope } from '@/reactivity/index.ts'
 import type { PlainObject } from '@/shared/index.ts'
 
@@ -15,8 +16,7 @@ export function createComponentInstance<
   T extends SetupComponent,
 >(
   component: T,
-  props: ElementProps<T>,
-  propsSource: ElementProps<T>,
+  propsState: ComponentPropsState<T>,
   container: HostElement | HostFragment,
   context?: MountContext,
 ): ComponentInstance<HostNode, HostElement, HostFragment, T> {
@@ -28,6 +28,7 @@ export function createComponentInstance<
   const parent = context?.parent
   const shouldUseAnchor = context?.shouldUseAnchor ?? false
   const appContext = parent?.appContext ?? context?.appContext ?? getCurrentAppContext()
+  const { props, propsSource } = propsState
 
   /*
    * `provides` 采用原型链：

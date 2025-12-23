@@ -4,7 +4,7 @@ import type { MountedHandle } from '../mount/handle.ts'
 import { asRuntimeVirtualNode } from '../virtual-node.ts'
 import type { ComponentInstance } from './context.ts'
 import { attachInstanceToVirtualNode, createComponentInstance } from './instance.ts'
-import { resolveComponentProps } from './props.ts'
+import { createComponentPropsState, resolveComponentProps } from './props.ts'
 import { performInitialRender } from './render-effect.ts'
 import { setupComponent } from './setup.ts'
 import { teardownComponentInstance } from './teardown.ts'
@@ -26,8 +26,9 @@ export function mountComponent<
   const shouldUseAnchor = context?.shouldUseAnchor ?? false
   /* 准备实例前先规整 `props`，以免 `setup` 阶段读到旧引用。 */
   const props = resolveComponentProps(virtualNode)
+  const { props: readonlyProps, propsSource } = createComponentPropsState(props)
   const component = virtualNode.type
-  const instance = createComponentInstance(component, props, container, {
+  const instance = createComponentInstance(component, readonlyProps, propsSource, container, {
     ...context,
     shouldUseAnchor,
   })

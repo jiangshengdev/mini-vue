@@ -13,6 +13,7 @@ export {
 export type { EffectScope } from './effect-scope.ts'
 export { effect, effectStack, ReactiveEffect } from './effect.ts'
 export { isReactive, reactive } from './reactive.ts'
+export { shallowReadonly, shallowReactive } from './shallow.ts'
 export { computed, isRef, ref, state, toRef, unref } from './ref/index.ts'
 export type {
   ComputedGetter,

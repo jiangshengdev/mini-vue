@@ -16,6 +16,7 @@ export function createComponentInstance<
 >(
   component: T,
   props: ElementProps<T>,
+  propsSource: ElementProps<T>,
   container: HostElement | HostFragment,
   context?: MountContext,
 ): ComponentInstance<HostNode, HostElement, HostFragment, T> {
@@ -45,6 +46,7 @@ export function createComponentInstance<
     type: component,
     container,
     props,
+    propsSource,
     /**
      * `setup` 阶段会把它替换为真实 `render` 闭包；这里提供占位实现以保持类型稳定。
      */

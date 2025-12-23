@@ -243,7 +243,7 @@ function patchComponent<
   /* 组件 `props` 需要走规范化流程（包含默认值/`attrs` 等策略），避免直接透传 raw `props`。 */
   const nextProps = resolveComponentProps(next)
 
-  syncComponentProps(instance.props, nextProps)
+  syncComponentProps(instance.propsSource, nextProps)
   /* `effect.run` 依赖实例化时的 `this` 语义，这里显式 `bind` 保持一致。 */
   const runner = instance.effect?.run.bind(instance.effect)
 

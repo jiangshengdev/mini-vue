@@ -39,6 +39,8 @@ export interface ComponentInstance<
   readonly container: HostElement | HostFragment
   /** 组件接收到的 `props` 副本。 */
   props: ElementProps<T>
+  /** 允许内部同步的浅响应式 `props` 源对象。 */
+  propsSource: ElementProps<T>
   /** `setup` 返回的渲染闭包，每次 `effect` 执行都会调用。 */
   render: RenderFunction
   /** 组件独立的响应式副作用，驱动更新调度。 */

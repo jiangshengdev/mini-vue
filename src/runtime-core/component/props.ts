@@ -1,4 +1,5 @@
 import type { ElementProps, SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
+import { shallowReadonly, shallowReactive } from '@/reactivity/index.ts'
 
 /**
  * 规整组件 `props`，并根据 `children` 数量注入合适的 `children` 形态。
@@ -19,4 +20,17 @@ export function resolveComponentProps<T extends SetupComponent>(
   }
 
   return props
+}
+
+/**
+ * 为组件创建独立的浅响应式 props 容器，并暴露只读代理给 `setup`。
+ */
+export function createComponentPropsState<T extends SetupComponent>(resolvedProps: ElementProps<T>): {
+  props: ElementProps<T>
+  propsSource: ElementProps<T>
+} {
+  const propsSource = shallowReactive(resolvedProps) as ElementProps<T>
+  const props = shallowReadonly(resolvedProps) as ElementProps<T>
+
+  return { props, propsSource }
 }

@@ -17,8 +17,8 @@
     - 定义 NavigatorState、StepNavigator 接口
     - _Requirements: 1.1, 1.2, 1.3, 1.4_
 
-- [ ] 2. 实现追踪函数
-  - [ ] 2.1 实现 traceLIS 函数
+- [-] 2. 实现追踪函数
+  - [x] 2.1 实现 traceLIS 函数
     - 复用 LIS 算法逻辑，在每次迭代时记录步骤
     - 捕获 sequence 和 predecessors 的深拷贝
     - 记录操作类型（append/replace/skip）

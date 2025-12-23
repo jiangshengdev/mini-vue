@@ -57,28 +57,28 @@
 - [x] 4. Checkpoint - 核心逻辑验证
   - 确保所有测试通过，ask the user if questions arise.
 
-- [-] 5. 实现 UI 组件
-  - [-] 5.1 实现 ArrayDisplay 组件
+- [x] 5. 实现 UI 组件
+  - [x] 5.1 实现 ArrayDisplay 组件
     - 显示输入数组，高亮当前处理的索引
     - 支持点击元素跳转到对应步骤
     - _Requirements: 5.1, 5.2_
 
-  - [ ] 5.2 实现 SequenceGraph 组件
+  - [x] 5.2 实现 SequenceGraph 组件
     - 显示 Sequence State 和 Predecessors 数组
     - 显示当前时刻的所有链表（Chain View）
     - 从 sequence 中的每个索引回溯 predecessors 构建链
     - _Requirements: 5.3_
 
-  - [ ] 5.3 实现 ActionPanel 组件
+  - [x] 5.3 实现 ActionPanel 组件
     - 显示当前操作类型和详情
     - _Requirements: 5.4_
 
-  - [ ] 5.4 实现 StepControls 组件
+  - [x] 5.4 实现 StepControls 组件
     - 实现 Prev/Next/Reset/Auto 按钮
     - 实现速度滑块
     - _Requirements: 4.1, 4.2, 4.3, 4.4_
 
-  - [ ] 5.5 实现 InputEditor 组件
+  - [x] 5.5 实现 InputEditor 组件
     - 允许用户编辑输入数组
     - 输入变化时重新计算追踪
     - _Requirements: 6.1, 6.2, 6.3_

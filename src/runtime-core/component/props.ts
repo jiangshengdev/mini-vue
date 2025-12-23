@@ -1,5 +1,5 @@
 import type { ElementProps, SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
-import { shallowReadonly, shallowReactive } from '@/reactivity/index.ts'
+import { shallowReactive, shallowReadonly } from '@/reactivity/index.ts'
 
 /**
  * 规整组件 `props`，并根据 `children` 数量注入合适的 `children` 形态。

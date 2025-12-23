@@ -63,16 +63,21 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
                   Chain {chainIndex + 1} (length: {chain.length}):
                 </span>
                 <div class={styles.chainNodes}>
-                  {chain.map((nodeIndex, i) => (
-                    <>
-                      <div key={nodeIndex} class={styles.chainNode}>
+                  {chain.flatMap((nodeIndex, i) => {
+                    const node = (
+                      <div key={`node-${nodeIndex}`} class={styles.chainNode}>
                         <span class={styles.nodeValue}>{props.input[nodeIndex]}</span>
                         <span class={styles.nodeInfo}>idx:{nodeIndex}</span>
                         <span class={styles.nodeInfo}>pred:{props.predecessors[nodeIndex]}</span>
                       </div>
-                      {i < chain.length - 1 && <span class={styles.chainArrow}>←</span>}
-                    </>
-                  ))}
+                    )
+
+                    if (i < chain.length - 1) {
+                      return [node, <span key={`arrow-${nodeIndex}`} class={styles.chainArrow}>←</span>]
+                    }
+
+                    return [node]
+                  })}
                 </div>
               </div>
             ))}

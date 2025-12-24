@@ -26,6 +26,7 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
   const isPlaying = state(false)
   const speed = state(500)
   const hoveredChainIndexes = state<number[]>([])
+  const hoveredChainInfo = state<{ chainIndex: number } | undefined>(undefined)
   const isSequenceHovered = state(false)
   const isPredecessorsHovered = state(false)
   /* 导航器版本号（用于触发响应式更新） */
@@ -35,11 +36,48 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
   let trace = traceLongestIncreasingSubsequence(input.get())
   let navigator = createStepNavigator(trace)
 
-  /* 步骤切换时的统一更新（清空 hover 状态 + 触发响应式更新） */
+  /* 根据当前步骤数据刷新 hover 状态（避免切换步骤时丢失 hover） */
+  const refreshHoverState = () => {
+    const currentStep = navigator.getCurrentStep()
+    const chainInfo = hoveredChainInfo.get()
+
+    /* 如果当前没有链 hover，保持现状 */
+    if (!chainInfo) {
+      return
+    }
+
+    if (!currentStep) {
+      hoveredChainIndexes.set([])
+      hoveredChainInfo.set(undefined)
+
+      return
+    }
+
+    /* 重新构建当前步骤下对应链的索引列表 */
+    const { sequence, predecessors } = currentStep
+    const { chainIndex } = chainInfo
+
+    if (chainIndex < 0 || chainIndex >= sequence.length) {
+      hoveredChainIndexes.set([])
+      hoveredChainInfo.set(undefined)
+
+      return
+    }
+
+    const chain: number[] = []
+    let current = sequence[chainIndex]
+
+    while (current >= 0) {
+      chain.unshift(current)
+      current = predecessors[current]
+    }
+
+    hoveredChainIndexes.set(chain)
+  }
+
+  /* 步骤切换时的统一更新（刷新 hover 状态 + 触发响应式更新） */
   const updateStep = () => {
-    hoveredChainIndexes.set([])
-    isSequenceHovered.set(false)
-    isPredecessorsHovered.set(false)
+    refreshHoverState()
     navigatorVersion.set(navigatorVersion.get() + 1)
   }
 
@@ -124,11 +162,13 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
   }
 
   /* 链 hover 事件处理 */
-  const handleChainHover = (indexes: number[]) => {
+  const handleChainHover = (indexes: number[], chainIndex: number) => {
+    hoveredChainInfo.set({ chainIndex })
     hoveredChainIndexes.set(indexes)
   }
 
   const handleChainLeave = () => {
+    hoveredChainInfo.set(undefined)
     hoveredChainIndexes.set([])
   }
 

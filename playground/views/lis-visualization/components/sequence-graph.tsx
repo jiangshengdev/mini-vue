@@ -25,7 +25,7 @@ export interface SequenceGraphProps {
   /** Hover 高亮的索引列表 */
   hoveredIndexes?: number[]
   /** 链 hover 回调 */
-  onChainHover?: (indexes: number[]) => void
+  onChainHover?: (indexes: number[], chainIndex: number) => void
   /** 链 leave 回调 */
   onChainLeave?: () => void
   /** Sequence State 模块是否被 hover */
@@ -193,9 +193,9 @@ function renderHighlightedArray(options: RenderHighlightedArrayOptions) {
 }
 
 export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
-  const handleChainMouseEnter = (chain: number[]) => {
+  const handleChainMouseEnter = (chain: number[], chainIndex: number) => {
     return () => {
-      props.onChainHover?.(chain)
+      props.onChainHover?.(chain, chainIndex)
     }
   }
 
@@ -403,7 +403,7 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
                 <div
                   key={chainIndex}
                   class={chainClass}
-                  onMouseEnter={handleChainMouseEnter(chain)}
+                  onMouseEnter={handleChainMouseEnter(chain, chainIndex)}
                   onMouseLeave={handleChainMouseLeave}
                 >
                   <span class={styles.chainLabel}>

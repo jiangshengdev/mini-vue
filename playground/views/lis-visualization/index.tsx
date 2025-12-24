@@ -114,6 +114,13 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
 
   /* 键盘快捷键处理 */
   const handleKeyDown = (event: KeyboardEvent) => {
+    // 如果焦点在输入框内，不触发快捷键
+    const target = event.target as HTMLElement
+
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+      return
+    }
+
     const { key } = event
 
     // 导航快捷键

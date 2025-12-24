@@ -48,14 +48,14 @@ export const StepControls: SetupComponent<StepControlsProps> = (props) => {
             class={styles.controlButton}
             onClick={props.onPrev}
             disabled={!props.canGoBack}
-            title="上一步 (←)"
+            title="上一步（←）"
           >
             <span class={styles.iconArrowLeft} />
-            Prev
+            上一步
           </button>
 
           <span class={styles.stepIndicator}>
-            Step {props.currentStep + 1} / {props.totalSteps}
+            第 {props.currentStep + 1} 步 / 共 {props.totalSteps} 步
           </span>
 
           <button
@@ -63,9 +63,9 @@ export const StepControls: SetupComponent<StepControlsProps> = (props) => {
             class={styles.controlButton}
             onClick={props.onNext}
             disabled={!props.canGoForward}
-            title="下一步 (→)"
+            title="下一步（→）"
           >
-            Next
+            下一步
             <span class={styles.iconArrowRight} />
           </button>
 
@@ -73,27 +73,27 @@ export const StepControls: SetupComponent<StepControlsProps> = (props) => {
             type="button"
             class={styles.controlButton}
             onClick={props.onReset}
-            title="重置 (Home)"
+            title="重置（Home）"
           >
             <span class={styles.iconReplay} />
-            Reset
+            重置
           </button>
 
           <button
             type="button"
             class={`${styles.controlButton} ${props.isPlaying ? styles.playing : ''}`}
             onClick={props.onTogglePlay}
-            title="自动播放/暂停 (Space)"
+            title="自动播放/暂停（Space）"
           >
             {props.isPlaying ? (
               <>
                 <span class={styles.iconPause} />
-                Pause
+                暂停
               </>
             ) : (
               <>
                 <span class={styles.iconPlay} />
-                Auto
+                自动
               </>
             )}
           </button>
@@ -101,7 +101,7 @@ export const StepControls: SetupComponent<StepControlsProps> = (props) => {
 
         <div class={styles.speedControl}>
           <label class={styles.speedLabel}>
-            速度: {props.speed}ms
+            速度：{props.speed}ms
             <input
               type="range"
               class={styles.speedSlider}

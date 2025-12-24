@@ -19,15 +19,15 @@ export interface ActionPanelProps {
 function getActionDescription(action: StepAction, currentValue: number): string {
   switch (action.type) {
     case 'append': {
-      return `APPEND index ${action.index} (value ${currentValue}) to sequence`
+      return `追加索引 ${action.index}（值 ${currentValue}）到 sequence`
     }
 
     case 'replace': {
-      return `REPLACE sequence[${action.position}] with index ${action.index} (value ${currentValue})`
+      return `替换 sequence[${action.position}] 为索引 ${action.index}（值 ${currentValue}）`
     }
 
     case 'skip': {
-      return `SKIP index ${action.index} (value is -1)`
+      return `跳过索引 ${action.index}（值为 -1）`
     }
   }
 }
@@ -54,7 +54,7 @@ export const ActionPanel: SetupComponent<ActionPanelProps> = (props) => {
     if (!props.action || props.currentValue === undefined) {
       return (
         <div class={styles.actionPanel}>
-          <h3 class={styles.sectionTitle}>Action</h3>
+          <h3 class={styles.sectionTitle}>操作</h3>
           <div class={styles.actionContent}>（等待开始）</div>
         </div>
       )
@@ -63,11 +63,17 @@ export const ActionPanel: SetupComponent<ActionPanelProps> = (props) => {
     const description = getActionDescription(props.action, props.currentValue)
     const actionClass = getActionClass(props.action)
 
+    const actionTypeMap: Record<string, string> = {
+      append: '追加',
+      replace: '替换',
+      skip: '跳过',
+    }
+
     return (
       <div class={styles.actionPanel}>
-        <h3 class={styles.sectionTitle}>Action</h3>
+        <h3 class={styles.sectionTitle}>操作</h3>
         <div class={`${styles.actionContent} ${actionClass}`}>
-          <span class={styles.actionType}>{props.action.type.toUpperCase()}</span>
+          <span class={styles.actionType}>{actionTypeMap[props.action.type]}</span>
           <span class={styles.actionDescription}>{description}</span>
         </div>
       </div>

@@ -1,5 +1,46 @@
 /* LIS 算法可视化样式 */
 
+/* 颜色变量 */
+:root {
+  /* 主色调 */
+  --color-primary: #3b82f6;
+  --color-primary-light: #eff6ff;
+  --color-primary-shadow: rgba(59, 130, 246, 0.2);
+
+  /* 成功色（追加操作、结果高亮） */
+  --color-success: #22c55e;
+  --color-success-light: #f0fdf4;
+  --color-success-medium: #dcfce7;
+  --color-success-shadow: rgba(34, 197, 94, 0.2);
+
+  /* 警告色（替换操作） */
+  --color-warning: #f59e0b;
+  --color-warning-light: #fffbeb;
+
+  /* 错误色 */
+  --color-error: #ef4444;
+  --color-error-light: #fef2f2;
+  --color-error-border: #fecaca;
+  --color-error-text: #dc2626;
+
+  /* 中性色 */
+  --color-text-primary: #1e293b;
+  --color-text-secondary: #475569;
+  --color-text-muted: #64748b;
+  --color-text-hint: #94a3b8;
+
+  /* 边框和背景 */
+  --color-border: #e2e8f0;
+  --color-border-light: #cbd5e1;
+  --color-border-medium: #94a3b8;
+  --color-bg-page: #fff;
+  --color-bg-section: #f8fafc;
+  --color-bg-hover: #f1f5f9;
+
+  /* 字体 */
+  --font-mono: 'JetBrains Mono', Menlo, Monaco, 'Courier New', monospace;
+}
+
 /* 主页面布局 */
 .container {
   max-width: 900px;
@@ -22,7 +63,7 @@
   margin: 0 0 0.5rem;
   font-size: 1.25rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--color-text-primary);
 }
 
 .main {
@@ -35,7 +76,7 @@
 .footer {
   margin-top: 0.75rem;
   padding-top: 0.5rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--color-border);
 }
 
 .emptyState {
@@ -43,10 +84,10 @@
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  background: #f8fafc;
+  background: var(--color-bg-section);
   border-radius: 0.5rem;
-  border: 2px dashed #e2e8f0;
-  color: #64748b;
+  border: 2px dashed var(--color-border);
+  color: var(--color-text-muted);
   font-size: 0.875rem;
 }
 
@@ -54,7 +95,7 @@
   margin: 0 0 0.25rem;
   font-size: 0.8125rem;
   font-weight: 600;
-  color: #666;
+  color: var(--color-text-muted);
 }
 
 /* 数组显示组件 */
@@ -75,15 +116,15 @@
   justify-content: center;
   width: 2.75rem;
   height: 3rem;
-  border: 2px solid #ddd;
+  border: 2px solid var(--color-border);
   border-radius: 0.375rem;
-  background: #fff;
+  background: var(--color-bg-page);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .arrayCell:hover:not(.currentCell):not(.resultCell) {
-  border-color: #999;
+  border-color: var(--color-border-medium);
   transform: translateY(-2px);
 }
 
@@ -92,32 +133,32 @@
 }
 
 .currentCell {
-  border-color: #3b82f6;
-  background: #eff6ff;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+  box-shadow: 0 0 0 3px var(--color-primary-shadow);
 }
 
 .resultCell {
-  border-color: #22c55e;
-  background: #f0fdf4;
+  border-color: var(--color-success);
+  background: var(--color-success-light);
 }
 
 /* 当前高亮且是结果的单元格 */
 .currentCell.resultCell {
-  border-color: #22c55e;
-  background: #dcfce7;
+  border-color: var(--color-success);
+  background: var(--color-success-medium);
   animation: pulseGreen 1.5s ease-in-out infinite;
 }
 
 .cellValue {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .cellIndex {
   font-size: 0.75rem;
-  color: #999;
+  color: var(--color-text-hint);
 }
 
 /* 序列状态图组件 */
@@ -127,20 +168,33 @@
 
 .sequenceSection,
 .predecessorsSection {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
   margin-bottom: 0.5rem;
   padding: 0.375rem 0.625rem;
-  background: #f8fafc;
+  background: var(--color-bg-section);
   border-radius: 0.375rem;
-  font-family: 'SF Mono', Monaco, monospace;
   font-size: 0.8125rem;
+}
+
+.stateLabel {
+  font-weight: 600;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.stateCode {
+  font-family: var(--font-mono);
+  color: var(--color-text-primary);
 }
 
 .chainView {
   margin-top: 0.5rem;
   padding: 0.75rem;
-  background: #f8fafc;
+  background: var(--color-bg-section);
   border-radius: 0.5rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
 }
 
 .chainsContainer {
@@ -159,7 +213,7 @@
 .chainLabel {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #64748b;
+  color: var(--color-text-muted);
 }
 
 .chainNodes {
@@ -175,30 +229,30 @@
   align-items: center;
   padding: 0.375rem;
   min-width: 2.5rem;
-  border: 2px solid #94a3b8;
+  border: 2px solid var(--color-border-medium);
   border-radius: 0.375rem;
-  background: #fff;
+  background: var(--color-bg-page);
 }
 
 .nodeValue {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--color-text-primary);
 }
 
 .nodeInfo {
   font-size: 0.5625rem;
-  color: #94a3b8;
-  font-family: 'SF Mono', Monaco, monospace;
+  color: var(--color-text-hint);
+  font-family: var(--font-mono);
 }
 
 .chainArrow {
   font-size: 1rem;
-  color: #94a3b8;
+  color: var(--color-text-hint);
 }
 
 .emptyChain {
-  color: #94a3b8;
+  color: var(--color-text-hint);
   font-style: italic;
 }
 
@@ -213,8 +267,8 @@
   gap: 0.5rem;
   padding: 0.5rem 0.75rem;
   border-radius: 0.375rem;
-  border: 2px solid #e2e8f0;
-  background: #fff;
+  border: 2px solid var(--color-border);
+  background: var(--color-bg-page);
 }
 
 .actionType {
@@ -228,37 +282,37 @@
 
 .actionDescription {
   font-size: 0.875rem;
-  color: #475569;
+  color: var(--color-text-secondary);
 }
 
 .actionAppend {
-  border-color: #22c55e;
-  background: #f0fdf4;
+  border-color: var(--color-success);
+  background: var(--color-success-light);
 }
 
 .actionAppend .actionType {
-  background: #22c55e;
-  color: #fff;
+  background: var(--color-success);
+  color: var(--color-bg-page);
 }
 
 .actionReplace {
-  border-color: #f59e0b;
-  background: #fffbeb;
+  border-color: var(--color-warning);
+  background: var(--color-warning-light);
 }
 
 .actionReplace .actionType {
-  background: #f59e0b;
-  color: #fff;
+  background: var(--color-warning);
+  color: var(--color-bg-page);
 }
 
 .actionSkip {
-  border-color: #94a3b8;
-  background: #f8fafc;
+  border-color: var(--color-border-medium);
+  background: var(--color-bg-section);
 }
 
 .actionSkip .actionType {
-  background: #94a3b8;
-  color: #fff;
+  background: var(--color-border-medium);
+  color: var(--color-bg-page);
 }
 
 /* 步骤控制组件 */
@@ -267,9 +321,9 @@
   flex-direction: column;
   gap: 0.5rem;
   padding: 0.625rem;
-  background: #f8fafc;
+  background: var(--color-bg-section);
   border-radius: 0.375rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
 }
 
 .controlsRow {
@@ -285,12 +339,12 @@
   align-items: center;
   gap: 0.125rem;
   padding: 0.375rem 0.75rem;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--color-border-light);
   border-radius: 0.375rem;
-  background: #fff;
+  background: var(--color-bg-page);
   font-size: 0.8125rem;
   font-weight: 500;
-  color: #475569;
+  color: var(--color-text-secondary);
   cursor: pointer;
   transition: all 0.15s ease;
   height: 2rem;
@@ -353,8 +407,8 @@
 }
 
 .controlButton:hover:not(:disabled) {
-  background: #f1f5f9;
-  border-color: #94a3b8;
+  background: var(--color-bg-hover);
+  border-color: var(--color-border-medium);
 }
 
 .controlButton:disabled {
@@ -363,14 +417,14 @@
 }
 
 .controlButton:disabled:hover {
-  background: #fff;
-  border-color: #cbd5e1;
+  background: var(--color-bg-page);
+  border-color: var(--color-border-light);
 }
 
 .controlButton.playing {
-  background: #3b82f6;
-  border-color: #3b82f6;
-  color: #fff;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-bg-page);
 }
 
 .stepIndicator {
@@ -379,10 +433,10 @@
   padding: 0.375rem 0.75rem;
   font-size: 0.8125rem;
   font-weight: 600;
-  color: #1e293b;
-  background: #fff;
+  color: var(--color-text-primary);
+  background: var(--color-bg-page);
   border-radius: 0.375rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   height: 2rem;
   box-sizing: border-box;
 }
@@ -397,7 +451,7 @@
   align-items: center;
   gap: 0.75rem;
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--color-text-muted);
 }
 
 .speedSlider {
@@ -416,26 +470,26 @@
   gap: 0.375rem;
   font-size: 0.8125rem;
   font-weight: 500;
-  color: #475569;
+  color: var(--color-text-secondary);
 }
 
 .inputField {
   padding: 0.5rem 0.75rem;
-  border: 2px solid #e2e8f0;
+  border: 2px solid var(--color-border);
   border-radius: 0.375rem;
   font-size: 0.8125rem;
-  font-family: 'SF Mono', Monaco, monospace;
+  font-family: var(--font-mono);
   transition: border-color 0.15s ease;
 }
 
 .inputField:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .inputField.inputError {
-  border-color: #ef4444;
+  border-color: var(--color-error);
 }
 
 .inputField.inputError:focus {
@@ -445,11 +499,11 @@
 .errorMessage {
   margin-top: 0.375rem;
   padding: 0.375rem 0.625rem;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: var(--color-error-light);
+  border: 1px solid var(--color-error-border);
   border-radius: 0.375rem;
   font-size: 0.75rem;
-  color: #dc2626;
+  color: var(--color-error-text);
 }
 
 /* 动画过渡效果 */
@@ -467,7 +521,7 @@
 @keyframes pulse {
   0%,
   100% {
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    box-shadow: 0 0 0 3px var(--color-primary-shadow);
   }
   50% {
     box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.1);
@@ -477,7 +531,7 @@
 @keyframes pulseGreen {
   0%,
   100% {
-    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+    box-shadow: 0 0 0 3px var(--color-success-shadow);
   }
   50% {
     box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.1);

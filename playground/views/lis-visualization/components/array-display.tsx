@@ -49,7 +49,7 @@ export const ArrayDisplay: SetupComponent<ArrayDisplayProps> = (props) => {
                 key={index}
                 class={cellClasses}
                 onClick={handleClick(index)}
-                title={`点击跳转到步骤 ${index}`}
+                title={`点击跳转到第 ${index + 1} 步`}
               >
                 <span class={styles.cellValue}>{value === -1 ? '-' : value}</span>
                 <span class={styles.cellIndex}>{index}</span>

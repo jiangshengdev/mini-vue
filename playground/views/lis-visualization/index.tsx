@@ -203,7 +203,7 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
       return (
         <div class={styles.container}>
           <header class={styles.header}>
-            <h1 class={styles.title}>LIS Algorithm Visualization</h1>
+            <h1 class={styles.title}>LIS 算法可视化</h1>
             <InputEditor input={input.get()} onInputChange={handleInputChange} />
           </header>
           <main class={styles.main}>
@@ -216,7 +216,7 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
     return (
       <div class={styles.container}>
         <header class={styles.header}>
-          <h1 class={styles.title}>LIS Algorithm Visualization</h1>
+          <h1 class={styles.title}>LIS 算法可视化</h1>
           <InputEditor input={input.get()} onInputChange={handleInputChange} />
           <StepControls
             currentStep={navState.currentStep}

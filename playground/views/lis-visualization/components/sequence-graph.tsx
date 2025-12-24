@@ -44,20 +44,22 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
       <div class={styles.sequenceGraph}>
         {/* Sequence State */}
         <div class={styles.sequenceSection}>
-          <h3 class={styles.sectionTitle}>
-            Sequence State: [{props.sequence.join(', ')}] → values: [
+          <span class={styles.stateLabel}>Sequence State:</span>
+          <code class={styles.stateCode}>
+            [{props.sequence.join(', ')}] → values: [
             {props.sequence
               .map((idx) => {
                 return props.input[idx]
               })
               .join(', ')}
             ]
-          </h3>
+          </code>
         </div>
 
         {/* Predecessors */}
         <div class={styles.predecessorsSection}>
-          <h3 class={styles.sectionTitle}>Predecessors: [{props.predecessors.join(', ')}]</h3>
+          <span class={styles.stateLabel}>Predecessors:</span>
+          <code class={styles.stateCode}>[{props.predecessors.join(', ')}]</code>
         </div>
 
         {/* Chain View */}
@@ -68,7 +70,7 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
               return (
                 <div key={chainIndex} class={styles.chain}>
                   <span class={styles.chainLabel}>
-                    Chain {chainIndex + 1} (length: {chain.length}):
+                    Chain {chainIndex + 1}（长度：{chain.length}）
                   </span>
                   <div class={styles.chainNodes}>
                     {chain.flatMap((nodeIndex, i) => {

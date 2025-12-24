@@ -68,13 +68,13 @@ export const InputEditor: SetupComponent<InputEditorProps> = (props) => {
     return (
       <div class={styles.inputEditor}>
         <label class={styles.inputLabel}>
-          输入数组（逗号或空格分隔，-1 表示跳过）:
+          输入数组（逗号或空格分隔，-1 表示跳过）
           <input
             type="text"
             class={`${styles.inputField} ${currentError ? styles.inputError : ''}`}
             value={inputText.get()}
             onInput={handleInput}
-            placeholder="例如: 2, 1, 3, 0, 4"
+            placeholder="例如：2, 1, 3, 0, 4"
           />
         </label>
         {currentError && <div class={styles.errorMessage}>{currentError}</div>}

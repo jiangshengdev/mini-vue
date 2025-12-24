@@ -316,6 +316,16 @@
   background: var(--color-border);
   padding: 0.125rem 0.25rem;
   border-radius: 0.25rem;
+  box-sizing: border-box;
+}
+
+/* 上一步行半高亮：灰色虚线，保持弱提示 */
+.highlightPreviousSecondary {
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0.0625rem 0.1875rem;
+  border-radius: 0.25rem;
+  box-sizing: border-box;
 }
 
 /* 半高亮：显示前驱来源（追加操作 - 绿色虚线） */
@@ -324,6 +334,7 @@
   border: 1px dashed var(--color-success);
   padding: 0.0625rem 0.1875rem;
   border-radius: 0.25rem;
+  box-sizing: border-box;
 }
 
 /* 半高亮：显示前驱来源（替换操作 - 黄色虚线） */
@@ -332,6 +343,7 @@
   border: 1px dashed var(--color-warning);
   padding: 0.0625rem 0.1875rem;
   border-radius: 0.25rem;
+  box-sizing: border-box;
 }
 
 /* hover 高亮：紫色背景（覆盖已有高亮） */

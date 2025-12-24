@@ -252,6 +252,7 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
     // 计算前驱值（用于 Sequence State 的半高亮）
     // 当 Predecessors 变化且值不为 -1 时，在 Sequence 中半高亮该前驱索引
     let predecessorValue: number | undefined
+    let previousPredecessorValue: number | undefined
 
     if (highlightPredIndex >= 0) {
       const predValue = props.predecessors[highlightPredIndex]
@@ -259,6 +260,14 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
       if (predValue >= 0) {
         predecessorValue = predValue
       }
+    }
+
+    // 替换/追加操作时，为上一步行添加与当前相同的前驱半高亮，保持上下对齐
+    if (
+      (action?.type === 'replace' || action?.type === 'append') &&
+      predecessorValue !== undefined
+    ) {
+      previousPredecessorValue = predecessorValue
     }
 
     // 比较 predecessors 是否真的有变化
@@ -298,6 +307,8 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
                     array: previousSequence,
                     highlightPos: previousHighlightSeqPosition,
                     highlightClass: styles.highlightPrevious,
+                    secondaryHighlightValue: previousPredecessorValue,
+                    secondaryHighlightClass: styles.highlightPreviousSecondary,
                   })}
                 </code>
                 <code class={styles.stateCode}>

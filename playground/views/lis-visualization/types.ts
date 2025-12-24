@@ -53,6 +53,8 @@ export interface StepNavigator {
   getState(): NavigatorState
   /** 获取当前步骤数据 */
   getCurrentStep(): VisualizationStep | undefined
+  /** 获取上一步数据（用于状态对比） */
+  getPreviousStep(): VisualizationStep | undefined
   /** 前进到下一步 */
   next(): VisualizationStep | undefined
   /** 后退到上一步 */

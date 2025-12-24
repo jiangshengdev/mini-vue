@@ -108,7 +108,8 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
 
   const handleIndexClick = (index: number) => {
     stopAutoPlay()
-    navigator.goTo(index)
+    // 第 0 步是 init，所以点击数组索引 i 应该跳转到步骤 i + 1
+    navigator.goTo(index + 1)
     navigatorVersion.set(navigatorVersion.get() + 1)
   }
 
@@ -202,6 +203,7 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
     navigatorVersion.get()
 
     const step = navigator.getCurrentStep()
+    const previousStep = navigator.getPreviousStep()
     const navState = navigator.getState()
     const showResult = navState.currentStep === navState.totalSteps - 1
 
@@ -254,6 +256,8 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
             sequence={step?.sequence ?? []}
             predecessors={step?.predecessors ?? []}
             action={step?.action}
+            previousSequence={previousStep?.sequence}
+            previousPredecessors={previousStep?.predecessors}
           />
 
           <ActionPanel

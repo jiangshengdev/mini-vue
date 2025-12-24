@@ -26,6 +26,14 @@ export function createStepNavigator(trace: TraceResult): StepNavigator {
     return trace.steps[currentStepIndex]
   }
 
+  const getPreviousStep = (): VisualizationStep | undefined => {
+    if (currentStepIndex > 0) {
+      return trace.steps[currentStepIndex - 1]
+    }
+
+    return undefined
+  }
+
   const next = (): VisualizationStep | undefined => {
     if (currentStepIndex < trace.steps.length - 1) {
       currentStepIndex++
@@ -63,6 +71,7 @@ export function createStepNavigator(trace: TraceResult): StepNavigator {
   return {
     getState,
     getCurrentStep,
+    getPreviousStep,
     next,
     prev: previous,
     goTo,

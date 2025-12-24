@@ -167,6 +167,49 @@
   margin-bottom: 0.5rem;
 }
 
+/* 状态对比区域 - CSS Grid + subgrid 4列布局 */
+.stateCompareSection {
+  margin-bottom: 0.5rem;
+  padding: 0.375rem 0.625rem;
+  background: var(--color-bg-section);
+  border-radius: 0.375rem;
+  font-size: 0.8125rem;
+}
+
+.stateCompareGrid {
+  display: grid;
+  grid-template-columns: auto auto auto auto;
+  gap: 0.125rem 0.5rem;
+  margin-top: 0.25rem;
+  width: fit-content;
+}
+
+.stateRow {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  align-items: baseline;
+}
+
+.previousRow {
+  color: var(--color-text-hint);
+}
+
+.previousRow .stateCode {
+  color: var(--color-text-hint);
+}
+
+.stateRowLabel {
+  color: var(--color-text-hint);
+  white-space: nowrap;
+}
+
+.changeIndicator {
+  color: var(--color-text-hint);
+  white-space: nowrap;
+}
+
+/* 兼容旧样式 */
 .sequenceSection,
 .predecessorsSection {
   display: flex;
@@ -507,6 +550,7 @@
   padding: 0.375rem 0.75rem;
   font-size: 0.8125rem;
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
   color: var(--color-text-primary);
   background: var(--color-bg-page);
   border-radius: 0.375rem;

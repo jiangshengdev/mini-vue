@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { createHostRenderer } from '../patch/test-utils.ts'
 import type { SetupComponent } from '@/index.ts'
-import { createRenderer } from '@/runtime-core/index.ts'
 import { effect, isReactive, ref } from '@/index.ts'
+import { createRenderer } from '@/runtime-core/index.ts'
 
 describe('runtime-core 组件 props 响应式', () => {
   it('props 为浅只读响应式，依赖追踪随父级更新', () => {

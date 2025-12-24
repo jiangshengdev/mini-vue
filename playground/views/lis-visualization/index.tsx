@@ -14,8 +14,8 @@ import {
 import { createStepNavigator } from './navigator.ts'
 import styles from './styles/visualization.module.css'
 import { traceLongestIncreasingSubsequence } from './trace.ts'
-import { onScopeDispose, state } from '@/index.ts'
 import type { SetupComponent } from '@/index.ts'
+import { onScopeDispose, state } from '@/index.ts'
 
 /** 默认输入数组 */
 const defaultInput = [2, 1, 3, 0, 4]

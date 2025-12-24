@@ -34,11 +34,17 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
   let trace = traceLongestIncreasingSubsequence(input.get())
   let navigator = createStepNavigator(trace)
 
+  /* 步骤切换时的统一更新（清空 hover 状态 + 触发响应式更新） */
+  const updateStep = () => {
+    hoveredChainIndexes.set([])
+    navigatorVersion.set(navigatorVersion.get() + 1)
+  }
+
   /* 重新计算追踪和导航器 */
   const resetNavigator = () => {
     trace = traceLongestIncreasingSubsequence(input.get())
     navigator = createStepNavigator(trace)
-    navigatorVersion.set(navigatorVersion.get() + 1)
+    updateStep()
   }
 
   /* 自动播放定时器 */
@@ -60,7 +66,7 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
       const result = navigator.next()
 
       if (result) {
-        navigatorVersion.set(navigatorVersion.get() + 1)
+        updateStep()
       } else {
         stopAutoPlay()
       }
@@ -76,18 +82,18 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
 
   const handlePrevious = () => {
     navigator.prev()
-    navigatorVersion.set(navigatorVersion.get() + 1)
+    updateStep()
   }
 
   const handleNext = () => {
     navigator.next()
-    navigatorVersion.set(navigatorVersion.get() + 1)
+    updateStep()
   }
 
   const handleReset = () => {
     stopAutoPlay()
     navigator.reset()
-    navigatorVersion.set(navigatorVersion.get() + 1)
+    updateStep()
   }
 
   const handleTogglePlay = () => {
@@ -111,7 +117,7 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
     stopAutoPlay()
     // 第 0 步是 init，所以点击数组索引 i 应该跳转到步骤 i + 1
     navigator.goTo(index + 1)
-    navigatorVersion.set(navigatorVersion.get() + 1)
+    updateStep()
   }
 
   /* 链 hover 事件处理 */
@@ -163,7 +169,7 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
       const navState = navigator.getState()
 
       navigator.goTo(navState.totalSteps - 1)
-      navigatorVersion.set(navigatorVersion.get() + 1)
+      updateStep()
 
       return
     }

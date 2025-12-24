@@ -218,6 +218,19 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
         <header class={styles.header}>
           <h1 class={styles.title}>LIS Algorithm Visualization</h1>
           <InputEditor input={input.get()} onInputChange={handleInputChange} />
+          <StepControls
+            currentStep={navState.currentStep}
+            totalSteps={navState.totalSteps}
+            canGoBack={navState.canGoBack}
+            canGoForward={navState.canGoForward}
+            isPlaying={isPlaying.get()}
+            speed={speed.get()}
+            onPrev={handlePrevious}
+            onNext={handleNext}
+            onReset={handleReset}
+            onTogglePlay={handleTogglePlay}
+            onSpeedChange={handleSpeedChange}
+          />
         </header>
 
         <main class={styles.main}>
@@ -237,22 +250,6 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
 
           <ActionPanel action={step?.action} currentValue={step?.currentValue} />
         </main>
-
-        <footer class={styles.footer}>
-          <StepControls
-            currentStep={navState.currentStep}
-            totalSteps={navState.totalSteps}
-            canGoBack={navState.canGoBack}
-            canGoForward={navState.canGoForward}
-            isPlaying={isPlaying.get()}
-            speed={speed.get()}
-            onPrev={handlePrevious}
-            onNext={handleNext}
-            onReset={handleReset}
-            onTogglePlay={handleTogglePlay}
-            onSpeedChange={handleSpeedChange}
-          />
-        </footer>
       </div>
     )
   }

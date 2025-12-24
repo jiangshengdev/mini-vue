@@ -35,7 +35,12 @@ function getActionDescription(action: StepAction, currentValue: number): string 
     }
 
     case 'skip': {
-      return `跳过索引 ${action.index}（值为 -1）`
+      /* 区分跳过原因：-1 表示占位符，其他值表示重复 */
+      if (currentValue === -1) {
+        return `跳过索引 ${action.index}（值为 -1，占位符）`
+      }
+
+      return `跳过索引 ${action.index}（值 ${currentValue}，重复值无需替换）`
     }
   }
 }

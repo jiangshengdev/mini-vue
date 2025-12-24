@@ -15,6 +15,9 @@ export interface InputEditorProps {
   onInputChange: (input: number[]) => void
 }
 
+/** 默认示例数组 */
+const defaultInput = [2, 1, 3, 0, 4]
+
 /** 解析输入字符串为数字数组 */
 function parseInput(
   value: string,
@@ -42,6 +45,25 @@ function parseInput(
   return { success: true, data: numbers }
 }
 
+/** 生成随机数字序列 */
+function generateRandomSequence(): number[] {
+  // 随机长度 5-10
+  const length = Math.floor(Math.random() * 6) + 5
+  const result: number[] = []
+
+  for (let i = 0; i < length; i++) {
+    // 随机决定是否生成 -1（约 10% 概率）
+    if (Math.random() < 0.1) {
+      result.push(-1)
+    } else {
+      // 生成 0-20 的随机数
+      result.push(Math.floor(Math.random() * 21))
+    }
+  }
+
+  return result
+}
+
 export const InputEditor: SetupComponent<InputEditorProps> = (props) => {
   const inputText = state(props.input.join(', '))
   const error = state<string | undefined>(undefined)
@@ -62,6 +84,29 @@ export const InputEditor: SetupComponent<InputEditorProps> = (props) => {
     }
   }
 
+  const handleClear = () => {
+    inputText.set('')
+    error.set(undefined)
+    props.onInputChange([])
+  }
+
+  const handleReset = () => {
+    const text = defaultInput.join(', ')
+
+    inputText.set(text)
+    error.set(undefined)
+    props.onInputChange(defaultInput)
+  }
+
+  const handleRandom = () => {
+    const randomSequence = generateRandomSequence()
+    const text = randomSequence.join(', ')
+
+    inputText.set(text)
+    error.set(undefined)
+    props.onInputChange(randomSequence)
+  }
+
   return () => {
     const currentError = error.get()
 
@@ -69,13 +114,41 @@ export const InputEditor: SetupComponent<InputEditorProps> = (props) => {
       <div class={styles.inputEditor}>
         <label class={styles.inputLabel}>
           输入数组（逗号或空格分隔，-1 表示跳过）
-          <input
-            type="text"
-            class={`${styles.inputField} ${currentError ? styles.inputError : ''}`}
-            value={inputText.get()}
-            onInput={handleInput}
-            placeholder="例如：2, 1, 3, 0, 4"
-          />
+          <div class={styles.inputRow}>
+            <input
+              type="text"
+              class={`${styles.inputField} ${currentError ? styles.inputError : ''}`}
+              value={inputText.get()}
+              onInput={handleInput}
+              placeholder="例如：2, 1, 3, 0, 4"
+            />
+            <div class={styles.inputActions}>
+              <button
+                type="button"
+                class={styles.inputActionButton}
+                onClick={handleClear}
+                title="清空输入"
+              >
+                <span class={styles.iconClear} />
+              </button>
+              <button
+                type="button"
+                class={styles.inputActionButton}
+                onClick={handleReset}
+                title="重置为默认示例"
+              >
+                <span class={styles.iconReplay} />
+              </button>
+              <button
+                type="button"
+                class={styles.inputActionButton}
+                onClick={handleRandom}
+                title="生成随机序列"
+              >
+                <span class={styles.iconShuffle} />
+              </button>
+            </div>
+          </div>
         </label>
         {currentError && <div class={styles.errorMessage}>{currentError}</div>}
       </div>

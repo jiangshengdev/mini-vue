@@ -5,6 +5,36 @@ import { effect, RouterLink, RouterView, state } from '@/index.ts'
 const DESKTOP_BREAKPOINT = 768
 
 /**
+ * 导航链接配置
+ */
+interface NavLinkConfig {
+  to: string
+  label: string
+  children?: NavLinkConfig[]
+}
+
+/**
+ * 导航链接数据
+ */
+const NAV_LINKS: NavLinkConfig[] = [
+  { to: '/', label: '首页' },
+  { to: '/counter', label: '计数器' },
+  { to: '/lis-visualization', label: 'LIS 可视化' },
+  {
+    to: '/basic',
+    label: '基础示例',
+    children: [
+      { to: '/basic/hello-world', label: '你好，世界' },
+      { to: '/basic/handling-user-input', label: '处理用户输入' },
+      { to: '/basic/attribute-bindings', label: '属性绑定' },
+      { to: '/basic/conditionals-and-loops', label: '条件与循环' },
+      { to: '/basic/form-bindings', label: '表单绑定' },
+      { to: '/basic/simple-component', label: '简单组件' },
+    ],
+  },
+]
+
+/**
  * NavLinks 组件属性
  */
 interface NavLinksProps {
@@ -16,42 +46,35 @@ interface NavLinksProps {
  * 导航链接组件 - 供桌面端导航和移动端抽屉共用
  */
 const NavLinks: SetupComponent<NavLinksProps> = (props) => {
+  /**
+   * 高阶组件：封装 RouterLink，自动注入 onClick 回调
+   */
+  const NavLink: SetupComponent<{ to: string; class?: string }> = (linkProps) => {
+    return () => (
+      <RouterLink class={linkProps.class ?? 'nav-link'} to={linkProps.to} onClick={props.onLinkClick}>
+        {linkProps.children}
+      </RouterLink>
+    )
+  }
+
   return () => (
     <>
-      <RouterLink class="nav-link" to="/" onClick={props.onLinkClick}>
-        首页
-      </RouterLink>
-      <RouterLink class="nav-link" to="/counter" onClick={props.onLinkClick}>
-        计数器
-      </RouterLink>
-      <RouterLink class="nav-link" to="/lis-visualization" onClick={props.onLinkClick}>
-        LIS 可视化
-      </RouterLink>
-      <div class="nav-group">
-        <RouterLink class="nav-link" to="/basic" onClick={props.onLinkClick}>
-          基础示例
-        </RouterLink>
-        <div class="nav-sub">
-          <RouterLink class="nav-link nav-sub-link" to="/basic/hello-world" onClick={props.onLinkClick}>
-            你好，世界
-          </RouterLink>
-          <RouterLink class="nav-link nav-sub-link" to="/basic/handling-user-input" onClick={props.onLinkClick}>
-            处理用户输入
-          </RouterLink>
-          <RouterLink class="nav-link nav-sub-link" to="/basic/attribute-bindings" onClick={props.onLinkClick}>
-            属性绑定
-          </RouterLink>
-          <RouterLink class="nav-link nav-sub-link" to="/basic/conditionals-and-loops" onClick={props.onLinkClick}>
-            条件与循环
-          </RouterLink>
-          <RouterLink class="nav-link nav-sub-link" to="/basic/form-bindings" onClick={props.onLinkClick}>
-            表单绑定
-          </RouterLink>
-          <RouterLink class="nav-link nav-sub-link" to="/basic/simple-component" onClick={props.onLinkClick}>
-            简单组件
-          </RouterLink>
-        </div>
-      </div>
+      {NAV_LINKS.map((link) =>
+        link.children ? (
+          <div class="nav-group">
+            <NavLink to={link.to}>{link.label}</NavLink>
+            <div class="nav-sub">
+              {link.children.map((child) => (
+                <NavLink class="nav-link nav-sub-link" to={child.to}>
+                  {child.label}
+                </NavLink>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <NavLink to={link.to}>{link.label}</NavLink>
+        ),
+      )}
     </>
   )
 }

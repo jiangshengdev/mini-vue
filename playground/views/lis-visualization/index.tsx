@@ -290,6 +290,10 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
         <div class={styles.container}>
           <header class={styles.header}>
             <h1 class={styles.title}>LIS 算法可视化</h1>
+            <p class={styles.intro}>
+              Chain View 显示每个长度的最佳链；Sequence 列表展示各长度的当前最佳尾节点，Predecessors
+              可回溯出对应链。输入数组后可逐步查看贪心 + 二分的构造过程，空格播放、左右箭头单步，或点击数组索引跳到对应步骤。
+            </p>
             <InputEditor input={input.get()} onInputChange={handleInputChange} />
           </header>
           <main class={styles.main}>
@@ -303,6 +307,10 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
       <div class={styles.container}>
         <header class={styles.header}>
           <h1 class={styles.title}>LIS 算法可视化</h1>
+          <p class={styles.intro}>
+            Chain View 显示每个长度的最佳链；Sequence 列表展示各长度的当前最佳尾节点，Predecessors
+            可回溯出对应链。输入数组后可逐步查看贪心 + 二分的构造过程，空格播放、左右箭头单步，或点击数组索引跳到对应步骤。
+          </p>
           <InputEditor input={input.get()} onInputChange={handleInputChange} />
           <StepControls
             currentStep={navState.currentStep}
@@ -354,6 +362,19 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
             predecessors={step?.predecessors ?? []}
           />
         </main>
+
+        <footer class={styles.footer}>
+          <h2 class={styles.sectionTitle}>原理速记</h2>
+          <ul class={styles.principlesList}>
+            <li>每步只做追加、替换或跳过（-1）。</li>
+            <li>虽然仅存 Sequence / Predecessors，但隐含了每个长度的完整最优链表，可据此重建并显示全部节点。</li>
+            <li>追加：当新元素大于当前最长链的末尾时，以该链为基础重建更长的链，把当前元素接在末尾；新旧两条链都会保留。</li>
+            <li>
+              替换：只替换各链的末尾元素，用二分在当前各链末尾中找到插入位，且当前元素更小时才会替换；被命中的那条链会被废弃，从长度减一的链末尾元素开始，用当前元素追加重建这一长度的新链。
+            </li>
+            <li>回溯：从任意末尾元素沿 Predecessors 向前可还原对应最佳链。</li>
+          </ul>
+        </footer>
       </div>
     )
   }

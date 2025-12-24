@@ -398,7 +398,9 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
         <div class={styles.chainView}>
           <h3 class={styles.sectionTitle}>
             Chain View（当前时刻）
-            <span class={styles.sectionHint}>（节点显示 value，下方 idx/pred 均为 index）</span>
+            <span class={styles.sectionHint}>
+              （左对齐按前驱顺序排列，每行对应一个长度，最右端是当前末尾元素；节点显示 value，下方 idx/pred 均为 index）
+            </span>
           </h3>
           <div class={styles.chainsContainer}>
             {chains.map((chain, chainIndex) => {

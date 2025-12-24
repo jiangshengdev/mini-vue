@@ -16,6 +16,8 @@ export interface RouterLinkProps extends PropsShape {
   router?: Router
   /** `a` 标签的 target。 */
   target?: string
+  /** 点击链接时的回调，在导航完成后调用。 */
+  onClick?: (event?: Event) => void
   /** 插入到链接内部的子节点。 */
   children?: ComponentChildren
 }
@@ -46,11 +48,14 @@ export const RouterLink: SetupComponent<RouterLinkProps> = (props) => {
     }
 
     resolvedRouter.navigate(props.to)
+
+    // 导航完成后调用外部传入的 onClick 回调
+    props.onClick?.(event)
   }
 
   /* 渲染标准 `a` 标签并挂载导航行为。 */
   return () => {
-    const { to, router: _router, children, ...rest } = props
+    const { to, router: _router, onClick: _onClick, children, ...rest } = props
 
     return (
       <a {...rest} href={normalizePath(to)} onClick={handleClick}>

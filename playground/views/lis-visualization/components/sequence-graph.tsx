@@ -73,6 +73,19 @@ function getHighlightClass(action: StepAction | undefined): string {
   }
 }
 
+/** 根据操作类型获取半高亮样式类名（用于前驱来源） */
+function getSecondaryHighlightClass(action: StepAction | undefined): string {
+  if (!action || action.type === 'init' || action.type === 'skip') {
+    return ''
+  }
+
+  if (action.type === 'append') {
+    return styles.highlightSecondaryAppend
+  }
+
+  return styles.highlightSecondaryReplace
+}
+
 /** 计算 Sequence 变化指示器文本 */
 function getSeqChangeIndicator(action: StepAction | undefined, hasPrevious: boolean): string {
   if (!hasPrevious) {
@@ -103,14 +116,34 @@ function getSeqChangeIndicator(action: StepAction | undefined, hasPrevious: bool
 }
 
 /** 渲染带高亮的数组 */
-function renderHighlightedArray(array: number[], highlightPos: number, highlightClass: string) {
+function renderHighlightedArray(
+  array: number[],
+  highlightPos: number,
+  highlightClass: string,
+  secondaryHighlightValue?: number,
+  secondaryHighlightClass?: string,
+) {
   return (
     <>
       [
       {array.map((value, pos) => {
         const isHighlight = pos === highlightPos
+        // 半高亮：值等于前驱索引（用于显示 Sequence 中的前驱来源）
+        const isSecondaryHighlight =
+          secondaryHighlightValue !== undefined &&
+          secondaryHighlightValue >= 0 &&
+          value === secondaryHighlightValue
+
+        let className = ''
+
+        if (isHighlight) {
+          className = highlightClass
+        } else if (isSecondaryHighlight && secondaryHighlightClass) {
+          className = secondaryHighlightClass
+        }
+
         const content = (
-          <span key={pos} class={isHighlight ? highlightClass : ''}>
+          <span key={pos} class={className}>
             {value}
           </span>
         )
@@ -137,6 +170,7 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
     const chains = buildAllChains(props.sequence, props.predecessors)
     const { action, previousSequence, previousPredecessors } = props
     const highlightClass = getHighlightClass(action)
+    const secondaryHighlightClass = getSecondaryHighlightClass(action)
     const hasPrevious = previousSequence !== undefined
 
     // 确定需要高亮的位置
@@ -161,6 +195,18 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
 
     // 计算变化指示器
     const seqChangeIndicator = getSeqChangeIndicator(action, hasPrevious)
+
+    // 计算前驱值（用于 Sequence State 的半高亮）
+    // 当 Predecessors 变化且值不为 -1 时，在 Sequence 中半高亮该前驱索引
+    let predecessorValue: number | undefined
+
+    if (highlightPredIndex >= 0) {
+      const predValue = props.predecessors[highlightPredIndex]
+
+      if (predValue >= 0) {
+        predecessorValue = predValue
+      }
+    }
 
     // 比较 predecessors 是否真的有变化
     let predChangeIndicator = ''
@@ -214,7 +260,13 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
             <div class={styles.stateRow}>
               <span class={styles.stateRowLabel}>{hasPrevious ? '当前:' : ''}</span>
               <code class={styles.stateCode}>
-                {renderHighlightedArray(props.sequence, highlightSeqPosition, highlightClass)}
+                {renderHighlightedArray(
+                  props.sequence,
+                  highlightSeqPosition,
+                  highlightClass,
+                  predecessorValue,
+                  secondaryHighlightClass,
+                )}
               </code>
               <code class={styles.stateCode}>
                 → values:{' '}

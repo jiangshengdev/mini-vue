@@ -313,6 +313,22 @@
   border-radius: 0.25rem;
 }
 
+/* 半高亮：显示前驱来源（追加操作 - 绿色虚线） */
+.highlightSecondaryAppend {
+  background: var(--color-success-light);
+  border: 1px dashed var(--color-success);
+  padding: 0.0625rem 0.1875rem;
+  border-radius: 0.25rem;
+}
+
+/* 半高亮：显示前驱来源（替换操作 - 黄色虚线） */
+.highlightSecondaryReplace {
+  background: var(--color-warning-light);
+  border: 1px dashed var(--color-warning);
+  padding: 0.0625rem 0.1875rem;
+  border-radius: 0.25rem;
+}
+
 /* Chain 节点高亮 */
 .chainNode.highlightAppend {
   border-color: var(--color-success);

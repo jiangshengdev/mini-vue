@@ -99,19 +99,19 @@ function getSeqChangeIndicator(action: StepAction | undefined, hasPrevious: bool
 }
 
 /** 渲染带高亮的数组 */
-function renderHighlightedArray(arr: number[], highlightPos: number, highlightClass: string) {
+function renderHighlightedArray(array: number[], highlightPos: number, highlightClass: string) {
   return (
     <>
       [
-      {arr.map((val, pos) => {
+      {array.map((value, pos) => {
         const isHighlight = pos === highlightPos
         const content = (
           <span key={pos} class={isHighlight ? highlightClass : ''}>
-            {val}
+            {value}
           </span>
         )
 
-        return pos < arr.length - 1 ? [content, ', '] : content
+        return pos < array.length - 1 ? [content, ', '] : content
       })}
       ]
     </>
@@ -128,14 +128,20 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
     // 确定需要高亮的位置
     let highlightSeqPosition = -1
     let highlightPredIndex = -1
+    // 上一步行：替换操作时高亮被替换的位置
+    let previousHighlightSeqPosition = -1
 
     if (action) {
       if (action.type === 'append') {
         highlightSeqPosition = props.sequence.length - 1
         highlightPredIndex = action.index
+        // 追加操作：上一步不高亮
+        previousHighlightSeqPosition = -1
       } else if (action.type === 'replace') {
         highlightSeqPosition = action.position
         highlightPredIndex = action.index
+        // 替换操作：上一步高亮被替换的位置
+        previousHighlightSeqPosition = action.position
       }
     }
 
@@ -146,7 +152,9 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
     let predChangeIndicator = ''
 
     if (hasPrevious && previousPredecessors) {
-      const predChanged = props.predecessors.some((val, idx) => val !== previousPredecessors[idx])
+      const predChanged = props.predecessors.some((value, idx) => {
+        return value !== previousPredecessors[idx]
+      })
 
       if (predChanged && highlightPredIndex >= 0) {
         predChangeIndicator = `← 位置 ${highlightPredIndex} 变化`
@@ -166,14 +174,20 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
               <div class={`${styles.stateRow} ${styles.previousRow}`}>
                 <span class={styles.stateRowLabel}>上一步:</span>
                 <code class={styles.stateCode}>
-                  {renderHighlightedArray(previousSequence!, -1, '')}
+                  {renderHighlightedArray(
+                    previousSequence,
+                    previousHighlightSeqPosition,
+                    styles.highlightPrevious,
+                  )}
                 </code>
                 <code class={styles.stateCode}>
                   → values:{' '}
                   {renderHighlightedArray(
-                    previousSequence!.map((idx) => props.input[idx]),
-                    -1,
-                    '',
+                    previousSequence.map((idx) => {
+                      return props.input[idx]
+                    }),
+                    previousHighlightSeqPosition,
+                    styles.highlightPrevious,
                   )}
                 </code>
                 <span class={styles.changeIndicator}></span>
@@ -188,7 +202,9 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
               <code class={styles.stateCode}>
                 → values:{' '}
                 {renderHighlightedArray(
-                  props.sequence.map((idx) => props.input[idx]),
+                  props.sequence.map((idx) => {
+                    return props.input[idx]
+                  }),
                   highlightSeqPosition,
                   highlightClass,
                 )}
@@ -207,7 +223,11 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
               <div class={`${styles.stateRow} ${styles.previousRow}`}>
                 <span class={styles.stateRowLabel}>上一步:</span>
                 <code class={styles.stateCode}>
-                  {renderHighlightedArray(previousPredecessors!, -1, '')}
+                  {renderHighlightedArray(
+                    previousPredecessors!,
+                    highlightPredIndex,
+                    styles.highlightPrevious,
+                  )}
                 </code>
                 <span></span>
                 <span class={styles.changeIndicator}></span>

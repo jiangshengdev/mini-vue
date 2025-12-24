@@ -255,6 +255,13 @@
   border-radius: 0.25rem;
 }
 
+/* 上一步行：被替换位置的灰色高亮 */
+.highlightPrevious {
+  background: var(--color-border);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+}
+
 /* Chain 节点高亮 */
 .chainNode.highlightAppend {
   border-color: var(--color-success);

@@ -329,6 +329,19 @@
   border-radius: 0.25rem;
 }
 
+/* hover 高亮：紫色背景（覆盖已有高亮） */
+.highlightHover {
+  background: var(--color-hover);
+  color: var(--color-bg-page);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+}
+
+/* hover 高亮：紫色字体（普通位置） */
+.highlightHoverText {
+  color: var(--color-hover);
+}
+
 /* Chain 节点高亮 */
 .chainNode.highlightAppend {
   border-color: var(--color-success);

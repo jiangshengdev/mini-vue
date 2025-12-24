@@ -82,10 +82,33 @@ function parseInput(
   return { success: true, data: deduplicateInput(numbers) }
 }
 
+/** 归一化数组：将非 -1 的值按大小顺序映射为 0, 1, 2, ... */
+function normalizeSequence(numbers: number[]): number[] {
+  // 提取非 -1 的值并排序
+  const nonNegativeOnes = numbers.filter((n) => {
+    return n !== -1
+  })
+  const sorted = [...nonNegativeOnes].sort((a, b) => {
+    return a - b
+  })
+
+  // 建立值到归一化索引的映射
+  const valueToIndex = new Map<number, number>()
+
+  for (const [index, value] of sorted.entries()) {
+    valueToIndex.set(value, index)
+  }
+
+  // 替换原数组中的值
+  return numbers.map((n) => {
+    return n === -1 ? -1 : valueToIndex.get(n)!
+  })
+}
+
 /** 生成随机数字序列（无重复值） */
 function generateRandomSequence(): number[] {
-  // 随机长度 5-10
-  const length = Math.floor(Math.random() * 6) + 5
+  // 随机长度 8-15
+  const length = Math.floor(Math.random() * 8) + 8
   const result: number[] = []
   const used = new Set<number>()
 
@@ -94,11 +117,11 @@ function generateRandomSequence(): number[] {
     if (Math.random() < 0.1) {
       result.push(-1)
     } else {
-      // 生成不重复的 0-20 随机数
+      // 生成不重复的 0-50 随机数
       let number_: number
 
       do {
-        number_ = Math.floor(Math.random() * 21)
+        number_ = Math.floor(Math.random() * 51)
       } while (used.has(number_))
 
       used.add(number_)
@@ -106,7 +129,8 @@ function generateRandomSequence(): number[] {
     }
   }
 
-  return result
+  // 归一化：将值映射为 0, 1, 2, ...
+  return normalizeSequence(result)
 }
 
 export const InputEditor: SetupComponent<InputEditorProps> = (props) => {

@@ -275,6 +275,7 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
             action={step?.action}
             previousSequence={previousStep?.sequence}
             previousPredecessors={previousStep?.predecessors}
+            hoveredIndexes={hoveredChainIndexes.get()}
             onChainHover={handleChainHover}
             onChainLeave={handleChainLeave}
           />

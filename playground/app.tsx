@@ -1,8 +1,8 @@
 import type { SetupComponent } from '@/index.ts'
-import { effect, RouterLink, RouterView, state } from '@/index.ts'
+import { onScopeDispose, RouterLink, RouterView, state } from '@/index.ts'
 
 // 桌面端断点宽度
-const DESKTOP_BREAKPOINT = 768
+const desktopBreakpoint = 768
 
 /**
  * 导航链接配置
@@ -16,7 +16,7 @@ interface NavLinkConfig {
 /**
  * 导航链接数据
  */
-const NAV_LINKS: NavLinkConfig[] = [
+const navLinks: NavLinkConfig[] = [
   { to: '/', label: '首页' },
   { to: '/counter', label: '计数器' },
   { to: '/lis-visualization', label: 'LIS 可视化' },
@@ -50,33 +50,43 @@ const NavLinks: SetupComponent<NavLinksProps> = (props) => {
    * 高阶组件：封装 RouterLink，自动注入 onClick 回调
    */
   const NavLink: SetupComponent<{ to: string; class?: string }> = (linkProps) => {
-    return () => (
-      <RouterLink class={linkProps.class ?? 'nav-link'} to={linkProps.to} onClick={props.onLinkClick}>
-        {linkProps.children}
-      </RouterLink>
-    )
+    return () => {
+      return (
+        <RouterLink
+          class={linkProps.class ?? 'nav-link'}
+          to={linkProps.to}
+          onClick={props.onLinkClick}
+        >
+          {linkProps.children}
+        </RouterLink>
+      )
+    }
   }
 
-  return () => (
-    <>
-      {NAV_LINKS.map((link) =>
-        link.children ? (
-          <div class="nav-group">
-            <NavLink to={link.to}>{link.label}</NavLink>
-            <div class="nav-sub">
-              {link.children.map((child) => (
-                <NavLink class="nav-link nav-sub-link" to={child.to}>
-                  {child.label}
-                </NavLink>
-              ))}
+  return () => {
+    return (
+      <>
+        {navLinks.map((link) => {
+          return link.children ? (
+            <div class="nav-group">
+              <NavLink to={link.to}>{link.label}</NavLink>
+              <div class="nav-sub">
+                {link.children.map((child) => {
+                  return (
+                    <NavLink class="nav-link nav-sub-link" to={child.to}>
+                      {child.label}
+                    </NavLink>
+                  )
+                })}
+              </div>
             </div>
-          </div>
-        ) : (
-          <NavLink to={link.to}>{link.label}</NavLink>
-        ),
-      )}
-    </>
-  )
+          ) : (
+            <NavLink to={link.to}>{link.label}</NavLink>
+          )
+        })}
+      </>
+    )
+  }
 }
 
 export const App: SetupComponent = () => {
@@ -109,21 +119,19 @@ export const App: SetupComponent = () => {
 
   // 处理窗口大小变化 - 桌面端尺寸时自动关闭抽屉
   const handleResize = (): void => {
-    if (window.innerWidth >= DESKTOP_BREAKPOINT && isDrawerOpen.get()) {
+    if (window.innerWidth >= desktopBreakpoint && isDrawerOpen.get()) {
       closeDrawer()
     }
   }
 
-  // 使用 effect 管理事件监听器的生命周期
-  effect(() => {
-    document.addEventListener('keydown', handleKeyDown)
-    window.addEventListener('resize', handleResize)
+  // 注册事件监听器
+  document.addEventListener('keydown', handleKeyDown)
+  window.addEventListener('resize', handleResize)
 
-    // 清理函数 - effect 停止时移除监听器
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown)
-      window.removeEventListener('resize', handleResize)
-    }
+  // 使用 onScopeDispose 在组件卸载时清理事件监听器
+  onScopeDispose(() => {
+    document.removeEventListener('keydown', handleKeyDown)
+    window.removeEventListener('resize', handleResize)
   })
 
   return () => {

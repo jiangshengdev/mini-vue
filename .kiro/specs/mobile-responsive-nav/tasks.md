@@ -27,20 +27,20 @@
     - z-index 层级设置
     - _Requirements: 3.1, 3.2, 4.1, 4.2, 4.3_
 
-- [ ] 2. 重构 App 组件，添加移动端导航功能
-  - [ ] 2.1 提取 NavLinks 组件
+- [x] 2. 重构 App 组件，添加移动端导航功能
+  - [x] 2.1 提取 NavLinks 组件
     - 将导航链接提取为独立组件
     - 支持 onLinkClick 回调属性
     - _Requirements: 3.5_
 
-  - [ ] 2.2 添加抽屉状态管理和事件处理
+  - [x] 2.2 添加抽屉状态管理和事件处理
     - 使用 state() 创建 isDrawerOpen 状态
     - 实现 openDrawer、closeDrawer、toggleDrawer 函数
     - 添加 Escape 键监听，打开时按 Escape 关闭抽屉
     - 添加窗口 resize 监听，桌面端尺寸时自动关闭抽屉
     - _Requirements: 2.3, 3.3, 3.4, 5.3_
 
-  - [ ] 2.3 实现汉堡按钮和抽屉导航 JSX
+  - [x] 2.3 实现汉堡按钮和抽屉导航 JSX
     - 添加移动端头部区域和汉堡按钮
     - 添加抽屉容器、遮罩层和抽屉导航
     - 设置 aria-label 和 aria-expanded 属性

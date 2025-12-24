@@ -4,6 +4,7 @@
 :root {
   /* 主色调 */
   --color-primary: #3b82f6;
+  --color-primary-dark: #2563eb;
   --color-primary-light: #eff6ff;
   --color-primary-shadow: rgba(59, 130, 246, 0.2);
 
@@ -493,6 +494,11 @@
   background: var(--color-primary);
   border-color: var(--color-primary);
   color: var(--color-bg-page);
+}
+
+.controlButton.playing:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
 }
 
 .stepIndicator {

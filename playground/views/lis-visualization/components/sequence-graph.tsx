@@ -406,9 +406,6 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
                   onMouseEnter={handleChainMouseEnter(chain, chainIndex)}
                   onMouseLeave={handleChainMouseLeave}
                 >
-                  <span class={styles.chainLabel}>
-                    Chain {chainIndex + 1}（长度：{chain.length}）
-                  </span>
                   <div class={styles.chainNodes}>
                     {chain.flatMap((nodeIndex, i) => {
                       const isHighlightNode = isHighlightChain && nodeIndex === highlightPredIndex

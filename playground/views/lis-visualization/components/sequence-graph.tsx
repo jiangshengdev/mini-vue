@@ -28,6 +28,18 @@ export interface SequenceGraphProps {
   onChainHover?: (indexes: number[]) => void
   /** 链 leave 回调 */
   onChainLeave?: () => void
+  /** Sequence State 模块是否被 hover */
+  isSequenceHovered?: boolean
+  /** Sequence State hover 回调 */
+  onSequenceHover?: () => void
+  /** Sequence State leave 回调 */
+  onSequenceLeave?: () => void
+  /** Predecessors 模块是否被 hover */
+  isPredecessorsHovered?: boolean
+  /** Predecessors hover 回调 */
+  onPredecessorsHover?: () => void
+  /** Predecessors leave 回调 */
+  onPredecessorsLeave?: () => void
 }
 
 /** 从 sequence 中的索引回溯 predecessors 构建链 */
@@ -191,6 +203,22 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
     props.onChainLeave?.()
   }
 
+  const handleSequenceMouseEnter = () => {
+    props.onSequenceHover?.()
+  }
+
+  const handleSequenceMouseLeave = () => {
+    props.onSequenceLeave?.()
+  }
+
+  const handlePredecessorsMouseEnter = () => {
+    props.onPredecessorsHover?.()
+  }
+
+  const handlePredecessorsMouseLeave = () => {
+    props.onPredecessorsLeave?.()
+  }
+
   return () => {
     const chains = buildAllChains(props.sequence, props.predecessors)
     const { action, previousSequence, previousPredecessors } = props
@@ -251,7 +279,11 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
     return (
       <div class={styles.sequenceGraph}>
         {/* Sequence State - CSS Grid 4列布局 */}
-        <div class={styles.stateCompareSection}>
+        <div
+          class={styles.stateCompareSection}
+          onMouseEnter={handleSequenceMouseEnter}
+          onMouseLeave={handleSequenceMouseLeave}
+        >
           <div class={styles.sectionTitle}>
             Sequence State:
             <span class={styles.sectionHint}>（存储的是 index，→ 后显示对应 value）</span>
@@ -309,7 +341,11 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
         </div>
 
         {/* Predecessors - CSS Grid 4列布局 */}
-        <div class={styles.stateCompareSection}>
+        <div
+          class={styles.stateCompareSection}
+          onMouseEnter={handlePredecessorsMouseEnter}
+          onMouseLeave={handlePredecessorsMouseLeave}
+        >
           <div class={styles.sectionTitle}>
             Predecessors:
             <span class={styles.sectionHint}>（每个位置存储前驱元素的 index，-1 表示无前驱）</span>
@@ -356,11 +392,17 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
           <div class={styles.chainsContainer}>
             {chains.map((chain, chainIndex) => {
               const isHighlightChain = highlightPredIndex >= 0 && chain.includes(highlightPredIndex)
+              // 当 Predecessors 被 hover 时，高亮包含当前操作索引的链
+              const isPredecessorsHighlightChain = props.isPredecessorsHovered && isHighlightChain
+
+              const chainClass = isPredecessorsHighlightChain
+                ? `${styles.chain} ${styles.chainHighlight}`
+                : styles.chain
 
               return (
                 <div
                   key={chainIndex}
-                  class={styles.chain}
+                  class={chainClass}
                   onMouseEnter={handleChainMouseEnter(chain)}
                   onMouseLeave={handleChainMouseLeave}
                 >
@@ -370,9 +412,17 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
                   <div class={styles.chainNodes}>
                     {chain.flatMap((nodeIndex, i) => {
                       const isHighlightNode = isHighlightChain && nodeIndex === highlightPredIndex
-                      const nodeClass = isHighlightNode
-                        ? `${styles.chainNode} ${highlightClass}`
-                        : styles.chainNode
+                      const isLastNode = i === chain.length - 1
+                      // 当 Sequence State 被 hover 时，高亮链尾节点
+                      const isChainTailHighlight = props.isSequenceHovered && isLastNode
+
+                      let nodeClass = styles.chainNode
+
+                      if (isChainTailHighlight) {
+                        nodeClass = `${styles.chainNode} ${styles.chainNodeTailHighlight}`
+                      } else if (isHighlightNode) {
+                        nodeClass = `${styles.chainNode} ${highlightClass}`
+                      }
 
                       const node = (
                         <div key={`node-${nodeIndex}`} class={nodeClass}>

@@ -26,7 +26,8 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
   const isPlaying = state(false)
   const speed = state(500)
   const hoveredChainIndexes = state<number[]>([])
-
+  const isSequenceHovered = state(false)
+  const isPredecessorsHovered = state(false)
   /* 导航器版本号（用于触发响应式更新） */
   const navigatorVersion = state(0)
 
@@ -37,6 +38,8 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
   /* 步骤切换时的统一更新（清空 hover 状态 + 触发响应式更新） */
   const updateStep = () => {
     hoveredChainIndexes.set([])
+    isSequenceHovered.set(false)
+    isPredecessorsHovered.set(false)
     navigatorVersion.set(navigatorVersion.get() + 1)
   }
 
@@ -127,6 +130,24 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
 
   const handleChainLeave = () => {
     hoveredChainIndexes.set([])
+  }
+
+  /* Sequence State hover 事件处理 */
+  const handleSequenceHover = () => {
+    isSequenceHovered.set(true)
+  }
+
+  const handleSequenceLeave = () => {
+    isSequenceHovered.set(false)
+  }
+
+  /* Predecessors hover 事件处理 */
+  const handlePredecessorsHover = () => {
+    isPredecessorsHovered.set(true)
+  }
+
+  const handlePredecessorsLeave = () => {
+    isPredecessorsHovered.set(false)
   }
 
   /* 键盘快捷键处理 */
@@ -278,6 +299,12 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
             hoveredIndexes={hoveredChainIndexes.get()}
             onChainHover={handleChainHover}
             onChainLeave={handleChainLeave}
+            isSequenceHovered={isSequenceHovered.get()}
+            onSequenceHover={handleSequenceHover}
+            onSequenceLeave={handleSequenceLeave}
+            isPredecessorsHovered={isPredecessorsHovered.get()}
+            onPredecessorsHover={handlePredecessorsHover}
+            onPredecessorsLeave={handlePredecessorsLeave}
           />
 
           <ActionPanel

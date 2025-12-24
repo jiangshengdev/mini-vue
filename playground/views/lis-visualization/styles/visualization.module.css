@@ -82,8 +82,12 @@
   transition: all 0.2s ease;
 }
 
-.arrayCell:hover {
+.arrayCell:hover:not(.currentCell):not(.resultCell) {
   border-color: #999;
+  transform: translateY(-2px);
+}
+
+.arrayCell:hover {
   transform: translateY(-2px);
 }
 
@@ -96,6 +100,13 @@
 .resultCell {
   border-color: #22c55e;
   background: #f0fdf4;
+}
+
+/* 当前高亮且是结果的单元格 */
+.currentCell.resultCell {
+  border-color: #22c55e;
+  background: #dcfce7;
+  animation: pulseGreen 1.5s ease-in-out infinite;
 }
 
 .cellValue {
@@ -460,6 +471,16 @@
   }
   50% {
     box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.1);
+  }
+}
+
+@keyframes pulseGreen {
+  0%,
+  100% {
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.1);
   }
 }
 

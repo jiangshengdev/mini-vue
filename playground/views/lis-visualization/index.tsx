@@ -25,6 +25,7 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
   const input = state(defaultInput)
   const isPlaying = state(false)
   const speed = state(500)
+  const hoveredChainIndexes = state<number[]>([])
 
   /* 导航器版本号（用于触发响应式更新） */
   const navigatorVersion = state(0)
@@ -111,6 +112,15 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
     // 第 0 步是 init，所以点击数组索引 i 应该跳转到步骤 i + 1
     navigator.goTo(index + 1)
     navigatorVersion.set(navigatorVersion.get() + 1)
+  }
+
+  /* 链 hover 事件处理 */
+  const handleChainHover = (indexes: number[]) => {
+    hoveredChainIndexes.set(indexes)
+  }
+
+  const handleChainLeave = () => {
+    hoveredChainIndexes.set([])
   }
 
   /* 键盘快捷键处理 */
@@ -248,6 +258,7 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
             currentIndex={step?.currentIndex ?? -1}
             result={trace.result}
             showResult={showResult}
+            hoveredIndexes={hoveredChainIndexes.get()}
             onIndexClick={handleIndexClick}
           />
 
@@ -258,6 +269,8 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
             action={step?.action}
             previousSequence={previousStep?.sequence}
             previousPredecessors={previousStep?.predecessors}
+            onChainHover={handleChainHover}
+            onChainLeave={handleChainLeave}
           />
 
           <ActionPanel

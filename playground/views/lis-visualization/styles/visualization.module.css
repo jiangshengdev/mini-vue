@@ -24,6 +24,12 @@
   --color-error-border: #fecaca;
   --color-error-text: #dc2626;
 
+  /* hover 高亮色（紫色） */
+  --color-hover: #8b5cf6;
+  --color-hover-light: #f5f3ff;
+  --color-hover-shadow: rgba(139, 92, 246, 0.2);
+  --color-hover-shadow-light: rgba(139, 92, 246, 0.1);
+
   /* 中性色 */
   --color-text-primary: #1e293b;
   --color-text-secondary: #475569;
@@ -173,6 +179,18 @@
 /* 新节点（-1）的特殊样式 */
 .newNodeCell {
   border-style: dashed;
+}
+
+/* hover 链时的高亮样式（优先级最高） */
+.hoveredCell {
+  border-color: var(--color-hover) !important;
+  background: var(--color-hover-light) !important;
+  box-shadow: 0 0 0 2px var(--color-hover-shadow) !important;
+}
+
+/* hover 且是当前激活的单元格：紫色呼吸效果 */
+.hoveredCell.currentCell {
+  animation: pulseViolet 1.5s ease-in-out infinite !important;
 }
 
 /* 当前高亮且是结果的单元格 */
@@ -332,6 +350,13 @@
   display: flex;
   flex-direction: column;
   gap: 0.375rem;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  transition: background-color 0.15s ease;
+}
+
+.chain:hover {
+  background: var(--color-hover-light);
 }
 
 .chainLabel {
@@ -748,6 +773,16 @@
   }
   50% {
     box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.1);
+  }
+}
+
+@keyframes pulseViolet {
+  0%,
+  100% {
+    box-shadow: 0 0 0 3px var(--color-hover-shadow);
+  }
+  50% {
+    box-shadow: 0 0 0 6px var(--color-hover-shadow-light);
   }
 }
 

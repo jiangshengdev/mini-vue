@@ -22,6 +22,10 @@ export interface SequenceGraphProps {
   previousSequence?: number[]
   /** 上一步的前驱数组（用于对比） */
   previousPredecessors?: number[]
+  /** 链 hover 回调 */
+  onChainHover?: (indexes: number[]) => void
+  /** 链 leave 回调 */
+  onChainLeave?: () => void
 }
 
 /** 从 sequence 中的索引回溯 predecessors 构建链 */
@@ -119,6 +123,16 @@ function renderHighlightedArray(array: number[], highlightPos: number, highlight
 }
 
 export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
+  const handleChainMouseEnter = (chain: number[]) => {
+    return () => {
+      props.onChainHover?.(chain)
+    }
+  }
+
+  const handleChainMouseLeave = () => {
+    props.onChainLeave?.()
+  }
+
   return () => {
     const chains = buildAllChains(props.sequence, props.predecessors)
     const { action, previousSequence, previousPredecessors } = props
@@ -262,7 +276,12 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
               const isHighlightChain = highlightPredIndex >= 0 && chain.includes(highlightPredIndex)
 
               return (
-                <div key={chainIndex} class={styles.chain}>
+                <div
+                  key={chainIndex}
+                  class={styles.chain}
+                  onMouseEnter={handleChainMouseEnter(chain)}
+                  onMouseLeave={handleChainMouseLeave}
+                >
                   <span class={styles.chainLabel}>
                     Chain {chainIndex + 1}（长度：{chain.length}）
                   </span>

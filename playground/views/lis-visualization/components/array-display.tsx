@@ -16,6 +16,8 @@ export interface ArrayDisplayProps {
   result: number[]
   /** 是否显示最终结果高亮 */
   showResult: boolean
+  /** Hover 高亮的索引列表 */
+  hoveredIndexes: number[]
   /** 点击元素时的回调 */
   onIndexClick: (index: number) => void
 }
@@ -39,14 +41,15 @@ export const ArrayDisplay: SetupComponent<ArrayDisplayProps> = (props) => {
           {props.input.map((value, index) => {
             const isCurrent = index === props.currentIndex
             const isInResult = props.showResult && props.result.includes(index)
-
             const isNewNode = value === -1
+            const isHovered = props.hoveredIndexes.includes(index)
 
             const cellClasses = [
               styles.arrayCell,
               isCurrent ? styles.currentCell : '',
               isInResult ? styles.resultCell : '',
               isNewNode ? styles.newNodeCell : '',
+              isHovered ? styles.hoveredCell : '',
             ]
               .filter(Boolean)
               .join(' ')

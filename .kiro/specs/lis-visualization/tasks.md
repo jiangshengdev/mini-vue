@@ -40,6 +40,18 @@
     - **Property 5: 深拷贝隔离**
     - **Validates: Requirements 2.1, 2.2**
 
+  - [x]\* 2.6 编写属性测试：步骤数据完整性
+    - **Property 4: 步骤数据完整性**
+    - **Validates: Requirements 1.5, 1.6**
+
+  - [x]\* 2.7 编写属性测试：步骤索引和值一致性
+    - **Property 6: 步骤索引和值一致性**
+    - **Validates: Requirements 2.3, 2.4**
+
+  - [x]\* 2.8 编写属性测试：追踪结果可序列化
+    - **Property 7: 追踪结果可序列化**
+    - **Validates: Requirements 3.4**
+
 - [x] 3. 实现步骤导航器
   - [x] 3.1 实现 createStepNavigator 函数
     - 实现 getState、getCurrentStep、next、prev、goTo、reset 方法

@@ -93,6 +93,38 @@ describe('traceLIS 属性测试', () => {
   })
 
   /**
+   * Feature: lis-visualization, Property 4: 步骤数据完整性
+   * Validates: Requirements 1.5, 1.6
+   *
+   * 对于任意追踪步骤，应该包含有效的 sequence 数组和 predecessors 数组，
+   * 且 predecessors 长度与输入一致。
+   */
+  test.prop([lisInputArbitrary], { numRuns: 100 })('Property 4: 步骤数据完整性', (input) => {
+    const traceResult = traceLongestIncreasingSubsequence(input)
+
+    for (const step of traceResult.steps) {
+      /* Sequence 应该是有效数组 */
+      expect(Array.isArray(step.sequence)).toBe(true)
+
+      /* Predecessors 应该是有效数组，长度与输入一致 */
+      expect(Array.isArray(step.predecessors)).toBe(true)
+      expect(step.predecessors.length).toBe(input.length)
+
+      /* Sequence 中的索引应该在有效范围内 */
+      for (const idx of step.sequence) {
+        expect(idx).toBeGreaterThanOrEqual(0)
+        expect(idx).toBeLessThan(input.length)
+      }
+
+      /* Predecessors 中的值应该是 -1 或有效索引 */
+      for (const pred of step.predecessors) {
+        expect(pred).toBeGreaterThanOrEqual(-1)
+        expect(pred).toBeLessThan(input.length)
+      }
+    }
+  })
+
+  /**
    * Feature: lis-visualization, Property 5: 深拷贝隔离
    * Validates: Requirements 2.1, 2.2
    *
@@ -120,5 +152,48 @@ describe('traceLIS 属性测试', () => {
     /* 验证第二个步骤的数组未受影响 */
     expect(traceResult.steps[1].sequence).toEqual(step1SequenceOriginal)
     expect(traceResult.steps[1].predecessors).toEqual(step1PredecessorsOriginal)
+  })
+
+  /**
+   * Feature: lis-visualization, Property 6: 步骤索引和值一致性
+   * Validates: Requirements 2.3, 2.4
+   *
+   * 对于任意追踪步骤（非初始化步骤），currentIndex 应该等于 stepIndex - 1，
+   * 且 currentValue 应该等于 input[currentIndex]。
+   */
+  test.prop([lisInputArbitrary], { numRuns: 100 })('Property 6: 步骤索引和值一致性', (input) => {
+    const traceResult = traceLongestIncreasingSubsequence(input)
+
+    for (const step of traceResult.steps) {
+      /* 第 0 步是初始化，currentIndex 为 -1 */
+      if (step.stepIndex === 0) {
+        expect(step.currentIndex).toBe(-1)
+
+        continue
+      }
+
+      /* 非初始化步骤：currentIndex 应该等于 stepIndex - 1 */
+      expect(step.currentIndex).toBe(step.stepIndex - 1)
+
+      /* CurrentValue 应该等于 input[currentIndex] */
+      expect(step.currentValue).toBe(input[step.currentIndex])
+    }
+  })
+
+  /**
+   * Feature: lis-visualization, Property 7: 追踪结果可序列化
+   * Validates: Requirements 3.4
+   *
+   * 对于任意追踪结果，JSON.parse(JSON.stringify(trace)) 应该产生与原始结果等价的对象。
+   */
+  test.prop([lisInputArbitrary], { numRuns: 100 })('Property 7: 追踪结果可序列化', (input) => {
+    const traceResult = traceLongestIncreasingSubsequence(input)
+
+    /* 序列化再反序列化 */
+    const serialized = JSON.stringify(traceResult)
+    const deserialized = JSON.parse(serialized) as typeof traceResult
+
+    /* 验证结果等价 */
+    expect(deserialized).toEqual(traceResult)
   })
 })

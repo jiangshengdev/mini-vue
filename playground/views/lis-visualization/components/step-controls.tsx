@@ -50,7 +50,8 @@ export const StepControls: SetupComponent<StepControlsProps> = (props) => {
             disabled={!props.canGoBack}
             title="上一步 (←)"
           >
-            ◀ Prev
+            <span class={styles.iconArrowLeft} />
+            Prev
           </button>
 
           <span class={styles.stepIndicator}>
@@ -64,7 +65,8 @@ export const StepControls: SetupComponent<StepControlsProps> = (props) => {
             disabled={!props.canGoForward}
             title="下一步 (→)"
           >
-            Next ▶
+            Next
+            <span class={styles.iconArrowRight} />
           </button>
 
           <button
@@ -73,7 +75,8 @@ export const StepControls: SetupComponent<StepControlsProps> = (props) => {
             onClick={props.onReset}
             title="重置 (Home)"
           >
-            ⟲ Reset
+            <span class={styles.iconReplay} />
+            Reset
           </button>
 
           <button
@@ -82,7 +85,17 @@ export const StepControls: SetupComponent<StepControlsProps> = (props) => {
             onClick={props.onTogglePlay}
             title="自动播放/暂停 (Space)"
           >
-            {props.isPlaying ? '⏸ Pause' : '▶ Auto'}
+            {props.isPlaying ? (
+              <>
+                <span class={styles.iconPause} />
+                Pause
+              </>
+            ) : (
+              <>
+                <span class={styles.iconPlay} />
+                Auto
+              </>
+            )}
           </button>
         </div>
 

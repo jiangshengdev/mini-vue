@@ -270,6 +270,9 @@
 }
 
 .controlButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
   padding: 0.5rem 1rem;
   border: 1px solid #cbd5e1;
   border-radius: 0.375rem;
@@ -279,6 +282,61 @@
   color: #475569;
   cursor: pointer;
   transition: all 0.15s ease;
+}
+
+/* SVG 图标基础样式 */
+.iconBase {
+  display: inline-block;
+  width: 1.25rem;
+  height: 1.25rem;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  flex-shrink: 0;
+}
+
+/* 各图标使用 CSS mask 实现颜色跟随 */
+.iconArrowLeft,
+.iconArrowRight,
+.iconReplay,
+.iconPlay,
+.iconPause {
+  display: inline-block;
+  width: 1.25rem;
+  height: 1.25rem;
+  background-color: currentColor;
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  flex-shrink: 0;
+}
+
+.iconArrowLeft {
+  mask-image: url('../../../assets/material-design-icons/hardware/keyboard_arrow_left/materialiconsround/24px.svg');
+  -webkit-mask-image: url('../../../assets/material-design-icons/hardware/keyboard_arrow_left/materialiconsround/24px.svg');
+}
+
+.iconArrowRight {
+  mask-image: url('../../../assets/material-design-icons/hardware/keyboard_arrow_right/materialiconsround/24px.svg');
+  -webkit-mask-image: url('../../../assets/material-design-icons/hardware/keyboard_arrow_right/materialiconsround/24px.svg');
+}
+
+.iconReplay {
+  mask-image: url('../../../assets/material-design-icons/av/replay/materialiconsround/24px.svg');
+  -webkit-mask-image: url('../../../assets/material-design-icons/av/replay/materialiconsround/24px.svg');
+}
+
+.iconPlay {
+  mask-image: url('../../../assets/material-design-icons/av/play_arrow/materialiconsround/24px.svg');
+  -webkit-mask-image: url('../../../assets/material-design-icons/av/play_arrow/materialiconsround/24px.svg');
+}
+
+.iconPause {
+  mask-image: url('../../../assets/material-design-icons/av/pause/materialiconsround/24px.svg');
+  -webkit-mask-image: url('../../../assets/material-design-icons/av/pause/materialiconsround/24px.svg');
 }
 
 .controlButton:hover:not(:disabled) {

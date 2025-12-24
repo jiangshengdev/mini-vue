@@ -192,6 +192,69 @@ function renderHighlightedArray(options: RenderHighlightedArrayOptions) {
   )
 }
 
+function computeChangedNodesByChain(
+  chains: number[][],
+  previousChains: number[][] | undefined,
+  isChainAction: boolean,
+  highlightPredIndex: number,
+): Map<number, Set<number>> {
+  const changed = new Map<number, Set<number>>()
+
+  for (const [chainIndex, chain] of chains.entries()) {
+    const previousChain = previousChains?.[chainIndex]
+    const nodeSet = new Set<number>()
+
+    if (previousChain) {
+      const maxLength = Math.max(chain.length, previousChain.length)
+
+      for (let i = 0; i < maxLength; i += 1) {
+        const currentNode = chain[i]
+        const previousNode = previousChain[i]
+
+        if (currentNode !== previousNode && currentNode !== undefined) {
+          nodeSet.add(currentNode)
+        }
+      }
+    } else if (isChainAction && highlightPredIndex >= 0 && chain.includes(highlightPredIndex)) {
+      for (const nodeIndex of chain) {
+        nodeSet.add(nodeIndex)
+      }
+    }
+
+    if (nodeSet.size > 0) {
+      changed.set(chainIndex, nodeSet)
+    }
+  }
+
+  return changed
+}
+
+function getNodeClassName(options: {
+  isChainTailHighlight: boolean
+  isHighlightNode: boolean
+  isChangedNode: boolean
+  actionType: StepAction['type'] | undefined
+  highlightClass: string
+}): string {
+  const { isChainTailHighlight, isHighlightNode, isChangedNode, actionType, highlightClass } =
+    options
+  let nodeClass = styles.chainNode
+
+  if (isChainTailHighlight) {
+    nodeClass = `${styles.chainNode} ${styles.chainNodeTailHighlight}`
+  } else if (isHighlightNode) {
+    nodeClass = `${styles.chainNode} ${highlightClass}`
+  } else if (isChangedNode) {
+    if (actionType === 'append') {
+      nodeClass = `${styles.chainNode} ${styles.chainNodeChangedSecondaryAppend}`
+    } else if (actionType === 'replace') {
+      nodeClass = `${styles.chainNode} ${styles.chainNodeChangedSecondaryReplace}`
+    }
+  }
+
+  return nodeClass
+}
+
 export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
   const handleChainMouseEnter = (chain: number[], chainIndex: number) => {
     return () => {
@@ -221,10 +284,15 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
 
   return () => {
     const chains = buildAllChains(props.sequence, props.predecessors)
+    const previousChains =
+      props.previousSequence && props.previousPredecessors
+        ? buildAllChains(props.previousSequence, props.previousPredecessors)
+        : undefined
     const { action, previousSequence, previousPredecessors } = props
     const highlightClass = getHighlightClass(action)
     const secondaryHighlightClass = getSecondaryHighlightClass(action)
     const hasPrevious = previousSequence !== undefined
+    const isChainAction = action?.type === 'append' || action?.type === 'replace'
 
     // 确定需要高亮的位置
     let highlightSeqPosition = -1
@@ -245,6 +313,13 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
         previousHighlightSeqPosition = action.position
       }
     }
+
+    const changedNodesByChain = computeChangedNodesByChain(
+      chains,
+      previousChains,
+      isChainAction,
+      highlightPredIndex,
+    )
 
     // 计算变化指示器
     const seqChangeIndicator = getSeqChangeIndicator(action, hasPrevious)
@@ -399,7 +474,8 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
           <h3 class={styles.sectionTitle}>
             Chain View（当前时刻）
             <span class={styles.sectionHint}>
-              （左对齐按前驱顺序排列，每行对应一个长度，最右端是当前末尾元素；节点显示 value，下方 idx/pred 均为 index）
+              （左对齐按前驱顺序排列，每行对应一个长度，最右端是当前末尾元素；节点显示 value，下方
+              idx/pred 均为 index）
             </span>
           </h3>
           <div class={styles.chainsContainer}>
@@ -424,15 +500,21 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
                       const isHighlightNode = isHighlightChain && nodeIndex === highlightPredIndex
                       const isLastNode = i === chain.length - 1
                       // 当 Sequence State 被 hover 时，高亮链尾节点
-                      const isChainTailHighlight = props.isSequenceHovered && isLastNode
-
-                      let nodeClass = styles.chainNode
-
-                      if (isChainTailHighlight) {
-                        nodeClass = `${styles.chainNode} ${styles.chainNodeTailHighlight}`
-                      } else if (isHighlightNode) {
-                        nodeClass = `${styles.chainNode} ${highlightClass}`
-                      }
+                      const isChainTailHighlight = Boolean(props.isSequenceHovered && isLastNode)
+                      const changedNodes = changedNodesByChain.get(chainIndex)
+                      const isChangedNode =
+                        isChainAction &&
+                        isHighlightChain &&
+                        changedNodes !== undefined &&
+                        changedNodes.has(nodeIndex) &&
+                        !isHighlightNode
+                      const nodeClass = getNodeClassName({
+                        isChainTailHighlight,
+                        isHighlightNode,
+                        isChangedNode,
+                        actionType: action?.type,
+                        highlightClass,
+                      })
 
                       const node = (
                         <div key={`node-${nodeIndex}`} class={nodeClass}>

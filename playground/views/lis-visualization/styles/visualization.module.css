@@ -392,6 +392,20 @@
   background: var(--color-bg-section);
 }
 
+.chainNodes .chainNode.chainNodeChangedSecondaryAppend {
+  border-color: var(--color-success);
+  border-style: dashed;
+  border-width: 2px;
+  background: var(--color-success-light);
+}
+
+.chainNodes .chainNode.chainNodeChangedSecondaryReplace {
+  border-color: var(--color-warning);
+  border-style: dashed;
+  border-width: 2px;
+  background: var(--color-warning-light);
+}
+
 /* Chain 节点链尾高亮（Sequence State hover 时） */
 .chainNodeTailHighlight {
   border-color: var(--color-hover) !important;

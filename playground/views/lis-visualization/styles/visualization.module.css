@@ -97,11 +97,35 @@
   font-size: 0.8125rem;
   font-weight: 600;
   color: var(--color-text-muted);
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.sectionHint {
+  font-size: 0.6875rem;
+  font-weight: 400;
+  color: var(--color-text-hint);
 }
 
 /* 数组显示组件 */
 .arrayDisplay {
   margin-bottom: 0.5rem;
+}
+
+.arrayLegend {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.375rem;
+  font-size: 0.6875rem;
+  color: var(--color-text-hint);
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .arrayContainer {

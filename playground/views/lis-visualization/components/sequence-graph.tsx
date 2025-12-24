@@ -167,7 +167,10 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
       <div class={styles.sequenceGraph}>
         {/* Sequence State - CSS Grid 4列布局 */}
         <div class={styles.stateCompareSection}>
-          <div class={styles.sectionTitle}>Sequence State:</div>
+          <div class={styles.sectionTitle}>
+            Sequence State:
+            <span class={styles.sectionHint}>（存储的是 index，→ 后显示对应 value）</span>
+          </div>
           <div class={styles.stateCompareGrid}>
             {/* 上一步行 */}
             {hasPrevious && (
@@ -216,7 +219,10 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
 
         {/* Predecessors - CSS Grid 4列布局 */}
         <div class={styles.stateCompareSection}>
-          <div class={styles.sectionTitle}>Predecessors:</div>
+          <div class={styles.sectionTitle}>
+            Predecessors:
+            <span class={styles.sectionHint}>（每个位置存储前驱元素的 index，-1 表示无前驱）</span>
+          </div>
           <div class={styles.stateCompareGrid}>
             {/* 上一步行 */}
             {hasPrevious && (
@@ -247,7 +253,10 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
 
         {/* Chain View */}
         <div class={styles.chainView}>
-          <h3 class={styles.sectionTitle}>Chain View（当前时刻）</h3>
+          <h3 class={styles.sectionTitle}>
+            Chain View（当前时刻）
+            <span class={styles.sectionHint}>（节点显示 value，下方 idx/pred 均为 index）</span>
+          </h3>
           <div class={styles.chainsContainer}>
             {chains.map((chain, chainIndex) => {
               const isHighlightChain = highlightPredIndex >= 0 && chain.includes(highlightPredIndex)

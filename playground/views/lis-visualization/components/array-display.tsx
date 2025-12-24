@@ -31,6 +31,10 @@ export const ArrayDisplay: SetupComponent<ArrayDisplayProps> = (props) => {
     return (
       <div class={styles.arrayDisplay}>
         <h3 class={styles.sectionTitle}>输入数组</h3>
+        <div class={styles.arrayLegend}>
+          <span class={styles.legendItem}>上方: value（值）</span>
+          <span class={styles.legendItem}>下方: index（索引）</span>
+        </div>
         <div class={styles.arrayContainer}>
           {props.input.map((value, index) => {
             const isCurrent = index === props.currentIndex

@@ -3,30 +3,53 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color: #0f172a;
-  background-color: #f8fafc;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* 颜色变量 */
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #374151;
+  --color-text-light: #213547;
+  --color-text-muted: #888;
+  --color-link: #1d4ed8;
+  --color-link-default: #646cff;
+  --color-link-hover: #535bf2;
+  --color-link-hover-light: #747bff;
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f8fafc;
+  --color-bg-hover: #f3f4f6;
+  --color-bg-button: #0f172a;
+  --color-bg-button-light: #f9f9f9;
+  --color-border: #e5e7eb;
+  --color-focus: #1d4ed8;
+  --color-accent: #646cff;
+  --color-accent-ts: #3178c6;
+  --color-overlay: rgba(0, 0, 0, 0.5);
+  --color-shadow: rgba(15, 23, 42, 0.06);
+  --color-shadow-dark: rgba(0, 0, 0, 0.15);
+
+  /* 应用颜色变量 */
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-secondary);
 }
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: var(--color-link-default);
   text-decoration: inherit;
 }
 
 a:hover {
-  color: #535bf2;
+  color: var(--color-link-hover);
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background-color: #f8fafc;
+  background-color: var(--color-bg-secondary);
 }
 
 h1 {
@@ -47,26 +70,26 @@ h1 {
 }
 
 .logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+  filter: drop-shadow(0 0 2em var(--color-accent));
 }
 
 .logo.vanilla:hover {
-  filter: drop-shadow(0 0 2em #3178c6aa);
+  filter: drop-shadow(0 0 2em var(--color-accent-ts));
 }
 
 .card {
   padding: 1.5em;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
   border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 10px 30px var(--color-shadow);
   overflow: hidden;
   word-break: break-word;
   overflow-wrap: anywhere;
 }
 
 .read-the-docs {
-  color: #888;
+  color: var(--color-text-muted);
 }
 
 button {
@@ -77,13 +100,13 @@ button {
   font-weight: 500;
   font-family: 'JetBrains Mono', 'SFMono-Regular', Consolas, Menlo, monospace;
   font-variant-numeric: tabular-nums;
-  background-color: #0f172a;
+  background-color: var(--color-bg-button);
   cursor: pointer;
   transition: border-color 0.25s;
 }
 
 button:hover {
-  border-color: #646cff;
+  border-color: var(--color-accent);
 }
 
 button:focus,
@@ -93,15 +116,15 @@ button:focus-visible {
 
 @media (prefers-color-scheme: light) {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    color: var(--color-text-light);
+    background-color: var(--color-bg-primary);
   }
 
   a:hover {
-    color: #747bff;
+    color: var(--color-link-hover-light);
   }
 
   button {
-    background-color: #f9f9f9;
+    background-color: var(--color-bg-button-light);
   }
 }

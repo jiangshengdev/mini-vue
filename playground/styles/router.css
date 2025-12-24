@@ -17,16 +17,16 @@
   min-width: 200px;
   height: fit-content;
   padding: 1rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-border);
   border-radius: 12px;
-  background: #ffffff;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  background: var(--color-bg-primary);
+  box-shadow: 0 10px 30px var(--color-shadow);
 }
 
 .nav-link {
   display: block;
   padding: 0.25rem 0.5rem;
-  color: #1d4ed8;
+  color: var(--color-link);
   text-decoration: none;
   font-weight: 600;
 }
@@ -46,7 +46,7 @@
   flex-direction: column;
   gap: 0.25rem;
   padding-left: 0.75rem;
-  border-left: 1px solid #e5e7eb;
+  border-left: 1px solid var(--color-border);
 }
 
 .nav-sub-link {
@@ -55,4 +55,227 @@
 
 .main {
   flex: 1;
+}
+
+/* ========================================
+   移动端响应式样式
+   ======================================== */
+
+/* 移动端头部区域 */
+.mobile-header {
+  display: none;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: var(--color-bg-primary);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* 移动端媒体查询 - 768px 断点 */
+@media (max-width: 767px) {
+  /* 移动端显示头部 */
+  .mobile-header {
+    display: flex;
+  }
+
+  /* 移动端隐藏左侧固定导航 */
+  .nav {
+    display: none;
+  }
+
+  /* 移动端单列布局 */
+  .layout {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  /* 内容区占满宽度 */
+  .main {
+    width: 100%;
+  }
+}
+
+/* 桌面端媒体查询 - 确保导航显示 */
+@media (min-width: 768px) {
+  .nav {
+    display: flex;
+  }
+
+  .mobile-header {
+    display: none;
+  }
+}
+
+/* ========================================
+   汉堡按钮样式
+   ======================================== */
+
+.hamburger-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.hamburger-btn:hover {
+  background: var(--color-bg-hover);
+}
+
+.hamburger-btn:focus {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* 三横线图标 - 使用伪元素 */
+.hamburger-icon {
+  position: relative;
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--color-text-secondary);
+  border-radius: 1px;
+  transition: background-color 0.2s ease;
+}
+
+.hamburger-icon::before,
+.hamburger-icon::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 20px;
+  height: 2px;
+  background: var(--color-text-secondary);
+  border-radius: 1px;
+  transition: transform 0.2s ease;
+}
+
+.hamburger-icon::before {
+  top: -6px;
+}
+
+.hamburger-icon::after {
+  top: 6px;
+}
+
+/* 移动端显示汉堡按钮 */
+@media (max-width: 767px) {
+  .hamburger-btn {
+    display: flex;
+  }
+}
+
+/* 桌面端隐藏汉堡按钮 */
+@media (min-width: 768px) {
+  .hamburger-btn {
+    display: none;
+  }
+}
+
+/* ========================================
+   抽屉导航和遮罩层样式
+   ======================================== */
+
+/* 抽屉容器 - 默认隐藏 */
+.drawer-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 200;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+/* 抽屉打开时启用交互 */
+.drawer-container.open {
+  pointer-events: auto;
+  visibility: visible;
+}
+
+/* 遮罩层 */
+.drawer-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--color-overlay);
+  opacity: 0;
+  transition: opacity 250ms ease;
+  z-index: 201;
+}
+
+/* 抽屉打开时遮罩层淡入 */
+.drawer-container.open .drawer-overlay {
+  opacity: 1;
+}
+
+/* 抽屉导航面板 */
+.drawer-nav {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 280px;
+  max-width: 80vw;
+  height: 100%;
+  background: var(--color-bg-primary);
+  box-shadow: 4px 0 20px var(--color-shadow-dark);
+  transform: translateX(-100%);
+  transition: transform 250ms ease;
+  z-index: 202;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.5rem 1rem;
+}
+
+/* 抽屉打开时滑入 */
+.drawer-container.open .drawer-nav {
+  transform: translateX(0);
+}
+
+/* 抽屉内导航链接样式 - 继承 .nav 的样式 */
+.drawer-nav .nav-link {
+  display: block;
+  padding: 0.5rem 0.75rem;
+  color: var(--color-link);
+  text-decoration: none;
+  font-weight: 600;
+  border-radius: 6px;
+  transition: background-color 0.15s ease;
+}
+
+.drawer-nav .nav-link:hover {
+  background: var(--color-bg-hover);
+  text-decoration: none;
+}
+
+.drawer-nav .nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.drawer-nav .nav-sub {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding-left: 0.75rem;
+  border-left: 1px solid var(--color-border);
+}
+
+.drawer-nav .nav-sub-link {
+  font-weight: 500;
 }

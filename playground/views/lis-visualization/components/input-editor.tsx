@@ -18,6 +18,33 @@ export interface InputEditorProps {
 /** 默认示例数组 */
 const defaultInput = [2, 1, 3, 0, 4]
 
+/**
+ * 去重处理：保留第一次出现的值，后续重复的替换为 -1。
+ * -1 本身不参与去重（可以有多个 -1）。
+ */
+function deduplicateInput(numbers: number[]): number[] {
+  const seen = new Set<number>()
+  const result: number[] = []
+
+  for (const number_ of numbers) {
+    /* -1 是占位符，不参与去重 */
+    if (number_ === -1) {
+      result.push(-1)
+      continue
+    }
+
+    if (seen.has(number_)) {
+      /* 重复值替换为 -1 */
+      result.push(-1)
+    } else {
+      seen.add(number_)
+      result.push(number_)
+    }
+  }
+
+  return result
+}
+
 /** 解析输入字符串为数字数组 */
 function parseInput(
   value: string,
@@ -39,25 +66,43 @@ function parseInput(
       return { success: false, error: `无效的数字: "${part}"` }
     }
 
+    /* 只允许 -1 和非负整数 */
+    if (number_ < -1) {
+      return { success: false, error: `不支持的负数: "${part}"（仅支持 -1 表示新节点）` }
+    }
+
+    if (!Number.isInteger(number_)) {
+      return { success: false, error: `不支持小数: "${part}"` }
+    }
+
     numbers.push(number_)
   }
 
-  return { success: true, data: numbers }
+  /* 去重：重复值替换为 -1，符合真实 diff 场景 */
+  return { success: true, data: deduplicateInput(numbers) }
 }
 
-/** 生成随机数字序列 */
+/** 生成随机数字序列（无重复值） */
 function generateRandomSequence(): number[] {
   // 随机长度 5-10
   const length = Math.floor(Math.random() * 6) + 5
   const result: number[] = []
+  const used = new Set<number>()
 
   for (let i = 0; i < length; i++) {
     // 随机决定是否生成 -1（约 10% 概率）
     if (Math.random() < 0.1) {
       result.push(-1)
     } else {
-      // 生成 0-20 的随机数
-      result.push(Math.floor(Math.random() * 21))
+      // 生成不重复的 0-20 随机数
+      let number_: number
+
+      do {
+        number_ = Math.floor(Math.random() * 21)
+      } while (used.has(number_))
+
+      used.add(number_)
+      result.push(number_)
     }
   }
 
@@ -113,7 +158,7 @@ export const InputEditor: SetupComponent<InputEditorProps> = (props) => {
     return (
       <div class={styles.inputEditor}>
         <label class={styles.inputLabel}>
-          输入数组（逗号或空格分隔，-1 表示跳过）
+          输入数组（逗号或空格分隔，-1 表示新节点，重复值自动转为 -1）
           <div class={styles.inputRow}>
             <input
               type="text"

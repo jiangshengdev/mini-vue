@@ -170,6 +170,11 @@
   background: var(--color-success-light);
 }
 
+/* 新节点（-1）的特殊样式 */
+.newNodeCell {
+  border-style: dashed;
+}
+
 /* 当前高亮且是结果的单元格 */
 .currentCell.resultCell {
   border-color: var(--color-success);

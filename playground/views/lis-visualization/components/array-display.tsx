@@ -40,10 +40,13 @@ export const ArrayDisplay: SetupComponent<ArrayDisplayProps> = (props) => {
             const isCurrent = index === props.currentIndex
             const isInResult = props.showResult && props.result.includes(index)
 
+            const isNewNode = value === -1
+
             const cellClasses = [
               styles.arrayCell,
               isCurrent ? styles.currentCell : '',
               isInResult ? styles.resultCell : '',
+              isNewNode ? styles.newNodeCell : '',
             ]
               .filter(Boolean)
               .join(' ')

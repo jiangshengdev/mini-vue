@@ -4,6 +4,7 @@
 
 /** 步骤操作类型 */
 export type StepAction =
+  | { type: 'init' }
   | { type: 'append'; index: number }
   | { type: 'replace'; position: number; index: number }
   | { type: 'skip'; index: number }

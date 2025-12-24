@@ -37,23 +37,27 @@ describe('traceLIS 属性测试', () => {
   )
 
   /**
-   * Feature: lis-visualization, Property 2: 步骤数量等于输入长度
+   * Feature: lis-visualization, Property 2: 步骤数量等于输入长度加一
    * Validates: Requirements 1.1
    *
-   * 对于任意输入数组，追踪结果的步骤数量应该等于输入数组的长度。
-   * 每个输入元素都会产生一个对应的步骤。
+   * 对于任意输入数组，追踪结果的步骤数量应该等于输入数组的长度加一。
+   * 第 0 步是初始状态，后续每个输入元素都会产生一个对应的步骤。
    */
-  test.prop([lisInputArbitrary], { numRuns: 100 })('Property 2: 步骤数量等于输入长度', (input) => {
-    const traceResult = traceLongestIncreasingSubsequence(input)
+  test.prop([lisInputArbitrary], { numRuns: 100 })(
+    'Property 2: 步骤数量等于输入长度加一',
+    (input) => {
+      const traceResult = traceLongestIncreasingSubsequence(input)
 
-    expect(traceResult.steps.length).toBe(input.length)
-  })
+      expect(traceResult.steps.length).toBe(input.length + 1)
+    },
+  )
 
   /**
    * Feature: lis-visualization, Property 3: 操作类型正确性
    * Validates: Requirements 1.2, 1.3, 1.4
    *
    * 对于任意追踪步骤：
+   * - 第 0 步的 action.type 应该是 "init"
    * - 当 currentValue === -1 时，action.type 应该是 "skip"
    * - 当值被追加到序列末尾时，action.type 应该是 "append"
    * - 当值替换序列中的位置时，action.type 应该是 "replace"
@@ -62,13 +66,20 @@ describe('traceLIS 属性测试', () => {
     const traceResult = traceLongestIncreasingSubsequence(input)
 
     for (const step of traceResult.steps) {
+      /* 第 0 步是初始化 */
+      if (step.stepIndex === 0) {
+        expect(step.action.type).toBe('init')
+
+        continue
+      }
+
       /* 当值为 -1 时，操作类型必须是 skip */
       if (step.currentValue === -1) {
         expect(step.action.type).toBe('skip')
       }
 
-      /* 验证操作类型只能是三种之一 */
-      expect(['append', 'replace', 'skip']).toContain(step.action.type)
+      /* 验证操作类型只能是四种之一 */
+      expect(['init', 'append', 'replace', 'skip']).toContain(step.action.type)
 
       /* 验证 action 中的 index 与 currentIndex 一致 */
       if (step.action.type === 'append' || step.action.type === 'skip') {

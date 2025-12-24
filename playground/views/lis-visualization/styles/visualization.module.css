@@ -189,6 +189,46 @@
   color: var(--color-text-primary);
 }
 
+/* 高亮样式 - 用于显示当前操作的改动 */
+.highlightAppend {
+  background: var(--color-success);
+  color: var(--color-bg-page);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+}
+
+.highlightReplace {
+  background: var(--color-warning);
+  color: var(--color-bg-page);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+}
+
+.highlightSkip {
+  background: var(--color-border-medium);
+  color: var(--color-bg-page);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+}
+
+/* Chain 节点高亮 */
+.chainNode.highlightAppend {
+  border-color: var(--color-success);
+  background: var(--color-success-light);
+  box-shadow: 0 0 0 2px var(--color-success-shadow);
+}
+
+.chainNode.highlightReplace {
+  border-color: var(--color-warning);
+  background: var(--color-warning-light);
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+}
+
+.chainNode.highlightSkip {
+  border-color: var(--color-border-medium);
+  background: var(--color-bg-section);
+}
+
 .chainView {
   margin-top: 0.5rem;
   padding: 0.75rem;
@@ -312,6 +352,16 @@
 
 .actionSkip .actionType {
   background: var(--color-border-medium);
+  color: var(--color-bg-page);
+}
+
+.actionInit {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.actionInit .actionType {
+  background: var(--color-primary);
   color: var(--color-bg-page);
 }
 

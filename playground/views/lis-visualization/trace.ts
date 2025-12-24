@@ -20,6 +20,16 @@ export function traceLongestIncreasingSubsequence(indexes: number[]): TraceResul
   /* 每个索引的前驱位置（-1 代表无前驱） */
   const predecessors = Array.from<number>({ length: indexes.length }).fill(-1)
 
+  /* 第 0 步：记录初始状态 */
+  steps.push({
+    stepIndex: 0,
+    currentIndex: -1,
+    currentValue: -1,
+    action: { type: 'init' },
+    sequence: [],
+    predecessors: [...predecessors],
+  })
+
   /* 逐项遍历输入数组，记录每一步的状态变化 */
   for (let currentIndex = 0; currentIndex < indexes.length; currentIndex += 1) {
     const currentValue = indexes[currentIndex]
@@ -29,7 +39,7 @@ export function traceLongestIncreasingSubsequence(indexes: number[]): TraceResul
 
     /* 记录当前步骤的快照（深拷贝 sequence 和 predecessors） */
     steps.push({
-      stepIndex: currentIndex,
+      stepIndex: currentIndex + 1,
       currentIndex,
       currentValue,
       action,

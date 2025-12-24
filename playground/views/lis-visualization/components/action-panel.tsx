@@ -18,6 +18,10 @@ export interface ActionPanelProps {
 /** 根据操作类型生成描述文本 */
 function getActionDescription(action: StepAction, currentValue: number): string {
   switch (action.type) {
+    case 'init': {
+      return '算法初始化，sequence 为空，predecessors 全为 -1'
+    }
+
     case 'append': {
       return `追加索引 ${action.index}（值 ${currentValue}）到 sequence`
     }
@@ -35,6 +39,10 @@ function getActionDescription(action: StepAction, currentValue: number): string 
 /** 根据操作类型获取样式类名 */
 function getActionClass(action: StepAction): string {
   switch (action.type) {
+    case 'init': {
+      return styles.actionInit
+    }
+
     case 'append': {
       return styles.actionAppend
     }
@@ -51,7 +59,7 @@ function getActionClass(action: StepAction): string {
 
 export const ActionPanel: SetupComponent<ActionPanelProps> = (props) => {
   return () => {
-    if (!props.action || props.currentValue === undefined) {
+    if (!props.action) {
       return (
         <div class={styles.actionPanel}>
           <h3 class={styles.sectionTitle}>操作</h3>
@@ -60,10 +68,11 @@ export const ActionPanel: SetupComponent<ActionPanelProps> = (props) => {
       )
     }
 
-    const description = getActionDescription(props.action, props.currentValue)
+    const description = getActionDescription(props.action, props.currentValue ?? -1)
     const actionClass = getActionClass(props.action)
 
     const actionTypeMap: Record<string, string> = {
+      init: '初始化',
       append: '追加',
       replace: '替换',
       skip: '跳过',

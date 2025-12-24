@@ -55,7 +55,7 @@ export const StepControls: SetupComponent<StepControlsProps> = (props) => {
           </button>
 
           <span class={styles.stepIndicator}>
-            第 {props.currentStep + 1} 步 / 共 {props.totalSteps} 步
+            第 {props.currentStep} 步 / 共 {props.totalSteps - 1} 步
           </span>
 
           <button

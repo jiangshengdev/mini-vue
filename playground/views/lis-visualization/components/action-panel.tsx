@@ -13,6 +13,10 @@ export interface ActionPanelProps {
   action: StepAction | undefined
   /** 当前处理的值 */
   currentValue: number | undefined
+  /** 当前 sequence 状态 */
+  sequence: number[]
+  /** 当前 predecessors 状态 */
+  predecessors: number[]
 }
 
 /** 根据操作类型生成描述文本 */
@@ -57,6 +61,45 @@ function getActionClass(action: StepAction): string {
   }
 }
 
+/** 生成变更明细 */
+function getChangeDetails(
+  action: StepAction,
+  sequence: number[],
+  predecessors: number[],
+): { sequenceChange: string; predecessorsChange: string } {
+  switch (action.type) {
+    case 'init': {
+      return {
+        sequenceChange: 'sequence = []',
+        predecessorsChange: `predecessors = [${predecessors.join(', ')}]`,
+      }
+    }
+
+    case 'append': {
+      const pos = sequence.length - 1
+
+      return {
+        sequenceChange: `sequence[${pos}] = ${action.index}`,
+        predecessorsChange: `predecessors[${action.index}] = ${predecessors[action.index]}`,
+      }
+    }
+
+    case 'replace': {
+      return {
+        sequenceChange: `sequence[${action.position}] = ${action.index}`,
+        predecessorsChange: `predecessors[${action.index}] = ${predecessors[action.index]}`,
+      }
+    }
+
+    case 'skip': {
+      return {
+        sequenceChange: '（无变更）',
+        predecessorsChange: '（无变更）',
+      }
+    }
+  }
+}
+
 export const ActionPanel: SetupComponent<ActionPanelProps> = (props) => {
   return () => {
     if (!props.action) {
@@ -70,6 +113,11 @@ export const ActionPanel: SetupComponent<ActionPanelProps> = (props) => {
 
     const description = getActionDescription(props.action, props.currentValue ?? -1)
     const actionClass = getActionClass(props.action)
+    const { sequenceChange, predecessorsChange } = getChangeDetails(
+      props.action,
+      props.sequence,
+      props.predecessors,
+    )
 
     const actionTypeMap: Record<string, string> = {
       init: '初始化',
@@ -84,6 +132,10 @@ export const ActionPanel: SetupComponent<ActionPanelProps> = (props) => {
         <div class={`${styles.actionContent} ${actionClass}`}>
           <span class={styles.actionType}>{actionTypeMap[props.action.type]}</span>
           <span class={styles.actionDescription}>{description}</span>
+        </div>
+        <div class={styles.actionDetails}>
+          <code class={styles.actionDetailCode}>{sequenceChange}</code>
+          <code class={styles.actionDetailCode}>{predecessorsChange}</code>
         </div>
       </div>
     )

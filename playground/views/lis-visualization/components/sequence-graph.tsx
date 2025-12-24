@@ -41,7 +41,9 @@ function buildAllChains(sequence: number[], predecessors: number[]): number[][] 
 
 /** 根据操作类型获取高亮样式类名 */
 function getHighlightClass(action: StepAction | undefined): string {
-  if (!action) return ''
+  if (!action) {
+    return ''
+  }
 
   switch (action.type) {
     case 'init': {
@@ -69,8 +71,8 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
     const highlightClass = getHighlightClass(action)
 
     // 确定需要高亮的位置
-    let highlightSeqPosition = -1 // sequence 数组中的位置
-    let highlightPredIndex = -1 // predecessors 数组中的索引
+    let highlightSeqPosition = -1 // Sequence 数组中的位置
+    let highlightPredIndex = -1 // Predecessors 数组中的索引
 
     if (action) {
       if (action.type === 'append') {
@@ -139,8 +141,7 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
           <div class={styles.chainsContainer}>
             {chains.map((chain, chainIndex) => {
               // 判断这条链是否包含当前操作的索引
-              const isHighlightChain =
-                highlightPredIndex >= 0 && chain.includes(highlightPredIndex)
+              const isHighlightChain = highlightPredIndex >= 0 && chain.includes(highlightPredIndex)
 
               return (
                 <div key={chainIndex} class={styles.chain}>

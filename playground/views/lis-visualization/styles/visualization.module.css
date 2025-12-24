@@ -365,6 +365,24 @@
   color: var(--color-bg-page);
 }
 
+/* 操作明细 */
+.actionDetails {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.actionDetailCode {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--color-text-primary);
+  background: var(--color-bg-section);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  display: block;
+}
+
 /* 步骤控制组件 */
 .stepControls {
   display: flex;

@@ -256,7 +256,12 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
             action={step?.action}
           />
 
-          <ActionPanel action={step?.action} currentValue={step?.currentValue} />
+          <ActionPanel
+            action={step?.action}
+            currentValue={step?.currentValue}
+            sequence={step?.sequence ?? []}
+            predecessors={step?.predecessors ?? []}
+          />
         </main>
       </div>
     )

@@ -177,32 +177,35 @@ describe('StateManager resetState 属性测试', () => {
    *
    * resetState() 应该将所有状态重置到初始值
    */
-  test.prop(
-    [
-      inputArrayArbitrary,
-      inputArrayArbitrary,
-      fc.boolean(),
-      speedArbitrary,
-      chainIndexesArbitrary,
-      chainInfoArbitrary,
-      fc.boolean(),
-      fc.boolean(),
-      fc.integer({ min: 1, max: 100 }),
-    ],
-    { numRuns: 100 },
-  )(
+
+  // 将多个 arbitrary 组合成一个 record，避免箭头函数参数过多
+  const resetStateArbitrary = fc.record({
+    defaultInput: inputArrayArbitrary,
+    newInput: inputArrayArbitrary,
+    isPlaying: fc.boolean(),
+    speed: speedArbitrary,
+    chainIndexes: chainIndexesArbitrary,
+    chainInfo: chainInfoArbitrary,
+    isSequenceHovered: fc.boolean(),
+    isPredecessorsHovered: fc.boolean(),
+    version: fc.integer({ min: 1, max: 100 }),
+  })
+
+  test.prop([resetStateArbitrary], { numRuns: 100 })(
     'Property 1: resetState 正确重置所有状态',
-    (
-      defaultInput,
-      newInput,
-      isPlaying,
-      speed,
-      chainIndexes,
-      chainInfo,
-      isSequenceHovered,
-      isPredecessorsHovered,
-      version,
-    ) => {
+    (properties) => {
+      const {
+        defaultInput,
+        newInput,
+        isPlaying,
+        speed,
+        chainIndexes,
+        chainInfo,
+        isSequenceHovered,
+        isPredecessorsHovered,
+        version,
+      } = properties
+
       const stateManager = createStateManager(defaultInput)
       const state = stateManager.getState()
 

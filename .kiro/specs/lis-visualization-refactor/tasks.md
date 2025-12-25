@@ -6,8 +6,8 @@
 
 ## Tasks
 
-- [ ] 1. 增强类型定义
-  - [ ] 1.1 在 `types.ts` 中添加新模块的接口定义
+- [x] 1. 增强类型定义
+  - [x] 1.1 在 `types.ts` 中添加新模块的接口定义
     - 添加 `StateRef<T>` 接口
     - 添加 `VisualizationState` 接口
     - 添加 `StateManager` 接口

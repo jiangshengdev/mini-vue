@@ -6,7 +6,7 @@ import {
 } from '../array/index.ts'
 import type { ReactiveTarget } from '../contracts/index.ts'
 import { iterateDependencyKey, rawFlag, reactiveFlag, triggerOpTypes } from '../contracts/index.ts'
-import { reactive } from '../reactive.ts'
+import { reactive, readonly } from '../reactive.ts'
 import { isRef } from '../ref/api.ts'
 import { track, trigger } from './operations.ts'
 import { withoutTracking } from './tracking.ts'
@@ -63,8 +63,12 @@ function createGetter(isReadonly: boolean, shallow: boolean): Getter {
     }
 
     if (isObject(rawValue)) {
-      /* `shallow` 直接返回原值，深层模式才递归代理 */
-      return shallow ? rawValue : reactive(rawValue)
+      /* `shallow` 直接返回原值，深层模式递归创建对应代理 */
+      if (shallow) {
+        return rawValue
+      }
+
+      return isReadonly ? readonly(rawValue) : reactive(rawValue)
     }
 
     return rawValue
@@ -183,6 +187,14 @@ export const shallowReactiveHandlers = {
 
 export const shallowReadonlyHandlers = {
   get: createGetter(true, true),
+  set: readonlySet,
+  deleteProperty: readonlyDeleteProperty,
+  has: mutableHas,
+  ownKeys: mutableOwnKeys,
+} satisfies ProxyHandler<ReactiveTarget>
+
+export const readonlyHandlers = {
+  get: createGetter(true, false),
   set: readonlySet,
   deleteProperty: readonlyDeleteProperty,
   has: mutableHas,

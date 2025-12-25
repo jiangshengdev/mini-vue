@@ -1,6 +1,6 @@
 import { describe, expect, expectTypeOf, it } from 'vitest'
 import type { Ref } from '@/index.ts'
-import { effect, isReactive, isRef, reactive, ref, toRaw } from '@/index.ts'
+import { effect, isReactive, isRef, reactive, readonly, ref, toRaw } from '@/index.ts'
 import { reactivityUnsupportedType } from '@/messages/index.ts'
 import type { PlainObject } from '@/shared/index.ts'
 
@@ -192,5 +192,36 @@ describe('reactive', () => {
     /* 若 set 内部读旧值导致 getter 收集依赖，则这里会触发 writeOnly 重跑。 */
     state._v = 2
     expect(runs).toBe(1)
+  })
+})
+
+describe('readonly', () => {
+  it('创建只读代理并阻止写入', () => {
+    const raw = { foo: 1 }
+    const proxy = readonly(raw)
+
+    // @ts-expect-error 只读代理
+    proxy.foo = 2
+
+    expect(proxy.foo).toBe(1)
+    expect(raw.foo).toBe(1)
+  })
+
+  it('深层对象同样保持只读', () => {
+    const raw = { nested: { count: 1 } }
+    const proxy = readonly(raw)
+
+    // @ts-expect-error 只读代理
+    proxy.nested.count = 2
+
+    expect(raw.nested.count).toBe(1)
+  })
+
+  it('重复调用返回同一代理实例', () => {
+    const raw = { foo: 1 }
+    const proxy1 = readonly(raw)
+    const proxy2 = readonly(raw)
+
+    expect(proxy1).toBe(proxy2)
   })
 })

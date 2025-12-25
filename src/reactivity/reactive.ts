@@ -1,10 +1,11 @@
 /**
- * 提供 `reactive`/`shallowReactive`/`shallowReadonly`，统一在此文件内复用缓存与创建逻辑。
+ * 提供 `reactive`/`readonly`/`shallowReactive`/`shallowReadonly`，统一在此文件内复用缓存与创建逻辑。
  */
 import type { ReactiveTarget } from './contracts/index.ts'
 import { reactiveFlag } from './contracts/index.ts'
 import {
   mutableHandlers,
+  readonlyHandlers,
   shallowReactiveHandlers,
   shallowReadonlyHandlers,
 } from './internals/index.ts'
@@ -17,6 +18,7 @@ import { isObject } from '@/shared/index.ts'
 type ProxyCache = WeakMap<ReactiveTarget, ReactiveTarget>
 
 const reactiveCache: ProxyCache = new WeakMap()
+const readonlyCache: ProxyCache = new WeakMap()
 const shallowReactiveCache: ProxyCache = new WeakMap()
 const shallowReadonlyCache: ProxyCache = new WeakMap()
 
@@ -92,6 +94,14 @@ export function shallowReadonly<T>(target: T): Readonly<T>
 
 export function shallowReadonly(target: unknown): unknown {
   return createProxy(target, shallowReadonlyHandlers, shallowReadonlyCache)
+}
+
+export function readonly<T extends PlainObject>(target: T): Readonly<T>
+export function readonly<T extends readonly unknown[]>(target: T): Readonly<T>
+export function readonly<T>(target: T): Readonly<T>
+
+export function readonly(target: unknown): unknown {
+  return createProxy(target, readonlyHandlers, readonlyCache)
 }
 
 /**

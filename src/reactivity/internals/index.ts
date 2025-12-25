@@ -1,5 +1,6 @@
 export {
   mutableHandlers,
+  readonlyHandlers,
   shallowReactiveHandlers,
   shallowReadonlyHandlers,
 } from './base-handlers.ts'

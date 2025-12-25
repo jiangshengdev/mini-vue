@@ -12,7 +12,7 @@ export {
 } from './effect-scope.ts'
 export type { EffectScope } from './effect-scope.ts'
 export { effect, effectStack, ReactiveEffect } from './effect.ts'
-export { isReactive, reactive, shallowReactive, shallowReadonly } from './reactive.ts'
+export { isReactive, reactive, readonly, shallowReactive, shallowReadonly } from './reactive.ts'
 export type {
   ComputedGetter,
   ComputedSetter,

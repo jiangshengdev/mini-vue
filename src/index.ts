@@ -11,6 +11,7 @@ export {
   getCurrentScope,
   isReactive,
   isRef,
+  readonly,
   onScopeDispose,
   reactive,
   ref,

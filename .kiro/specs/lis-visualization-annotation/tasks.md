@@ -39,30 +39,30 @@
     - 为主组件和初始化逻辑添加注释
     - _Requirements: 3.1, 5.1, 9.1, 10.1_
 
-- [ ] 3. 控制器模块注释
-  - [ ] 3.1 为 `controllers/index.ts` 添加/更新注释
+- [x] 3. 控制器模块注释
+  - [x] 3.1 为 `controllers/index.ts` 添加/更新注释
     - 检查并清理无效注释
     - _Requirements: 9.1_
 
-  - [ ] 3.2 为 `controllers/state-manager.ts` 添加/更新注释
+  - [x] 3.2 为 `controllers/state-manager.ts` 添加/更新注释
     - 检查并清理无效注释
     - 更新过期注释
     - 为状态管理函数添加职责注释
     - _Requirements: 3.1, 9.1, 10.1_
 
-  - [ ] 3.3 为 `controllers/playback-controller.ts` 添加/更新注释
+  - [x] 3.3 为 `controllers/playback-controller.ts` 添加/更新注释
     - 检查并清理无效注释
     - 更新过期注释
     - 为播放控制函数添加职责注释
     - _Requirements: 3.1, 9.1, 10.1_
 
-  - [ ] 3.4 为 `controllers/keyboard-handler.ts` 添加/更新注释
+  - [x] 3.4 为 `controllers/keyboard-handler.ts` 添加/更新注释
     - 检查并清理无效注释
     - 更新过期注释
     - 为键盘处理函数添加职责注释
     - _Requirements: 3.1, 9.1, 10.1_
 
-  - [ ] 3.5 为 `controllers/hover-manager.ts` 添加/更新注释
+  - [x] 3.5 为 `controllers/hover-manager.ts` 添加/更新注释
     - 检查并清理无效注释
     - 更新过期注释
     - 为 hover 管理函数添加职责注释

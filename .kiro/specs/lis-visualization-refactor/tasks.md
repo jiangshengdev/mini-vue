@@ -28,13 +28,13 @@
     - **Property 1: 状态设置后获取一致性**
     - **Validates: Requirements 1.5**
 
-- [ ] 3. 创建播放控制器模块
-  - [ ] 3.1 创建 `controllers/playback-controller.ts`
+- [x] 3. 创建播放控制器模块
+  - [x] 3.1 创建 `controllers/playback-controller.ts`
     - 实现 `createPlaybackController` 函数
     - 实现 `start()`, `stop()`, `toggle()`, `updateSpeed()`, `dispose()` 方法
     - 处理自动停止逻辑（到达最后一步时）
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6_
-  - [ ] 3.2 编写播放控制器单元测试
+  - [x] 3.2 编写播放控制器单元测试
     - 使用 fake timers 测试定时器行为
     - 测试自动停止逻辑
     - _Requirements: 2.2, 2.3, 2.4, 2.5_

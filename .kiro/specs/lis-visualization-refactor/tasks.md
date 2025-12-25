@@ -18,13 +18,13 @@
     - 添加 `Disposable` 基础接口
     - _Requirements: 7.1, 7.2, 7.3, 7.4_
 
-- [ ] 2. 创建状态管理器模块
-  - [ ] 2.1 创建 `controllers/state-manager.ts`
+- [x] 2. 创建状态管理器模块
+  - [x] 2.1 创建 `controllers/state-manager.ts`
     - 实现 `createStateManager` 函数
     - 管理所有响应式状态：input, isPlaying, speed, hoveredChainIndexes, hoveredChainInfo, isSequenceHovered, isPredecessorsHovered, navigatorVersion
     - 实现 `getState()`, `resetState()`, `incrementVersion()` 方法
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_
-  - [ ] 2.2 编写状态管理器属性测试
+  - [x] 2.2 编写状态管理器属性测试
     - **Property 1: 状态设置后获取一致性**
     - **Validates: Requirements 1.5**
 

@@ -44,31 +44,31 @@
     - 导出所有工具函数
     - _Requirements: 2.1, 3.1, 5.1_
 
-- [ ] 2. Checkpoint - 验证工具模块
+- [x] 2. Checkpoint - 验证工具模块
   - 运行 `pnpm run typecheck` 验证类型正确性
   - 运行新增的属性测试
   - 确保所有测试通过，如有问题请询问用户
 
-- [ ] 3. 创建 SequenceGraph 子组件
-  - [ ] 3.1 创建 `components/sequence-graph/highlighted-array.tsx`
+- [x] 3. 创建 SequenceGraph 子组件
+  - [x] 3.1 创建 `components/sequence-graph/highlighted-array.tsx`
     - 实现 `HighlightedArray` 组件
     - 从 `sequence-graph.tsx` 提取 `renderHighlightedArray` 逻辑
     - _Requirements: 1.1_
-  - [ ] 3.2 创建 `components/sequence-graph/sequence-section.tsx`
+  - [x] 3.2 创建 `components/sequence-graph/sequence-section.tsx`
     - 实现 `SequenceSection` 组件
     - 从 `sequence-graph.tsx` 提取 `renderSequenceSection` 逻辑
     - 使用 `HighlightedArray` 组件
     - _Requirements: 1.2_
-  - [ ] 3.3 创建 `components/sequence-graph/predecessor-section.tsx`
+  - [x] 3.3 创建 `components/sequence-graph/predecessor-section.tsx`
     - 实现 `PredecessorSection` 组件
     - 从 `sequence-graph.tsx` 提取 `renderPredecessorSection` 逻辑
     - 使用 `HighlightedArray` 组件
     - _Requirements: 1.3_
-  - [ ] 3.4 创建 `components/sequence-graph/chain-view.tsx`
+  - [x] 3.4 创建 `components/sequence-graph/chain-view.tsx`
     - 实现 `ChainView` 组件
     - 从 `sequence-graph.tsx` 提取 `renderChainView` 逻辑
     - _Requirements: 1.4_
-  - [ ] 3.5 创建 `components/sequence-graph/index.ts`
+  - [x] 3.5 创建 `components/sequence-graph/index.ts`
     - 导出所有子组件
     - _Requirements: 1.5_
 

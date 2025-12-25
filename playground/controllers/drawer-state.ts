@@ -5,8 +5,8 @@
  * 该模块被提取为独立模块以便于测试。
  */
 
-import { state } from '@/index.ts'
 import type { State } from '@/index.ts'
+import { state } from '@/index.ts'
 
 /**
  * 桌面端断点宽度

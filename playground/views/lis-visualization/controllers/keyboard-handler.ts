@@ -27,15 +27,7 @@ function isInputFocused(target: EventTarget | null): boolean {
  * @returns 键盘处理器实例
  */
 export function createKeyboardHandler(actions: KeyboardHandlerActions): KeyboardHandler {
-  const {
-    onPrevious,
-    onNext,
-    onReset,
-    onGoToEnd,
-    onTogglePlay,
-    onSpeedUp,
-    onSpeedDown,
-  } = actions
+  const { onPrevious, onNext, onReset, onGoToEnd, onTogglePlay, onSpeedUp, onSpeedDown } = actions
 
   /**
    * 键盘事件处理函数

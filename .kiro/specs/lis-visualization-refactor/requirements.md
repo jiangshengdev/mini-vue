@@ -61,7 +61,7 @@
 5. WHEN End is pressed, THE Keyboard_Handler SHALL navigate to the last step
 6. WHEN Space is pressed, THE Keyboard_Handler SHALL toggle auto-play
 7. WHEN + or = is pressed, THE Keyboard_Handler SHALL increase playback speed (decrease interval)
-8. WHEN - or _ is pressed, THE Keyboard_Handler SHALL decrease playback speed (increase interval)
+8. WHEN - or \_ is pressed, THE Keyboard_Handler SHALL decrease playback speed (increase interval)
 9. WHEN focus is on an input element, THE Keyboard_Handler SHALL ignore keyboard shortcuts
 10. THE Keyboard_Handler SHALL provide a `dispose` method to remove event listeners
 

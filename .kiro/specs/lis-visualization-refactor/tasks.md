@@ -43,7 +43,7 @@
   - [x] 4.1 创建 `controllers/keyboard-handler.ts`
     - 实现 `createKeyboardHandler` 函数
     - 实现 `register()`, `dispose()` 方法
-    - 处理所有快捷键：ArrowLeft, ArrowRight, Home, End, Space, +/=, -/_
+    - 处理所有快捷键：ArrowLeft, ArrowRight, Home, End, Space, +/=, -/\_
     - 实现焦点检测逻辑（输入框内忽略快捷键）
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 3.10_
   - [x] 4.2 编写键盘处理器单元测试
@@ -51,15 +51,15 @@
     - 测试焦点检测逻辑
     - _Requirements: 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9_
 
-- [ ] 5. 创建 Hover 管理器模块
-  - [ ] 5.1 创建 `controllers/hover-manager.ts`
+- [x] 5. 创建 Hover 管理器模块
+  - [x] 5.1 创建 `controllers/hover-manager.ts`
     - 实现 `createHoverManager` 函数
     - 实现 `handleChainHover()`, `handleChainLeave()` 方法
     - 实现 `handleSequenceHover()`, `handleSequenceLeave()` 方法
     - 实现 `handlePredecessorsHover()`, `handlePredecessorsLeave()` 方法
     - 实现 `refreshHoverState()` 方法
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
-  - [ ] 5.2 编写 Hover 管理器属性测试
+  - [x] 5.2 编写 Hover 管理器属性测试
     - **Property 2: Hover 状态更新正确性**
     - **Validates: Requirements 4.2**
 

@@ -14,7 +14,10 @@ import { createStateManager } from '../controllers/state-manager.ts'
 /**
  * 生成有效的输入数组（0-20 个整数）
  */
-const inputArrayArbitrary = fc.array(fc.integer({ min: -1000, max: 1000 }), { minLength: 0, maxLength: 20 })
+const inputArrayArbitrary = fc.array(fc.integer({ min: -1000, max: 1000 }), {
+  minLength: 0,
+  maxLength: 20,
+})
 
 /**
  * 生成有效的播放速度（100-2000 毫秒）
@@ -24,15 +27,17 @@ const speedArbitrary = fc.integer({ min: 100, max: 2000 })
 /**
  * 生成有效的链索引数组
  */
-const chainIndexesArbitrary = fc.array(fc.integer({ min: 0, max: 100 }), { minLength: 0, maxLength: 10 })
+const chainIndexesArbitrary = fc.array(fc.integer({ min: 0, max: 100 }), {
+  minLength: 0,
+  maxLength: 10,
+})
 
 /**
  * 生成有效的链信息
  */
-const chainInfoArbitrary = fc.option(
-  fc.record({ chainIndex: fc.integer({ min: 0, max: 100 }) }),
-  { nil: undefined },
-)
+const chainInfoArbitrary = fc.option(fc.record({ chainIndex: fc.integer({ min: 0, max: 100 }) }), {
+  nil: undefined,
+})
 
 describe('StateManager 属性测试', () => {
   /**

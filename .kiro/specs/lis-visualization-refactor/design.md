@@ -313,15 +313,13 @@ interface Disposable {
 }
 ```
 
-
-
 ## Correctness Properties
 
-*A property is a characteristic or behavior that should hold true across all valid executions of a system—essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
+_A property is a characteristic or behavior that should hold true across all valid executions of a system—essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees._
 
 ### Property 1: 状态设置后获取一致性
 
-*For any* state value of any supported type, when `set(value)` is called on a state reference, immediately calling `get()` SHALL return the same value.
+_For any_ state value of any supported type, when `set(value)` is called on a state reference, immediately calling `get()` SHALL return the same value.
 
 **Validates: Requirements 1.5**
 
@@ -329,7 +327,7 @@ This is a round-trip property that ensures the reactive state system correctly s
 
 ### Property 2: Hover 状态更新正确性
 
-*For any* chain index list and chain index, when `handleChainHover(indexes, chainIndex)` is called, the `hoveredChainIndexes` state SHALL contain exactly the provided indexes, and `hoveredChainInfo` SHALL contain the provided chainIndex.
+_For any_ chain index list and chain index, when `handleChainHover(indexes, chainIndex)` is called, the `hoveredChainIndexes` state SHALL contain exactly the provided indexes, and `hoveredChainInfo` SHALL contain the provided chainIndex.
 
 **Validates: Requirements 4.2**
 
@@ -337,7 +335,7 @@ This property ensures that hover state updates are correctly propagated to the u
 
 ### Property 3: 现有属性测试兼容性
 
-*For any* input that passes the existing property tests (navigator and trace tests), the refactored implementation SHALL produce identical results.
+_For any_ input that passes the existing property tests (navigator and trace tests), the refactored implementation SHALL produce identical results.
 
 **Validates: Requirements 8.2, 8.5**
 
@@ -424,7 +422,7 @@ export default defineConfig({
   test: {
     // 属性测试最少运行 100 次
     // fast-check 默认配置
-  }
+  },
 })
 ```
 

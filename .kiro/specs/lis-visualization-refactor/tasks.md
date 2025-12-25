@@ -63,8 +63,8 @@
     - **Property 2: Hover 状态更新正确性**
     - **Validates: Requirements 4.2**
 
-- [ ] 6. 创建控制器导出模块
-  - [ ] 6.1 创建 `controllers/index.ts`
+- [x] 6. 创建控制器导出模块
+  - [x] 6.1 创建 `controllers/index.ts`
     - 导出所有控制器创建函数
     - 导出相关类型
     - _Requirements: 5.1_

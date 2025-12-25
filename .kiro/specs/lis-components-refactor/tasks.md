@@ -6,29 +6,29 @@
 
 ## Tasks
 
-- [ ] 1. 创建工具模块
-  - [ ] 1.1 创建 `utils/chain-utils.ts`
+- [x] 1. 创建工具模块
+  - [x] 1.1 创建 `utils/chain-utils.ts`
     - 实现 `buildChain` 函数
     - 实现 `buildAllChains` 函数
     - 实现 `computeChangedNodesByChain` 函数
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
-  - [ ] 1.2 编写 chain-utils 属性测试
+  - [x] 1.2 编写 chain-utils 属性测试
     - **Property 1: buildChain 返回完整的前驱链**
     - **Property 2: buildAllChains 返回正确数量的链**
     - **Validates: Requirements 2.3, 2.4**
-  - [ ] 1.3 创建 `utils/input-utils.ts`
+  - [x] 1.3 创建 `utils/input-utils.ts`
     - 从 `input-editor.tsx` 提取 `parseInput` 函数
     - 从 `input-editor.tsx` 提取 `deduplicateInput` 函数
     - 从 `input-editor.tsx` 提取 `normalizeSequence` 函数
     - 从 `input-editor.tsx` 提取 `generateRandomSequence` 函数
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9_
-  - [ ] 1.4 编写 input-utils 属性测试
+  - [x] 1.4 编写 input-utils 属性测试
     - **Property 3: parseInput 解析往返一致性**
     - **Property 4: deduplicateInput 保持首次出现**
     - **Property 5: normalizeSequence 映射为连续整数**
     - **Property 6: generateRandomSequence 返回有效归一化序列**
     - **Validates: Requirements 3.5, 3.6, 3.7, 3.8, 3.9**
-  - [ ] 1.5 创建 `utils/highlight-utils.ts`
+  - [x] 1.5 创建 `utils/highlight-utils.ts`
     - 从 `sequence-graph.tsx` 提取 `getHighlightClass` 函数
     - 从 `sequence-graph.tsx` 提取 `getSecondaryHighlightClass` 函数
     - 从 `sequence-graph.tsx` 提取 `getSeqChangeIndicator` 函数
@@ -37,10 +37,10 @@
     - 从 `sequence-graph.tsx` 提取 `computePredChangeIndicator` 函数
     - 从 `sequence-graph.tsx` 提取 `getNodeClassName` 函数
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6_
-  - [ ] 1.6 编写 highlight-utils 属性测试
+  - [x] 1.6 编写 highlight-utils 属性测试
     - **Property 7: 高亮函数纯函数性**
     - **Validates: Requirements 5.5, 5.6**
-  - [ ] 1.7 创建 `utils/index.ts`
+  - [x] 1.7 创建 `utils/index.ts`
     - 导出所有工具函数
     - _Requirements: 2.1, 3.1, 5.1_
 

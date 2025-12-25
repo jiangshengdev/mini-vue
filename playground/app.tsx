@@ -1,11 +1,11 @@
-import type { SetupComponent } from '@/index.ts'
-import { onScopeDispose, RouterLink, RouterView } from '@/index.ts'
 import {
   createDrawerStateManager,
   getHamburgerAriaLabel,
   handleEscapeKey,
   handleWindowResize,
 } from './controllers/drawer-state.ts'
+import type { SetupComponent } from '@/index.ts'
+import { onScopeDispose, RouterLink, RouterView } from '@/index.ts'
 
 /**
  * 导航链接配置

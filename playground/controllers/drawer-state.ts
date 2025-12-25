@@ -66,8 +66,10 @@ export function createDrawerStateManager(initialOpen = false): DrawerStateManage
 export function handleEscapeKey(event: KeyboardEvent, manager: DrawerStateManager): boolean {
   if (event.key === 'Escape' && manager.isOpen.get()) {
     manager.close()
+
     return true
   }
+
   return false
 }
 
@@ -81,8 +83,10 @@ export function handleEscapeKey(event: KeyboardEvent, manager: DrawerStateManage
 export function handleWindowResize(windowWidth: number, manager: DrawerStateManager): boolean {
   if (windowWidth >= desktopBreakpoint && manager.isOpen.get()) {
     manager.close()
+
     return true
   }
+
   return false
 }
 

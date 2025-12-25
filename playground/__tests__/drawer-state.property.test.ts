@@ -74,6 +74,7 @@ describe('DrawerStateManager 属性测试', () => {
 
       // 奇数次调用后状态应该与初始状态相反，偶数次调用后状态应该与初始状态相同
       const expectedState = toggleCount % 2 === 1 ? !initialOpen : initialOpen
+
       expect(manager.isOpen.get()).toBe(expectedState)
     },
   )
@@ -179,17 +180,14 @@ describe('Overlay 可见性属性测试', () => {
    *
    * 打开抽屉后遮罩层应该可见（状态为 true）。
    */
-  test.prop([fc.boolean()], { numRuns: 100 })(
-    'Property 4: 打开抽屉后遮罩层可见',
-    (initialOpen) => {
-      const manager = createDrawerStateManager(initialOpen)
+  test.prop([fc.boolean()], { numRuns: 100 })('Property 4: 打开抽屉后遮罩层可见', (initialOpen) => {
+    const manager = createDrawerStateManager(initialOpen)
 
-      manager.open()
+    manager.open()
 
-      // 打开后状态为 true，遮罩层应该可见
-      expect(manager.isOpen.get()).toBe(true)
-    },
-  )
+    // 打开后状态为 true，遮罩层应该可见
+    expect(manager.isOpen.get()).toBe(true)
+  })
 
   /**
    * Feature: mobile-responsive-nav, Property 4: 抽屉打开时遮罩层可见
@@ -197,17 +195,14 @@ describe('Overlay 可见性属性测试', () => {
    *
    * 关闭抽屉后遮罩层应该隐藏（状态为 false）。
    */
-  test.prop([fc.boolean()], { numRuns: 100 })(
-    'Property 4: 关闭抽屉后遮罩层隐藏',
-    (initialOpen) => {
-      const manager = createDrawerStateManager(initialOpen)
+  test.prop([fc.boolean()], { numRuns: 100 })('Property 4: 关闭抽屉后遮罩层隐藏', (initialOpen) => {
+    const manager = createDrawerStateManager(initialOpen)
 
-      manager.close()
+    manager.close()
 
-      // 关闭后状态为 false，遮罩层应该隐藏
-      expect(manager.isOpen.get()).toBe(false)
-    },
-  )
+    // 关闭后状态为 false，遮罩层应该隐藏
+    expect(manager.isOpen.get()).toBe(false)
+  })
 })
 
 describe('aria-expanded 属性测试', () => {
@@ -222,7 +217,7 @@ describe('aria-expanded 属性测试', () => {
     (initialOpen) => {
       const manager = createDrawerStateManager(initialOpen)
 
-      // aria-expanded 应该与 isOpen 状态一致
+      // Aria-expanded 应该与 isOpen 状态一致
       // 在实际 UI 中，aria-expanded={drawerOpen} 直接使用状态值
       expect(manager.isOpen.get()).toBe(initialOpen)
     },
@@ -241,7 +236,7 @@ describe('aria-expanded 属性测试', () => {
 
       manager.toggle()
 
-      // toggle 后 aria-expanded 应该与新状态一致
+      // Toggle 后 aria-expanded 应该与新状态一致
       expect(manager.isOpen.get()).toBe(!initialOpen)
     },
   )
@@ -252,18 +247,15 @@ describe('aria-expanded 属性测试', () => {
    *
    * aria-label 应该根据状态正确返回。
    */
-  test.prop([fc.boolean()], { numRuns: 100 })(
-    'Property 7: aria-label 与抽屉状态一致',
-    (isOpen) => {
-      const label = getHamburgerAriaLabel(isOpen)
+  test.prop([fc.boolean()], { numRuns: 100 })('Property 7: aria-label 与抽屉状态一致', (isOpen) => {
+    const label = getHamburgerAriaLabel(isOpen)
 
-      if (isOpen) {
-        expect(label).toBe('关闭导航菜单')
-      } else {
-        expect(label).toBe('打开导航菜单')
-      }
-    },
-  )
+    if (isOpen) {
+      expect(label).toBe('关闭导航菜单')
+    } else {
+      expect(label).toBe('打开导航菜单')
+    }
+  })
 })
 
 describe('Escape 键处理属性测试', () => {
@@ -312,8 +304,15 @@ describe('Escape 键处理属性测试', () => {
    * 非 Escape 键不应该关闭抽屉。
    */
   test.prop(
-    [fc.boolean(), fc.string().filter((s) => s !== 'Escape' && s.length > 0)],
-    { numRuns: 100 },
+    [
+      fc.boolean(),
+      fc.string().filter((s) => {
+        return s !== 'Escape' && s.length > 0
+      }),
+    ],
+    {
+      numRuns: 100,
+    },
   )('Property 8: 非 Escape 键不关闭抽屉', (initialOpen, key) => {
     const manager = createDrawerStateManager(initialOpen)
     const otherKeyEvent = new KeyboardEvent('keydown', { key })

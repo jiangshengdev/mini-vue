@@ -320,7 +320,11 @@ export function getChainNodeHighlightClass(
       return styles.chainNodeHighlightSkip
     }
 
-    default: {
+    case 'init': {
+      return ''
+    }
+
+    case undefined: {
       return ''
     }
   }

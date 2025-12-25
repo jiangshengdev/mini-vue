@@ -1,6 +1,6 @@
 import { CounterDemo } from '../views/counter-demo.tsx'
 import { Home } from '../views/home.tsx'
-import { LongestIncreasingSubsequenceVisualization } from '../views/lis-visualization'
+import { LongestIncreasingSubsequenceVisualization } from '../views/lis-visualization/index.tsx'
 import { NotFound } from '../views/not-found.tsx'
 import {
   AttributeBindings,
@@ -10,7 +10,7 @@ import {
   HandlingUserInput,
   HelloWorld,
   SimpleComponent,
-} from '../views/basic'
+} from '../views/basic/index.ts'
 import type { RouteRecord } from '@/index.ts'
 import { createRouter } from '@/index.ts'
 

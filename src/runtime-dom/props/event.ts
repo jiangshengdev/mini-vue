@@ -1,7 +1,24 @@
+/**
+ * 事件绑定处理模块。
+ *
+ * 本模块负责将 `onXxx` 形式的 props 绑定到 DOM 事件监听器，核心策略：
+ * - 使用 invoker 包装函数保持事件监听引用稳定，避免频繁 add/remove
+ * - invoker 缓存挂在元素上，通过 `invokerCacheKey` Symbol 访问
+ * - 更新时仅替换 invoker 内部的 `value` 回调，无需重新绑定监听器
+ */
+
 /** 事件处理器缓存键，挂在宿主元素上保存稳定的 invoker 映射。 */
 export const invokerCacheKey = Symbol('invokerCache')
 
-/** 处理 `onXxx` 事件绑定。 */
+/**
+ * 处理 `onXxx` 事件绑定。
+ *
+ * @param element - 目标 DOM 元素
+ * @param key - 属性名，如 `onClick`、`onInput`
+ * @param previous - 上一次的事件处理器
+ * @param next - 本次的事件处理器
+ * @returns 是否已处理该属性（`true` 表示已处理，调用方应跳过后续逻辑）
+ */
 export function handleEventProp(
   element: Element,
   key: string,
@@ -18,7 +35,17 @@ export function handleEventProp(
 }
 
 /**
- * 为事件绑定创建稳定的包装函数，保证增删逻辑复用同一引用。
+ * 为事件绑定创建或更新稳定的包装函数（invoker）。
+ *
+ * 策略：
+ * - 首次绑定时创建 invoker 并注册监听器
+ * - 后续更新仅替换 invoker.value，保持监听引用稳定
+ * - 传入非函数值时移除监听器并清理缓存
+ *
+ * @param element - 目标 DOM 元素
+ * @param eventName - 小写事件名，如 `click`、`input`
+ * @param _previous - 上一次的事件处理器（未使用，保留参数位置）
+ * @param next - 本次的事件处理器
  */
 function patchEvent(
   element: HTMLElement,
@@ -85,4 +112,5 @@ function isEventProp(key: string): boolean {
 
 type EventInvoker = ((event: Event) => void) & { value?: EventListener }
 
+/** 事件名到 invoker 的映射表，挂在元素上复用。 */
 type InvokerMap = Record<string, EventInvoker>

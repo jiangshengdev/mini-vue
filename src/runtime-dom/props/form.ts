@@ -1,7 +1,26 @@
+/**
+ * 表单受控属性处理模块。
+ *
+ * 本模块负责将 `value`/`checked` 等表单状态属性写入 DOM property，
+ * 而非 attribute，以确保受控组件的 UI 与状态同步。
+ *
+ * 支持的元素与属性：
+ * - `<input>` 的 `value` 和 `checked`
+ * - `<textarea>` 的 `value`
+ * - `<select>` 的 `value`（支持单选和多选）
+ */
 import { runtimeDomUnsupportedAttrValue } from '@/messages/index.ts'
 import { __DEV__, isNil } from '@/shared/index.ts'
 
-/** 处理受控表单的 `value`/`checked`。 */
+/**
+ * 处理受控表单的 `value`/`checked` 属性。
+ *
+ * @param element - 目标 DOM 元素
+ * @param key - 属性名，仅处理 `value` 或 `checked`
+ * @param _previous - 上一次的属性值（未使用，保留参数位置）
+ * @param next - 本次的属性值
+ * @returns 是否已处理该属性（`true` 表示已处理，调用方应跳过后续逻辑）
+ */
 export function handleFormStateProp(
   element: Element,
   key: string,
@@ -37,7 +56,16 @@ export function handleFormStateProp(
 }
 
 /**
- * 为多选 `select` 应用数组值，按严格等于匹配选中项。
+ * 为 `<select>` 元素应用 value 属性。
+ *
+ * 策略：
+ * - 单选模式：直接设置 `element.value`
+ * - 多选模式：遍历 options 按值匹配设置 `selected`
+ * - 数组值 + 单选：取首个元素
+ * - 使用 `queueMicrotask` 延迟执行，等待 DOM option 生成完毕
+ *
+ * @param element - 目标 select 元素
+ * @param value - 要设置的值，支持单值或数组
  */
 function applySelectValue(element: HTMLSelectElement, value: unknown): void {
   const applySingleValue = (next: unknown) => {

@@ -1,7 +1,28 @@
+/**
+ * style 属性处理模块。
+ *
+ * 本模块负责将 `style` props 写入 DOM，支持：
+ * - 字符串形式：直接设置 `style` attribute
+ * - 对象形式：逐属性写入，支持增量更新与删除
+ * - 空值/false：移除整个 `style` attribute
+ *
+ * 对象形式的增量更新策略：
+ * 1. 收集需要删除的键（旧有但新无，或新值为 null/undefined）
+ * 2. 收集需要写入的键（值有变化的 string/number）
+ * 3. 批量执行删除和写入，减少 DOM 操作次数
+ */
 import { runtimeDomInvalidStyleValue } from '@/messages/index.ts'
 import { __DEV__, isNil, isObject } from '@/shared/index.ts'
 
-/** 处理内联样式字符串/对象。 */
+/**
+ * 处理内联样式字符串/对象。
+ *
+ * @param element - 目标 DOM 元素
+ * @param key - 属性名，仅处理 `style`
+ * @param previous - 上一次的属性值
+ * @param next - 本次的属性值
+ * @returns 是否已处理该属性（`true` 表示已处理，调用方应跳过后续逻辑）
+ */
 export function handleStyleProp(
   element: Element,
   key: string,
@@ -17,7 +38,17 @@ export function handleStyleProp(
   return true
 }
 
-/** 写入单个样式属性，兼容标准属性名与自定义属性名。 */
+/**
+ * 写入单个样式属性。
+ *
+ * 兼容标准属性名（如 `color`）与自定义属性名（如 `--my-var`）：
+ * - 标准属性：直接通过 `style[property]` 写入
+ * - 自定义属性：通过 `setProperty` 写入
+ *
+ * @param element - 目标 DOM 元素
+ * @param property - 样式属性名
+ * @param input - 样式值，空字符串表示删除
+ */
 function setStyleValue(element: HTMLElement, property: string, input: string): void {
   if (Reflect.has(element.style, property)) {
     ;(element.style as WritableStyle)[property] = input
@@ -27,7 +58,11 @@ function setStyleValue(element: HTMLElement, property: string, input: string): v
 }
 
 /**
- * 处理 `style` 属性，支持字符串和对象两种写法。
+ * 处理 style 属性的核心逻辑。
+ *
+ * @param element - 目标 DOM 元素
+ * @param previous - 上一次的 style 值
+ * @param next - 本次的 style 值
  */
 function applyStyle(element: HTMLElement, previous: unknown, next: unknown): void {
   /* 传入空值或 `false` 时移除整段内联样式。 */
@@ -81,6 +116,19 @@ function applyStyle(element: HTMLElement, previous: unknown, next: unknown): voi
   }
 }
 
+/**
+ * 对象形式 style 的增量更新。
+ *
+ * 策略：
+ * 1. 遍历旧对象，找出需要删除的键（新对象中不存在或值为 null/undefined）
+ * 2. 遍历新对象，找出需要写入的键（值有变化的 string/number）
+ * 3. 批量执行删除（设为空字符串）和写入
+ * 4. 若最终无有效值，移除整个 style attribute
+ *
+ * @param element - 目标 DOM 元素
+ * @param previousStyle - 上一次的 style 对象
+ * @param nextStyle - 本次的 style 对象
+ */
 function patchStyleObject(
   element: HTMLElement,
   previousStyle: Record<string, unknown>,
@@ -147,5 +195,9 @@ function patchStyleObject(
   }
 }
 
-/** 扩展原生 `style` 声明，允许对任意属性键执行写入。 */
+/**
+ * 扩展原生 CSSStyleDeclaration 声明，允许对任意属性键执行写入。
+ *
+ * 用于支持自定义 CSS 属性（如 `--my-var`）的类型安全写入。
+ */
 type WritableStyle = CSSStyleDeclaration & Record<string, string | undefined>

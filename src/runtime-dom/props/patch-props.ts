@@ -1,5 +1,18 @@
 /**
- * 将 `virtualNode` 上的 `props` 映射到真实 DOM 元素上。
+ * 将 VirtualNode 上的 props 映射到真实 DOM 元素上。
+ *
+ * 本模块是 DOM 属性打补丁的统一入口，负责：
+ * 1. 收集前后 props 的所有键，确保新增与删除都被覆盖
+ * 2. 按处理优先级逐项分派到各专用处理器
+ * 3. 剩余普通属性直接映射到 DOM attribute
+ *
+ * 处理优先级（从高到低）：
+ * - `ref`：交由上层消费，这里跳过
+ * - `class`/`className`：统一映射到 className 字段
+ * - `style`：样式对象/字符串的合并与删除
+ * - `value`/`checked`：表单受控属性，通过 DOM property 控制
+ * - `onXxx`：事件绑定，复用 invoker 保持监听引用稳定
+ * - 其他：普通 DOM attribute
  */
 import { patchDomAttr } from './attr.ts'
 import { handleClassProp } from './class.ts'
@@ -9,6 +22,13 @@ import { ignoreRefProp } from './ref.ts'
 import { handleStyleProp } from './style.ts'
 import type { PropsShape } from '@/shared/index.ts'
 
+/**
+ * 将 VirtualNode 的 props 差异应用到真实 DOM 元素。
+ *
+ * @param element - 目标 DOM 元素
+ * @param previousProps - 上一次渲染的 props，用于对比删除
+ * @param nextProps - 本次渲染的 props，用于新增或更新
+ */
 export function patchProps(
   element: Element,
   previousProps?: PropsShape,

@@ -1,6 +1,23 @@
+/**
+ * class 属性处理模块。
+ *
+ * 本模块负责将 `class`/`className` props 归一化并写入 DOM，支持：
+ * - 字符串形式：直接使用
+ * - 数组形式：递归展开后用空格连接
+ * - 对象形式：truthy 的键作为类名
+ * - 混合嵌套：以上形式的任意组合
+ */
 import { isNil, isObject } from '@/shared/index.ts'
 
-/** 统一处理 `class`/`className`。 */
+/**
+ * 统一处理 `class`/`className` 属性。
+ *
+ * @param element - 目标 DOM 元素
+ * @param key - 属性名，仅处理 `class` 或 `className`
+ * @param previous - 上一次的属性值
+ * @param next - 本次的属性值
+ * @returns 是否已处理该属性（`true` 表示已处理，调用方应跳过后续逻辑）
+ */
 export function handleClassProp(
   element: Element,
   key: string,
@@ -24,6 +41,9 @@ export function handleClassProp(
   return true
 }
 
+/**
+ * 将 class 属性值归一化为字符串，空值返回空字符串。
+ */
 function normalizeClassProp(value: unknown): string {
   if (isNil(value) || value === false) {
     return ''

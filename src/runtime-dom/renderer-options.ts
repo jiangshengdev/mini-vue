@@ -1,34 +1,54 @@
 /**
  * DOM 宿主环境的渲染原语实现。
+ *
+ * 本模块提供 runtime-core 所需的 DOM 操作原语，包括：
+ * - 节点创建：`createElement`、`createText`、`createFragment`
+ * - 节点操作：`appendChild`、`insertBefore`、`remove`、`clear`
+ * - 文本更新：`setText`
+ * - 属性打补丁：`patchProps`
+ *
+ * 这些原语构成 runtime-core 与 DOM 宿主之间的契约，
+ * 使渲染器可以在不同宿主环境（如 DOM、Canvas、Native）间复用。
  */
 import { patchProps } from './props/index.ts'
 import type { RendererOptions } from '@/runtime-core/index.ts'
 
 /**
- * DOM 宿主环境完整的渲染原语集合，供 `renderer` 复用。
+ * DOM 宿主环境完整的渲染原语集合。
+ *
+ * 实现 `RendererOptions` 接口，供 `createRenderer` 创建 DOM 渲染器。
+ * 泛型参数：
+ * - `Node`：所有 DOM 节点的基类
+ * - `Element`：DOM 元素节点
+ * - `DocumentFragment`：DOM 片段节点
  */
 export const domRendererOptions: RendererOptions<Node, Element, DocumentFragment> = {
-  /** 创建指定标签的 `HTMLElement`。 */
+  /** 创建指定标签的 HTMLElement。 */
   createElement(type): HTMLElement {
     return document.createElement(type)
   },
-  /** 根据文本内容生成 `Text` 节点，承载字符串 `children`。 */
+  /** 根据文本内容生成 Text 节点，承载字符串 children。 */
   createText(text): Text {
     return document.createTextNode(text)
   },
-  /** 覆用现有文本节点，仅更新其内容避免重新创建节点。 */
+  /** 更新现有文本节点的内容，避免重新创建节点。 */
   setText(node, text): void {
     ;(node as Text).nodeValue = text
   },
-  /** 创建片段节点，用于批量插入 `children`。 */
+  /** 创建 DocumentFragment，用于批量插入 children。 */
   createFragment(): DocumentFragment {
     return document.createDocumentFragment()
   },
-  /** 按顺序把子节点挂到父节点末尾。 */
+  /** 将子节点追加到父节点末尾。 */
   appendChild(parent, child): void {
     parent.append(child)
   },
-  /** 在指定锚点前插入子节点，保持原有兄弟顺序。 */
+  /**
+   * 在指定锚点前插入子节点。
+   *
+   * 若锚点不存在，则追加到父节点末尾。
+   * 若锚点不是父节点的子节点，抛出 DOMException。
+   */
   insertBefore(parent, child, anchor?): void {
     if (!anchor) {
       parent.append(child)
@@ -47,16 +67,14 @@ export const domRendererOptions: RendererOptions<Node, Element, DocumentFragment
 
     anchorNode.before(child)
   },
-  /** 重置容器文本内容，相当于全量清空。 */
+  /** 清空容器内所有内容，通过设置 textContent 实现。 */
   clear(container): void {
     container.textContent = ''
   },
-  /**
-   * 将节点从其父容器中移除，兼容文本、元素等所有宿主节点。
-   */
+  /** 将节点从其父容器中移除，兼容 Text、Element 等所有 ChildNode。 */
   remove(node): void {
     ;(node as ChildNode).remove()
   },
-  /** DOM 属性打补丁逻辑，转发到专用实现。 */
+  /** DOM 属性打补丁，转发到 props 子模块的专用实现。 */
   patchProps,
 }

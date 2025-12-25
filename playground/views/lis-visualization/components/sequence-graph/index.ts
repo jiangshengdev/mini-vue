@@ -1,18 +1,20 @@
 /**
- * SequenceGraph 子组件导出
+ * SequenceGraph 子组件模块入口。
  *
- * 导出所有 SequenceGraph 相关的子组件和类型
+ * @remarks
+ * 导出序列图相关的子组件、工具函数和类型定义：
+ * - `renderHighlightedArray`：高亮数组渲染工具
+ * - `SequenceSection`：序列状态显示区域
+ * - `PredecessorSection`：前驱数组显示区域
+ * - `ChainView`：链视图显示区域
  */
 
-// 工具函数导出
 export { renderHighlightedArray } from './highlighted-array.tsx'
 
-// 组件导出
 export { SequenceSection } from './sequence-section.tsx'
 export { PredecessorSection } from './predecessor-section.tsx'
 export { ChainView } from './chain-view.tsx'
 
-// 类型导出
 export type { HighlightedArrayOptions } from './highlighted-array.tsx'
 export type { SequenceSectionProps } from './sequence-section.tsx'
 export type { PredecessorSectionProps } from './predecessor-section.tsx'

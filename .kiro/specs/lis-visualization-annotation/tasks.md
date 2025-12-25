@@ -143,36 +143,36 @@
     - 为组件和数据处理逻辑添加注释
     - _Requirements: 3.1, 5.1, 9.1, 10.1_
 
-- [ ] 8. 序列图子组件注释
-  - [ ] 8.1 为 `components/sequence-graph/index.ts` 添加/更新注释
+- [x] 8. 序列图子组件注释
+  - [x] 8.1 为 `components/sequence-graph/index.ts` 添加/更新注释
     - 检查并清理无效注释
     - _Requirements: 9.1_
 
-  - [ ] 8.2 为 `components/sequence-graph/chain-view.tsx` 添加/更新注释
+  - [x] 8.2 为 `components/sequence-graph/chain-view.tsx` 添加/更新注释
     - 检查并清理无效注释
     - 更新过期注释
     - 为链视图组件添加注释
     - _Requirements: 3.1, 9.1, 10.1_
 
-  - [ ] 8.3 为 `components/sequence-graph/highlighted-array.tsx` 添加/更新注释
+  - [x] 8.3 为 `components/sequence-graph/highlighted-array.tsx` 添加/更新注释
     - 检查并清理无效注释
     - 更新过期注释
     - 为高亮数组渲染函数添加注释
     - _Requirements: 3.1, 9.1, 10.1_
 
-  - [ ] 8.4 为 `components/sequence-graph/predecessor-section.tsx` 添加/更新注释
+  - [x] 8.4 为 `components/sequence-graph/predecessor-section.tsx` 添加/更新注释
     - 检查并清理无效注释
     - 更新过期注释
     - 为前驱区域组件添加注释
     - _Requirements: 3.1, 9.1, 10.1_
 
-  - [ ] 8.5 为 `components/sequence-graph/sequence-section.tsx` 添加/更新注释
+  - [x] 8.5 为 `components/sequence-graph/sequence-section.tsx` 添加/更新注释
     - 检查并清理无效注释
     - 更新过期注释
     - 为序列区域组件添加注释
     - _Requirements: 3.1, 9.1, 10.1_
 
-- [ ] 9. Final Checkpoint - 完整验证
+- [x] 9. Final Checkpoint - 完整验证
   - 运行 `pnpm run fmt` 确保格式正确
   - 运行 `pnpm run typecheck` 确保类型正确
   - 运行 `pnpm run test` 确保所有测试通过

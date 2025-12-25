@@ -9,6 +9,8 @@ import { __DEV__, isNil } from '@/shared/index.ts'
  * @remarks
  * - 仅在 `__DEV__` 下启用，避免影响生产性能与输出。
  * - 运行时会忽略不受支持的 `children` 类型（与 Vue 3 行为对齐），该告警用于辅助定位问题。
+ *
+ * @param child - 不受支持的子节点值
  */
 function warnUnsupportedChild(child: unknown): void {
   if (!__DEV__) {
@@ -22,8 +24,12 @@ function warnUnsupportedChild(child: unknown): void {
  * 将任意形式的 `children` 归一化为扁平的 `VirtualNodeChild` 数组。
  *
  * @remarks
- * - 过滤掉 `null`/`undefined`/`boolean` 等「可忽略」值。
- * - 递归展开数组 `children`，并保持原始顺序不变。
+ * - 过滤掉 `null`/`undefined`/`boolean` 等「可忽略」值，这些值在渲染层不产生输出。
+ * - 递归展开嵌套数组 `children`，并保持原始顺序不变。
+ * - 字符串与数字保留原样，由渲染层按需包装为文本节点。
+ *
+ * @param rawChildren - 原始 `children` 输入，可以是任意类型
+ * @returns 扁平化后的 `VirtualNodeChild` 数组，仅包含 `VirtualNode`、`string`、`number`
  */
 export function normalizeChildren(rawChildren: unknown): VirtualNodeChild[] {
   const result: VirtualNodeChild[] = []
@@ -40,9 +46,13 @@ export function normalizeChildren(rawChildren: unknown): VirtualNodeChild[] {
  * @remarks
  * - 递归过程不返回新数组，而是写入 `accumulator`，减少中间数组分配。
  * - 遇到不支持的类型时会直接忽略，在开发态额外给出告警。
+ * - 处理顺序：空值 → 数组 → virtualNode → 字符串/数字 → 其他（忽略）
+ *
+ * @param rawChild - 待处理的单个子节点
+ * @param accumulator - 收集结果的目标数组
  */
 function flattenChild(rawChild: unknown, accumulator: VirtualNodeChild[]): void {
-  /* `null`、`undefined`、`boolean` 等空值在渲染层会被忽略 */
+  /* `null`、`undefined`、`boolean` 等空值在渲染层会被忽略，直接跳过 */
   if (isNil(rawChild) || typeof rawChild === 'boolean') {
     return
   }
@@ -56,14 +66,14 @@ function flattenChild(rawChild: unknown, accumulator: VirtualNodeChild[]): void 
     return
   }
 
-  /* 已经是 `virtualNode` 的值直接保留，不做包装 */
+  /* 已经是 `virtualNode` 的值直接保留，不做额外包装 */
   if (isVirtualNode(rawChild)) {
     accumulator.push(rawChild)
 
     return
   }
 
-  /* 字符串与数字作为文本节点内容直接入队 */
+  /* 字符串与数字作为文本节点内容直接入队，渲染层会按需包装 */
   if (typeof rawChild === 'string' || typeof rawChild === 'number') {
     accumulator.push(rawChild)
 

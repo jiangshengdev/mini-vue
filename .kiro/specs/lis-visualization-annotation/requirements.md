@@ -129,4 +129,3 @@
 2. WHEN a comment references renamed identifiers, THE Annotation_Agent SHALL update the identifier names in the comment
 3. WHEN a comment describes an outdated algorithm or approach, THE Annotation_Agent SHALL update it to reflect the current implementation
 4. THE Annotation_Agent SHALL verify that each comment accurately describes its associated code
-

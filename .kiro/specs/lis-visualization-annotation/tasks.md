@@ -6,14 +6,14 @@
 
 ## Tasks
 
-- [ ] 1. 准备工作
-  - [ ] 1.1 阅读参考文件确认注释风格
+- [x] 1. 准备工作
+  - [x] 1.1 阅读参考文件确认注释风格
     - 阅读 `src/runtime-core/create-app.ts` 和 `src/runtime-core/renderer.ts`
     - 确认 JSDoc 格式、块注释格式、措辞风格
     - _Requirements: 2.4_
 
-- [ ] 2. 核心模块注释
-  - [ ] 2.1 为 `types.ts` 添加/更新注释
+- [-] 2. 核心模块注释
+  - [x] 2.1 为 `types.ts` 添加/更新注释
     - 检查并清理无效注释
     - 更新过期注释
     - 为所有接口和类型添加职责注释
@@ -185,4 +185,3 @@
 - 注释风格需与 `src/runtime-core/create-app.ts` 和 `src/runtime-core/renderer.ts` 保持一致
 - 不改变业务逻辑、函数签名或执行路径
 - 使用简体中文编写注释
-

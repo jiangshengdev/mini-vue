@@ -72,17 +72,17 @@
     - 导出所有子组件
     - _Requirements: 1.5_
 
-- [ ] 4. 重构主组件
-  - [ ] 4.1 重构 `components/sequence-graph.tsx`
+- [x] 4. 重构主组件
+  - [x] 4.1 重构 `components/sequence-graph.tsx`
     - 导入并使用子组件
     - 导入并使用工具函数
     - 简化为编排层
     - _Requirements: 1.1, 1.5, 1.6_
-  - [ ] 4.2 重构 `components/input-editor.tsx`
+  - [x] 4.2 重构 `components/input-editor.tsx`
     - 导入并使用 `utils/input-utils.ts`
     - 移除内联的工具函数
     - _Requirements: 3.1, 3.2, 3.3, 3.4_
-  - [ ] 4.3 更新 `components/index.ts`
+  - [x] 4.3 更新 `components/index.ts`
     - 导出新增的子组件
     - 导出新增的类型
     - _Requirements: 6.1, 6.2, 6.3_

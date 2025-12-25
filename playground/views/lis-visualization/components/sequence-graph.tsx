@@ -178,7 +178,6 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
           changedNodesByChain={changedNodesByChain}
           highlightPredIndex={highlightPredIndex}
           isChainAction={isChainAction}
-          highlightClass={highlightClass}
           isSequenceHovered={Boolean(props.isSequenceHovered)}
           isPredecessorsHovered={props.isPredecessorsHovered}
           input={props.input}

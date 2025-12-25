@@ -161,20 +161,20 @@
   font-style: italic;
 }
 
-/* Chain 节点高亮 */
-.chainNode.highlightAppend {
+/* Chain 节点高亮 - 使用专用类名避免与 shared.module.css 冲突 */
+.chainNodeHighlightAppend {
   border-color: var(--color-success);
   background: var(--color-success-light);
   box-shadow: 0 0 0 2px var(--color-success-shadow);
 }
 
-.chainNode.highlightReplace {
+.chainNodeHighlightReplace {
   border-color: var(--color-warning);
   background: var(--color-warning-light);
   box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
 }
 
-.chainNode.highlightSkip {
+.chainNodeHighlightSkip {
   border-color: var(--color-border-medium);
   background: var(--color-bg-section);
 }

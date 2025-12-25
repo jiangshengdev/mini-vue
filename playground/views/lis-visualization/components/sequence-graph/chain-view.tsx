@@ -26,8 +26,6 @@ export interface ChainViewProps {
   highlightPredIndex: number
   /** 是否为链操作（append/replace） */
   isChainAction: boolean
-  /** 高亮类名 */
-  highlightClass: string
   /** Sequence 区域是否被 hover */
   isSequenceHovered: boolean
   /** Predecessors 区域是否被 hover */
@@ -72,7 +70,6 @@ export const ChainView: SetupComponent<ChainViewProps> = (props) => {
       changedNodesByChain,
       highlightPredIndex,
       isChainAction,
-      highlightClass,
       isSequenceHovered,
       isPredecessorsHovered,
       input,
@@ -125,7 +122,6 @@ export const ChainView: SetupComponent<ChainViewProps> = (props) => {
                         isHighlightNode,
                         isChangedNode,
                         actionType,
-                        highlightClass,
                       },
                       mergedStyles,
                     )

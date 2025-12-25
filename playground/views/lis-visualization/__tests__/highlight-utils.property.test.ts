@@ -49,6 +49,9 @@ const mockStyles: Record<string, string> = {
   highlightSecondaryReplace: 'highlight-secondary-replace',
   chainNode: 'chain-node',
   chainNodeTailHighlight: 'chain-node-tail-highlight',
+  chainNodeHighlightAppend: 'chain-node-highlight-append',
+  chainNodeHighlightReplace: 'chain-node-highlight-replace',
+  chainNodeHighlightSkip: 'chain-node-highlight-skip',
   chainNodeChangedSecondaryAppend: 'chain-node-changed-secondary-append',
   chainNodeChangedSecondaryReplace: 'chain-node-changed-secondary-replace',
 }
@@ -188,7 +191,6 @@ describe('highlight-utils 属性测试', () => {
           ),
           { nil: undefined },
         ),
-        highlightClass: fc.string(),
       }),
     ],
     { numRuns: 100 },

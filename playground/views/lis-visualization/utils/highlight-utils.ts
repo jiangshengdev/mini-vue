@@ -42,8 +42,6 @@ export interface NodeClassNameOptions {
   isChangedNode: boolean
   /** 当前步骤的操作类型 */
   actionType: StepAction['type'] | undefined
-  /** 主高亮类名 */
-  highlightClass: string
 }
 
 /**
@@ -268,15 +266,17 @@ export function getNodeClassName(
   options: NodeClassNameOptions,
   styles: Record<string, string>,
 ): string {
-  const { isChainTailHighlight, isHighlightNode, isChangedNode, actionType, highlightClass } =
-    options
+  const { isChainTailHighlight, isHighlightNode, isChangedNode, actionType } = options
 
   if (isChainTailHighlight) {
     return `${styles.chainNode} ${styles.chainNodeTailHighlight}`
   }
 
   if (isHighlightNode) {
-    return `${styles.chainNode} ${highlightClass}`
+    /* 使用 chain 节点专用的高亮类名 */
+    const chainHighlightClass = getChainNodeHighlightClass(actionType, styles)
+
+    return `${styles.chainNode} ${chainHighlightClass}`
   }
 
   if (isChangedNode) {
@@ -290,4 +290,38 @@ export function getNodeClassName(
   }
 
   return styles.chainNode
+}
+
+/**
+ * 根据操作类型获取链节点的高亮类名。
+ *
+ * @remarks
+ * 链节点使用专用的高亮类名（chainNodeHighlightAppend 等），
+ * 与文本高亮类名（highlightAppend 等）分开，避免 CSS 模块命名冲突。
+ *
+ * @param actionType - 操作类型
+ * @param styles - CSS 模块样式对象
+ * @returns CSS 类名
+ */
+export function getChainNodeHighlightClass(
+  actionType: StepAction['type'] | undefined,
+  styles: Record<string, string>,
+): string {
+  switch (actionType) {
+    case 'append': {
+      return styles.chainNodeHighlightAppend
+    }
+
+    case 'replace': {
+      return styles.chainNodeHighlightReplace
+    }
+
+    case 'skip': {
+      return styles.chainNodeHighlightSkip
+    }
+
+    default: {
+      return ''
+    }
+  }
 }

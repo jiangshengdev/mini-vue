@@ -63,7 +63,7 @@ function createGetter(isReadonly: boolean, shallow: boolean): Getter {
     }
 
     if (isObject(rawValue)) {
-      /* shallow 直接返回原值，深层模式才递归代理 */
+      /* `shallow` 直接返回原值，深层模式才递归代理 */
       return shallow ? rawValue : reactive(rawValue)
     }
 

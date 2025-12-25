@@ -3,7 +3,11 @@
  */
 import type { ReactiveTarget } from './contracts/index.ts'
 import { reactiveFlag } from './contracts/index.ts'
-import { mutableHandlers, shallowReactiveHandlers, shallowReadonlyHandlers } from './internals/index.ts'
+import {
+  mutableHandlers,
+  shallowReactiveHandlers,
+  shallowReadonlyHandlers,
+} from './internals/index.ts'
 import { isSupportedTarget } from './to-raw.ts'
 import type { Reactive } from './types.ts'
 import { reactivityUnsupportedType } from '@/messages/index.ts'

@@ -14,6 +14,8 @@ export {
   onScopeDispose,
   reactive,
   ref,
+  shallowReactive,
+  shallowReadonly,
   state,
   toRaw,
   toRef,

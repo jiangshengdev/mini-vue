@@ -225,6 +225,31 @@ describe('readonly', () => {
     expect(proxy1).toBe(proxy2)
   })
 
+  it('对只读代理再次调用保持幂等', () => {
+    const proxy = readonly({ foo: 1 })
+    const wrapped = readonly(proxy)
+
+    expect(wrapped).toBe(proxy)
+  })
+
+  it('属性上的 Ref 不会被解包', () => {
+    const foo = ref(1)
+    const proxy = readonly({ foo })
+
+    expect(isRef(proxy.foo)).toBe(true)
+  })
+
+  it('数组与嵌套对象可正常读取且保持只读', () => {
+    const raw = [{ count: 1 }]
+    const proxy = readonly(raw)
+
+    expect(proxy[0].count).toBe(1)
+
+    // @ts-expect-error 只读代理
+    proxy[0].count = 2
+    expect(raw[0].count).toBe(1)
+  })
+
   it('isReadonly 对代理与原始值的判定', () => {
     const raw = { foo: 1 }
     const proxy = readonly(raw)

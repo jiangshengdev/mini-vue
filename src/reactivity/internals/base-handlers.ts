@@ -63,7 +63,12 @@ function createGetter(isReadonly: boolean, shallow: boolean): Getter {
     /* 读取属性同时收集依赖，连接目标字段与当前副作用 */
     track(target, key)
 
-    if (!isReadonly && isRef(rawValue)) {
+    if (isRef(rawValue)) {
+      if (isReadonly) {
+        /* 只读模式保持 Ref 原样返回，不解包。 */
+        return rawValue
+      }
+
       /* 数组索引上的 Ref 保持原样返回，其余场景自动解包 */
       if (Array.isArray(target) && isArrayIndex(key)) {
         return rawValue

@@ -26,7 +26,10 @@ function createProxy(
   target: unknown,
   handlers: ProxyHandler<ReactiveTarget>,
   cache: ProxyCache,
-  { skipReactiveCheck = false }: { skipReactiveCheck?: boolean } = {},
+  {
+    skipReactiveCheck = false,
+    skipReadonlyCheck = false,
+  }: { skipReactiveCheck?: boolean; skipReadonlyCheck?: boolean } = {},
 ): unknown {
   /* 非对象值无法建立响应式代理，直接返回原值 */
   if (!isObject(target)) {
@@ -35,6 +38,10 @@ function createProxy(
 
   /* 可选跳过已代理对象，保持 reactive/shallowReactive 的幂等性。 */
   if (skipReactiveCheck && (target as ReactiveTarget)[reactiveFlag] === true) {
+    return target
+  }
+
+  if (skipReadonlyCheck && (target as ReactiveTarget)[readonlyFlag] === true) {
     return target
   }
 
@@ -93,7 +100,9 @@ export function shallowReadonly<T extends readonly unknown[]>(target: T): Readon
 export function shallowReadonly<T>(target: T): Readonly<T>
 
 export function shallowReadonly(target: unknown): unknown {
-  return createProxy(target, shallowReadonlyHandlers, shallowReadonlyCache)
+  return createProxy(target, shallowReadonlyHandlers, shallowReadonlyCache, {
+    skipReadonlyCheck: true,
+  })
 }
 
 export function readonly<T extends PlainObject>(target: T): ReadonlyReactive<T>
@@ -101,7 +110,7 @@ export function readonly<T extends readonly unknown[]>(target: T): ReadonlyReact
 export function readonly<T>(target: T): ReadonlyReactive<T>
 
 export function readonly(target: unknown): unknown {
-  return createProxy(target, readonlyHandlers, readonlyCache)
+  return createProxy(target, readonlyHandlers, readonlyCache, { skipReadonlyCheck: true })
 }
 
 /**

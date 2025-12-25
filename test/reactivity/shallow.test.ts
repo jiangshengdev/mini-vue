@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { isReactive, isRef, reactive, ref, shallowReactive, shallowReadonly } from '@/index.ts'
+import {
+  isReactive,
+  isReadonly,
+  isRef,
+  reactive,
+  ref,
+  shallowReactive,
+  shallowReadonly,
+} from '@/index.ts'
 import { reactivityUnsupportedType } from '@/messages/index.ts'
 
 describe('shallowReactive', () => {
@@ -70,5 +78,19 @@ describe('shallowReadonly', () => {
 
     expect(state.foo).toBe(1)
     expect(isReactive(readonlyState)).toBe(false)
+  })
+
+  it('对只读浅代理再次调用保持幂等', () => {
+    const proxy = shallowReadonly({ foo: 1 })
+    const wrapped = shallowReadonly(proxy)
+
+    expect(wrapped).toBe(proxy)
+  })
+
+  it('isReadonly 识别 shallowReadonly 代理', () => {
+    const proxy = shallowReadonly({ foo: 1 })
+
+    expect(isReadonly(proxy)).toBe(true)
+    expect(isReadonly({})).toBe(false)
   })
 })

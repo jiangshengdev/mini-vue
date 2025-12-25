@@ -94,14 +94,14 @@
     - 确保 `onScopeDispose` 调用所有控制器的 `dispose` 方法
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7_
 
-- [ ] 10. Checkpoint - 验证功能完整性
+- [x] 10. Checkpoint - 验证功能完整性
   - 运行现有属性测试验证兼容性
   - 运行 `pnpm run test` 确保所有测试通过
   - 确保所有测试通过，如有问题请询问用户
   - _Requirements: 8.5_
 
-- [ ] 11. 最终验证
-  - [ ] 11.1 运行完整测试套件
+- [x] 11. 最终验证
+  - [x] 11.1 运行完整测试套件
     - 运行 `pnpm run test` 验证所有测试通过
     - 运行 `pnpm run typecheck` 验证类型正确性
     - 运行 `pnpm run lint` 验证代码风格

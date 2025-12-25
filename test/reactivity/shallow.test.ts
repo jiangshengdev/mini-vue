@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest'
+import type { MockInstance } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   isReactive,
   isReadonly,
@@ -58,6 +59,18 @@ describe('shallowReactive', () => {
 })
 
 describe('shallowReadonly', () => {
+  let warn: MockInstance<Console['warn']>
+
+  beforeEach(() => {
+    warn = vi.spyOn(console, 'warn').mockImplementation(() => {
+      return undefined
+    })
+  })
+
+  afterEach(() => {
+    warn.mockRestore()
+  })
+
   it('阻止写入且不解包 Ref', () => {
     const raw = { foo: 1, bar: ref(2) }
     const proxy = shallowReadonly(raw)

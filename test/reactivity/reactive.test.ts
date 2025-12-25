@@ -1,4 +1,5 @@
-import { describe, expect, expectTypeOf, it, vi } from 'vitest'
+import type { MockInstance } from 'vitest'
+import { afterEach, beforeEach, describe, expect, expectTypeOf, it, vi } from 'vitest'
 import type { Ref } from '@/index.ts'
 import { effect, isReactive, isReadonly, isRef, reactive, readonly, ref, toRaw } from '@/index.ts'
 import { reactivityUnsupportedType } from '@/messages/index.ts'
@@ -196,6 +197,18 @@ describe('reactive', () => {
 })
 
 describe('readonly', () => {
+  let warn: MockInstance<Console['warn']>
+
+  beforeEach(() => {
+    warn = vi.spyOn(console, 'warn').mockImplementation(() => {
+      return undefined
+    })
+  })
+
+  afterEach(() => {
+    warn.mockRestore()
+  })
+
   it('创建只读代理并阻止写入', () => {
     const raw = { foo: 1 }
     const proxy = readonly(raw)
@@ -261,9 +274,6 @@ describe('readonly', () => {
   })
 
   it('只读代理被写入/删除时发出警告', () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {
-      return undefined
-    })
     const proxy = readonly({ foo: 1 })
 
     // @ts-expect-error 只读代理
@@ -272,6 +282,5 @@ describe('readonly', () => {
     delete proxy.foo
 
     expect(warn).toHaveBeenCalled()
-    warn.mockRestore()
   })
 })

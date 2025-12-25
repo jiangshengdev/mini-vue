@@ -8,6 +8,11 @@ import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
 /**
  * `watch` 可接受的追踪源类型，覆盖 ref、getter 与普通对象。
  *
+ * @remarks
+ * - Ref：追踪 `value` 属性的变化。
+ * - getter 函数：追踪函数执行期间读取的响应式属性。
+ * - 普通对象：若为 reactive 代理，默认深度追踪所有嵌套字段。
+ *
  * @public
  */
 export type WatchSource<T> = Ref<T> | (() => T) | PlainObject
@@ -15,15 +20,27 @@ export type WatchSource<T> = Ref<T> | (() => T) | PlainObject
 /**
  * 外部可调用的停止函数类型。
  *
+ * @remarks
+ * - 调用后会停止 watch 的响应式追踪，并执行最后一次清理回调。
+ *
  * @public
  */
 export type WatchStopHandle = () => void
 
-/** 供用户注册的清理回调类型。 */
+/**
+ * 供用户注册的清理回调类型。
+ *
+ * @remarks
+ * - 清理回调会在下一次回调执行前或 watch 停止时被调用。
+ */
 export type WatchCleanup = () => void
 
 /**
  * `watch` 回调签名，暴露新旧值和清理钩子。
+ *
+ * @param newValue - 最新的值
+ * @param oldValue - 上一次的值，首次执行时为 `undefined`
+ * @param onCleanup - 注册清理回调的函数
  *
  * @public
  */
@@ -39,20 +56,36 @@ export type WatchCallback<T> = (
  * @public
  */
 export interface WatchOptions {
-  /** `true` 时立即执行一次回调。 */
+  /**
+   * `true` 时立即执行一次回调，而非等待首次变更。
+   */
   immediate?: boolean
-  /** `true` 时强制深度遍历追踪。 */
+
+  /**
+   * `true` 时强制深度遍历追踪，即使源是 getter 或 ref。
+   *
+   * @remarks
+   * - 对于 reactive 对象，默认就是深度追踪。
+   * - 对于 getter 或 ref，默认只追踪返回值本身。
+   */
   deep?: boolean
 }
 
 /**
  * 建立响应式副作用并在数据变化时派发回调。
+ *
+ * @param source - 追踪源，可以是 ref、getter 函数或 reactive 对象
+ * @param callback - 数据变化时执行的回调函数
+ * @param options - 可选配置，支持 immediate 和 deep
+ * @returns 停止函数，调用后会停止追踪并执行最后一次清理
+ *
+ * @remarks
  * - 支持深度遍历与懒执行策略。
- * - 允许注册清理逻辑并与父 `effect` 生命周期同步。
+ * - 允许注册清理逻辑并与父 effect 生命周期同步。
+ * - 回调内部抛出的异常不会向外冒泡，而是仅通过 `setErrorHandler` 汇报，确保同一触发链的其余副作用可继续执行。
+ * - watch 会被自动登记到当前活跃的 `effectScope`，便于统一管理生命周期。
  *
  * @public
- *
- * @remarks 回调内部抛出的异常不会向外冒泡，而是仅通过 setErrorHandler 汇报，确保同一触发链的其余副作用可继续执行。
  */
 export function watch<T>(
   source: WatchSource<T>,

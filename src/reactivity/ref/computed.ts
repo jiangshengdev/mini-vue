@@ -16,12 +16,18 @@ import {
 /**
  * `computed` getter 负责在依赖图中派生出最终结果。
  *
+ * @remarks
+ * - getter 函数会被 `ReactiveEffect` 包装，执行期间读取的响应式属性会被自动收集为依赖。
+ *
  * @public
  */
 export type ComputedGetter<T> = () => T
 
 /**
  * `computed` setter 在可写场景下接收外部写入值。
+ *
+ * @remarks
+ * - setter 通常会修改上游依赖，从而间接更新 computed 的值。
  *
  * @public
  */
@@ -33,9 +39,14 @@ export type ComputedSetter<T> = (value: T) => void
  * @public
  */
 export interface WritableComputedOptions<T> {
-  /** 读取时返回派生值，并建立依赖关系。 */
+  /**
+   * 读取时返回派生值，并建立依赖关系。
+   */
   get: ComputedGetter<T>
-  /** 写入时自定义同步方式，可触发外部副作用。 */
+
+  /**
+   * 写入时自定义同步方式，可触发外部副作用。
+   */
   set: ComputedSetter<T>
 }
 
@@ -47,26 +58,49 @@ interface GetterMockLike {
 
 /**
  * `computed` 的底层实现，通过惰性求值与脏标记保持派生状态最新。
+ *
+ * @remarks
+ * - 内部使用 `ReactiveEffect` 追踪 getter 的依赖。
+ * - 依赖变更时通过调度器标记脏值，而非立即重新计算。
+ * - 只有在读取 `value` 时才会执行实际计算（惰性求值）。
  */
 class ComputedRefImpl<T> implements Ref<T> {
+  /** 当前 computed 的依赖集合，用于收集/触发读取 `value` 的外层副作用。 */
   readonly dependencyBucket: DependencyBucket = new Set()
 
+  /** 标记当前对象为 Ref 实例。 */
   readonly [refFlag] = true as const
 
+  /**
+   * 内部 effect，用于追踪 getter 的依赖并在依赖变更时标记脏值。
+   */
   private readonly effect: ReactiveEffect<T>
 
+  /**
+   * 开发态用于调试输出的 getter 名称。
+   */
   private readonly effectName?: string
 
+  /**
+   * 用户提供的 setter，用于可写 computed 场景。
+   */
   private readonly setter: ComputedSetter<T>
 
-  /** 标记当前缓存是否过期，true 时需要重新执行 getter。 */
+  /**
+   * 标记当前缓存是否过期，`true` 时需要重新执行 getter。
+   */
   private needsRecompute = true
 
-  /** 缓存最近一次执行 getter 的结果，供下次同步返回。 */
+  /**
+   * 缓存最近一次执行 getter 的结果，供下次同步返回。
+   */
   private cachedValue!: T
 
   /**
-   * 将 getter 封装为 ReactiveEffect，并注入专用调度器以刷新脏标记。
+   * 构造函数：将 getter 封装为 ReactiveEffect，并注入专用调度器以刷新脏标记。
+   *
+   * @param getter - 计算属性的 getter 函数
+   * @param setter - 计算属性的 setter 函数（只读 computed 会传入抛出异常的 setter）
    */
   constructor(getter: ComputedGetter<T>, setter: ComputedSetter<T>) {
     this.setter = setter
@@ -87,6 +121,12 @@ class ComputedRefImpl<T> implements Ref<T> {
 
   /**
    * 读取 computed 值时，先追踪依赖，再在需要时执行惰性求值。
+   *
+   * @returns 计算后的值
+   *
+   * @remarks
+   * - 外层 effect 访问 computed 时会记录依赖，便于后续触发。
+   * - 首次访问或依赖脏时重新运行 getter，并缓存结果。
    */
   get value(): T {
     /* 外层 effect 访问 computed 时记录依赖，便于后续触发。 */
@@ -121,6 +161,12 @@ class ComputedRefImpl<T> implements Ref<T> {
 
   /**
    * 写入 computed 值时交给自定义 setter，由实现自行决定同步策略。
+   *
+   * @param newValue - 新值
+   *
+   * @remarks
+   * - 只读 computed 的 setter 会抛出 TypeError。
+   * - 可写 computed 的 setter 由用户提供，通常会修改上游依赖。
    */
   set value(newValue: T) {
     if (__INTERNAL_DEV__ && debug) {
@@ -140,6 +186,10 @@ class ComputedRefImpl<T> implements Ref<T> {
 
   /**
    * 将当前 computed 标记为脏，并唤起依赖它的 effect 重新计算。
+   *
+   * @remarks
+   * - 已经是脏状态时无需重复触发，避免额外调度。
+   * - 该方法由内部 effect 的调度器调用。
    */
   private markDirty(): void {
     /* 已经是脏状态时无需重复触发，避免额外调度。 */
@@ -163,6 +213,8 @@ class ComputedRefImpl<T> implements Ref<T> {
 
 /**
  * 生成只读 computed 的 setter，在运行时抛出明确的类型错误。
+ *
+ * @returns 抛出 TypeError 的 setter 函数
  */
 function createReadonlySetter<T>(): ComputedSetter<T> {
   return (newValue) => {

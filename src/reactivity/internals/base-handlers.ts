@@ -19,8 +19,22 @@ import { withoutTracking } from './tracking.ts'
 import { reactivityReadonlyWarning } from '@/messages/index.ts'
 import { __DEV__, isArrayIndex, isObject } from '@/shared/index.ts'
 
+/** Proxy get 拦截器类型。 */
 type Getter = ProxyHandler<ReactiveTarget>['get']
 
+/**
+ * 响应式 Proxy 的 get 拦截器工厂函数。
+ *
+ * @param isReadonly - 是否为只读代理
+ * @param shallow - 是否为浅层代理
+ * @returns Proxy get 拦截器
+ *
+ * @remarks
+ * - 处理内部标记（reactiveFlag/readonlyFlag/rawFlag）的读取。
+ * - 数组变更方法和查询方法会返回特殊包装版本。
+ * - 深层模式下嵌套对象会被懒代理。
+ * - 对象属性中的 Ref 会被自动解包（数组索引除外）。
+ */
 function createGetter(isReadonly: boolean, shallow: boolean): Getter {
   return (target, key, receiver) => {
     /* 读取内部标记不应触发依赖收集。 */
@@ -93,6 +107,11 @@ function createGetter(isReadonly: boolean, shallow: boolean): Getter {
 
 /**
  * 响应式写入逻辑：仅在值实际变更时触发依赖更新。
+ *
+ * @remarks
+ * - 通过 `Object.is` 判等，避免无意义的触发。
+ * - 区分新增（add）和修改（set）两种操作类型。
+ * - 读取旧值时会禁用依赖收集，避免写入阶段意外建立依赖。
  */
 const mutableSet: ProxyHandler<ReactiveTarget>['set'] = (target, key, value, receiver) => {
   /* 数组的新增与修改需要依赖索引判断，普通对象则通过 hasOwn 区分逻辑分支。 */
@@ -137,6 +156,9 @@ const mutableSet: ProxyHandler<ReactiveTarget>['set'] = (target, key, value, rec
 
 /**
  * 拦截 delete 操作，确保删除成功后触发对应依赖。
+ *
+ * @remarks
+ * - 仅在确实移除既有字段时通知依赖，避免重复触发。
  */
 const mutableDeleteProperty: ProxyHandler<ReactiveTarget>['deleteProperty'] = (target, key) => {
   /* 删除前记录字段是否存在，后续只对真实变更触发更新。 */
@@ -152,7 +174,9 @@ const mutableDeleteProperty: ProxyHandler<ReactiveTarget>['deleteProperty'] = (t
   return wasApplied
 }
 
-/** 拦截 in 操作，确保查询同样建立依赖。 */
+/**
+ * 拦截 `in` 操作符，确保查询同样建立依赖。
+ */
 const mutableHas: ProxyHandler<ReactiveTarget>['has'] = (target, key) => {
   /* 复用 Reflect.has 获取布尔结果，与原生语义一致。 */
   const result = Reflect.has(target, key)
@@ -163,7 +187,12 @@ const mutableHas: ProxyHandler<ReactiveTarget>['has'] = (target, key) => {
   return result
 }
 
-/** `ownKeys` 捕获 for...in/Object.keys 等场景以追踪结构性更改。 */
+/**
+ * 拦截 `ownKeys` 操作，捕获 `for...in`/`Object.keys` 等场景以追踪结构性更改。
+ *
+ * @remarks
+ * - 数组结构依赖 `length`，普通对象使用 `iterateDependencyKey` 作为统一标识。
+ */
 const mutableOwnKeys: ProxyHandler<ReactiveTarget>['ownKeys'] = (target) => {
   /* 数组结构依赖 length，普通对象使用 iterateDependencyKey 作为统一标识。 */
   const key = Array.isArray(target) ? 'length' : iterateDependencyKey
@@ -174,6 +203,9 @@ const mutableOwnKeys: ProxyHandler<ReactiveTarget>['ownKeys'] = (target) => {
   return Reflect.ownKeys(target)
 }
 
+/**
+ * 只读代理的 set 拦截器：在开发态输出警告，始终返回 `true` 以避免抛出异常。
+ */
 const readonlySet: ProxyHandler<ReactiveTarget>['set'] = () => {
   if (__DEV__) {
     console.warn(reactivityReadonlyWarning)
@@ -182,6 +214,9 @@ const readonlySet: ProxyHandler<ReactiveTarget>['set'] = () => {
   return true
 }
 
+/**
+ * 只读代理的 deleteProperty 拦截器：在开发态输出警告，始终返回 `true` 以避免抛出异常。
+ */
 const readonlyDeleteProperty: ProxyHandler<ReactiveTarget>['deleteProperty'] = () => {
   if (__DEV__) {
     console.warn(reactivityReadonlyWarning)
@@ -191,7 +226,11 @@ const readonlyDeleteProperty: ProxyHandler<ReactiveTarget>['deleteProperty'] = (
 }
 
 /**
- * 与 Vue mutableHandlers 对齐的基础处理器，适配普通对象与数组。
+ * 深层可变响应式代理的处理器，适配普通对象与数组。
+ *
+ * @remarks
+ * - 与 Vue 3 的 `mutableHandlers` 对齐。
+ * - 支持依赖收集、触发、Ref 解包等完整响应式能力。
  */
 export const mutableHandlers = {
   get: createGetter(false, false),
@@ -201,6 +240,12 @@ export const mutableHandlers = {
   ownKeys: mutableOwnKeys,
 } satisfies ProxyHandler<ReactiveTarget>
 
+/**
+ * 浅层可变响应式代理的处理器。
+ *
+ * @remarks
+ * - 仅代理顶层属性，嵌套对象保持原样。
+ */
 export const shallowReactiveHandlers = {
   get: createGetter(false, true),
   set: mutableSet,
@@ -209,6 +254,12 @@ export const shallowReactiveHandlers = {
   ownKeys: mutableOwnKeys,
 } satisfies ProxyHandler<ReactiveTarget>
 
+/**
+ * 浅层只读代理的处理器。
+ *
+ * @remarks
+ * - 仅顶层属性为只读，嵌套对象保持原样可写。
+ */
 export const shallowReadonlyHandlers = {
   get: createGetter(true, true),
   set: readonlySet,
@@ -217,6 +268,12 @@ export const shallowReadonlyHandlers = {
   ownKeys: mutableOwnKeys,
 } satisfies ProxyHandler<ReactiveTarget>
 
+/**
+ * 深层只读代理的处理器。
+ *
+ * @remarks
+ * - 所有层级的属性都为只读，写入操作在开发态会触发警告。
+ */
 export const readonlyHandlers = {
   get: createGetter(true, false),
   set: readonlySet,

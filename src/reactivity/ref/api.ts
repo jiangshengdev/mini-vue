@@ -8,7 +8,14 @@ import type { PlainObject } from '@/shared/index.ts'
 import { isObject } from '@/shared/index.ts'
 
 /**
- * 将任意值转换为 `Ref`，若已经是 `Ref` 则原样返回。
+ * 将任意值转换为 Ref，若已经是 Ref 则原样返回。
+ *
+ * @param value - 要转换的值，可以是普通值或已有的 Ref
+ * @returns Ref 实例
+ *
+ * @remarks
+ * - 若传入的值已是 Ref，会直接返回以保持引用稳定。
+ * - 若传入的值是对象或数组，内部会被转换为 reactive 代理。
  *
  * @public
  */
@@ -22,7 +29,14 @@ export function ref<T>(value: T | Ref<T>): Ref<T> {
 }
 
 /**
- * 判断传入的对象是否拥有 `Ref` 标记。
+ * 判断传入的值是否为 Ref 实例。
+ *
+ * @param value - 要检查的值
+ * @returns 若为 Ref 则返回 `true`
+ *
+ * @remarks
+ * - 通过检查 `refFlag` 符号属性判断，该属性由 Ref 实现类提供。
+ * - 非对象值直接返回 `false`。
  *
  * @public
  */
@@ -36,7 +50,13 @@ export function isRef<T>(value: unknown): value is Ref<T> {
 }
 
 /**
- * 读取 `Ref` 的内部值，若为普通值则直接返回原值。
+ * 读取 Ref 的内部值，若为普通值则直接返回原值。
+ *
+ * @param value - Ref 或普通值
+ * @returns Ref 的 value 属性值，或原值本身
+ *
+ * @remarks
+ * - 常用于需要同时处理 Ref 和普通值的场景。
  *
  * @public
  */
@@ -46,7 +66,16 @@ export function unref<T>(value: T | Ref<T>): T {
 }
 
 /**
- * 针对对象的指定属性创建 `Ref`，复用已有 `Ref` 或包装成 `getter`/`setter`。
+ * 针对对象的指定属性创建 Ref，复用已有 Ref 或包装成 getter/setter。
+ *
+ * @param target - 目标对象
+ * @param key - 属性键
+ * @returns 指向目标属性的 Ref
+ *
+ * @remarks
+ * - 若属性已是 Ref，会直接返回以保持响应式关系。
+ * - 若目标对象是 reactive 代理，读写会直接代理到原对象属性上，复用 reactive 的依赖收集。
+ * - 若目标对象是普通对象，会创建本地依赖集合以支持响应式。
  *
  * @public
  */

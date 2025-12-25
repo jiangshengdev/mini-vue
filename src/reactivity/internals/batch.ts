@@ -1,18 +1,40 @@
 import type { EffectInstance } from '../contracts/index.ts'
 import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
 
-/** 当前批处理嵌套深度：用于支持 start/end 成对调用并允许嵌套批处理。 */
+/**
+ * 当前批处理嵌套深度。
+ *
+ * @remarks
+ * - 用于支持 `startBatch`/`endBatch` 成对调用并允许嵌套批处理。
+ * - 只有最外层 batch 退出时才会触发 flush。
+ */
 let batchDepth = 0
 
-/** 批处理期间收集的副作用集合：使用 Set 去重，保证同一 effect 在一次 flush 中只执行一次。 */
+/**
+ * 批处理期间收集的副作用集合。
+ *
+ * @remarks
+ * - 使用 Set 去重，保证同一 effect 在一次 flush 中只执行一次。
+ * - 延迟初始化，避免多数场景下的额外分配。
+ */
 let pendingEffects: Set<EffectInstance> | undefined
 
-/** 判断当前是否处于批处理上下文中。 */
+/**
+ * 判断当前是否处于批处理上下文中。
+ *
+ * @returns 若在批处理中则返回 `true`
+ */
 export function isBatching(): boolean {
   return batchDepth > 0
 }
 
-/** 进入一次批处理上下文：允许嵌套调用并通过 depth 统一管理退出时机。 */
+/**
+ * 进入一次批处理上下文。
+ *
+ * @remarks
+ * - 允许嵌套调用，通过 depth 统一管理退出时机。
+ * - 必须与 `endBatch()` 成对调用。
+ */
 export function startBatch(): void {
   batchDepth += 1
 }
@@ -43,8 +65,12 @@ export function endBatch(): void {
 /**
  * 在批处理上下文中执行回调，并在最外层退出时一次性刷新期间收集的副作用。
  *
+ * @param batchJob - 要执行的回调函数
+ * @returns 回调函数的返回值
+ *
  * @remarks
- * - 通过 try/finally 确保异常情况下也能正确 endBatch，避免批处理状态泄漏。
+ * - 通过 try/finally 确保异常情况下也能正确 `endBatch`，避免批处理状态泄漏。
+ * - 常用于数组变更方法等需要批量触发的场景。
  */
 export function runInBatch<T>(batchJob: () => T): T {
   startBatch()
@@ -58,6 +84,12 @@ export function runInBatch<T>(batchJob: () => T): T {
 
 /**
  * 将 effect 纳入批处理调度：批处理中入队去重，非批处理则立即执行。
+ *
+ * @param effect - 要调度的副作用实例
+ *
+ * @remarks
+ * - 批处理中会延迟执行，等最外层 batch 退出时统一 flush。
+ * - 非批处理中会立即执行，走 `runEffect` 的调度逻辑。
  */
 export function enqueueEffect(effect: EffectInstance): void {
   if (isBatching()) {
@@ -96,6 +128,13 @@ function flushPendingEffects(): void {
 
 /**
  * 执行单个 effect：若带 scheduler 则交给 scheduler 调度，否则直接运行。
+ *
+ * @param effect - 要执行的副作用实例
+ *
+ * @remarks
+ * - 有 scheduler 时，将 `effect.run()` 包装为任务函数交给 scheduler 决定执行时机。
+ * - 无 scheduler 时同步执行 `effect.run()`。
+ * - scheduler 执行过程中的异常会通过共享错误通道处理，不会穿透到内部调度栈。
  */
 function runEffect(effect: EffectInstance): void {
   const { scheduler } = effect

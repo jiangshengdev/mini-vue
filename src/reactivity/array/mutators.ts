@@ -5,8 +5,9 @@ import { withoutTracking } from '../internals/tracking.ts'
  * 需要被特殊处理的数组「变更型」方法名集合。
  *
  * @remarks
- * - 这些方法会修改数组内容/长度。
+ * - 这些方法会修改数组内容或长度。
  * - 在响应式场景里直接调用原生实现，过程中可能读取 length/索引等，从而意外建立依赖。
+ * - 因此需要在「暂停依赖收集」的上下文中调用。
  */
 type ArrayMutatorKey =
   | 'push'
@@ -49,8 +50,14 @@ const nativeMutators = {
 /**
  * 在「暂停依赖收集」的上下文中调用数组变更方法。
  *
+ * @param mutator - 要调用的数组方法名
+ * @param thisArg - 数组实例（this 绑定）
+ * @param args - 方法参数
+ * @returns 原生方法的返回值
+ *
  * @remarks
  * - 变更方法内部可能读取 length、遍历或触发 getter，这些读取不应被视为用户态依赖。
+ * - 使用 `runInBatch` 包装以支持批量触发，避免多次触发导致的性能问题。
  * - 与 `base-handlers` 中对数组方法的拦截配合：读取到的 mutator 直接是该包装版本。
  */
 function callUntracked<K extends ArrayMutatorKey>(
@@ -180,8 +187,11 @@ export const arrayUntrackedMutators = {
 /**
  * 判断某个属性 key 是否为「需要无追踪包装」的数组变更方法。
  *
+ * @param key - 属性键
+ * @returns 若为变更方法则返回 `true`
+ *
  * @remarks
- * - 仅接受 string key；symbol 等场景直接返回 false。
+ * - 仅接受 string key；symbol 等场景直接返回 `false`。
  * - 使用 `Object.hasOwn` 保证只匹配表内方法，不走原型链。
  */
 export function isArrayMutatorKey(key: PropertyKey): key is keyof typeof arrayUntrackedMutators {

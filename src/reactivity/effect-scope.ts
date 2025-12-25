@@ -2,38 +2,77 @@ import type { EffectInstance } from './contracts/index.ts'
 import { reactivityScopeDisposeOutside } from '@/messages/index.ts'
 import { ContextStack, errorContexts, errorPhases, runSilent, runThrowing } from '@/shared/index.ts'
 
-/** 当前正在运行的 `effect scope` 栈，用于关联副作用与清理。 */
+/**
+ * 当前正在运行的 `EffectScope` 栈，用于关联副作用与清理。
+ *
+ * @remarks
+ * - 通过栈式结构支持嵌套 scope 场景。
+ * - `scope.run()` 执行期间会将当前 scope 压入栈顶。
+ */
 const effectScopeStack = new ContextStack<EffectScope>()
 
 /**
- * `EffectScope` 负责集中托管多个副作用，统一 stop 时可全部清理。
+ * `EffectScope` 负责集中托管多个副作用，统一 `stop` 时可全部清理。
+ *
+ * @remarks
+ * - 支持嵌套 scope，子 scope 会在父 scope 停止时级联销毁。
+ * - 通过 `detached` 参数可创建独立 scope，不与父 scope 关联。
+ * - 常用于组件级别的副作用管理，组件卸载时统一清理所有副作用。
  *
  * @public
  */
 export class EffectScope {
-  /** 当前 `scope` 是否仍可用，`stop` 后将不再收集副作用。 */
+  /**
+   * 当前 scope 是否仍可用。
+   *
+   * @remarks
+   * - `stop()` 后将变为 `false`，不再收集新的副作用。
+   * - 外部可通过该属性判断 scope 的生命周期状态。
+   */
   active = true
 
-  /** 是否与父 `scope` 断开自动关联，默认继承现有 `scope`。 */
+  /**
+   * 是否与父 scope 断开自动关联。
+   *
+   * @remarks
+   * - `true` 时不会挂载到当前活跃 scope 下，需要手动管理生命周期。
+   * - 默认为 `false`，会自动继承现有 scope 的生命周期。
+   */
   private readonly detached: boolean
 
-  /** 父级 `scope` 引用，便于停止时同步移除子节点。 */
+  /**
+   * 父级 scope 引用，便于停止时同步移除子节点。
+   */
   private parent?: EffectScope
 
-  /** 子 `scope` 列表，`stop` 时需要级联销毁。 */
+  /**
+   * 子 scope 列表，`stop()` 时需要级联销毁。
+   */
   private childScopes?: EffectScope[]
 
-  /** 当前 `scope` 在父 `scope` 中的索引，便于 `O(1)` 移除。 */
+  /**
+   * 当前 scope 在父 scope 子列表中的索引，便于 `O(1)` 移除。
+   */
   private positionInParent?: number
 
-  /** 记录属于该 `scope` 的副作用实例。 */
+  /**
+   * 记录属于该 scope 的副作用实例。
+   */
   private readonly effects: EffectInstance[] = []
 
-  /** 由用户注册的清理回调。 */
+  /**
+   * 由用户通过 `onScopeDispose` 注册的清理回调。
+   */
   private readonly cleanups: Array<() => void> = []
 
   /**
-   * 构造函数可选择与父 `scope` 自动关联，便于层级 `stop` 时级联处理。
+   * 构造函数：创建新的 scope，可选择与父 scope 自动关联。
+   *
+   * @param detached - 是否与父 scope 断开关联，默认为 `false`
+   *
+   * @remarks
+   * - 非独立 scope 会自动挂载到当前活跃 scope 下，复用其生命周期。
+   * - 独立 scope 需要手动调用 `stop()` 进行清理。
    */
   constructor(detached = false) {
     this.detached = detached
@@ -47,11 +86,16 @@ export class EffectScope {
   }
 
   /**
-   * 在当前 `scope` 上下文中执行回调，使其创建的副作用被自动托管。
+   * 在当前 scope 上下文中执行回调，使其创建的副作用被自动托管。
    *
-   * @throws
-   * @see {@link https://www.typescriptlang.org/docs/handbook/2/functions.html#unknown | unknown }
-   * 回调内部抛出的异常会同步向上传播，并在传播前交给 setErrorHandler 处理。
+   * @param scopeCallback - 要执行的回调函数
+   * @returns 回调函数的返回值，若 scope 已停用则返回 `undefined`
+   *
+   * @remarks
+   * - 执行期间会将当前 scope 压入栈顶，回调内创建的 effect/computed 会自动登记到该 scope。
+   * - 无论回调如何结束（正常返回或抛出异常），都会恢复先前的 scope 状态。
+   *
+   * @throws 回调内部抛出的异常会同步向上传播，并在传播前交给 `setErrorHandler` 处理。
    */
   run<T>(scopeCallback: () => T): T | undefined {
     /* `scope` 已停用时直接返回，避免在无效上下文中继续注册副作用。 */
@@ -74,7 +118,12 @@ export class EffectScope {
   }
 
   /**
-   * 记录一个副作用，等待 `scope.stop` 时统一停止。
+   * 记录一个副作用实例，等待 `scope.stop()` 时统一停止。
+   *
+   * @param effect - 要托管的副作用实例
+   *
+   * @remarks
+   * - 仅在 scope 仍活跃时登记副作用，避免 `stop()` 之后再次触发清理。
    */
   recordEffect(effect: EffectInstance): void {
     /* 仅在 `scope` 仍活跃时登记副作用，避免 `stop` 之后再次触发清理。 */
@@ -84,7 +133,13 @@ export class EffectScope {
   }
 
   /**
-   * 为 `scope` 注册一次性清理回调。
+   * 为 scope 注册一次性清理回调，会在 `stop()` 时执行。
+   *
+   * @param cleanup - 清理函数
+   *
+   * @remarks
+   * - 若 scope 已停止，清理函数会被立即执行而非入队。
+   * - 这样可以避免「登记到永远不会再被 `stop` 消费的队列」造成资源无法释放。
    */
   addCleanup(cleanup: () => void): void {
     /*
@@ -104,7 +159,14 @@ export class EffectScope {
   }
 
   /**
-   * 停用 `scope`，并停止所有副作用与递归销毁子 `scope`。
+   * 停用 scope，停止所有副作用并递归销毁子 scope。
+   *
+   * @param fromParent - 是否由父 scope 触发的停止，内部使用
+   *
+   * @remarks
+   * - 停止顺序：先停止自身副作用，再执行清理回调，最后级联停止子 scope。
+   * - 非 detached scope 会从父级列表中移除自身，防止残留引用。
+   * - 重复调用 `stop()` 是安全的，不会产生副作用。
    */
   stop(fromParent = false): void {
     if (!this.active) {
@@ -167,7 +229,9 @@ export class EffectScope {
   }
 
   /**
-   * 记录子 `scope`，并缓存其在父级数组中的位置，方便快速删除。
+   * 记录子 scope，并缓存其在父级数组中的位置，方便快速删除。
+   *
+   * @param scope - 要记录的子 scope
    */
   private trackChildScope(scope: EffectScope): void {
     scope.parent = this
@@ -182,7 +246,12 @@ export class EffectScope {
   }
 
   /**
-   * 将指定子 `scope` 从父级列表中移除，保持索引连续性。
+   * 将指定子 scope 从父级列表中移除，保持索引连续性。
+   *
+   * @param scope - 要移除的子 scope
+   *
+   * @remarks
+   * - 使用「交换删除」策略：将末尾元素移到待删除位置，实现 O(1) 删除。
    */
   private removeChildScope(scope: EffectScope): void {
     const { childScopes } = this
@@ -211,6 +280,13 @@ export class EffectScope {
 /**
  * 创建一个新的 effect scope，可选地与现有 scope 自动关联。
  *
+ * @param detached - 是否创建独立 scope，默认为 `false`
+ * @returns 新创建的 `EffectScope` 实例
+ *
+ * @remarks
+ * - 非独立 scope 会自动挂载到当前活跃 scope 下。
+ * - 独立 scope 需要手动调用 `stop()` 进行清理。
+ *
  * @public
  */
 export function effectScope(detached = false): EffectScope {
@@ -220,6 +296,8 @@ export function effectScope(detached = false): EffectScope {
 /**
  * 返回当前生效的 scope，供手动记录副作用或注册清理使用。
  *
+ * @returns 当前活跃的 `EffectScope`，若不在任何 scope 上下文中则返回 `undefined`
+ *
  * @public
  */
 export function getCurrentScope(): EffectScope | undefined {
@@ -227,7 +305,13 @@ export function getCurrentScope(): EffectScope | undefined {
 }
 
 /**
- * 内部方法：将副作用记录到指定 scope，默认使用当前 scope。
+ * 内部方法：将副作用记录到指定 scope，默认使用当前活跃 scope。
+ *
+ * @param effect - 要记录的副作用实例
+ * @param scope - 目标 scope，默认为当前活跃 scope
+ *
+ * @remarks
+ * - 该方法供 `effect()`、`computed()` 等内部使用，自动将副作用登记到 scope。
  */
 export function recordEffectScope(
   effect: EffectInstance,
@@ -237,7 +321,11 @@ export function recordEffectScope(
 }
 
 /**
- * 注册 scope 清理回调，仅能在活跃 scope 中调用。
+ * 注册 scope 清理回调，仅能在活跃 scope 上下文中调用。
+ *
+ * @param cleanup - 清理函数，会在 scope 停止时执行
+ *
+ * @throws 若不在任何 scope 上下文中调用，会抛出 `TypeError`
  *
  * @public
  */
@@ -253,7 +341,13 @@ export function onScopeDispose(cleanup: () => void): void {
 }
 
 /**
- * 内部方法：为指定 scope 记录清理函数，供 stop 时统一执行。
+ * 内部方法：为指定 scope 记录清理函数，供 `stop()` 时统一执行。
+ *
+ * @param cleanup - 清理函数
+ * @param scope - 目标 scope，默认为当前活跃 scope
+ *
+ * @remarks
+ * - 与 `onScopeDispose` 不同，该方法不会在无 scope 时抛出异常。
  */
 export function recordScopeCleanup(
   cleanup: () => void,

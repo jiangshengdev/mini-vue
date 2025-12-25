@@ -1,5 +1,16 @@
 /**
- * 对外统一导出响应式系统的核心接口。
+ * 响应式系统的对外统一出口。
+ *
+ * @remarks
+ * 导出内容分为以下几类：
+ *
+ * - 响应式代理：`reactive`、`readonly`、`shallowReactive`、`shallowReadonly`、`isReactive`、`isReadonly`、`toRaw`
+ * - Ref 相关：`ref`、`isRef`、`unref`、`toRef`、`computed`、`state`
+ * - Effect 相关：`effect`、`ReactiveEffect`、`effectStack`
+ * - EffectScope 相关：`effectScope`、`getCurrentScope`、`onScopeDispose`、`recordEffectScope`、`recordScopeCleanup`
+ * - Watch 相关：`watch`
+ * - 数组工具：`arrayUntrackedMutators`、`isArrayMutatorKey`
+ * - 类型定义：`Ref`、`State`、`Reactive`、`DeepReadonly`、`ReadonlyReactive`、`EffectHandle`、`EffectOptions`、`EffectScheduler`、`EffectScope`、`ComputedGetter`、`ComputedSetter`、`WritableComputedOptions`、`WatchCallback`、`WatchOptions`、`WatchSource`、`WatchStopHandle`
  */
 export { arrayUntrackedMutators, isArrayMutatorKey } from './array/index.ts'
 export type { EffectHandle, EffectOptions, EffectScheduler } from './contracts/index.ts'

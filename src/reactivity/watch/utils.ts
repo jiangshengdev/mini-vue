@@ -5,6 +5,15 @@ import { isObject } from '@/shared/index.ts'
 
 /**
  * 根据显式传参与源类型推导是否需要深度监听。
+ *
+ * @param source - watch 的追踪源
+ * @param explicit - 用户显式传入的 deep 选项
+ * @returns 是否需要深度监听
+ *
+ * @remarks
+ * - 用户显式声明时直接返回，优先级最高。
+ * - getter 与 ref 默认只追踪自身引用，无需深度遍历。
+ * - reactive 对象推导为 `true`，以便追踪嵌套字段。
  */
 export function resolveDeepOption(
   source: WatchSource<unknown>,
@@ -29,7 +38,16 @@ export function resolveDeepOption(
 }
 
 /**
- * 按 `deep` 策略生成统一的 `getter`，供 `effect` 收集依赖。
+ * 按 `deep` 策略生成统一的 getter，供 effect 收集依赖。
+ *
+ * @param source - watch 的追踪源
+ * @param deep - 是否需要深度监听
+ * @returns getter 函数
+ *
+ * @remarks
+ * - 函数源直接作为 getter 使用，保证懒读取。
+ * - ref 源在深度模式下递归读取 `value`，确保嵌套字段被追踪。
+ * - reactive 源在深度模式下通过 `traverse` 递归触发每个字段的依赖。
  */
 export function createGetter<T>(source: WatchSource<T>, deep: boolean): () => T {
   /* 函数源直接作为 `getter` 使用，保证懒读取。 */
@@ -80,6 +98,15 @@ export function createGetter<T>(source: WatchSource<T>, deep: boolean): () => T 
 
 /**
  * 递归访问对象所有字段以触发依赖，避免循环引用导致死循环。
+ *
+ * @param target - 要遍历的目标对象
+ * @param seen - 已访问对象的集合，用于检测循环引用
+ * @returns 原始目标对象
+ *
+ * @remarks
+ * - 非对象或已访问过的节点直接返回，防止无限递归。
+ * - 遇到 ref 时继续深入其 `value`，保持与响应式对象一致。
+ * - 仅遍历可枚举自有键，包含字符串与 Symbol。
  */
 function traverse<T>(target: T, seen = new Set<unknown>()): T {
   /* 非对象或已访问过的节点直接返回，防止无限递归。 */

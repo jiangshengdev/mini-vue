@@ -6,6 +6,14 @@ import type { PlainObject } from '@/shared/index.ts'
 
 /**
  * 收集当前活跃的副作用到依赖集合，确保后续触发时能够回调。
+ *
+ * @param dependencyBucket - 目标字段对应的副作用集合
+ * @param debugInfo - 可选的调试信息，仅在开发态使用
+ *
+ * @remarks
+ * - 依赖收集被显式禁用时（如写入阶段读取旧值）会直接跳过。
+ * - 已停止或已存在于集合中的副作用不会被重复收集。
+ * - 建立双向关联：依赖集合记录副作用，副作用记录关联的依赖集合。
  */
 export function trackEffect(dependencyBucket: DependencyBucket, debugInfo?: PlainObject): void {
   /*
@@ -42,7 +50,14 @@ export function trackEffect(dependencyBucket: DependencyBucket, debugInfo?: Plai
 }
 
 /**
- * 触发依赖集合中的副作用，按照快照顺序执行 `run`。
+ * 触发依赖集合中的副作用，按照快照顺序执行。
+ *
+ * @param dependencyBucket - 目标字段对应的副作用集合
+ *
+ * @remarks
+ * - 使用快照避免遍历过程中依赖集合被修改导致的问题。
+ * - 跳过当前正在执行的 effect 和已停止的 effect。
+ * - 通过 `enqueueEffect` 统一调度，支持批处理场景。
  */
 export function triggerEffects(dependencyBucket: DependencyBucket): void {
   /* 空集合无需触发，快速退出 */
@@ -61,6 +76,9 @@ export function triggerEffects(dependencyBucket: DependencyBucket): void {
 
 /**
  * 拷贝一份依赖集合，保证触发期间的稳定遍历。
+ *
+ * @param dependencyBucket - 原始依赖集合
+ * @returns 依赖集合的浅拷贝
  */
 function depSnapshot(dependencyBucket: DependencyBucket): DependencyBucket {
   return new Set(dependencyBucket)
@@ -68,8 +86,15 @@ function depSnapshot(dependencyBucket: DependencyBucket): DependencyBucket {
 
 /**
  * 判断副作用是否应在当前调度周期内运行。
+ *
+ * @param effect - 要检查的副作用实例
+ * @returns 若应该运行则返回 `true`
+ *
+ * @remarks
+ * - 避免重复执行当前正在运行的 effect（防止无限循环）。
+ * - 跳过已停止的 effect。
  */
 function shouldRun(effect: EffectInstance): boolean {
-  /* 避免重复执行当前 `effect`，并确保目标 `effect` 尚未停止 */
+  /* 避免重复执行当前 effect，并确保目标 effect 尚未停止。 */
   return effect !== effectStack.current && effect.active
 }

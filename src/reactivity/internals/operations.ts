@@ -7,15 +7,29 @@ import { isArrayIndex } from '@/shared/index.ts'
 
 /**
  * 集中管理对象属性与副作用之间的依赖关系。
+ *
+ * @remarks
+ * - 使用两层 Map 结构：`target -> key -> DependencyBucket`。
+ * - 外层使用 WeakMap 避免内存泄漏，内层使用 Map 支持任意 PropertyKey。
  */
 class DependencyRegistry {
   /**
-   * 使用 `WeakMap` 建立目标对象到属性依赖集合的索引结构。
+   * 使用 WeakMap 建立目标对象到属性依赖集合的索引结构。
+   *
+   * @remarks
+   * - WeakMap 的键为弱引用，当目标对象被垃圾回收时，对应的依赖映射也会被自动清理。
    */
   private readonly targetMap = new WeakMap<ReactiveTarget, Map<PropertyKey, DependencyBucket>>()
 
   /**
    * 把当前活跃副作用加入目标字段的依赖集合。
+   *
+   * @param target - 响应式代理的原始目标对象
+   * @param key - 被访问的属性键
+   *
+   * @remarks
+   * - 当外层显式禁用依赖收集时（如写入阶段读取旧值），会短路跳过。
+   * - 没有活跃 effect 时不会创建依赖集合，节省内存。
    */
   track(target: ReactiveTarget, key: PropertyKey): void {
     /*
@@ -45,6 +59,15 @@ class DependencyRegistry {
 
   /**
    * 触发指定字段的依赖集合，逐个执行对应副作用。
+   *
+   * @param target - 响应式代理的原始目标对象
+   * @param key - 被修改的属性键
+   * @param type - 触发操作类型（set/add/delete）
+   * @param newValue - 新值，用于数组 length 截断场景的判断
+   *
+   * @remarks
+   * - 根据操作类型决定是否额外触发 iterate 依赖（结构性变化）。
+   * - 数组场景有特殊处理：索引变更会触发 iterate，新增索引会触发 length。
    */
   trigger(target: ReactiveTarget, key: PropertyKey, type: TriggerOpType, newValue?: unknown): void {
     const depsMap = this.targetMap.get(target)
@@ -122,6 +145,10 @@ class DependencyRegistry {
 
   /**
    * 确保目标字段具备依赖集合，不存在时创建新集合。
+   *
+   * @param target - 响应式代理的原始目标对象
+   * @param key - 属性键
+   * @returns 目标字段对应的依赖集合
    */
   private getOrCreateDep(target: ReactiveTarget, key: PropertyKey): DependencyBucket {
     /* 读取或初始化目标对象的依赖映射表 */
@@ -144,15 +171,34 @@ class DependencyRegistry {
   }
 }
 
+/** 全局依赖注册表单例。 */
 const registry = new DependencyRegistry()
 
-/** 响应式系统对外暴露的依赖收集入口。 */
+/**
+ * 响应式系统对外暴露的依赖收集入口。
+ *
+ * @param target - 响应式代理的原始目标对象
+ * @param key - 被访问的属性键
+ *
+ * @remarks
+ * - 由 Proxy handler 的 get/has/ownKeys 等拦截器调用。
+ * - 将当前活跃的 effect 加入目标字段的依赖集合。
+ */
 export function track(target: ReactiveTarget, key: PropertyKey): void {
   registry.track(target, key)
 }
 
 /**
- * 响应式系统对外暴露的触发入口，参数与 DependencyRegistry.trigger 对齐。
+ * 响应式系统对外暴露的触发入口。
+ *
+ * @param target - 响应式代理的原始目标对象
+ * @param key - 被修改的属性键
+ * @param type - 触发操作类型（set/add/delete）
+ * @param newValue - 新值，用于数组 length 截断场景的判断
+ *
+ * @remarks
+ * - 由 Proxy handler 的 set/deleteProperty 等拦截器调用。
+ * - 触发目标字段依赖集合中的所有副作用重新执行。
  */
 export function trigger(
   target: ReactiveTarget,

@@ -9,6 +9,7 @@ import { toRaw } from '../to-raw.ts'
  * @remarks
  * - 这些方法会基于元素做相等性比较（identity-sensitive）。
  * - 响应式数组在读取元素时会懒代理对象，若直接调用原生实现会导致 raw/proxy 对比失败。
+ * - 例如：`reactiveArray.includes(rawObj)` 可能返回 `false`，即使数组中确实包含该对象。
  */
 export type ArrayIdentitySearchKey = 'includes' | 'indexOf' | 'lastIndexOf'
 
@@ -31,6 +32,14 @@ const nativeArraySearchMethods = {
 
 /**
  * 为 identity-sensitive 的数组查询方法创建包装，确保依赖收集与 raw/proxy 比较语义一致。
+ *
+ * @param key - 要包装的查询方法名
+ * @returns 包装后的查询方法
+ *
+ * @remarks
+ * - 先在原始数组上执行查询并收集 iterate 依赖。
+ * - 若查询失败（includes 返回 false，indexOf/lastIndexOf 返回 -1），
+ *   会将入参转换为 raw 后再查一次，以兼容用户传入 proxy 的场景。
  */
 function createIdentitySearchWrapper<K extends ArrayIdentitySearchKey>(
   key: K,
@@ -75,6 +84,13 @@ function createIdentitySearchWrapper<K extends ArrayIdentitySearchKey>(
   }
 }
 
+/**
+ * 提供给响应式 Proxy 的数组查询方法包装表。
+ *
+ * @remarks
+ * - 仅覆盖 identity-sensitive 的查询方法。
+ * - 通过 `satisfies` 约束确保每个 key 的签名与原生完全一致。
+ */
 export const arraySearchWrappers = {
   includes: createIdentitySearchWrapper('includes'),
   indexOf: createIdentitySearchWrapper('indexOf'),
@@ -83,6 +99,9 @@ export const arraySearchWrappers = {
 
 /**
  * 判断某个属性 key 是否为需要特殊包装的数组查询方法。
+ *
+ * @param key - 属性键
+ * @returns 若为查询方法则返回 `true`
  */
 export function isArraySearchKey(key: PropertyKey): key is keyof typeof arraySearchWrappers {
   return typeof key === 'string' && Object.hasOwn(arraySearchWrappers, key)

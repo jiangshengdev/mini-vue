@@ -69,12 +69,12 @@
     - 导出相关类型
     - _Requirements: 5.1_
 
-- [ ] 7. 创建事件处理器工厂
-  - [ ] 7.1 创建 `handlers/event-handlers.ts`
+- [x] 7. 创建事件处理器工厂
+  - [x] 7.1 创建 `handlers/event-handlers.ts`
     - 实现 `createEventHandlers` 函数
     - 创建所有事件处理函数：handleInputChange, handlePrevious, handleNext, handleReset, handleTogglePlay, handleSpeedChange, handleIndexClick, handleChainHover, handleChainLeave, handleSequenceHover, handleSequenceLeave, handlePredecessorsHover, handlePredecessorsLeave
     - _Requirements: 6.1, 6.2, 6.3, 6.4_
-  - [ ] 7.2 创建 `handlers/index.ts`
+  - [x] 7.2 创建 `handlers/index.ts`
     - 导出事件处理器工厂
     - _Requirements: 6.1_
 

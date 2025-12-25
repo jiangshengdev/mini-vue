@@ -178,8 +178,8 @@ export interface StateManager extends Disposable {
 export interface PlaybackControllerDeps {
   /** 状态管理器实例。 */
   stateManager: StateManager
-  /** 步骤导航器实例。 */
-  navigator: StepNavigator
+  /** 获取当前的步骤导航器实例。 */
+  getNavigator: () => StepNavigator
   /** 步骤更新后的回调函数。 */
   onStepUpdate: () => void
 }

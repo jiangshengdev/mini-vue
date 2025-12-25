@@ -7,6 +7,7 @@
  * - 播放控制器负责管理自动播放的启停和速度调节。
  * - 内部使用 `setInterval` 实现定时步进，到达末尾时自动停止。
  * - 实现 `Disposable` 接口，确保组件卸载时清理定时器。
+ * - 通过 `getNavigator` 获取导航器，确保输入变更后使用最新实例。
  */
 
 import type { PlaybackController, PlaybackControllerDeps } from '../types.ts'
@@ -23,7 +24,7 @@ import type { PlaybackController, PlaybackControllerDeps } from '../types.ts'
  * @returns 播放控制器实例
  */
 export function createPlaybackController(deps: PlaybackControllerDeps): PlaybackController {
-  const { stateManager, navigator, onStepUpdate } = deps
+  const { stateManager, getNavigator, onStepUpdate } = deps
   const state = stateManager.getState()
 
   /** 自动播放定时器句柄，用于停止时清理。 */
@@ -55,7 +56,7 @@ export function createPlaybackController(deps: PlaybackControllerDeps): Playback
     state.isPlaying.set(true)
 
     playTimer = setInterval(() => {
-      const result = navigator.next()
+      const result = getNavigator().next()
 
       if (result) {
         onStepUpdate()

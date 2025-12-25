@@ -111,7 +111,9 @@ describe('createPlaybackController', () => {
 
       const controller = createPlaybackController({
         stateManager,
-        navigator,
+        getNavigator() {
+          return navigator
+        },
         onStepUpdate,
       })
 
@@ -139,7 +141,9 @@ describe('createPlaybackController', () => {
 
       const controller = createPlaybackController({
         stateManager,
-        navigator,
+        getNavigator() {
+          return navigator
+        },
         onStepUpdate,
       })
 
@@ -150,6 +154,37 @@ describe('createPlaybackController', () => {
 
       expect(onStepUpdate).toHaveBeenCalledTimes(3)
       expect(navigator.getState().currentStep).toBe(3)
+
+      controller.dispose()
+    })
+
+    it('输入变更后应使用最新的导航器实例', () => {
+      const stateManager = createStateManager([1, 2, 3])
+      const traceA = createMockTrace(3)
+      const traceB = createMockTrace(4)
+      const staleNavigator = createMockNavigator(traceA)
+      let currentNavigator = staleNavigator
+      const onStepUpdate = vi.fn()
+
+      const controller = createPlaybackController({
+        stateManager,
+        getNavigator() {
+          return currentNavigator
+        },
+        onStepUpdate,
+      })
+
+      // 模拟输入变更后重建导航器
+      controller.stop()
+      currentNavigator = createMockNavigator(traceB)
+
+      controller.start()
+
+      vi.advanceTimersByTime(500)
+
+      expect(onStepUpdate).toHaveBeenCalledTimes(1)
+      expect(currentNavigator.getState().currentStep).toBe(1)
+      expect(staleNavigator.getState().currentStep).toBe(0)
 
       controller.dispose()
     })
@@ -164,7 +199,9 @@ describe('createPlaybackController', () => {
 
       const controller = createPlaybackController({
         stateManager,
-        navigator,
+        getNavigator() {
+          return navigator
+        },
         onStepUpdate,
       })
 
@@ -189,7 +226,9 @@ describe('createPlaybackController', () => {
 
       const controller = createPlaybackController({
         stateManager,
-        navigator,
+        getNavigator() {
+          return navigator
+        },
         onStepUpdate,
       })
 
@@ -213,7 +252,9 @@ describe('createPlaybackController', () => {
 
       const controller = createPlaybackController({
         stateManager,
-        navigator,
+        getNavigator() {
+          return navigator
+        },
         onStepUpdate,
       })
 
@@ -234,7 +275,9 @@ describe('createPlaybackController', () => {
 
       const controller = createPlaybackController({
         stateManager,
-        navigator,
+        getNavigator() {
+          return navigator
+        },
         onStepUpdate,
       })
 
@@ -258,7 +301,9 @@ describe('createPlaybackController', () => {
 
       const controller = createPlaybackController({
         stateManager,
-        navigator,
+        getNavigator() {
+          return navigator
+        },
         onStepUpdate,
       })
 
@@ -277,7 +322,9 @@ describe('createPlaybackController', () => {
 
       const controller = createPlaybackController({
         stateManager,
-        navigator,
+        getNavigator() {
+          return navigator
+        },
         onStepUpdate,
       })
 
@@ -308,7 +355,9 @@ describe('createPlaybackController', () => {
 
       const controller = createPlaybackController({
         stateManager,
-        navigator,
+        getNavigator() {
+          return navigator
+        },
         onStepUpdate,
       })
 
@@ -343,7 +392,9 @@ describe('createPlaybackController', () => {
 
       const controller = createPlaybackController({
         stateManager,
-        navigator,
+        getNavigator() {
+          return navigator
+        },
         onStepUpdate,
       })
 
@@ -368,7 +419,9 @@ describe('createPlaybackController', () => {
 
       const controller = createPlaybackController({
         stateManager,
-        navigator,
+        getNavigator() {
+          return navigator
+        },
         onStepUpdate,
       })
 
@@ -392,7 +445,9 @@ describe('createPlaybackController', () => {
 
       const controller = createPlaybackController({
         stateManager,
-        navigator,
+        getNavigator() {
+          return navigator
+        },
         onStepUpdate,
       })
 

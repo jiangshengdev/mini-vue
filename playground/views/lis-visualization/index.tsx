@@ -99,7 +99,7 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
    * ======================================================================== */
   const playbackController = createPlaybackController({
     stateManager,
-    navigator,
+    getNavigator,
     onStepUpdate: updateStep,
   })
 

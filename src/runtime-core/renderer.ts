@@ -14,6 +14,10 @@ import type { PropsShape } from '@/shared/index.ts'
 
 /**
  * 宿主环境需要提供的渲染原语集合。
+ *
+ * @remarks
+ * - 这些方法由宿主平台（如 `runtime-dom`）实现，`runtime-core` 通过它们完成平台无关的渲染逻辑。
+ * - 所有方法应保持幂等或可预测的副作用，便于 `patch` 阶段复用与回滚。
  */
 export interface RendererOptions<
   HostNode,
@@ -38,7 +42,10 @@ export interface RendererOptions<
   remove(node: HostNode): void
   /**
    * 将 `virtualNode` `props` 映射到真实元素节点。
-   * 传入 `null` 时代表没有任何 `props` 需要处理。
+   *
+   * @remarks
+   * - 传入 `null`/`undefined` 时代表没有任何 `props` 需要处理。
+   * - 实现方需负责属性/事件/`class`/`style` 等的增量更新与移除。
    */
   patchProps(element: HostElement, previousProps?: PropsShape, nextProps?: PropsShape): void
 }
@@ -53,6 +60,11 @@ export type RootRenderFunction<HostElement extends WeakKey> = (
 export interface Renderer<HostNode, HostElement extends HostNode & WeakKey> {
   /**
    * 将 `virtualNode` 子树渲染到指定容器中。
+   *
+   * @remarks
+   * - 首次渲染会清空容器并挂载新子树。
+   * - 后续渲染会复用 `patch` 更新根子树，避免整棵重建。
+   * - 传入 `undefined`/`null` 等价于卸载：清理缓存并保持容器空白。
    *
    * @public
    */

@@ -10,6 +10,12 @@ import { Fragment } from '@/jsx-foundation/index.ts'
 
 /**
  * 将通用 `virtualNode` 分派给组件或元素挂载路径。
+ *
+ * @remarks
+ * 分派策略：
+ * - `Fragment`：直接展开自身 `children`，不走组件路径。
+ * - 函数组件：通过 `mountComponent` 执行并挂载其返回值。
+ * - 普通标签名：走元素挂载逻辑（`mountElement`）。
  */
 export function mountVirtualNode<
   HostNode,

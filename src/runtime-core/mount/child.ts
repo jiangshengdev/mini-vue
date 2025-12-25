@@ -10,6 +10,13 @@ import { __DEV__, isNil } from '@/shared/index.ts'
 
 /**
  * 根据子节点类型生成宿主节点，统一处理数组、`virtualNode` 与原始值。
+ *
+ * @remarks
+ * 支持的子节点类型：
+ * - `null`/`undefined`/布尔值：不产生实际节点。
+ * - 数组：以锚点包裹，逐个挂载子项。
+ * - `virtualNode`：交给 `mountVirtualNode` 处理组件或元素。
+ * - 原始文本（`string`/`number`）：创建文本节点。
  */
 export function mountChild<
   HostNode,
@@ -116,6 +123,11 @@ export function mountChild<
 
 /**
  * 挂载数组子节点：为整体生成锚点区间，并逐个交给 `mountChild` 处理。
+ *
+ * @remarks
+ * - 空数组不产生节点。
+ * - 单元素数组直接复用子节点策略，无需额外锚点。
+ * - 多元素数组使用首尾锚点包裹，保证区间边界清晰。
  */
 function mountArrayChild<
   HostNode,

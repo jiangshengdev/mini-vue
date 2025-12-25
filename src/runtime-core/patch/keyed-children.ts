@@ -22,10 +22,12 @@ import { findNextAnchor, isSameVirtualNode } from './utils.ts'
  *
  * @remarks
  * 算法步骤：
- * 1) 头尾同步：尽可能从两端消耗相同节点，缩小中间 `diff` 范围。
- * 2) 处理纯新增/纯删除的剩余段。
- * 3) 为中间段建立索引映射并 `patch` 可复用节点。
- * 4) 倒序遍历新列表中间段：`mount` 新节点或将旧节点移动到正确位置。
+ * 1. 头尾同步：尽可能从两端消耗相同节点，缩小中间 `diff` 范围。
+ * 2. 处理纯新增/纯删除的剩余段。
+ * 3. 为中间段建立索引映射并 `patch` 可复用节点。
+ * 4. 倒序遍历新列表中间段：`mount` 新节点或将旧节点移动到正确位置。
+ *
+ * 时间复杂度：O(n log n)（主要来自 LIS 计算）。
  */
 export function patchKeyedChildren<
   HostNode,
@@ -83,6 +85,10 @@ export function patchKeyedChildren<
  * 遍历旧列表的中间段：
  * - 找不到对应新节点则卸载。
  * - 找到则 `patch`，并记录「新索引 -> 旧索引」的复用映射。
+ *
+ * @remarks
+ * - 有 `key` 则优先通过映射定位，否则尝试在新列表中间段线性寻找可复用的无 `key` 节点。
+ * - `key` 命中但类型不同时视为替换，卸载旧节点并让后续阶段按「需要 `mount`」处理。
  */
 function patchAlignedChildren<
   HostNode,
@@ -153,7 +159,9 @@ function patchAlignedChildren<
  * 将新列表中间段的节点移动/挂载到正确位置。
  *
  * @remarks
- * 倒序遍历可以让每个节点都以「其后继节点」作为锚点插入，避免在同一轮移动中锚点失效。
+ * - 倒序遍历可以让每个节点都以「其后继节点」作为锚点插入，避免在同一轮移动中锚点失效。
+ * - 在最长递增子序列中的节点保持相对顺序，无需移动。
+ * - 不在 LIS 中的节点需要移动到正确位置。
  */
 function moveOrMountChildren<
   HostNode,

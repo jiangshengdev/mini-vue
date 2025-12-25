@@ -12,6 +12,13 @@ import type { SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
 
 /**
  * 执行函数组件并将返回的子树继续挂载到容器。
+ *
+ * @remarks
+ * 组件挂载流程：
+ * 1. 规整 `props` 并创建组件实例。
+ * 2. 执行 `setup` 获取渲染闭包。
+ * 3. 创建响应式 `effect` 并执行首次渲染。
+ * 4. 将子树挂载到宿主容器。
  */
 export function mountComponent<
   HostNode,

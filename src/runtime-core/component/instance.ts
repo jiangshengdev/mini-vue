@@ -8,6 +8,11 @@ import type { PlainObject } from '@/shared/index.ts'
 
 /**
  * 创建组件实例与关联的 `effect` 作用域。
+ *
+ * @remarks
+ * - 实例的 `provides` 通过原型链继承父组件或应用级 `provides`，实现层级依赖注入。
+ * - `render`/`effect` 初始为空，由 `setup` 与 `performInitialRender` 回填。
+ * - `scope` 用于托管 `setup` 内部创建的所有副作用，卸载时统一 `stop`。
  */
 export function createComponentInstance<
   HostNode,
@@ -65,6 +70,9 @@ export function createComponentInstance<
 
 /**
  * 将实例回写到 `virtualNode`，方便测试或调试阶段访问。
+ *
+ * @remarks
+ * 该函数扩展 `virtualNode` 类型后写入实例引用，供外部消费（如 DevTools）。
  */
 export function attachInstanceToVirtualNode<
   HostNode,

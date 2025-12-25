@@ -4,15 +4,20 @@ import type { SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
 
 /**
  * 运行时附加元信息的 `virtualNode`，便于挂载与 `diff` 阶段复用宿主节点。
+ *
+ * @remarks
+ * - `mount` 阶段会将宿主节点引用写入 `el`/`anchor`/`handle`。
+ * - `patch` 阶段通过 `syncRuntimeMetadata` 将这些引用从旧 `virtualNode` 继承到新 `virtualNode`。
+ * - 组件 `virtualNode` 额外持有 `component` 实例引用，用于驱动 `effect` 更新与卸载。
  */
 export interface RuntimeVirtualNode<
   HostNode,
   HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
 > extends VirtualNode {
-  /** 对应宿主节点引用，组件时为根节点，`Fragment` 为首节点。 */
+  /** 对应宿主节点引用：元素为自身，组件为子树根节点，`Fragment` 为首节点。 */
   el?: HostNode
-  /** `Fragment` 的尾锚点或子节点范围末尾，用于批量插入时定位。 */
+  /** `Fragment` 或组件的尾锚点，用于批量插入/移动时定位区间末尾。 */
   anchor?: HostNode
   /** 若为组件 `virtualNode`，指向其组件实例，便于后续更新与卸载。 */
   component?: ComponentInstance<HostNode, HostElement, HostFragment, SetupComponent>
@@ -22,8 +27,10 @@ export interface RuntimeVirtualNode<
 
 /**
  * 将普通 `virtualNode` 断言为运行时增强形态，供挂载路径写入元信息。
+ *
+ * @remarks
+ * 该函数仅做类型断言，不进行运行时校验；调用方需确保 `virtualNode` 来自合法的渲染流程。
  */
-
 export function asRuntimeVirtualNode<
   HostNode,
   HostElement extends HostNode & WeakKey = HostNode & WeakKey,

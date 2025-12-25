@@ -11,7 +11,12 @@ export type RuntimeNormalizedVirtualNode<
   HostFragment extends HostNode = HostNode,
 > = RuntimeVirtualNode<HostNode, HostElement, HostFragment> & NormalizedVirtualNode
 
-/** 将 normalize 后的 `virtualNode` 断言为 runtime `virtualNode`，统一出口便于后续收紧。 */
+/**
+ * 将 normalize 后的 `virtualNode` 断言为 runtime `virtualNode`，统一出口便于后续收紧。
+ *
+ * @remarks
+ * 该函数仅做类型断言，不进行运行时校验；调用方需确保 `virtualNode` 来自合法的渲染流程。
+ */
 export function asRuntimeNormalizedVirtualNode<
   HostNode,
   HostElement extends HostNode & WeakKey = HostNode & WeakKey,
@@ -24,7 +29,13 @@ export function asRuntimeNormalizedVirtualNode<
   ) as RuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>
 }
 
-/** 读取 `virtualNode` 对应的宿主节点集合（`Fragment`/组件/元素/文本统一）。 */
+/**
+ * 读取 `virtualNode` 对应的宿主节点集合（`Fragment`/组件/元素/文本统一）。
+ *
+ * @remarks
+ * - 通过 `runtime.handle.nodes` 获取，`handle` 在 `mount` 阶段写入。
+ * - 若 `handle` 不存在则返回空数组。
+ */
 export function getHostNodes<
   HostNode,
   HostElement extends HostNode & WeakKey,
@@ -35,7 +46,13 @@ export function getHostNodes<
   return runtime.handle?.nodes ?? []
 }
 
-/** 读取 `virtualNode` 对应的首个宿主节点，用于作为插入锚点。 */
+/**
+ * 读取 `virtualNode` 对应的首个宿主节点，用于作为插入锚点。
+ *
+ * @remarks
+ * - 对于 `Fragment`/组件，返回其子树的第一个宿主节点。
+ * - 对于元素/文本，返回其自身的宿主节点。
+ */
 export function getFirstHostNode<
   HostNode,
   HostElement extends HostNode & WeakKey = HostNode & WeakKey,

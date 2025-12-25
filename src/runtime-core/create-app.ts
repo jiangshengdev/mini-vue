@@ -24,6 +24,9 @@ type AppLifecycleStatus = (typeof appLifecycleStatus)[keyof typeof appLifecycleS
 
 /**
  * 宿主平台注入的渲染配置，提供渲染与清理能力。
+ *
+ * @remarks
+ * 由宿主平台（如 `runtime-dom`）实现，`createApp` 通过它完成平台无关的应用生命周期管理。
  */
 export interface AppHostDriver<HostElement extends WeakKey> {
   /** 将根子树挂载到目标容器的渲染函数。 */
@@ -32,19 +35,37 @@ export interface AppHostDriver<HostElement extends WeakKey> {
   unmount: (container: HostElement) => void
 }
 
-/** 最小的应用级上下文，用于插件与 `provide`/`inject` 的根级 `provides`。 */
+/**
+ * 最小的应用级上下文，用于插件与 `provide`/`inject` 的根级 `provides`。
+ *
+ * @remarks
+ * - `provides` 会在根组件实例创建时注入到组件树的 `provides` 原型链上。
+ * - 通过 `app.provide()` 写入的值会存储在这里。
+ */
 export interface AppContext {
   /** 应用级依赖注入容器（root `provides`），供整棵组件树通过原型链继承读取。 */
   provides: PlainObject
 }
 
-/** 应用插件：仅支持函数形式，保持 API 收敛。 */
+/**
+ * 应用插件：支持函数形式与对象形式（带 `install` 方法）。
+ *
+ * @remarks
+ * - 函数形式：`(app) => { ... }`
+ * - 对象形式：`{ install(app) { ... } }`
+ */
 export type AppPlugin<HostElement> =
   | ((app: AppInstance<HostElement>) => void)
   | { install: (app: AppInstance<HostElement>) => void }
 
 /**
  * `createApp` 返回的实例 API，封装 `mount`/`unmount` 生命周期。
+ *
+ * @remarks
+ * - `mount`：指定宿主容器并触发首次渲染，只能调用一次。
+ * - `unmount`：停止渲染并释放容器内容，之后可重新 `mount`。
+ * - `use`：安装插件，支持函数形式与对象形式。
+ * - `provide`：在应用级提供依赖，供整个组件树通过 `inject()` 读取。
  */
 export interface AppInstance<HostElement> extends PluginInstallApp {
   /** 指定宿主容器并触发首次渲染。 */
@@ -84,6 +105,10 @@ interface AppState<HostElement extends WeakKey> {
 
 /**
  * 按当前状态执行一次挂载，负责生成子树并调度渲染。
+ *
+ * @remarks
+ * - 已挂载时直接阻止重复操作，避免宿主状态错乱。
+ * - 渲染成功后再缓存容器和状态，避免失败时留下残留。
  */
 function mountApp<HostElement extends WeakKey>(
   state: AppState<HostElement>,
@@ -117,6 +142,10 @@ function mountApp<HostElement extends WeakKey>(
 
 /**
  * 清理当前应用实例，释放宿主容器与内部状态。
+ *
+ * @remarks
+ * - 没有容器代表尚未挂载，直接跳过。
+ * - 调用宿主清理逻辑并重置状态，便于后续重新挂载。
  */
 function unmountApp<HostElement extends WeakKey>(state: AppState<HostElement>): void {
   /* 没有容器代表尚未挂载，直接跳过。 */
@@ -150,6 +179,11 @@ function createRootVirtualNode<HostElement extends WeakKey>(state: AppState<Host
 
 /**
  * 创建应用实例，封装 `mount`/`unmount` 生命周期与状态管理。
+ *
+ * @remarks
+ * - 应用实例是 mini-vue 的顶层入口，负责管理根组件的挂载与卸载。
+ * - 通过 `app.provide()` 可在应用级提供依赖，供整个组件树通过 `inject()` 读取。
+ * - 通过 `app.use()` 可安装插件，扩展应用能力。
  */
 export function createAppInstance<HostElement extends WeakKey>(
   config: AppHostDriver<HostElement>,

@@ -13,6 +13,10 @@ import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
 
 /**
  * 运行组件 `effect` 并将首个结果挂载到容器。
+ *
+ * @remarks
+ * - 首次 `run()` 会同步生成子树结果并挂载到宿主容器。
+ * - 首渲染异常会通过错误通道上报，但不中断兄弟组件的挂载。
  */
 export function performInitialRender<
   HostNode,
@@ -67,6 +71,10 @@ export function performInitialRender<
 
 /**
  * 创建组件渲染用的响应式 `effect`，负责产出子树并在依赖变更时调度更新。
+ *
+ * @remarks
+ * - `effect` 的 `fn` 每次执行都会调用 `render()` 获取最新子树。
+ * - `scheduler` 负责将更新任务提交给调度器，由调度器决定合并与执行时机。
  */
 function createRenderEffect<
   HostNode,
@@ -99,6 +107,10 @@ function createRenderEffect<
 
 /**
  * Rerender 时先尝试生成新子树，成功后再替换旧挂载，失败则保留旧子树。
+ *
+ * @remarks
+ * - 调度执行由 `effect` 决定，异常时标记失败并避免替换旧子树。
+ * - 这种「失败回滚」策略可防止渲染错误导致整棵子树丢失。
  */
 function rerenderComponent<
   HostNode,
@@ -135,6 +147,10 @@ function rerenderComponent<
 
 /**
  * 以 `patch` 方式更新组件子树，保持宿主节点复用。
+ *
+ * @remarks
+ * - `patch` 会对比新旧子树，仅更新变更部分，避免整棵重建。
+ * - 更新后同步 `mountedHandle`，确保后续 `teardown` 能正确清理。
  */
 function patchLatestSubtree<
   HostNode,

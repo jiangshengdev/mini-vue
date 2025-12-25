@@ -10,6 +10,10 @@ import { findNextAnchor } from './utils.ts'
  * - 先按索引 `patch` 公共长度。
  * - 新列表更长则追加 `mount`，并按「后继节点」计算插入锚点。
  * - 旧列表更长则卸载多余节点。
+ *
+ * @remarks
+ * - `unkeyed diff` 只按索引对齐，不支持「同节点换位置」的语义。
+ * - 适用于简单列表或列表项没有稳定标识的场景。
  */
 export function patchUnkeyedChildren<
   HostNode,

@@ -6,6 +6,10 @@ import type { RenderOutput, SetupComponent } from '@/jsx-foundation/index.ts'
 
 /**
  * 处理需要锚点的组件子树挂载，避免与兄弟节点混淆。
+ *
+ * @remarks
+ * - 当组件不是父容器的最后一个子节点时，需要首尾锚点来标记其占据的区间。
+ * - 锚点为空文本节点，不影响渲染结果但能保证后续兄弟节点的插入位置正确。
  */
 export function mountComponentSubtreeWithAnchors<
   HostNode,
@@ -78,6 +82,10 @@ export function mountComponentSubtreeWithAnchors<
 
 /**
  * 为需要锚点的组件创建首尾空文本占位符，保证兄弟节点插入位置固定。
+ *
+ * @remarks
+ * - 首锚点标记组件子树的起始位置，尾锚点标记结束位置。
+ * - 后续兄弟节点会插入到尾锚点之后，避免与组件子树混淆。
  */
 function ensureComponentAnchors<
   HostNode,

@@ -9,6 +9,12 @@ import { errorContexts, errorPhases, isThenable, runSilent } from '@/shared/inde
 
 /**
  * 初始化组件，创建 `setup` 阶段与渲染闭包。
+ *
+ * @remarks
+ * - `setup` 返回的渲染闭包会成为 `effect` 调度的核心逻辑。
+ * - `setup` 失败或返回空值时跳过后续挂载，由上层处理清理。
+ *
+ * @returns `true` 表示 `setup` 成功，`false` 表示失败。
  */
 export function setupComponent<
   HostNode,
@@ -31,6 +37,11 @@ export function setupComponent<
 
 /**
  * 安全运行组件 `setup`：挂载当前实例上下文，收集错误并校验返回值。
+ *
+ * @remarks
+ * - 在组件专属 `scope` 内运行 `setup`，便于后续统一 `stop`。
+ * - 替换全局 `currentInstance` 以便 `setup` 内部通过 API 访问自身。
+ * - 校验返回值：必须是函数，不支持异步 `setup`。
  */
 function invokeSetup<
   HostNode,

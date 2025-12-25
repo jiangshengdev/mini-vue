@@ -5,6 +5,9 @@ import { findNextAnchor, isSameVirtualNode } from './utils.ts'
 
 /**
  * 初始化 `diff` 区间，后续会被头尾同步逻辑收缩。
+ *
+ * @remarks
+ * 区间表示「需要真正对比」的中间段，头尾同步会逐步收缩这个区间。
  */
 export function createIndexRange(previousLength: number, nextLength: number): IndexRange {
   return {
@@ -17,6 +20,10 @@ export function createIndexRange(previousLength: number, nextLength: number): In
 
 /**
  * 从头部同步：只要两侧节点相同就持续 `patch` 并推进区间起点。
+ *
+ * @remarks
+ * - 头部同步可以快速消耗列表前缀的相同节点，减少后续 `keyed` 匹配的工作量。
+ * - 同步完成后 `range.oldStart`/`range.newStart` 指向第一个不同的节点。
  */
 export function syncFromStart<
   HostNode,
@@ -51,6 +58,10 @@ export function syncFromStart<
 
 /**
  * 从尾部同步：只要两侧节点相同就持续 `patch` 并收缩区间终点。
+ *
+ * @remarks
+ * - 尾部同步可以快速消耗列表后缀的相同节点，减少后续 `keyed` 匹配的工作量。
+ * - 同步完成后 `range.oldEnd`/`range.newEnd` 指向最后一个不同的节点。
  */
 export function syncFromEnd<
   HostNode,
@@ -82,6 +93,10 @@ export function syncFromEnd<
 
 /**
  * 旧列表已耗尽：将新列表剩余段依次 `mount`，并整体插入到同一个锚点之前。
+ *
+ * @remarks
+ * - 旧侧已耗尽时，剩余新节点应整体插入到「尾部已对齐区间」的前面。
+ * - 使用同一个 `insertAnchor` 可避免 `mountChild` 对插入位置的不同宿主实现差异。
  */
 export function insertRemainingChildren<
   HostNode,
@@ -128,6 +143,11 @@ export function removeRemainingChildren<
 
 /**
  * 为 `keyed diff` 的中间段建立索引映射结构。
+ *
+ * @remarks
+ * - `keyToNewIndexMap`：`key` -> `newIndex` 的映射，便于旧节点通过 `key` 快速命中。
+ * - `newIndexToOldIndexMap`：`newIndex` -> `oldIndex` 的映射，`-1` 表示需要 `mount`。
+ * - `middleSegmentCount`：中间段待处理的新节点数量。
  */
 export function buildIndexMaps<
   HostNode,

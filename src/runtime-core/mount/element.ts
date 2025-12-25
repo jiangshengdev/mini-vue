@@ -8,6 +8,14 @@ import { isRef } from '@/reactivity/index.ts'
 
 /**
  * 创建宿主元素并同步 `props` 与 `children`。
+ *
+ * @remarks
+ * 挂载顺序：
+ * 1. 创建宿主元素节点。
+ * 2. 写入属性与事件（`patchProps`）。
+ * 3. 挂载子节点（`mountElementChildren`）。
+ * 4. 将元素插入到父容器。
+ * 5. 绑定 `ref`（若存在）。
  */
 export function mountElement<
   HostNode,
@@ -59,6 +67,10 @@ export function mountElement<
 
 /**
  * 元素 `ref` 的统一抽象：支持回调 `ref` 与 `Ref` 容器两种写法。
+ *
+ * @remarks
+ * - 回调 `ref`：`(el) => { ... }`，挂载时传入元素，卸载时传入 `undefined`。
+ * - `Ref` 容器：`ref<HTMLElement>()`，挂载时写入 `.value`，卸载时置为 `undefined`。
  */
 type ElementRefBinding<HostElement> =
   | Ref<HostElement | undefined>
@@ -66,6 +78,11 @@ type ElementRefBinding<HostElement> =
 
 /**
  * 将组件传入的 `ref` 属性规整为函数或 `Ref` 对象，便于统一回写。
+ *
+ * @remarks
+ * - 函数类型直接返回。
+ * - `Ref` 对象通过 `isRef` 判断后返回。
+ * - 其他类型返回 `undefined`，表示无有效 `ref` 绑定。
  */
 export function resolveElementRefBinding<HostElement>(
   candidate: unknown,

@@ -6,7 +6,13 @@ import { mountChildInEnvironment } from './insertion.ts'
 import type { PatchResult } from './types.ts'
 import { moveNodes, unmount } from './utils.ts'
 
-/** `children diff` 期间的宿主驱动，统一封装新增/替换/卸载/移动操作。 */
+/**
+ * `children diff` 期间的宿主驱动，统一封装新增/替换/卸载/移动操作。
+ *
+ * @remarks
+ * - 提供统一的宿主操作接口，便于 `keyed`/`unkeyed` diff 复用。
+ * - 所有操作都基于当前容器与锚点，保持插入位置一致性。
+ */
 export interface PatchDriver<
   HostNode,
   HostElement extends HostNode & WeakKey,
@@ -48,7 +54,11 @@ export interface PatchDriver<
 }
 
 /**
- * 统一封装新增/替换/卸载/移动的宿主操作，便于 children diff 与 `patchChild` 复用。
+ * 统一封装新增/替换/卸载/移动的宿主操作，便于 `children diff` 与 `patchChild` 复用。
+ *
+ * @remarks
+ * - 所有操作都基于传入的 `environment`，保持容器/锚点/上下文一致。
+ * - 返回的 `PatchDriver` 对象提供声明式的宿主操作接口。
  */
 export function createPatchDriver<
   HostNode,

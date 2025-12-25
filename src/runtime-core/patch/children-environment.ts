@@ -6,6 +6,9 @@ import type { PatchResult } from './types.ts'
 
 /**
  * 子节点 `patch` 回调签名：由 `patchChildren` 调用，用于复用单节点的 `mount`/`patch`/`unmount` 逻辑。
+ *
+ * @remarks
+ * 通过回调注入 `patchChild` 实现，避免 `child.ts`/`children.ts` 互相 `import` 造成循环依赖。
  */
 export type PatchChildFunction<
   HostNode,
@@ -29,6 +32,10 @@ export type PatchEnvironment<
 
 /**
  * `patchChildren` 的调用环境：在 `PatchEnvironment` 基础上追加 `patchChild` 回调。
+ *
+ * @remarks
+ * - `patchChild` 由调用方提供，常见为 `patchChild` 函数。
+ * - 这种设计允许在不同场景下注入不同的单节点处理逻辑。
  */
 export interface PatchChildrenEnvironment<
   HostNode,
@@ -42,6 +49,10 @@ export interface PatchChildrenEnvironment<
 /**
  * 基于父环境为当前子节点派生环境：
  * - 根据位置计算 `shouldUseAnchor`，用于同级批量插入的锚点策略。
+ *
+ * @remarks
+ * - `shouldUseAnchor` 为 `true` 表示当前节点后面还有兄弟，需要锚点保序。
+ * - 最后一个节点不需要锚点（它天然落在末尾）。
  */
 export function createChildEnvironment<
   HostNode,

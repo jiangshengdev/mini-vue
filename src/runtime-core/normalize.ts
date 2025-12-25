@@ -22,19 +22,27 @@ import {
 } from '@/jsx-foundation/index.ts'
 import { isNil } from '@/shared/index.ts'
 
-/** 归一化后的 virtualNode：children 已转为 virtualNode 数组（文本已转换为 Text virtualNode）。 */
+/** 归一化后的 `virtualNode`：`children` 已转为 `virtualNode` 数组（文本已转换为 `Text` `virtualNode`）。 */
 export interface NormalizedVirtualNode<T extends ElementType = ElementType> extends VirtualNode<T> {
+  /** 归一化后的子节点列表，仅包含 `virtualNode`（文本已转换为 `Text` `virtualNode`）。 */
   children: NormalizedVirtualNode[]
 }
 
-/** Patch 阶段可假定的 children 形态：仅包含已归一化的 virtualNode。 */
+/** `Patch` 阶段可假定的 `children` 形态：仅包含已归一化的 `virtualNode`。 */
 export type NormalizedChildren = NormalizedVirtualNode[]
 
-/** 组件 render 归一化后的输出形态：要么 virtualNode，要么空。 */
+/** 组件 `render` 归一化后的输出形态：要么 `virtualNode`，要么空（`undefined`）。 */
 export type NormalizedRenderOutput = NormalizedVirtualNode | undefined
 
 /**
- * 将 render 返回的结果规整为 runtime-core 可消费的 VirtualNode。
+ * 将 `render` 返回的结果规整为 `runtime-core` 可消费的 `VirtualNode`。
+ *
+ * @remarks
+ * 支持的输入类型：
+ * - `null`/`undefined`/布尔值：归一为 `undefined`，不产生渲染输出。
+ * - 数组：包裹为 `Fragment`，交由后续 `children` 归一化处理。
+ * - `VirtualNode`：递归规整内部 `children`。
+ * - 原始文本（`string`/`number`）：转为 `Text` `VirtualNode`。
  */
 export function normalizeRenderOutput(output: RenderOutput): NormalizedRenderOutput {
   /* 空值与布尔值不会产生任何渲染输出，直接归一为空。 */
@@ -68,7 +76,11 @@ export function normalizeRenderOutput(output: RenderOutput): NormalizedRenderOut
 }
 
 /**
- * 深度规整 VirtualNode，确保 children 形态与 runtime 预期一致。
+ * 深度规整 `VirtualNode`，确保 `children` 形态与 runtime 预期一致。
+ *
+ * @remarks
+ * - 递归归一化子节点，统一 `VirtualNode` 与文本节点的表达方式。
+ * - 文本子节点转为 `Text` `VirtualNode`，便于 `diff` 与挂载复用同一路径。
  */
 function normalizeVirtualNodeForRuntime(virtualNode: VirtualNode): NormalizedVirtualNode {
   /* 递归归一化子节点，统一 VirtualNode 与文本节点的表达方式。 */

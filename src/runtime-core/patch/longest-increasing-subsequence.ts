@@ -6,6 +6,12 @@
  * - 使用「贪心 + 二分」维护每个长度的最小可能尾值，避免 O(n²) 的 DP。
  * - 返回值是偏移量列表（索引），供外层据此判定哪些节点可以跳过移动。
  * - 时间复杂度 O(n log n)，空间复杂度 O(n)。
+ *
+ * @example
+ * ```ts
+ * // 输入 [3, 1, 4, 1, 5, 9, 2, 6]
+ * // 返回 [1, 2, 4, 7]（对应值 1, 4, 5, 6）
+ * ```
  */
 export function computeLongestIncreasingSubsequence(indexes: number[]): number[] {
   /* 为即将构建的序列准备初始状态，长度与输入一致。 */
@@ -18,7 +24,13 @@ export function computeLongestIncreasingSubsequence(indexes: number[]): number[]
   return traceSequence(state)
 }
 
-/** LIS 计算过程中的中间状态，保存当前序列与前驱关系。 */
+/**
+ * LIS 计算过程中的中间状态，保存当前序列与前驱关系。
+ *
+ * @remarks
+ * - `sequence`：递增序列的索引列表，每个位置存储该长度序列的最小尾部索引。
+ * - `predecessors`：每个索引的前驱位置，用于回溯完整序列。
+ */
 interface LongestIncreasingSubsequenceState {
   /** 递增序列的索引列表。 */
   sequence: number[]
@@ -26,7 +38,13 @@ interface LongestIncreasingSubsequenceState {
   predecessors: number[]
 }
 
-/** 初始化 LIS 状态，预填充前驱数组。 */
+/**
+ * 初始化 LIS 状态，预填充前驱数组。
+ *
+ * @remarks
+ * - 序列初始为空，等待扫描过程中逐步填充。
+ * - 前驱数组按输入长度填充为 `-1`，表示默认无前驱。
+ */
 function createSequenceState(length: number): LongestIncreasingSubsequenceState {
   /* 序列初始为空，等待扫描过程中逐步填充。 */
   const sequence: number[] = []

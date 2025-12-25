@@ -11,6 +11,10 @@ export type { PatchEnvironment } from './children-environment.ts'
  * `patch` 一组 `children`：
  * - 若存在 `key`（任一侧有 `key`），走 `keyed diff` 以支持移动与复用。
  * - 否则按索引对齐的 `unkeyed diff`，逻辑更简单。
+ *
+ * @remarks
+ * - `keyed diff` 允许跨索引复用与移动，适用于列表项有稳定标识的场景。
+ * - `unkeyed diff` 只按索引对齐，不支持「同节点换位置」的语义，适用于简单列表。
  */
 export function patchChildren<
   HostNode,

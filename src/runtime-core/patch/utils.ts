@@ -8,6 +8,10 @@ import { Text } from '@/jsx-foundation/index.ts'
  * 卸载一个已渲染的 `virtualNode`：
  * - 若存在 `mount` 阶段生成的 `handle`，则优先走 `handle.teardown()` 释放副作用与宿主节点。
  * - 否则退化为直接从宿主容器移除已记录的 `el`。
+ *
+ * @remarks
+ * - `handle.teardown` 会统一处理组件 `effect`、事件清理、以及多节点/片段的宿主移除。
+ * - 无 `handle` 的节点只记录了单一 `el`，直接移除即可。
  */
 export function unmount<
   HostNode,
@@ -37,8 +41,9 @@ export function unmount<
  * 判断两个 `virtualNode` 是否可视为「同一个节点」，用于决定走 `patch` 还是卸载重建。
  *
  * @remarks
- * - `Text` 节点在 `diff` 中只要都是 `Text` 即可复用宿主节点。
+ * - `Text` 节点在 `diff` 中只要都是 `Text` 且 `key` 相同即可复用宿主节点。
  * - 其它节点需同时满足 `type` 与 `key` 相同。
+ * - 与 Vue 的 `isSameVNodeType` 语义对齐。
  */
 export function isSameVirtualNode(
   a: NormalizedVirtualNode | undefined,
@@ -79,8 +84,9 @@ export function moveNodes<
  * 从 `children` 的指定位置向后寻找「下一个可用锚点」。
  *
  * @remarks
- * - 这里使用 `runtime.handle.nodes[0]` 作为锚点，是因为一个 `virtualNode` 可能对应多宿主节点（如 `Fragment`）。
+ * - 使用 `runtime.handle.nodes[0]` 作为锚点，因为一个 `virtualNode` 可能对应多宿主节点（如 `Fragment`）。
  * - 找不到时返回 `fallback`（通常来自父级传入的 `anchor`）。
+ * - 该函数用于 `keyed`/`unkeyed` diff 中确定新节点的插入位置。
  */
 export function findNextAnchor<HostNode>(
   children: NormalizedChildren,
@@ -115,6 +121,7 @@ export function hasKeys(children: NormalizedChildren): boolean {
  * @remarks
  * - `el`/`handle` 会在 `mount` 时写入，`patch` 时必须继承以避免重复创建/丢失 `teardown` 能力。
  * - `anchor`/`component` 允许按需覆盖：例如 `Text`/`Fragment` 分支会显式清空 `component`。
+ * - 这是 `patch` 复用宿主节点的核心机制。
  */
 export function syncRuntimeMetadata<
   HostNode,

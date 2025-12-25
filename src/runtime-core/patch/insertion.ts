@@ -5,7 +5,11 @@ import type { NormalizedVirtualNode } from '../normalize.ts'
 import type { RendererOptions } from '../renderer.ts'
 
 /**
- * 在已知容器/锚点/上下文的前提下挂载单个 virtualNode，并直接插入到目标位置。
+ * 在已知容器/锚点/上下文的前提下挂载单个 `virtualNode`，并直接插入到目标位置。
+ *
+ * @remarks
+ * - 该函数是 `patch` 阶段复用 `mount` 能力的桥接层。
+ * - 传入 `undefined` 时直接返回 `undefined`，不产生任何节点。
  */
 export function mountChildInEnvironment<
   HostNode,

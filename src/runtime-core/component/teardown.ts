@@ -5,6 +5,10 @@ import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
 
 /**
  * 移除当前缓存的宿主节点，防止重复保留旧 DOM。
+ *
+ * @remarks
+ * - 无挂载记录时无需额外清理，直接返回。
+ * - 释放宿主节点引用后，旧 DOM 会被宿主实现回收。
  */
 export function teardownMountedSubtree<
   HostNode,
@@ -24,6 +28,13 @@ export function teardownMountedSubtree<
 
 /**
  * 释放组件实例，确保子树、`effect` 与自定义清理任务全部执行。
+ *
+ * @remarks
+ * 清理顺序：
+ * 1. 卸载已挂载的子树（`mountedHandle.teardown`）。
+ * 2. 移除首尾锚点占位符。
+ * 3. 停止 `scope` 以回收所有 `setup` 内创建的副作用。
+ * 4. 执行外部注册的清理任务（`cleanupTasks`）。
  */
 export function teardownComponentInstance<
   HostNode,

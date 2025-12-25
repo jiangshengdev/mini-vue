@@ -13,13 +13,18 @@ import { ContextStack } from '@/shared/index.ts'
  * 组件实例的依赖注入容器类型。
  *
  * @remarks
- * - 运行期使用「对象 + 原型链」表达层级 `provides`。
- * - `key` 支持 `symbol`（推荐）与 `string`。
+ * - 运行期使用「对象 + 原型链」表达层级 `provides`，子组件可沿原型链读取祖先提供的值。
+ * - `key` 支持 `symbol`（推荐，避免命名冲突）与 `string`。
  */
 export type Provides = PlainObject
 
 /**
  * 运行期组件实例结构，统一记录渲染与清理状态。
+ *
+ * @remarks
+ * - 每个组件实例持有独立的 `effect`/`scope`，负责跟踪依赖并调度重渲染。
+ * - `provides` 通过原型链继承父组件/应用级依赖，实现层级注入。
+ * - `mountedHandle` 记录当前挂载到宿主的节点句柄，支持 `teardown` 清理。
  */
 export interface ComponentInstance<
   HostNode,
@@ -33,28 +38,29 @@ export interface ComponentInstance<
   appContext?: AppContext
   /** 依赖注入容器，默认通过原型链继承父/应用级 `provides`。 */
   provides: Provides
-  /** 组件定义本身，保存以便多次渲染重用。 */
+  /** 组件定义本身（即 `setup` 函数），保存以便多次渲染重用。 */
   readonly type: T
   /** 宿主容器或片段引用，挂载子树时作为根。 */
   readonly container: HostElement | HostFragment
-  /** 组件接收到的 `props` 副本。 */
+  /** 组件接收到的只读 `props` 代理。 */
   props: ElementProps<T>
   /** 允许内部同步的浅响应式 `props` 源对象。 */
   propsSource: ElementProps<T>
-  /** `setup` 返回的渲染闭包，每次 `effect` 执行都会调用。 */
+  /** `setup` 返回的渲染闭包，每次 `effect` 执行都会调用以获取最新子树。 */
   render: RenderFunction
   /** 组件独立的响应式副作用，驱动更新调度。 */
   effect?: ReactiveEffect<NormalizedVirtualNode | undefined>
-  /** 组件级 `effect scope`，托管所有 `setup` 内部副作用。 */
+  /** 组件级 `effect scope`，托管所有 `setup` 内部创建的副作用。 */
   scope: EffectScope
   /** 最近一次渲染生成的虚拟子树结果。 */
   subTree?: NormalizedVirtualNode
-  /** 当前挂载到宿主的节点句柄，支持 `teardown`。 */
+  /** 当前挂载到宿主的节点句柄，支持 `teardown` 清理。 */
   mountedHandle?: MountedHandle<HostNode>
-  /** 组件在父容器中的首尾锚点，用于保持兄弟顺序。 */
+  /** 组件在父容器中的首锚点，用于保持兄弟顺序。 */
   startAnchor?: HostNode
+  /** 组件在父容器中的尾锚点，用于保持兄弟顺序。 */
   endAnchor?: HostNode
-  /** 是否需要为组件维护锚点以保序。 */
+  /** 是否需要为组件维护锚点以保序（非最后一个兄弟时为 `true`）。 */
   shouldUseAnchor: boolean
   /** 注册的外部清理任务，在卸载时逐一执行。 */
   cleanupTasks: Array<() => void>
@@ -64,14 +70,18 @@ export interface ComponentInstance<
   setupContext: PlainObject
 }
 
-/** 兼容任意宿主类型的组件实例别名，简化当前实例管理。 */
+/** 兼容任意宿主类型的组件实例别名，简化当前实例管理与跨模块传递。 */
 export type UnknownComponentInstance = ComponentInstance<unknown, WeakKey, unknown, SetupComponent>
 
-/** 当前 `setup` 调用栈正在处理的实例引用。 */
+/** 当前 `setup` 调用栈正在处理的实例引用，支持嵌套组件的 `setup` 调用。 */
 const instanceStack = new ContextStack<UnknownComponentInstance>()
 
 /**
- * 设置当前运行中的组件实例，供 `setup` 期间访问。
+ * 设置当前运行中的组件实例，供 `setup` 期间通过 `getCurrentInstance()` 访问。
+ *
+ * @remarks
+ * - 在 `setup` 开始前调用，结束后需配对调用 `unsetCurrentInstance()`。
+ * - 支持嵌套：内层组件 `setup` 会暂时覆盖外层实例。
  */
 export function setCurrentInstance<
   HostNode,
@@ -83,7 +93,10 @@ export function setCurrentInstance<
 }
 
 /**
- * 清空当前实例引用，避免泄漏。
+ * 清空当前实例引用，恢复到上一层（若存在），避免泄漏。
+ *
+ * @remarks
+ * 必须与 `setCurrentInstance` 配对调用，否则会导致后续组件读取到错误的实例。
  */
 export function unsetCurrentInstance(): void {
   instanceStack.pop()
@@ -91,6 +104,10 @@ export function unsetCurrentInstance(): void {
 
 /**
  * 读取当前组件实例，仅供内部组合式能力使用。
+ *
+ * @remarks
+ * - 仅在 `setup()` 执行期间返回有效实例。
+ * - 在 `setup()` 外部调用（如事件回调、异步任务）会返回 `undefined`。
  */
 export function getCurrentInstance(): UnknownComponentInstance | undefined {
   return instanceStack.current

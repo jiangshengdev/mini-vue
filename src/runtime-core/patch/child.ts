@@ -16,6 +16,13 @@ import { Fragment } from '@/jsx-foundation/index.ts'
  * 对单个子节点进行 `patch`：
  * - 处理新增/删除/替换/同节点更新四种情况。
  * - 需要时会使用 `anchor` 将新挂载的节点移动到正确位置。
+ *
+ * @remarks
+ * 四种情况的处理策略：
+ * 1. 同一引用：无变更，跳过。
+ * 2. 仅存在新节点：走 `mount` 路径。
+ * 3. 仅存在旧节点：直接卸载。
+ * 4. 同节点（`type`/`key` 相同）：走 `patch` 复用；否则卸载重建。
  */
 export function patchChild<
   HostNode,
@@ -80,6 +87,12 @@ export function patchChild<
 
 /**
  * `patch` 同类型节点：按 `Text` / `Fragment` / 组件 / 元素分派到不同更新策略。
+ *
+ * @remarks
+ * - `Text`：复用旧 `el`，仅更新文本内容。
+ * - `Fragment`：通过 `patchChildren` 更新子节点列表。
+ * - 组件：复用实例，触发 `effect` 或直接 `patch` 子树。
+ * - 元素：复用旧 `el`，更新 `props` 与 `children`。
  */
 function patchExisting<
   HostNode,
@@ -150,6 +163,14 @@ function patchExisting<
 
 /**
  * `patch` 同标签元素：复用旧 `el`，更新 `props` 与 `children`，并维护 `ref` 绑定。
+ *
+ * @remarks
+ * 更新顺序：
+ * 1. 同步 runtime 元数据（`el`/`handle`）。
+ * 2. 解绑旧 `ref`。
+ * 3. 更新 `props`。
+ * 4. `patch` `children`。
+ * 5. 绑定新 `ref`。
  */
 function patchElement<
   HostNode,
@@ -203,6 +224,11 @@ function patchElement<
 
 /**
  * 同类型组件 `virtualNode` 的更新逻辑：复用实例，触发 `effect` 或直接 `patch` 子树。
+ *
+ * @remarks
+ * - 组件更新依赖 `runtime.component`：正常情况下 `mount` 会写入实例。
+ * - 若缺失则无法复用，只能退化为重新 `mount` 新 `virtualNode`。
+ * - 有调度器时只提交「运行任务」，由调度器决定合并与执行时机。
  */
 function patchComponent<
   HostNode,
@@ -267,7 +293,11 @@ function patchComponent<
 }
 
 /**
- * 组件 props 变更时保持引用不变，便于渲染闭包捕获的 `props` 能读取最新值。
+ * 组件 `props` 变更时保持引用不变，便于渲染闭包捕获的 `props` 能读取最新值。
+ *
+ * @remarks
+ * - 先删除旧 `props` 中不存在于新 `props` 的属性。
+ * - 再用 `Object.assign` 合并新属性，保持响应式追踪。
  */
 function syncComponentProps(
   target: ElementProps<SetupComponent>,

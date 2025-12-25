@@ -78,13 +78,13 @@
     - 导出事件处理器工厂
     - _Requirements: 6.1_
 
-- [ ] 8. Checkpoint - 验证模块独立性
+- [x] 8. Checkpoint - 验证模块独立性
   - 确保所有新模块可以独立编译
   - 运行 `pnpm run typecheck` 验证类型正确性
   - 确保所有测试通过，如有问题请询问用户
 
-- [ ] 9. 重构主组件
-  - [ ] 9.1 重构 `index.tsx` 使用新模块
+- [x] 9. 重构主组件
+  - [x] 9.1 重构 `index.tsx` 使用新模块
     - 导入并使用 `createStateManager`
     - 导入并使用 `createPlaybackController`
     - 导入并使用 `createKeyboardHandler`

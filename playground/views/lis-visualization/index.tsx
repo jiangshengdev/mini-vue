@@ -1,7 +1,7 @@
 /**
  * LIS 算法可视化 - 主页面组件
  *
- * 组合所有子组件，管理响应式状态
+ * 作为编排层，组合所有子模块和 UI 组件
  */
 
 import {
@@ -11,273 +11,129 @@ import {
   SequenceGraph,
   StepControls,
 } from './components/index.ts'
+import {
+  createHoverManager,
+  createKeyboardHandler,
+  createPlaybackController,
+  createStateManager,
+} from './controllers/index.ts'
+import { createEventHandlers } from './handlers/index.ts'
 import { createStepNavigator } from './navigator.ts'
 import styles from './styles/visualization.module.css'
 import { traceLongestIncreasingSubsequence } from './trace.ts'
+import type { StepNavigator } from './types.ts'
 import type { SetupComponent } from '@/index.ts'
-import { onScopeDispose, state } from '@/index.ts'
+import { onScopeDispose } from '@/index.ts'
 
 /** 默认输入数组 */
 const defaultInput = [2, 1, 3, 0, 4]
 
 export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
-  /* 响应式状态 */
-  const input = state(defaultInput)
-  const isPlaying = state(false)
-  const speed = state(500)
-  const hoveredChainIndexes = state<number[]>([])
-  const hoveredChainInfo = state<{ chainIndex: number } | undefined>(undefined)
-  const isSequenceHovered = state(false)
-  const isPredecessorsHovered = state(false)
-  /* 导航器版本号（用于触发响应式更新） */
-  const navigatorVersion = state(0)
+  // ============================================================================
+  // 初始化状态管理器
+  // ============================================================================
+  const stateManager = createStateManager(defaultInput)
+  const state = stateManager.getState()
 
-  /* 追踪结果和导航器（非响应式，手动管理） */
-  let trace = traceLongestIncreasingSubsequence(input.get())
-  let navigator = createStepNavigator(trace)
+  // ============================================================================
+  // 追踪结果和导航器（非响应式，手动管理）
+  // ============================================================================
+  let trace = traceLongestIncreasingSubsequence(state.input.get())
+  let navigator: StepNavigator = createStepNavigator(trace)
 
-  /* 根据当前步骤数据刷新 hover 状态（避免切换步骤时丢失 hover） */
-  const refreshHoverState = () => {
-    const currentStep = navigator.getCurrentStep()
-    const chainInfo = hoveredChainInfo.get()
+  /** 获取当前导航器（用于闭包） */
+  const getNavigator = (): StepNavigator => navigator
 
-    /* 如果当前没有链 hover，保持现状 */
-    if (!chainInfo) {
-      return
-    }
+  // ============================================================================
+  // 初始化 Hover 管理器
+  // ============================================================================
+  const hoverManager = createHoverManager({
+    stateManager,
+    getCurrentStep: () => navigator.getCurrentStep(),
+  })
 
-    if (!currentStep) {
-      hoveredChainIndexes.set([])
-      hoveredChainInfo.set(undefined)
-
-      return
-    }
-
-    /* 重新构建当前步骤下对应链的索引列表 */
-    const { sequence, predecessors } = currentStep
-    const { chainIndex } = chainInfo
-
-    if (chainIndex < 0 || chainIndex >= sequence.length) {
-      hoveredChainIndexes.set([])
-      hoveredChainInfo.set(undefined)
-
-      return
-    }
-
-    const chain: number[] = []
-    let current = sequence[chainIndex]
-
-    while (current >= 0) {
-      chain.unshift(current)
-      current = predecessors[current]
-    }
-
-    hoveredChainIndexes.set(chain)
+  /** 步骤切换时的统一更新（刷新 hover 状态 + 触发响应式更新） */
+  const updateStep = (): void => {
+    hoverManager.refreshHoverState()
+    stateManager.incrementVersion()
   }
 
-  /* 步骤切换时的统一更新（刷新 hover 状态 + 触发响应式更新） */
-  const updateStep = () => {
-    refreshHoverState()
-    navigatorVersion.set(navigatorVersion.get() + 1)
-  }
-
-  /* 重新计算追踪和导航器 */
-  const resetNavigator = () => {
-    trace = traceLongestIncreasingSubsequence(input.get())
+  /** 重新计算追踪和导航器 */
+  const resetNavigator = (): void => {
+    trace = traceLongestIncreasingSubsequence(state.input.get())
     navigator = createStepNavigator(trace)
     updateStep()
   }
 
-  /* 自动播放定时器 */
-  let playTimer: ReturnType<typeof setInterval> | undefined
+  // ============================================================================
+  // 初始化播放控制器
+  // ============================================================================
+  const playbackController = createPlaybackController({
+    stateManager,
+    navigator,
+    onStepUpdate: updateStep,
+  })
 
-  const stopAutoPlay = () => {
-    if (playTimer) {
-      clearInterval(playTimer)
-      playTimer = undefined
-    }
+  // ============================================================================
+  // 初始化事件处理器
+  // ============================================================================
+  const eventHandlers = createEventHandlers({
+    stateManager,
+    getNavigator,
+    playbackController,
+    hoverManager,
+    resetNavigator,
+    updateStep,
+  })
 
-    isPlaying.set(false)
-  }
-
-  const startAutoPlay = () => {
-    stopAutoPlay()
-    isPlaying.set(true)
-    playTimer = setInterval(() => {
-      const result = navigator.next()
-
-      if (result) {
-        updateStep()
-      } else {
-        stopAutoPlay()
-      }
-    }, speed.get())
-  }
-
-  /* 事件处理函数 */
-  const handleInputChange = (newInput: number[]) => {
-    stopAutoPlay()
-    input.set(newInput)
-    resetNavigator()
-  }
-
-  const handlePrevious = () => {
-    navigator.prev()
-    updateStep()
-  }
-
-  const handleNext = () => {
-    navigator.next()
-    updateStep()
-  }
-
-  const handleReset = () => {
-    stopAutoPlay()
-    navigator.reset()
-    updateStep()
-  }
-
-  const handleTogglePlay = () => {
-    if (isPlaying.get()) {
-      stopAutoPlay()
-    } else {
-      startAutoPlay()
-    }
-  }
-
-  const handleSpeedChange = (newSpeed: number) => {
-    speed.set(newSpeed)
-
-    // 如果正在播放，重新启动以应用新速度
-    if (isPlaying.get()) {
-      startAutoPlay()
-    }
-  }
-
-  const handleIndexClick = (index: number) => {
-    stopAutoPlay()
-    // 第 0 步是 init，所以点击数组索引 i 应该跳转到步骤 i + 1
-    navigator.goTo(index + 1)
-    updateStep()
-  }
-
-  /* 链 hover 事件处理 */
-  const handleChainHover = (indexes: number[], chainIndex: number) => {
-    hoveredChainInfo.set({ chainIndex })
-    hoveredChainIndexes.set(indexes)
-  }
-
-  const handleChainLeave = () => {
-    hoveredChainInfo.set(undefined)
-    hoveredChainIndexes.set([])
-  }
-
-  /* Sequence State hover 事件处理 */
-  const handleSequenceHover = () => {
-    isSequenceHovered.set(true)
-  }
-
-  const handleSequenceLeave = () => {
-    isSequenceHovered.set(false)
-  }
-
-  /* Predecessors hover 事件处理 */
-  const handlePredecessorsHover = () => {
-    isPredecessorsHovered.set(true)
-  }
-
-  const handlePredecessorsLeave = () => {
-    isPredecessorsHovered.set(false)
-  }
-
-  /* 键盘快捷键处理 */
-  const handleKeyDown = (event: KeyboardEvent) => {
-    // 如果焦点在输入框内，不触发快捷键
-    const target = event.target as HTMLElement
-
-    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
-      return
-    }
-
-    const { key } = event
-
-    // 导航快捷键
-    if (key === 'ArrowLeft') {
-      event.preventDefault()
-      handlePrevious()
-
-      return
-    }
-
-    if (key === 'ArrowRight') {
-      event.preventDefault()
-      handleNext()
-
-      return
-    }
-
-    if (key === 'Home') {
-      event.preventDefault()
-      handleReset()
-
-      return
-    }
-
-    if (key === 'End') {
-      event.preventDefault()
-      stopAutoPlay()
+  // ============================================================================
+  // 初始化键盘处理器
+  // ============================================================================
+  const keyboardHandler = createKeyboardHandler({
+    onPrevious: eventHandlers.handlePrevious,
+    onNext: eventHandlers.handleNext,
+    onReset: eventHandlers.handleReset,
+    onGoToEnd: () => {
+      playbackController.stop()
 
       const navState = navigator.getState()
 
       navigator.goTo(navState.totalSteps - 1)
       updateStep()
-
-      return
-    }
-
-    // 播放控制
-    if (key === ' ') {
-      event.preventDefault()
-      handleTogglePlay()
-
-      return
-    }
-
-    // 速度控制：+ 或 = 加速
-    if (key === '+' || key === '=') {
-      event.preventDefault()
-
-      const currentSpeed = speed.get()
+    },
+    onTogglePlay: eventHandlers.handleTogglePlay,
+    onSpeedUp: () => {
+      const currentSpeed = state.speed.get()
       const newSpeed = Math.max(100, currentSpeed - 100)
 
-      handleSpeedChange(newSpeed)
-
-      return
-    }
-
-    // 速度控制：- 或 _ 减速
-    if (key === '-' || key === '_') {
-      event.preventDefault()
-
-      const currentSpeed = speed.get()
+      eventHandlers.handleSpeedChange(newSpeed)
+    },
+    onSpeedDown: () => {
+      const currentSpeed = state.speed.get()
       const newSpeed = Math.min(2000, currentSpeed + 100)
 
-      handleSpeedChange(newSpeed)
-    }
-  }
-
-  /* 注册键盘事件监听 */
-  globalThis.addEventListener('keydown', handleKeyDown)
-
-  /* 清理函数 */
-  onScopeDispose(() => {
-    stopAutoPlay()
-    globalThis.removeEventListener('keydown', handleKeyDown)
+      eventHandlers.handleSpeedChange(newSpeed)
+    },
   })
 
+  // 注册键盘事件监听
+  keyboardHandler.register()
+
+  // ============================================================================
+  // 清理函数
+  // ============================================================================
+  onScopeDispose(() => {
+ playbackController.dispose()
+    keyboardHandler.dispose()
+    stateManager.dispose()
+  })
+
+  // ============================================================================
+  // 渲染函数
+  // ============================================================================
   return () => {
     // 触发依赖追踪
-    navigatorVersion.get()
+    state.navigatorVersion.get()
 
     const step = navigator.getCurrentStep()
     const previousStep = navigator.getPreviousStep()
@@ -295,7 +151,7 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
               可回溯出对应链。输入数组后可逐步查看贪心 +
               二分的构造过程，空格播放、左右箭头单步，或点击数组索引跳到对应步骤。
             </p>
-            <InputEditor input={input.get()} onInputChange={handleInputChange} />
+            <InputEditor input={state.input.get()} onInputChange={eventHandlers.handleInputChange} />
           </header>
           <main class={styles.main}>
             <div class={styles.emptyState}>请输入数组以开始可视化</div>
@@ -313,19 +169,19 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
             可回溯出对应链。输入数组后可逐步查看贪心 +
             二分的构造过程，空格播放、左右箭头单步，或点击数组索引跳到对应步骤。
           </p>
-          <InputEditor input={input.get()} onInputChange={handleInputChange} />
+          <InputEditor input={state.input.get()} onInputChange={eventHandlers.handleInputChange} />
           <StepControls
             currentStep={navState.currentStep}
             totalSteps={navState.totalSteps}
             canGoBack={navState.canGoBack}
             canGoForward={navState.canGoForward}
-            isPlaying={isPlaying.get()}
-            speed={speed.get()}
-            onPrev={handlePrevious}
-            onNext={handleNext}
-            onReset={handleReset}
-            onTogglePlay={handleTogglePlay}
-            onSpeedChange={handleSpeedChange}
+            isPlaying={state.isPlaying.get()}
+            speed={state.speed.get()}
+            onPrev={eventHandlers.handlePrevious}
+            onNext={eventHandlers.handleNext}
+            onReset={eventHandlers.handleReset}
+            onTogglePlay={eventHandlers.handleTogglePlay}
+            onSpeedChange={eventHandlers.handleSpeedChange}
           />
         </header>
 
@@ -335,8 +191,8 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
             currentIndex={step?.currentIndex ?? -1}
             result={trace.result}
             showResult={showResult}
-            hoveredIndexes={hoveredChainIndexes.get()}
-            onIndexClick={handleIndexClick}
+            hoveredIndexes={state.hoveredChainIndexes.get()}
+            onIndexClick={eventHandlers.handleIndexClick}
           />
 
           <SequenceGraph
@@ -346,15 +202,15 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
             action={step?.action}
             previousSequence={previousStep?.sequence}
             previousPredecessors={previousStep?.predecessors}
-            hoveredIndexes={hoveredChainIndexes.get()}
-            onChainHover={handleChainHover}
-            onChainLeave={handleChainLeave}
-            isSequenceHovered={isSequenceHovered.get()}
-            onSequenceHover={handleSequenceHover}
-            onSequenceLeave={handleSequenceLeave}
-            isPredecessorsHovered={isPredecessorsHovered.get()}
-            onPredecessorsHover={handlePredecessorsHover}
-            onPredecessorsLeave={handlePredecessorsLeave}
+            hoveredIndexes={state.hoveredChainIndexes.get()}
+            onChainHover={eventHandlers.handleChainHover}
+            onChainLeave={eventHandlers.handleChainLeave}
+            isSequenceHovered={state.isSequenceHovered.get()}
+            onSequenceHover={eventHandlers.handleSequenceHover}
+            onSequenceLeave={eventHandlers.handleSequenceLeave}
+            isPredecessorsHovered={state.isPredecessorsHovered.get()}
+            onPredecessorsHover={eventHandlers.handlePredecessorsHover}
+            onPredecessorsLeave={eventHandlers.handlePredecessorsLeave}
           />
 
           <ActionPanel

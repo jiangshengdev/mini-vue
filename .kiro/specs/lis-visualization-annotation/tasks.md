@@ -103,41 +103,41 @@
     - 为输入处理函数添加职责注释
     - _Requirements: 3.1, 9.1, 10.1_
 
-- [ ] 6. Checkpoint - 核心模块验证
+- [x] 6. Checkpoint - 核心模块验证
   - 运行 `pnpm run fmt` 确保格式正确
   - 运行 `pnpm run typecheck` 确保类型正确
   - 确保所有测试通过，ask the user if questions arise.
 
-- [ ] 7. UI 组件模块注释
-  - [ ] 7.1 为 `components/index.ts` 添加/更新注释
+- [x] 7. UI 组件模块注释
+  - [x] 7.1 为 `components/index.ts` 添加/更新注释
     - 检查并清理无效注释
     - _Requirements: 9.1_
 
-  - [ ] 7.2 为 `components/array-display.tsx` 添加/更新注释
+  - [x] 7.2 为 `components/array-display.tsx` 添加/更新注释
     - 检查并清理无效注释
     - 更新过期注释
     - 为组件和渲染逻辑添加注释
     - _Requirements: 3.1, 9.1, 10.1_
 
-  - [ ] 7.3 为 `components/action-panel.tsx` 添加/更新注释
+  - [x] 7.3 为 `components/action-panel.tsx` 添加/更新注释
     - 检查并清理无效注释
     - 更新过期注释
     - 为组件和辅助函数添加注释
     - _Requirements: 3.1, 9.1, 10.1_
 
-  - [ ] 7.4 为 `components/input-editor.tsx` 添加/更新注释
+  - [x] 7.4 为 `components/input-editor.tsx` 添加/更新注释
     - 检查并清理无效注释
     - 更新过期注释
     - 为组件和事件处理添加注释
     - _Requirements: 3.1, 9.1, 10.1_
 
-  - [ ] 7.5 为 `components/step-controls.tsx` 添加/更新注释
+  - [x] 7.5 为 `components/step-controls.tsx` 添加/更新注释
     - 检查并清理无效注释
     - 更新过期注释
     - 为组件添加注释
     - _Requirements: 3.1, 9.1, 10.1_
 
-  - [ ] 7.6 为 `components/sequence-graph.tsx` 添加/更新注释
+  - [x] 7.6 为 `components/sequence-graph.tsx` 添加/更新注释
     - 检查并清理无效注释
     - 更新过期注释
     - 为组件和数据处理逻辑添加注释

@@ -1,7 +1,10 @@
 /**
  * LIS 算法可视化 - 操作面板组件
  *
- * 显示当前操作类型和详情
+ * @remarks
+ * 显示当前步骤的操作类型、描述和变更明细。
+ * - 操作类型：初始化、追加、替换、跳过
+ * - 变更明细：展示 `sequence` 和 `predecessors` 的具体修改
  */
 
 import type { StepAction } from '../types'
@@ -9,9 +12,12 @@ import sharedStyles from '../styles/shared.module.css'
 import styles from '../styles/action-panel.module.css'
 import type { SetupComponent } from '@/index.ts'
 
-// 合并样式对象，共享样式优先级较低
+/** 合并共享样式与组件专属样式，共享样式优先级较低 */
 const mergedStyles = { ...sharedStyles, ...styles }
 
+/**
+ * 操作面板组件的 Props 定义
+ */
 export interface ActionPanelProps {
   /** 当前操作 */
   action: StepAction | undefined
@@ -23,7 +29,15 @@ export interface ActionPanelProps {
   predecessors: number[]
 }
 
-/** 根据操作类型生成描述文本 */
+/**
+ * 根据操作类型生成人类可读的描述文本
+ *
+ * @remarks
+ * - `init`：算法初始化说明
+ * - `append`：追加操作，显示索引和值
+ * - `replace`：替换操作，显示位置、索引和值
+ * - `skip`：跳过操作，区分占位符和重复值两种情况
+ */
 function getActionDescription(action: StepAction, currentValue: number): string {
   switch (action.type) {
     case 'init': {
@@ -49,7 +63,9 @@ function getActionDescription(action: StepAction, currentValue: number): string 
   }
 }
 
-/** 根据操作类型获取样式类名 */
+/**
+ * 根据操作类型获取对应的 CSS 样式类名
+ */
 function getActionClass(action: StepAction): string {
   switch (action.type) {
     case 'init': {
@@ -70,7 +86,14 @@ function getActionClass(action: StepAction): string {
   }
 }
 
-/** 生成变更明细 */
+/**
+ * 生成 `sequence` 和 `predecessors` 的变更明细文本
+ *
+ * @remarks
+ * - `init`：显示初始状态
+ * - `append`/`replace`：显示具体的数组修改
+ * - `skip`：显示无变更
+ */
 function getChangeDetails(
   action: StepAction,
   sequence: number[],
@@ -109,8 +132,16 @@ function getChangeDetails(
   }
 }
 
+/**
+ * 操作面板组件，展示当前步骤的操作信息
+ *
+ * @remarks
+ * - 无操作时显示等待状态
+ * - 有操作时显示操作类型、描述和变更明细
+ */
 export const ActionPanel: SetupComponent<ActionPanelProps> = (props) => {
   return () => {
+    /* 无操作时显示等待状态 */
     if (!props.action) {
       return (
         <div class={mergedStyles.actionPanel}>
@@ -120,6 +151,7 @@ export const ActionPanel: SetupComponent<ActionPanelProps> = (props) => {
       )
     }
 
+    /* 计算操作描述、样式和变更明细 */
     const description = getActionDescription(props.action, props.currentValue ?? -1)
     const actionClass = getActionClass(props.action)
     const { sequenceChange, predecessorsChange } = getChangeDetails(
@@ -128,6 +160,7 @@ export const ActionPanel: SetupComponent<ActionPanelProps> = (props) => {
       props.predecessors,
     )
 
+    /** 操作类型中英文映射 */
     const actionTypeMap: Record<string, string> = {
       init: '初始化',
       append: '追加',

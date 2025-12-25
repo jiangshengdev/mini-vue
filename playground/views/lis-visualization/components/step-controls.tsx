@@ -1,16 +1,23 @@
 /**
  * LIS 算法可视化 - 步骤控制组件
  *
- * 实现 Prev/Next/Reset/Auto 按钮和速度滑块
+ * @remarks
+ * 提供算法执行的步骤控制界面。
+ * - 导航按钮：上一步、下一步、重置
+ * - 自动播放：播放/暂停切换
+ * - 速度控制：滑块调节播放速度
  */
 
 import sharedStyles from '../styles/shared.module.css'
 import styles from '../styles/step-controls.module.css'
 import type { SetupComponent } from '@/index.ts'
 
-// 确保共享样式（CSS 变量）被加载
+/* 确保共享样式（CSS 变量）被加载 */
 void sharedStyles
 
+/**
+ * 步骤控制组件的 Props 定义
+ */
 export interface StepControlsProps {
   /** 当前步骤索引 */
   currentStep: number
@@ -36,7 +43,15 @@ export interface StepControlsProps {
   onSpeedChange: (speed: number) => void
 }
 
+/**
+ * 步骤控制组件，提供算法执行的导航和播放控制
+ *
+ * @remarks
+ * - 支持键盘快捷键：← 上一步、→ 下一步、Home 重置、Space 播放/暂停
+ * - 速度滑块范围：100ms ~ 2000ms
+ */
 export const StepControls: SetupComponent<StepControlsProps> = (props) => {
+  /** 处理速度滑块变化 */
   const handleSpeedChange = (event: Event) => {
     const target = event.target as HTMLInputElement
 
@@ -46,6 +61,7 @@ export const StepControls: SetupComponent<StepControlsProps> = (props) => {
   return () => {
     return (
       <div class={styles.stepControls}>
+        {/* 控制按钮行 */}
         <div class={styles.controlsRow}>
           <button
             type="button"
@@ -103,6 +119,7 @@ export const StepControls: SetupComponent<StepControlsProps> = (props) => {
           </button>
         </div>
 
+        {/* 速度控制滑块 */}
         <div class={styles.speedControl}>
           <label class={styles.speedLabel}>
             速度：{props.speed}ms

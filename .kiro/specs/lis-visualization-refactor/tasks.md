@@ -39,14 +39,14 @@
     - 测试自动停止逻辑
     - _Requirements: 2.2, 2.3, 2.4, 2.5_
 
-- [ ] 4. 创建键盘处理器模块
-  - [ ] 4.1 创建 `controllers/keyboard-handler.ts`
+- [x] 4. 创建键盘处理器模块
+  - [x] 4.1 创建 `controllers/keyboard-handler.ts`
     - 实现 `createKeyboardHandler` 函数
     - 实现 `register()`, `dispose()` 方法
     - 处理所有快捷键：ArrowLeft, ArrowRight, Home, End, Space, +/=, -/_
     - 实现焦点检测逻辑（输入框内忽略快捷键）
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 3.10_
-  - [ ] 4.2 编写键盘处理器单元测试
+  - [x] 4.2 编写键盘处理器单元测试
     - 模拟键盘事件测试各快捷键
     - 测试焦点检测逻辑
     - _Requirements: 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9_

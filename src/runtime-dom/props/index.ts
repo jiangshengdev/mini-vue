@@ -1,5 +1,5 @@
 /**
- * props 子模块入口。
+ * Props 子模块入口。
  *
  * 本模块负责将 VirtualNode 上的 props 映射到真实 DOM 元素，包括：
  * - `patchProps`：统一的属性打补丁入口，按类型分派到各专用处理器

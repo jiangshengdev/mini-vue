@@ -63,7 +63,7 @@ export const runtimeCoreAsyncSetupNotSupported =
   '暂不支持异步 setup：setup() 必须同步返回渲染函数（不要返回 Promise）'
 
 /**
- * setup 必须返回渲染函数的错误
+ * Setup 必须返回渲染函数的错误
  *
  * 组件的 `setup()` 函数必须返回一个渲染函数 `() => VNode`，
  * 用于描述组件的 UI 结构；返回其他类型会抛出此错误。
@@ -79,7 +79,7 @@ export const runtimeCoreSetupMustReturnRender = '组件必须返回渲染函数�
 export const runtimeCoreObjectChildWarning = '[runtime-core] 检测到无法渲染的子节点，已被忽略：'
 
 /**
- * patch 阶段缺失宿主节点的调试警告
+ * Patch 阶段缺失宿主节点的调试警告
  *
  * 在 patch 过程中，若 VirtualNode 未记录对应的宿主节点（el/anchor），
  * 则无法进行 DOM 移动或锚点解析；此警告用于调试此类异常情况。

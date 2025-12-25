@@ -1,5 +1,5 @@
 /**
- * runtime-dom 模块入口。
+ * Runtime-dom 模块入口。
  *
  * 本模块为 DOM 宿主环境提供完整的渲染能力，包括：
  * - `createApp`：创建基于 DOM 的应用实例，支持字符串选择器挂载

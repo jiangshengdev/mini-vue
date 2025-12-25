@@ -17,7 +17,7 @@
 export const runtimeDomContainerNotFound = 'createApp: 未找到可用的挂载容器'
 
 /**
- * style 值类型不合法的警告
+ * Style 值类型不合法的警告
  *
  * 内联 style 的属性值仅支持字符串或数字类型；
  * 传入对象、数组等其他类型时，输出此警告并忽略写入。

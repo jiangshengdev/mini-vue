@@ -1,5 +1,5 @@
 /**
- * mini-vue 框架主入口。
+ * Mini-vue 框架主入口。
  *
  * 本模块聚合并导出框架的核心能力，供外部统一引入，包括：
  * - JSX 运行时：`h`、`jsx`、`jsxs`、`jsxDEV`、`Fragment`

@@ -1,5 +1,5 @@
 /**
- * class 属性处理模块。
+ * Class 属性处理模块。
  *
  * 本模块负责将 `class`/`className` props 归一化并写入 DOM，支持：
  * - 字符串形式：直接使用

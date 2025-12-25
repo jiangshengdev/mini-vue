@@ -34,7 +34,7 @@ export const renderDomRoot = renderDomRootImpl
  * 用于支持容器解析、HMR 重挂载等场景。
  */
 interface DomAppState {
-  /** runtime-core 的通用应用实例，用来执行真正的渲染逻辑。 */
+  /** Runtime-core 的通用应用实例，用来执行真正的渲染逻辑。 */
   baseApp: AppInstance<Element>
   /** 最近一次 mount 调用时的原始目标，字符串选择器或 DOM 节点。 */
   lastMountTarget?: string | Element

@@ -1,5 +1,5 @@
 /**
- * style 属性处理模块。
+ * Style 属性处理模块。
  *
  * 本模块负责将 `style` props 写入 DOM，支持：
  * - 字符串形式：直接设置 `style` attribute

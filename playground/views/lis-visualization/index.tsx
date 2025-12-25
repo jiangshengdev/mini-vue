@@ -167,13 +167,14 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
     /* 触发依赖追踪，确保版本变化时重新渲染 */
     state.navigatorVersion.get()
 
+    const input = state.input.get()
     const step = navigator.getCurrentStep()
     const previousStep = navigator.getPreviousStep()
     const navState = navigator.getState()
     const showResult = navState.currentStep === navState.totalSteps - 1
 
     /* 处理空输入的情况：显示简化界面 */
-    if (trace.steps.length === 0) {
+    if (input.length === 0) {
       return (
         <div class={styles.container}>
           <header class={styles.header}>
@@ -183,10 +184,7 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
               可回溯出对应链。输入数组后可逐步查看贪心 +
               二分的构造过程，空格播放、左右箭头单步，或点击数组索引跳到对应步骤。
             </p>
-            <InputEditor
-              input={state.input.get()}
-              onInputChange={eventHandlers.handleInputChange}
-            />
+            <InputEditor input={input} onInputChange={eventHandlers.handleInputChange} />
           </header>
           <main class={styles.main}>
             <div class={styles.emptyState}>请输入数组以开始可视化</div>
@@ -205,7 +203,7 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
             可回溯出对应链。输入数组后可逐步查看贪心 +
             二分的构造过程，空格播放、左右箭头单步，或点击数组索引跳到对应步骤。
           </p>
-          <InputEditor input={state.input.get()} onInputChange={eventHandlers.handleInputChange} />
+          <InputEditor input={input} onInputChange={eventHandlers.handleInputChange} />
           <StepControls
             currentStep={navState.currentStep}
             totalSteps={navState.totalSteps}

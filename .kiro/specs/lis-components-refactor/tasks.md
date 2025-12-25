@@ -127,14 +127,14 @@
     - 更新各组件的样式导入
     - _Requirements: 4.2_
 
-- [ ] 7. Checkpoint - 验证样式重构
+- [x] 7. Checkpoint - 验证样式重构
   - 运行 `pnpm run typecheck` 验证类型正确性
   - 运行 `pnpm run lint` 验证代码风格
   - 确保所有测试通过，如有问题请询问用户
   - _Requirements: 4.5, 7.1_
 
-- [ ] 8. 最终验证
-  - [ ] 8.1 运行完整测试套件
+- [x] 8. 最终验证
+  - [x] 8.1 运行完整测试套件
     - 运行 `pnpm run test` 验证所有测试通过
     - 运行 `pnpm run typecheck` 验证类型正确性
     - 运行 `pnpm run lint` 验证代码风格

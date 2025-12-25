@@ -1,7 +1,17 @@
+/**
+ * 插件契约模块。
+ *
+ * 本模块定义插件安装所需的最小 App 能力契约，
+ * 用于约束插件可以访问的应用实例方法。
+ */
 import type { InjectionKey, InjectionToken } from './injection.ts'
 
 /**
  * 插件安装所需的最小 App 能力契约。
+ *
+ * 插件通过此接口访问应用实例的有限能力，包括：
+ * - `unmount`：可选的卸载钩子，用于插件清理
+ * - `provide`：应用级依赖注入入口
  */
 export interface PluginInstallApp {
   /** 可选卸载钩子：存在时插件可在卸载后完成清理。 */

@@ -1,5 +1,12 @@
 /**
- * 用于在类型层面把 `InjectionKey<T>` 与 `T` 关联起来的品牌字段。
+ * 依赖注入类型模块。
+ *
+ * 本模块提供类型安全的依赖注入 Key 定义，用于在 provide/inject 间建立关联。
+ * 推荐使用 symbol 作为 key，以避免命名冲突。
+ */
+
+/**
+ * 用于在类型层面把 InjectionKey<T> 与 T 关联起来的品牌字段。
  *
  * @remarks
  * - 仅参与类型推导；运行期不会产生任何额外字段。
@@ -7,13 +14,13 @@
 declare const injectionKeyBrand: unique symbol
 
 /**
- * 依赖注入 Key（推荐使用 `symbol`），用于在 `provide`/`inject` 间建立类型安全的关联。
+ * 依赖注入 Key（推荐使用 symbol），用于在 provide/inject 间建立类型安全的关联。
  *
  * @public
  *
  * @remarks
  * - 该类型仅用于类型推导与约束。
- * - 运行期 key 就是一个 `symbol`，不会自动做任何命名空间隔离。
+ * - 运行期 key 就是一个 symbol，不会自动做任何命名空间隔离。
  */
 export type InjectionKey<T = unknown> = symbol & { readonly [injectionKeyBrand]?: T }
 

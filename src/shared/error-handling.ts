@@ -1,3 +1,15 @@
+/**
+ * 错误处理模块。
+ *
+ * 本模块提供框架级的错误处理器注册与调度机制，包括：
+ * - `setErrorHandler`：允许外部重写默认的错误处理逻辑
+ * - `handleError`：在内部捕获异常时调用，统一调度至用户提供的处理器或兜底方案
+ *
+ * 错误处理器会在以下入口发生异常时被调用：
+ * - effect、effectScope.run、watch 回调
+ * - scheduler 调度队列
+ * - 组件 setup 与 cleanup 阶段
+ */
 import type { ErrorContext, ErrorMeta, ErrorPhase, ErrorToken } from './error-channel.ts'
 
 /**

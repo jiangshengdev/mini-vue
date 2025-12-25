@@ -1,3 +1,13 @@
+/**
+ * 错误通道模块。
+ *
+ * 本模块提供框架级的错误捕获与上报机制，包括：
+ * - 错误上下文标签：标记异常来源位置（scheduler、effect、watch、component 等）
+ * - 错误传播模式：控制同步阶段是否把异常继续抛给调用方
+ * - 错误捕获阶段：区分同步栈内捕获还是异步兜底捕获
+ * - 去重机制：同一 tick 内同一 Error 对象只上报一次
+ * - 运行器封装：`runThrowing`（同步传播）、`runSilent`（静默处理）
+ */
 import { handleError } from './error-handling.ts'
 import type { PlainObject } from './types.ts'
 import { isThenable } from './utils.ts'

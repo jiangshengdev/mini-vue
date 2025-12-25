@@ -1,3 +1,11 @@
+/**
+ * 调试日志模块。
+ *
+ * 本模块提供具名调试记录器，支持：
+ * - 在创建时判定是否启用日志，便于生产环境 tree-shake
+ * - 为日志添加命名空间前缀，便于过滤与定位来源
+ * - 支持可选的负载输出，格式化为 JSON
+ */
 import { __INTERNAL_DEV__, isDevDebugEnvironment } from './env.ts'
 
 /**

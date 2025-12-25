@@ -1,4 +1,13 @@
 /**
+ * 环境检测模块。
+ *
+ * 本模块提供开发/生产环境检测能力，包括：
+ * - `__DEV__`：Vite 注入的开发模式标识，便于编译期摇树
+ * - `__INTERNAL_DEV__`：内部专用的开发期开关，用于剔除内部调试代码
+ * - `isDevDebugEnvironment`：检测是否启用了调试能力（inspect/IDE 连接器等）
+ */
+
+/**
  * 直接使用 Vite 注入的 DEV 常量，便于编译期摇树。
  */
 // eslint-disable-next-line @typescript-eslint/naming-convention

@@ -1,5 +1,16 @@
 /**
- * 聚合 `shared` 层的基础能力与类型，作为各子域的统一入口。
+ * shared 模块入口。
+ *
+ * 本模块聚合跨子域的基础能力与类型，作为各子域的统一入口，包括：
+ * - 上下文栈管理：`ContextStack`
+ * - 调试日志：`createDebugLogger`
+ * - 环境检测：`__DEV__`、`__INTERNAL_DEV__`、`isDevDebugEnvironment`
+ * - 错误通道：`dispatchError`、`runSilent`、`runThrowing`
+ * - 错误处理：`handleError`、`setErrorHandler`
+ * - 依赖注入：`InjectionKey`、`InjectionToken`
+ * - 插件契约：`PluginInstallApp`
+ * - 通用类型：`PlainObject`、`PropsShape`
+ * - 工具函数：`isNil`、`isObject`、`isPlainObject`、`isArrayIndex`、`isThenable`
  */
 export { ContextStack } from './context-stack.ts'
 export { createDebugLogger } from './debug.ts'

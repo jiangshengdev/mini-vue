@@ -12,62 +12,63 @@ import { track, trigger } from './operations.ts'
 import { withoutTracking } from './tracking.ts'
 import { isArrayIndex, isObject } from '@/shared/index.ts'
 
-/**
- * 响应式读取逻辑：在取值时触发依赖收集，并对嵌套对象递归创建代理。
- */
-const mutableGet: ProxyHandler<ReactiveTarget>['get'] = (target, key, receiver) => {
-  /* 内部标记读取不应触发依赖收集。 */
-  if (key === reactiveFlag) {
-    return true
-  }
+type Getter = ProxyHandler<ReactiveTarget>['get']
 
-  if (key === rawFlag) {
-    return target
-  }
-
-  /*
-   * 数组变更方法需要走「无依赖收集」的包装版本。
-   *
-   * @remarks
-   * - 变更方法内部可能读取 length/索引等，这些读取属于实现细节，不应被 track 到用户 effect 上。
-   * - 因此在代理层读取 `arr.push` 等方法时，直接返回包装后的函数实现。
-   */
-  if (Array.isArray(target) && isArrayMutatorKey(key)) {
-    return arrayUntrackedMutators[key]
-  }
-
-  /*
-   * 数组查询方法需要走「对 raw/proxy 兼容」的包装版本。
-   *
-   * @remarks
-   * - 直接调用原生 includes/indexOf/lastIndexOf 会读取代理数组元素并进行 identity 对比。
-   * - 元素读取会被懒代理，导致 `proxy !== raw`，从而出现查找失败。
-   */
-  if (Array.isArray(target) && isArraySearchKey(key)) {
-    return arraySearchWrappers[key]
-  }
-
-  /* 使用 Reflect 读取原始值，保持与原生访问一致的 this 绑定与行为 */
-  const rawValue = Reflect.get(target, key, receiver) as unknown
-
-  /* 读取属性同时收集依赖，连接目标字段与当前副作用 */
-  track(target, key)
-
-  if (isRef(rawValue)) {
-    /* 数组索引上的 Ref 保持原样返回，其余场景自动解包 */
-    if (Array.isArray(target) && isArrayIndex(key)) {
-      return rawValue
+function createGetter(isReadonly: boolean, shallow: boolean): Getter {
+  return (target, key, receiver) => {
+    /* 读取内部标记不应触发依赖收集。 */
+    if (key === reactiveFlag) {
+      return !isReadonly
     }
 
-    return rawValue.value
-  }
+    if (key === rawFlag) {
+      return target
+    }
 
-  if (isObject(rawValue)) {
-    /* 对嵌套对象进行懒加载代理，避免初始化时递归遍历 */
-    return reactive(rawValue)
-  }
+    /*
+     * 数组变更方法需要走「无依赖收集」的包装版本。
+     *
+     * @remarks
+     * - 变更方法内部可能读取 length/索引等，这些读取属于实现细节，不应被 track 到用户 effect 上。
+     * - 因此在代理层读取 `arr.push` 等方法时，直接返回包装后的函数实现。
+     */
+    if (Array.isArray(target) && isArrayMutatorKey(key)) {
+      return arrayUntrackedMutators[key]
+    }
 
-  return rawValue
+    /*
+     * 数组查询方法需要走「对 raw/proxy 兼容」的包装版本。
+     *
+     * @remarks
+     * - 直接调用原生 includes/indexOf/lastIndexOf 会读取代理数组元素并进行 identity 对比。
+     * - 元素读取会被懒代理，导致 `proxy !== raw`，从而出现查找失败。
+     */
+    if (Array.isArray(target) && isArraySearchKey(key)) {
+      return arraySearchWrappers[key]
+    }
+
+    /* 使用 Reflect 读取原始值，保持与原生访问一致的 this 绑定与行为 */
+    const rawValue = Reflect.get(target, key, receiver) as unknown
+
+    /* 读取属性同时收集依赖，连接目标字段与当前副作用 */
+    track(target, key)
+
+    if (!isReadonly && isRef(rawValue)) {
+      /* 数组索引上的 Ref 保持原样返回，其余场景自动解包 */
+      if (Array.isArray(target) && isArrayIndex(key)) {
+        return rawValue
+      }
+
+      return rawValue.value
+    }
+
+    if (isObject(rawValue)) {
+      /* shallow 直接返回原值，深层模式才递归代理 */
+      return shallow ? rawValue : reactive(rawValue)
+    }
+
+    return rawValue
+  }
 }
 
 /**
@@ -153,13 +154,37 @@ const mutableOwnKeys: ProxyHandler<ReactiveTarget>['ownKeys'] = (target) => {
   return Reflect.ownKeys(target)
 }
 
+const readonlySet: ProxyHandler<ReactiveTarget>['set'] = () => {
+  return true
+}
+
+const readonlyDeleteProperty: ProxyHandler<ReactiveTarget>['deleteProperty'] = () => {
+  return true
+}
+
 /**
- * 导出与 Vue 中 mutableHandlers 对齐的基础处理器，适配普通对象与数组。
+ * 与 Vue mutableHandlers 对齐的基础处理器，适配普通对象与数组。
  */
 export const mutableHandlers = {
-  get: mutableGet,
+  get: createGetter(false, false),
   set: mutableSet,
   deleteProperty: mutableDeleteProperty,
+  has: mutableHas,
+  ownKeys: mutableOwnKeys,
+} satisfies ProxyHandler<ReactiveTarget>
+
+export const shallowReactiveHandlers = {
+  get: createGetter(false, true),
+  set: mutableSet,
+  deleteProperty: mutableDeleteProperty,
+  has: mutableHas,
+  ownKeys: mutableOwnKeys,
+} satisfies ProxyHandler<ReactiveTarget>
+
+export const shallowReadonlyHandlers = {
+  get: createGetter(true, true),
+  set: readonlySet,
+  deleteProperty: readonlyDeleteProperty,
   has: mutableHas,
   ownKeys: mutableOwnKeys,
 } satisfies ProxyHandler<ReactiveTarget>

@@ -1,7 +1,9 @@
 /**
- * LIS 算法可视化 - 主页面组件
+ * LIS 算法可视化 - 主页面组件模块。
  *
- * 作为编排层，组合所有子模块和 UI 组件
+ * @remarks
+ * 本模块是可视化功能的顶层入口，作为编排层组合所有子模块和 UI 组件。
+ * 负责初始化状态管理器、导航器、控制器，并将它们连接到 UI 组件。
  */
 
 import {
@@ -26,33 +28,42 @@ import type { StepNavigator } from './types.ts'
 import type { SetupComponent } from '@/index.ts'
 import { onScopeDispose } from '@/index.ts'
 
-// 合并样式对象
+/* 合并样式对象，便于在 JSX 中统一引用 */
 const styles = { ...sharedStyles, ...layoutStyles }
 
-/** 默认输入数组 */
+/** 默认输入数组，用于初始化演示 */
 const defaultInput = [2, 1, 3, 0, 4]
 
+/**
+ * LIS 算法可视化主组件。
+ *
+ * @remarks
+ * 组件采用「编排层」模式，自身不包含业务逻辑，
+ * 而是组合各个控制器和 UI 组件，协调它们之间的交互。
+ */
 export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
-  // ============================================================================
-  // 初始化状态管理器
-  // ============================================================================
+  /* ========================================================================
+   * 初始化状态管理器
+   * ======================================================================== */
   const stateManager = createStateManager(defaultInput)
   const state = stateManager.getState()
 
-  // ============================================================================
-  // 追踪结果和导航器（非响应式，手动管理）
-  // ============================================================================
+  /* ========================================================================
+   * 追踪结果和导航器（非响应式，手动管理生命周期）
+   * ======================================================================== */
   let trace = traceLongestIncreasingSubsequence(state.input.get())
   let navigator: StepNavigator = createStepNavigator(trace)
 
-  /** 获取当前导航器（用于闭包） */
+  /**
+   * 获取当前导航器实例，供闭包内部使用。
+   */
   const getNavigator = (): StepNavigator => {
     return navigator
   }
 
-  // ============================================================================
-  // 初始化 Hover 管理器
-  // ============================================================================
+  /* ========================================================================
+   * 初始化 Hover 管理器
+   * ======================================================================== */
   const hoverManager = createHoverManager({
     stateManager,
     getCurrentStep() {
@@ -60,31 +71,41 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
     },
   })
 
-  /** 步骤切换时的统一更新（刷新 hover 状态 + 触发响应式更新） */
+  /**
+   * 步骤切换时的统一更新回调。
+   *
+   * @remarks
+   * 刷新 hover 状态以保持与当前步骤一致，并递增版本号触发响应式更新。
+   */
   const updateStep = (): void => {
     hoverManager.refreshHoverState()
     stateManager.incrementVersion()
   }
 
-  /** 重新计算追踪和导航器 */
+  /**
+   * 重新计算追踪结果和导航器。
+   *
+   * @remarks
+   * 当输入数组变化时调用，重新执行 LIS 算法并重置导航状态。
+   */
   const resetNavigator = (): void => {
     trace = traceLongestIncreasingSubsequence(state.input.get())
     navigator = createStepNavigator(trace)
     updateStep()
   }
 
-  // ============================================================================
-  // 初始化播放控制器
-  // ============================================================================
+  /* ========================================================================
+   * 初始化播放控制器
+   * ======================================================================== */
   const playbackController = createPlaybackController({
     stateManager,
     navigator,
     onStepUpdate: updateStep,
   })
 
-  // ============================================================================
-  // 初始化事件处理器
-  // ============================================================================
+  /* ========================================================================
+   * 初始化事件处理器
+   * ======================================================================== */
   const eventHandlers = createEventHandlers({
     stateManager,
     getNavigator,
@@ -94,13 +115,14 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
     updateStep,
   })
 
-  // ============================================================================
-  // 初始化键盘处理器
-  // ============================================================================
+  /* ========================================================================
+   * 初始化键盘处理器
+   * ======================================================================== */
   const keyboardHandler = createKeyboardHandler({
     onPrevious: eventHandlers.handlePrevious,
     onNext: eventHandlers.handleNext,
     onReset: eventHandlers.handleReset,
+    /* 跳转到最后一步 */
     onGoToEnd() {
       playbackController.stop()
 
@@ -110,12 +132,14 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
       updateStep()
     },
     onTogglePlay: eventHandlers.handleTogglePlay,
+    /* 加快播放速度（减少间隔时间） */
     onSpeedUp() {
       const currentSpeed = state.speed.get()
       const newSpeed = Math.max(100, currentSpeed - 100)
 
       eventHandlers.handleSpeedChange(newSpeed)
     },
+    /* 减慢播放速度（增加间隔时间） */
     onSpeedDown() {
       const currentSpeed = state.speed.get()
       const newSpeed = Math.min(2000, currentSpeed + 100)
@@ -124,23 +148,23 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
     },
   })
 
-  // 注册键盘事件监听
+  /* 注册键盘事件监听 */
   keyboardHandler.register()
 
-  // ============================================================================
-  // 清理函数
-  // ============================================================================
+  /* ========================================================================
+   * 清理函数：组件卸载时释放所有资源
+   * ======================================================================== */
   onScopeDispose(() => {
     playbackController.dispose()
     keyboardHandler.dispose()
     stateManager.dispose()
   })
 
-  // ============================================================================
-  // 渲染函数
-  // ============================================================================
+  /* ========================================================================
+   * 渲染函数
+   * ======================================================================== */
   return () => {
-    // 触发依赖追踪
+    /* 触发依赖追踪，确保版本变化时重新渲染 */
     state.navigatorVersion.get()
 
     const step = navigator.getCurrentStep()
@@ -148,7 +172,7 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
     const navState = navigator.getState()
     const showResult = navState.currentStep === navState.totalSteps - 1
 
-    /* 处理空输入的情况 */
+    /* 处理空输入的情况：显示简化界面 */
     if (trace.steps.length === 0) {
       return (
         <div class={styles.container}>
@@ -171,6 +195,7 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
       )
     }
 
+    /* 正常渲染：完整的可视化界面 */
     return (
       <div class={styles.container}>
         <header class={styles.header}>

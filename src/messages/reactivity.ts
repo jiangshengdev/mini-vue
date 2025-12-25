@@ -7,3 +7,6 @@ export const reactivityComputedReadonly =
 
 /** `onScopeDispose` 在非活跃 `effect scope` 中调用的错误 */
 export const reactivityScopeDisposeOutside = 'onScopeDispose 仅能在活跃的 effect scope 中调用'
+
+/** 在只读代理上尝试写入/删除的警告 */
+export const reactivityReadonlyWarning = '当前目标为 readonly，写入/删除操作已被忽略'

@@ -10,6 +10,7 @@ export {
 } from './jsx.ts'
 export {
   reactivityComputedReadonly,
+  reactivityReadonlyWarning,
   reactivityScopeDisposeOutside,
   reactivityUnsupportedType,
 } from './reactivity.ts'

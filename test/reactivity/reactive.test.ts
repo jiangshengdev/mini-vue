@@ -1,4 +1,4 @@
-import { describe, expect, expectTypeOf, it } from 'vitest'
+import { describe, expect, expectTypeOf, it, vi } from 'vitest'
 import type { Ref } from '@/index.ts'
 import { effect, isReactive, isReadonly, isRef, reactive, readonly, ref, toRaw } from '@/index.ts'
 import { reactivityUnsupportedType } from '@/messages/index.ts'
@@ -258,5 +258,20 @@ describe('readonly', () => {
     expect(isReadonly(proxy)).toBe(true)
     expect(isReadonly(raw)).toBe(false)
     expect(isReadonly(reactiveProxy)).toBe(false)
+  })
+
+  it('只读代理被写入/删除时发出警告', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {
+      return undefined
+    })
+    const proxy = readonly({ foo: 1 })
+
+    // @ts-expect-error 只读代理
+    proxy.foo = 2
+    // @ts-expect-error 只读代理
+    delete proxy.foo
+
+    expect(warn).toHaveBeenCalled()
+    warn.mockRestore()
   })
 })

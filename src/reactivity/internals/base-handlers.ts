@@ -16,7 +16,8 @@ import { reactive, readonly } from '../reactive.ts'
 import { isRef } from '../ref/api.ts'
 import { track, trigger } from './operations.ts'
 import { withoutTracking } from './tracking.ts'
-import { isArrayIndex, isObject } from '@/shared/index.ts'
+import { reactivityReadonlyWarning } from '@/messages/index.ts'
+import { __DEV__, isArrayIndex, isObject } from '@/shared/index.ts'
 
 type Getter = ProxyHandler<ReactiveTarget>['get']
 
@@ -174,10 +175,18 @@ const mutableOwnKeys: ProxyHandler<ReactiveTarget>['ownKeys'] = (target) => {
 }
 
 const readonlySet: ProxyHandler<ReactiveTarget>['set'] = () => {
+  if (__DEV__) {
+    console.warn(reactivityReadonlyWarning)
+  }
+
   return true
 }
 
 const readonlyDeleteProperty: ProxyHandler<ReactiveTarget>['deleteProperty'] = () => {
+  if (__DEV__) {
+    console.warn(reactivityReadonlyWarning)
+  }
+
   return true
 }
 

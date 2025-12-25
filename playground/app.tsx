@@ -1,8 +1,11 @@
 import type { SetupComponent } from '@/index.ts'
-import { onScopeDispose, RouterLink, RouterView, state } from '@/index.ts'
-
-// 桌面端断点宽度
-const desktopBreakpoint = 768
+import { onScopeDispose, RouterLink, RouterView } from '@/index.ts'
+import {
+  createDrawerStateManager,
+  getHamburgerAriaLabel,
+  handleEscapeKey,
+  handleWindowResize,
+} from './controllers/drawer-state.ts'
 
 /**
  * 导航链接配置
@@ -90,38 +93,17 @@ const NavLinks: SetupComponent<NavLinksProps> = (props) => {
 }
 
 export const App: SetupComponent = () => {
-  // 抽屉导航的开关状态
-  const isDrawerOpen = state(false)
-
-  // 打开抽屉（保留以备扩展使用）
-  const _openDrawer = (): void => {
-    isDrawerOpen.set(true)
-  }
-
-  void _openDrawer
-
-  // 关闭抽屉
-  const closeDrawer = (): void => {
-    isDrawerOpen.set(false)
-  }
-
-  // 切换抽屉状态
-  const toggleDrawer = (): void => {
-    isDrawerOpen.set(!isDrawerOpen.get())
-  }
+  // 使用抽屉状态管理器
+  const drawer = createDrawerStateManager()
 
   // 处理键盘事件 - Escape 键关闭抽屉
   const handleKeyDown = (event: KeyboardEvent): void => {
-    if (event.key === 'Escape' && isDrawerOpen.get()) {
-      closeDrawer()
-    }
+    handleEscapeKey(event, drawer)
   }
 
   // 处理窗口大小变化 - 桌面端尺寸时自动关闭抽屉
   const handleResize = (): void => {
-    if (window.innerWidth >= desktopBreakpoint && isDrawerOpen.get()) {
-      closeDrawer()
-    }
+    handleWindowResize(window.innerWidth, drawer)
   }
 
   // 注册事件监听器
@@ -135,7 +117,7 @@ export const App: SetupComponent = () => {
   })
 
   return () => {
-    const drawerOpen = isDrawerOpen.get()
+    const drawerOpen = drawer.isOpen.get()
 
     return (
       <>
@@ -144,9 +126,9 @@ export const App: SetupComponent = () => {
           <button
             class="hamburger-btn"
             type="button"
-            aria-label={drawerOpen ? '关闭导航菜单' : '打开导航菜单'}
+            aria-label={getHamburgerAriaLabel(drawerOpen)}
             aria-expanded={drawerOpen}
-            onClick={toggleDrawer}
+            onClick={drawer.toggle}
           >
             <span class="hamburger-icon" />
           </button>
@@ -154,9 +136,9 @@ export const App: SetupComponent = () => {
 
         {/* 抽屉导航 */}
         <div class={`drawer-container ${drawerOpen ? 'open' : ''}`}>
-          <div class="drawer-overlay" onClick={closeDrawer} />
+          <div class="drawer-overlay" onClick={drawer.close} />
           <nav class="drawer-nav" aria-expanded={drawerOpen}>
-            <NavLinks onLinkClick={closeDrawer} />
+            <NavLinks onLinkClick={drawer.close} />
           </nav>
         </div>
 

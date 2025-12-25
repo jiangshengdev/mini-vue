@@ -53,28 +53,28 @@
   - 测试汉堡按钮点击、遮罩点击、链接点击、Escape 键
   - 确保所有功能正常工作，如有问题请反馈
 
-- [ ]\* 4. 添加属性测试
-  - [ ]\* 4.1 创建抽屉状态切换的属性测试文件
+- [x] 4. 添加属性测试
+  - [x] 4.1 创建抽屉状态切换的属性测试文件
     - **Property 3: 点击汉堡按钮切换抽屉状态**
     - **Validates: Requirements 2.3**
 
-  - [ ]\* 4.2 添加遮罩层和 aria 属性的属性测试
+  - [x] 4.2 添加遮罩层和 aria 属性的属性测试
     - **Property 4: 抽屉打开时遮罩层可见**
     - **Property 7: aria-expanded 属性与抽屉状态一致**
     - **Validates: Requirements 3.2, 5.2**
 
-- [ ]\* 5. 添加单元测试
-  - [ ]\* 5.1 添加状态管理函数的单元测试
+- [x]\* 5. 添加单元测试
+  - [x]\* 5.1 添加状态管理函数的单元测试
     - 测试 toggleDrawer 切换状态
     - 测试 openDrawer 和 closeDrawer 设置正确状态
     - _Requirements: 2.3, 3.3_
 
-  - [ ]\* 5.2 添加键盘事件处理的单元测试
+  - [x]\* 5.2 添加键盘事件处理的单元测试
     - 测试 Escape 键在抽屉打开时关闭抽屉
     - 测试 Escape 键在抽屉关闭时无效果
     - _Requirements: 5.3_
 
-- [ ] 6. Final Checkpoint - 确保所有测试通过
+- [x] 6. Final Checkpoint - 确保所有测试通过
   - 运行 `pnpm run test` 确保所有测试通过
   - 如有问题请反馈
 

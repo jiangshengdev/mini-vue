@@ -1,48 +1,63 @@
 /**
  * 高亮计算工具函数
  *
- * 提供 LIS 算法可视化中高亮类名计算相关的纯函数
+ * 提供 LIS 算法可视化中高亮类名计算相关的纯函数。
+ * 根据当前步骤的操作类型（init/append/replace/skip）计算对应的 CSS 类名，
+ * 用于在 UI 中高亮显示算法执行过程中的关键元素。
  */
 
 import type { StepAction } from '../types.ts'
 
-/** 高亮状态 */
+/**
+ * 高亮状态，描述当前步骤中需要高亮的位置信息。
+ */
 export interface HighlightState {
-  /** Sequence 高亮位置 */
+  /** Sequence 数组中需要高亮的位置索引 */
   highlightSeqPosition: number
-  /** Predecessors 高亮索引 */
+  /** Predecessors 数组中需要高亮的索引 */
   highlightPredIndex: number
-  /** 上一步 Sequence 高亮位置 */
+  /** 上一步 Sequence 中被替换的位置（仅 replace 操作有效） */
   previousHighlightSeqPosition: number
 }
 
-/** 前驱高亮信息 */
+/**
+ * 前驱高亮信息，描述前驱指针的变化。
+ */
 export interface PredecessorHighlight {
-  /** 前驱值 */
+  /** 当前前驱值（-1 表示无前驱） */
   predecessorValue: number | undefined
-  /** 上一步前驱值 */
+  /** 上一步的前驱值（用于显示变化） */
   previousPredecessorValue: number | undefined
 }
 
-/** 节点类名计算选项 */
+/**
+ * 节点类名计算选项，包含节点的各种状态标志。
+ */
 export interface NodeClassNameOptions {
-  /** 是否为链尾高亮 */
+  /** 是否为链尾高亮（当前处理的元素） */
   isChainTailHighlight: boolean
-  /** 是否为高亮节点 */
+  /** 是否为高亮节点（主要高亮） */
   isHighlightNode: boolean
-  /** 是否为变更节点 */
+  /** 是否为变更节点（次要高亮） */
   isChangedNode: boolean
-  /** 操作类型 */
+  /** 当前步骤的操作类型 */
   actionType: StepAction['type'] | undefined
-  /** 高亮类名 */
+  /** 主高亮类名 */
   highlightClass: string
 }
 
 /**
- * 根据操作类型获取主高亮类名
+ * 根据操作类型获取主高亮类名。
  *
- * @param action 步骤操作
- * @param styles CSS 模块样式对象
+ * @remarks
+ * 不同操作类型对应不同的视觉样式：
+ * - `init`：无高亮
+ * - `append`：追加操作高亮（通常为绿色）
+ * - `replace`：替换操作高亮（通常为橙色）
+ * - `skip`：跳过操作高亮（通常为灰色）
+ *
+ * @param action - 步骤操作
+ * @param styles - CSS 模块样式对象
  * @returns CSS 类名
  */
 export function getHighlightClass(
@@ -73,10 +88,14 @@ export function getHighlightClass(
 }
 
 /**
- * 根据操作类型获取半高亮类名
+ * 根据操作类型获取次要高亮类名。
  *
- * @param action 步骤操作
- * @param styles CSS 模块样式对象
+ * @remarks
+ * 次要高亮用于显示与主高亮相关联的元素，如前驱链中的其他节点。
+ * 仅 `append` 和 `replace` 操作有次要高亮。
+ *
+ * @param action - 步骤操作
+ * @param styles - CSS 模块样式对象
  * @returns CSS 类名
  */
 export function getSecondaryHighlightClass(
@@ -93,10 +112,13 @@ export function getSecondaryHighlightClass(
 }
 
 /**
- * 获取 sequence 变更指示器文本
+ * 获取 sequence 变更指示器文本。
  *
- * @param action 步骤操作
- * @param hasPrevious 是否有上一步
+ * @remarks
+ * 在 UI 中显示当前步骤对 sequence 数组的影响，帮助用户理解算法行为。
+ *
+ * @param action - 步骤操作
+ * @param hasPrevious - 是否有上一步（用于判断是否显示变化信息）
  * @returns 指示器文本
  */
 export function getSeqChangeIndicator(
@@ -131,10 +153,15 @@ export function getSeqChangeIndicator(
 }
 
 /**
- * 计算高亮状态
+ * 计算高亮状态。
  *
- * @param action 步骤操作
- * @param sequence 当前 sequence
+ * @remarks
+ * 根据当前步骤的操作类型，计算需要高亮的位置信息：
+ * - `append`：高亮 sequence 末尾和新增元素的索引
+ * - `replace`：高亮被替换的位置和替换元素的索引
+ *
+ * @param action - 步骤操作
+ * @param sequence - 当前 sequence 数组
  * @returns 高亮位置信息
  */
 export function computeHighlightState(
@@ -158,11 +185,14 @@ export function computeHighlightState(
 }
 
 /**
- * 计算前驱高亮信息
+ * 计算前驱高亮信息。
  *
- * @param highlightPredIndex 高亮前驱索引
- * @param predecessors 前驱数组
- * @param action 步骤操作
+ * @remarks
+ * 提取当前高亮元素的前驱值，用于在 UI 中显示前驱指针的变化。
+ *
+ * @param highlightPredIndex - 高亮前驱索引
+ * @param predecessors - 前驱数组
+ * @param action - 步骤操作
  * @returns 前驱值信息
  */
 export function computePredecessorHighlight(
@@ -189,12 +219,15 @@ export function computePredecessorHighlight(
 }
 
 /**
- * 计算前驱变更指示器文本
+ * 计算前驱变更指示器文本。
  *
- * @param hasPrevious 是否有上一步
- * @param previousPredecessors 上一步前驱数组
- * @param highlightPredIndex 高亮前驱索引
- * @param predecessors 当前前驱数组
+ * @remarks
+ * 比较当前前驱数组与上一步前驱数组，生成描述变化的文本。
+ *
+ * @param hasPrevious - 是否有上一步
+ * @param previousPredecessors - 上一步前驱数组
+ * @param highlightPredIndex - 高亮前驱索引
+ * @param predecessors - 当前前驱数组
  * @returns 指示器文本
  */
 export function computePredChangeIndicator(
@@ -221,10 +254,14 @@ export function computePredChangeIndicator(
 }
 
 /**
- * 获取链节点的 CSS 类名
+ * 获取链节点的 CSS 类名。
  *
- * @param options 节点状态选项
- * @param styles CSS 模块样式对象
+ * @remarks
+ * 根据节点的各种状态标志，组合生成最终的 CSS 类名。
+ * 优先级：链尾高亮 > 主高亮 > 变更高亮 > 默认样式。
+ *
+ * @param options - 节点状态选项
+ * @param styles - CSS 模块样式对象
  * @returns CSS 类名
  */
 export function getNodeClassName(

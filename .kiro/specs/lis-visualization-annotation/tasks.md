@@ -68,36 +68,36 @@
     - 为 hover 管理函数添加职责注释
     - _Requirements: 3.1, 9.1, 10.1_
 
-- [ ] 4. 事件处理器模块注释
-  - [ ] 4.1 为 `handlers/index.ts` 添加/更新注释
+- [x] 4. 事件处理器模块注释
+  - [x] 4.1 为 `handlers/index.ts` 添加/更新注释
     - 检查并清理无效注释
     - _Requirements: 9.1_
 
-  - [ ] 4.2 为 `handlers/event-handlers.ts` 添加/更新注释
+  - [x] 4.2 为 `handlers/event-handlers.ts` 添加/更新注释
     - 检查并清理无效注释
     - 更新过期注释
     - 为事件处理函数添加职责注释
     - _Requirements: 3.1, 9.1, 10.1_
 
-- [ ] 5. 工具函数模块注释
-  - [ ] 5.1 为 `utils/index.ts` 添加/更新注释
+- [x] 5. 工具函数模块注释
+  - [x] 5.1 为 `utils/index.ts` 添加/更新注释
     - 检查并清理无效注释
     - _Requirements: 9.1_
 
-  - [ ] 5.2 为 `utils/chain-utils.ts` 添加/更新注释
+  - [x] 5.2 为 `utils/chain-utils.ts` 添加/更新注释
     - 检查并清理无效注释
     - 更新过期注释
     - 为链构建函数添加职责注释
     - 为复杂算法逻辑添加意图注释
     - _Requirements: 3.1, 5.1, 9.1, 10.1, 10.3_
 
-  - [ ] 5.3 为 `utils/highlight-utils.ts` 添加/更新注释
+  - [x] 5.3 为 `utils/highlight-utils.ts` 添加/更新注释
     - 检查并清理无效注释
     - 更新过期注释
     - 为高亮计算函数添加职责注释
     - _Requirements: 3.1, 9.1, 10.1_
 
-  - [ ] 5.4 为 `utils/input-utils.ts` 添加/更新注释
+  - [x] 5.4 为 `utils/input-utils.ts` 添加/更新注释
     - 检查并清理无效注释
     - 更新过期注释
     - 为输入处理函数添加职责注释

@@ -56,3 +56,11 @@ type UnwrapNestedRefs<T> = T extends Ref ? T : UnwrapRefRecursive<T>
  * - 数组索引 Ref 保持 Ref
  */
 export type Reactive<T> = UnwrapNestedRefs<T>
+
+/** 深度只读工具类型，保留内建值与 Ref 原样，其余递归只读。 */
+export type DeepReadonly<T> = T extends UnwrapBailTypes | Ref
+  ? T
+  : { readonly [K in keyof T]: DeepReadonly<T[K]> }
+
+/** `readonly` 返回值的类型投射：在解包 Ref 后做深层只读。 */
+export type ReadonlyReactive<T> = DeepReadonly<UnwrapNestedRefs<T>>

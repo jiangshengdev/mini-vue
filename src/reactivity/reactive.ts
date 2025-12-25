@@ -10,7 +10,7 @@ import {
   shallowReadonlyHandlers,
 } from './internals/index.ts'
 import { isSupportedTarget } from './to-raw.ts'
-import type { Reactive } from './types.ts'
+import type { Reactive, ReadonlyReactive } from './types.ts'
 import { reactivityUnsupportedType } from '@/messages/index.ts'
 import type { PlainObject } from '@/shared/index.ts'
 import { isObject } from '@/shared/index.ts'
@@ -96,9 +96,9 @@ export function shallowReadonly(target: unknown): unknown {
   return createProxy(target, shallowReadonlyHandlers, shallowReadonlyCache)
 }
 
-export function readonly<T extends PlainObject>(target: T): Readonly<T>
-export function readonly<T extends readonly unknown[]>(target: T): Readonly<T>
-export function readonly<T>(target: T): Readonly<T>
+export function readonly<T extends PlainObject>(target: T): ReadonlyReactive<T>
+export function readonly<T extends readonly unknown[]>(target: T): ReadonlyReactive<T>
+export function readonly<T>(target: T): ReadonlyReactive<T>
 
 export function readonly(target: unknown): unknown {
   return createProxy(target, readonlyHandlers, readonlyCache)

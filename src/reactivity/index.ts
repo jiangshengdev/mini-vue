@@ -20,6 +20,7 @@ export type {
   State,
   WritableComputedOptions,
 } from './ref/index.ts'
+export type { DeepReadonly, Reactive, ReadonlyReactive } from './types.ts'
 export { computed, isRef, ref, state, toRef, unref } from './ref/index.ts'
 export { toRaw } from './to-raw.ts'
 export { watch } from './watch/index.ts'

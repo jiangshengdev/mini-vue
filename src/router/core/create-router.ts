@@ -11,18 +11,35 @@ import { ref } from '@/reactivity/index.ts'
  * @remarks
  * - 该类型避免把运行时 `AppInstance` 强耦合进 `router` 包。
  * - 仅用于 `router.install(app)` 的参数约束与内部 bookkeeping。
+ * - 从 `Router['install']` 的参数类型中提取，保持与 `Router` 接口同步。
  */
 type InstallableApp = Parameters<Router['install']>[0]
 
-/** 是否处于浏览器环境并支持 `history/popstate` 事件。 */
+/**
+ * 检测当前环境是否为浏览器且支持 `history/popstate` 事件。
+ *
+ * @remarks
+ * - 用于在 SSR 或非浏览器环境下跳过 `history` 相关操作。
+ * - 检测 `window.addEventListener` 存在性以确保事件绑定可用。
+ */
 const canUseWindowEvents =
   globalThis.window !== undefined && typeof window.addEventListener === 'function'
 
-/** 记录已安装任意 `router` 的 `app`，避免重复安装。 */
+/**
+ * 记录已安装任意 `router` 的 `app` 实例。
+ *
+ * @remarks
+ * - 用于防止同一个 `app` 重复安装不同的 `router`。
+ * - 使用 `WeakSet` 避免阻止 `app` 被垃圾回收。
+ */
 const appsWithRouter = new WeakSet<InstallableApp>()
 
 /**
- * 读取当前浏览器路径；无 `window` 环境时退回根路径。
+ * 读取当前浏览器路径。
+ *
+ * @remarks
+ * - 无 `window` 环境时退回根路径 `/`，确保 SSR 场景下有合理默认值。
+ * - 仅读取 `pathname`，不含 `query` 和 `hash`。
  */
 function getCurrentBrowserPath(): string {
   if (!canUseWindowEvents) {
@@ -33,11 +50,17 @@ function getCurrentBrowserPath(): string {
 }
 
 /**
- * 基于 `history` 的最小路由实现，封装路径匹配与状态同步。
+ * 基于 `history` API 的最小路由实现，封装路径匹配与状态同步。
+ *
+ * @remarks
+ * - 支持作为插件安装到 `app`，自动管理 `popstate` 监听的生命周期。
+ * - 路由匹配采用精确匹配策略，未命中时使用 `fallback` 组件。
+ * - 当前仅支持单层路由结构，嵌套路由通过 `matched` 数组长度控制。
  *
  * @beta
  */
 export function createRouter(config: RouterConfig): Router {
+  /** 路径到组件的映射表，用于 O(1) 时间复杂度的路由匹配。 */
   const routeMap = new Map<string, RouteRecord['component']>()
 
   /* 预构建 `path` → 组件的映射，提升匹配效率。 */
@@ -48,7 +71,12 @@ export function createRouter(config: RouterConfig): Router {
   const { fallback } = config
 
   /**
-   * 将原始路径解析为路由定位，未命中时落兜底组件。
+   * 将原始路径解析为路由定位信息。
+   *
+   * @remarks
+   * - 路径会先经过归一化处理（去 query/hash、补前导斜杠等）。
+   * - 未命中任何路由记录时使用 `fallback` 组件。
+   * - `matched` 数组当前仅包含单个组件，为嵌套路由预留扩展空间。
    */
   const matchRoute = (rawPath: string): RouteLocation => {
     const normalized = normalizePath(rawPath)
@@ -61,23 +89,48 @@ export function createRouter(config: RouterConfig): Router {
     return { path: normalized, component, matched: [component] }
   }
 
-  /* 用当前地址初始化路由状态，确保首屏渲染一致。 */
+  /* 用当前浏览器地址初始化路由状态，确保首屏渲染与 URL 一致。 */
   const currentRoute: Ref<RouteLocation> = ref(matchRoute(getCurrentBrowserPath()))
 
-  /* `popstate` 触发时同步最新路径到路由状态。 */
+  /**
+   * `popstate` 事件处理器：浏览器前进/后退时同步路由状态。
+   *
+   * @remarks
+   * - 仅在 `start()` 后生效，`stop()` 后解绑。
+   * - 读取当前浏览器路径并更新 `currentRoute`。
+   */
   const onPopState = (): void => {
     currentRoute.value = matchRoute(getCurrentBrowserPath())
   }
 
+  /** 标记当前 `router` 是否正在监听 `popstate` 事件。 */
   let listening = false
 
-  /** 记录已安装该 `router` 的 `app`，避免重复 install 并用于卸载时闭环 `stop`。 */
+  /**
+   * 记录已安装该 `router` 实例的 `app` 集合。
+   *
+   * @remarks
+   * - 用于追踪安装计数，在最后一个 `app` 卸载时自动 `stop`。
+   * - 与 `appsWithRouter` 不同，这里只记录当前 `router` 的安装情况。
+   */
   const installedApps = new Set<InstallableApp>()
-  /** 记录已被当前 `router` 包装过 `unmount` 的 `app`，避免重复包装。 */
+
+  /**
+   * 记录已被当前 `router` 包装过 `unmount` 方法的 `app`。
+   *
+   * @remarks
+   * - 防止同一个 `app` 的 `unmount` 被重复包装。
+   * - 使用 `WeakSet` 避免阻止 `app` 被垃圾回收。
+   */
   const wrappedUnmountApps = new WeakSet<InstallableApp>()
 
   /**
-   * 开始监听浏览器前进/后退，并立即同步一次路径。
+   * 开始监听浏览器前进/后退事件。
+   *
+   * @remarks
+   * - 绑定 `popstate` 事件处理器，用户点击浏览器前进/后退按钮时同步路由状态。
+   * - 调用时会立即同步一次当前路径，防止在初始化前已有 `pushState` 调用导致状态不一致。
+   * - 重复调用或非浏览器环境下会直接返回，不会重复绑定。
    */
   const start = (): void => {
     /* 无浏览器环境或已监听时直接返回，避免重复绑定。 */
@@ -92,7 +145,12 @@ export function createRouter(config: RouterConfig): Router {
   }
 
   /**
-   * 停止路由监听，移除 `popstate` 绑定。
+   * 停止监听浏览器前进/后退事件。
+   *
+   * @remarks
+   * - 移除 `popstate` 事件绑定，释放资源。
+   * - 通常在所有安装该 `router` 的 `app` 都卸载后自动调用。
+   * - 未启动或非浏览器环境下会直接返回。
    */
   const stop = (): void => {
     /* 若未启动或不在浏览器中则无需处理。 */
@@ -105,13 +163,21 @@ export function createRouter(config: RouterConfig): Router {
   }
 
   /**
-   * 主动导航到目标路径，写入 `history` 并刷新 `currentRoute`。
+   * 主动导航到目标路径。
+   *
+   * @remarks
+   * - 将路径写入 `history` 并更新 `currentRoute` 状态。
+   * - 路径中的 `query` 和 `hash` 会保留在 URL 中，但不参与路由匹配。
+   * - 若目标 URL 与当前 URL 相同，则跳过 `pushState` 避免产生重复历史记录。
+   * - 非浏览器环境下仅更新 `currentRoute`，不操作 `history`。
    */
   const navigate = (path: string): void => {
+    /* 归一化路径用于路由匹配，保留 query/hash 用于 URL 显示。 */
     const normalizedPath = normalizePath(path)
     const queryAndHash = getQueryAndHash(path)
     const historyTarget = `${normalizedPath}${queryAndHash}`
 
+    /* 浏览器环境下写入 history，相同 URL 时跳过以避免重复记录。 */
     if (canUseWindowEvents) {
       const currentUrl = `${globalThis.location.pathname ?? ''}${globalThis.location.search ?? ''}${globalThis.location.hash ?? ''}`
 
@@ -120,6 +186,7 @@ export function createRouter(config: RouterConfig): Router {
       }
     }
 
+    /* 更新响应式路由状态，触发依赖该状态的组件重新渲染。 */
     currentRoute.value = matchRoute(normalizedPath)
   }
 
@@ -140,40 +207,42 @@ export function createRouter(config: RouterConfig): Router {
         throw new Error(routerDuplicateInstallOnApp, { cause: app })
       }
 
-      /* 防御重复 install：当前 `router` 已记录该 `app` 时直接忽略。 */
+      /* 防御重复 install：当前 `router` 已记录该 `app` 时直接返回。 */
       if (installedApps.has(app)) {
         return
       }
 
-      /* 只有从 0 → 1 时才需要启动监听，避免多 `app` 场景重复 `start`。 */
+      /* 首次 install 时需要启动监听，后续 install 复用已有监听。 */
       const isFirstInstall = installedApps.size === 0
 
+      /* 记录安装关系，用于追踪计数和防止重复安装。 */
       installedApps.add(app)
       appsWithRouter.add(app)
 
+      /* 只有从 0 → 1 时才启动监听，避免多 `app` 场景重复 `start`。 */
       if (isFirstInstall) {
         start()
       }
 
       /*
-       * 若 `app` 支持 `unmount`，则在其卸载链路中回收 `installedApps` 计数。
+       * 若 `app` 支持 `unmount`，则包装其卸载方法以回收安装计数。
        *
        * @remarks
-       * - 用 `WeakSet` 防止重复包装（同一个 `app` 可能多次 install）。
-       * - 用 `finally` 确保 `rawUnmount` 抛错时也能完成 `stop` 判断。
+       * - 用 `WeakSet` 防止重复包装（同一个 `app` 可能多次调用 install）。
+       * - 用 `finally` 确保 `rawUnmount` 抛错时也能完成计数回收和 `stop` 判断。
+       * - 当最后一个 `app` 卸载时自动调用 `stop` 释放事件监听。
        */
       if (typeof app.unmount === 'function' && !wrappedUnmountApps.has(app)) {
         const rawUnmount = app.unmount.bind(app)
 
-        /*
-         * 用包装函数替换 `app.unmount`：在用户卸载后回收计数，并在最后一个 `app` 卸载时 `stop`。
-         */
+        /* 包装 `unmount`：在原始卸载逻辑后回收计数，最后一个 `app` 卸载时 `stop`。 */
         app.unmount = () => {
           try {
             rawUnmount()
           } finally {
             installedApps.delete(app)
 
+            /* 所有 `app` 都卸载后停止监听，释放资源。 */
             if (installedApps.size === 0) {
               stop()
             }

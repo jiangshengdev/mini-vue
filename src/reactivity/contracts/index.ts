@@ -2,6 +2,7 @@ export {
   iterateDependencyKey,
   rawFlag,
   reactiveFlag,
+  readonlyFlag,
   refFlag,
   triggerOpTypes,
 } from './constants.ts'

@@ -18,6 +18,14 @@ export const refFlag = Symbol('isRef')
 export const reactiveFlag = Symbol('isReactive')
 
 /**
+ * 标记对象为 readonly 生成的代理。
+ *
+ * @remarks
+ * - 由 Proxy handler 在读取该 Symbol 时返回布尔值。
+ */
+export const readonlyFlag = Symbol('isReadonly')
+
+/**
  * 访问 reactive Proxy 对应的原始对象。
  *
  * @remarks

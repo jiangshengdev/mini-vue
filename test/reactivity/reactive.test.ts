@@ -1,6 +1,6 @@
 import { describe, expect, expectTypeOf, it } from 'vitest'
 import type { Ref } from '@/index.ts'
-import { effect, isReactive, isRef, reactive, readonly, ref, toRaw } from '@/index.ts'
+import { effect, isReactive, isReadonly, isRef, reactive, readonly, ref, toRaw } from '@/index.ts'
 import { reactivityUnsupportedType } from '@/messages/index.ts'
 import type { PlainObject } from '@/shared/index.ts'
 
@@ -223,5 +223,15 @@ describe('readonly', () => {
     const proxy2 = readonly(raw)
 
     expect(proxy1).toBe(proxy2)
+  })
+
+  it('isReadonly 对代理与原始值的判定', () => {
+    const raw = { foo: 1 }
+    const proxy = readonly(raw)
+    const reactiveProxy = reactive({ bar: 1 })
+
+    expect(isReadonly(proxy)).toBe(true)
+    expect(isReadonly(raw)).toBe(false)
+    expect(isReadonly(reactiveProxy)).toBe(false)
   })
 })

@@ -2,7 +2,7 @@
  * 提供 `reactive`/`readonly`/`shallowReactive`/`shallowReadonly`，统一在此文件内复用缓存与创建逻辑。
  */
 import type { ReactiveTarget } from './contracts/index.ts'
-import { reactiveFlag } from './contracts/index.ts'
+import { reactiveFlag, readonlyFlag } from './contracts/index.ts'
 import {
   mutableHandlers,
   readonlyHandlers,
@@ -121,4 +121,21 @@ export function isReactive(target: unknown): target is ReactiveTarget {
   }
 
   return (target as ReactiveTarget)[reactiveFlag] === true
+}
+
+/**
+ * 判断给定值是否为 readonly 生成的 Proxy。
+ *
+ * @public
+ */
+export function isReadonly(target: unknown): target is ReactiveTarget {
+  if (!isObject(target)) {
+    return false
+  }
+
+  if (!isSupportedTarget(target)) {
+    return false
+  }
+
+  return (target as ReactiveTarget)[readonlyFlag] === true
 }

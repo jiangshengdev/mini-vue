@@ -5,7 +5,13 @@ import {
   isArraySearchKey,
 } from '../array/index.ts'
 import type { ReactiveTarget } from '../contracts/index.ts'
-import { iterateDependencyKey, rawFlag, reactiveFlag, triggerOpTypes } from '../contracts/index.ts'
+import {
+  iterateDependencyKey,
+  rawFlag,
+  reactiveFlag,
+  readonlyFlag,
+  triggerOpTypes,
+} from '../contracts/index.ts'
 import { reactive, readonly } from '../reactive.ts'
 import { isRef } from '../ref/api.ts'
 import { track, trigger } from './operations.ts'
@@ -19,6 +25,10 @@ function createGetter(isReadonly: boolean, shallow: boolean): Getter {
     /* 读取内部标记不应触发依赖收集。 */
     if (key === reactiveFlag) {
       return !isReadonly
+    }
+
+    if (key === readonlyFlag) {
+      return isReadonly
     }
 
     if (key === rawFlag) {

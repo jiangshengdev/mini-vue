@@ -1,6 +1,8 @@
 /* LIS 可视化 - 数组显示组件样式 */
 /* 包含数组单元格、图例和高亮效果 */
 
+@value fadeIn, pulse, pulseGreen, pulseViolet from './shared.module.css';
+
 /* 数组显示组件 */
 .arrayDisplay {
   margin-bottom: 0.5rem;

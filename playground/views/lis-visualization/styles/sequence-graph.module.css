@@ -1,6 +1,8 @@
 /* LIS 可视化 - 序列图组件样式 */
 /* 包含状态对比区域、链视图和节点样式 */
 
+@value slideIn from './shared.module.css';
+
 /* 序列状态图组件 */
 .sequenceGraph {
   margin-bottom: 0.5rem;

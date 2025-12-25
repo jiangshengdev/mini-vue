@@ -13,7 +13,14 @@ import type { EventHandlers, EventHandlersDeps } from '../types.ts'
  * @returns 事件处理器集合
  */
 export function createEventHandlers(deps: EventHandlersDeps): EventHandlers {
-  const { stateManager, getNavigator, playbackController, hoverManager, resetNavigator, updateStep } = deps
+  const {
+    stateManager,
+    getNavigator,
+    playbackController,
+    hoverManager,
+    resetNavigator,
+    updateStep,
+  } = deps
   const state = stateManager.getState()
 
   /**

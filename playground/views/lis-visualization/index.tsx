@@ -42,14 +42,18 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
   let navigator: StepNavigator = createStepNavigator(trace)
 
   /** 获取当前导航器（用于闭包） */
-  const getNavigator = (): StepNavigator => navigator
+  const getNavigator = (): StepNavigator => {
+    return navigator
+  }
 
   // ============================================================================
   // 初始化 Hover 管理器
   // ============================================================================
   const hoverManager = createHoverManager({
     stateManager,
-    getCurrentStep: () => navigator.getCurrentStep(),
+    getCurrentStep() {
+      return navigator.getCurrentStep()
+    },
   })
 
   /** 步骤切换时的统一更新（刷新 hover 状态 + 触发响应式更新） */
@@ -93,7 +97,7 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
     onPrevious: eventHandlers.handlePrevious,
     onNext: eventHandlers.handleNext,
     onReset: eventHandlers.handleReset,
-    onGoToEnd: () => {
+    onGoToEnd() {
       playbackController.stop()
 
       const navState = navigator.getState()
@@ -102,13 +106,13 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
       updateStep()
     },
     onTogglePlay: eventHandlers.handleTogglePlay,
-    onSpeedUp: () => {
+    onSpeedUp() {
       const currentSpeed = state.speed.get()
       const newSpeed = Math.max(100, currentSpeed - 100)
 
       eventHandlers.handleSpeedChange(newSpeed)
     },
-    onSpeedDown: () => {
+    onSpeedDown() {
       const currentSpeed = state.speed.get()
       const newSpeed = Math.min(2000, currentSpeed + 100)
 
@@ -123,7 +127,7 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
   // 清理函数
   // ============================================================================
   onScopeDispose(() => {
- playbackController.dispose()
+    playbackController.dispose()
     keyboardHandler.dispose()
     stateManager.dispose()
   })
@@ -151,7 +155,10 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
               可回溯出对应链。输入数组后可逐步查看贪心 +
               二分的构造过程，空格播放、左右箭头单步，或点击数组索引跳到对应步骤。
             </p>
-            <InputEditor input={state.input.get()} onInputChange={eventHandlers.handleInputChange} />
+            <InputEditor
+              input={state.input.get()}
+              onInputChange={eventHandlers.handleInputChange}
+            />
           </header>
           <main class={styles.main}>
             <div class={styles.emptyState}>请输入数组以开始可视化</div>

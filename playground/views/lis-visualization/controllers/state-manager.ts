@@ -8,7 +8,7 @@ import type { StateManager, StateRef, VisualizationState } from '../types.ts'
 import { state } from '@/index.ts'
 
 /** 默认播放速度（毫秒） */
-const DEFAULT_SPEED = 500
+const defaultSpeed = 500
 
 /**
  * 创建状态引用包装器
@@ -19,8 +19,10 @@ function createStateRef<T>(initialValue: T): StateRef<T> {
   const s = state(initialValue)
 
   return {
-    get: () => s.get(),
-    set: (value: T) => {
+    get() {
+      return s.get()
+    },
+    set(value: T) {
       s.set(value)
     },
   }
@@ -36,7 +38,7 @@ export function createStateManager(defaultInput: number[]): StateManager {
   // 创建所有响应式状态
   const inputState = createStateRef<number[]>([...defaultInput])
   const isPlayingState = createStateRef(false)
-  const speedState = createStateRef(DEFAULT_SPEED)
+  const speedState = createStateRef(defaultSpeed)
   const hoveredChainIndexesState = createStateRef<number[]>([])
   const hoveredChainInfoState = createStateRef<{ chainIndex: number } | undefined>(undefined)
   const isSequenceHoveredState = createStateRef(false)
@@ -65,7 +67,7 @@ export function createStateManager(defaultInput: number[]): StateManager {
     resetState(): void {
       inputState.set([...initialInput])
       isPlayingState.set(false)
-      speedState.set(DEFAULT_SPEED)
+      speedState.set(defaultSpeed)
       hoveredChainIndexesState.set([])
       hoveredChainInfoState.set(undefined)
       isSequenceHoveredState.set(false)

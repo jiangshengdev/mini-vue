@@ -24,12 +24,16 @@ function createMockTrace(stepCount: number): TraceResult {
       currentValue: i,
       action: { type: 'append', index: i },
       sequence: [i],
-      predecessors: Array.from({ length: stepCount }, () => -1),
+      predecessors: Array.from({ length: stepCount }, () => {
+        return -1
+      }),
     })
   }
 
   return {
-    input: Array.from({ length: stepCount }, (_, i) => i),
+    input: Array.from({ length: stepCount }, (_, i) => {
+      return i
+    }),
     steps,
     result: [0],
   }
@@ -42,15 +46,21 @@ function createMockNavigator(trace: TraceResult): StepNavigator {
   let currentStepIndex = 0
 
   return {
-    getState: () => ({
-      currentStep: currentStepIndex,
-      totalSteps: trace.steps.length,
-      canGoBack: currentStepIndex > 0,
-      canGoForward: currentStepIndex < trace.steps.length - 1,
-    }),
-    getCurrentStep: () => trace.steps[currentStepIndex],
-    getPreviousStep: () => (currentStepIndex > 0 ? trace.steps[currentStepIndex - 1] : undefined),
-    next: () => {
+    getState() {
+      return {
+        currentStep: currentStepIndex,
+        totalSteps: trace.steps.length,
+        canGoBack: currentStepIndex > 0,
+        canGoForward: currentStepIndex < trace.steps.length - 1,
+      }
+    },
+    getCurrentStep() {
+      return trace.steps[currentStepIndex]
+    },
+    getPreviousStep() {
+      return currentStepIndex > 0 ? trace.steps[currentStepIndex - 1] : undefined
+    },
+    next() {
       if (currentStepIndex < trace.steps.length - 1) {
         currentStepIndex++
 
@@ -59,7 +69,7 @@ function createMockNavigator(trace: TraceResult): StepNavigator {
 
       return undefined
     },
-    prev: () => {
+    prev() {
       if (currentStepIndex > 0) {
         currentStepIndex--
 
@@ -68,7 +78,7 @@ function createMockNavigator(trace: TraceResult): StepNavigator {
 
       return undefined
     },
-    goTo: (stepIndex: number) => {
+    goTo(stepIndex: number) {
       if (stepIndex >= 0 && stepIndex < trace.steps.length) {
         currentStepIndex = stepIndex
 
@@ -77,7 +87,7 @@ function createMockNavigator(trace: TraceResult): StepNavigator {
 
       return undefined
     },
-    reset: () => {
+    reset() {
       currentStepIndex = 0
     },
   }

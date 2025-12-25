@@ -10,12 +10,12 @@ import type { KeyboardHandler, KeyboardHandlerActions } from '../types.ts'
  * 检查当前焦点是否在输入元素内
  * 如果焦点在输入框、文本域或可编辑元素内，应忽略快捷键
  */
-function isInputFocused(target: EventTarget | null): boolean {
+function isInputFocused(target: EventTarget | undefined): boolean {
   if (!(target instanceof HTMLElement)) {
     return false
   }
 
-  const tagName = target.tagName
+  const { tagName } = target
 
   return tagName === 'INPUT' || tagName === 'TEXTAREA' || target.isContentEditable
 }
@@ -34,7 +34,7 @@ export function createKeyboardHandler(actions: KeyboardHandlerActions): Keyboard
    */
   const handleKeyDown = (event: KeyboardEvent): void => {
     // 如果焦点在输入元素内，不触发快捷键
-    if (isInputFocused(event.target)) {
+    if (isInputFocused(event.target ?? undefined)) {
       return
     }
 

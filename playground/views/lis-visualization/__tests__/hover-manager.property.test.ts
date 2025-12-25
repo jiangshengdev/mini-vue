@@ -49,7 +49,9 @@ describe('HoverManager 属性测试', () => {
       const stateManager = createStateManager(defaultInput)
       const hoverManager = createHoverManager({
         stateManager,
-        getCurrentStep: () => undefined,
+        getCurrentStep() {
+          return undefined
+        },
       })
 
       // 调用 handleChainHover
@@ -69,7 +71,9 @@ describe('HoverManager 属性测试', () => {
       const stateManager = createStateManager(defaultInput)
       const hoverManager = createHoverManager({
         stateManager,
-        getCurrentStep: () => undefined,
+        getCurrentStep() {
+          return undefined
+        },
       })
 
       // 先设置 hover 状态
@@ -98,7 +102,9 @@ describe('HoverManager Sequence/Predecessors hover 属性测试', () => {
       const stateManager = createStateManager(defaultInput)
       const hoverManager = createHoverManager({
         stateManager,
-        getCurrentStep: () => undefined,
+        getCurrentStep() {
+          return undefined
+        },
       })
 
       const state = stateManager.getState()
@@ -106,11 +112,11 @@ describe('HoverManager Sequence/Predecessors hover 属性测试', () => {
       // 初始状态应该是 false
       expect(state.isSequenceHovered.get()).toBe(false)
 
-      // hover 进入
+      // Hover 进入
       hoverManager.handleSequenceHover()
       expect(state.isSequenceHovered.get()).toBe(true)
 
-      // hover 离开
+      // Hover 离开
       hoverManager.handleSequenceLeave()
       expect(state.isSequenceHovered.get()).toBe(false)
     },
@@ -122,7 +128,9 @@ describe('HoverManager Sequence/Predecessors hover 属性测试', () => {
       const stateManager = createStateManager(defaultInput)
       const hoverManager = createHoverManager({
         stateManager,
-        getCurrentStep: () => undefined,
+        getCurrentStep() {
+          return undefined
+        },
       })
 
       const state = stateManager.getState()
@@ -130,11 +138,11 @@ describe('HoverManager Sequence/Predecessors hover 属性测试', () => {
       // 初始状态应该是 false
       expect(state.isPredecessorsHovered.get()).toBe(false)
 
-      // hover 进入
+      // Hover 进入
       hoverManager.handlePredecessorsHover()
       expect(state.isPredecessorsHovered.get()).toBe(true)
 
-      // hover 离开
+      // Hover 离开
       hoverManager.handlePredecessorsLeave()
       expect(state.isPredecessorsHovered.get()).toBe(false)
     },
@@ -159,7 +167,9 @@ describe('HoverManager refreshHoverState 属性测试', () => {
 
       const hoverManager = createHoverManager({
         stateManager,
-        getCurrentStep: () => undefined,
+        getCurrentStep() {
+          return undefined
+        },
       })
 
       // 调用 refreshHoverState
@@ -183,7 +193,9 @@ describe('HoverManager refreshHoverState 属性测试', () => {
 
       const hoverManager = createHoverManager({
         stateManager,
-        getCurrentStep: () => undefined, // 返回 undefined
+        getCurrentStep() {
+          return undefined
+        }, // 返回 undefined
       })
 
       // 调用 refreshHoverState
@@ -201,7 +213,7 @@ describe('HoverManager refreshHoverState 属性测试', () => {
   test.prop(
     [
       inputArrayArbitrary,
-      fc.integer({ min: 1, max: 10 }), // sequence 长度
+      fc.integer({ min: 1, max: 10 }), // Sequence 长度
     ],
     { numRuns: 100 },
   )(
@@ -222,13 +234,19 @@ describe('HoverManager refreshHoverState 属性测试', () => {
         currentIndex: 0,
         currentValue: 0,
         action: { type: 'init' },
-        sequence: Array.from({ length: sequenceLength }, (_, i) => i),
-        predecessors: Array.from({ length: sequenceLength }, () => -1),
+        sequence: Array.from({ length: sequenceLength }, (_, i) => {
+          return i
+        }),
+        predecessors: Array.from({ length: sequenceLength }, () => {
+          return -1
+        }),
       }
 
       const hoverManager = createHoverManager({
         stateManager,
-        getCurrentStep: () => mockStep,
+        getCurrentStep() {
+          return mockStep
+        },
       })
 
       // 调用 refreshHoverState

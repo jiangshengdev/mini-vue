@@ -20,7 +20,7 @@ export interface HighlightedArrayOptions {
   secondaryHighlightValue?: number
   /** 半高亮类名 */
   secondaryHighlightClass?: string
-  /** hover 高亮位置列表 */
+  /** Hover 高亮位置列表 */
   hoveredPositions?: number[]
 }
 
@@ -78,4 +78,3 @@ export function renderHighlightedArray(options: HighlightedArrayOptions) {
     </>
   )
 }
-

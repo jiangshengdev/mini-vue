@@ -6,7 +6,7 @@
 
 import { fc, test } from '@fast-check/vitest'
 import { describe, expect } from 'vitest'
-import { buildChain, buildAllChains } from '../utils/chain-utils.ts'
+import { buildAllChains, buildChain } from '../utils/chain-utils.ts'
 
 /**
  * 生成有效的 predecessors 数组
@@ -17,9 +17,9 @@ import { buildChain, buildAllChains } from '../utils/chain-utils.ts'
  */
 const validPredecessorsArbitrary = fc
   .array(fc.integer({ min: 0, max: 50 }), { minLength: 1, maxLength: 50 })
-  .map((arr) => {
+  .map((array) => {
     // 将数组转换为有效的 predecessors 数组
-    return arr.map((_, index) => {
+    return array.map((_, index) => {
       if (index === 0) {
         // 第一个元素必须是 -1（根节点）
         return -1
@@ -35,8 +35,6 @@ const validPredecessorsArbitrary = fc
       return Math.floor(Math.random() * index)
     })
   })
-
-
 
 describe('chain-utils 属性测试', () => {
   /**
@@ -59,7 +57,7 @@ describe('chain-utils 属性测试', () => {
       expect(chain.length).toBeGreaterThan(0)
 
       // 链的最后一个元素应该是 startIndex
-      expect(chain[chain.length - 1]).toBe(startIndex)
+      expect(chain.at(-1)).toBe(startIndex)
 
       // 链的第一个元素的 predecessor 应该是 -1（根节点）
       expect(predecessors[chain[0]]).toBe(-1)
@@ -99,12 +97,11 @@ describe('chain-utils 属性测试', () => {
       expect(chains.length).toBe(sequence.length)
 
       // 每条链应该以对应的 sequence 元素结尾
-      for (let i = 0; i < chains.length; i += 1) {
-        const chain = chains[i]
+      for (const [i, chain] of chains.entries()) {
         const expectedEnd = sequence[i]
 
         expect(chain.length).toBeGreaterThan(0)
-        expect(chain[chain.length - 1]).toBe(expectedEnd)
+        expect(chain.at(-1)).toBe(expectedEnd)
       }
     },
   )

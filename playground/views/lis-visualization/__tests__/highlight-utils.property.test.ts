@@ -8,13 +8,13 @@ import { fc, test } from '@fast-check/vitest'
 import { describe, expect } from 'vitest'
 import type { StepAction } from '../types.ts'
 import {
+  computeHighlightState,
+  computePredChangeIndicator,
+  computePredecessorHighlight,
   getHighlightClass,
+  getNodeClassName,
   getSecondaryHighlightClass,
   getSeqChangeIndicator,
-  computeHighlightState,
-  computePredecessorHighlight,
-  computePredChangeIndicator,
-  getNodeClassName,
 } from '../utils/highlight-utils.ts'
 
 /**
@@ -124,17 +124,19 @@ describe('highlight-utils 属性测试', () => {
     },
   )
 
-  test.prop(
-    [fc.integer({ min: -1, max: 100 }), predecessorsArbitrary, stepActionArbitrary],
-    { numRuns: 100 },
-  )('Property 7: computePredecessorHighlight 纯函数性', (highlightPredIndex, predecessors, action) => {
-    const result1 = computePredecessorHighlight(highlightPredIndex, predecessors, action)
-    const result2 = computePredecessorHighlight(highlightPredIndex, predecessors, action)
-    const result3 = computePredecessorHighlight(highlightPredIndex, predecessors, action)
+  test.prop([fc.integer({ min: -1, max: 100 }), predecessorsArbitrary, stepActionArbitrary], {
+    numRuns: 100,
+  })(
+    'Property 7: computePredecessorHighlight 纯函数性',
+    (highlightPredIndex, predecessors, action) => {
+      const result1 = computePredecessorHighlight(highlightPredIndex, predecessors, action)
+      const result2 = computePredecessorHighlight(highlightPredIndex, predecessors, action)
+      const result3 = computePredecessorHighlight(highlightPredIndex, predecessors, action)
 
-    expect(result1).toEqual(result2)
-    expect(result2).toEqual(result3)
-  })
+      expect(result1).toEqual(result2)
+      expect(result2).toEqual(result3)
+    },
+  )
 
   test.prop(
     [
@@ -173,40 +175,31 @@ describe('highlight-utils 属性测试', () => {
 
   test.prop(
     [
-      fc.boolean(),
-      fc.boolean(),
-      fc.boolean(),
-      fc.option(
-        fc.oneof(
-          fc.constant('init' as const),
-          fc.constant('append' as const),
-          fc.constant('replace' as const),
-          fc.constant('skip' as const),
+      fc.record({
+        isChainTailHighlight: fc.boolean(),
+        isHighlightNode: fc.boolean(),
+        isChangedNode: fc.boolean(),
+        actionType: fc.option(
+          fc.oneof(
+            fc.constant('init' as const),
+            fc.constant('append' as const),
+            fc.constant('replace' as const),
+            fc.constant('skip' as const),
+          ),
+          { nil: undefined },
         ),
-        { nil: undefined },
-      ),
-      fc.string(),
+        highlightClass: fc.string(),
+      }),
     ],
     { numRuns: 100 },
-  )(
-    'Property 7: getNodeClassName 纯函数性',
-    (isChainTailHighlight, isHighlightNode, isChangedNode, actionType, highlightClass) => {
-      const options = {
-        isChainTailHighlight,
-        isHighlightNode,
-        isChangedNode,
-        actionType,
-        highlightClass,
-      }
+  )('Property 7: getNodeClassName 纯函数性', (options) => {
+    const result1 = getNodeClassName(options, mockStyles)
+    const result2 = getNodeClassName(options, mockStyles)
+    const result3 = getNodeClassName(options, mockStyles)
 
-      const result1 = getNodeClassName(options, mockStyles)
-      const result2 = getNodeClassName(options, mockStyles)
-      const result3 = getNodeClassName(options, mockStyles)
-
-      expect(result1).toBe(result2)
-      expect(result2).toBe(result3)
-    },
-  )
+    expect(result1).toBe(result2)
+    expect(result2).toBe(result3)
+  })
 
   /**
    * 验证 getHighlightClass 返回正确的类名

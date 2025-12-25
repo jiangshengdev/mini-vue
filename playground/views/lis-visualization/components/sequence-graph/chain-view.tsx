@@ -4,11 +4,11 @@
  * 显示所有链的可视化视图，支持节点高亮和 hover 交互
  */
 
-import type { SetupComponent } from '@/index.ts'
 import type { StepAction } from '../../types.ts'
 import { getNodeClassName } from '../../utils/highlight-utils.ts'
 import sharedStyles from '../../styles/shared.module.css'
 import styles from '../../styles/sequence-graph.module.css'
+import type { SetupComponent } from '@/index.ts'
 
 // 合并样式对象
 const mergedStyles = { ...sharedStyles, ...styles }
@@ -30,7 +30,7 @@ export interface ChainViewProps {
   isPredecessorsHovered?: boolean
   /** 输入数组 */
   input: number[]
-  /** predecessors 数组 */
+  /** Predecessors 数组 */
   predecessors: number[]
   /** 操作类型 */
   actionType?: StepAction['type']

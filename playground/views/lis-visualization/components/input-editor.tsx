@@ -7,14 +7,14 @@
 import sharedStyles from '../styles/shared.module.css'
 import stepControlsStyles from '../styles/step-controls.module.css'
 import inputEditorStyles from '../styles/input-editor.module.css'
+import { generateRandomSequence, parseInput } from '../utils/input-utils.ts'
 import type { SetupComponent } from '@/index.ts'
 import { state } from '@/index.ts'
 
+// 导入工具函数
+
 // 合并样式对象
 const styles = { ...sharedStyles, ...stepControlsStyles, ...inputEditorStyles }
-
-// 导入工具函数
-import { parseInput, generateRandomSequence } from '../utils/input-utils.ts'
 
 export interface InputEditorProps {
   /** 当前输入数组 */

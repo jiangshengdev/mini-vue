@@ -7,30 +7,30 @@
 import { fc, test } from '@fast-check/vitest'
 import { describe, expect } from 'vitest'
 import {
-  parseInput,
   deduplicateInput,
-  normalizeSequence,
   generateRandomSequence,
+  normalizeSequence,
+  parseInput,
 } from '../utils/input-utils.ts'
 
 /**
  * 生成有效的输入数组（只包含 -1 和非负整数）
  */
-const validInputArbitrary = fc.array(
-  fc.oneof(fc.constant(-1), fc.integer({ min: 0, max: 100 })),
-  { minLength: 0, maxLength: 30 },
-)
+const validInputArbitrary = fc.array(fc.oneof(fc.constant(-1), fc.integer({ min: 0, max: 100 })), {
+  minLength: 0,
+  maxLength: 30,
+})
 
 /**
  * 生成无重复的非负整数数组（用于测试归一化）
  */
 const uniqueNonNegativeArbitrary = fc
   .uniqueArray(fc.integer({ min: 0, max: 100 }), { minLength: 0, maxLength: 30 })
-  .map((arr) => {
+  .map((array) => {
     // 随机插入一些 -1
     const result: number[] = []
 
-    for (const n of arr) {
+    for (const n of array) {
       if (Math.random() < 0.1) {
         result.push(-1)
       }
@@ -91,9 +91,7 @@ describe('input-utils 属性测试', () => {
       // 记录每个值的首次出现位置
       const firstOccurrence = new Map<number, number>()
 
-      for (let i = 0; i < numbers.length; i += 1) {
-        const value = numbers[i]
-
+      for (const [i, value] of numbers.entries()) {
         if (value !== -1 && !firstOccurrence.has(value)) {
           firstOccurrence.set(value, i)
         }
@@ -107,9 +105,7 @@ describe('input-utils 属性测试', () => {
       // 验证后续出现被替换为 -1
       const seen = new Set<number>()
 
-      for (let i = 0; i < numbers.length; i += 1) {
-        const originalValue = numbers[i]
-
+      for (const [i, originalValue] of numbers.entries()) {
         if (originalValue === -1) {
           // -1 保持不变
           expect(result[i]).toBe(-1)
@@ -143,18 +139,30 @@ describe('input-utils 属性测试', () => {
       expect(result.length).toBe(numbers.length)
 
       // 收集非 -1 的值
-      const nonNegativeOnes = numbers.filter((n) => n !== -1)
-      const resultNonNegativeOnes = result.filter((n) => n !== -1)
+      const nonNegativeOnes = numbers.filter((n) => {
+        return n !== -1
+      })
+      const resultNonNegativeOnes = result.filter((n) => {
+        return n !== -1
+      })
 
       // -1 的数量应该相同
-      const negativeOneCount = numbers.filter((n) => n === -1).length
-      const resultNegativeOneCount = result.filter((n) => n === -1).length
+      const negativeOneCount = numbers.filter((n) => {
+        return n === -1
+      }).length
+      const resultNegativeOneCount = result.filter((n) => {
+        return n === -1
+      }).length
 
       expect(resultNegativeOneCount).toBe(negativeOneCount)
 
       // 非 -1 值应该是从 0 到 n-1 的连续整数
-      const sortedResult = [...resultNonNegativeOnes].sort((a, b) => a - b)
-      const expected = Array.from({ length: nonNegativeOnes.length }, (_, i) => i)
+      const sortedResult = [...resultNonNegativeOnes].sort((a, b) => {
+        return a - b
+      })
+      const expected = Array.from({ length: nonNegativeOnes.length }, (_, i) => {
+        return i
+      })
 
       expect(sortedResult).toEqual(expected)
 
@@ -209,7 +217,9 @@ describe('input-utils 属性测试', () => {
       }
 
       // 收集非 -1 的值
-      const nonNegativeOnes = result.filter((n) => n !== -1)
+      const nonNegativeOnes = result.filter((n) => {
+        return n !== -1
+      })
 
       // 非 -1 值应该没有重复
       const uniqueNonNegativeOnes = new Set(nonNegativeOnes)
@@ -217,8 +227,12 @@ describe('input-utils 属性测试', () => {
       expect(uniqueNonNegativeOnes.size).toBe(nonNegativeOnes.length)
 
       // 非 -1 值应该是从 0 到 n-1 的连续整数
-      const sorted = [...nonNegativeOnes].sort((a, b) => a - b)
-      const expected = Array.from({ length: nonNegativeOnes.length }, (_, i) => i)
+      const sorted = [...nonNegativeOnes].sort((a, b) => {
+        return a - b
+      })
+      const expected = Array.from({ length: nonNegativeOnes.length }, (_, i) => {
+        return i
+      })
 
       expect(sorted).toEqual(expected)
     },

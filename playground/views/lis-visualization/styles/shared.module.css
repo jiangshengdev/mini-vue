@@ -10,7 +10,7 @@
   --color-primary-shadow: rgba(59, 130, 246, 0.2);
 
   /* 成功色（追加操作、结果高亮） */
---color-success: #22c55e;
+  --color-success: #22c55e;
   --color-success-light: #f0fdf4;
   --color-success-medium: #dcfce7;
   --color-success-shadow: rgba(34, 197, 94, 0.2);

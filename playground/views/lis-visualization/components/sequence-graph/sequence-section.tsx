@@ -4,10 +4,10 @@
  * 显示 sequence 状态，支持上一步与当前步骤的对比
  */
 
-import type { SetupComponent } from '@/index.ts'
 import sharedStyles from '../../styles/shared.module.css'
 import styles from '../../styles/sequence-graph.module.css'
 import { renderHighlightedArray } from './highlighted-array.tsx'
+import type { SetupComponent } from '@/index.ts'
 
 // 合并样式对象
 const mergedStyles = { ...sharedStyles, ...styles }
@@ -92,7 +92,9 @@ export const SequenceSection: SetupComponent<SequenceSectionProps> = (props) => 
               <code class={mergedStyles.stateCode}>
                 → values:{' '}
                 {renderHighlightedArray({
-                  array: previousSequence.map((idx) => input[idx]),
+                  array: previousSequence.map((idx) => {
+                    return input[idx]
+                  }),
                   highlightPos: previousHighlightSeqPosition,
                   highlightClass: mergedStyles.highlightPrevious,
                 })}
@@ -114,7 +116,9 @@ export const SequenceSection: SetupComponent<SequenceSectionProps> = (props) => 
             <code class={mergedStyles.stateCode}>
               → values:{' '}
               {renderHighlightedArray({
-                array: sequence.map((idx) => input[idx]),
+                array: sequence.map((idx) => {
+                  return input[idx]
+                }),
                 highlightPos: highlightSeqPosition,
                 highlightClass,
               })}

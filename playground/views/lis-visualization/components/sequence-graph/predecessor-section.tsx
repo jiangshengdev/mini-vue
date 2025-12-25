@@ -4,16 +4,16 @@
  * 显示 predecessors 数组，支持 hover 高亮
  */
 
-import type { SetupComponent } from '@/index.ts'
 import sharedStyles from '../../styles/shared.module.css'
 import styles from '../../styles/sequence-graph.module.css'
 import { renderHighlightedArray } from './highlighted-array.tsx'
+import type { SetupComponent } from '@/index.ts'
 
 // 合并样式对象
 const mergedStyles = { ...sharedStyles, ...styles }
 
 export interface PredecessorSectionProps {
-  /** predecessors 数组 */
+  /** Predecessors 数组 */
   predecessors: number[]
   /** 上一步 predecessors */
   previousPredecessors?: number[]
@@ -23,7 +23,7 @@ export interface PredecessorSectionProps {
   highlightClass: string
   /** 变更指示器文本 */
   predChangeIndicator: string
-  /** hover 高亮位置列表 */
+  /** Hover 高亮位置列表 */
   hoveredPositions?: number[]
   /** 鼠标进入回调 */
   onMouseEnter: () => void
@@ -62,7 +62,9 @@ export const PredecessorSection: SetupComponent<PredecessorSectionProps> = (prop
       >
         <div class={mergedStyles.sectionTitle}>
           Predecessors:
-          <span class={mergedStyles.sectionHint}>（每个位置存储前驱元素的 index，-1 表示无前驱）</span>
+          <span class={mergedStyles.sectionHint}>
+            （每个位置存储前驱元素的 index，-1 表示无前驱）
+          </span>
         </div>
         <div class={mergedStyles.stateCompareGrid}>
           {hasPrevious && previousPredecessors && (

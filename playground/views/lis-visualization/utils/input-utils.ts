@@ -5,9 +5,7 @@
  */
 
 /** 解析结果类型 */
-export type ParseResult =
-  | { success: true; data: number[] }
-  | { success: false; error: string }
+export type ParseResult = { success: true; data: number[] } | { success: false; error: string }
 
 /**
  * 去重处理：保留第一次出现的值，后续重复的替换为 -1

@@ -230,9 +230,7 @@ function computeChangedNodesByChain(
 
 ```typescript
 /** 解析结果类型 */
-type ParseResult =
-  | { success: true; data: number[] }
-  | { success: false; error: string }
+type ParseResult = { success: true; data: number[] } | { success: false; error: string }
 
 /**
  * 解析输入字符串为数字数组
@@ -366,9 +364,7 @@ type StepAction =
 
 ```typescript
 /** 解析结果类型 */
-type ParseResult =
-  | { success: true; data: number[] }
-  | { success: false; error: string }
+type ParseResult = { success: true; data: number[] } | { success: false; error: string }
 
 /** 高亮状态 */
 interface HighlightState {
@@ -388,10 +384,10 @@ interface PredecessorHighlight {
 
 _A property is a characteristic or behavior that should hold true across all valid executions of a system—essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees._
 
-
 ### Property 1: buildChain 返回完整的前驱链
 
 _For any_ valid predecessors array and start index within bounds, when `buildChain(startIndex, predecessors)` is called, the returned chain SHALL:
+
 - Start with a node whose predecessor is -1 (root node)
 - End with the start index
 - Each consecutive pair (chain[i], chain[i+1]) satisfies predecessors[chain[i+1]] === chain[i]
@@ -403,6 +399,7 @@ This property ensures the chain building logic correctly traverses the predecess
 ### Property 2: buildAllChains 返回正确数量的链
 
 _For any_ sequence array and predecessors array, when `buildAllChains(sequence, predecessors)` is called, the returned chains array SHALL:
+
 - Have length equal to sequence.length
 - Each chain[i] ends with sequence[i]
 
@@ -421,6 +418,7 @@ This is a round-trip property that ensures parsing correctly handles valid input
 ### Property 4: deduplicateInput 保持首次出现
 
 _For any_ number array, when `deduplicateInput` is called:
+
 - The output length SHALL equal the input length
 - For each unique non-(-1) value, its first occurrence position SHALL be preserved
 - All subsequent occurrences of the same value SHALL be replaced with -1
@@ -432,6 +430,7 @@ This property ensures the deduplication logic correctly identifies and handles d
 ### Property 5: normalizeSequence 映射为连续整数
 
 _For any_ number array, when `normalizeSequence` is called:
+
 - All -1 values SHALL remain as -1
 - All non-(-1) values SHALL be mapped to consecutive integers starting from 0
 - The relative order of non-(-1) values by their original magnitude SHALL be preserved
@@ -443,6 +442,7 @@ This property ensures normalization produces a valid normalized sequence.
 ### Property 6: generateRandomSequence 返回有效的归一化序列
 
 _For any_ call to `generateRandomSequence`, the returned array SHALL:
+
 - Contain only -1 and non-negative integers
 - Have all non-(-1) values form a consecutive sequence from 0 to n-1 (where n is the count of non-(-1) values)
 - Have no duplicate non-(-1) values

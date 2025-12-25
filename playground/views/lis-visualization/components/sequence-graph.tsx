@@ -8,24 +8,20 @@
  */
 
 import type { StepAction } from '../types'
-import type { SetupComponent } from '@/index.ts'
 import sharedStyles from '../styles/shared.module.css'
 import styles from '../styles/sequence-graph.module.css'
-
-// 导入子组件
-import { SequenceSection, PredecessorSection, ChainView } from './sequence-graph/index.ts'
-
-// 导入工具函数
 import {
   buildAllChains,
   computeChangedNodesByChain,
+  computeHighlightState,
+  computePredChangeIndicator,
+  computePredecessorHighlight,
   getHighlightClass,
   getSecondaryHighlightClass,
   getSeqChangeIndicator,
-  computeHighlightState,
-  computePredecessorHighlight,
-  computePredChangeIndicator,
 } from '../utils/index.ts'
+import { ChainView, PredecessorSection, SequenceSection } from './sequence-graph/index.ts'
+import type { SetupComponent } from '@/index.ts'
 
 // 合并样式对象
 const mergedStyles = { ...sharedStyles, ...styles }

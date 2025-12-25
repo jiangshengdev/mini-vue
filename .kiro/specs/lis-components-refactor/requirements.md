@@ -110,4 +110,3 @@
 2. WHEN hover interactions occur, THE highlighting SHALL match the original behavior
 3. WHEN input is edited, THE parsing and validation SHALL behave identically to the original
 4. THE existing tests SHALL pass without modification
-

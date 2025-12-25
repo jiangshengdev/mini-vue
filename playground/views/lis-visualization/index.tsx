@@ -19,11 +19,15 @@ import {
 } from './controllers/index.ts'
 import { createEventHandlers } from './handlers/index.ts'
 import { createStepNavigator } from './navigator.ts'
-import styles from './styles/visualization.module.css'
+import sharedStyles from './styles/shared.module.css'
+import layoutStyles from './styles/layout.module.css'
 import { traceLongestIncreasingSubsequence } from './trace.ts'
 import type { StepNavigator } from './types.ts'
 import type { SetupComponent } from '@/index.ts'
 import { onScopeDispose } from '@/index.ts'
+
+// 合并样式对象
+const styles = { ...sharedStyles, ...layoutStyles }
 
 /** 默认输入数组 */
 const defaultInput = [2, 1, 3, 0, 4]

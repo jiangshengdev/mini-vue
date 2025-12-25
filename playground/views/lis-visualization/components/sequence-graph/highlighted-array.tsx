@@ -4,7 +4,10 @@
  * 用于统一渲染带高亮的数组，支持主高亮、半高亮和 hover 高亮
  */
 
-import styles from '../../styles/visualization.module.css'
+import sharedStyles from '../../styles/shared.module.css'
+
+// 合并样式对象（用于高亮类名）
+const styles = { ...sharedStyles }
 
 export interface HighlightedArrayOptions {
   /** 数组数据 */

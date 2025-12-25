@@ -4,9 +4,14 @@
  * 允许用户编辑输入数组，输入变化时重新计算追踪
  */
 
-import styles from '../styles/visualization.module.css'
+import sharedStyles from '../styles/shared.module.css'
+import stepControlsStyles from '../styles/step-controls.module.css'
+import inputEditorStyles from '../styles/input-editor.module.css'
 import type { SetupComponent } from '@/index.ts'
 import { state } from '@/index.ts'
+
+// 合并样式对象
+const styles = { ...sharedStyles, ...stepControlsStyles, ...inputEditorStyles }
 
 // 导入工具函数
 import { parseInput, generateRandomSequence } from '../utils/input-utils.ts'

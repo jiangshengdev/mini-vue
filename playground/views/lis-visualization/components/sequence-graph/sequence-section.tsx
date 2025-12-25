@@ -5,8 +5,12 @@
  */
 
 import type { SetupComponent } from '@/index.ts'
-import styles from '../../styles/visualization.module.css'
+import sharedStyles from '../../styles/shared.module.css'
+import styles from '../../styles/sequence-graph.module.css'
 import { renderHighlightedArray } from './highlighted-array.tsx'
+
+// 合并样式对象
+const mergedStyles = { ...sharedStyles, ...styles }
 
 export interface SequenceSectionProps {
   /** 输入数组 */
@@ -64,41 +68,41 @@ export const SequenceSection: SetupComponent<SequenceSectionProps> = (props) => 
 
     return (
       <div
-        class={styles.stateCompareSection}
+        class={mergedStyles.stateCompareSection}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
       >
-        <div class={styles.sectionTitle}>
+        <div class={mergedStyles.sectionTitle}>
           Sequence State:
-          <span class={styles.sectionHint}>（存储的是 index，→ 后显示对应 value）</span>
+          <span class={mergedStyles.sectionHint}>（存储的是 index，→ 后显示对应 value）</span>
         </div>
-        <div class={styles.stateCompareGrid}>
+        <div class={mergedStyles.stateCompareGrid}>
           {hasPrevious && previousSequence && (
-            <div class={`${styles.stateRow} ${styles.previousRow}`}>
-              <span class={styles.stateRowLabel}>上一步:</span>
-              <code class={styles.stateCode}>
+            <div class={`${mergedStyles.stateRow} ${mergedStyles.previousRow}`}>
+              <span class={mergedStyles.stateRowLabel}>上一步:</span>
+              <code class={mergedStyles.stateCode}>
                 {renderHighlightedArray({
                   array: previousSequence,
                   highlightPos: previousHighlightSeqPosition,
-                  highlightClass: styles.highlightPrevious,
+                  highlightClass: mergedStyles.highlightPrevious,
                   secondaryHighlightValue: previousPredecessorValue,
-                  secondaryHighlightClass: styles.highlightPreviousSecondary,
+                  secondaryHighlightClass: mergedStyles.highlightPreviousSecondary,
                 })}
               </code>
-              <code class={styles.stateCode}>
+              <code class={mergedStyles.stateCode}>
                 → values:{' '}
                 {renderHighlightedArray({
                   array: previousSequence.map((idx) => input[idx]),
                   highlightPos: previousHighlightSeqPosition,
-                  highlightClass: styles.highlightPrevious,
+                  highlightClass: mergedStyles.highlightPrevious,
                 })}
               </code>
-              <span class={styles.changeIndicator}></span>
+              <span class={mergedStyles.changeIndicator}></span>
             </div>
           )}
-          <div class={styles.stateRow}>
-            <span class={styles.stateRowLabel}>{hasPrevious ? '当前:' : ''}</span>
-            <code class={styles.stateCode}>
+          <div class={mergedStyles.stateRow}>
+            <span class={mergedStyles.stateRowLabel}>{hasPrevious ? '当前:' : ''}</span>
+            <code class={mergedStyles.stateCode}>
               {renderHighlightedArray({
                 array: sequence,
                 highlightPos: highlightSeqPosition,
@@ -107,7 +111,7 @@ export const SequenceSection: SetupComponent<SequenceSectionProps> = (props) => 
                 secondaryHighlightClass,
               })}
             </code>
-            <code class={styles.stateCode}>
+            <code class={mergedStyles.stateCode}>
               → values:{' '}
               {renderHighlightedArray({
                 array: sequence.map((idx) => input[idx]),
@@ -115,7 +119,7 @@ export const SequenceSection: SetupComponent<SequenceSectionProps> = (props) => 
                 highlightClass,
               })}
             </code>
-            <span class={styles.changeIndicator}>{seqChangeIndicator}</span>
+            <span class={mergedStyles.changeIndicator}>{seqChangeIndicator}</span>
           </div>
         </div>
       </div>

@@ -1,0 +1,206 @@
+/* LIS 可视化 - 共享样式 */
+/* 包含 CSS 变量、动画定义和通用工具类 */
+
+/* ========== CSS 变量定义 ========== */
+:root {
+  /* 主色调 */
+  --color-primary: #3b82f6;
+  --color-primary-dark: #2563eb;
+  --color-primary-light: #eff6ff;
+  --color-primary-shadow: rgba(59, 130, 246, 0.2);
+
+  /* 成功色（追加操作、结果高亮） */
+--color-success: #22c55e;
+  --color-success-light: #f0fdf4;
+  --color-success-medium: #dcfce7;
+  --color-success-shadow: rgba(34, 197, 94, 0.2);
+
+  /* 警告色（替换操作） */
+  --color-warning: #f59e0b;
+  --color-warning-light: #fffbeb;
+
+  /* 错误色 */
+  --color-error: #ef4444;
+  --color-error-light: #fef2f2;
+  --color-error-border: #fecaca;
+  --color-error-text: #dc2626;
+
+  /* hover 高亮色（紫色） */
+  --color-hover: #8b5cf6;
+  --color-hover-light: #f5f3ff;
+  --color-hover-shadow: rgba(139, 92, 246, 0.2);
+  --color-hover-shadow-light: rgba(139, 92, 246, 0.1);
+
+  /* 中性色 */
+  --color-text-primary: #1e293b;
+  --color-text-secondary: #475569;
+  --color-text-muted: #64748b;
+  --color-text-hint: #94a3b8;
+
+  /* 边框和背景 */
+  --color-border: #e2e8f0;
+  --color-border-light: #cbd5e1;
+  --color-border-medium: #94a3b8;
+  --color-bg-page: #fff;
+  --color-bg-section: #f8fafc;
+  --color-bg-hover: #f1f5f9;
+
+  /* 字体 */
+  --font-mono: 'JetBrains Mono', Menlo, Monaco, 'Courier New', monospace;
+}
+
+/* ========== 动画定义 ========== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 3px var(--color-primary-shadow);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.1);
+  }
+}
+
+@keyframes pulseGreen {
+  0%,
+  100% {
+    box-shadow: 0 0 0 3px var(--color-success-shadow);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.1);
+  }
+}
+
+@keyframes pulseViolet {
+  0%,
+  100% {
+    box-shadow: 0 0 0 3px var(--color-hover-shadow);
+  }
+  50% {
+    box-shadow: 0 0 0 6px var(--color-hover-shadow-light);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ========== 通用工具类 ========== */
+
+/* 高亮样式 - 用于显示当前操作的改动 */
+.highlightAppend {
+  background: var(--color-success);
+  color: var(--color-bg-page);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+}
+
+.highlightReplace {
+  background: var(--color-warning);
+  color: var(--color-bg-page);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+}
+
+.highlightSkip {
+  background: var(--color-border-medium);
+  color: var(--color-bg-page);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+}
+
+/* 上一步行：被替换位置的灰色高亮 */
+.highlightPrevious {
+  background: var(--color-border);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  box-sizing: border-box;
+}
+
+/* 上一步行半高亮：灰色虚线，保持弱提示 */
+.highlightPreviousSecondary {
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0.0625rem 0.1875rem;
+  border-radius: 0.25rem;
+  box-sizing: border-box;
+}
+
+/* 半高亮：显示前驱来源（追加操作 - 绿色虚线） */
+.highlightSecondaryAppend {
+  background: var(--color-success-light);
+  border: 1px dashed var(--color-success);
+  padding: 0.0625rem 0.1875rem;
+  border-radius: 0.25rem;
+  box-sizing: border-box;
+}
+
+/* 半高亮：显示前驱来源（替换操作 - 黄色虚线） */
+.highlightSecondaryReplace {
+  background: var(--color-warning-light);
+  border: 1px dashed var(--color-warning);
+  padding: 0.0625rem 0.1875rem;
+  border-radius: 0.25rem;
+  box-sizing: border-box;
+}
+
+/* hover 高亮：紫色背景（覆盖已有高亮） */
+.highlightHover {
+  background: var(--color-hover);
+  color: var(--color-bg-page);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+}
+
+/* hover 高亮：紫色字体（普通位置） */
+.highlightHoverText {
+  color: var(--color-hover);
+}
+
+/* 空状态 */
+.emptyState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: var(--color-bg-section);
+  border-radius: 0.5rem;
+  border: 2px dashed var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+/* 区块标题 */
+.sectionTitle {
+  margin: 0 0 0.25rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.sectionHint {
+  font-size: 0.6875rem;
+  font-weight: 400;
+  color: var(--color-text-hint);
+}

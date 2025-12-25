@@ -5,8 +5,12 @@
  */
 
 import type { StepAction } from '../types'
-import styles from '../styles/visualization.module.css'
+import sharedStyles from '../styles/shared.module.css'
+import styles from '../styles/action-panel.module.css'
 import type { SetupComponent } from '@/index.ts'
+
+// 合并样式对象，共享样式优先级较低
+const mergedStyles = { ...sharedStyles, ...styles }
 
 export interface ActionPanelProps {
   /** 当前操作 */
@@ -49,19 +53,19 @@ function getActionDescription(action: StepAction, currentValue: number): string 
 function getActionClass(action: StepAction): string {
   switch (action.type) {
     case 'init': {
-      return styles.actionInit
+      return mergedStyles.actionInit
     }
 
     case 'append': {
-      return styles.actionAppend
+      return mergedStyles.actionAppend
     }
 
     case 'replace': {
-      return styles.actionReplace
+      return mergedStyles.actionReplace
     }
 
     case 'skip': {
-      return styles.actionSkip
+      return mergedStyles.actionSkip
     }
   }
 }
@@ -109,9 +113,9 @@ export const ActionPanel: SetupComponent<ActionPanelProps> = (props) => {
   return () => {
     if (!props.action) {
       return (
-        <div class={styles.actionPanel}>
-          <h3 class={styles.sectionTitle}>操作</h3>
-          <div class={styles.actionContent}>（等待开始）</div>
+        <div class={mergedStyles.actionPanel}>
+          <h3 class={mergedStyles.sectionTitle}>操作</h3>
+          <div class={mergedStyles.actionContent}>（等待开始）</div>
         </div>
       )
     }
@@ -132,15 +136,15 @@ export const ActionPanel: SetupComponent<ActionPanelProps> = (props) => {
     }
 
     return (
-      <div class={styles.actionPanel}>
-        <h3 class={styles.sectionTitle}>操作</h3>
-        <div class={`${styles.actionContent} ${actionClass}`}>
-          <span class={styles.actionType}>{actionTypeMap[props.action.type]}</span>
-          <span class={styles.actionDescription}>{description}</span>
+      <div class={mergedStyles.actionPanel}>
+        <h3 class={mergedStyles.sectionTitle}>操作</h3>
+        <div class={`${mergedStyles.actionContent} ${actionClass}`}>
+          <span class={mergedStyles.actionType}>{actionTypeMap[props.action.type]}</span>
+          <span class={mergedStyles.actionDescription}>{description}</span>
         </div>
-        <div class={styles.actionDetails}>
-          <code class={styles.actionDetailCode}>{sequenceChange}</code>
-          <code class={styles.actionDetailCode}>{predecessorsChange}</code>
+        <div class={mergedStyles.actionDetails}>
+          <code class={mergedStyles.actionDetailCode}>{sequenceChange}</code>
+          <code class={mergedStyles.actionDetailCode}>{predecessorsChange}</code>
         </div>
       </div>
     )

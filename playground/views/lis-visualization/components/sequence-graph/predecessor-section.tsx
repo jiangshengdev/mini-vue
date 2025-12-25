@@ -5,8 +5,12 @@
  */
 
 import type { SetupComponent } from '@/index.ts'
-import styles from '../../styles/visualization.module.css'
+import sharedStyles from '../../styles/shared.module.css'
+import styles from '../../styles/sequence-graph.module.css'
 import { renderHighlightedArray } from './highlighted-array.tsx'
+
+// 合并样式对象
+const mergedStyles = { ...sharedStyles, ...styles }
 
 export interface PredecessorSectionProps {
   /** predecessors 数组 */
@@ -52,32 +56,32 @@ export const PredecessorSection: SetupComponent<PredecessorSectionProps> = (prop
 
     return (
       <div
-        class={styles.stateCompareSection}
+        class={mergedStyles.stateCompareSection}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
       >
-        <div class={styles.sectionTitle}>
+        <div class={mergedStyles.sectionTitle}>
           Predecessors:
-          <span class={styles.sectionHint}>（每个位置存储前驱元素的 index，-1 表示无前驱）</span>
+          <span class={mergedStyles.sectionHint}>（每个位置存储前驱元素的 index，-1 表示无前驱）</span>
         </div>
-        <div class={styles.stateCompareGrid}>
+        <div class={mergedStyles.stateCompareGrid}>
           {hasPrevious && previousPredecessors && (
-            <div class={`${styles.stateRow} ${styles.previousRow}`}>
-              <span class={styles.stateRowLabel}>上一步:</span>
-              <code class={styles.stateCode}>
+            <div class={`${mergedStyles.stateRow} ${mergedStyles.previousRow}`}>
+              <span class={mergedStyles.stateRowLabel}>上一步:</span>
+              <code class={mergedStyles.stateCode}>
                 {renderHighlightedArray({
                   array: previousPredecessors,
                   highlightPos: highlightPredIndex,
-                  highlightClass: styles.highlightPrevious,
+                  highlightClass: mergedStyles.highlightPrevious,
                 })}
               </code>
               <span></span>
-              <span class={styles.changeIndicator}></span>
+              <span class={mergedStyles.changeIndicator}></span>
             </div>
           )}
-          <div class={styles.stateRow}>
-            <span class={styles.stateRowLabel}>{hasPrevious ? '当前:' : ''}</span>
-            <code class={styles.stateCode}>
+          <div class={mergedStyles.stateRow}>
+            <span class={mergedStyles.stateRowLabel}>{hasPrevious ? '当前:' : ''}</span>
+            <code class={mergedStyles.stateCode}>
               {renderHighlightedArray({
                 array: predecessors,
                 highlightPos: highlightPredIndex,
@@ -86,7 +90,7 @@ export const PredecessorSection: SetupComponent<PredecessorSectionProps> = (prop
               })}
             </code>
             <span></span>
-            <span class={styles.changeIndicator}>{predChangeIndicator}</span>
+            <span class={mergedStyles.changeIndicator}>{predChangeIndicator}</span>
           </div>
         </div>
       </div>

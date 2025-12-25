@@ -7,7 +7,11 @@
 import type { SetupComponent } from '@/index.ts'
 import type { StepAction } from '../../types.ts'
 import { getNodeClassName } from '../../utils/highlight-utils.ts'
-import styles from '../../styles/visualization.module.css'
+import sharedStyles from '../../styles/shared.module.css'
+import styles from '../../styles/sequence-graph.module.css'
+
+// 合并样式对象
+const mergedStyles = { ...sharedStyles, ...styles }
 
 export interface ChainViewProps {
   /** 所有链 */
@@ -69,21 +73,21 @@ export const ChainView: SetupComponent<ChainViewProps> = (props) => {
     } = props
 
     return (
-      <div class={styles.chainView}>
-        <h3 class={styles.sectionTitle}>
+      <div class={mergedStyles.chainView}>
+        <h3 class={mergedStyles.sectionTitle}>
           Chain View（当前时刻）
-          <span class={styles.sectionHint}>
+          <span class={mergedStyles.sectionHint}>
             （按长度排序，左对齐展示前驱链，每行对应一个长度，最右端是当前末尾元素；节点显示
             value，下方 idx/pred 均为 index）
           </span>
         </h3>
-        <div class={styles.chainsContainer}>
+        <div class={mergedStyles.chainsContainer}>
           {chains.map((chain, chainIndex) => {
             const isHighlightChain = highlightPredIndex >= 0 && chain.includes(highlightPredIndex)
             const isPredecessorsHighlightChain = isPredecessorsHovered && isHighlightChain
             const chainClass = isPredecessorsHighlightChain
-              ? `${styles.chain} ${styles.chainHighlight}`
-              : styles.chain
+              ? `${mergedStyles.chain} ${mergedStyles.chainHighlight}`
+              : mergedStyles.chain
             const changedNodes = changedNodesByChain.get(chainIndex)
 
             return (
@@ -93,7 +97,7 @@ export const ChainView: SetupComponent<ChainViewProps> = (props) => {
                 onMouseEnter={handleChainMouseEnter(chain, chainIndex)}
                 onMouseLeave={onChainLeave}
               >
-                <div class={styles.chainNodes}>
+                <div class={mergedStyles.chainNodes}>
                   {chain.flatMap((nodeIndex, i) => {
                     const isHighlightNode = isHighlightChain && nodeIndex === highlightPredIndex
                     const isLastNode = i === chain.length - 1
@@ -112,21 +116,21 @@ export const ChainView: SetupComponent<ChainViewProps> = (props) => {
                         actionType,
                         highlightClass,
                       },
-                      styles,
+                      mergedStyles,
                     )
 
                     const node = (
                       <div key={`node-${nodeIndex}`} class={nodeClass}>
-                        <span class={styles.nodeValue}>{input[nodeIndex]}</span>
-                        <span class={styles.nodeInfo}>idx:{nodeIndex}</span>
-                        <span class={styles.nodeInfo}>pred:{predecessors[nodeIndex]}</span>
+                        <span class={mergedStyles.nodeValue}>{input[nodeIndex]}</span>
+                        <span class={mergedStyles.nodeInfo}>idx:{nodeIndex}</span>
+                        <span class={mergedStyles.nodeInfo}>pred:{predecessors[nodeIndex]}</span>
                       </div>
                     )
 
                     if (i < chain.length - 1) {
                       return [
                         node,
-                        <span key={`arrow-${nodeIndex}`} class={styles.chainArrow}>
+                        <span key={`arrow-${nodeIndex}`} class={mergedStyles.chainArrow}>
                           ←
                         </span>,
                       ]
@@ -138,7 +142,7 @@ export const ChainView: SetupComponent<ChainViewProps> = (props) => {
               </div>
             )
           })}
-          {chains.length === 0 && <div class={styles.emptyChain}>（空序列）</div>}
+          {chains.length === 0 && <div class={mergedStyles.emptyChain}>（空序列）</div>}
         </div>
       </div>
     )

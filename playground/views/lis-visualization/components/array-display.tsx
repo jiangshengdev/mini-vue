@@ -4,8 +4,12 @@
  * 显示输入数组，高亮当前处理的索引，支持点击元素跳转到对应步骤
  */
 
-import styles from '../styles/visualization.module.css'
+import sharedStyles from '../styles/shared.module.css'
+import styles from '../styles/array-display.module.css'
 import type { SetupComponent } from '@/index.ts'
+
+// 合并样式对象
+const mergedStyles = { ...sharedStyles, ...styles }
 
 export interface ArrayDisplayProps {
   /** 输入数组 */
@@ -31,13 +35,13 @@ export const ArrayDisplay: SetupComponent<ArrayDisplayProps> = (props) => {
 
   return () => {
     return (
-      <div class={styles.arrayDisplay}>
-        <h3 class={styles.sectionTitle}>输入数组</h3>
-        <div class={styles.arrayLegend}>
-          <span class={styles.legendItem}>上方: value（值）</span>
-          <span class={styles.legendItem}>下方: index（索引）</span>
+      <div class={mergedStyles.arrayDisplay}>
+        <h3 class={mergedStyles.sectionTitle}>输入数组</h3>
+        <div class={mergedStyles.arrayLegend}>
+          <span class={mergedStyles.legendItem}>上方: value（值）</span>
+          <span class={mergedStyles.legendItem}>下方: index（索引）</span>
         </div>
-        <div class={styles.arrayContainer}>
+        <div class={mergedStyles.arrayContainer}>
           {props.input.map((value, index) => {
             const isCurrent = index === props.currentIndex
             const isInResult = props.showResult && props.result.includes(index)
@@ -45,11 +49,11 @@ export const ArrayDisplay: SetupComponent<ArrayDisplayProps> = (props) => {
             const isHovered = props.hoveredIndexes.includes(index)
 
             const cellClasses = [
-              styles.arrayCell,
-              isCurrent ? styles.currentCell : '',
-              isInResult ? styles.resultCell : '',
-              isNewNode ? styles.newNodeCell : '',
-              isHovered ? styles.hoveredCell : '',
+              mergedStyles.arrayCell,
+              isCurrent ? mergedStyles.currentCell : '',
+              isInResult ? mergedStyles.resultCell : '',
+              isNewNode ? mergedStyles.newNodeCell : '',
+              isHovered ? mergedStyles.hoveredCell : '',
             ]
               .filter(Boolean)
               .join(' ')
@@ -61,8 +65,8 @@ export const ArrayDisplay: SetupComponent<ArrayDisplayProps> = (props) => {
                 onClick={handleClick(index)}
                 title={`点击跳转到第 ${index + 1} 步`}
               >
-                <span class={styles.cellValue}>{value === -1 ? '-' : value}</span>
-                <span class={styles.cellIndex}>{index}</span>
+                <span class={mergedStyles.cellValue}>{value === -1 ? '-' : value}</span>
+                <span class={mergedStyles.cellIndex}>{index}</span>
               </div>
             )
           })}

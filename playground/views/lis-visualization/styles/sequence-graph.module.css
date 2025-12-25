@@ -1,0 +1,201 @@
+/* LIS 可视化 - 序列图组件样式 */
+/* 包含状态对比区域、链视图和节点样式 */
+
+/* 序列状态图组件 */
+.sequenceGraph {
+  margin-bottom: 0.5rem;
+}
+
+/* 状态对比区域 - CSS Grid + subgrid 4列布局 */
+.stateCompareSection {
+  margin-bottom: 0.5rem;
+  padding: 0.375rem 0.625rem;
+  background: var(--color-bg-section);
+  border-radius: 0.375rem;
+  font-size: 0.8125rem;
+  transition: background-color 0.15s ease;
+}
+
+.stateCompareSection:hover {
+  background: var(--color-hover-light);
+}
+
+.stateCompareGrid {
+  display: grid;
+  grid-template-columns: auto auto auto auto;
+  gap: 0.125rem 0.5rem;
+  margin-top: 0.25rem;
+  width: fit-content;
+}
+
+.stateRow {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  align-items: baseline;
+}
+
+.previousRow {
+  color: var(--color-text-hint);
+}
+
+.previousRow .stateCode {
+  color: var(--color-text-hint);
+}
+
+.stateRowLabel {
+  color: var(--color-text-hint);
+  white-space: nowrap;
+}
+
+.changeIndicator {
+  color: var(--color-text-hint);
+  white-space: nowrap;
+}
+
+/* 兼容旧样式 */
+.sequenceSection,
+.predecessorsSection {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding: 0.375rem 0.625rem;
+  background: var(--color-bg-section);
+  border-radius: 0.375rem;
+  font-size: 0.8125rem;
+}
+
+.stateLabel {
+  font-weight: 600;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.stateCode {
+  font-family: var(--font-mono);
+  color: var(--color-text-primary);
+}
+
+/* Chain 视图 */
+.chainView {
+  margin-top: 0.5rem;
+  padding: 0.375rem;
+  background: var(--color-bg-section);
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-border);
+}
+
+.chainsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 0.125rem;
+}
+
+.chain {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  padding: 0.25rem;
+  border-radius: 0.375rem;
+  transition: background-color 0.15s ease;
+}
+
+.chain:hover {
+  background: var(--color-hover-light);
+}
+
+/* Predecessors hover 时高亮整条链 */
+.chainHighlight {
+  background: var(--color-hover-light);
+}
+
+.chainLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.chainNodes {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+}
+
+.chainNode {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.25rem 0.375rem;
+  min-width: 2.5rem;
+  border: 2px solid var(--color-border-medium);
+  border-radius: 0.375rem;
+  background: var(--color-bg-page);
+  box-sizing: border-box;
+  animation: slideIn 0.2s ease;
+}
+
+.nodeValue {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+
+.nodeInfo {
+  font-size: 0.5625rem;
+  color: var(--color-text-hint);
+  font-family: var(--font-mono);
+}
+
+.chainArrow {
+  font-size: 1rem;
+  color: var(--color-text-hint);
+}
+
+.emptyChain {
+  color: var(--color-text-hint);
+  font-style: italic;
+}
+
+/* Chain 节点高亮 */
+.chainNode.highlightAppend {
+  border-color: var(--color-success);
+  background: var(--color-success-light);
+  box-shadow: 0 0 0 2px var(--color-success-shadow);
+}
+
+.chainNode.highlightReplace {
+  border-color: var(--color-warning);
+  background: var(--color-warning-light);
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+}
+
+.chainNode.highlightSkip {
+  border-color: var(--color-border-medium);
+  background: var(--color-bg-section);
+}
+
+.chainNodes .chainNode.chainNodeChangedSecondaryAppend {
+  border-color: var(--color-success);
+  border-style: dashed;
+  border-width: 2px;
+  background: var(--color-success-light);
+}
+
+.chainNodes .chainNode.chainNodeChangedSecondaryReplace {
+  border-color: var(--color-warning);
+  border-style: dashed;
+  border-width: 2px;
+  background: var(--color-warning-light);
+}
+
+/* Chain 节点链尾高亮（Sequence State hover 时） */
+.chainNodeTailHighlight {
+  border-color: var(--color-hover) !important;
+  background: var(--color-hover-light) !important;
+  box-shadow: 0 0 0 2px var(--color-hover-shadow) !important;
+}

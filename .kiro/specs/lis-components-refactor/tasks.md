@@ -87,43 +87,43 @@
     - 导出新增的类型
     - _Requirements: 6.1, 6.2, 6.3_
 
-- [ ] 5. Checkpoint - 验证组件重构
+- [x] 5. Checkpoint - 验证组件重构
   - 运行 `pnpm run typecheck` 验证类型正确性
   - 运行现有测试验证兼容性
   - 确保所有测试通过，如有问题请询问用户
   - _Requirements: 7.1, 7.2, 7.3, 7.4_
 
-- [ ] 6. 拆分样式文件
-  - [ ] 6.1 创建 `styles/shared.module.css`
+- [x] 6. 拆分样式文件
+  - [x] 6.1 创建 `styles/shared.module.css`
     - 提取 CSS 变量定义
     - 提取动画定义
     - 提取通用工具类
     - _Requirements: 4.3_
-  - [ ] 6.2 创建 `styles/layout.module.css`
+  - [x] 6.2 创建 `styles/layout.module.css`
     - 提取页面布局样式
     - 提取 header/footer 样式
     - _Requirements: 4.1_
-  - [ ] 6.3 创建 `styles/array-display.module.css`
+  - [x] 6.3 创建 `styles/array-display.module.css`
     - 提取数组显示相关样式
     - 导入共享样式
     - _Requirements: 4.1, 4.2, 4.4_
-  - [ ] 6.4 创建 `styles/sequence-graph.module.css`
+  - [x] 6.4 创建 `styles/sequence-graph.module.css`
     - 提取序列图相关样式
     - 导入共享样式
     - _Requirements: 4.1, 4.2, 4.4_
-  - [ ] 6.5 创建 `styles/action-panel.module.css`
+  - [x] 6.5 创建 `styles/action-panel.module.css`
     - 提取操作面板相关样式
     - 导入共享样式
     - _Requirements: 4.1, 4.2, 4.4_
-  - [ ] 6.6 创建 `styles/step-controls.module.css`
+  - [x] 6.6 创建 `styles/step-controls.module.css`
     - 提取步骤控制相关样式
     - 导入共享样式
     - _Requirements: 4.1, 4.2, 4.4_
-  - [ ] 6.7 创建 `styles/input-editor.module.css`
+  - [x] 6.7 创建 `styles/input-editor.module.css`
     - 提取输入编辑器相关样式
     - 导入共享样式
     - _Requirements: 4.1, 4.2, 4.4_
-  - [ ] 6.8 更新组件导入
+  - [x] 6.8 更新组件导入
     - 更新各组件的样式导入
     - _Requirements: 4.2_
 

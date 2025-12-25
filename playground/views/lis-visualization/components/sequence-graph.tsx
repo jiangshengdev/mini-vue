@@ -9,7 +9,8 @@
 
 import type { StepAction } from '../types'
 import type { SetupComponent } from '@/index.ts'
-import styles from '../styles/visualization.module.css'
+import sharedStyles from '../styles/shared.module.css'
+import styles from '../styles/sequence-graph.module.css'
 
 // 导入子组件
 import { SequenceSection, PredecessorSection, ChainView } from './sequence-graph/index.ts'
@@ -25,6 +26,9 @@ import {
   computePredecessorHighlight,
   computePredChangeIndicator,
 } from '../utils/index.ts'
+
+// 合并样式对象
+const mergedStyles = { ...sharedStyles, ...styles }
 
 export interface SequenceGraphProps {
   input: number[]
@@ -81,8 +85,8 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
         : undefined
 
     // 计算高亮状态
-    const highlightClass = getHighlightClass(action, styles)
-    const secondaryHighlightClass = getSecondaryHighlightClass(action, styles)
+    const highlightClass = getHighlightClass(action, mergedStyles)
+    const secondaryHighlightClass = getSecondaryHighlightClass(action, mergedStyles)
     const hasPrevious = previousSequence !== undefined
     const isChainAction = action?.type === 'append' || action?.type === 'replace'
 
@@ -113,7 +117,7 @@ export const SequenceGraph: SetupComponent<SequenceGraphProps> = (props) => {
     )
 
     return (
-      <div class={styles.sequenceGraph}>
+      <div class={mergedStyles.sequenceGraph}>
         <SequenceSection
           input={props.input}
           sequence={props.sequence}

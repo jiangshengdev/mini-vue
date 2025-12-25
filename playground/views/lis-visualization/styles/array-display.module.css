@@ -1,0 +1,114 @@
+/* LIS 可视化 - 数组显示组件样式 */
+/* 包含数组单元格、图例和高亮效果 */
+
+/* 数组显示组件 */
+.arrayDisplay {
+  margin-bottom: 0.5rem;
+}
+
+.arrayLegend {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.375rem;
+  font-size: 0.6875rem;
+  color: var(--color-text-hint);
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.arrayContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.arrayCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  height: 3rem;
+  padding: 0 0.5rem;
+  border: 2px solid var(--color-border);
+  border-radius: 0.375rem;
+  background: var(--color-bg-page);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  animation: fadeIn 0.2s ease;
+}
+
+.arrayCell:hover:not(.currentCell):not(.resultCell) {
+  border-color: var(--color-border-medium);
+  transform: translateY(-2px);
+}
+
+.arrayCell:hover {
+  transform: translateY(-2px);
+}
+
+.currentCell {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+  box-shadow: 0 0 0 3px var(--color-primary-shadow);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.resultCell {
+  border-color: var(--color-success);
+  background: var(--color-success-light);
+}
+
+/* 新节点（-1）的特殊样式 */
+.newNodeCell {
+  border-style: dashed;
+}
+
+/* hover 链时的高亮样式（优先级最高） */
+.hoveredCell {
+  border-color: var(--color-hover) !important;
+  background: var(--color-hover-light) !important;
+  box-shadow: 0 0 0 2px var(--color-hover-shadow) !important;
+}
+
+/* hover 且是当前激活的单元格：紫色呼吸效果 */
+.hoveredCell.currentCell {
+  animation: pulseViolet 1.5s ease-in-out infinite !important;
+}
+
+/* 当前高亮且是结果的单元格 */
+.currentCell.resultCell {
+  border-color: var(--color-success);
+  background: var(--color-success-medium);
+  animation: pulseGreen 1.5s ease-in-out infinite;
+}
+
+.cellValue {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+
+.cellIndex {
+  font-size: 0.75rem;
+  color: var(--color-text-hint);
+}
+
+/* 响应式布局 */
+@media (max-width: 640px) {
+  .arrayCell {
+    min-width: 2.5rem;
+    height: 3rem;
+  }
+
+  .cellValue {
+    font-size: 1rem;
+  }
+}

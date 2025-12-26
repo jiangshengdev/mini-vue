@@ -40,7 +40,7 @@
 
 .actionAppend .actionType {
   background: var(--color-success);
-  color: var(--color-bg-page);
+  color: var(--color-contrast);
 }
 
 .actionReplace {
@@ -50,7 +50,7 @@
 
 .actionReplace .actionType {
   background: var(--color-warning);
-  color: var(--color-bg-page);
+  color: var(--color-contrast);
 }
 
 .actionSkip {
@@ -60,7 +60,7 @@
 
 .actionSkip .actionType {
   background: var(--color-border-medium);
-  color: var(--color-bg-page);
+  color: var(--color-contrast);
 }
 
 .actionInit {
@@ -70,7 +70,7 @@
 
 .actionInit .actionType {
   background: var(--color-primary);
-  color: var(--color-bg-page);
+  color: var(--color-contrast);
 }
 
 /* 操作明细 */

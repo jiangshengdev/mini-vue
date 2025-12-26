@@ -8,31 +8,32 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  /* 颜色变量 */
-  --color-text-primary: #0f172a;
-  --color-text-secondary: #374151;
-  --color-text-light: #213547;
-  --color-text-muted: #888;
-  --color-link: #1d4ed8;
-  --color-link-default: #646cff;
-  --color-link-hover: #535bf2;
+  /* 颜色变量 - 默认暗黑模式 */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #e5e7eb;
+  --color-text-light: #ffffff;
+  --color-text-muted: #cbd5e1;
+  --color-link: #c7d2fe;
+  --color-link-default: #dfe3ff;
+  --color-link-hover: #e5edff;
   --color-link-hover-light: #747bff;
-  --color-bg-primary: #ffffff;
-  --color-bg-secondary: #f8fafc;
-  --color-bg-hover: #f3f4f6;
-  --color-bg-button: #0f172a;
+  --color-bg-primary: #0b0d12;
+  --color-bg-secondary: #05060a;
+  --color-bg-hover: #1e293b;
+  --color-bg-button: #2563eb;
   --color-bg-button-light: #f9f9f9;
-  --color-border: #e5e7eb;
-  --color-focus: #1d4ed8;
-  --color-accent: #646cff;
-  --color-accent-ts: #3178c6;
-  --color-overlay: rgba(0, 0, 0, 0.5);
-  --color-shadow: rgba(15, 23, 42, 0.06);
-  --color-shadow-dark: rgba(0, 0, 0, 0.15);
+  --color-border: #334155;
+  --color-focus: #93c5fd;
+  --color-accent: #a5b4fc;
+  --color-accent-ts: #93c5fd;
+  --color-overlay: rgba(0, 0, 0, 0.55);
+  --color-shadow: rgba(8, 15, 40, 0.35);
+  --color-shadow-dark: rgba(0, 0, 0, 0.5);
 
   /* 应用颜色变量 */
   color: var(--color-text-primary);
   background-color: var(--color-bg-secondary);
+  color-scheme: dark;
 }
 
 a {
@@ -50,6 +51,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background-color: var(--color-bg-secondary);
+  color: var(--color-text-primary);
 }
 
 h1 {
@@ -101,6 +103,7 @@ button {
   font-family: 'JetBrains Mono', 'SFMono-Regular', Consolas, Menlo, monospace;
   font-variant-numeric: tabular-nums;
   background-color: var(--color-bg-button);
+  color: var(--color-text-primary);
   cursor: pointer;
   transition: border-color 0.25s;
 }
@@ -116,8 +119,27 @@ button:focus-visible {
 
 @media (prefers-color-scheme: light) {
   :root {
+    --color-text-primary: #0f172a;
+    --color-text-secondary: #374151;
+    --color-text-light: #213547;
+    --color-text-muted: #888;
+    --color-link: #1d4ed8;
+    --color-link-default: #646cff;
+    --color-link-hover: #535bf2;
+    --color-bg-primary: #ffffff;
+    --color-bg-secondary: #f8fafc;
+    --color-bg-hover: #f3f4f6;
+    --color-bg-button: #0f172a;
+    --color-border: #e5e7eb;
+    --color-focus: #1d4ed8;
+    --color-accent: #646cff;
+    --color-accent-ts: #3178c6;
+    --color-overlay: rgba(0, 0, 0, 0.5);
+    --color-shadow: rgba(15, 23, 42, 0.06);
+    --color-shadow-dark: rgba(0, 0, 0, 0.15);
     color: var(--color-text-light);
     background-color: var(--color-bg-primary);
+    color-scheme: light;
   }
 
   a:hover {
@@ -126,5 +148,6 @@ button:focus-visible {
 
   button {
     background-color: var(--color-bg-button-light);
+    color: var(--color-text-primary);
   }
 }

@@ -122,7 +122,7 @@
 .controlButton.playing {
   background: var(--color-primary);
   border-color: var(--color-primary);
-  color: var(--color-bg-page);
+  color: var(--color-contrast);
 }
 
 .controlButton.playing:hover:not(:disabled) {

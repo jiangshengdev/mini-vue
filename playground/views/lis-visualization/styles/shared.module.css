@@ -2,51 +2,93 @@
 /* 包含 CSS 变量、动画定义和通用工具类 */
 
 /* ========== CSS 变量定义 ========== */
-:root {
+.lisTheme {
   /* 主色调 */
-  --color-primary: #3b82f6;
+  --color-primary: #60a5fa;
   --color-primary-dark: #2563eb;
-  --color-primary-light: #eff6ff;
-  --color-primary-shadow: rgba(59, 130, 246, 0.2);
+  --color-primary-light: rgba(96, 165, 250, 0.15);
+  --color-primary-shadow: rgba(96, 165, 250, 0.2);
+  --color-contrast: #ffffff;
 
   /* 成功色（追加操作、结果高亮） */
   --color-success: #22c55e;
-  --color-success-light: #f0fdf4;
-  --color-success-medium: #dcfce7;
+  --color-success-light: rgba(34, 197, 94, 0.16);
+  --color-success-medium: rgba(34, 197, 94, 0.3);
   --color-success-shadow: rgba(34, 197, 94, 0.2);
 
   /* 警告色（替换操作） */
   --color-warning: #f59e0b;
-  --color-warning-light: #fffbeb;
+  --color-warning-light: rgba(245, 158, 11, 0.18);
 
   /* 错误色 */
   --color-error: #ef4444;
-  --color-error-light: #fef2f2;
+  --color-error-light: rgba(239, 68, 68, 0.18);
   --color-error-border: #fecaca;
-  --color-error-text: #dc2626;
+  --color-error-text: #fef2f2;
 
   /* hover 高亮色（紫色） */
   --color-hover: #8b5cf6;
-  --color-hover-light: #f5f3ff;
+  --color-hover-light: rgba(139, 92, 246, 0.16);
   --color-hover-shadow: rgba(139, 92, 246, 0.2);
   --color-hover-shadow-light: rgba(139, 92, 246, 0.1);
 
   /* 中性色 */
-  --color-text-primary: #1e293b;
-  --color-text-secondary: #475569;
-  --color-text-muted: #64748b;
+  --color-text-primary: #f8fafc;
+  --color-text-secondary: #e2e8f0;
+  --color-text-muted: #cbd5e1;
   --color-text-hint: #94a3b8;
 
   /* 边框和背景 */
-  --color-border: #e2e8f0;
-  --color-border-light: #cbd5e1;
-  --color-border-medium: #94a3b8;
-  --color-bg-page: #fff;
-  --color-bg-section: #f8fafc;
-  --color-bg-hover: #f1f5f9;
+  --color-border: #1f2937;
+  --color-border-light: #2b3647;
+  --color-border-medium: #475569;
+  --color-bg-page: #0b0d12;
+  --color-bg-section: #0f172a;
+  --color-bg-hover: #1e293b;
 
   /* 字体 */
   --font-mono: 'JetBrains Mono', Menlo, Monaco, 'Courier New', monospace;
+}
+
+/* 浅色模式下的 LIS 局部配色，避免黑底 */
+@media (prefers-color-scheme: light) {
+  .lisTheme {
+    --color-primary: #3b82f6;
+    --color-primary-dark: #2563eb;
+    --color-primary-light: #eff6ff;
+    --color-primary-shadow: rgba(59, 130, 246, 0.2);
+    --color-contrast: #ffffff;
+
+    --color-success: #22c55e;
+    --color-success-light: #f0fdf4;
+    --color-success-medium: #dcfce7;
+    --color-success-shadow: rgba(34, 197, 94, 0.2);
+
+    --color-warning: #f59e0b;
+    --color-warning-light: #fffbeb;
+
+    --color-error: #ef4444;
+    --color-error-light: #fef2f2;
+    --color-error-border: #fecaca;
+    --color-error-text: #dc2626;
+
+    --color-hover: #8b5cf6;
+    --color-hover-light: #f5f3ff;
+    --color-hover-shadow: rgba(139, 92, 246, 0.2);
+    --color-hover-shadow-light: rgba(139, 92, 246, 0.1);
+
+    --color-text-primary: #1e293b;
+    --color-text-secondary: #475569;
+    --color-text-muted: #64748b;
+    --color-text-hint: #94a3b8;
+
+    --color-border: #e2e8f0;
+    --color-border-light: #cbd5e1;
+    --color-border-medium: #94a3b8;
+    --color-bg-page: #ffffff;
+    --color-bg-section: #f8fafc;
+    --color-bg-hover: #f1f5f9;
+  }
 }
 
 /* ========== 动画定义 ========== */
@@ -107,21 +149,21 @@
 /* 高亮样式 - 用于显示当前操作的改动 */
 .highlightAppend {
   background: var(--color-success);
-  color: var(--color-bg-page);
+  color: var(--color-contrast);
   padding: 0.125rem 0.25rem;
   border-radius: 0.25rem;
 }
 
 .highlightReplace {
   background: var(--color-warning);
-  color: var(--color-bg-page);
+  color: var(--color-contrast);
   padding: 0.125rem 0.25rem;
   border-radius: 0.25rem;
 }
 
 .highlightSkip {
   background: var(--color-border-medium);
-  color: var(--color-bg-page);
+  color: var(--color-contrast);
   padding: 0.125rem 0.25rem;
   border-radius: 0.25rem;
 }
@@ -164,7 +206,7 @@
 /* hover 高亮：紫色背景（覆盖已有高亮） */
 .highlightHover {
   background: var(--color-hover);
-  color: var(--color-bg-page);
+  color: var(--color-contrast);
   padding: 0.125rem 0.25rem;
   border-radius: 0.25rem;
 }

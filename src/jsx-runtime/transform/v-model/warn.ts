@@ -31,9 +31,10 @@ export function warnNonFormElement(type: string, props: unknown): void {
  *
  * @param type - 元素类型（标签名）
  * @param conflicts - 冲突的属性名列表
+ * @param props - 原始 props，便于输出上下文
  */
-export function warnConflictProps(type: string, conflicts: string[]): void {
+export function warnConflictProps(type: string, conflicts: string[], props: unknown): void {
   if (__DEV__ && conflicts.length > 0) {
-    console.warn(jsxModelBindingConflictWarning(type, conflicts))
+    console.warn(jsxModelBindingConflictWarning(type, conflicts), props)
   }
 }

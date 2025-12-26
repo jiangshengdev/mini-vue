@@ -206,9 +206,9 @@ const mutableOwnKeys: ProxyHandler<ReactiveRawTarget>['ownKeys'] = (target) => {
 /**
  * 只读代理的 set 拦截器：在开发态输出警告，始终返回 `true` 以避免抛出异常。
  */
-const readonlySet: ProxyHandler<ReactiveRawTarget>['set'] = () => {
+const readonlySet: ProxyHandler<ReactiveRawTarget>['set'] = (target, key, value) => {
   if (__DEV__) {
-    console.warn(reactivityReadonlyWarning)
+    console.warn(reactivityReadonlyWarning, { target, key, value })
   }
 
   return true
@@ -217,9 +217,9 @@ const readonlySet: ProxyHandler<ReactiveRawTarget>['set'] = () => {
 /**
  * 只读代理的 deleteProperty 拦截器：在开发态输出警告，始终返回 `true` 以避免抛出异常。
  */
-const readonlyDeleteProperty: ProxyHandler<ReactiveRawTarget>['deleteProperty'] = () => {
+const readonlyDeleteProperty: ProxyHandler<ReactiveRawTarget>['deleteProperty'] = (target, key) => {
   if (__DEV__) {
-    console.warn(reactivityReadonlyWarning)
+    console.warn(reactivityReadonlyWarning, { target, key })
   }
 
   return true

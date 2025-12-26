@@ -130,7 +130,7 @@ export function transformModelBindingProps<T extends ElementType>(
   }
 
   /* 如果存在冲突属性，在开发模式下发出警告。 */
-  warnConflictProps(type, conflicts)
+  warnConflictProps(type, conflicts, props)
 
   return { props: nextProps as ElementProps<T>, conflicts }
 }

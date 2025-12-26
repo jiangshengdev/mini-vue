@@ -1,7 +1,7 @@
 import { setCurrentAppContext, unsetCurrentAppContext } from './app-context.ts'
 import type { RootRenderFunction } from './renderer.ts'
 import type { ElementProps, SetupComponent } from '@/jsx-foundation/index.ts'
-import { createVirtualNode } from '@/jsx-foundation/index.ts'
+import { buildVirtualNode } from '@/jsx-runtime/index.ts'
 import { runtimeCoreAppAlreadyMounted, runtimeCoreInvalidPlugin } from '@/messages/index.ts'
 import type {
   InjectionKey,
@@ -167,10 +167,7 @@ function createRootVirtualNode<HostElement extends WeakKey>(state: AppState<Host
     ? { ...state.initialRootProps }
     : undefined
 
-  const node = createVirtualNode({
-    type: state.rootComponent,
-    rawProps,
-  })
+  const node = buildVirtualNode(state.rootComponent, rawProps)
 
   ;(node as { appContext?: AppContext }).appContext = state.appContext
 

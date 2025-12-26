@@ -7,5 +7,5 @@
  *
  * 两类函数最终都通过 `buildVirtualNode` 创建 VirtualNode，区别在于调用方式与参数形态。
  */
-export { h } from './builder.ts'
+export { buildVirtualNode, h } from './builder.ts'
 export { jsx, jsxDEV, jsxs } from './runtime.ts'

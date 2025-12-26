@@ -16,7 +16,6 @@ import {
 import { isSupportedTarget } from './to-raw.ts'
 import type { Reactive, ReadonlyReactive } from './types.ts'
 import { reactivityUnsupportedType } from '@/messages/index.ts'
-import type { PlainObject } from '@/shared/index.ts'
 import { isObject } from '@/shared/index.ts'
 
 /** 响应式代理缓存类型：使用 WeakMap 避免内存泄漏。 */
@@ -100,7 +99,7 @@ function createProxy(
  *
  * @public
  */
-export function reactive<T extends PlainObject>(target: T): Reactive<T>
+export function reactive<T extends ReactiveRawTarget>(target: T): Reactive<T>
 /**
  * @public
  */
@@ -124,7 +123,7 @@ export function reactive(target: unknown): unknown {
  * - 仅代理顶层属性，嵌套对象保持原样不会被代理。
  * - 适用于性能敏感场景或不需要深层响应式的情况。
  */
-export function shallowReactive<T extends PlainObject>(target: T): T
+export function shallowReactive<T extends ReactiveRawTarget>(target: T): T
 export function shallowReactive<T extends readonly unknown[]>(target: T): T
 export function shallowReactive<T>(target: T): T
 
@@ -144,7 +143,7 @@ export function shallowReactive(target: unknown): unknown {
  * - 仅顶层属性为只读，嵌套对象保持原样可写。
  * - 写入操作在开发态会触发警告。
  */
-export function shallowReadonly<T extends PlainObject>(target: T): Readonly<T>
+export function shallowReadonly<T extends ReactiveRawTarget>(target: T): Readonly<T>
 export function shallowReadonly<T extends readonly unknown[]>(target: T): Readonly<T>
 export function shallowReadonly<T>(target: T): Readonly<T>
 
@@ -164,7 +163,7 @@ export function shallowReadonly(target: unknown): unknown {
  * - 所有层级的属性都为只读，写入操作在开发态会触发警告。
  * - 嵌套对象会在访问时懒代理为只读。
  */
-export function readonly<T extends PlainObject>(target: T): ReadonlyReactive<T>
+export function readonly<T extends ReactiveRawTarget>(target: T): ReadonlyReactive<T>
 export function readonly<T extends readonly unknown[]>(target: T): ReadonlyReactive<T>
 export function readonly<T>(target: T): ReadonlyReactive<T>
 

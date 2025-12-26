@@ -1,4 +1,4 @@
-import type { DependencyBucket } from '../contracts/index.ts'
+import type { DependencyBucket, ReactiveRawTarget } from '../contracts/index.ts'
 import { refFlag } from '../contracts/index.ts'
 import { trackEffect, triggerEffects } from '../internals/index.ts'
 import { withoutTracking } from '../internals/tracking.ts'
@@ -97,7 +97,7 @@ export class RefImpl<T> implements Ref<T> {
  * - 若目标对象是 reactive 代理，会复用其依赖收集机制。
  * - 若目标对象是普通对象，会创建本地依赖集合以支持响应式。
  */
-export class ObjectRefImpl<T extends PlainObject, K extends keyof T> implements Ref<T[K]> {
+export class ObjectRefImpl<T extends ReactiveRawTarget, K extends keyof T> implements Ref<T[K]> {
   /** 标记当前对象为 Ref 实例。 */
   readonly [refFlag] = true as const
 

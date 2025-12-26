@@ -1,8 +1,8 @@
+import type { ReactiveRawTarget } from '../contracts/index.ts'
 import { recordEffectScope, recordScopeCleanup } from '../effect-scope.ts'
 import { effectStack, ReactiveEffect } from '../effect.ts'
 import type { Ref } from '../ref/types.ts'
 import { createGetter, resolveDeepOption } from './utils.ts'
-import type { PlainObject } from '@/shared/index.ts'
 import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
 
 /**
@@ -15,7 +15,7 @@ import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
  *
  * @public
  */
-export type WatchSource<T> = Ref<T> | (() => T) | PlainObject
+export type WatchSource<T> = Ref<T> | (() => T) | ReactiveRawTarget
 
 /**
  * 外部可调用的停止函数类型。

@@ -1,10 +1,10 @@
+import type { ReactiveRawTarget } from '../contracts/index.ts'
 import { refFlag } from '../contracts/index.ts'
 import { withoutTracking } from '../internals/tracking.ts'
 import { isReactive } from '../reactive.ts'
 import { toRaw } from '../to-raw.ts'
 import { ObjectRefImpl, RefImpl } from './impl.ts'
 import type { Ref } from './types.ts'
-import type { PlainObject } from '@/shared/index.ts'
 import { isObject } from '@/shared/index.ts'
 
 /**
@@ -79,7 +79,10 @@ export function unref<T>(value: T | Ref<T>): T {
  *
  * @public
  */
-export function toRef<T extends PlainObject, K extends keyof T>(target: T, key: K): Ref<T[K]> {
+export function toRef<T extends ReactiveRawTarget, K extends keyof T>(
+  target: T,
+  key: K,
+): Ref<T[K]> {
   /*
    * 创建阶段只做一次「是否为 `Ref`」的探测。
    *

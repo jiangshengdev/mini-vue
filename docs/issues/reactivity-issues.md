@@ -22,3 +22,24 @@
 - 可能方案：
   - 在浅模式下对响应式对象至少访问一次自身或顶层键以建立依赖，例如读取 `Object.keys`/`iterateDependencyKey` 或逐个访问顶层属性。
   - 通过 `effect`/`track` 辅助方法触发顶层依赖收集，并补充用例覆盖 `deep: false` + 响应式对象场景。
+
+## 4. `readonly` 访问仍收集依赖（与 Vue 3 不一致，待修复）
+
+- 位置：`src/reactivity/internals/base-handlers.ts`
+- 现状：`createGetter` 中无条件调用 `track`，即使是只读代理也会把读取行为收集为依赖。
+- 影响：只读数据会意外参与依赖链，违背「只读不追踪」的设计，可能导致副作用在只读读取下被触发。
+- 提示：参考 Vue 3，在只读 handler 下跳过 `track`。
+
+## 5. `readonly` 读取 Ref 未解包（与文档不符，待修复）
+
+- 位置：`src/reactivity/internals/base-handlers.ts`
+- 现状：只读代理读取属性值为 Ref 时直接返回 Ref 对象，而不是像 `reactive` 那样解包成值。
+- 影响：与官方文档「解包但值只读」的描述不符，用户拿到的仍是 Ref，需要额外 `.value` 才能使用。
+- 提示：在只读代理中延续解包逻辑，但返回只读视图。
+
+## 6. `readonly()` 不接受 Ref 目标（与文档不符，待修复）
+
+- 位置：`src/reactivity/reactive.ts` 与 `src/reactivity/to-raw.ts`
+- 现状：内部通过 `isSupportedTarget` 限制，仅允许普通对象或数组；传入 Ref 会抛出不支持的类型错误。
+- 影响：违背官方 API「接受对象或 Ref」的约定，无法对 Ref 创建只读代理或只读 Ref。
+- 提示：放宽目标类型检测以支持 Ref，或在 `readonly` 创建前检测并处理 Ref。

@@ -1,4 +1,3 @@
-import type { ReactiveTarget } from '../contracts/index.ts'
 import { iterateDependencyKey } from '../contracts/index.ts'
 import { track } from '../internals/operations.ts'
 import { toRaw } from '../to-raw.ts'
@@ -51,7 +50,7 @@ function createIdentitySearchWrapper<K extends ArrayIdentitySearchKey>(
     const rawArray = toRaw(this)
 
     // 查询行为关注数组元素集合的变化，使用 iterate 依赖统一收敛。
-    track(rawArray as ReactiveTarget, iterateDependencyKey)
+    track(rawArray, iterateDependencyKey)
 
     const method = nativeArraySearchMethods[key] as ArrayIdentitySearchMethod<K>
 

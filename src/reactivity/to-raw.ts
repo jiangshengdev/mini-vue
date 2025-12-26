@@ -1,4 +1,4 @@
-import type { ReactiveTarget } from './contracts/index.ts'
+import type { ReactiveRawTarget, ReactiveTarget } from './contracts/index.ts'
 import { rawFlag } from './contracts/index.ts'
 import { isObject, isPlainObject } from '@/shared/index.ts'
 
@@ -12,7 +12,7 @@ import { isObject, isPlainObject } from '@/shared/index.ts'
  * - 当前仅支持普通对象（`isPlainObject`）与数组。
  * - Map、Set、WeakMap、WeakSet 等原生集合暂不支持。
  */
-export function isSupportedTarget(target: unknown): target is ReactiveTarget {
+export function isSupportedTarget(target: unknown): target is ReactiveRawTarget {
   return Array.isArray(target) || isPlainObject(target)
 }
 

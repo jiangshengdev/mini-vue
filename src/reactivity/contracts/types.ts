@@ -122,7 +122,7 @@ export interface ReactiveProxyInternals {
 }
 
 /** 支持响应式代理的原生目标类型，目前覆盖普通对象与数组。 */
-type ReactiveRawTarget = PlainObject | unknown[]
+export type ReactiveRawTarget = PlainObject | unknown[]
 
 /** 将原生目标类型与内部标记接口合并，形成完整的响应式目标类型。 */
 type ReactiveTargetBase<T extends ReactiveRawTarget> = T & ReactiveProxyInternals

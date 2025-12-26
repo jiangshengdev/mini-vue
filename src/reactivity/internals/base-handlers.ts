@@ -4,7 +4,7 @@ import {
   isArrayMutatorKey,
   isArraySearchKey,
 } from '../array/index.ts'
-import type { ReactiveTarget } from '../contracts/index.ts'
+import type { ReactiveRawTarget } from '../contracts/index.ts'
 import {
   iterateDependencyKey,
   rawFlag,
@@ -20,7 +20,7 @@ import { reactivityReadonlyWarning } from '@/messages/index.ts'
 import { __DEV__, isArrayIndex, isObject } from '@/shared/index.ts'
 
 /** Proxy get 拦截器类型。 */
-type Getter = ProxyHandler<ReactiveTarget>['get']
+type Getter = ProxyHandler<ReactiveRawTarget>['get']
 
 /**
  * 响应式 Proxy 的 get 拦截器工厂函数。
@@ -113,7 +113,7 @@ function createGetter(isReadonly: boolean, shallow: boolean): Getter {
  * - 区分新增（add）和修改（set）两种操作类型。
  * - 读取旧值时会禁用依赖收集，避免写入阶段意外建立依赖。
  */
-const mutableSet: ProxyHandler<ReactiveTarget>['set'] = (target, key, value, receiver) => {
+const mutableSet: ProxyHandler<ReactiveRawTarget>['set'] = (target, key, value, receiver) => {
   /* 数组的新增与修改需要依赖索引判断，普通对象则通过 hasOwn 区分逻辑分支。 */
   const targetIsArray = Array.isArray(target)
   const keyIsArrayIndex = isArrayIndex(key)
@@ -160,7 +160,7 @@ const mutableSet: ProxyHandler<ReactiveTarget>['set'] = (target, key, value, rec
  * @remarks
  * - 仅在确实移除既有字段时通知依赖，避免重复触发。
  */
-const mutableDeleteProperty: ProxyHandler<ReactiveTarget>['deleteProperty'] = (target, key) => {
+const mutableDeleteProperty: ProxyHandler<ReactiveRawTarget>['deleteProperty'] = (target, key) => {
   /* 删除前记录字段是否存在，后续只对真实变更触发更新。 */
   const hadKey = Object.hasOwn(target, key)
   /* 通过 Reflect 删除属性以保持原生行为一致。 */
@@ -177,7 +177,7 @@ const mutableDeleteProperty: ProxyHandler<ReactiveTarget>['deleteProperty'] = (t
 /**
  * 拦截 `in` 操作符，确保查询同样建立依赖。
  */
-const mutableHas: ProxyHandler<ReactiveTarget>['has'] = (target, key) => {
+const mutableHas: ProxyHandler<ReactiveRawTarget>['has'] = (target, key) => {
   /* 复用 Reflect.has 获取布尔结果，与原生语义一致。 */
   const result = Reflect.has(target, key)
 
@@ -193,7 +193,7 @@ const mutableHas: ProxyHandler<ReactiveTarget>['has'] = (target, key) => {
  * @remarks
  * - 数组结构依赖 `length`，普通对象使用 `iterateDependencyKey` 作为统一标识。
  */
-const mutableOwnKeys: ProxyHandler<ReactiveTarget>['ownKeys'] = (target) => {
+const mutableOwnKeys: ProxyHandler<ReactiveRawTarget>['ownKeys'] = (target) => {
   /* 数组结构依赖 length，普通对象使用 iterateDependencyKey 作为统一标识。 */
   const key = Array.isArray(target) ? 'length' : iterateDependencyKey
 
@@ -206,7 +206,7 @@ const mutableOwnKeys: ProxyHandler<ReactiveTarget>['ownKeys'] = (target) => {
 /**
  * 只读代理的 set 拦截器：在开发态输出警告，始终返回 `true` 以避免抛出异常。
  */
-const readonlySet: ProxyHandler<ReactiveTarget>['set'] = () => {
+const readonlySet: ProxyHandler<ReactiveRawTarget>['set'] = () => {
   if (__DEV__) {
     console.warn(reactivityReadonlyWarning)
   }
@@ -217,7 +217,7 @@ const readonlySet: ProxyHandler<ReactiveTarget>['set'] = () => {
 /**
  * 只读代理的 deleteProperty 拦截器：在开发态输出警告，始终返回 `true` 以避免抛出异常。
  */
-const readonlyDeleteProperty: ProxyHandler<ReactiveTarget>['deleteProperty'] = () => {
+const readonlyDeleteProperty: ProxyHandler<ReactiveRawTarget>['deleteProperty'] = () => {
   if (__DEV__) {
     console.warn(reactivityReadonlyWarning)
   }
@@ -238,7 +238,7 @@ export const mutableHandlers = {
   deleteProperty: mutableDeleteProperty,
   has: mutableHas,
   ownKeys: mutableOwnKeys,
-} satisfies ProxyHandler<ReactiveTarget>
+} satisfies ProxyHandler<ReactiveRawTarget>
 
 /**
  * 浅层可变响应式代理的处理器。
@@ -252,7 +252,7 @@ export const shallowReactiveHandlers = {
   deleteProperty: mutableDeleteProperty,
   has: mutableHas,
   ownKeys: mutableOwnKeys,
-} satisfies ProxyHandler<ReactiveTarget>
+} satisfies ProxyHandler<ReactiveRawTarget>
 
 /**
  * 浅层只读代理的处理器。
@@ -266,7 +266,7 @@ export const shallowReadonlyHandlers = {
   deleteProperty: readonlyDeleteProperty,
   has: mutableHas,
   ownKeys: mutableOwnKeys,
-} satisfies ProxyHandler<ReactiveTarget>
+} satisfies ProxyHandler<ReactiveRawTarget>
 
 /**
  * 深层只读代理的处理器。
@@ -280,4 +280,4 @@ export const readonlyHandlers = {
   deleteProperty: readonlyDeleteProperty,
   has: mutableHas,
   ownKeys: mutableOwnKeys,
-} satisfies ProxyHandler<ReactiveTarget>
+} satisfies ProxyHandler<ReactiveRawTarget>

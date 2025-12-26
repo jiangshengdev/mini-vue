@@ -5,7 +5,7 @@
  * - 统一在此文件内复用缓存与创建逻辑，确保同一原始对象只创建一个代理。
  * - 不同代理类型使用独立的缓存，避免相互干扰。
  */
-import type { ReactiveTarget } from './contracts/index.ts'
+import type { ReactiveRawTarget, ReactiveTarget } from './contracts/index.ts'
 import { reactiveFlag, readonlyFlag } from './contracts/index.ts'
 import {
   mutableHandlers,
@@ -20,7 +20,7 @@ import type { PlainObject } from '@/shared/index.ts'
 import { isObject } from '@/shared/index.ts'
 
 /** 响应式代理缓存类型：使用 WeakMap 避免内存泄漏。 */
-type ProxyCache = WeakMap<ReactiveTarget, ReactiveTarget>
+type ProxyCache = WeakMap<ReactiveRawTarget, ReactiveTarget>
 
 /** `reactive` 代理缓存。 */
 const reactiveCache: ProxyCache = new WeakMap()
@@ -45,7 +45,7 @@ const shallowReadonlyCache: ProxyCache = new WeakMap()
  */
 function createProxy(
   target: unknown,
-  handlers: ProxyHandler<ReactiveTarget>,
+  handlers: ProxyHandler<ReactiveRawTarget>,
   cache: ProxyCache,
   {
     skipReactiveCheck = false,
@@ -71,7 +71,7 @@ function createProxy(
     throw new TypeError(reactivityUnsupportedType, { cause: target })
   }
 
-  const reactiveTarget = target as ReactiveTarget
+  const reactiveTarget = target as ReactiveRawTarget
   const cached = cache.get(reactiveTarget)
 
   if (cached) {

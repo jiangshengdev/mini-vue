@@ -4,7 +4,7 @@
  * @remarks
  * - 导出内部标记常量（reactiveFlag、readonlyFlag、rawFlag、refFlag、iterateDependencyKey）。
  * - 导出触发操作类型常量（triggerOpTypes）及其类型（TriggerOpType）。
- * - 导出核心接口类型（EffectHandle、EffectInstance、EffectOptions、EffectScheduler、DependencyBucket、ReactiveTarget）。
+ * - 导出核心接口类型（EffectHandle、EffectInstance、EffectOptions、EffectScheduler、DependencyBucket、ReactiveRawTarget、ReactiveTarget）。
  */
 
 export {
@@ -22,5 +22,6 @@ export type {
   EffectInstance,
   EffectOptions,
   EffectScheduler,
+  ReactiveRawTarget,
   ReactiveTarget,
 } from './types.ts'

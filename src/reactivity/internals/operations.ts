@@ -1,4 +1,4 @@
-import type { DependencyBucket, ReactiveTarget, TriggerOpType } from '../contracts/index.ts'
+import type { DependencyBucket, ReactiveRawTarget, TriggerOpType } from '../contracts/index.ts'
 import { iterateDependencyKey, triggerOpTypes } from '../contracts/index.ts'
 import { effectStack } from '../effect.ts'
 import { trackEffect, triggerEffects } from './dependency.ts'
@@ -19,7 +19,7 @@ class DependencyRegistry {
    * @remarks
    * - WeakMap 的键为弱引用，当目标对象被垃圾回收时，对应的依赖映射也会被自动清理。
    */
-  private readonly targetMap = new WeakMap<ReactiveTarget, Map<PropertyKey, DependencyBucket>>()
+  private readonly targetMap = new WeakMap<ReactiveRawTarget, Map<PropertyKey, DependencyBucket>>()
 
   /**
    * 把当前活跃副作用加入目标字段的依赖集合。
@@ -31,7 +31,7 @@ class DependencyRegistry {
    * - 当外层显式禁用依赖收集时（如写入阶段读取旧值），会短路跳过。
    * - 没有活跃 effect 时不会创建依赖集合，节省内存。
    */
-  track(target: ReactiveTarget, key: PropertyKey): void {
+  track(target: ReactiveRawTarget, key: PropertyKey): void {
     /*
      * 当外层显式禁用依赖收集时（例如：写入阶段读取旧值、创建阶段探测属性），
      * 这里必须短路，否则会把「探测读取」的依赖错误地记录到当前 effect。
@@ -69,7 +69,12 @@ class DependencyRegistry {
    * - 根据操作类型决定是否额外触发 iterate 依赖（结构性变化）。
    * - 数组场景有特殊处理：索引变更会触发 iterate，新增索引会触发 length。
    */
-  trigger(target: ReactiveTarget, key: PropertyKey, type: TriggerOpType, newValue?: unknown): void {
+  trigger(
+    target: ReactiveRawTarget,
+    key: PropertyKey,
+    type: TriggerOpType,
+    newValue?: unknown,
+  ): void {
     const depsMap = this.targetMap.get(target)
 
     if (!depsMap) {
@@ -150,7 +155,7 @@ class DependencyRegistry {
    * @param key - 属性键
    * @returns 目标字段对应的依赖集合
    */
-  private getOrCreateDep(target: ReactiveTarget, key: PropertyKey): DependencyBucket {
+  private getOrCreateDep(target: ReactiveRawTarget, key: PropertyKey): DependencyBucket {
     /* 读取或初始化目标对象的依赖映射表 */
     let depsMap = this.targetMap.get(target)
 
@@ -184,7 +189,7 @@ const registry = new DependencyRegistry()
  * - 由 Proxy handler 的 get/has/ownKeys 等拦截器调用。
  * - 将当前活跃的 effect 加入目标字段的依赖集合。
  */
-export function track(target: ReactiveTarget, key: PropertyKey): void {
+export function track(target: ReactiveRawTarget, key: PropertyKey): void {
   registry.track(target, key)
 }
 
@@ -201,7 +206,7 @@ export function track(target: ReactiveTarget, key: PropertyKey): void {
  * - 触发目标字段依赖集合中的所有副作用重新执行。
  */
 export function trigger(
-  target: ReactiveTarget,
+  target: ReactiveRawTarget,
   key: PropertyKey,
   type: TriggerOpType,
   newValue?: unknown,

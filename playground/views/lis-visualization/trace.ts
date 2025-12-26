@@ -182,7 +182,7 @@ function findInsertPosition(sequence: number[], indexes: number[], target: numbe
  *
  * @remarks
  * 由于 `sequence` 数组在算法执行过程中会被替换操作修改，
- * 它只保存了每个长度���的最优尾部索引，而非完整的 LIS。
+ * 它只保存了每个长度的最优尾部索引，而非完整的 LIS。
  * 需要通过 `predecessors` 数组从尾部向前回溯，才能得到真正的 LIS。
  *
  * @param sequence - 递增序列的索引列表（仅用于获取尾部起点）

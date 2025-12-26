@@ -11,7 +11,7 @@ import type { InjectionKey } from '@/shared/index.ts'
  * - 用于嵌套 `RouterView` 场景下确定当前视图在 `matched` 数组中的索引。
  * - 每层 `RouterView` 会将深度 +1 后向下注入，子级据此读取对应组件。
  */
-const routerViewDepthKey: InjectionKey<number> = Symbol('router-view-depth')
+const routerViewDepthKey: InjectionKey<number> = Symbol('routerViewDepth')
 
 /**
  * 路由匹配结果获取器的类型定义。
@@ -29,7 +29,7 @@ type MatchedGetter = () => SetupComponent[]
  * - 首层 `RouterView` 创建 getter 并注入，内层直接复用。
  * - 避免每层都重新读取 `router.currentRoute`，保持渲染一致性。
  */
-const routerViewMatchedKey: InjectionKey<MatchedGetter> = Symbol('router-view-matched')
+const routerViewMatchedKey: InjectionKey<MatchedGetter> = Symbol('routerViewMatched')
 /**
  * `RouterView` 深度计数的默认起点。
  *

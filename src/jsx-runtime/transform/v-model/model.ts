@@ -39,6 +39,6 @@ export function setModelValue(modelBinding: unknown, value: unknown): void {
 
   /* 非 Ref 目标无法写入，在开发模式下发出警告。 */
   if (__DEV__) {
-    console.warn(jsxModelBindingReadonlyTarget, modelBinding)
+    console.warn(jsxModelBindingReadonlyTarget, { modelBinding, value })
   }
 }

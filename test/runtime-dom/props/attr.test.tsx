@@ -41,7 +41,10 @@ describe('runtime-dom attrs props', () => {
     const element = container.firstElementChild as HTMLDivElement
 
     expect(element.hasAttribute('title')).toBe(false)
-    expect(warn).toHaveBeenCalledWith(runtimeDomUnsupportedAttrValue('title', 'object'), payload)
+    expect(warn).toHaveBeenCalledWith(runtimeDomUnsupportedAttrValue('title', 'object'), {
+      element,
+      value: payload,
+    })
 
     warn.mockRestore()
   })

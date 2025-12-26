@@ -154,7 +154,10 @@ function patchStyleObject(
 
     if (typeof styleValue !== 'string' && typeof styleValue !== 'number') {
       if (__DEV__) {
-        console.warn(runtimeDomInvalidStyleValue(name, typeof styleValue), styleValue)
+        console.warn(runtimeDomInvalidStyleValue(name, typeof styleValue), {
+          element,
+          value: styleValue,
+        })
       }
 
       continue

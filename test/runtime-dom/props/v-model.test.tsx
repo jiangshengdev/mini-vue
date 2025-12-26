@@ -232,7 +232,10 @@ describe('runtime-dom JSX v-model', () => {
       />,
     )
 
-    expect(warn).toHaveBeenCalledWith(jsxModelBindingConflictWarning('input', ['value', 'onInput']))
+    expect(warn).toHaveBeenCalledWith(
+      jsxModelBindingConflictWarning('input', ['value', 'onInput']),
+      expect.any(Object),
+    )
 
     warn.mockRestore()
   })
@@ -249,7 +252,10 @@ describe('runtime-dom JSX v-model', () => {
     input.value = 'next'
     input.dispatchEvent(new Event('input'))
 
-    expect(warn).toHaveBeenCalledWith(jsxModelBindingReadonlyTarget, 'fixed')
+    expect(warn).toHaveBeenCalledWith(jsxModelBindingReadonlyTarget, {
+      modelBinding: 'fixed',
+      value: 'next',
+    })
 
     warn.mockRestore()
   })

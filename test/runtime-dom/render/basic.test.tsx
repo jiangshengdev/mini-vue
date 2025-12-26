@@ -136,7 +136,7 @@ describe('runtime-dom 基础渲染', () => {
 
       for (const [index, payload] of payloads.entries()) {
         expect(warnSpy.mock.calls[index]?.[0]).toBe(runtimeCoreObjectChildWarning)
-        expect(warnSpy.mock.calls[index]?.[1]).toBe(payload)
+        expect(warnSpy.mock.calls[index]?.[1]).toMatchObject({ child: payload })
       }
     } finally {
       warnSpy.mockRestore()

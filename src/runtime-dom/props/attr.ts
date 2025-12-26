@@ -67,6 +67,6 @@ export function patchDomAttr(
   }
 
   if (__DEV__) {
-    console.warn(runtimeDomUnsupportedAttrValue(key, typeof next), next)
+    console.warn(runtimeDomUnsupportedAttrValue(key, typeof next), { element, value: next })
   }
 }

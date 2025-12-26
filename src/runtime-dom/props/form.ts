@@ -77,7 +77,10 @@ function applySelectValue(element: HTMLSelectElement, value: unknown): void {
       normalized = String(next)
     } else {
       if (__DEV__) {
-        console.warn(runtimeDomUnsupportedAttrValue('value', typeof next), next)
+        console.warn(runtimeDomUnsupportedAttrValue('value', typeof next), {
+          element,
+          value: next,
+        })
       }
 
       normalized = ''

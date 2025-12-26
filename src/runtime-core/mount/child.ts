@@ -115,7 +115,7 @@ export function mountChild<
 
   /* 其他不受支持值统一忽略：开发期警告以提示用户修正输出。 */
   if (__DEV__) {
-    console.warn(runtimeCoreObjectChildWarning, child)
+    console.warn(runtimeCoreObjectChildWarning, { child, container })
   }
 
   return undefined

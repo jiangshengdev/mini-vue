@@ -17,6 +17,7 @@ import { isRef } from '../ref/api.ts'
 import { track, trigger } from './operations.ts'
 import { withoutTracking } from './tracking.ts'
 import { reactivityReadonlyWarning } from '@/messages/index.ts'
+import type { PlainObject } from '@/shared/index.ts'
 import { __DEV__, isArrayIndex, isObject } from '@/shared/index.ts'
 
 /** Proxy get 拦截器类型。 */
@@ -208,7 +209,13 @@ const mutableOwnKeys: ProxyHandler<ReactiveRawTarget>['ownKeys'] = (target) => {
  */
 const readonlySet: ProxyHandler<ReactiveRawTarget>['set'] = (target, key, value) => {
   if (__DEV__) {
-    console.warn(reactivityReadonlyWarning, { target, key, value })
+    const payload = {
+      target,
+      key,
+      value,
+    } satisfies PlainObject
+
+    console.warn(reactivityReadonlyWarning, payload)
   }
 
   return true
@@ -219,7 +226,12 @@ const readonlySet: ProxyHandler<ReactiveRawTarget>['set'] = (target, key, value)
  */
 const readonlyDeleteProperty: ProxyHandler<ReactiveRawTarget>['deleteProperty'] = (target, key) => {
   if (__DEV__) {
-    console.warn(reactivityReadonlyWarning, { target, key })
+    const payload = {
+      target,
+      key,
+    } satisfies PlainObject
+
+    console.warn(reactivityReadonlyWarning, payload)
   }
 
   return true

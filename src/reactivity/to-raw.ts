@@ -1,5 +1,5 @@
 import type { ReactiveRawTarget, ReactiveTarget } from './contracts/index.ts'
-import { rawFlag } from './contracts/index.ts'
+import { rawKey } from './contracts/index.ts'
 import { isObject, isPlainObject } from '@/shared/index.ts'
 
 /**
@@ -23,7 +23,7 @@ export function isSupportedTarget(target: unknown): target is ReactiveRawTarget 
  * @returns 原始对象，若非代理则返回原值
  *
  * @remarks
- * - 通过读取 `rawFlag` 符号属性获取原始对象，该属性由 Proxy handler 动态返回。
+ * - 通过读取 `rawKey` 符号属性获取原始对象，该属性由 Proxy handler 动态返回。
  * - 原始值、null、不支持的对象类型会直接返回原值。
  * - 常用于需要操作原始对象的场景，如序列化、比较等。
  *
@@ -38,7 +38,7 @@ export function toRaw<T>(target: T): T {
     return target
   }
 
-  const raw = (target as ReactiveTarget)[rawFlag] as unknown
+  const raw = (target as ReactiveTarget)[rawKey] as unknown
 
   return (raw ?? target) as T
 }

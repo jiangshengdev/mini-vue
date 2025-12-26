@@ -7,7 +7,7 @@ import {
 import type { ReactiveRawTarget } from '../contracts/index.ts'
 import {
   iterateDependencyKey,
-  rawFlag,
+  rawKey,
   reactiveFlag,
   readonlyFlag,
   triggerOpTypes,
@@ -30,7 +30,7 @@ type Getter = ProxyHandler<ReactiveRawTarget>['get']
  * @returns Proxy get 拦截器
  *
  * @remarks
- * - 处理内部标记（reactiveFlag/readonlyFlag/rawFlag）的读取。
+ * - 处理内部标记（reactiveFlag/readonlyFlag/rawKey）的读取。
  * - 数组变更方法和查询方法会返回特殊包装版本。
  * - 深层模式下嵌套对象会被懒代理。
  * - 对象属性中的 Ref 会被自动解包（数组索引除外）。
@@ -46,7 +46,7 @@ function createGetter(isReadonly: boolean, shallow: boolean): Getter {
       return isReadonly
     }
 
-    if (key === rawFlag) {
+    if (key === rawKey) {
       return target
     }
 

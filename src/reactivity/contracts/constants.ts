@@ -36,7 +36,7 @@ export const readonlyFlag = Symbol('isReadonly')
  * - 由 Proxy handler 拦截并返回 raw target。
  * - 用于实现 `toRaw`，避免依赖私有缓存做反查。
  */
-export const rawFlag = Symbol('raw')
+export const rawKey = Symbol('raw')
 
 /**
  * 触发操作类型常量，用于区分不同的响应式变更场景。

@@ -1,4 +1,4 @@
-import type { rawFlag, reactiveFlag, readonlyFlag } from './constants.ts'
+import type { rawKey, reactiveFlag, readonlyFlag } from './constants.ts'
 import type { PlainObject } from '@/shared/index.ts'
 
 /**
@@ -118,7 +118,7 @@ export interface ReactiveProxyInternals {
   /** 标记对象已被 `readonly` 代理，供 `isReadonly` 识别。 */
   readonly [readonlyFlag]?: true
   /** 存放对应的原始对象引用，便于 `toRaw` 取回。 */
-  readonly [rawFlag]?: PlainObject | unknown[]
+  readonly [rawKey]?: PlainObject | unknown[]
 }
 
 /** 支持响应式代理的原生目标类型，目前覆盖普通对象与数组。 */

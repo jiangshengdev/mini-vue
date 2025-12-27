@@ -2,10 +2,10 @@ import { describe, expect, it, vi } from 'vitest'
 import userEvent from '@testing-library/user-event'
 import { createTestContainer } from '$/index.ts'
 import type { SetupComponent } from '@/index.ts'
-import { reactive, render } from '@/index.ts'
+import { nextTick, reactive, render } from '@/index.ts'
 
 describe('runtime-dom patch/diff', () => {
-  it('组件更新复用同一文本节点', () => {
+  it('组件更新复用同一文本节点', async () => {
     const container = createTestContainer()
     const state = reactive({ msg: 'hello' })
 
@@ -20,6 +20,8 @@ describe('runtime-dom patch/diff', () => {
     const textNode = container.querySelector('p')?.firstChild
 
     state.msg = 'world'
+
+    await nextTick()
 
     expect(container.querySelector('p')?.firstChild).toBe(textNode)
     expect(container.querySelector('p')?.textContent).toBe('world')
@@ -73,7 +75,7 @@ describe('runtime-dom patch/diff', () => {
     expect(button.dataset.id).toBeUndefined()
   })
 
-  it('keyed children 只移动不重建节点', () => {
+  it('keyed children 只移动不重建节点', async () => {
     const container = createTestContainer()
     const state = reactive({
       items: ['a', 'b', 'c'],
@@ -96,6 +98,8 @@ describe('runtime-dom patch/diff', () => {
     const initialNodes = [...container.querySelectorAll('li')]
 
     state.items = ['c', 'a', 'b']
+
+    await nextTick()
 
     const updatedNodes = [...container.querySelectorAll('li')]
 

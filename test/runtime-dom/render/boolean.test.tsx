@@ -2,10 +2,10 @@ import { describe, expect, it } from 'vitest'
 import { within } from '@testing-library/dom'
 import { createTestContainer, renderIntoNewContainer } from '$/index.ts'
 import type { SetupComponent } from '@/index.ts'
-import { render } from '@/index.ts'
+import { nextTick, render } from '@/index.ts'
 
 describe('runtime-dom 布尔子节点', () => {
-  it('布尔子节点在 false 时不会渲染文本', () => {
+  it('布尔子节点在 false 时不会渲染文本', async () => {
     interface FlagProps {
       flag: boolean
     }
@@ -25,6 +25,7 @@ describe('runtime-dom 布尔子节点', () => {
     expect(container.firstElementChild).toBeEmptyDOMElement()
 
     render(<FlagView flag />, container)
+    await nextTick()
     expect(view.getByText('ok')).toHaveTextContent('ok')
   })
 

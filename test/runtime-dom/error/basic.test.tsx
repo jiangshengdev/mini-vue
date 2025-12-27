@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createTestContainer, renderIntoNewContainer } from '$/index.ts'
 import type { ErrorHandler, SetupComponent } from '@/index.ts'
-import { reactive, render, setErrorHandler } from '@/index.ts'
+import { nextTick, reactive, render, setErrorHandler } from '@/index.ts'
 import { errorContexts } from '@/shared/index.ts'
 
 describe('runtime-dom 组件错误隔离（基础）', () => {
@@ -61,7 +61,7 @@ describe('runtime-dom 组件错误隔离（基础）', () => {
     expect(container.querySelector('[data-testid="faulty"]')).toBeNull()
   })
 
-  it('首次渲染抛错会停止组件 effect 且不阻断兄弟渲染', () => {
+  it('首次渲染抛错会停止组件 effect 且不阻断兄弟渲染', async () => {
     const container = createTestContainer()
     const handler = vi.fn<ErrorHandler>()
     const boom = new Error('render failed')
@@ -103,12 +103,14 @@ describe('runtime-dom 组件错误隔离（基础）', () => {
 
     state.count += 1
 
+    await nextTick()
+
     expect(renderSpy).toHaveBeenCalledTimes(1)
     expect(handler).toHaveBeenCalledTimes(1)
     expect(container.querySelector('[data-testid="sibling"]')?.textContent).toBe('ok')
   })
 
-  it('更新阶段抛错会保留旧子树且不影响兄弟', () => {
+  it('更新阶段抛错会保留旧子树且不影响兄弟', async () => {
     const container = createTestContainer()
     const handler = vi.fn<ErrorHandler>()
     const boom = new Error('update failed')
@@ -156,6 +158,8 @@ describe('runtime-dom 组件错误隔离（基础）', () => {
 
     state.count += 1
 
+    await nextTick()
+
     expect(handler).toHaveBeenCalledTimes(1)
     const [error, context] = handler.mock.calls[0]
 
@@ -166,7 +170,9 @@ describe('runtime-dom 组件错误隔离（基础）', () => {
 
     state.count += 1
 
-    expect(handler).toHaveBeenCalledTimes(1)
+    await nextTick()
+
+    expect(handler).toHaveBeenCalledTimes(2)
     expect(getFaulty()?.textContent).toBe('fine')
     expect(getSibling()?.textContent).toBe('ok')
   })

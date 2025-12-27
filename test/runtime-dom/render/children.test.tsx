@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { within } from '@testing-library/dom'
 import { createTestContainer, renderIntoNewContainer } from '$/index.ts'
 import type { SetupComponent } from '@/index.ts'
-import { reactive, render } from '@/index.ts'
+import { nextTick, reactive, render } from '@/index.ts'
 
 describe('runtime-dom children 形态', () => {
   it('无 children 时 props.children 为 undefined', () => {
@@ -79,7 +79,7 @@ describe('runtime-dom children 形态', () => {
     expect(view.getByText('second')).toBeDefined()
   })
 
-  it('组件重渲染不会改变兄弟顺序', () => {
+  it('组件重渲染不会改变兄弟顺序', async () => {
     const state = reactive({ mid: 'middle' })
 
     const Middle: SetupComponent = () => {
@@ -110,10 +110,12 @@ describe('runtime-dom children 形态', () => {
 
     state.mid = 'updated'
 
+    await nextTick()
+
     expect(readOrder()).toEqual(['first', 'updated', 'last'])
   })
 
-  it('Fragment 包单组件时重渲染不会改变兄弟顺序', () => {
+  it('Fragment 包单组件时重渲染不会改变兄弟顺序', async () => {
     const state = reactive({ mid: 'middle' })
 
     const Middle: SetupComponent = () => {
@@ -145,6 +147,8 @@ describe('runtime-dom children 形态', () => {
     expect(readOrder()).toEqual(['first', 'middle', 'last'])
 
     state.mid = 'updated'
+
+    await nextTick()
 
     expect(readOrder()).toEqual(['first', 'updated', 'last'])
   })

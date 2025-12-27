@@ -9,14 +9,19 @@
 
 ## Action items
 
-[ ] 梳理现有 `ReactiveEffect` 调度入口与组件 render effect 调用链，明确接入点（如 `src/runtime-core/component/render-effect.ts`）。  
-[ ] 设计微任务调度器：任务队列去重、flush 时序、错误处理与递归更新防护；确定微任务实现方式（`Promise`/`queueMicrotask`）。  
-[ ] 实现 `nextTick(callback?)`，复用同一 flush，返回 Promise，覆盖 callback/await 用法。  
-[ ] 将组件 render effect 的 scheduler 接入新调度器，确保同一 tick 多次触发只执行一次渲染，同时保持首渲染同步。  
-[ ] 预留/插入 `onBeforeUpdate`/`onUpdated` 钩子执行时机（只留 TODO/占位，不实现钩子），防止调度栈溢出或无限循环。  
-[ ] 补充测试：调度去重、嵌套触发、错误不破坏队列、`nextTick` 顺序、组件更新批量合并等。  
-[ ] 评估边界风险：大批量任务、错误传播、SSR/无 DOM 环境兼容；无需宏任务降级（目标环境具备微任务）。  
-[ ] 运行相关测试套件（至少 `pnpm run test`）验证无回归。
+[x] 梳理现有 `ReactiveEffect` 调度入口与组件 render effect 调用链，明确接入点（如 `src/runtime-core/component/render-effect.ts`）。  
+[x] 设计微任务调度器：任务队列去重、flush 时序、错误处理与递归更新防护；确定微任务实现方式（`Promise`/`queueMicrotask`）。  
+[x] 实现 `nextTick(callback?)`，复用同一 flush，返回 Promise，覆盖 callback/await 用法。  
+[x] 将组件 render effect 的 scheduler 接入新调度器，确保同一 tick 多次触发只执行一次渲染，同时保持首渲染同步。  
+[x] 预留/插入 `onBeforeUpdate`/`onUpdated` 钩子执行时机（只留 TODO/占位，不实现钩子），防止调度栈溢出或无限循环。  
+[x] 补充测试：调度去重、嵌套触发、错误不破坏队列、`nextTick` 顺序、组件更新批量合并等。  
+[x] 评估边界风险：大批量任务、错误传播、SSR/无 DOM 环境兼容；无需宏任务降级（目标环境具备微任务）。  
+[x] 运行相关测试套件（至少 `pnpm run test`）验证无回归。  
+
+风险评估结论：
+- 大批量任务：队列使用数组 + Set 去重，单轮按插入序遍历；若持续入队会延长单个微任务执行时间，但不会丢任务。
+- 错误传播：`runSilent` 统一上报且不中断后续 job，同一 tick 内重复错误仅首个触发处理器，符合 dedupe 设计。
+- 兼容性：依赖微任务能力（`Promise.resolve()`），不涉及 DOM API，对 SSR/无 DOM 环境无额外假设；未做宏任务降级按目标环境约束。
 
 ## 决策与约束
 

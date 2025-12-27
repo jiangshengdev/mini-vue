@@ -3,7 +3,7 @@ import { within } from '@testing-library/dom'
 import userEvent from '@testing-library/user-event'
 import { renderIntoNewContainer } from '$/index.ts'
 import type { Ref, SetupComponent } from '@/index.ts'
-import { ref } from '@/index.ts'
+import { nextTick, ref } from '@/index.ts'
 import {
   jsxModelBindingConflictWarning,
   jsxModelBindingNonFormWarning,
@@ -33,6 +33,8 @@ describe('runtime-dom JSX v-model', () => {
 
     text.value = 'patched'
 
+    await nextTick()
+
     expect(input.value).toBe('patched')
 
     await user.type(input, '!')
@@ -60,6 +62,8 @@ describe('runtime-dom JSX v-model', () => {
     expect(checked.value).toBe(false)
 
     checked.value = true
+
+    await nextTick()
 
     expect(input.checked).toBe(true)
   })
@@ -145,7 +149,7 @@ describe('runtime-dom JSX v-model', () => {
 
     const select = within(container).getByLabelText<HTMLSelectElement>('single')
 
-    await Promise.resolve()
+    await nextTick()
 
     expect(select.value).toBe('b')
 
@@ -156,7 +160,7 @@ describe('runtime-dom JSX v-model', () => {
 
     selected.value = 'a'
 
-    await Promise.resolve()
+    await nextTick()
 
     expect(select.value).toBe('a')
   })
@@ -180,7 +184,7 @@ describe('runtime-dom JSX v-model', () => {
 
     const select = within(container).getByLabelText<HTMLSelectElement>('multi')
 
-    await Promise.resolve()
+    await nextTick()
 
     expect(
       [...select.selectedOptions].map((option) => {
@@ -190,7 +194,7 @@ describe('runtime-dom JSX v-model', () => {
 
     selected.value = ['b', 'c']
 
-    await Promise.resolve()
+    await nextTick()
 
     expect(
       [...select.selectedOptions].map((option) => {

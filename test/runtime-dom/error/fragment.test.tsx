@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createTestContainer, renderIntoNewContainer } from '$/index.ts'
 import type { ErrorHandler, SetupComponent } from '@/index.ts'
-import { reactive, render, setErrorHandler } from '@/index.ts'
+import { nextTick, reactive, render, setErrorHandler } from '@/index.ts'
 import { errorContexts } from '@/shared/index.ts'
 
 describe('runtime-dom 组件错误隔离（fragment）', () => {
@@ -35,7 +35,7 @@ describe('runtime-dom 组件错误隔离（fragment）', () => {
     expect(container.querySelector('[data-testid="sibling"]')?.textContent).toBe('ok')
   })
 
-  it('有故障的子组件保留旧视图且兄弟仍可响应更新', () => {
+  it('有故障的子组件保留旧视图且兄弟仍可响应更新', async () => {
     const container = createTestContainer()
     const handler = vi.fn<ErrorHandler>()
     const boom = new Error('rerender failed')
@@ -89,18 +89,22 @@ describe('runtime-dom 组件错误隔离（fragment）', () => {
 
     state.a += 1
 
+    await nextTick()
+
     expect(handler).toHaveBeenCalledTimes(1)
     expect(getFaulty()?.textContent).toBe('a:0')
     expect(getSibling()?.textContent).toBe('b:0')
 
     state.b += 1
 
+    await nextTick()
+
     expect(getSibling()?.textContent).toBe('b:1')
     expect(getFaulty()?.textContent).toBe('a:0')
     expect(handler).toHaveBeenCalledTimes(1)
   })
 
-  it('Fragment 内子组件渲染失败不会误移除兄弟', () => {
+  it('Fragment 内子组件渲染失败不会误移除兄弟', async () => {
     const container = createTestContainer()
     const handler = vi.fn<ErrorHandler>()
     const boom = new Error('fragment rerender failed')
@@ -149,11 +153,15 @@ describe('runtime-dom 组件错误隔离（fragment）', () => {
 
     state.a += 1
 
+    await nextTick()
+
     expect(handler).toHaveBeenCalledTimes(1)
     expect(getFaulty()?.textContent).toBe('a:0')
     expect(getSibling()?.textContent).toBe('b:0')
 
     state.b += 1
+
+    await nextTick()
 
     expect(getSibling()?.textContent).toBe('b:1')
     expect(getFaulty()?.textContent).toBe('a:0')

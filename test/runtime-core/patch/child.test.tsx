@@ -4,6 +4,7 @@ import { createHostRenderer, normalize } from './test-utils.ts'
 import type { NormalizedVirtualNode } from '@/runtime-core/index.ts'
 import { asRuntimeVirtualNode, mountChild, patchChild } from '@/runtime-core/index.ts'
 import type { SetupComponent } from '@/index.ts'
+import { nextTick } from '@/index.ts'
 import * as patchChildrenModule from '@/runtime-core/patch/children.ts'
 
 vi.mock('@/runtime-core/patch/children.ts', { spy: true })
@@ -91,7 +92,7 @@ describe('patchChild 元素/Fragment/组件 patch 行为', () => {
     expect(runtimePrevious.anchor).not.toBe(parentAnchor)
   })
 
-  it('组件重渲染抛错时保持旧子树不被替换', () => {
+  it('组件重渲染抛错时保持旧子树不被替换', async () => {
     const renderCounts: number[] = []
     const ThrowingComponent: SetupComponent = () => {
       let renderCount = 0
@@ -120,6 +121,8 @@ describe('patchChild 元素/Fragment/组件 patch 行为', () => {
     const beforeNodes = [...host.container.children]
 
     patchChild(host.options, previous, next, { container: host.container })
+
+    await nextTick()
 
     expect(host.counters.appendChild).toBe(0)
     expect(host.counters.insertBefore).toBe(0)

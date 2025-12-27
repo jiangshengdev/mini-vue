@@ -3,7 +3,7 @@ import { within } from '@testing-library/dom'
 import userEvent from '@testing-library/user-event'
 import { createTestContainer, renderIntoNewContainer } from '$/index.ts'
 import type { SetupComponent } from '@/index.ts'
-import { Fragment, reactive, render } from '@/index.ts'
+import { Fragment, nextTick, reactive, render } from '@/index.ts'
 import { runtimeCoreObjectChildWarning } from '@/messages/index.ts'
 
 describe('runtime-dom 基础渲染', () => {
@@ -80,7 +80,7 @@ describe('runtime-dom 基础渲染', () => {
     expect(view.getByText('second')).toBeInTheDocument()
   })
 
-  it('重复 render 会清理旧树的 effect', () => {
+  it('重复 render 会清理旧树的 effect', async () => {
     const renderSpy = vi.fn()
     const state = reactive({ count: 0 })
     const container = createTestContainer()
@@ -100,11 +100,15 @@ describe('runtime-dom 基础渲染', () => {
 
     state.count = 1
 
+    await nextTick()
+
     expect(renderSpy).toHaveBeenCalledTimes(2)
     expect(container.querySelector('[data-testid="count"]')?.textContent).toBe('1')
 
     render(<div data-testid="next">next</div>, container)
     state.count = 2
+
+    await nextTick()
 
     expect(renderSpy).toHaveBeenCalledTimes(2)
     expect(container.querySelector('[data-testid="next"]')?.textContent).toBe('next')

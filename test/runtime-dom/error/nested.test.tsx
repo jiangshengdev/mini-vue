@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createTestContainer, renderIntoNewContainer } from '$/index.ts'
 import type { ErrorHandler, SetupComponent } from '@/index.ts'
-import { reactive, render, setErrorHandler } from '@/index.ts'
+import { nextTick, reactive, render, setErrorHandler } from '@/index.ts'
 import { errorContexts } from '@/shared/index.ts'
 
 describe('runtime-dom 组件错误隔离（嵌套）', () => {
@@ -40,7 +40,7 @@ describe('runtime-dom 组件错误隔离（嵌套）', () => {
     expect(container.querySelector('[data-testid="sibling"]')?.textContent).toBe('stay')
   })
 
-  it('嵌套子组件更新抛错会保留旧子树', () => {
+  it('嵌套子组件更新抛错会保留旧子树', async () => {
     const container = createTestContainer()
     const handler = vi.fn<ErrorHandler>()
     const boom = new Error('nested update failed')
@@ -87,6 +87,8 @@ describe('runtime-dom 组件错误隔离（嵌套）', () => {
 
     state.count += 1
 
+    await nextTick()
+
     expect(handler).toHaveBeenCalledTimes(1)
     const [error, context] = handler.mock.calls[0]
 
@@ -122,7 +124,7 @@ describe('runtime-dom 组件错误隔离（嵌套）', () => {
     expect(container.querySelector('[data-testid="ok"]')?.textContent).toBe('ok')
   })
 
-  it('数组 children 更新抛错会保留故障子树', () => {
+  it('数组 children 更新抛错会保留故障子树', async () => {
     const container = createTestContainer()
     const handler = vi.fn<ErrorHandler>()
     const boom = new Error('list update failed')
@@ -163,6 +165,8 @@ describe('runtime-dom 组件错误隔离（嵌套）', () => {
     expect(handler).not.toHaveBeenCalled()
 
     state.count += 1
+
+    await nextTick()
 
     expect(handler).toHaveBeenCalledTimes(1)
     const [error, context] = handler.mock.calls[0]

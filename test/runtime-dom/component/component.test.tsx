@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { within } from '@testing-library/dom'
 import { createTestContainer } from '$/index.ts'
 import type { ErrorHandler, SetupComponent } from '@/index.ts'
-import { reactive, render, setErrorHandler, watch } from '@/index.ts'
+import { nextTick, reactive, render, setErrorHandler, watch } from '@/index.ts'
 import { getCurrentInstance } from '@/runtime-core/index.ts'
 import { errorContexts } from '@/shared/index.ts'
 
@@ -47,7 +47,7 @@ describe('runtime-dom component reactivity', () => {
     expect(within(container).getByText('second')).toBeInTheDocument()
   })
 
-  it('组件体读取 reactive 数据时会自动重渲染', () => {
+  it('组件体读取 reactive 数据时会自动重渲染', async () => {
     let capturedState: { count: number } | undefined
 
     const Counter: SetupComponent = () => {
@@ -69,13 +69,15 @@ describe('runtime-dom component reactivity', () => {
     expect(view.getByText('count: 0')).toBeInTheDocument()
 
     capturedState!.count = 1
+    await nextTick()
     expect(view.getByText('count: 1')).toBeInTheDocument()
 
     capturedState!.count = 2
+    await nextTick()
     expect(view.getByText('count: 2')).toBeInTheDocument()
   })
 
-  it('容器卸载后会停止组件渲染 effect', () => {
+  it('容器卸载后会停止组件渲染 effect', async () => {
     const renderSpy = vi.fn()
     let capturedState: { on: boolean } | undefined
 
@@ -101,6 +103,7 @@ describe('runtime-dom component reactivity', () => {
     expect(view.getByText('OFF')).toBeInTheDocument()
 
     capturedState!.on = true
+    await nextTick()
     expect(renderSpy).toHaveBeenCalledTimes(2)
     expect(view.getByText('ON')).toBeInTheDocument()
 
@@ -108,10 +111,11 @@ describe('runtime-dom component reactivity', () => {
     expect(container).toBeEmptyDOMElement()
 
     capturedState!.on = false
+    await nextTick()
     expect(renderSpy).toHaveBeenCalledTimes(2)
   })
 
-  it('返回空子树的组件也会在卸载时停止 effect', () => {
+  it('返回空子树的组件也会在卸载时停止 effect', async () => {
     const renderSpy = vi.fn()
     let capturedState: { visible: boolean } | undefined
 
@@ -139,6 +143,7 @@ describe('runtime-dom component reactivity', () => {
     expect(container).toBeEmptyDOMElement()
 
     capturedState!.visible = true
+    await nextTick()
     expect(renderSpy).toHaveBeenCalledTimes(2)
     expect(container.textContent).toBe('ghost')
 
@@ -146,6 +151,7 @@ describe('runtime-dom component reactivity', () => {
     expect(container).toBeEmptyDOMElement()
 
     capturedState!.visible = false
+    await nextTick()
     expect(renderSpy).toHaveBeenCalledTimes(2)
   })
 

@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { within } from '@testing-library/dom'
 import { createTestContainer, renderIntoNewContainer } from '$/index.ts'
 import type { ElementRef, SetupComponent } from '@/index.ts'
-import { createApp, reactive, ref, render } from '@/index.ts'
+import { createApp, nextTick, reactive, ref, render } from '@/index.ts'
 
 describe('runtime-dom ref 回调', () => {
   it('render 卸载时会以 undefined 调用 ref', () => {
@@ -25,7 +25,7 @@ describe('runtime-dom ref 回调', () => {
     expect(refSpy).toHaveBeenLastCalledWith(undefined)
   })
 
-  it('组件重渲染与卸载都会清理 ref', () => {
+  it('组件重渲染与卸载都会清理 ref', async () => {
     const refSpy = vi.fn<(element: Element | undefined) => void>()
     const state = reactive({ label: 'first' })
 
@@ -53,6 +53,8 @@ describe('runtime-dom ref 回调', () => {
     expect(refSpy).toHaveBeenLastCalledWith(firstButton)
 
     state.label = 'second'
+
+    await nextTick()
 
     const secondButton = within(container).getByRole('button', {
       name: 'second',
@@ -99,7 +101,7 @@ describe('runtime-dom ref 回调', () => {
     expect(container).toBeEmptyDOMElement()
   })
 
-  it('组件重渲染与卸载同样支持响应式 ref', () => {
+  it('组件重渲染与卸载同样支持响应式 ref', async () => {
     const elementRef = ref<Element | undefined>(undefined)
     const state = reactive({ label: 'first' })
 
@@ -122,6 +124,8 @@ describe('runtime-dom ref 回调', () => {
     expect(elementRef.value?.textContent).toBe('first')
 
     state.label = 'second'
+
+    await nextTick()
 
     expect(elementRef.value).not.toBeUndefined()
     expect(elementRef.value?.textContent).toBe('second')

@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { screen, within } from '@testing-library/dom'
 import { createHostWithApp } from '$/index.ts'
 import type { SetupComponent } from '@/index.ts'
-import { reactive } from '@/index.ts'
+import { nextTick, reactive } from '@/index.ts'
 import { runtimeCoreAppAlreadyMounted, runtimeDomContainerNotFound } from '@/messages/index.ts'
 
 const App: SetupComponent = () => {
@@ -67,7 +67,7 @@ describe('runtime-dom createApp', () => {
     expect(host).toBeEmptyDOMElement()
   })
 
-  it('根组件可以直接消费 reactive 并刷新视图', () => {
+  it('根组件可以直接消费 reactive 并刷新视图', async () => {
     const state = reactive({ count: 0 })
 
     const Root: SetupComponent = () => {
@@ -85,13 +85,15 @@ describe('runtime-dom createApp', () => {
     expect(view.getByText('count: 0')).toBeInTheDocument()
 
     state.count = 1
+
+    await nextTick()
     expect(view.getByText('count: 1')).toBeInTheDocument()
 
     app.unmount()
     expect(host).toBeEmptyDOMElement()
   })
 
-  it('根组件卸载后会停止响应式 effect', () => {
+  it('根组件卸载后会停止响应式 effect', async () => {
     const renderSpy = vi.fn()
     const state = reactive({ on: false })
 
@@ -111,6 +113,8 @@ describe('runtime-dom createApp', () => {
     expect(screen.getByText('OFF')).toBeInTheDocument()
 
     state.on = true
+
+    await nextTick()
     expect(renderSpy).toHaveBeenCalledTimes(2)
     expect(screen.getByText('ON')).toBeInTheDocument()
 
@@ -118,6 +122,8 @@ describe('runtime-dom createApp', () => {
     expect(host).toBeEmptyDOMElement()
 
     state.on = false
+
+    await nextTick()
     expect(renderSpy).toHaveBeenCalledTimes(2)
   })
 })

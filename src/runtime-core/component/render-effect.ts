@@ -3,6 +3,7 @@ import type { MountedHandle } from '../mount/handle.ts'
 import type { NormalizedVirtualNode } from '../normalize.ts'
 import { normalizeRenderOutput } from '../normalize.ts'
 import { patchChild } from '../patch/index.ts'
+import { queueSchedulerJob } from '../scheduler.ts'
 import { asRuntimeVirtualNode } from '../virtual-node.ts'
 import { mountComponentSubtreeWithAnchors } from './anchor.ts'
 import type { ComponentInstance } from './context.ts'
@@ -85,6 +86,21 @@ function createRenderEffect<
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
 ): ReactiveEffect<NormalizedVirtualNode | undefined> {
+  let pendingRenderJob: (() => void) | undefined
+
+  const componentUpdateJob = (): void => {
+    const job = pendingRenderJob
+
+    pendingRenderJob = undefined
+
+    /* 组件已卸载或缺少 runner 时无需继续执行。 */
+    if (!job || !instance.effect?.active) {
+      return
+    }
+
+    rerenderComponent(options, instance, job)
+  }
+
   const effect = new ReactiveEffect<NormalizedVirtualNode | undefined>(
     () => {
       /* 每次渲染时记录最新子树，供后续挂载或复用。 */
@@ -95,8 +111,8 @@ function createRenderEffect<
       return subtree
     },
     (renderSchedulerJob) => {
-      /* 调度阶段尝试生成新子树，成功后再替换旧挂载。 */
-      rerenderComponent(options, instance, renderSchedulerJob)
+      pendingRenderJob = renderSchedulerJob
+      queueSchedulerJob(componentUpdateJob)
     },
   )
 
@@ -128,7 +144,7 @@ function rerenderComponent<
   /* 调度执行由 `effect` 决定，异常时标记失败并避免替换旧子树。 */
   runSilent(renderSchedulerJob, {
     origin: errorContexts.scheduler,
-    handlerPhase: errorPhases.sync,
+    handlerPhase: errorPhases.async,
     afterRun(token) {
       if (token?.error) {
         rerenderFailed = true
@@ -142,7 +158,11 @@ function rerenderComponent<
     return
   }
 
+  /* 预留 onBeforeUpdate 生命周期钩子触发时机。 */
+
   patchLatestSubtree(options, instance, previousSubTree)
+
+  /* 预留 onUpdated 生命周期钩子触发时机。 */
 }
 
 /**

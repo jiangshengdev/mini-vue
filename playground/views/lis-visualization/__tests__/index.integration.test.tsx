@@ -9,6 +9,7 @@ import type * as HoverManagerModule from '../controllers/hover-manager.ts'
 import type { HoverManagerDeps } from '../types.ts'
 import { LongestIncreasingSubsequenceVisualization } from '../index.tsx'
 import { createHostWithApp } from '$/index.ts'
+import { nextTick } from '@/index.ts'
 
 const hoverLogs = vi.hoisted(() => {
   return [] as number[][]
@@ -62,12 +63,14 @@ describe('LongestIncreasingSubsequenceVisualization 编排层', () => {
     app.unmount()
   })
 
-  it('清空输入应切换到空状态视图', () => {
+  it('清空输入应切换到空状态视图', async () => {
     const { app, container } = mountApp()
 
     const clearButton = container.querySelector('button[title="清空输入"]')!
 
     clearButton.dispatchEvent(new Event('click', { bubbles: true }))
+
+    await nextTick()
 
     expect(container.textContent).toContain('请输入数组以开始可视化')
     expect(container.querySelector('[title^="点击跳转到第"]')).toBeNull()
@@ -76,7 +79,7 @@ describe('LongestIncreasingSubsequenceVisualization 编排层', () => {
     app.unmount()
   })
 
-  it('输入变更后播放应基于新导航器推进并自动停止', () => {
+  it('输入变更后播放应基于新导航器推进并自动停止', async () => {
     vi.useFakeTimers()
 
     const { app, container } = mountApp()
@@ -86,6 +89,8 @@ describe('LongestIncreasingSubsequenceVisualization 编排层', () => {
     input.value = '1 2'
     input.dispatchEvent(new Event('input', { bubbles: true }))
 
+    await nextTick()
+
     expect(container.textContent).toContain('第 0 步 / 共 2 步')
 
     const playButton = container.querySelector('button[title="自动播放/暂停（Space）"]')!
@@ -93,12 +98,15 @@ describe('LongestIncreasingSubsequenceVisualization 编排层', () => {
     playButton.dispatchEvent(new Event('click', { bubbles: true }))
 
     vi.advanceTimersByTime(500)
+    await nextTick()
     expect(container.textContent).toContain('第 1 步 / 共 2 步')
 
     vi.advanceTimersByTime(500)
+    await nextTick()
     expect(container.textContent).toContain('第 2 步 / 共 2 步')
 
     vi.advanceTimersByTime(500)
+    await nextTick()
     expect(playButton.textContent).toContain('自动')
 
     app.unmount()
@@ -111,7 +119,7 @@ describe('LongestIncreasingSubsequenceVisualization 编排层', () => {
 
     nextButton.dispatchEvent(new Event('click', { bubbles: true }))
 
-    await Promise.resolve()
+    await nextTick()
 
     expect(container.textContent).toContain('第 1 步 / 共 5 步')
 

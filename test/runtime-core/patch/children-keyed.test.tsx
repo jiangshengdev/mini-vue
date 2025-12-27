@@ -7,7 +7,7 @@ import {
   patchChild,
   patchChildren,
 } from '@/runtime-core/index.ts'
-import { Fragment, ref } from '@/index.ts'
+import { Fragment, nextTick, ref } from '@/index.ts'
 import { createTextVirtualNode } from '@/jsx-foundation/index.ts'
 
 function collectLeafTexts(node: TestNode, output: string[]): void {
@@ -384,7 +384,7 @@ describe('patchChildren 有 key diff', () => {
     expect(host.container.children[1]).not.toBe(firstRuntime.el)
   })
 
-  it('组件移动后 rerender 仍按锚点顺序插入', () => {
+  it('组件移动后 rerender 仍按锚点顺序插入', async () => {
     const host = createHostRenderer()
     const createToggleComponent = (label: string) => {
       const expanded = ref(false)
@@ -434,6 +434,8 @@ describe('patchChildren 有 key diff', () => {
     expect(anchorA && host.container.children.at(-1)).toBe(anchorA)
 
     componentA.expand()
+
+    await nextTick()
 
     const elementOrder = host.container.children
       .filter((node) => {

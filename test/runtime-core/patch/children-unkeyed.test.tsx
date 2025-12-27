@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { createHostRenderer, normalize } from './test-utils.ts'
 import { mountChild, patchChild, patchChildren } from '@/runtime-core/index.ts'
-import { ref } from '@/index.ts'
+import { nextTick, ref } from '@/index.ts'
 
 describe('patchChildren 无 key diff', () => {
   it('公共区间按派生锚点上下文 patch', () => {
@@ -77,7 +77,7 @@ describe('patchChildren 无 key diff', () => {
     ).toEqual(['div'])
   })
 
-  it('组件 rerender 切换多节点时保持顺序', () => {
+  it('组件 rerender 切换多节点时保持顺序', async () => {
     const host = createHostRenderer()
     const createToggleComponent = (label: string) => {
       const expanded = ref(false)
@@ -120,6 +120,8 @@ describe('patchChildren 无 key diff', () => {
     })
 
     componentA.expand()
+
+    await nextTick()
 
     const elementOrder = host.container.children
       .filter((node) => {

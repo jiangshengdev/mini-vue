@@ -2,7 +2,7 @@ import type { MockInstance } from 'vitest'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createHostRenderer } from '../patch/test-utils.ts'
 import type { SetupComponent } from '@/index.ts'
-import { effect, isReactive, ref } from '@/index.ts'
+import { effect, isReactive, nextTick, ref } from '@/index.ts'
 import { createRenderer } from '@/runtime-core/index.ts'
 
 describe('runtime-core 组件 props 响应式', () => {
@@ -18,7 +18,7 @@ describe('runtime-core 组件 props 响应式', () => {
     warn.mockRestore()
   })
 
-  it('props 为浅只读响应式，依赖追踪随父级更新', () => {
+  it('props 为浅只读响应式，依赖追踪随父级更新', async () => {
     const host = createHostRenderer()
     const renderer = createRenderer(host.options)
     const message = ref('foo')
@@ -45,11 +45,13 @@ describe('runtime-core 组件 props 响应式', () => {
     expect(observed).toBe('foo')
     message.value = 'bar'
 
+    await nextTick()
+
     expect(observed).toBe('bar')
     expect(host.container.children[0]?.children[0]?.text).toBe('bar')
   })
 
-  it('props 只读且不主动深度响应', () => {
+  it('props 只读且不主动深度响应', async () => {
     const host = createHostRenderer()
     const renderer = createRenderer(host.options)
     const nested = { foo: 'bar' }
@@ -90,6 +92,8 @@ describe('runtime-core 组件 props 响应式', () => {
     expect(nestedEffectRuns).toBe(1)
 
     message.value = 'bar'
+
+    await nextTick()
     expect(receivedProps?.msg).toBe('bar')
   })
 })

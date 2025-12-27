@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createTestContainer } from '$/index.ts'
 import type { ErrorHandler, SetupComponent } from '@/index.ts'
-import { reactive, render, setErrorHandler } from '@/index.ts'
+import { nextTick, reactive, render, setErrorHandler } from '@/index.ts'
 import { errorContexts } from '@/shared/index.ts'
 
 describe('runtime-dom fragment 边界', () => {
@@ -9,7 +9,7 @@ describe('runtime-dom fragment 边界', () => {
     setErrorHandler(undefined)
   })
 
-  it('隐藏片段不会误移除外部兄弟', () => {
+  it('隐藏片段不会误移除外部兄弟', async () => {
     const container = createTestContainer()
     const state = reactive({ show: true })
 
@@ -32,12 +32,14 @@ describe('runtime-dom fragment 边界', () => {
 
     state.show = false
 
+    await nextTick()
+
     expect(container.querySelector('[data-testid="a"]')).toBeNull()
     expect(container.querySelector('[data-testid="b"]')).toBeNull()
     expect(container.querySelector('[data-testid="tail"]')?.textContent).toBe('tail')
   })
 
-  it('片段子组件故障时保留旧子树且外部兄弟仍可更新', () => {
+  it('片段子组件故障时保留旧子树且外部兄弟仍可更新', async () => {
     const container = createTestContainer()
     const handler = vi.fn<ErrorHandler>()
     const boom = new Error('fragment child failed')
@@ -94,6 +96,8 @@ describe('runtime-dom fragment 边界', () => {
 
     state.fail = true
 
+    await nextTick()
+
     expect(handler).toHaveBeenCalledTimes(1)
     const [error, context] = handler.mock.calls[0]
 
@@ -105,6 +109,8 @@ describe('runtime-dom fragment 边界', () => {
 
     state.stable += 1
     state.tail += 1
+
+    await nextTick()
 
     expect(getStable()?.textContent).toBe('stable:1')
     expect(getTail()?.textContent).toBe('tail:1')

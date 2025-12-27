@@ -3,7 +3,7 @@ import process from 'node:process'
 import ts from 'typescript'
 import { resolveFromImportMeta } from '../_shared/paths.ts'
 import type { Position } from '../_shared/ts-check.ts'
-import { getPosition, listTsFilesInDir, readTsSourceFile } from '../_shared/ts-check.ts'
+import { createSourceFileChecker, getPosition, listTsFilesInDir } from '../_shared/ts-check.ts'
 
 type Kind = 'import' | 'export'
 
@@ -84,9 +84,7 @@ function handleModuleSpecifier(parameters: {
   }
 }
 
-function checkFile(filePath: string, findings: Finding[]): void {
-  const sourceFile = readTsSourceFile(filePath)
-
+const checkFile = createSourceFileChecker<Finding>(({ sourceFile, findings }) => {
   for (const statement of sourceFile.statements) {
     if (ts.isImportDeclaration(statement) && statement.moduleSpecifier) {
       const clause = statement.importClause
@@ -113,7 +111,7 @@ function checkFile(filePath: string, findings: Finding[]): void {
       })
     }
   }
-}
+})
 
 function formatFinding(finding: Finding): string {
   const { filePath, kind, module, reason, position, severity } = finding

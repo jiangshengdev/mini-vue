@@ -163,3 +163,102 @@ export function runTsCheck<Finding>(parameters: {
 
   console.log(successMessage)
 }
+
+export interface SourceFileCheckContext<Finding> {
+  filePath: string
+  sourceFile: ts.SourceFile
+  findings: Finding[]
+}
+
+export function createSourceFileChecker<Finding>(
+  handler: (context: SourceFileCheckContext<Finding>) => void,
+): (filePath: string, findings: Finding[]) => void {
+  return (filePath, findings) => {
+    const sourceFile = readTsSourceFile(filePath)
+
+    handler({
+      filePath,
+      sourceFile,
+      findings,
+    })
+  }
+}
+
+export interface BoundaryCheckContext<Finding> extends SourceFileCheckContext<Finding> {
+  boundary: string
+}
+
+export function createBoundarySourceFileChecker<Finding>(parameters: {
+  srcDir: string
+  handler: (context: BoundaryCheckContext<Finding>) => void
+}): (filePath: string, findings: Finding[]) => void {
+  const { srcDir, handler } = parameters
+
+  return (filePath, findings) => {
+    const boundary = getBoundaryDir({ srcDir, filePath })
+
+    if (!boundary) {
+      return
+    }
+
+    const sourceFile = readTsSourceFile(filePath)
+
+    handler({
+      filePath,
+      boundary,
+      sourceFile,
+      findings,
+    })
+  }
+}
+
+export type ModuleSpecifierKind = 'import' | 'export'
+
+export interface ModuleSpecifierVisitContext {
+  kind: ModuleSpecifierKind
+  moduleSpecifier: ts.Expression
+  statement: ts.ImportDeclaration | ts.ExportDeclaration
+}
+
+export function visitImportExportModuleSpecifiers(
+  sourceFile: ts.SourceFile,
+  visitor: (context: ModuleSpecifierVisitContext) => void,
+): void {
+  for (const statement of sourceFile.statements) {
+    if (ts.isImportDeclaration(statement) && statement.moduleSpecifier) {
+      visitor({
+        kind: 'import',
+        moduleSpecifier: statement.moduleSpecifier,
+        statement,
+      })
+      continue
+    }
+
+    if (ts.isExportDeclaration(statement) && statement.moduleSpecifier) {
+      visitor({
+        kind: 'export',
+        moduleSpecifier: statement.moduleSpecifier,
+        statement,
+      })
+    }
+  }
+}
+
+export function createBoundaryModuleSpecifierChecker<Finding>(parameters: {
+  srcDir: string
+  handler: (context: BoundaryCheckContext<Finding> & ModuleSpecifierVisitContext) => void
+}): (filePath: string, findings: Finding[]) => void {
+  const { srcDir, handler } = parameters
+
+  return createBoundarySourceFileChecker<Finding>({
+    srcDir,
+    handler(context) {
+      visitImportExportModuleSpecifiers(context.sourceFile, (visitContext) => {
+        handler({
+          ...context,
+          ...visitContext,
+        })
+      })
+    },
+  })
+}

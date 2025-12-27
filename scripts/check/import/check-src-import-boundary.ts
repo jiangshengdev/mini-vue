@@ -1,7 +1,11 @@
 import ts from 'typescript'
 import { resolveFromImportMeta } from '../_shared/paths.ts'
 import type { Position } from '../_shared/ts-check.ts'
-import { getBoundaryDir, getPosition, readTsSourceFile, runSrcCheck } from '../_shared/ts-check.ts'
+import {
+  createBoundaryModuleSpecifierChecker,
+  getPosition,
+  runSrcCheck,
+} from '../_shared/ts-check.ts'
 
 type Kind = 'import' | 'export'
 
@@ -64,38 +68,18 @@ function handleModuleSpecifier(parameters: {
   })
 }
 
-function checkFile(filePath: string, findings: Finding[]): void {
-  const boundary = getBoundaryDir({ srcDir, filePath })
-
-  if (!boundary) {
-    return
-  }
-
-  const sourceFile = readTsSourceFile(filePath)
-
-  for (const statement of sourceFile.statements) {
-    if (ts.isImportDeclaration(statement) && statement.moduleSpecifier) {
-      handleModuleSpecifier({
-        sourceFile,
-        moduleSpecifier: statement.moduleSpecifier,
-        boundary,
-        kind: 'import',
-        findings,
-      })
-      continue
-    }
-
-    if (ts.isExportDeclaration(statement) && statement.moduleSpecifier) {
-      handleModuleSpecifier({
-        sourceFile,
-        moduleSpecifier: statement.moduleSpecifier,
-        boundary,
-        kind: 'export',
-        findings,
-      })
-    }
-  }
-}
+const checkFile = createBoundaryModuleSpecifierChecker<Finding>({
+  srcDir,
+  handler({ sourceFile, moduleSpecifier, boundary, kind, findings }) {
+    handleModuleSpecifier({
+      sourceFile,
+      moduleSpecifier,
+      boundary,
+      kind,
+      findings,
+    })
+  },
+})
 
 function formatFinding(finding: Finding): string {
   const { filePath, kind, module, position, boundary } = finding

@@ -1,6 +1,6 @@
 import path from 'node:path'
 import ts from 'typescript'
-import { getPosition, readTsSourceFile, runTsCheck } from './_shared/ts-check.ts'
+import { createSourceFileChecker, getPosition, runTsCheck } from './_shared/ts-check.ts'
 import { resolveFromImportMeta } from './_shared/paths.ts'
 
 interface Finding {
@@ -168,8 +168,7 @@ function visitTopLevelForDestructure(parameters: {
   })
 }
 
-function checkFile(filePath: string, findings: Finding[]): void {
-  const sourceFile = readTsSourceFile(filePath)
+const checkFile = createSourceFileChecker<Finding>(({ filePath, sourceFile, findings }) => {
   const normalizedPath = path.resolve(filePath)
 
   ts.forEachChild(sourceFile, (node) => {
@@ -199,7 +198,7 @@ function checkFile(filePath: string, findings: Finding[]): void {
       })
     }
   })
-}
+})
 
 function formatFinding(finding: Finding): string {
   const positionText = `${finding.filePath}:${finding.line}:${finding.column}`

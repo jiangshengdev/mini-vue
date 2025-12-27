@@ -2,7 +2,7 @@ import path from 'node:path'
 import ts from 'typescript'
 import { resolveFromImportMeta } from '../_shared/paths.ts'
 import type { Position } from '../_shared/ts-check.ts'
-import { getPosition, readTsSourceFile, runSrcCheck } from '../_shared/ts-check.ts'
+import { createSourceFileChecker, getPosition, runSrcCheck } from '../_shared/ts-check.ts'
 
 type Reason = 'non-relative' | 'outside-folder' | 'subdir-non-index'
 
@@ -90,12 +90,10 @@ function isAllowedIndexReExport(
   return { ok: false, reason: 'non-relative' }
 }
 
-function checkFile(filePath: string, findings: Finding[]): void {
+const checkFile = createSourceFileChecker<Finding>(({ filePath, sourceFile, findings }) => {
   if (path.basename(filePath) !== 'index.ts') {
     return
   }
-
-  const sourceFile = readTsSourceFile(filePath)
 
   for (const statement of sourceFile.statements) {
     if (!ts.isExportDeclaration(statement) || !statement.moduleSpecifier) {
@@ -122,7 +120,7 @@ function checkFile(filePath: string, findings: Finding[]): void {
       reason: allowed.reason,
     })
   }
-}
+})
 
 function formatFinding(finding: Finding): string {
   const { filePath, module, position, reason } = finding

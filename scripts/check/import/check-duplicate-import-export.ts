@@ -1,7 +1,7 @@
 import ts from 'typescript'
 import { resolveFromImportMeta } from '../_shared/paths.ts'
 import type { Position } from '../_shared/ts-check.ts'
-import { getPosition, readTsSourceFile, runSrcCheck } from '../_shared/ts-check.ts'
+import { createSourceFileChecker, getPosition, runSrcCheck } from '../_shared/ts-check.ts'
 
 const srcDir = resolveFromImportMeta(import.meta.url, '../../../src')
 
@@ -194,9 +194,7 @@ function handleExport(
   }
 }
 
-function checkFile(filePath: string, findings: Finding[]): void {
-  const sourceFile = readTsSourceFile(filePath)
-
+const checkFile = createSourceFileChecker<Finding>(({ sourceFile, findings }) => {
   const importMap = new Map<string, ModuleRecord>()
   const exportMap = new Map<string, ModuleRecord>()
 
@@ -210,7 +208,7 @@ function checkFile(filePath: string, findings: Finding[]): void {
       handleExport(statement, sourceFile, exportMap, findings)
     }
   }
-}
+})
 
 function formatFinding(finding: Finding): string {
   const { filePath, module, category, current, previous, kind } = finding

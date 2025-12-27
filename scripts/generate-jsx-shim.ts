@@ -1,13 +1,12 @@
 import { access, mkdir, readFile, writeFile } from 'node:fs/promises'
 import { relative, resolve } from 'node:path'
+import ts from 'typescript'
 import { resolveFromImportMeta } from './_shared/paths.ts'
 
 const projectRoot = resolveFromImportMeta(import.meta.url, '..')
 const sourcePath = resolve(projectRoot, 'src/jsx-shim.d.ts')
 const targetDir = resolve(projectRoot, 'dist/jsx')
 const targetPath = resolve(targetDir, 'index.d.ts')
-
-const importStripPattern = /^import type\s+{[^}]+}\s+from\s+'@\/[^']+'\s*$\n?/gm
 
 async function ensureSourceExists() {
   try {
@@ -35,11 +34,79 @@ async function resolvePackageName() {
   return name
 }
 
+function collectAliasImports(sourceFile: ts.SourceFile): {
+  specifiers: string[]
+  rangesToRemove: Array<{ start: number; end: number }>
+} {
+  const specifiers: string[] = []
+  const rangesToRemove: Array<{ start: number; end: number }> = []
+
+  for (const statement of sourceFile.statements) {
+    if (
+      !ts.isImportDeclaration(statement) ||
+      !statement.moduleSpecifier ||
+      !ts.isStringLiteral(statement.moduleSpecifier)
+    ) {
+      continue
+    }
+
+    const moduleText = statement.moduleSpecifier.text
+
+    if (!moduleText.startsWith('@/')) {
+      continue
+    }
+
+    const clause = statement.importClause
+
+    if (!clause?.namedBindings || !ts.isNamedImports(clause.namedBindings)) {
+      continue
+    }
+
+    for (const element of clause.namedBindings.elements) {
+      if (element.propertyName) {
+        specifiers.push(`${element.propertyName.text} as ${element.name.text}`)
+      } else {
+        specifiers.push(element.name.text)
+      }
+    }
+
+    rangesToRemove.push({
+      start: statement.getFullStart(),
+      end: statement.getEnd(),
+    })
+  }
+
+  return { specifiers, rangesToRemove }
+}
+
+function stripRanges(content: string, ranges: Array<{ start: number; end: number }>): string {
+  if (ranges.length === 0) {
+    return content
+  }
+
+  let result = content
+
+  // 从后往前裁剪，避免偏移。
+  for (const range of [...ranges].sort((a, b) => {
+    return b.start - a.start
+  })) {
+    result = `${result.slice(0, range.start)}${result.slice(range.end)}`
+  }
+
+  return result
+}
+
 function prepareShimContent(rawContent: string, packageName: string) {
-  const stripped = rawContent.replaceAll(importStripPattern, '')
-  const normalizedBody = stripped.replace(/^\n+/, '')
-  const headerImport = `import type { ElementRef, ElementType as VirtualNodeType, PropsShape, VirtualNode } from '${packageName}'\n\n`
-  const result = `${headerImport}${normalizedBody}`
+  const sourceFile = ts.createSourceFile(sourcePath, rawContent, ts.ScriptTarget.Latest, true)
+  const { specifiers, rangesToRemove } = collectAliasImports(sourceFile)
+
+  if (specifiers.length === 0) {
+    throw new Error('未找到 "@/..." 导入，无法生成 JSX shim')
+  }
+
+  const body = stripRanges(rawContent, rangesToRemove).replace(/^\s+/, '')
+  const header = `import type { ${specifiers.join(', ')} } from '${packageName}'\n\n`
+  const result = `${header}${body}`
 
   return result.endsWith('\n') ? result : `${result}\n`
 }

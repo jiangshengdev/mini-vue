@@ -38,6 +38,7 @@
     "check:duplicate-import-export": "tsx scripts/check/import/check-duplicate-import-export.ts",
     "check:import-export-sorted": "tsx scripts/check/import/check-import-export-sorted.ts",
     "check:index-export-local-only": "tsx scripts/check/import/check-index-export-local-only.ts",
+    "check:props-destructure": "tsx scripts/check/props-destructure.ts",
     "check:src-import-boundary": "tsx scripts/check/import/check-src-import-boundary.ts",
     "check:test-prefer-root-index": "tsx scripts/check/import/check-test-prefer-root-index.ts",
     "check:test-src-import-style": "tsx scripts/check/import/check-test-src-import-style.ts",

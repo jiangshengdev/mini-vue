@@ -107,3 +107,59 @@ export function runSrcCheck<Finding>(parameters: {
 
   console.log(successMessage)
 }
+
+export function runTsCheck<Finding>(parameters: {
+  dirs: string[]
+  checkFile: (filePath: string, findings: Finding[]) => void
+  formatFinding: (finding: Finding) => string
+  successMessage: string
+  filter?: (filePath: string) => boolean
+  extensions?: string[]
+  includeGlobs?: string[]
+}): void {
+  const { dirs, checkFile, formatFinding, successMessage, filter, extensions, includeGlobs } =
+    parameters
+  let hasMissingDir = false
+  const files: string[] = []
+
+  for (const dir of dirs) {
+    if (!fs.existsSync(dir)) {
+      console.error(`未找到目录：${dir}`)
+      hasMissingDir = true
+      continue
+    }
+
+    files.push(
+      ...listTsFilesInDir({
+        dirPath: dir,
+        extensions,
+        includeGlobs,
+        filter(filePath) {
+          if (filePath.endsWith('.d.ts')) {
+            return false
+          }
+
+          return filter ? filter(filePath) : true
+        },
+      }),
+    )
+  }
+
+  const findings: Finding[] = []
+
+  for (const filePath of files) {
+    checkFile(filePath, findings)
+  }
+
+  if (findings.length > 0 || hasMissingDir) {
+    for (const finding of findings) {
+      console.error(formatFinding(finding))
+    }
+
+    process.exitCode = 1
+
+    return
+  }
+
+  console.log(successMessage)
+}

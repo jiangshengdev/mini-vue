@@ -13,4 +13,4 @@ export type {
   WatchSource,
   WatchStopHandle,
 } from './core.ts'
-export { watch } from './core.ts'
+export { createWatch } from './core.ts'

@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { within } from '@testing-library/dom'
 import { createTestContainer } from '$/index.ts'
 import type { ErrorHandler, SetupComponent } from '@/index.ts'
-import { nextTick, reactive, render, setErrorHandler, watch } from '@/index.ts'
+import { nextTick, reactive, render, setErrorHandler, createWatch } from '@/index.ts'
 import { getCurrentInstance } from '@/runtime-core/index.ts'
 import { errorContexts } from '@/shared/index.ts'
 
@@ -192,7 +192,7 @@ describe('runtime-dom component reactivity', () => {
     const cleanupSpy = vi.fn()
 
     const Tracker: SetupComponent = () => {
-      watch(
+      createWatch(
         () => {
           return state.count
         },

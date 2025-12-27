@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { ErrorHandler } from '@/index.ts'
-import { reactive, setErrorHandler, watch } from '@/index.ts'
+import { reactive, setErrorHandler, createWatch } from '@/index.ts'
 import { errorContexts } from '@/shared/index.ts'
 
 describe('watch - cleanup 与错误', () => {
@@ -12,7 +12,7 @@ describe('watch - cleanup 与错误', () => {
     const state = reactive({ count: 0 })
     const cleanups: number[] = []
 
-    watch(
+    createWatch(
       function readCount() {
         return state.count
       },
@@ -39,7 +39,7 @@ describe('watch - cleanup 与错误', () => {
 
     setErrorHandler(handler)
 
-    watch(
+    createWatch(
       function readCount() {
         return state.count
       },
@@ -73,7 +73,7 @@ describe('watch - cleanup 与错误', () => {
 
     setErrorHandler(handler)
 
-    watch(
+    createWatch(
       function readCount() {
         return state.count
       },
@@ -98,7 +98,7 @@ describe('watch - cleanup 与错误', () => {
 
     setErrorHandler(handler)
 
-    const stop = watch(
+    const stop = createWatch(
       function readCount() {
         return state.count
       },

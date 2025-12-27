@@ -14,6 +14,7 @@ export { Fragment } from '@/jsx-foundation/index.ts'
 export { h, jsx, jsxDEV, jsxs } from '@/jsx-runtime/index.ts'
 export {
   computed,
+  createWatch,
   effect,
   effectScope,
   getCurrentScope,
@@ -30,7 +31,6 @@ export {
   toRaw,
   toRef,
   unref,
-  watch,
 } from '@/reactivity/index.ts'
 export type {
   ComputedGetter,

@@ -1,12 +1,12 @@
 import { describe, expect, it, vi } from 'vitest'
-import { reactive, ref, watch } from '@/index.ts'
+import { reactive, ref, createWatch } from '@/index.ts'
 
 describe('watch - 基础行为', () => {
   it('默认懒执行并在源变化后触发回调', () => {
     const state = reactive({ count: 0 })
     const spy = vi.fn()
 
-    watch(
+    createWatch(
       function readCount() {
         return state.count
       },
@@ -33,7 +33,7 @@ describe('watch - 基础行为', () => {
     const state = reactive({ count: 0 })
     const spy = vi.fn()
 
-    watch(
+    createWatch(
       function readCount() {
         return state.count
       },
@@ -58,7 +58,7 @@ describe('watch - 基础行为', () => {
     const state = reactive({ count: 0 })
     const spy = vi.fn()
 
-    const stop = watch(
+    const stop = createWatch(
       function readCount() {
         return state.count
       },
@@ -80,7 +80,7 @@ describe('watch - 基础行为', () => {
     const state = reactive({ count: 0 })
     const spy = vi.fn()
 
-    watch(
+    createWatch(
       function readParity() {
         return state.count % 2
       },
@@ -103,7 +103,7 @@ describe('watch - 基础行为', () => {
     const state = ref({ nested: { value: 0 } })
     const spy = vi.fn()
 
-    watch(state, function onChange() {
+    createWatch(state, function onChange() {
       spy(state.value.nested.value)
     })
 

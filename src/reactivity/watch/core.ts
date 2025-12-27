@@ -95,7 +95,7 @@ export interface WatchOptions {
  *
  * @public
  */
-export function watch<T>(
+export function createWatch<T>(
   source: WatchSource<T>,
   callback: WatchCallback<T>,
   options: WatchOptions = {},

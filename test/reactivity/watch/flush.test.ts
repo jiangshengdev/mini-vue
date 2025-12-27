@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { reactive, watch } from '@/index.ts'
+import { reactive, createWatch } from '@/index.ts'
 
 async function nextMicrotask(): Promise<void> {
   return new Promise((resolve) => {
@@ -12,7 +12,7 @@ describe('watch - flush 选项', () => {
     const state = reactive({ count: 0 })
     const spy = vi.fn()
 
-    watch(
+    createWatch(
       () => {
         return state.count
       },
@@ -32,7 +32,7 @@ describe('watch - flush 选项', () => {
     const state = reactive({ count: 0 })
     const spy = vi.fn()
 
-    watch(
+    createWatch(
       () => {
         return state.count
       },
@@ -56,7 +56,7 @@ describe('watch - flush 选项', () => {
     const state = reactive({ count: 0 })
     const spy = vi.fn()
 
-    watch(
+    createWatch(
       () => {
         return state.count
       },
@@ -81,7 +81,7 @@ describe('watch - flush 选项', () => {
     const state = reactive({ count: 0 })
     const spy = vi.fn()
 
-    watch(
+    createWatch(
       () => {
         return state.count
       },
@@ -103,7 +103,7 @@ describe('watch - flush 选项', () => {
     const state = reactive({ count: 0 })
     const spy = vi.fn()
 
-    watch(
+    createWatch(
       () => {
         return state.count
       },

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { WatchCallback } from '@/index.ts'
-import { effect, effectScope, reactive, watch } from '@/index.ts'
+import { effect, effectScope, reactive, createWatch } from '@/index.ts'
 
 function registerCleanup<T>(
   onCleanup: Parameters<WatchCallback<T>>[2],
@@ -18,7 +18,7 @@ describe('watch - 生命周期联动', () => {
     const spy = vi.fn()
 
     const parent = effect(function parentEffect() {
-      watch(
+      createWatch(
         function readCount() {
           return state.count
         },
@@ -45,7 +45,7 @@ describe('watch - 生命周期联动', () => {
     const callbackSpy = vi.fn()
 
     scope.run(() => {
-      watch(
+      createWatch(
         function readCount() {
           return state.count
         },

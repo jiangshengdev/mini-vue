@@ -5,8 +5,8 @@ export interface Todo {
   text: string
 }
 
-export const TodoItem: SetupComponent<{ todo: Todo }> = ({ todo }) => {
+export const TodoItem: SetupComponent<{ todo: Todo }> = (props) => {
   return () => {
-    return <li>{todo?.text}</li>
+    return <li>{props.todo?.text}</li>
   }
 }

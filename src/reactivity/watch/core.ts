@@ -18,6 +18,14 @@ import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
 export type WatchSource<T> = Ref<T> | (() => T) | ReactiveRawTarget
 
 /**
+ * 调度器函数签名，可由调用方自定义调度策略。
+ *
+ * @remarks
+ * - `isFirstRun` 为 `true` 时表示这是首次触发（不含 immediate 首跑）。
+ */
+export type WatchScheduler = (job: () => void, isFirstRun: boolean) => void
+
+/**
  * 外部可调用的停止函数类型。
  *
  * @remarks
@@ -70,6 +78,14 @@ export interface WatchOptions {
   flush?: 'sync' | 'pre' | 'post'
 
   /**
+   * 自定义调度策略，接管回调执行时机。
+   *
+   * @remarks
+   * - 若提供该选项，将覆盖 `flush` 的默认调度策略。
+   */
+  scheduler?: WatchScheduler
+
+  /**
    * `true` 时强制深度遍历追踪，即使源是 getter 或 ref。
    *
    * @remarks
@@ -108,7 +124,8 @@ export function createWatch<T>(
   let cleanup: WatchCleanup | undefined
   let oldValue: T | undefined
   let hasOldValue = false
-  const schedule = createScheduler(flush)
+  const schedule = createScheduler(flush, options.scheduler)
+  let isFirstRun = true
 
   /**
    * 替换当前清理逻辑，下一次触发前确保调用旧清理函数。
@@ -119,7 +136,7 @@ export function createWatch<T>(
 
   /* 构建底层 `effect`，调度回调统一走 `runWatchJob` 以便复用逻辑。 */
   const runner = new ReactiveEffect(getter as () => T, () => {
-    schedule(runWatchJob)
+    schedule(job, isFirstRun)
   })
 
   recordEffectScope(runner)
@@ -162,6 +179,14 @@ export function createWatch<T>(
   }
 
   /**
+   * 包装实际回调执行，确保首轮触发后更新首跑标记。
+   */
+  const job = (): void => {
+    runWatchJob()
+    isFirstRun = false
+  }
+
+  /**
    * 暴露给外部的停止函数，终止 `effect` 并运行末次清理。
    */
   const stop: WatchStopHandle = () => {
@@ -195,7 +220,7 @@ export function createWatch<T>(
 
   /* 根据 immediate 选择立即执行还是先懒获取一次旧值。 */
   if (immediate) {
-    runWatchJob()
+    job()
   } else {
     oldValue = runner.run()
     hasOldValue = true
@@ -207,7 +232,16 @@ export function createWatch<T>(
 /**
  * 根据 flush 选项返回调度函数，默认同步，`pre`/`post` 使用微任务占位。
  */
-function createScheduler(flush: WatchOptions['flush']): (job: () => void) => void {
+function createScheduler(
+  flush: WatchOptions['flush'],
+  scheduler: WatchScheduler | undefined,
+): (job: () => void, isFirstRun: boolean) => void {
+  if (scheduler) {
+    return (job, isFirstRun) => {
+      scheduler(job, isFirstRun)
+    }
+  }
+
   if (flush === 'pre' || flush === 'post') {
     let pending = false
 

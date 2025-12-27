@@ -1,0 +1,47 @@
+import { queuePostFlushCb, queuePreFlushCb } from './scheduler.ts'
+import type {
+  WatchCallback,
+  WatchOptions,
+  WatchScheduler,
+  WatchSource,
+  WatchStopHandle,
+} from '@/reactivity/index.ts'
+import { createWatch } from '@/reactivity/index.ts'
+
+/**
+ * Runtime 层封装的 `watch`，默认接入调度器的 `pre` 队列。
+ *
+ * @remarks
+ * - 默认 `flush` 为 `pre`，与组件更新保持同一批次；`post` 走后置队列，`sync` 仍同步。
+ * - 如未提供调度器（纯 reactivity 场景），`pre/post` 会在 `createWatch` 内退化为微任务占位。
+ */
+export function watch<T>(
+  source: WatchSource<T>,
+  callback: WatchCallback<T>,
+  options: WatchOptions = {},
+): WatchStopHandle {
+  const flush = options.flush ?? 'pre'
+  const scheduler = options.scheduler ?? resolveScheduler(flush)
+
+  return createWatch(source, callback, {
+    ...options,
+    flush,
+    scheduler,
+  })
+}
+
+function resolveScheduler(flush: WatchOptions['flush']): WatchScheduler | undefined {
+  if (flush === 'pre') {
+    return (job) => {
+      queuePreFlushCb(job)
+    }
+  }
+
+  if (flush === 'post') {
+    return (job) => {
+      queuePostFlushCb(job)
+    }
+  }
+
+  return undefined
+}

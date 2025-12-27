@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { WatchCallback } from '@/index.ts'
-import { effect, effectScope, reactive, createWatch } from '@/index.ts'
+import { createWatch, effect, effectScope, reactive } from '@/index.ts'
 
 function registerCleanup<T>(
   onCleanup: Parameters<WatchCallback<T>>[2],

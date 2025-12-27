@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { WatchCallback } from '@/index.ts'
-import { reactive, ref, createWatch } from '@/index.ts'
+import { createWatch, reactive, ref } from '@/index.ts'
 
 describe('watch - deep 行为', () => {
   it('默认对 reactive 对象执行深度侦听', () => {

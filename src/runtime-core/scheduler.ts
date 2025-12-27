@@ -6,6 +6,12 @@ type SchedulerJob = () => void
 const jobQueue: SchedulerJob[] = []
 /** 去重集合，保证同一任务在一次 flush 中只会运行一次。 */
 const pendingJobSet = new Set<SchedulerJob>()
+/** 渲染前的回调队列与去重集合（如 `watch` flush: pre）。 */
+const preFlushQueue: SchedulerJob[] = []
+const pendingPreFlushSet = new Set<SchedulerJob>()
+/** 渲染后的回调队列与去重集合（如 `watch` flush: post）。 */
+const postFlushQueue: SchedulerJob[] = []
+const pendingPostFlushSet = new Set<SchedulerJob>()
 
 /** 标记是否已安排过本轮微任务 flush。 */
 let isFlushPending = false
@@ -28,6 +34,30 @@ export function queueSchedulerJob(job: SchedulerJob): void {
   if (!pendingJobSet.has(job)) {
     pendingJobSet.add(job)
     jobQueue.push(job)
+  }
+
+  queueFlush()
+}
+
+/**
+ * 将回调加入渲染前队列，按插入顺序执行并去重。
+ */
+export function queuePreFlushCb(job: SchedulerJob): void {
+  if (!pendingPreFlushSet.has(job)) {
+    pendingPreFlushSet.add(job)
+    preFlushQueue.push(job)
+  }
+
+  queueFlush()
+}
+
+/**
+ * 将回调加入渲染后队列，按插入顺序执行并去重。
+ */
+export function queuePostFlushCb(job: SchedulerJob): void {
+  if (!pendingPostFlushSet.has(job)) {
+    pendingPostFlushSet.add(job)
+    postFlushQueue.push(job)
   }
 
   queueFlush()
@@ -77,20 +107,74 @@ function flushJobs(): void {
   let jobIndex = 0
 
   try {
-    while (jobIndex < jobQueue.length) {
-      const job = jobQueue[jobIndex]
+    do {
+      flushPreFlushCbs()
 
-      runSilent(job, {
-        origin: errorContexts.scheduler,
-        handlerPhase: errorPhases.async,
-      })
+      while (jobIndex < jobQueue.length) {
+        const job = jobQueue[jobIndex]
 
-      jobIndex += 1
+        runSilent(job, {
+          origin: errorContexts.scheduler,
+          handlerPhase: errorPhases.async,
+        })
+
+        jobIndex += 1
+      }
+    } while (preFlushQueue.length > 0)
+
+    while (postFlushQueue.length > 0) {
+      flushPostFlushCbs()
     }
   } finally {
     jobQueue.length = 0
     pendingJobSet.clear()
+    preFlushQueue.length = 0
+    pendingPreFlushSet.clear()
+    postFlushQueue.length = 0
+    pendingPostFlushSet.clear()
     isFlushing = false
     currentFlushPromise = undefined
   }
+}
+
+function flushPreFlushCbs(): void {
+  if (preFlushQueue.length === 0) {
+    return
+  }
+
+  let preIndex = 0
+
+  while (preIndex < preFlushQueue.length) {
+    const job = preFlushQueue[preIndex]
+
+    runSilent(job, {
+      origin: errorContexts.scheduler,
+      handlerPhase: errorPhases.async,
+    })
+
+    preIndex += 1
+  }
+
+  preFlushQueue.length = 0
+}
+
+function flushPostFlushCbs(): void {
+  if (postFlushQueue.length === 0) {
+    return
+  }
+
+  let postIndex = 0
+
+  while (postIndex < postFlushQueue.length) {
+    const job = postFlushQueue[postIndex]
+
+    runSilent(job, {
+      origin: errorContexts.scheduler,
+      handlerPhase: errorPhases.async,
+    })
+
+    postIndex += 1
+  }
+
+  postFlushQueue.length = 0
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { reactive, createWatch } from '@/index.ts'
+import { createWatch, reactive } from '@/index.ts'
 
 async function nextMicrotask(): Promise<void> {
   return new Promise((resolve) => {

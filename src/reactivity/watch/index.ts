@@ -10,6 +10,7 @@ export type {
   WatchCallback,
   WatchCleanup,
   WatchOptions,
+  WatchScheduler,
   WatchSource,
   WatchStopHandle,
 } from './core.ts'

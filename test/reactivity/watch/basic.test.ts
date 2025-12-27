@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { reactive, ref, createWatch } from '@/index.ts'
+import { createWatch, reactive, ref } from '@/index.ts'
 
 describe('watch - 基础行为', () => {
   it('默认懒执行并在源变化后触发回调', () => {

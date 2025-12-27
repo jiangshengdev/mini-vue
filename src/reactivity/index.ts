@@ -42,4 +42,10 @@ export { computed, isRef, ref, state, toRef, unref } from './ref/index.ts'
 export { toRaw } from './to-raw.ts'
 export type { DeepReadonly, Reactive, ReadonlyReactive } from './types.ts'
 export { createWatch } from './watch/index.ts'
-export type { WatchCallback, WatchOptions, WatchSource, WatchStopHandle } from './watch/index.ts'
+export type {
+  WatchCallback,
+  WatchOptions,
+  WatchScheduler,
+  WatchSource,
+  WatchStopHandle,
+} from './watch/index.ts'

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { ErrorHandler } from '@/index.ts'
-import { reactive, setErrorHandler, createWatch } from '@/index.ts'
+import { createWatch, reactive, setErrorHandler } from '@/index.ts'
 import { errorContexts } from '@/shared/index.ts'
 
 describe('watch - cleanup 与错误', () => {

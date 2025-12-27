@@ -22,5 +22,6 @@ export {
 export { inject, provide } from './provide-inject.ts'
 export { createRenderer } from './renderer.ts'
 export type { Renderer, RendererOptions, RootRenderFunction } from './renderer.ts'
-export { nextTick } from './scheduler.ts'
+export { nextTick, queueSchedulerJob } from './scheduler.ts'
 export { asRuntimeVirtualNode } from './virtual-node.ts'
+export { watch } from './watch.ts'

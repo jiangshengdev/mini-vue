@@ -52,6 +52,31 @@ describe('watch - flush 选项', () => {
     expect(spy).toHaveBeenLastCalledWith(1)
   })
 
+  it('flush: pre + immediate 首次同步，后续延迟到微任务', async () => {
+    const state = reactive({ count: 0 })
+    const spy = vi.fn()
+
+    watch(
+      () => {
+        return state.count
+      },
+      (value) => {
+        spy(value)
+      },
+      { flush: 'pre', immediate: true },
+    )
+
+    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy).toHaveBeenLastCalledWith(0)
+
+    state.count = 1
+    expect(spy).toHaveBeenCalledTimes(1)
+
+    await nextMicrotask()
+    expect(spy).toHaveBeenCalledTimes(2)
+    expect(spy).toHaveBeenLastCalledWith(1)
+  })
+
   it('flush: pre 同一微任务多次触发仅执行一次，取最新值', async () => {
     const state = reactive({ count: 0 })
     const spy = vi.fn()

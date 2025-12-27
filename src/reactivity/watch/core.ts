@@ -62,6 +62,14 @@ export interface WatchOptions {
   immediate?: boolean
 
   /**
+   * 控制调度时机：默认为同步。
+   *
+   * - `sync`：同步执行回调。
+   * - `pre`/`post`：以微任务延迟执行（本实现不接入全局队列，局部微任务占位）。
+   */
+  flush?: 'sync' | 'pre' | 'post'
+
+  /**
    * `true` 时强制深度遍历追踪，即使源是 getter 或 ref。
    *
    * @remarks
@@ -94,11 +102,13 @@ export function watch<T>(
 ): WatchStopHandle {
   /* 预先解析执行策略，避免每次触发重复判断。 */
   const { immediate = false } = options
+  const flush = options.flush ?? 'sync'
   const deep = resolveDeepOption(source, options.deep)
   const getter = createGetter(source, deep)
   let cleanup: WatchCleanup | undefined
   let oldValue: T | undefined
   let hasOldValue = false
+  const schedule = createScheduler(flush)
 
   /**
    * 替换当前清理逻辑，下一次触发前确保调用旧清理函数。
@@ -109,7 +119,7 @@ export function watch<T>(
 
   /* 构建底层 `effect`，调度回调统一走 `runWatchJob` 以便复用逻辑。 */
   const runner = new ReactiveEffect(getter as () => T, () => {
-    runWatchJob()
+    schedule(runWatchJob)
   })
 
   recordEffectScope(runner)
@@ -192,4 +202,30 @@ export function watch<T>(
   }
 
   return stop
+}
+
+/**
+ * 根据 flush 选项返回调度函数，默认同步，`pre`/`post` 使用微任务占位。
+ */
+function createScheduler(flush: WatchOptions['flush']): (job: () => void) => void {
+  if (flush === 'pre' || flush === 'post') {
+    let pending = false
+
+    return (job) => {
+      if (pending) {
+        return
+      }
+
+      pending = true
+
+      queueMicrotask(() => {
+        pending = false
+        job()
+      })
+    }
+  }
+
+  return (job) => {
+    job()
+  }
 }

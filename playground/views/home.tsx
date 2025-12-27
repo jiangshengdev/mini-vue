@@ -1,8 +1,8 @@
 import typescriptLogo from '../assets/typescript.svg'
-// eslint-disable-next-line
-import viteLogo from '/vite.svg'
 import { Counter } from '../components/counter.tsx'
 import type { SetupComponent } from '@/index.ts'
+
+const viteLogo = '/vite.svg'
 
 export const Home: SetupComponent = () => {
   return () => {

@@ -17,6 +17,6 @@
 
 ## 决策确认
 
-- flush: pre/post 采用微任务占位，不接入全局队列，首跑同步。  
-- 不引入 Vue 的 `options.call`/`onError` 扩展，保持最小 API。  
+- flush: pre/post 采用微任务占位，不接入全局队列，首跑同步。
+- 不引入 Vue 的 `options.call`/`onError` 扩展，保持最小 API。
 - 对外暴露 `flush` 选项以覆盖默认同步语义，其余保持最简。

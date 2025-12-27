@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import type { TestElement, TestFragment, TestNode } from './test-utils.ts'
-import { createHostRenderer, normalize } from './test-utils.ts'
+import type { TestElement, TestFragment, TestNode } from '../host-utils.ts'
+import { createHostRenderer, normalize } from '../host-utils.ts'
 import { asRuntimeVirtualNode, mountChild, patchChild } from '@/runtime-core/index.ts'
 import { createTextVirtualNode } from '@/jsx-foundation/index.ts'
 

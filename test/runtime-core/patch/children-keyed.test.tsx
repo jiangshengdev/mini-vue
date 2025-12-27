@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import type { TestNode } from './test-utils.ts'
-import { createHostRenderer, normalize } from './test-utils.ts'
+import type { TestNode } from '../host-utils.ts'
+import { createHostRenderer, normalize } from '../host-utils.ts'
 import {
   asRuntimeVirtualNode,
   mountChild,

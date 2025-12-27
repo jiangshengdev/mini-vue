@@ -143,6 +143,74 @@ export function createHostRenderer(hooks: HostRendererHooks = {}): HostRenderer 
   }
 }
 
+/**
+ * 在自定义 host 渲染树中按类名查找元素（广度优先，返回首个匹配）。
+ */
+export function findHostElementByClass(
+  root: TestElement | TestFragment,
+  className: string,
+): TestElement | undefined {
+  return breadthFirstSearch(root, (node) => {
+    return node.props?.class === className
+  })
+}
+
+/**
+ * 在自定义 host 渲染树中按标签名查找元素（广度优先，返回首个匹配）。
+ */
+export function findHostElementByTag(
+  root: TestElement | TestFragment,
+  tag: string,
+): TestElement | undefined {
+  return breadthFirstSearch(root, (node) => {
+    return node.tag === tag
+  })
+}
+
+/** 读取自定义 host 渲染树中元素的首个文本子节点内容。 */
+export function getHostElementText(element?: TestElement): string | undefined {
+  if (!element) {
+    return undefined
+  }
+
+  const textNode = element.children.find((child) => {
+    return child.kind === 'text'
+  })
+
+  return textNode?.text
+}
+
+function breadthFirstSearch(
+  root: TestElement | TestFragment,
+  predicate: (node: TestElement) => boolean,
+): TestElement | undefined {
+  const queue: Array<TestElement | TestFragment> = [root]
+
+  while (queue.length > 0) {
+    const current = queue.shift()
+
+    if (!current) {
+      continue
+    }
+
+    if (current.kind === 'element' && predicate(current)) {
+      return current
+    }
+
+    for (const child of current.children) {
+      if (isBranchNode(child)) {
+        queue.push(child)
+      }
+    }
+  }
+
+  return undefined
+}
+
+function isBranchNode(node: TestNode): node is TestElement | TestFragment {
+  return node.kind === 'element' || node.kind === 'fragment'
+}
+
 export function normalize(output: RenderOutput): NormalizedVirtualNode {
   const normalized = normalizeRenderOutput(output)
 

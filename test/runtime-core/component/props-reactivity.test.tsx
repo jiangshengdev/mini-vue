@@ -1,6 +1,6 @@
 import type { MockInstance } from 'vitest'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { createHostRenderer } from '../patch/test-utils.ts'
+import { createHostRenderer, findHostElementByTag, getHostElementText } from '../host-utils.ts'
 import type { SetupComponent } from '@/index.ts'
 import { effect, isReactive, nextTick, ref } from '@/index.ts'
 import { createRenderer } from '@/runtime-core/index.ts'
@@ -48,7 +48,7 @@ describe('runtime-core 组件 props 响应式', () => {
     await nextTick()
 
     expect(observed).toBe('bar')
-    expect(host.container.children[0]?.children[0]?.text).toBe('bar')
+    expect(getHostElementText(findHostElementByTag(host.container, 'div'))).toBe('bar')
   })
 
   it('props 只读且不主动深度响应', async () => {

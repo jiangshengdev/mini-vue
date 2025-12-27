@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
-import type { TestElement, TestNode } from './test-utils.ts'
-import { createHostRenderer, normalize } from './test-utils.ts'
+import type { TestElement, TestNode } from '../host-utils.ts'
+import { createHostRenderer, normalize } from '../host-utils.ts'
 import type { NormalizedVirtualNode } from '@/runtime-core/index.ts'
 import { asRuntimeVirtualNode, mountChild, patchChild } from '@/runtime-core/index.ts'
 import type { SetupComponent } from '@/index.ts'

@@ -6,8 +6,8 @@
  * Validates: Requirements 6.1, 6.2, 6.3, 6.4
  */
 import { describe, expect, it } from 'vitest'
-import type { HostRenderer } from './test-utils.ts'
-import { createHostRenderer, normalize } from './test-utils.ts'
+import type { HostRenderer } from '../host-utils.ts'
+import { createHostRenderer, normalize } from '../host-utils.ts'
 import type { NormalizedVirtualNode } from '@/runtime-core/index.ts'
 import {
   asRuntimeVirtualNode,

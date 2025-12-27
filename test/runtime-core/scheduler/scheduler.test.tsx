@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { createHostRenderer } from '../patch/test-utils.ts'
+import { createHostRenderer, findHostElementByClass, getHostElementText } from '../host-utils.ts'
 import type { ErrorHandler, SetupComponent } from '@/index.ts'
 import { nextTick, ref, setErrorHandler } from '@/index.ts'
 import { errorContexts } from '@/shared/index.ts'
@@ -20,7 +20,11 @@ describe('runtime-core 调度器', () => {
       return () => {
         renderSpy()
 
-        return <div>{count.value}</div>
+        return (
+          <div class="app">
+            <span class="count">{count.value}</span>
+          </div>
+        )
       }
     }
 
@@ -33,12 +37,12 @@ describe('runtime-core 调度器', () => {
 
     /* 更新应延迟到微任务，且同一 tick 合并为一次。 */
     expect(renderSpy).toHaveBeenCalledTimes(1)
-    expect(host.container.children[0]?.children[0]?.text).toBe('0')
+    expect(getHostElementText(findHostElementByClass(host.container, 'count'))).toBe('0')
 
     await nextTick()
 
     expect(renderSpy).toHaveBeenCalledTimes(2)
-    expect(host.container.children[0]?.children[0]?.text).toBe('2')
+    expect(getHostElementText(findHostElementByClass(host.container, 'count'))).toBe('2')
   })
 
   it('flush 过程中新增的任务会在同一轮执行', async () => {
@@ -54,7 +58,7 @@ describe('runtime-core 调度器', () => {
           flag.value = true
         }
 
-        return <div>count:{count.value}</div>
+        return <div class="trigger">count:{count.value}</div>
       }
     }
 
@@ -64,7 +68,7 @@ describe('runtime-core 调度器', () => {
 
         depRenderText = text
 
-        return <div>{text}</div>
+        return <div class="dep-flag">{text}</div>
       }
     }
 
@@ -81,6 +85,7 @@ describe('runtime-core 调度器', () => {
     await nextTick()
 
     expect(depRenderText).toBe('flag:yes')
+    expect(getHostElementText(findHostElementByClass(host.container, 'dep-flag'))).toBe('flag:yes')
   })
 
   it('队列中的错误不会阻断后续任务并触发统一错误处理', async () => {
@@ -106,7 +111,7 @@ describe('runtime-core 调度器', () => {
 
         crashRenderText = text
 
-        return <div>{text}</div>
+        return <div class="crash">{text}</div>
       }
     }
 
@@ -116,7 +121,7 @@ describe('runtime-core 调度器', () => {
 
         stableRenderText = text
 
-        return <div>{text}</div>
+        return <div class="stable">{text}</div>
       }
     }
 
@@ -140,6 +145,8 @@ describe('runtime-core 调度器', () => {
     /* Crash 更新失败不影响队列内的其他任务。 */
     expect(stableRenderText).toBe('stable:1')
     expect(crashRenderText).toBe('crash:0')
+    expect(getHostElementText(findHostElementByClass(host.container, 'stable'))).toBe('stable:1')
+    expect(getHostElementText(findHostElementByClass(host.container, 'crash'))).toBe('crash:0')
   })
 
   it('nextTick 支持回调与 await 语法', async () => {
@@ -150,7 +157,7 @@ describe('runtime-core 调度器', () => {
 
     const App: SetupComponent = () => {
       return () => {
-        return <div>{count.value}</div>
+        return <div class="count">{count.value}</div>
       }
     }
 
@@ -159,7 +166,7 @@ describe('runtime-core 调度器', () => {
     count.value = 1
 
     await nextTick(() => {
-      callback(host.container.children[0]?.children[0]?.text)
+      callback(getHostElementText(findHostElementByClass(host.container, 'count')))
     })
 
     expect(callback).toHaveBeenCalledWith('1')
@@ -168,6 +175,6 @@ describe('runtime-core 调度器', () => {
 
     await nextTick()
 
-    expect(host.container.children[0]?.children[0]?.text).toBe('2')
+    expect(getHostElementText(findHostElementByClass(host.container, 'count'))).toBe('2')
   })
 })

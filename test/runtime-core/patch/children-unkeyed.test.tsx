@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { createHostRenderer, normalize } from './test-utils.ts'
+import { createHostRenderer, normalize } from '../host-utils.ts'
 import { mountChild, patchChild, patchChildren } from '@/runtime-core/index.ts'
 import { nextTick, ref } from '@/index.ts'
 

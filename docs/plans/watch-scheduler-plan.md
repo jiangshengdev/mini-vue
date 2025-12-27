@@ -14,4 +14,4 @@
 - [x] 确认组件内 watcher 随组件 `effectScope` 自动清理（`createWatch` 已通过 `recordEffectScope`/`recordScopeCleanup` 注册），无需额外挂载；必要时补测试验证。
 - [x] 在调度器中明确 pre/post 队列执行顺序（`pre → render jobs → post`），确保 `nextTick` 复用当前 flush Promise。
 - [x] 补充单测：纯 reactivity 同步与 `pre/post` 回退、runtime 下 `pre/post` 相对组件渲染/`nextTick` 排序、混合 flush 去重、`onWatcherCleanup` 与 stop 行为。
-- [ ] 运行 watch 与 runtime-core 相关测试，最终跑 `pnpm run test` 验证无回归。
+- [x] 运行 watch 与 runtime-core 相关测试，最终跑 `pnpm run test` 验证无回归。

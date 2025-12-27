@@ -9,11 +9,11 @@
 
 ## Action items
 
-[ ] 梳理现有 `watch` 实现与官方语义差异（同步触发、首跑、deep/immediate 行为）。  
-[ ] 设计/实现 `watch` 的 `flush` 选项：默认同步；支持 `sync`/`pre`/`post`，首跑同步；未接入 runtime 队列时使用微任务占位保持语义，保持最小 API。  
-[ ] 确保清理与 stop 行为一致：回调抛错、cleanup 抛错走错误通道且不阻断后续。  
-[ ] 补充/更新 `watch` 单测：基础同步触发、`immediate`、`deep`、`cleanup`、`flush` 选项覆盖、自定义 scheduler 覆盖。  
-[ ] 运行相关 `watch` 测试（Vitest 目标文件）验证回归与边界。
+[x] 梳理现有 `watch` 实现与官方语义差异（同步触发、首跑、deep/immediate 行为）。  
+[x] 设计/实现 `watch` 的 `flush` 选项：默认同步；支持 `sync`/`pre`/`post`，首跑同步；未接入 runtime 队列时使用微任务占位保持语义，保持最小 API。  
+[x] 确保清理与 stop 行为一致：回调抛错、cleanup 抛错走错误通道且不阻断后续。  
+[x] 补充/更新 `watch` 单测：基础同步触发、`immediate`、`deep`、`cleanup`、`flush` 选项覆盖、自定义 scheduler 覆盖。  
+[x] 运行相关 `watch` 测试（Vitest 目标文件）验证回归与边界（已全量跑 `test/reactivity/watch` 通过；ci `check` 阶段仍受本地 `tsx` EPERM 限制，需在允许 socket 的环境重试）。
 
 ## 决策确认
 

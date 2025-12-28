@@ -13,7 +13,6 @@ import type {
   PlainObject,
   PluginInstallApp,
   PluginObject,
-  PluginUninstall,
   PropsShape,
 } from '@/shared/index.ts'
 import { errorContexts, errorPhases, runThrowing } from '@/shared/index.ts'
@@ -56,7 +55,7 @@ export interface AppContext {
 /**
  * 应用插件：支持对象形式（带 `install` 方法）。
  */
-export type AppPlugin<HostElement> = PluginObject<AppInstance<HostElement>>
+export type AppPlugin = PluginObject<PluginInstallApp>
 
 /**
  * `createApp` 返回的实例 API，封装 `mount`/`unmount` 生命周期。
@@ -73,7 +72,7 @@ export interface AppInstance<HostElement> extends PluginInstallApp {
   /** 停止渲染并释放容器内容。 */
   unmount(): void
   /** 安装对象插件。 */
-  use(plugin: AppPlugin<HostElement>): void
+  use(plugin: AppPlugin): void
   /**
    * 在应用级提供依赖，供整个组件树通过 `inject()` 读取。
    *
@@ -225,21 +224,17 @@ export function createAppInstance<HostElement extends WeakKey>(
   }
 
   const resolvePluginUninstall = (
-    plugin: AppPlugin<HostElement>,
+    plugin: AppPlugin,
     appInstance: AppInstance<HostElement>,
-  ): (() => void) | undefined => {
-    if (typeof plugin !== 'object' || plugin === null) {
-      return undefined
-    }
+  ): (() => void) => {
+    const { uninstall } = plugin
 
-    const candidate = (plugin as { uninstall?: unknown }).uninstall
-
-    if (typeof candidate !== 'function') {
-      return undefined
+    if (typeof uninstall !== 'function') {
+      throw new TypeError(runtimeCoreInvalidPlugin, { cause: plugin })
     }
 
     return () => {
-      ;(candidate as PluginUninstall<AppInstance<HostElement>>)(appInstance)
+      uninstall(appInstance)
     }
   }
 
@@ -265,7 +260,7 @@ export function createAppInstance<HostElement extends WeakKey>(
      * - 仅支持对象插件（必须提供 `install(app)` 方法）。
      * - 通过共享错误通道上报，保证行为与其他用户回调入口一致。
      */
-    use(plugin: AppPlugin<HostElement>) {
+    use(plugin: AppPlugin) {
       runThrowing(
         () => {
           if (!plugin || typeof plugin !== 'object') {

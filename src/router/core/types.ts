@@ -159,5 +159,5 @@ export interface Router extends PluginObject<PluginInstallApp> {
    */
   install: (app: PluginInstallApp) => void
   /** 卸载插件时的清理钩子，用于回收安装计数和停止监听。 */
-  uninstall?: PluginUninstall<PluginInstallApp>
+  uninstall: PluginUninstall<PluginInstallApp>
 }

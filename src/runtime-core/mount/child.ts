@@ -171,11 +171,11 @@ function mountArrayChild<
 
   insert(startAnchor)
 
-  /* 子项始终视为有后续兄弟，以 `endAnchor` 充当边界。 */
-  for (const item of children) {
+  /* 同层子项按声明顺序判断是否有后续兄弟，决定是否需要锚点。 */
+  for (const [index, item] of children.entries()) {
     const mounted = mountChild(options, item, {
       container,
-      context: { ...context, shouldUseAnchor: true },
+      context: { ...context, shouldUseAnchor: index < childCount - 1 },
       anchor,
     })
 

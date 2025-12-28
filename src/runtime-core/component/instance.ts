@@ -5,6 +5,7 @@ import type { ComponentPropsState } from './props.ts'
 import type { SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
 import { effectScope } from '@/reactivity/index.ts'
 import type { PlainObject } from '@/shared/index.ts'
+import { __DEV__ } from '@/shared/index.ts'
 
 /**
  * 创建组件实例与关联的 `effect` 作用域。
@@ -34,6 +35,7 @@ export function createComponentInstance<
   const shouldUseAnchor = context?.shouldUseAnchor ?? false
   const appContext = parent?.appContext ?? context?.appContext ?? getCurrentAppContext()
   const { props, propsSource } = propsState
+  const componentName = __DEV__ ? component.name || 'AnonymousComponent' : undefined
 
   /*
    * `provides` 采用原型链：
@@ -50,6 +52,7 @@ export function createComponentInstance<
     appContext,
     provides: Object.create(providesSource) as PlainObject,
     type: component,
+    componentName,
     container,
     props,
     propsSource,

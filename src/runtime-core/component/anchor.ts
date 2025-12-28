@@ -102,8 +102,9 @@ function ensureComponentAnchors<
     return
   }
 
-  const startLabel = __DEV__ ? 'component-anchor-start' : ''
-  const endLabel = __DEV__ ? 'component-anchor-end' : ''
+  const nameLabel = instance.componentName ? `:${instance.componentName}` : ''
+  const startLabel = __DEV__ ? `component-anchor-start${nameLabel}` : ''
+  const endLabel = __DEV__ ? `component-anchor-end${nameLabel}` : ''
   const start = options.createComment(startLabel)
   const end = options.createComment(endLabel)
 

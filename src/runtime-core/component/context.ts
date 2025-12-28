@@ -40,6 +40,8 @@ export interface ComponentInstance<
   provides: Provides
   /** 组件定义本身（即 `setup` 函数），保存以便多次渲染重用。 */
   readonly type: T
+  /** 组件名称（来自函数名），仅用于调试/标注场景。 */
+  readonly componentName?: string
   /** 宿主容器或片段引用，挂载子树时作为根。 */
   readonly container: HostElement | HostFragment
   /** 组件接收到的只读 `props` 代理。 */

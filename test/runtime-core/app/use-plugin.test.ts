@@ -61,6 +61,7 @@ describe('runtime-core app.use', () => {
     const render = vi.fn()
     const unmount = vi.fn()
     const app = createAppInstance({ render, unmount }, createRenderlessComponent())
+    const container = {}
 
     const calls: string[] = []
     const pluginA = {
@@ -87,10 +88,63 @@ describe('runtime-core app.use', () => {
 
     expect(calls).toEqual(['install-a', 'install-b'])
 
+    app.mount(container)
     app.unmount()
     expect(calls).toEqual(['install-a', 'install-b', 'cleanup-b', 'cleanup-a'])
 
     app.unmount()
     expect(calls).toEqual(['install-a', 'install-b', 'cleanup-b', 'cleanup-a'])
+  })
+
+  it('卸载后新注册的插件仍会执行 cleanup', () => {
+    const render = vi.fn()
+    const unmount = vi.fn()
+    const app = createAppInstance({ render, unmount }, createRenderlessComponent())
+    const container = {}
+
+    const cleanupA = vi.fn()
+    const cleanupB = vi.fn()
+
+    app.use({
+      name: 'plugin-a',
+      install: vi.fn(),
+      cleanup: cleanupA,
+    })
+
+    app.mount(container)
+    app.unmount()
+    expect(cleanupA).toHaveBeenCalledTimes(1)
+
+    app.use({
+      name: 'plugin-b',
+      install: vi.fn(),
+      cleanup: cleanupB,
+    })
+
+    app.mount(container)
+    app.unmount()
+    expect(cleanupB).toHaveBeenCalledTimes(1)
+  })
+
+  it('未挂载前调用 unmount 也会执行一次 cleanup（重复调用不重复执行）', () => {
+    const render = vi.fn()
+    const unmount = vi.fn()
+    const app = createAppInstance({ render, unmount }, createRenderlessComponent())
+    const container = {}
+
+    const cleanup = vi.fn()
+
+    app.use({
+      name: 'plugin-a',
+      install: vi.fn(),
+      cleanup,
+    })
+
+    app.unmount()
+    expect(cleanup).toHaveBeenCalledTimes(1)
+
+    app.mount(container)
+    app.unmount()
+    expect(cleanup).toHaveBeenCalledTimes(1)
   })
 })

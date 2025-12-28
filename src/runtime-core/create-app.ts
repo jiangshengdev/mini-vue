@@ -196,8 +196,6 @@ export function createAppInstance<HostElement extends WeakKey>(
   const installedPluginNames = new Set<string>()
   /** 插件清理回调栈，按安装顺序压栈，卸载时后进先出执行。 */
   const pluginCleanupStack: Array<() => void> = []
-  /** 标记清理是否已执行，重复 unmount 时静默忽略。 */
-  let cleanupExecuted = false
 
   const registerCleanup = (cleanup: unknown): void => {
     if (typeof cleanup === 'function') {
@@ -206,12 +204,6 @@ export function createAppInstance<HostElement extends WeakKey>(
   }
 
   const runPluginCleanups = (): void => {
-    if (cleanupExecuted) {
-      return
-    }
-
-    cleanupExecuted = true
-
     while (pluginCleanupStack.length > 0) {
       const cleanup = pluginCleanupStack.pop()
 

@@ -264,12 +264,10 @@ export function createAppInstance<HostElement extends WeakKey>(
             return
           }
 
-          let cleanup: unknown
-
           if (typeof plugin === 'function') {
-            cleanup = plugin(this)
+            plugin(this)
           } else if (plugin && typeof plugin.install === 'function') {
-            cleanup = plugin.install(this)
+            plugin.install(this)
           } else {
             throw new TypeError(runtimeCoreInvalidPlugin, { cause: plugin })
           }
@@ -283,11 +281,12 @@ export function createAppInstance<HostElement extends WeakKey>(
             plugin !== null &&
             'cleanup' in plugin &&
             isCleanup(plugin.cleanup)
-              ? plugin.cleanup
+              ? () => {
+                plugin.cleanup!(this)
+              }
               : undefined
 
           registerCleanup(pluginCleanup)
-          registerCleanup(cleanup)
         },
         {
           origin: errorContexts.appPluginUse,

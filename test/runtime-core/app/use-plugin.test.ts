@@ -47,11 +47,10 @@ describe('runtime-core app.use', () => {
       name: 'plugin-a',
       install: vi.fn(() => {
         calls.push('install-a')
-
-        return () => {
-          calls.push('cleanup-a')
-        }
       }),
+      cleanup() {
+        calls.push('cleanup-a')
+      },
     }
     const pluginB = {
       name: 'plugin-b',

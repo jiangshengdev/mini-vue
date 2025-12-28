@@ -1,6 +1,6 @@
 import type { SetupComponent } from '@/jsx-foundation/index.ts'
 import type { Ref } from '@/reactivity/index.ts'
-import type { PluginInstallApp } from '@/shared/index.ts'
+import type { PluginCleanup, PluginInstallApp, PluginObject } from '@/shared/index.ts'
 
 /**
  * 路由记录：定义原始路径与对应组件的绑定关系。
@@ -116,7 +116,7 @@ export interface RouterConfig {
  *
  * @beta
  */
-export interface Router {
+export interface Router extends PluginObject<PluginInstallApp> {
   /**
    * 当前路由定位的响应式引用。
    *
@@ -158,4 +158,6 @@ export interface Router {
    * - 同一个 `app` 不能安装多个不同的 `router`。
    */
   install: (app: PluginInstallApp) => void
+  /** 卸载插件时的清理钩子，用于回收安装计数和停止监听。 */
+  cleanup?: PluginCleanup<PluginInstallApp>
 }

@@ -182,6 +182,14 @@ export function createRouter(config: RouterConfig): Router {
     navigate,
     start,
     stop,
+    cleanup(app) {
+      installedApps.delete(app)
+      appsWithRouter.delete(app)
+
+      if (installedApps.size === 0) {
+        stop()
+      }
+    },
     /**
      * 作为应用插件安装：注入 `router` 并按需启动/停止监听。
      *
@@ -213,16 +221,6 @@ export function createRouter(config: RouterConfig): Router {
 
       /* 通过 `app.provide` 把 `router` 注入到组件树中，供 `useRouter/RouterLink/RouterView` 读取。 */
       app.provide(routerInjectionKey, router)
-
-      /* 返回清理函数：卸载 app 时回收安装计数并视情况停止监听。 */
-      return () => {
-        installedApps.delete(app)
-        appsWithRouter.delete(app)
-
-        if (installedApps.size === 0) {
-          stop()
-        }
-      }
     },
   }
 

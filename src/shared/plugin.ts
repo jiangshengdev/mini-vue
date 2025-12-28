@@ -23,19 +23,19 @@ export interface PluginInstallApp {
 }
 
 /** 插件清理回调类型。 */
-export type PluginCleanup = () => void
+export type PluginCleanup<App extends PluginInstallApp> = (app: App) => void
 
 /** 支持对象形式的插件定义。 */
 export interface PluginObject<App extends PluginInstallApp> {
   /** 插件名：用于去重。 */
   name?: string
   /** 安装钩子，可选返回清理函数。 */
-  install?: (app: App) => void | PluginCleanup
+  install?: (app: App) => void
   /** 显式声明的清理函数。 */
-  cleanup?: PluginCleanup
+  cleanup?: PluginCleanup<App>
 }
 
 /** 插件定义：函数插件或对象插件。 */
 export type PluginDefinition<App extends PluginInstallApp> =
-  | ((app: App) => void | PluginCleanup)
+  | ((app: App) => void)
   | PluginObject<App>

@@ -21,3 +21,21 @@ export interface PluginInstallApp {
   /** 非泛型 token 入口：用于兼容 string key 等场景。 */
   provide(key: InjectionToken, value: unknown): void
 }
+
+/** 插件清理回调类型。 */
+export type PluginCleanup = () => void
+
+/** 支持对象形式的插件定义。 */
+export interface PluginObject<App extends PluginInstallApp> {
+  /** 插件名：用于去重。 */
+  name?: string
+  /** 安装钩子，可选返回清理函数。 */
+  install?: (app: App) => void | PluginCleanup
+  /** 显式声明的清理函数。 */
+  cleanup?: PluginCleanup
+}
+
+/** 插件定义：函数插件或对象插件。 */
+export type PluginDefinition<App extends PluginInstallApp> =
+  | ((app: App) => void | PluginCleanup)
+  | PluginObject<App>

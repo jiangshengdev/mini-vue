@@ -7,6 +7,7 @@ import type {
   InjectionKey,
   InjectionToken,
   PlainObject,
+  PluginDefinition,
   PluginInstallApp,
   PropsShape,
 } from '@/shared/index.ts'
@@ -52,11 +53,9 @@ export interface AppContext {
  *
  * @remarks
  * - 函数形式：`(app) => { ... }`
- * - 对象形式：`{ install(app) { ... } }`
+ * - 对象形式：`{ install(app) { ... }, name?: string, cleanup?: () => void }`
  */
-export type AppPlugin<HostElement> =
-  | ((app: AppInstance<HostElement>) => void)
-  | { install: (app: AppInstance<HostElement>) => void }
+export type AppPlugin<HostElement> = PluginDefinition<AppInstance<HostElement>>
 
 /**
  * `createApp` 返回的实例 API，封装 `mount`/`unmount` 生命周期。
@@ -196,6 +195,44 @@ export function createAppInstance<HostElement extends WeakKey>(
     appContext: { provides: Object.create(null) as PlainObject },
   }
 
+  /** 已安装插件名，避免重复安装（有名插件按 name 去重）。 */
+  const installedPluginNames = new Set<string>()
+  /** 插件清理回调栈，按安装顺序压栈，卸载时后进先出执行。 */
+  const pluginCleanupStack: Array<() => void> = []
+  /** 标记清理是否已执行，重复 unmount 时静默忽略。 */
+  let cleanupExecuted = false
+
+  const isCleanup = (value: unknown): value is () => void => {
+    return typeof value === 'function'
+  }
+
+  const registerCleanup = (cleanup: unknown): void => {
+    if (isCleanup(cleanup)) {
+      pluginCleanupStack.push(cleanup)
+    }
+  }
+
+  const runPluginCleanups = (): void => {
+    if (cleanupExecuted) {
+      return
+    }
+
+    cleanupExecuted = true
+
+    while (pluginCleanupStack.length > 0) {
+      const cleanup = pluginCleanupStack.pop()
+
+      if (!cleanup) {
+        continue
+      }
+
+      runThrowing(cleanup, {
+        origin: errorContexts.appPluginUse,
+        handlerPhase: errorPhases.sync,
+      })
+    }
+  }
+
   /* 用户态 `mount` 会透传容器给核心挂载逻辑。 */
   function mount(target: HostElement): void {
     mountApp(state, target)
@@ -204,6 +241,7 @@ export function createAppInstance<HostElement extends WeakKey>(
   /* `unmount` 暴露为实例方法，便于控制生命周期。 */
   function unmount(): void {
     unmountApp(state)
+    runPluginCleanups()
   }
 
   return {
@@ -219,19 +257,37 @@ export function createAppInstance<HostElement extends WeakKey>(
     use(plugin: AppPlugin<HostElement>) {
       runThrowing(
         () => {
+          const pluginName = typeof plugin === 'function' ? plugin.name : plugin?.name
+
+          /* 按 name 去重：同名插件仅安装一次。 */
+          if (pluginName && installedPluginNames.has(pluginName)) {
+            return
+          }
+
+          let cleanup: unknown
+
           if (typeof plugin === 'function') {
-            plugin(this)
-
-            return
+            cleanup = plugin(this)
+          } else if (plugin && typeof plugin.install === 'function') {
+            cleanup = plugin.install(this)
+          } else {
+            throw new TypeError(runtimeCoreInvalidPlugin, { cause: plugin })
           }
 
-          if (plugin && typeof plugin.install === 'function') {
-            plugin.install(this)
-
-            return
+          if (pluginName) {
+            installedPluginNames.add(pluginName)
           }
 
-          throw new TypeError(runtimeCoreInvalidPlugin, { cause: plugin })
+          const pluginCleanup =
+            typeof plugin === 'object' &&
+            plugin !== null &&
+            'cleanup' in plugin &&
+            isCleanup(plugin.cleanup)
+              ? plugin.cleanup
+              : undefined
+
+          registerCleanup(pluginCleanup)
+          registerCleanup(cleanup)
         },
         {
           origin: errorContexts.appPluginUse,

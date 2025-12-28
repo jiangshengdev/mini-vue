@@ -112,15 +112,6 @@ export function createRouter(config: RouterConfig): Router {
   const installedApps = new Set<PluginInstallApp>()
 
   /**
-   * 记录已被当前 `router` 包装过 `unmount` 方法的 `app`。
-   *
-   * @remarks
-   * - 防止同一个 `app` 的 `unmount` 被重复包装。
-   * - 使用 `WeakSet` 避免阻止 `app` 被垃圾回收。
-   */
-  const wrappedUnmountApps = new WeakSet<PluginInstallApp>()
-
-  /**
    * 开始监听浏览器前进/后退事件。
    *
    * @remarks
@@ -220,37 +211,18 @@ export function createRouter(config: RouterConfig): Router {
         start()
       }
 
-      /*
-       * 若 `app` 支持 `unmount`，则包装其卸载方法以回收安装计数。
-       *
-       * @remarks
-       * - 用 `WeakSet` 防止重复包装（同一个 `app` 可能多次调用 install）。
-       * - 用 `finally` 确保 `rawUnmount` 抛错时也能完成计数回收和 `stop` 判断。
-       * - 当最后一个 `app` 卸载时自动调用 `stop` 释放事件监听。
-       */
-      if (typeof app.unmount === 'function' && !wrappedUnmountApps.has(app)) {
-        const rawUnmount = app.unmount.bind(app)
-
-        /* 包装 `unmount`：在原始卸载逻辑后回收计数，最后一个 `app` 卸载时 `stop`。 */
-        app.unmount = () => {
-          try {
-            rawUnmount()
-          } finally {
-            installedApps.delete(app)
-            appsWithRouter.delete(app)
-
-            /* 所有 `app` 都卸载后停止监听，释放资源。 */
-            if (installedApps.size === 0) {
-              stop()
-            }
-          }
-        }
-
-        wrappedUnmountApps.add(app)
-      }
-
       /* 通过 `app.provide` 把 `router` 注入到组件树中，供 `useRouter/RouterLink/RouterView` 读取。 */
       app.provide(routerInjectionKey, router)
+
+      /* 返回清理函数：卸载 app 时回收安装计数并视情况停止监听。 */
+      return () => {
+        installedApps.delete(app)
+        appsWithRouter.delete(app)
+
+        if (installedApps.size === 0) {
+          stop()
+        }
+      }
     },
   }
 

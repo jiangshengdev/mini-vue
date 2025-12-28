@@ -10,10 +10,10 @@
 ## Action items
 
 [x] 梳理现有 `app.use`/`PluginInstallApp` 契约，确定插件对象/函数的兼容要求与扩展点。
-[x] 设计并实现插件注册表：按 `name` 去重记录已安装插件、防重复安装、收集 cleanup 回调，`app.unmount` 时按 LIFO 顺序统一执行并清空，重复 unmount 静默忽略。
-[x] 定义插件接口（`install` + 可选 `cleanup`，当前仅支持对象式插件）。
+[x] 设计并实现插件注册表：按 `name` 去重记录已安装插件、防重复安装、收集 uninstall 回调，`app.unmount` 时按 LIFO 顺序统一执行并清空，重复 unmount 静默忽略。
+[x] 定义插件接口（`install` + 可选 `uninstall`，当前仅支持对象式插件）。
 [x] 将 router 安装逻辑迁移到注册表清理机制，去掉对 `app.unmount` 的直接包装，同时保留“一 app 同时仅一个 router”的约束。
-[x] 补充单测覆盖：重复安装防护、卸载触发 cleanup、卸载后重装/切换 router 等场景。
+[x] 补充单测覆盖：重复安装防护、卸载触发 uninstall、卸载后重装/切换 router 等场景。
 [x] 更新文档/注释说明新的插件生命周期与清理策略，确认类型导出是否需同步调整。
 
 ## Open questions

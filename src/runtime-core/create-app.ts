@@ -8,8 +8,8 @@ import type {
   InjectionToken,
   PlainObject,
   PluginCleanup,
-  PluginDefinition,
   PluginInstallApp,
+  PluginObject,
   PropsShape,
 } from '@/shared/index.ts'
 import { errorContexts, errorPhases, runThrowing } from '@/shared/index.ts'
@@ -50,13 +50,9 @@ export interface AppContext {
 }
 
 /**
- * 应用插件：支持函数形式与对象形式（带 `install` 方法）。
- *
- * @remarks
- * - 函数形式：`(app) => { ... }`
- * - 对象形式：`{ install(app) { ... }, name?: string, cleanup?: () => void }`
+ * 应用插件：支持对象形式（带 `install` 方法）。
  */
-export type AppPlugin<HostElement> = PluginDefinition<AppInstance<HostElement>>
+export type AppPlugin<HostElement> = PluginObject<AppInstance<HostElement>>
 
 /**
  * `createApp` 返回的实例 API，封装 `mount`/`unmount` 生命周期。
@@ -64,7 +60,7 @@ export type AppPlugin<HostElement> = PluginDefinition<AppInstance<HostElement>>
  * @remarks
  * - `mount`：指定宿主容器并触发首次渲染，只能调用一次。
  * - `unmount`：停止渲染并释放容器内容，之后可重新 `mount`。
- * - `use`：安装插件，支持函数形式与对象形式。
+ * - `use`：安装对象形式的插件。
  * - `provide`：在应用级提供依赖，供整个组件树通过 `inject()` 读取。
  */
 export interface AppInstance<HostElement> extends PluginInstallApp {
@@ -72,7 +68,7 @@ export interface AppInstance<HostElement> extends PluginInstallApp {
   mount(target: HostElement): void
   /** 停止渲染并释放容器内容。 */
   unmount(): void
-  /** 安装插件（函数或对象带 `install`）。 */
+  /** 安装对象插件。 */
   use(plugin: AppPlugin<HostElement>): void
   /**
    * 在应用级提供依赖，供整个组件树通过 `inject()` 读取。
@@ -267,26 +263,28 @@ export function createAppInstance<HostElement extends WeakKey>(
      * 安装应用插件。
      *
      * @remarks
-     * - 统一支持函数插件与 `{ install(app) {} }` 形式。
+     * - 仅支持对象插件（必须提供 `install(app)` 方法）。
      * - 通过共享错误通道上报，保证行为与其他用户回调入口一致。
      */
     use(plugin: AppPlugin<HostElement>) {
       runThrowing(
         () => {
-          const pluginName = typeof plugin === 'function' ? plugin.name : plugin?.name
+          if (!plugin || typeof plugin !== 'object') {
+            throw new TypeError(runtimeCoreInvalidPlugin, { cause: plugin })
+          }
+
+          const pluginName = plugin?.name
 
           /* 按 name 去重：同名插件仅安装一次。 */
           if (pluginName && installedPluginNames.has(pluginName)) {
             return
           }
 
-          if (typeof plugin === 'function') {
-            plugin(this)
-          } else if (plugin && typeof plugin.install === 'function') {
-            plugin.install(this)
-          } else {
+          if (typeof plugin.install !== 'function') {
             throw new TypeError(runtimeCoreInvalidPlugin, { cause: plugin })
           }
+
+          plugin.install(this)
 
           if (pluginName) {
             installedPluginNames.add(pluginName)

@@ -35,7 +35,5 @@ export interface PluginObject<App extends PluginInstallApp> {
   cleanup?: PluginCleanup<App>
 }
 
-/** 插件定义：函数插件或对象插件。 */
-export type PluginDefinition<App extends PluginInstallApp> =
-  | ((app: App) => void)
-  | PluginObject<App>
+/** 插件定义：仅支持对象形式。 */
+export type PluginDefinition<App extends PluginInstallApp> = PluginObject<App>

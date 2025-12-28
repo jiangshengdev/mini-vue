@@ -24,6 +24,25 @@ describe('runtime-core app.use', () => {
     expect((caught as Error & { cause: unknown }).cause).toBe(plugin)
   })
 
+  it('函数式插件被视为无效插件', () => {
+    const app = createAppInstance(
+      { render: vi.fn(), unmount: vi.fn() },
+      createRenderlessComponent(),
+    )
+    const plugin = vi.fn()
+    let caught: unknown
+
+    try {
+      app.use(plugin as never)
+    } catch (error) {
+      caught = error
+    }
+
+    expect(caught).toBeInstanceOf(TypeError)
+    expect((caught as Error).message).toBe(runtimeCoreInvalidPlugin)
+    expect((caught as Error & { cause: unknown }).cause).toBe(plugin)
+  })
+
   it('按 name 去重的插件只安装一次', () => {
     const render = vi.fn()
     const unmount = vi.fn()

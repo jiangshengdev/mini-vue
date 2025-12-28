@@ -37,12 +37,10 @@ export const runtimeCoreAppAlreadyMounted = 'createApp: 当前应用已挂载，
 /**
  * 插件类型错误
  *
- * `app.use(plugin)` 接受两种形式的插件：
- * - 函数：直接作为 install 函数调用
- * - 对象：必须包含 `install(app)` 方法
- * 其他类型会抛出此错误。
+ * `app.use(plugin)` 仅接受对象形式的插件，且必须包含 `install(app)` 方法，
+ * 其他类型或缺少 install 会抛出此错误。
  */
-export const runtimeCoreInvalidPlugin = 'createApp.use: plugin 必须是函数或带 install(app) 的对象'
+export const runtimeCoreInvalidPlugin = 'createApp.use: plugin 必须是带 install(app) 的对象'
 
 /**
  * 渲染器容器类型错误

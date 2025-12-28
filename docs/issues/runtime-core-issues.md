@@ -2,7 +2,7 @@
 
 ## 本轮审查补充
 
-- 本轮审查未发现新的 runtime-core 问题；现有条目仍然适用，如需新增议题请按问题模板补充并附可能方案。
+- 新增：「`shouldUseAnchor` 在 Fragment/数组子树中传染为 `true`，导致锚点滥用」议题，详见下文第 16 条。
 
 ## 1. 组件更新采用「卸载后重挂」导致状态丢失（已修复）
 
@@ -131,3 +131,21 @@
   - `src/runtime-core/patch/keyed-children-helpers.ts`（`findUnkeyedMatch`）
 - 修复：`patchAlignedChildren` 写入 `newIndexToOldIndexMap` 前会检查占用，重复命中时卸载当前旧节点；`findUnkeyedMatch` 兜底复用无 key 节点时跳过已占用的新索引，避免同一新节点被多次复用，最终移动阶段按正确映射插入/复用。
 - 回归验证：`test/runtime-core/patch/children-keyed.test.tsx`、`test/runtime-core/patch/children-keyed-regression.test.tsx` 覆盖重复 key 及逆序场景，确认不会残留额外宿主节点。
+
+## 16. `shouldUseAnchor` 在 Fragment/数组路径下会被继承为全局 `true`（待确认）
+
+- 位置：
+  - `src/runtime-core/mount/child.ts`（`mountChild`/`mountArrayChild`）
+  - `src/runtime-core/mount/virtual-node.ts`
+  - `src/runtime-core/mount/children.ts`
+  - `src/runtime-core/component/mount.ts`、`component/anchor.ts`
+- 现状：
+  - `mountChild` 读取父级 `context.shouldUseAnchor` 后直接转传给 `mountVirtualNode`；`Fragment` 分支再原样传给内部 `children`，导致父层设为 `true` 时子树层层继承。
+  - 数组分支 `mountArrayChild` 对每个子项强制 `shouldUseAnchor: true`，不按本层兄弟关系重算。
+  - 元素子节点路径会按索引重算 `shouldUseAnchor`，因此只有被数组/Fragment 包裹时会出现「一旦为真，后代皆真」。
+- 影响：组件/Fragment/数组子树都会创建首尾锚点，甚至在本层没有后续兄弟时也会被迫使用，占用额外空文本节点与插入成本。
+- 参考：Vue3 渲染器会在每层 children 遍历中独立计算是否需要锚点，Fragment/组件进入子树时不会继承父层需求。
+- 可能方案：
+  - 进入 Fragment/数组子树时重算或重置 `shouldUseAnchor`，按当前层的兄弟关系决定。
+  - 数组分支根据 `index < children.length - 1` 决定 `shouldUseAnchor`，而非一律 `true`。
+  - 组件子树仅在父层确实有后续兄弟时才创建首尾锚点，进入组件内部后应清零。

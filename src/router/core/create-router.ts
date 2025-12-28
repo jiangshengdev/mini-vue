@@ -4,16 +4,7 @@ import type { RouteLocation, Router, RouterConfig, RouteRecord } from './types.t
 import { routerDuplicateInstallOnApp } from '@/messages/index.ts'
 import type { Ref } from '@/reactivity/index.ts'
 import { ref } from '@/reactivity/index.ts'
-
-/**
- * `Router` 作为插件安装时，`app` 侧需要具备的最小能力子集。
- *
- * @remarks
- * - 该类型避免把运行时 `AppInstance` 强耦合进 `router` 包。
- * - 仅用于 `router.install(app)` 的参数约束与内部 bookkeeping。
- * - 从 `Router['install']` 的参数类型中提取，保持与 `Router` 接口同步。
- */
-type InstallableApp = Parameters<Router['install']>[0]
+import type { PluginInstallApp } from '@/shared/index.ts'
 
 /**
  * 检测当前环境是否为浏览器且支持 `history/popstate` 事件。
@@ -32,7 +23,7 @@ const canUseWindowEvents =
  * - 用于防止同一个 `app` 重复安装不同的 `router`。
  * - 使用 `WeakSet` 避免阻止 `app` 被垃圾回收。
  */
-const appsWithRouter = new WeakSet<InstallableApp>()
+const appsWithRouter = new WeakSet<PluginInstallApp>()
 
 /**
  * 读取当前浏览器路径。
@@ -118,7 +109,7 @@ export function createRouter(config: RouterConfig): Router {
    * - 用于追踪安装计数，在最后一个 `app` 卸载时自动 `stop`。
    * - 与 `appsWithRouter` 不同，这里只记录当前 `router` 的安装情况。
    */
-  const installedApps = new Set<InstallableApp>()
+  const installedApps = new Set<PluginInstallApp>()
 
   /**
    * 记录已被当前 `router` 包装过 `unmount` 方法的 `app`。
@@ -127,7 +118,7 @@ export function createRouter(config: RouterConfig): Router {
    * - 防止同一个 `app` 的 `unmount` 被重复包装。
    * - 使用 `WeakSet` 避免阻止 `app` 被垃圾回收。
    */
-  const wrappedUnmountApps = new WeakSet<InstallableApp>()
+  const wrappedUnmountApps = new WeakSet<PluginInstallApp>()
 
   /**
    * 开始监听浏览器前进/后退事件。

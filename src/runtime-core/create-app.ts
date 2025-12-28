@@ -7,6 +7,7 @@ import type {
   InjectionKey,
   InjectionToken,
   PlainObject,
+  PluginCleanup,
   PluginDefinition,
   PluginInstallApp,
   PropsShape,
@@ -202,13 +203,9 @@ export function createAppInstance<HostElement extends WeakKey>(
   /** 标记清理是否已执行，重复 unmount 时静默忽略。 */
   let cleanupExecuted = false
 
-  const isCleanup = (value: unknown): value is () => void => {
-    return typeof value === 'function'
-  }
-
   const registerCleanup = (cleanup: unknown): void => {
-    if (isCleanup(cleanup)) {
-      pluginCleanupStack.push(cleanup)
+    if (typeof cleanup === 'function') {
+      pluginCleanupStack.push(cleanup as () => void)
     }
   }
 
@@ -230,6 +227,25 @@ export function createAppInstance<HostElement extends WeakKey>(
         origin: errorContexts.appPluginUse,
         handlerPhase: errorPhases.sync,
       })
+    }
+  }
+
+  const resolvePluginCleanup = (
+    plugin: AppPlugin<HostElement>,
+    appInstance: AppInstance<HostElement>,
+  ): (() => void) | undefined => {
+    if (typeof plugin !== 'object' || plugin === null) {
+      return undefined
+    }
+
+    const candidate = (plugin as { cleanup?: unknown }).cleanup
+
+    if (typeof candidate !== 'function') {
+      return undefined
+    }
+
+    return () => {
+      ;(candidate as PluginCleanup<AppInstance<HostElement>>)(appInstance)
     }
   }
 
@@ -276,15 +292,7 @@ export function createAppInstance<HostElement extends WeakKey>(
             installedPluginNames.add(pluginName)
           }
 
-          const pluginCleanup =
-            typeof plugin === 'object' &&
-            plugin !== null &&
-            'cleanup' in plugin &&
-            isCleanup(plugin.cleanup)
-              ? () => {
-                plugin.cleanup!(this)
-              }
-              : undefined
+          const pluginCleanup = resolvePluginCleanup(plugin, this)
 
           registerCleanup(pluginCleanup)
         },

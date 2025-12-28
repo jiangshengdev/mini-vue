@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { createRenderlessComponent } from '$/index.ts'
 import { runtimeCoreInvalidPlugin } from '@/messages/index.ts'
 import { createAppInstance } from '@/runtime-core/index.ts'
+import type { PluginInstallApp } from '@/shared/index.ts'
 
 describe('runtime-core app.use', () => {
   it('无效插件抛错时在 cause 中返回原始插件对象', () => {
@@ -48,7 +49,7 @@ describe('runtime-core app.use', () => {
       install: vi.fn(() => {
         calls.push('install-a')
       }),
-      cleanup() {
+      cleanup(_app: PluginInstallApp) {
         calls.push('cleanup-a')
       },
     }
@@ -57,7 +58,7 @@ describe('runtime-core app.use', () => {
       install: vi.fn(() => {
         calls.push('install-b')
       }),
-      cleanup() {
+      cleanup(_app: PluginInstallApp) {
         calls.push('cleanup-b')
       },
     }

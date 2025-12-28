@@ -2,9 +2,9 @@
  * DOM 宿主环境的渲染原语实现。
  *
  * 本模块提供 runtime-core 所需的 DOM 操作原语，包括：
- * - 节点创建：`createElement`、`createText`、`createFragment`
+ * - 节点创建：`createElement`、`createText`、`createComment`、`createFragment`
  * - 节点操作：`appendChild`、`insertBefore`、`remove`、`clear`
- * - 文本更新：`setText`
+ * - 文本/注释更新：`setText`
  * - 属性打补丁：`patchProps`
  *
  * 这些原语构成 runtime-core 与 DOM 宿主之间的契约，
@@ -30,6 +30,10 @@ export const domRendererOptions: RendererOptions<Node, Element, DocumentFragment
   /** 根据文本内容生成 Text 节点，承载字符串 children。 */
   createText(text): Text {
     return document.createTextNode(text)
+  },
+  /** 创建注释节点，用于锚点等不可见占位。 */
+  createComment(text): Comment {
+    return document.createComment(text)
   },
   /** 更新现有文本节点的内容，避免重新创建节点。 */
   setText(node, text): void {

@@ -10,7 +10,7 @@ import { createTextVirtualNode } from '@/jsx-foundation/index.ts'
 import { __DEV__ } from '@/shared/index.ts'
 
 interface TestNode {
-  kind: 'element' | 'text' | 'fragment'
+  kind: 'element' | 'text' | 'comment' | 'fragment'
   children: TestNode[]
   parent?: TestNode
   text?: string
@@ -151,6 +151,9 @@ function createHostOptionsWithSpies(): {
     },
     createText(text): TestNode {
       return { kind: 'text', children: [], text }
+    },
+    createComment(text): TestNode {
+      return { kind: 'comment', children: [], text }
     },
     createFragment(): TestFragment {
       return { kind: 'fragment', children: [] }

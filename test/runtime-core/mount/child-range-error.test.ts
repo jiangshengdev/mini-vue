@@ -19,6 +19,9 @@ function createMockRendererOptions(): RendererOptions<MockNode, MockContainer, M
     createText(text) {
       return { text }
     },
+    createComment(text) {
+      return { text }
+    },
     createFragment() {
       return { children: [] }
     },

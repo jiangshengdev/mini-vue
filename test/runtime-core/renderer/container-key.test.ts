@@ -39,6 +39,7 @@ function createMinimalRendererOptions(): RendererOptions<
   return {
     createElement: createStub(),
     createText: createStub(),
+    createComment: createStub(),
     createFragment: createStub(),
     setText: vi.fn(),
     appendChild: vi.fn(),

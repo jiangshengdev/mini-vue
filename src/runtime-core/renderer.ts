@@ -28,6 +28,8 @@ export interface RendererOptions<
   createElement(type: string): HostElement
   /** 创建文本节点，用于渲染字符串与数字。 */
   createText(text: string): HostNode
+  /** 创建注释节点，常用于渲染锚点。 */
+  createComment(text: string): HostNode
   /** 创建片段节点，承载一组子节点再整体插入。 */
   createFragment(): HostFragment
   /** 设置文本节点内容，复用既有宿主节点。 */

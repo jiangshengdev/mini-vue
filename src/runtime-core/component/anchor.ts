@@ -3,13 +3,14 @@ import { mountChild } from '../mount/child.ts'
 import type { MountedHandle } from '../mount/handle.ts'
 import type { ComponentInstance } from './context.ts'
 import type { RenderOutput, SetupComponent } from '@/jsx-foundation/index.ts'
+import { __DEV__ } from '@/shared/index.ts'
 
 /**
  * 处理需要锚点的组件子树挂载，避免与兄弟节点混淆。
  *
  * @remarks
  * - 当组件不是父容器的最后一个子节点时，需要首尾锚点来标记其占据的区间。
- * - 锚点为空文本节点，不影响渲染结果但能保证后续兄弟节点的插入位置正确。
+ * - 锚点为注释节点，不影响渲染结果但能保证后续兄弟节点的插入位置正确。
  */
 export function mountComponentSubtreeWithAnchors<
   HostNode,
@@ -81,7 +82,7 @@ export function mountComponentSubtreeWithAnchors<
 }
 
 /**
- * 为需要锚点的组件创建首尾空文本占位符，保证兄弟节点插入位置固定。
+ * 为需要锚点的组件创建首尾注释占位符，保证兄弟节点插入位置固定。
  *
  * @remarks
  * - 首锚点标记组件子树的起始位置，尾锚点标记结束位置。
@@ -101,8 +102,10 @@ function ensureComponentAnchors<
     return
   }
 
-  const start = options.createText('')
-  const end = options.createText('')
+  const startLabel = __DEV__ ? 'component-anchor-start' : ''
+  const endLabel = __DEV__ ? 'component-anchor-end' : ''
+  const start = options.createComment(startLabel)
+  const end = options.createComment(endLabel)
 
   options.appendChild(instance.container, start)
   options.appendChild(instance.container, end)

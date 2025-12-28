@@ -138,8 +138,10 @@ function mountArrayChild<
   children: VirtualNodeChild[],
   environment: ChildEnvironment<HostNode, HostElement, HostFragment>,
 ): MountedHandle<HostNode> | undefined {
-  const { createText, remove } = options
+  const { createComment, remove } = options
   const { container, context, anchor } = environment
+  const startComment = __DEV__ ? 'array-start' : ''
+  const endComment = __DEV__ ? 'array-end' : ''
   const childCount = children.length
 
   if (childCount === 0) {
@@ -154,8 +156,8 @@ function mountArrayChild<
     })
   }
 
-  const startAnchor = createText('')
-  const endAnchor = createText('')
+  const startAnchor = createComment(startComment)
+  const endAnchor = createComment(endComment)
   const nodes: HostNode[] = [startAnchor]
   const teardowns: Array<(skipRemove?: boolean) => void> = []
   let ok = true

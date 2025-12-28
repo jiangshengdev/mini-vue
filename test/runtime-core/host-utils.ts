@@ -3,7 +3,7 @@ import { normalizeRenderOutput } from '@/runtime-core/index.ts'
 import type { RenderOutput } from '@/jsx-foundation/index.ts'
 
 export interface TestNode {
-  kind: 'element' | 'text' | 'fragment'
+  kind: 'element' | 'text' | 'comment' | 'fragment'
   children: TestNode[]
   parent?: TestNode
   text?: string
@@ -104,6 +104,9 @@ export function createHostRenderer(hooks: HostRendererHooks = {}): HostRenderer 
     },
     createText(text): TestNode {
       return { kind: 'text', children: [], text }
+    },
+    createComment(text): TestNode {
+      return { kind: 'comment', children: [], text }
     },
     createFragment(): TestFragment {
       return { kind: 'fragment', children: [] }

@@ -140,8 +140,8 @@ function mountArrayChild<
 ): MountedHandle<HostNode> | undefined {
   const { createComment, remove } = options
   const { container, context, anchor } = environment
-  const startComment = __DEV__ ? 'array-start' : ''
-  const endComment = __DEV__ ? 'array-end' : ''
+  const startComment = __DEV__ ? 'fragment-start' : ''
+  const endComment = __DEV__ ? 'fragment-end' : ''
   const childCount = children.length
 
   if (childCount === 0) {

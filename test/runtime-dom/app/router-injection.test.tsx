@@ -256,7 +256,7 @@ describe('runtime-dom router 注入', () => {
     const Root: SetupComponent = () => {
       return () => {
         return (
-          <RouterLink to="/counter" target="_blank">
+          <RouterLink to="/counter?foo=1#bar" target="_blank">
             go
           </RouterLink>
         )
@@ -273,6 +273,10 @@ describe('runtime-dom router 注入', () => {
     }
 
     expect(anchor).toBeTruthy()
+    expect(anchor!.getAttribute('href')).toBe('/counter?foo=1#bar')
+    expect(new URL(anchor!.href).pathname).toBe('/counter')
+    expect(new URL(anchor!.href).search).toBe('?foo=1')
+    expect(new URL(anchor!.href).hash).toBe('#bar')
 
     const clickInvoker = anchor[invokerCacheKey]?.click
     const event = new MouseEvent('click', { bubbles: true, cancelable: true })

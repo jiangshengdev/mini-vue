@@ -1,5 +1,5 @@
 import { useRouter } from '../core/injection.ts'
-import { normalizePath } from '../core/paths.ts'
+import { getQueryAndHash, normalizePath } from '../core/paths.ts'
 import type { Router } from '../core/types.ts'
 import type { ComponentChildren, SetupComponent } from '@/jsx-foundation/index.ts'
 import type { PropsShape } from '@/shared/index.ts'
@@ -75,8 +75,10 @@ export const RouterLink: SetupComponent<RouterLinkProps> = (props) => {
   return () => {
     const { to, router: _router, onClick: _onClick, children, ...rest } = props
 
+    const href = `${normalizePath(to)}${getQueryAndHash(to)}`
+
     return (
-      <a {...rest} href={normalizePath(to)} onClick={handleClick}>
+      <a {...rest} href={href} onClick={handleClick}>
         {children}
       </a>
     )

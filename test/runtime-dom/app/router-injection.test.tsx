@@ -3,7 +3,7 @@ import { createRenderlessComponent, createTestContainer } from '$/index.ts'
 import type { SetupComponent } from '@/index.ts'
 import { createApp, createRouter, ref, RouterLink, RouterView } from '@/index.ts'
 import { invokerCacheKey } from '@/runtime-dom/index.ts'
-import { routerDuplicateInstallOnApp } from '@/messages/index.ts'
+import { runtimeCoreDuplicatePluginName } from '@/messages/index.ts'
 
 type EventListenerCall = Parameters<typeof globalThis.removeEventListener>
 
@@ -69,7 +69,7 @@ describe('runtime-dom router 注入', () => {
 
     expect(() => {
       app.use(routerB)
-    }).toThrowError(routerDuplicateInstallOnApp)
+    }).toThrowError(runtimeCoreDuplicatePluginName)
   })
 
   it('app 卸载后可重新安装同一 router', () => {

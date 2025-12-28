@@ -43,6 +43,13 @@ export const runtimeCoreAppAlreadyMounted = 'createApp: 当前应用已挂载，
 export const runtimeCoreInvalidPlugin = 'createApp.use: plugin 必须是带 install(app) 的对象'
 
 /**
+ * 插件重复安装错误
+ *
+ * `app.use(plugin)` 不允许注册同名插件，重复调用会抛出此错误。
+ */
+export const runtimeCoreDuplicatePluginName = 'createApp.use: 已安装同名插件，请勿重复注册'
+
+/**
  * 渲染器容器类型错误
  *
  * `createRenderer` 使用 WeakMap 缓存容器的挂载状态，

@@ -2,7 +2,11 @@ import { setCurrentAppContext, unsetCurrentAppContext } from './app-context.ts'
 import type { RootRenderFunction } from './renderer.ts'
 import type { ElementProps, SetupComponent } from '@/jsx-foundation/index.ts'
 import { buildVirtualNode } from '@/jsx-runtime/index.ts'
-import { runtimeCoreAppAlreadyMounted, runtimeCoreInvalidPlugin } from '@/messages/index.ts'
+import {
+  runtimeCoreAppAlreadyMounted,
+  runtimeCoreDuplicatePluginName,
+  runtimeCoreInvalidPlugin,
+} from '@/messages/index.ts'
 import type {
   InjectionKey,
   InjectionToken,
@@ -270,9 +274,13 @@ export function createAppInstance<HostElement extends WeakKey>(
 
           const pluginName = plugin?.name
 
-          /* 按 name 去重：同名插件仅安装一次。 */
-          if (pluginName && installedPluginNames.has(pluginName)) {
-            return
+          if (typeof pluginName !== 'string') {
+            throw new TypeError(runtimeCoreInvalidPlugin, { cause: plugin })
+          }
+
+          /* 按 name 去重：同名插件视为重复注册，直接报错。 */
+          if (installedPluginNames.has(pluginName)) {
+            throw new Error(runtimeCoreDuplicatePluginName, { cause: plugin })
           }
 
           if (typeof plugin.install !== 'function') {
@@ -281,9 +289,7 @@ export function createAppInstance<HostElement extends WeakKey>(
 
           plugin.install(this)
 
-          if (pluginName) {
-            installedPluginNames.add(pluginName)
-          }
+          installedPluginNames.add(pluginName)
 
           const pluginUninstall = resolvePluginUninstall(plugin, this)
 

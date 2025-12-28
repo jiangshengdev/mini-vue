@@ -178,6 +178,7 @@ export function createRouter(config: RouterConfig): Router {
   }
 
   const router: Router = {
+    name: 'router',
     currentRoute,
     navigate,
     start,

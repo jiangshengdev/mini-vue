@@ -30,6 +30,7 @@ export { routerDuplicateInstallOnApp, routerNotFound } from './router.ts'
 export {
   runtimeCoreAppAlreadyMounted,
   runtimeCoreAsyncSetupNotSupported,
+  runtimeCoreDuplicatePluginName,
   runtimeCoreInjectOutsideSetup,
   runtimeCoreInvalidContainer,
   runtimeCoreInvalidPlugin,

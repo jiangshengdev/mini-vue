@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { createRenderlessComponent } from '$/index.ts'
-import { runtimeCoreInvalidPlugin } from '@/messages/index.ts'
+import { runtimeCoreDuplicatePluginName, runtimeCoreInvalidPlugin } from '@/messages/index.ts'
 import { createAppInstance } from '@/runtime-core/index.ts'
 import type { PluginInstallApp } from '@/shared/index.ts'
 
@@ -43,17 +43,18 @@ describe('runtime-core app.use', () => {
     expect((caught as Error & { cause: unknown }).cause).toBe(plugin)
   })
 
-  it('按 name 去重的插件只安装一次', () => {
+  it('按 name 去重的插件重复注册时报错', () => {
     const render = vi.fn()
     const unmount = vi.fn()
     const app = createAppInstance({ render, unmount }, createRenderlessComponent())
 
     const installSpy = vi.fn()
-    const plugin = { name: 'foo', install: installSpy }
+    const plugin = { name: 'foo', install: installSpy, uninstall: vi.fn() }
 
     app.use(plugin)
-    app.use(plugin)
-
+    expect(() => {
+      app.use(plugin)
+    }).toThrowError(runtimeCoreDuplicatePluginName)
     expect(installSpy).toHaveBeenCalledTimes(1)
   })
 

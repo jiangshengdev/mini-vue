@@ -246,6 +246,7 @@ export function createRouter(config: RouterConfig): Router {
             rawUnmount()
           } finally {
             installedApps.delete(app)
+            appsWithRouter.delete(app)
 
             /* 所有 `app` 都卸载后停止监听，释放资源。 */
             if (installedApps.size === 0) {

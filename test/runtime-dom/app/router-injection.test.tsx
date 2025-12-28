@@ -72,6 +72,49 @@ describe('runtime-dom router 注入', () => {
     }).toThrowError(routerDuplicateInstallOnApp)
   })
 
+  it('app 卸载后可重新安装同一 router', () => {
+    const Home = createRenderlessComponent()
+    const NotFound = createRenderlessComponent()
+    const router = createSingleRouteRouter(Home, NotFound)
+
+    const Root = createRenderlessComponent()
+
+    const app = createApp(Root)
+
+    app.use(router)
+    app.unmount()
+
+    expect(() => {
+      app.use(router)
+    }).not.toThrow()
+
+    app.unmount()
+    router.stop()
+  })
+
+  it('卸载后可切换到其他 router', () => {
+    const Home = createRenderlessComponent()
+    const NotFound = createRenderlessComponent()
+
+    const routerA = createSingleRouteRouter(Home, NotFound)
+    const routerB = createSingleRouteRouter(Home, NotFound)
+
+    const Root = createRenderlessComponent()
+
+    const app = createApp(Root)
+
+    app.use(routerA)
+    app.unmount()
+
+    expect(() => {
+      app.use(routerB)
+    }).not.toThrow()
+
+    app.unmount()
+    routerA.stop()
+    routerB.stop()
+  })
+
   it('共享 router 仅在最后一个 app unmount 后停止', () => {
     const addSpy = vi.spyOn(globalThis, 'addEventListener')
     const removeSpy = vi.spyOn(globalThis, 'removeEventListener')

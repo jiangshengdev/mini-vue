@@ -26,11 +26,8 @@
 - 现状：`RouteLocation` 现已携带 `fullPath`/`query`/`hash`，`matchRoute`/`navigate`/初始化会读取完整 `pathname + search + hash`，匹配仍按规范化路径进行。
 - 影响：`currentRoute` 与地址栏保持一致，组件可读取 query/hash，且不影响路径匹配。
 
-## 5. 全局 WeakSet 误判多实例重复安装（待修复）
+## 5. 全局 WeakSet 误判多实例重复安装（已修复）
 
 - 位置：`src/router/core/create-router.ts`
-- 现状：`appsWithRouter` 是模块级 WeakSet，多个 router 实例会共享，导致不同实例在同一 app 场景被误判为重复安装并抛错。
-- 影响：单页多 router 或微前端场景无法正常安装。
-- 可能方案：
-  - 将重复安装检查限定在 router 实例内部（仅对同一实例的重复安装报错），或在全局表中区分 router 实例标识。
-  - 为多实例场景提供显式约束/错误信息，避免误判。
+- 现状：安装时仍用全局 `appsWithRouter` 阻止同一 app 同时挂载多个 router，但在 app `unmount` 时会同时清理该 WeakSet 记录，允许卸载后重新安装或切换 router。
+- 影响：消除了卸载后无法再次安装的误判，保持“一个 app 同时只允许一个 router”的约束。

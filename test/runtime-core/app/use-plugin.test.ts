@@ -126,6 +126,35 @@ describe('runtime-core app.use', () => {
     expect(cleanupB).toHaveBeenCalledTimes(1)
   })
 
+  it('卸载后可重新安装同名插件并重新触发 install', () => {
+    const render = vi.fn()
+    const unmount = vi.fn()
+    const app = createAppInstance({ render, unmount }, createRenderlessComponent())
+    const container = {}
+
+    const installSpy = vi.fn()
+    const cleanup = vi.fn()
+    const plugin = {
+      name: 'plugin-a',
+      install: installSpy,
+      cleanup,
+    }
+
+    app.use(plugin)
+    app.mount(container)
+    app.unmount()
+
+    expect(installSpy).toHaveBeenCalledTimes(1)
+    expect(cleanup).toHaveBeenCalledTimes(1)
+
+    app.use(plugin)
+    app.mount(container)
+    app.unmount()
+
+    expect(installSpy).toHaveBeenCalledTimes(2)
+    expect(cleanup).toHaveBeenCalledTimes(2)
+  })
+
   it('未挂载前调用 unmount 也会执行一次 cleanup（重复调用不重复执行）', () => {
     const render = vi.fn()
     const unmount = vi.fn()

@@ -216,6 +216,8 @@ export function createAppInstance<HostElement extends WeakKey>(
         handlerPhase: errorPhases.sync,
       })
     }
+
+    installedPluginNames.clear()
   }
 
   const resolvePluginCleanup = (

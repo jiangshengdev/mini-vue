@@ -13,14 +13,12 @@
 - 影响：导致测试依赖于 `runtime-core` 的模块结构，增加了跨模块的隐式耦合。
 - 提示：建议考虑通过依赖注入（DI）或在测试配置层模拟注入失败，而非直接 Mock 底层模块导出。
 
-## 3. 未命中路由时 `RouterView` 未渲染 fallback 组件（待修复）
+## 3. 未命中路由时 `RouterView` 未渲染 fallback 组件（按设计，无需修复）
 
 - 位置：`src/router/components/router-view.tsx`
-- 现状：`getMatched` 默认返回 `currentRoute.value.matched`；`matchRoute` 未把 `fallback` 写入 `matched`，未命中时 `matched` 为空，RouterView 渲染 `undefined`。
-- 影响：路由兜底组件不会显示，未命中路径时页面空白。
-- 可能方案：
-  - 在 `matchRoute` 命中 fallback 时将 `matched` 填为 `[fallback]`，确保 RouterView 能渲染兜底。
-  - 补充未命中路径的组件渲染用例，覆盖多层 RouterView。
+- 现状：`matchRoute` 命中 fallback 时已将 `matched` 设为 `[fallback]`，最外层 `RouterView` 会渲染兜底；仅当有嵌套 RouterView 且深度超出 `matched` 长度时才返回 `undefined`。
+- 结论：根部兜底已生效，嵌套层空白是预期行为（未配置多级路由/fallback 时不渲染子级）。
+- 备注：如需多级兜底，可显式配置嵌套路由并为每层提供 fallback。
 
 ## 4. 路由状态丢失 query/hash，currentRoute 与地址栏不一致（待修复）
 

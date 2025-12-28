@@ -46,8 +46,8 @@ export function mountComponent<
   runtime.component = instance as never
   const { startAnchor, endAnchor } = instance
 
-  runtime.el = startAnchor as HostNode
-  runtime.anchor = endAnchor === undefined ? undefined : (endAnchor as HostNode)
+  runtime.el = startAnchor ? (startAnchor as HostNode) : undefined
+  runtime.anchor = endAnchor ? (endAnchor as HostNode) : undefined
 
   const setupSucceeded = setupComponent(instance)
 

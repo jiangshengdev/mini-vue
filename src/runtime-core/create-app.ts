@@ -7,9 +7,9 @@ import type {
   InjectionKey,
   InjectionToken,
   PlainObject,
-  PluginCleanup,
   PluginInstallApp,
   PluginObject,
+  PluginUninstall,
   PropsShape,
 } from '@/shared/index.ts'
 import { errorContexts, errorPhases, runThrowing } from '@/shared/index.ts'
@@ -195,23 +195,23 @@ export function createAppInstance<HostElement extends WeakKey>(
   /** 已安装插件名，避免重复安装（有名插件按 name 去重）。 */
   const installedPluginNames = new Set<string>()
   /** 插件清理回调栈，按安装顺序压栈，卸载时后进先出执行。 */
-  const pluginCleanupStack: Array<() => void> = []
+  const pluginUninstallStack: Array<() => void> = []
 
-  const registerCleanup = (cleanup: unknown): void => {
-    if (typeof cleanup === 'function') {
-      pluginCleanupStack.push(cleanup as () => void)
+  const registerUninstall = (uninstall: unknown): void => {
+    if (typeof uninstall === 'function') {
+      pluginUninstallStack.push(uninstall as () => void)
     }
   }
 
-  const runPluginCleanups = (): void => {
-    while (pluginCleanupStack.length > 0) {
-      const cleanup = pluginCleanupStack.pop()
+  const runPluginUninstalls = (): void => {
+    while (pluginUninstallStack.length > 0) {
+      const uninstall = pluginUninstallStack.pop()
 
-      if (!cleanup) {
+      if (!uninstall) {
         continue
       }
 
-      runThrowing(cleanup, {
+      runThrowing(uninstall, {
         origin: errorContexts.appPluginUse,
         handlerPhase: errorPhases.sync,
       })
@@ -220,7 +220,7 @@ export function createAppInstance<HostElement extends WeakKey>(
     installedPluginNames.clear()
   }
 
-  const resolvePluginCleanup = (
+  const resolvePluginUninstall = (
     plugin: AppPlugin<HostElement>,
     appInstance: AppInstance<HostElement>,
   ): (() => void) | undefined => {
@@ -228,14 +228,14 @@ export function createAppInstance<HostElement extends WeakKey>(
       return undefined
     }
 
-    const candidate = (plugin as { cleanup?: unknown }).cleanup
+    const candidate = (plugin as { uninstall?: unknown }).uninstall
 
     if (typeof candidate !== 'function') {
       return undefined
     }
 
     return () => {
-      ;(candidate as PluginCleanup<AppInstance<HostElement>>)(appInstance)
+      ;(candidate as PluginUninstall<AppInstance<HostElement>>)(appInstance)
     }
   }
 
@@ -248,7 +248,7 @@ export function createAppInstance<HostElement extends WeakKey>(
   function unmount(): void {
     /* 宿主卸载仅在存在容器时生效，但插件清理始终执行以回收安装期副作用。 */
     unmountApp(state)
-    runPluginCleanups()
+    runPluginUninstalls()
   }
 
   return {
@@ -285,9 +285,9 @@ export function createAppInstance<HostElement extends WeakKey>(
             installedPluginNames.add(pluginName)
           }
 
-          const pluginCleanup = resolvePluginCleanup(plugin, this)
+          const pluginUninstall = resolvePluginUninstall(plugin, this)
 
-          registerCleanup(pluginCleanup)
+          registerUninstall(pluginUninstall)
         },
         {
           origin: errorContexts.appPluginUse,

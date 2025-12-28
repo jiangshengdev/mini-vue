@@ -1,6 +1,6 @@
 import type { SetupComponent } from '@/jsx-foundation/index.ts'
 import type { Ref } from '@/reactivity/index.ts'
-import type { PluginCleanup, PluginInstallApp, PluginObject } from '@/shared/index.ts'
+import type { PluginInstallApp, PluginObject, PluginUninstall } from '@/shared/index.ts'
 
 /**
  * 路由记录：定义原始路径与对应组件的绑定关系。
@@ -159,5 +159,5 @@ export interface Router extends PluginObject<PluginInstallApp> {
    */
   install: (app: PluginInstallApp) => void
   /** 卸载插件时的清理钩子，用于回收安装计数和停止监听。 */
-  cleanup?: PluginCleanup<PluginInstallApp>
+  uninstall?: PluginUninstall<PluginInstallApp>
 }

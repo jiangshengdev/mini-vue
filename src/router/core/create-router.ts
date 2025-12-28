@@ -182,7 +182,7 @@ export function createRouter(config: RouterConfig): Router {
     navigate,
     start,
     stop,
-    cleanup(app) {
+    uninstall(app) {
       installedApps.delete(app)
       appsWithRouter.delete(app)
 

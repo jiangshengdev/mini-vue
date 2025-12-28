@@ -38,6 +38,6 @@ export type {
 export type { ErrorHandler, ErrorPayload } from './error-handling.ts'
 export { handleError, setErrorHandler } from './error-handling.ts'
 export type { InjectionKey, InjectionToken } from './injection.ts'
-export type { PluginCleanup, PluginDefinition, PluginInstallApp, PluginObject } from './plugin.ts'
+export type { PluginDefinition, PluginInstallApp, PluginObject, PluginUninstall } from './plugin.ts'
 export type { PlainObject, PropsShape, WithOptionalProp } from './types.ts'
 export { isArrayIndex, isNil, isObject, isPlainObject, isThenable } from './utils.ts'

@@ -57,7 +57,7 @@ describe('runtime-core app.use', () => {
     expect(installSpy).toHaveBeenCalledTimes(1)
   })
 
-  it('收集 cleanup 并按 LIFO 执行，多次 unmount 静默忽略', () => {
+  it('收集 uninstall 并按 LIFO 执行，多次 unmount 静默忽略', () => {
     const render = vi.fn()
     const unmount = vi.fn()
     const app = createAppInstance({ render, unmount }, createRenderlessComponent())
@@ -69,8 +69,8 @@ describe('runtime-core app.use', () => {
       install: vi.fn(() => {
         calls.push('install-a')
       }),
-      cleanup(_app: PluginInstallApp) {
-        calls.push('cleanup-a')
+      uninstall(_app: PluginInstallApp) {
+        calls.push('uninstall-a')
       },
     }
     const pluginB = {
@@ -78,8 +78,8 @@ describe('runtime-core app.use', () => {
       install: vi.fn(() => {
         calls.push('install-b')
       }),
-      cleanup(_app: PluginInstallApp) {
-        calls.push('cleanup-b')
+      uninstall(_app: PluginInstallApp) {
+        calls.push('uninstall-b')
       },
     }
 
@@ -90,40 +90,40 @@ describe('runtime-core app.use', () => {
 
     app.mount(container)
     app.unmount()
-    expect(calls).toEqual(['install-a', 'install-b', 'cleanup-b', 'cleanup-a'])
+    expect(calls).toEqual(['install-a', 'install-b', 'uninstall-b', 'uninstall-a'])
 
     app.unmount()
-    expect(calls).toEqual(['install-a', 'install-b', 'cleanup-b', 'cleanup-a'])
+    expect(calls).toEqual(['install-a', 'install-b', 'uninstall-b', 'uninstall-a'])
   })
 
-  it('卸载后新注册的插件仍会执行 cleanup', () => {
+  it('卸载后新注册的插件仍会执行 uninstall', () => {
     const render = vi.fn()
     const unmount = vi.fn()
     const app = createAppInstance({ render, unmount }, createRenderlessComponent())
     const container = {}
 
-    const cleanupA = vi.fn()
-    const cleanupB = vi.fn()
+    const uninstallA = vi.fn()
+    const uninstallB = vi.fn()
 
     app.use({
       name: 'plugin-a',
       install: vi.fn(),
-      cleanup: cleanupA,
+      uninstall: uninstallA,
     })
 
     app.mount(container)
     app.unmount()
-    expect(cleanupA).toHaveBeenCalledTimes(1)
+    expect(uninstallA).toHaveBeenCalledTimes(1)
 
     app.use({
       name: 'plugin-b',
       install: vi.fn(),
-      cleanup: cleanupB,
+      uninstall: uninstallB,
     })
 
     app.mount(container)
     app.unmount()
-    expect(cleanupB).toHaveBeenCalledTimes(1)
+    expect(uninstallB).toHaveBeenCalledTimes(1)
   })
 
   it('卸载后可重新安装同名插件并重新触发 install', () => {
@@ -133,11 +133,11 @@ describe('runtime-core app.use', () => {
     const container = {}
 
     const installSpy = vi.fn()
-    const cleanup = vi.fn()
+    const uninstall = vi.fn()
     const plugin = {
       name: 'plugin-a',
       install: installSpy,
-      cleanup,
+      uninstall,
     }
 
     app.use(plugin)
@@ -145,35 +145,35 @@ describe('runtime-core app.use', () => {
     app.unmount()
 
     expect(installSpy).toHaveBeenCalledTimes(1)
-    expect(cleanup).toHaveBeenCalledTimes(1)
+    expect(uninstall).toHaveBeenCalledTimes(1)
 
     app.use(plugin)
     app.mount(container)
     app.unmount()
 
     expect(installSpy).toHaveBeenCalledTimes(2)
-    expect(cleanup).toHaveBeenCalledTimes(2)
+    expect(uninstall).toHaveBeenCalledTimes(2)
   })
 
-  it('未挂载前调用 unmount 也会执行一次 cleanup（重复调用不重复执行）', () => {
+  it('未挂载前调用 unmount 也会执行一次 uninstall（重复调用不重复执行）', () => {
     const render = vi.fn()
     const unmount = vi.fn()
     const app = createAppInstance({ render, unmount }, createRenderlessComponent())
     const container = {}
 
-    const cleanup = vi.fn()
+    const uninstall = vi.fn()
 
     app.use({
       name: 'plugin-a',
       install: vi.fn(),
-      cleanup,
+      uninstall,
     })
 
     app.unmount()
-    expect(cleanup).toHaveBeenCalledTimes(1)
+    expect(uninstall).toHaveBeenCalledTimes(1)
 
     app.mount(container)
     app.unmount()
-    expect(cleanup).toHaveBeenCalledTimes(1)
+    expect(uninstall).toHaveBeenCalledTimes(1)
   })
 })

@@ -7,3 +7,4 @@
 - [vnode-diff-plan](./vnode-diff-plan.md)
 - [plan-v-model-jsx](./plan-v-model-jsx.md)
 - [v-model-jsx-impl](./v-model-jsx-impl.md)
+- [plugin-registry-plan](./plugin-registry-plan.md)

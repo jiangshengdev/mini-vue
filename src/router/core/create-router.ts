@@ -1,5 +1,5 @@
 import { routerInjectionKey } from './injection.ts'
-import { getQueryAndHash, normalizePath } from './paths.ts'
+import { getHash, getQueryAndHash, getSearch, normalizePath } from './paths.ts'
 import type { RouteLocation, Router, RouterConfig, RouteRecord } from './types.ts'
 import { routerDuplicateInstallOnApp } from '@/messages/index.ts'
 import type { Ref } from '@/reactivity/index.ts'
@@ -39,14 +39,16 @@ const appsWithRouter = new WeakSet<InstallableApp>()
  *
  * @remarks
  * - 无 `window` 环境时退回根路径 `/`，确保 SSR 场景下有合理默认值。
- * - 仅读取 `pathname`，不含 `query` 和 `hash`。
+ * - 包含 `pathname/search/hash`，用于保持地址栏与 `currentRoute` 一致。
  */
 function getCurrentBrowserPath(): string {
   if (!canUseWindowEvents) {
     return '/'
   }
 
-  return globalThis.location.pathname || '/'
+  const { pathname = '/', search = '', hash = '' } = globalThis.location ?? {}
+
+  return `${pathname || '/'}${search}${hash}`
 }
 
 /**
@@ -80,13 +82,16 @@ export function createRouter(config: RouterConfig): Router {
    */
   const matchRoute = (rawPath: string): RouteLocation => {
     const normalized = normalizePath(rawPath)
+    const query = getSearch(rawPath)
+    const hash = getHash(rawPath)
+    const fullPath = `${normalized}${query}${hash}`
     const component = routeMap.get(normalized) ?? fallback
 
     /*
      * 当前路由记录仅支持单层结构，`matched` 仅包含首层组件；
      * 嵌套 `RouterView` 会在超出 `matched` 长度时渲染为空以避免递归。
      */
-    return { path: normalized, component, matched: [component] }
+    return { path: normalized, fullPath, query, hash, component, matched: [component] }
   }
 
   /* 用当前浏览器地址初始化路由状态，确保首屏渲染与 URL 一致。 */
@@ -187,7 +192,7 @@ export function createRouter(config: RouterConfig): Router {
     }
 
     /* 更新响应式路由状态，触发依赖该状态的组件重新渲染。 */
-    currentRoute.value = matchRoute(normalizedPath)
+    currentRoute.value = matchRoute(historyTarget)
   }
 
   const router: Router = {

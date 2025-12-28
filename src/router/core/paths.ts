@@ -33,6 +33,38 @@ export function getQueryAndHash(path: string): string {
 }
 
 /**
+ * 提取路径中的查询字符串（含 `?`），不含 `hash`。
+ *
+ * @remarks
+ * - 不存在查询参数时返回空字符串。
+ * - 若同时存在 `hash`，会在 `#` 处截断。
+ */
+export function getSearch(path: string): string {
+  const queryIndex = path.indexOf('?')
+
+  if (queryIndex === -1) {
+    return ''
+  }
+
+  const hashIndex = path.indexOf('#')
+  const cutIndex = hashIndex === -1 ? path.length : hashIndex
+
+  return path.slice(queryIndex, cutIndex)
+}
+
+/**
+ * 提取路径中的 `hash` 片段（含 `#` 前缀）。
+ *
+ * @remarks
+ * - 不存在 hash 时返回空字符串。
+ */
+export function getHash(path: string): string {
+  const hashIndex = path.indexOf('#')
+
+  return hashIndex === -1 ? '' : path.slice(hashIndex)
+}
+
+/**
  * 规范化路由路径：去除 `query/hash`，补前导斜杠，移除尾随斜杠。
  *
  * @remarks

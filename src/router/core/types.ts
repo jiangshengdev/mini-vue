@@ -47,6 +47,21 @@ export interface RouteLocation {
    */
   path: string
   /**
+   * 携带 query/hash 的完整路径。
+   *
+   * @remarks
+   * - 以归一化后的路径为基准拼接 query/hash。
+   */
+  fullPath: string
+  /**
+   * 查询字符串，包含 `?` 前缀。
+   */
+  query: string
+  /**
+   * Hash 片段，包含 `#` 前缀。
+   */
+  hash: string
+  /**
    * 当前路径对应的组件。
    *
    * @remarks

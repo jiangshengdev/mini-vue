@@ -20,14 +20,11 @@
 - 结论：根部兜底已生效，嵌套层空白是预期行为（未配置多级路由/fallback 时不渲染子级）。
 - 备注：如需多级兜底，可显式配置嵌套路由并为每层提供 fallback。
 
-## 4. 路由状态丢失 query/hash，currentRoute 与地址栏不一致（待修复）
+## 4. 路由状态丢失 query/hash，currentRoute 与地址栏不一致（已修复）
 
 - 位置：`src/router/core/create-router.ts`
-- 现状：`normalizePath` 匹配时丢弃 query/hash，`navigate` 写入 history 时包含 query/hash，但 `currentRoute.path`/`matched` 仍是纯路径。
-- 影响：组件层无法读取 query/hash，状态与地址栏不一致，易导致功能异常。
-- 可能方案：
-  - 在 `RouteLocation` 中显式携带 `fullPath`/`query`/`hash`，`matchRoute` 保留这些信息。
-  - `navigate` 与初始化时同步写入完整路径信息，并提供解析后的结构。
+- 现状：`RouteLocation` 现已携带 `fullPath`/`query`/`hash`，`matchRoute`/`navigate`/初始化会读取完整 `pathname + search + hash`，匹配仍按规范化路径进行。
+- 影响：`currentRoute` 与地址栏保持一致，组件可读取 query/hash，且不影响路径匹配。
 
 ## 5. 全局 WeakSet 误判多实例重复安装（待修复）
 

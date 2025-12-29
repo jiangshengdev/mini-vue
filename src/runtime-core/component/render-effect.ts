@@ -5,7 +5,7 @@ import { normalizeRenderOutput } from '../normalize.ts'
 import { patchChild } from '../patch/index.ts'
 import { queueSchedulerJob } from '../scheduler.ts'
 import { asRuntimeVirtualNode } from '../virtual-node.ts'
-import { mountComponentSubtreeWithAnchors } from './anchor.ts'
+import { mountComponentSubtreeWithAnchors, syncComponentVirtualNodeHandleNodes } from './anchor.ts'
 import type { ComponentInstance } from './context.ts'
 import { teardownComponentInstance } from './teardown.ts'
 import type { SetupComponent } from '@/jsx-foundation/index.ts'
@@ -198,4 +198,6 @@ function patchLatestSubtree<
   } else {
     instance.mountedHandle = undefined
   }
+
+  syncComponentVirtualNodeHandleNodes(instance)
 }

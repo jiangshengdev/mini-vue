@@ -44,6 +44,7 @@ export function mountComponent<
   /* 让 `virtualNode` 拥有实例引用，方便调试或测试检索。 */
   attachInstanceToVirtualNode(virtualNode, instance)
   runtime.component = instance as never
+  instance.virtualNode = runtime as never
   const { startAnchor, endAnchor } = instance
 
   runtime.el = startAnchor ? (startAnchor as HostNode) : undefined
@@ -66,7 +67,7 @@ export function mountComponent<
 
   runtime.handle = initialRender
 
-  return {
+  const vnodeHandle: MountedHandle<HostNode> = {
     ok: initialRender.ok,
     nodes: initialRender.nodes,
     /**
@@ -76,4 +77,8 @@ export function mountComponent<
       teardownComponentInstance(options, instance, skipRemove)
     },
   }
+
+  instance.vnodeHandle = vnodeHandle
+
+  return vnodeHandle
 }

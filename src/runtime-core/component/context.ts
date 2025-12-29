@@ -4,6 +4,7 @@
 import type { AppContext } from '../create-app.ts'
 import type { MountedHandle } from '../mount'
 import type { NormalizedVirtualNode } from '../normalize.ts'
+import type { RuntimeVirtualNode } from '../virtual-node.ts'
 import type { ElementProps, RenderFunction, SetupComponent } from '@/jsx-foundation/index.ts'
 import type { EffectScope, ReactiveEffect } from '@/reactivity/index.ts'
 import type { PlainObject } from '@/shared/index.ts'
@@ -56,8 +57,24 @@ export interface ComponentInstance<
   scope: EffectScope
   /** 最近一次渲染生成的虚拟子树结果。 */
   subTree?: NormalizedVirtualNode
+  /**
+   * 当前组件对应的运行时 vnode 引用，用于同步 `el`/`anchor` 等宿主元数据。
+   *
+   * @remarks
+   * - 组件更新时 vnode 对象会被新建并替换，因此需要在 `mount/patch` 时刷新该引用。
+   * - 仅用于维护运行时元数据一致性，不参与对外 API。
+   */
+  virtualNode?: RuntimeVirtualNode<HostNode, HostElement, HostFragment>
   /** 当前挂载到宿主的节点句柄，支持 `teardown` 清理。 */
   mountedHandle?: MountedHandle<HostNode>
+  /**
+   * 组件自身对应的 vnode 句柄（用于 `children diff` 的移动/卸载）。
+   *
+   * @remarks
+   * - 组件重渲染时需要同步 `nodes`，否则父级重排会移动到「已卸载的旧节点」，导致 DOM 被错误复活。
+   * - 该句柄由 `mountComponent` 创建并回写，生命周期与组件 vnode 保持一致。
+   */
+  vnodeHandle?: MountedHandle<HostNode>
   /** 组件在父容器中的首锚点，用于保持兄弟顺序。 */
   startAnchor?: HostNode
   /** 组件在父容器中的尾锚点，用于保持兄弟顺序。 */

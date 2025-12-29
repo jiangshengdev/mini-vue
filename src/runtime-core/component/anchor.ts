@@ -1,6 +1,7 @@
-import type { RendererOptions } from '../index.ts'
 import { mountChild } from '../mount/child.ts'
 import type { MountedHandle } from '../mount/handle.ts'
+import type { RendererOptions } from '../renderer.ts'
+import { asRuntimeVirtualNode } from '../virtual-node.ts'
 import type { ComponentInstance } from './context.ts'
 import type { RenderOutput, SetupComponent } from '@/jsx-foundation/index.ts'
 import { __DEV__ } from '@/shared/index.ts'
@@ -88,7 +89,7 @@ export function mountComponentSubtreeWithAnchors<
  * - 首锚点标记组件子树的起始位置，尾锚点标记结束位置。
  * - 后续兄弟节点会插入到尾锚点之后，避免与组件子树混淆。
  */
-function ensureComponentAnchors<
+export function ensureComponentAnchors<
   HostNode,
   HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
@@ -113,4 +114,45 @@ function ensureComponentAnchors<
 
   instance.startAnchor = start
   instance.endAnchor = end
+}
+
+/**
+ * 同步组件 vnode 句柄的节点集合，确保父级 `children diff` 能移动到正确的「最新子树」。
+ *
+ * @remarks
+ * - 组件重渲染可能会卸载/新挂载宿主节点（例如 `render` 从 `<li />` 变为 `undefined`）。
+ * - 若不更新 `vnodeHandle.nodes`，父级重排会把「旧节点引用」重新插回 DOM，产生重复元素。
+ */
+export function syncComponentVirtualNodeHandleNodes<
+  HostNode,
+  HostElement extends HostNode & WeakKey,
+  HostFragment extends HostNode,
+  T extends SetupComponent,
+>(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): void {
+  const handle = instance.vnodeHandle
+
+  if (!handle) {
+    return
+  }
+
+  const subtreeNodes = instance.subTree
+    ? (asRuntimeVirtualNode<HostNode, HostElement, HostFragment>(instance.subTree).handle?.nodes ??
+      [])
+    : []
+  const nodes: HostNode[] = []
+
+  if (instance.startAnchor && instance.endAnchor) {
+    nodes.push(instance.startAnchor, ...subtreeNodes, instance.endAnchor)
+  } else {
+    nodes.push(...subtreeNodes)
+  }
+
+  handle.nodes.length = 0
+  handle.nodes.push(...nodes)
+
+  if (instance.virtualNode) {
+    instance.virtualNode.el = handle.nodes[0]
+    instance.virtualNode.anchor = handle.nodes.at(-1)
+    instance.virtualNode.handle = handle
+  }
 }

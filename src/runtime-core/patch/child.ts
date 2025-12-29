@@ -1,3 +1,4 @@
+import { ensureComponentAnchors, syncComponentVirtualNodeHandleNodes } from '../component/anchor.ts'
 import { resolveComponentProps } from '../component/props.ts'
 import { assignElementRef, resolveElementRefBinding } from '../mount/element.ts'
 import type { NormalizedVirtualNode } from '../normalize.ts'
@@ -266,6 +267,23 @@ function patchComponent<
 
   /* 复用旧组件实例：同步宿主引用，并将 `next` 绑定到同一个 `component` 上。 */
   syncRuntimeMetadata(runtimePrevious, runtimeNext, { component: instance })
+  instance.virtualNode = runtimeNext
+  instance.vnodeHandle = runtimeNext.handle
+
+  /*
+   * 组件在同级列表中的位置可能发生变化（例如 keyed 重排）：
+   * - `shouldUseAnchor` 需要随本轮 `patch` 的位置更新。
+   * - 需要锚点但缺失时，应立刻补齐，避免后续重排/插入把旧节点错误复活。
+   */
+  const nextShouldUseAnchor = environment.context?.shouldUseAnchor ?? instance.shouldUseAnchor
+
+  instance.shouldUseAnchor = nextShouldUseAnchor
+
+  if (nextShouldUseAnchor) {
+    ensureComponentAnchors(options, instance)
+  }
+
+  syncComponentVirtualNodeHandleNodes(instance)
   /* 组件 `props` 需要走规范化流程（包含默认值/`attrs` 等策略），避免直接透传 raw `props`。 */
   const nextProps = resolveComponentProps(next)
 

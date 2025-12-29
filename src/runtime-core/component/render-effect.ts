@@ -198,8 +198,18 @@ function patchLatestSubtree<
     : undefined
   let mountedHandle = runtimeSubTree?.handle
 
-  if (!mountedHandle || mountedHandle.nodes.length === 0) {
-    mountedHandle = createComponentAnchorPlaceholder(options, instance, anchor)
+  if (!mountedHandle) {
+    if (instance.shouldUseAnchor) {
+      mountedHandle = createComponentAnchorPlaceholder(options, instance, anchor)
+    } else {
+      mountedHandle = {
+        ok: true,
+        nodes: [],
+        teardown(): void {
+          /* 空占位无需额外清理。 */
+        },
+      }
+    }
   }
 
   instance.mountedHandle = mountedHandle

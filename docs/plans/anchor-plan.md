@@ -9,12 +9,12 @@
 
 ## Action items
 
-[x] 梳理锚点生命周期与调用点（mountComponentSubtreeWithAnchors、patchLatestSubtree、findNextAnchor 等），确认何时创建/清理/回退。
-[x] 设计并实现锚点回退：rerender/patch 时优先使用 endAnchor，缺失时回退父级 anchor，插入统一用 insertBefore。
-[x] 处理 render 为空的占位策略：shouldUseAnchor 为真时保留或重建注释锚点，避免下一轮 append 到尾部。
-[x] 对齐 Fragment/数组路径：检查空 children/移动场景下的锚点保留与回退，保持策略一致。
-[x] 补充回归测试：覆盖“隐藏组件 → 打乱顺序 → 再显示”以及有锚/无锚、Fragment 场景，验证无错位/重复。
-[x] 验证改动：运行 `pnpm vitest test/runtime-core/component/anchor-regression.test.tsx`、`pnpm tsc --noEmit`，相关用例通过。
+[ ] 梳理锚点生命周期与调用点（mountComponentSubtreeWithAnchors、patchLatestSubtree、findNextAnchor 等），确认何时创建/清理/回退。
+[ ] 设计并实现锚点回退：rerender/patch 时优先使用 endAnchor，缺失时回退父级 anchor，插入统一用 insertBefore。
+[ ] 处理 render 为空的占位策略：shouldUseAnchor 为真时保留或重建注释锚点，避免下一轮 append 到尾部。
+[ ] 对齐 Fragment/数组路径：检查空 children/移动场景下的锚点保留与回退，保持策略一致。
+[ ] 补充回归测试：覆盖“隐藏组件 → 打乱顺序 → 再显示”以及有锚/无锚、Fragment 场景，验证无错位/重复。
+[ ] 验证改动：运行 `pnpm run test`（可选过滤相关用例）和 `pnpm run typecheck`，确保通过。
 
 ## Notes / Decisions
 

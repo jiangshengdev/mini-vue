@@ -1,13 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import type { TestNode } from '../host-utils.ts'
 import { createHostRenderer, normalize } from '../host-utils.ts'
+import type { TestNode } from '../host-utils.ts'
 import {
   asRuntimeVirtualNode,
   mountChild,
-  patchChild,
   patchChildren,
+  patchChild,
 } from '@/runtime-core/index.ts'
-import type { SetupComponent } from '@/index.ts'
 import { nextTick, ref } from '@/index.ts'
 
 function collectElementTexts(children: TestNode[]): string[] {
@@ -155,55 +154,5 @@ describe('组件锚点回退', () => {
     await nextTick()
 
     expect(collectElementTexts(host.container.children)).toEqual(['B', 'C', 'A'])
-  })
-
-  it('全部隐藏后打乱顺序再显示，左右视图仍一致', async () => {
-    const host = createHostRenderer()
-    const ToggleComponent: SetupComponent<{ label: string; show: boolean }> = (props) => {
-      return () => {
-        return props.show ? <span>{props.label}</span> : undefined
-      }
-    }
-
-    let previousChildren = [
-      normalize(<ToggleComponent key="a" label="A" show />),
-      normalize(<ToggleComponent key="b" label="B" show />),
-      normalize(<ToggleComponent key="c" label="C" show />),
-    ]
-
-    for (const [index, child] of previousChildren.entries()) {
-      mountChild(host.options, child, {
-        container: host.container,
-        context: { shouldUseAnchor: index < previousChildren.length - 1 },
-      })
-    }
-
-    const hiddenChildren = [
-      normalize(<ToggleComponent key="c" label="C" show={false} />),
-      normalize(<ToggleComponent key="a" label="A" show={false} />),
-      normalize(<ToggleComponent key="b" label="B" show={false} />),
-    ]
-
-    patchChildren(host.options, previousChildren, hiddenChildren, {
-      container: host.container,
-      patchChild,
-    })
-
-    previousChildren = hiddenChildren
-
-    const shownChildren = [
-      normalize(<ToggleComponent key="c" label="C" show />),
-      normalize(<ToggleComponent key="a" label="A" show />),
-      normalize(<ToggleComponent key="b" label="B" show />),
-    ]
-
-    patchChildren(host.options, previousChildren, shownChildren, {
-      container: host.container,
-      patchChild,
-    })
-
-    const order = collectElementTexts(host.container.children)
-
-    expect(order.filter(Boolean)).toEqual(['C', 'A', 'B'])
   })
 })

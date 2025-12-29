@@ -13,7 +13,7 @@
 [x] 扩展宿主接口以支持“按区间遍历/移动”：在 `src/runtime-core/renderer.ts` 的 `RendererOptions` 增加 `nextSibling(node)`（必要时再加 `parentNode(node)`），同步更新 `src/runtime-dom/renderer-options.ts` 与 `test/runtime-core/host-utils.ts`。
 [x] 引入 `Comment` VNode（对齐 Vue3 的空渲染占位）：在 `src/jsx-foundation/constants.ts`/`factory.ts`/`types.ts` 增加 `Comment` 标识与 `createCommentVirtualNode`，并从 `src/jsx-foundation/index.ts` 导出。
 [x] 调整 normalize 策略区分“根卸载”与“内部空渲染”：normalize 层对所有 `null/boolean` 子节点都生成 `Comment` vnode（完全对齐 Vue3），但根级 `render(undefined)` 仍保持卸载语义（可通过 `src/runtime-core/renderer.ts` 先判空再 normalize，或拆分 `normalizeVNode`/`normalizeRoot` 两套入口于 `src/runtime-core/normalize.ts`）。
-[ ] 让 mount 路径真正“在最终位置插入”：给 `mountVirtualNode`/`mountElement`/`mountComponent` 增加 `anchor` 透传，删除 `src/runtime-core/mount/child.ts` 里“先 mount 再整体 move 到父 anchor”的补偿逻辑。
+[x] 让 mount 路径真正“在最终位置插入”：给 `mountVirtualNode`/`mountElement`/`mountComponent` 增加 `anchor` 透传，删除 `src/runtime-core/mount/child.ts` 里“先 mount 再整体 move 到父 anchor”的补偿逻辑。
 [ ] 实现 Vue3 风格的宿主范围辅助：新增/重写 `getFirstHostNode`/`getLastHostNode`/`getNextHostNode`（Fragment 用 `anchor`，Component 递归到 `instance.subTree`，其余用 `el` + `nextSibling`），集中放在 `src/runtime-core/patch/utils.ts`（或新文件）。
 [ ] 实现统一的 `move(vnode, container, anchor)`：Element/Text/Comment 移动单节点；Fragment 用 `nextSibling` 遍历 `[start..end]`；Component 递归 move `instance.subTree`，并更新相应运行时元数据一致性。
 [ ] 改造组件更新锚点来源：在 `src/runtime-core/component/render-effect.ts` 的更新分支中，用 `getNextHostNode(previousSubTree)` 作为 `patchChild(..., anchor)` 的插入锚点，逐步去除对 `instance.endAnchor` 的依赖。
@@ -87,6 +87,6 @@
    - Fragment patch 后必须重建 `handle.nodes`，否则 keyed move 会把旧节点引用插回 DOM（“复活旧节点”），见 `src/runtime-core/patch/child.ts` 的 Fragment 分支。
    - 组件 rerender/patch 后必须同步 `instance.vnodeHandle.nodes`，见 `src/runtime-core/component/render-effect.ts` 与 `src/runtime-core/component/anchor.ts`。
    - Vue3 方向：移动应基于 `vnode.el/anchor + hostNextSibling` 的“真实区间”，从根上消除“移动依赖快照数组”带来的同步负担。
-4. mount 后再 move（`src/runtime-core/mount/child.ts`）
-   - 当前 `mountVirtualNode` 不感知父级 `environment.anchor`，因此 `mountChild` 需要额外把整段节点再搬到 `anchor` 前。
-   - Vue3 方向：mount/patch API 天然携带 insertionAnchor，节点应一次性插入到最终位置，避免“先插后搬”的双写路径。
+4. mount 后再 move（已解决）
+   - 已让 `mountVirtualNode`/`mountElement`/`mountComponent` 透传 `anchor` 并在最终位置插入，删除了 `mountChild` 的二次移动补偿逻辑。
+   - 后续仍需把移动与插入锚点统一收敛到 Vue3 的 `getNextHostNode + move(vnode)`，才能进一步删掉 `shouldUseAnchor` 与 `handle.nodes` 同步点。

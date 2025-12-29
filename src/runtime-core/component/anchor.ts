@@ -22,11 +22,13 @@ export function mountComponentSubtreeWithAnchors<
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
   child: RenderOutput,
+  anchor?: HostNode,
 ): MountedHandle<HostNode> | undefined {
   /* 不需要锚点的组件直接复用容器尾部挂载策略。 */
   if (!instance.shouldUseAnchor) {
     return mountChild<HostNode, HostElement, HostFragment>(options, child, {
       container: instance.container,
+      anchor,
       context: {
         shouldUseAnchor: false,
         parent: instance,
@@ -35,12 +37,13 @@ export function mountComponentSubtreeWithAnchors<
   }
 
   /* 需要锚点时先准备首尾占位符，便于保持区间。 */
-  ensureComponentAnchors(options, instance)
+  ensureComponentAnchors(options, instance, anchor)
 
   /* 锚点创建失败时退化为普通挂载，避免影响渲染结果。 */
   if (!instance.startAnchor || !instance.endAnchor) {
     return mountChild<HostNode, HostElement, HostFragment>(options, child, {
       container: instance.container,
+      anchor,
       context: {
         shouldUseAnchor: false,
         parent: instance,

@@ -26,6 +26,7 @@ export function mountVirtualNode<
   virtualNode: VirtualNode,
   container: HostElement | HostFragment,
   context?: MountContext,
+  anchor?: HostNode,
 ): MountedHandle<HostNode> | undefined {
   const shouldUseAnchor = context?.shouldUseAnchor ?? false
 
@@ -33,6 +34,7 @@ export function mountVirtualNode<
   if (virtualNode.type === Fragment) {
     const mounted = mountChild(options, virtualNode.children, {
       container,
+      anchor,
       context: {
         ...context,
         shouldUseAnchor,
@@ -55,7 +57,7 @@ export function mountVirtualNode<
     const mounted = mountComponent(options, virtualNode as VirtualNode<SetupComponent>, container, {
       ...context,
       shouldUseAnchor,
-    })
+    }, anchor)
 
     const runtime = asRuntimeVirtualNode<HostNode, HostElement, HostFragment>(virtualNode)
 
@@ -69,7 +71,7 @@ export function mountVirtualNode<
   }
 
   /* 普通标签名直接走元素挂载逻辑。 */
-  const mounted = mountElement(options, virtualNode as VirtualNode<string>, container, context)
+  const mounted = mountElement(options, virtualNode as VirtualNode<string>, container, context, anchor)
   const runtime = asRuntimeVirtualNode<HostNode, HostElement, HostFragment>(virtualNode)
 
   runtime.el = mounted.nodes[0]

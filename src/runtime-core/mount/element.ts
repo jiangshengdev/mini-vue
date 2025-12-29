@@ -26,8 +26,9 @@ export function mountElement<
   virtualNode: VirtualNode<string>,
   container: HostElement | HostFragment,
   context?: MountContext,
+  anchor?: HostNode,
 ): MountedHandle<HostNode> {
-  const { createElement, patchProps, appendChild, remove } = options
+  const { createElement, patchProps, appendChild, insertBefore, remove } = options
   const element = createElement(virtualNode.type)
   const { props } = virtualNode
   const refBinding = resolveElementRefBinding<HostElement>(props?.ref)
@@ -40,8 +41,11 @@ export function mountElement<
     return handle.ok
   })
   /* 最终把元素插入到父容器中完成挂载。 */
-
-  appendChild(container, element)
+  if (anchor) {
+    insertBefore(container, element, anchor)
+  } else {
+    appendChild(container, element)
+  }
 
   assignElementRef(refBinding, element)
 

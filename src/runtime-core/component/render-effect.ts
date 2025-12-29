@@ -27,6 +27,7 @@ export function performInitialRender<
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
+  anchor?: HostNode,
 ): MountedHandle<HostNode> {
   /* 每个组件实例持有独立 `effect`，负责跟踪依赖并调度重渲染。 */
   instance.effect = createRenderEffect(options, instance)
@@ -41,7 +42,7 @@ export function performInitialRender<
       const subtree = instance.effect!.run()
 
       /* 子树由通用 `mountChild` 继续挂载到宿主容器。 */
-      mounted = mountComponentSubtreeWithAnchors(options, instance, subtree)
+      mounted = mountComponentSubtreeWithAnchors(options, instance, subtree, anchor)
 
       instance.mountedHandle = mounted
 

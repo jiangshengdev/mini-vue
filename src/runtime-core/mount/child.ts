@@ -106,17 +106,16 @@ export function mountChild<
       return handle
     }
 
-    const mounted = mountVirtualNode(options, child, container, {
-      ...context,
-      shouldUseAnchor,
-    })
-
-    /* `mountVirtualNode` 不感知父级 `anchor`：存在锚点时需将新节点整体移动到锚点之前。 */
-    if (mounted && anchor) {
-      for (const node of mounted.nodes) {
-        insertBefore(container, node, anchor)
-      }
-    }
+    const mounted = mountVirtualNode(
+      options,
+      child,
+      container,
+      {
+        ...context,
+        shouldUseAnchor,
+      },
+      anchor,
+    )
 
     return mounted
   }

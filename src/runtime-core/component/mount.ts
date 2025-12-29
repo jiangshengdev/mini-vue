@@ -29,6 +29,7 @@ export function mountComponent<
   virtualNode: VirtualNode<SetupComponent>,
   container: HostElement | HostFragment,
   context?: MountContext,
+  anchor?: HostNode,
 ): MountedHandle<HostNode> | undefined {
   const shouldUseAnchor = context?.shouldUseAnchor ?? false
   /* 准备实例前先规整 `props`，以免 `setup` 阶段读到旧引用。 */
@@ -64,6 +65,7 @@ export function mountComponent<
   const initialRender = performInitialRender<HostNode, HostElement, HostFragment, SetupComponent>(
     options,
     instance as ComponentInstance<HostNode, HostElement, HostFragment, SetupComponent>,
+    anchor,
   )
 
   runtime.handle = initialRender

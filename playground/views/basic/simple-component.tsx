@@ -70,7 +70,7 @@ export const SimpleComponent: SetupComponent = () => {
                   <span
                     key={item.id}
                     class={styles.item}
-                    style={{ '--item-color': color } as Record<string, string>}
+                    style={{ backgroundColor: color } as Record<string, string>}
                   >
                     {item.id}:{item.text}
                   </span>

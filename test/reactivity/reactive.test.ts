@@ -283,4 +283,92 @@ describe('readonly', () => {
 
     expect(warn).toHaveBeenCalled()
   })
+
+  it('readonly 访问不会收集依赖（与 Vue 3 对齐）', () => {
+    const raw: PlainObject = { foo: 1 }
+    const readonlyState = readonly(raw)
+    const reactiveState = reactive(raw)
+
+    let runs = 0
+    let dummy = 0
+
+    effect(function trackReadonlyFoo() {
+      runs += 1
+      dummy = readonlyState.foo as number
+    })
+
+    expect(runs).toBe(1)
+    expect(dummy).toBe(1)
+
+    reactiveState.foo = 2
+
+    expect(runs).toBe(1)
+    expect(dummy).toBe(1)
+    expect(readonlyState.foo).toBe(2)
+  })
+
+  it('readonly 的 in/Object.keys 不会收集依赖', () => {
+    const raw: PlainObject = { foo: 1 }
+    const readonlyState = readonly(raw)
+    const reactiveState = reactive(raw)
+
+    let inRuns = 0
+    let hasBar = true
+
+    effect(function trackReadonlyIn() {
+      inRuns += 1
+      hasBar = 'bar' in readonlyState
+    })
+
+    expect(inRuns).toBe(1)
+    expect(hasBar).toBe(false)
+
+    reactiveState.bar = 1
+
+    expect(inRuns).toBe(1)
+    expect(hasBar).toBe(false)
+    expect('bar' in readonlyState).toBe(true)
+
+    let keysRuns = 0
+    let keys: string[] = []
+
+    effect(function trackReadonlyKeys() {
+      keysRuns += 1
+      keys = Object.keys(readonlyState)
+    })
+
+    expect(keysRuns).toBe(1)
+    expect(keys).toEqual(['foo', 'bar'])
+
+    reactiveState.baz = 2
+
+    expect(keysRuns).toBe(1)
+    expect(keys).toEqual(['foo', 'bar'])
+    expect(Object.keys(readonlyState)).toEqual(['foo', 'bar', 'baz'])
+  })
+
+  it('readonly 数组查询方法不会收集依赖', () => {
+    const a = {}
+    const b = {}
+    const raw = [a]
+    const readonlyList = readonly(raw)
+    const reactiveList = reactive(raw)
+
+    let runs = 0
+    let observed = false
+
+    effect(function trackReadonlyIncludes() {
+      runs += 1
+      observed = readonlyList.includes(a)
+    })
+
+    expect(runs).toBe(1)
+    expect(observed).toBe(true)
+
+    reactiveList[0] = b
+
+    expect(runs).toBe(1)
+    expect(observed).toBe(true)
+    expect(readonlyList.includes(a)).toBe(false)
+  })
 })

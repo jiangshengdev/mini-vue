@@ -10,6 +10,7 @@ import {
   rawKey,
   reactiveFlag,
   readonlyFlag,
+  shallowFlag,
   triggerOpTypes,
 } from '../contracts/index.ts'
 import { reactive, readonly } from '../reactive.ts'
@@ -36,7 +37,15 @@ type Getter = ProxyHandler<ReactiveRawTarget>['get']
  * - 深层模式下嵌套对象会被懒代理。
  * - 对象属性中的 Ref 会被自动解包（数组索引除外）。
  */
-function createGetter(isReadonly: boolean, shallow: boolean): Getter {
+function createGetter({
+  isReadonly,
+  shallow,
+  shouldTrack,
+}: {
+  isReadonly: boolean
+  shallow: boolean
+  shouldTrack: boolean
+}): Getter {
   return (target, key, receiver) => {
     /* 读取内部标记不应触发依赖收集。 */
     if (key === reactiveFlag) {
@@ -45,6 +54,10 @@ function createGetter(isReadonly: boolean, shallow: boolean): Getter {
 
     if (key === readonlyFlag) {
       return isReadonly
+    }
+
+    if (key === shallowFlag) {
+      return shallow
     }
 
     if (key === rawKey) {
@@ -76,8 +89,16 @@ function createGetter(isReadonly: boolean, shallow: boolean): Getter {
     /* 使用 Reflect 读取原始值，保持与原生访问一致的 this 绑定与行为 */
     const rawValue = Reflect.get(target, key, receiver) as unknown
 
-    /* 读取属性同时收集依赖，连接目标字段与当前副作用 */
-    track(target, key)
+    /*
+     * 读取属性同时收集依赖，连接目标字段与当前副作用。
+     *
+     * @remarks
+     * - deep readonly 不追踪依赖（避免收集无意义依赖桶）。
+     * - shallowReadonly（如 props）仍需要追踪以响应上游更新。
+     */
+    if (shouldTrack) {
+      track(target, key)
+    }
 
     if (isRef(rawValue)) {
       if (isReadonly) {
@@ -175,33 +196,28 @@ const mutableDeleteProperty: ProxyHandler<ReactiveRawTarget>['deleteProperty'] =
   return wasApplied
 }
 
-/**
- * 拦截 `in` 操作符，确保查询同样建立依赖。
- */
-const mutableHas: ProxyHandler<ReactiveRawTarget>['has'] = (target, key) => {
-  /* 复用 Reflect.has 获取布尔结果，与原生语义一致。 */
-  const result = Reflect.has(target, key)
+function createHas(shouldTrack: boolean): ProxyHandler<ReactiveRawTarget>['has'] {
+  return (target, key) => {
+    const result = Reflect.has(target, key)
 
-  /* `in` 查询也会读取属性，因此需要收集依赖。 */
-  track(target, key)
+    if (shouldTrack) {
+      track(target, key)
+    }
 
-  return result
+    return result
+  }
 }
 
-/**
- * 拦截 `ownKeys` 操作，捕获 `for...in`/`Object.keys` 等场景以追踪结构性更改。
- *
- * @remarks
- * - 数组结构依赖 `length`，普通对象使用 `iterateDependencyKey` 作为统一标识。
- */
-const mutableOwnKeys: ProxyHandler<ReactiveRawTarget>['ownKeys'] = (target) => {
-  /* 数组结构依赖 length，普通对象使用 iterateDependencyKey 作为统一标识。 */
-  const key = Array.isArray(target) ? 'length' : iterateDependencyKey
+function createOwnKeys(shouldTrack: boolean): ProxyHandler<ReactiveRawTarget>['ownKeys'] {
+  return (target) => {
+    if (shouldTrack) {
+      const key = Array.isArray(target) ? 'length' : iterateDependencyKey
 
-  /* 遍历行为会关注集合结构是否变化，需要记录相应依赖。 */
-  track(target, key)
+      track(target, key)
+    }
 
-  return Reflect.ownKeys(target)
+    return Reflect.ownKeys(target)
+  }
 }
 
 /**
@@ -245,11 +261,11 @@ const readonlyDeleteProperty: ProxyHandler<ReactiveRawTarget>['deleteProperty'] 
  * - 支持依赖收集、触发、Ref 解包等完整响应式能力。
  */
 export const mutableHandlers = {
-  get: createGetter(false, false),
+  get: createGetter({ isReadonly: false, shallow: false, shouldTrack: true }),
   set: mutableSet,
   deleteProperty: mutableDeleteProperty,
-  has: mutableHas,
-  ownKeys: mutableOwnKeys,
+  has: createHas(true),
+  ownKeys: createOwnKeys(true),
 } satisfies ProxyHandler<ReactiveRawTarget>
 
 /**
@@ -259,11 +275,11 @@ export const mutableHandlers = {
  * - 仅代理顶层属性，嵌套对象保持原样。
  */
 export const shallowReactiveHandlers = {
-  get: createGetter(false, true),
+  get: createGetter({ isReadonly: false, shallow: true, shouldTrack: true }),
   set: mutableSet,
   deleteProperty: mutableDeleteProperty,
-  has: mutableHas,
-  ownKeys: mutableOwnKeys,
+  has: createHas(true),
+  ownKeys: createOwnKeys(true),
 } satisfies ProxyHandler<ReactiveRawTarget>
 
 /**
@@ -273,11 +289,11 @@ export const shallowReactiveHandlers = {
  * - 仅顶层属性为只读，嵌套对象保持原样可写。
  */
 export const shallowReadonlyHandlers = {
-  get: createGetter(true, true),
+  get: createGetter({ isReadonly: true, shallow: true, shouldTrack: true }),
   set: readonlySet,
   deleteProperty: readonlyDeleteProperty,
-  has: mutableHas,
-  ownKeys: mutableOwnKeys,
+  has: createHas(true),
+  ownKeys: createOwnKeys(true),
 } satisfies ProxyHandler<ReactiveRawTarget>
 
 /**
@@ -287,9 +303,9 @@ export const shallowReadonlyHandlers = {
  * - 所有层级的属性都为只读，写入操作在开发态会触发警告。
  */
 export const readonlyHandlers = {
-  get: createGetter(true, false),
+  get: createGetter({ isReadonly: true, shallow: false, shouldTrack: false }),
   set: readonlySet,
   deleteProperty: readonlyDeleteProperty,
-  has: mutableHas,
-  ownKeys: mutableOwnKeys,
+  has: createHas(false),
+  ownKeys: createOwnKeys(false),
 } satisfies ProxyHandler<ReactiveRawTarget>

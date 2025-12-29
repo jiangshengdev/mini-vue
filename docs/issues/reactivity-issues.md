@@ -23,12 +23,21 @@
   - 在浅模式下对响应式对象至少访问一次自身或顶层键以建立依赖，例如读取 `Object.keys`/`iterateDependencyKey` 或逐个访问顶层属性。
   - 通过 `effect`/`track` 辅助方法触发顶层依赖收集，并补充用例覆盖 `deep: false` + 响应式对象场景。
 
-## 4. `readonly` 访问仍收集依赖（与 Vue 3 不一致，待修复）
+## 4. `readonly` 访问仍收集依赖（与 Vue 3 不一致，已修复）
 
 - 位置：`src/reactivity/internals/base-handlers.ts`
-- 现状：`createGetter` 中无条件调用 `track`，即使是只读代理也会把读取行为收集为依赖。
-- 影响：只读数据会意外参与依赖链，违背「只读不追踪」的设计，可能导致副作用在只读读取下被触发。
-- 提示：参考 Vue 3，在只读 handler 下跳过 `track`。
+- 现状（修复前）：
+  - `createGetter` 中无条件调用 `track`，即使是只读代理也会把读取行为收集为依赖。
+  - `in` / `Object.keys` 等结构读取与数组查询方法（`includes/indexOf/lastIndexOf`）同样会建立依赖。
+- 影响：会出现「effect 里读 readonly，但 reactive 写入也会触发重跑」的意外联动；同时还会产生无意义的依赖桶占用内存。
+- 修复：
+  - deep `readonly` 访问不再收集依赖。
+  - 为兼容 runtime-core `props` 的更新语义，`shallowReadonly` 仍保持依赖追踪能力。
+  - 新增内部标记 `shallowFlag` 用于区分 shallow/deep 代理；数组查询包装基于该标记决定是否 `track`。
+- 位置补充：
+  - `src/reactivity/array/search.ts`
+  - `src/reactivity/contracts/constants.ts`
+- 测试：`test/reactivity/reactive.test.ts`
 
 ## 5. `readonly` 读取 Ref 未解包（与文档不符，待修复）
 

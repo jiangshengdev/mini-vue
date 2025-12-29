@@ -1,4 +1,4 @@
-import { iterateDependencyKey } from '../contracts/index.ts'
+import { iterateDependencyKey, readonlyFlag, shallowFlag } from '../contracts/index.ts'
 import { track } from '../internals/operations.ts'
 import { toRaw } from '../to-raw.ts'
 
@@ -50,7 +50,13 @@ function createIdentitySearchWrapper<K extends ArrayIdentitySearchKey>(
     const rawArray = toRaw(this)
 
     // 查询行为关注数组元素集合的变化，使用 iterate 依赖统一收敛。
-    track(rawArray, iterateDependencyKey)
+    // deep readonly 不追踪依赖；shallowReadonly 仍需要追踪（例如 props/上游驱动更新）。
+    const isReadonlyProxy = Reflect.get(this, readonlyFlag) === true
+    const isShallowProxy = Reflect.get(this, shallowFlag) === true
+
+    if (!isReadonlyProxy || isShallowProxy) {
+      track(rawArray, iterateDependencyKey)
+    }
 
     const method = nativeArraySearchMethods[key] as ArrayIdentitySearchMethod<K>
 

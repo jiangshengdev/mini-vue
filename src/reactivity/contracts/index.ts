@@ -13,6 +13,7 @@ export {
   reactiveFlag,
   readonlyFlag,
   refFlag,
+  shallowFlag,
   triggerOpTypes,
 } from './constants.ts'
 export type { TriggerOpType } from './constants.ts'

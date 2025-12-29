@@ -30,6 +30,15 @@ export const reactiveFlag = Symbol('isReactive')
 export const readonlyFlag = Symbol('isReadonly')
 
 /**
+ * 标记对象为浅层代理（shallowReactive/shallowReadonly）。
+ *
+ * @remarks
+ * - 由 Proxy handler 在读取该 Symbol 时返回布尔值。
+ * - 用于区分浅层/深层代理的行为差异（例如 readonly 的依赖追踪策略）。
+ */
+export const shallowFlag = Symbol('isShallow')
+
+/**
  * 访问 reactive Proxy 对应的原始对象。
  *
  * @remarks

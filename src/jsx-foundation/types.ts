@@ -1,4 +1,4 @@
-import type { Text, virtualNodeFlag } from './constants.ts'
+import type { Comment, Text, virtualNodeFlag } from './constants.ts'
 import type { PropsShape } from '@/shared/index.ts'
 
 /**
@@ -99,10 +99,11 @@ export type FragmentType = (props: FragmentProps) => ComponentChildren
  * - `ComponentLike`：用户定义的函数组件
  * - `FragmentType`：内置 `Fragment` 组件
  * - `typeof Text`：文本节点类型标识
+ * - `typeof Comment`：注释节点类型标识（常用于空渲染占位）
  *
  * @beta
  */
-export type ElementType = string | ComponentLike | FragmentType | typeof Text
+export type ElementType = string | ComponentLike | FragmentType | typeof Text | typeof Comment
 
 /**
  * 推导给定元素类型对应的 `props` 形状。
@@ -155,6 +156,6 @@ export interface VirtualNode<T extends ElementType = ElementType> {
   readonly children: VirtualNodeChild[]
   /** 可选的 diff `key`，用于稳定节点身份，提升列表更新性能。 */
   readonly key?: PropertyKey
-  /** 文本节点的内容，仅在 `type` 为 `Text` 时存在。 */
+  /** 文本/注释节点的内容，仅在 `type` 为 `Text`/`Comment` 时存在。 */
   readonly text?: string
 }

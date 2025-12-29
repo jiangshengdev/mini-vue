@@ -1,5 +1,5 @@
 import { normalizeChildren } from './children.ts'
-import { Text, virtualNodeFlag } from './constants.ts'
+import { Comment, Text, virtualNodeFlag } from './constants.ts'
 import type {
   ComponentChildren,
   ElementProps,
@@ -107,5 +107,25 @@ export function createTextVirtualNode(content: string | number): VirtualNode<typ
     props: undefined,
     children: [],
     text: String(content),
+  }
+}
+
+/**
+ * 创建注释 `virtualNode`，用于表示空渲染占位或开发态标记。
+ *
+ * @remarks
+ * - 注释节点的 `type` 为 `Comment` 符号，`children` 为空数组。
+ * - 注释内容存储在 `text` 字段，渲染层据此创建宿主注释节点。
+ *
+ * @param content - 注释内容
+ * @returns 类型为 `Comment` 的 `VirtualNode` 对象
+ */
+export function createCommentVirtualNode(content: string): VirtualNode<typeof Comment> {
+  return {
+    [virtualNodeFlag]: true,
+    type: Comment,
+    props: undefined,
+    children: [],
+    text: content,
   }
 }

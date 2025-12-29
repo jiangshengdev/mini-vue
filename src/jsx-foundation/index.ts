@@ -9,8 +9,8 @@
  *
  * 上层 `jsx-runtime` 模块依赖本模块构建 JSX 转换后的运行时表示。
  */
-export { Text, virtualNodeFlag } from './constants.ts'
-export { createTextVirtualNode, createVirtualNode, Fragment } from './factory.ts'
+export { Comment, Text, virtualNodeFlag } from './constants.ts'
+export { createCommentVirtualNode, createTextVirtualNode, createVirtualNode, Fragment } from './factory.ts'
 export { isVirtualNode } from './guards.ts'
 export type {
   ComponentChildren,

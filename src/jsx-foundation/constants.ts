@@ -16,3 +16,13 @@ export const virtualNodeFlag = Symbol('isVirtualNode')
  */
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const Text = Symbol('Text')
+
+/**
+ * 特殊的注释节点类型标识，用于表示「空渲染占位」等场景。
+ *
+ * @remarks
+ * - 对齐 Vue3：`null`/`boolean` 等可忽略值可被归一化为 `Comment` `virtualNode`，避免出现「0 个宿主节点」。
+ * - 渲染层可根据 `type === Comment` 创建宿主注释节点，保持区间/锚点语义稳定。
+ */
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Comment = Symbol('Comment')

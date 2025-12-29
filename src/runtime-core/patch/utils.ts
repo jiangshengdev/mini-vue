@@ -174,6 +174,101 @@ export function getNextHostNode<
 }
 
 /**
+ * 将 `virtualNode` 对应的宿主节点移动到指定容器/锚点之前。
+ *
+ * @remarks
+ * - Element/Text/Comment：移动单个宿主节点。
+ * - Fragment：通过 `nextSibling` 遍历 `[start..end]` 区间并整体搬移。
+ * - Component：优先搬移组件锚点区间（兼容旧实现），否则递归搬移 `instance.subTree`（逐步对齐 Vue3）。
+ */
+export function move<
+  HostNode,
+  HostElement extends HostNode & WeakKey,
+  HostFragment extends HostNode,
+>(
+  options: RendererOptions<HostNode, HostElement, HostFragment>,
+  virtualNode: NormalizedVirtualNode,
+  container: HostElement | HostFragment,
+  anchor?: HostNode,
+): void {
+  const runtime = asRuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>(virtualNode)
+
+  const insert = (node: HostNode): void => {
+    if (anchor) {
+      options.insertBefore(container, node, anchor)
+    } else {
+      options.appendChild(container, node)
+    }
+  }
+
+  const moveNodeRange = (start: HostNode, end: HostNode): void => {
+    let current: HostNode | undefined = start
+
+    while (current) {
+      const next = current === end ? undefined : options.nextSibling(current)
+
+      insert(current)
+
+      if (current === end) {
+        break
+      }
+
+      current = next
+    }
+  }
+
+  if (typeof virtualNode.type === 'function' && virtualNode.type !== Fragment) {
+    const instance = runtime.component
+    const startAnchor = instance?.startAnchor as HostNode | undefined
+    const endAnchor = instance?.endAnchor as HostNode | undefined
+
+    /*
+     * 兼容当前组件锚点体系：
+     * - 组件在非末尾时会生成 `start/endAnchor`，它们属于组件宿主范围的一部分。
+     * - 若仅递归移动 `subTree` 会导致锚点残留在原位置，破坏区间边界。
+     */
+    if (startAnchor && endAnchor) {
+      moveNodeRange(startAnchor, endAnchor)
+
+      return
+    }
+
+    if (instance?.subTree) {
+      move(options, instance.subTree, container, anchor)
+
+      return
+    }
+
+    if (runtime.el) {
+      insert(runtime.el)
+    }
+
+    return
+  }
+
+  if (virtualNode.type === Fragment) {
+    const start = runtime.el
+    const end = runtime.anchor ?? runtime.el
+
+    if (start && end) {
+      moveNodeRange(start, end)
+
+      return
+    }
+
+    if (start) {
+      insert(start)
+    }
+
+    return
+  }
+
+  if (runtime.el) {
+    insert(runtime.el)
+  }
+}
+
+/**
  * 判断两个 `virtualNode` 是否可视为「同一个节点」，用于决定走 `patch` 还是卸载重建。
  *
  * @remarks

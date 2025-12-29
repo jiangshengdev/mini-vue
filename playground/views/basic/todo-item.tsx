@@ -16,11 +16,11 @@ export const TodoItem: SetupComponent<{
       return undefined
     }
 
-    let style: { backgroundColor: string } | undefined
+    let style: { '--item-color': string } | undefined
 
     if (props.color) {
       style = {
-        backgroundColor: props.color,
+        '--item-color': props.color,
       } satisfies Record<string, string>
     } else {
       style = undefined

@@ -245,11 +245,12 @@ describe('readonly', () => {
     expect(wrapped).toBe(proxy)
   })
 
-  it('属性上的 Ref 不会被解包', () => {
+  it('属性上的 Ref 会被解包', () => {
     const foo = ref(1)
     const proxy = readonly({ foo })
 
-    expect(isRef(proxy.foo)).toBe(true)
+    expect(proxy.foo).toBe(1)
+    expect(isRef(proxy.foo)).toBe(false)
   })
 
   it('数组与嵌套对象可正常读取且保持只读', () => {

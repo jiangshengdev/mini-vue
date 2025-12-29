@@ -39,12 +39,19 @@
   - `src/reactivity/contracts/constants.ts`
 - 测试：`test/reactivity/reactive.test.ts`
 
-## 5. `readonly` 读取 Ref 未解包（与文档不符，待修复）
+## 5. `readonly` 读取 Ref 未解包（与文档不符，已修复）
 
 - 位置：`src/reactivity/internals/base-handlers.ts`
-- 现状：只读代理读取属性值为 Ref 时直接返回 Ref 对象，而不是像 `reactive` 那样解包成值。
-- 影响：与官方文档「解包但值只读」的描述不符，用户拿到的仍是 Ref，需要额外 `.value` 才能使用。
-- 提示：在只读代理中延续解包逻辑，但返回只读视图。
+- 现状（修复前）：只读代理读取属性值为 Ref 时直接返回 Ref 对象，而不是像 `reactive` 那样解包成值。
+- 影响：
+  - 与类型/文档中「对象属性 Ref 会解包」的描述不一致。
+  - 只读代理会把 Ref 直接暴露出去，用户可通过 `.value` 绕过只读限制并写入。
+- 修复：
+  - readonly/shallowReadonly 在对象属性读取 Ref 时会解包（数组索引 Ref 保持 Ref）。
+  - deep readonly 下对 Ref 解包出来的对象值返回 readonly 视图，避免通过 Ref 逃逸写入。
+- 测试：
+  - `test/reactivity/reactive.test.ts`
+  - `test/reactivity/shallow.test.ts`
 
 ## 6. `readonly()` 不接受 Ref 目标（与文档不符，待修复）
 

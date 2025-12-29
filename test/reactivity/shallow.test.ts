@@ -71,15 +71,16 @@ describe('shallowReadonly', () => {
     warn.mockRestore()
   })
 
-  it('阻止写入且不解包 Ref', () => {
-    const raw = { foo: 1, bar: ref(2) }
+  it('阻止写入且会解包顶层 Ref', () => {
+    const raw = { foo: 1, bar: ref(2), nested: { baz: ref(3) } }
     const proxy = shallowReadonly(raw)
 
     // @ts-expect-error 只读代理
     proxy.foo = 3
 
     expect(raw.foo).toBe(1)
-    expect(isRef(proxy.bar)).toBe(true)
+    expect(proxy.bar).toBe(2)
+    expect(isRef(proxy.nested.baz)).toBe(true)
   })
 
   it('可对 reactive 结果创建只读浅代理', () => {

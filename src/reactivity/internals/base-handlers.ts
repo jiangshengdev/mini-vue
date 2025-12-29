@@ -101,17 +101,25 @@ function createGetter({
     }
 
     if (isRef(rawValue)) {
-      if (isReadonly) {
-        /* 只读模式保持 Ref 原样返回，不解包。 */
-        return rawValue
-      }
-
       /* 数组索引上的 Ref 保持原样返回，其余场景自动解包 */
       if (Array.isArray(target) && isArrayIndex(key)) {
         return rawValue
       }
 
-      return rawValue.value
+      const unwrapped = rawValue.value
+
+      /*
+       * 与 Vue 3 行为对齐：readonly 读取 Ref 时同样会解包。
+       *
+       * @remarks
+       * - shallowReadonly 仅做浅层只读：不对解包结果做深层 readonly 包装。
+       * - deep readonly 需要对对象值返回 readonly 视图，避免通过 Ref 逃逸写入。
+       */
+      if (isReadonly && !shallow && isObject(unwrapped)) {
+        return readonly(unwrapped)
+      }
+
+      return unwrapped
     }
 
     if (isObject(rawValue)) {

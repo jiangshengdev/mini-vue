@@ -97,6 +97,7 @@ export function ensureComponentAnchors<
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
+  anchor?: HostNode,
 ): void {
   /* 已经创建过锚点时复用旧节点，避免重复插入。 */
   if (instance.startAnchor && instance.endAnchor) {
@@ -109,8 +110,21 @@ export function ensureComponentAnchors<
   const start = options.createComment(startLabel)
   const end = options.createComment(endLabel)
 
-  options.appendChild(instance.container, start)
-  options.appendChild(instance.container, end)
+  const firstMountedNode = instance.vnodeHandle?.nodes[0] ?? instance.mountedHandle?.nodes[0]
+
+  if (firstMountedNode) {
+    options.insertBefore(instance.container, start, firstMountedNode)
+  } else if (anchor) {
+    options.insertBefore(instance.container, start, anchor)
+  } else {
+    options.appendChild(instance.container, start)
+  }
+
+  if (anchor) {
+    options.insertBefore(instance.container, end, anchor)
+  } else {
+    options.appendChild(instance.container, end)
+  }
 
   instance.startAnchor = start
   instance.endAnchor = end

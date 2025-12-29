@@ -195,7 +195,7 @@ function mountArrayChild<
   insert(endAnchor)
   nodes.push(endAnchor)
 
-  return {
+  const handle: MountedHandle<HostNode> = {
     ok,
     nodes,
     /**
@@ -217,4 +217,12 @@ function mountArrayChild<
       remove(endAnchor)
     },
   }
+
+  ;(
+    handle as MountedHandle<HostNode> & {
+      __fragmentBoundaryHandle?: true
+    }
+  ).__fragmentBoundaryHandle = true
+
+  return handle
 }

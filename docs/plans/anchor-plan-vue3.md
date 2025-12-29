@@ -1,34 +1,38 @@
-# Plan
+# Plan（已完成）
 
-重写锚点逻辑对齐 Vue3：组件透传子树首尾注释，空渲染用单注释占位，插入锚点可靠回退，确保隐藏→重排→再显示顺序稳定且无重复注释；注释文案按 Vue3 语义自定义，优先 DOM，无需考虑 SSR。
+对齐 Vue3 的组件锚点/句柄语义：组件 vnode 的 `handle.nodes` 必须与最新子树一致；当组件需要锚点保序时，`vnode.el` 应指向 `startAnchor`，`vnode.anchor` 指向 `endAnchor`。修复「隐藏 → 重排 → 再显示」导致的旧节点复活与重复渲染。
 
 ## Scope
 
-- In: 组件/Fragment 锚点创建与同步、空渲染注释占位、插入锚点回退策略、相关测试与 Playground anchor 验证。
+- In: 组件 vnode `handle.nodes` 同步、组件锚点在 keyed 移动中的补齐、`vnode.el/anchor` 回写、相关测试与 Playground anchor 验证。
 - Out: SSR/hydration、样式/UI、与锚点无关的功能。
 
 ## Action items
 
-[ ] 梳理 Vue3 锚点语义与现状差异，明确组件 `vnode.el/anchor` 透传与占位注释文本（自定义但符号语义）。
-[ ] 设计组件锚点数据流：实例 `start/endAnchor`、`latestHostAnchor`、`mountedHandle.nodes` 的同步与空渲染单注释占位规则。
-[ ] 实现挂载路径：需要锚时创建首尾注释，子树挂 fragment 后按 endAnchor 插入；空渲染生成/复用占位注释并写回引用。
-[ ] 实现 patch 路径：插入锚点优先当前 endAnchor，缺失回退父锚；子树 handle 包裹锚点；移动后刷新实例锚引用。
-[ ] 加固占位复用：复用前校验 anchor 是否在容器，失效回退末尾/父锚，避免重复注释与 “anchor not found”。
-[ ] 更新锚点获取与移动：`findNextAnchor` 读取同步后的 handle 首节点作为稳定锚，确保注释随子树移动。
-[ ] 补齐测试与验证：修复 anchor 回归、unkeyed/keyed diff、mount-handle 空渲染；手动验证 playground anchor；运行相关 Vitest 与 `pnpm tsc --noEmit`。
+[x] 复现并对齐 Vue3 语义：确认组件 `vnode.el/anchor` 与 `handle.nodes` 在锚点场景下的预期指向。
+[x] 设计并实现同步点：组件 patch/rerender 后同步 `vnodeHandle.nodes`，并回写 `vnode.el/anchor`。
+[x] 加固 keyed 移动：组件在同级列表位置变化时同步 `shouldUseAnchor`，必要时补齐 `start/endAnchor`，再同步句柄。
+[x] 补齐测试与验证：新增 `test/runtime-dom/render/component-anchor-regression.test.tsx`，并确保相关 keyed 用例通过；运行 `pnpm run test`。
 
 ## Decisions
 
-- 占位注释文案：使用自定义但符合 Vue3 语义的注释文本，禁止空字符串。
-- 锚点策略：按 Vue3 官方优先使用当前 endAnchor/片段锚，`latestHostAnchor` 仅作回退。
+- 空渲染占位：当组件需要锚点保序时保留 `startAnchor/endAnchor`（即便子树为空），不额外引入单注释占位。
+- vnode 元数据：组件更新后必须保证 `handle.nodes`、`vnode.el`、`vnode.anchor` 对齐最新宿主节点集合，供 `children diff` 安全移动。
 - 宿主范围：只考虑 DOM 渲染，无需适配其他宿主或 SSR。
 
-## Findings / Known issues
+## Findings（已验证）
 
-- 隐藏→重排→再显示时占位锚点曾落到尾部，导致顺序错乱；空渲染复用旧锚未校验导致 `anchor not found` 异常；注释重复累积。
-- 当前失败用例（待修）：`test/runtime-core/component/anchor-regression.test.tsx` 中隐藏后重排再显示顺序不对、空渲染移动不应复活旧子节点。
+- 根因：组件 `render` 变成 `undefined` 后，真实 DOM 会被卸载，但组件 vnode 的 `handle.nodes` 未同步为最新节点集合；随后父级 keyed 重排会按旧 `handle.nodes` 进行移动，从而把「已卸载的旧节点」重新插回 DOM，最终出现重复。
+- 触发链路：子组件有稳定 `key` → 子组件渲染从「有节点」切到「空」→ 父级列表重排 → 子组件再次渲染出节点。
+
+## Fix summary
+
+- `src/runtime-core/component/anchor.ts`：新增 `syncComponentVirtualNodeHandleNodes`，同步 `vnodeHandle.nodes` 并回写 `vnode.el/anchor`。
+- `src/runtime-core/patch/child.ts`：组件 patch 时更新 `shouldUseAnchor`，必要时 `ensureComponentAnchors`，并同步句柄与元数据。
+- `src/runtime-core/component/render-effect.ts`：组件 rerender 后调用同步，避免后续移动拿到旧节点引用。
+- `test/runtime-dom/render/component-anchor-regression.test.tsx`：新增回归覆盖「隐藏 → 重排 → 再显示」。
 
 ## Validation plan
 
-- 目标测试：相关 Vitest 套件（anchor-regression、unkeyed/keyed diff、mount-handle）、`pnpm tsc --noEmit`。
-- Playground 手动：`playground/views/anchor` 反复隐藏/显示、打乱顺序，观察注释锚包裹与顺序稳定性。
+- 目标测试：`test/runtime-dom/render/component-anchor-regression.test.tsx`、`test/runtime-core/patch/children-keyed.test.tsx`（含组件移动用例）、`pnpm run test`。
+- Playground 手动：`playground/views/anchor` 反复隐藏/显示、打乱顺序，观察列表项是否重复。

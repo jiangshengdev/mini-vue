@@ -1,8 +1,8 @@
 import type { NormalizedChildren, NormalizedVirtualNode } from '../normalize.ts'
 import type { RendererOptions } from '../renderer.ts'
 import type { RuntimeNormalizedVirtualNode } from './runtime-virtual-node.ts'
-import { asRuntimeNormalizedVirtualNode, getFirstHostNode } from './runtime-virtual-node.ts'
-import { Text } from '@/jsx-foundation/index.ts'
+import { asRuntimeNormalizedVirtualNode } from './runtime-virtual-node.ts'
+import { Fragment, Text } from '@/jsx-foundation/index.ts'
 
 /**
  * 卸载一个已渲染的 `virtualNode`：
@@ -35,6 +35,142 @@ export function unmount<
     /* 无 `handle` 的节点只记录了单一 `el`：这里直接移除即可。 */
     options.remove(runtime.el)
   }
+}
+
+/**
+ * 获取 `virtualNode` 对应的首个宿主节点。
+ *
+ * @remarks
+ * - Element/Text/Comment：直接返回 `runtime.el`。
+ * - Fragment：返回片段起始锚点 `runtime.el`。
+ * - Component：优先使用组件起始锚点（若存在），否则递归读取 `instance.subTree`（逐步对齐 Vue3）。
+ */
+export function getFirstHostNode<
+  HostNode,
+  HostElement extends HostNode & WeakKey = HostNode & WeakKey,
+  HostFragment extends HostNode = HostNode,
+>(virtualNode: NormalizedVirtualNode): HostNode | undefined {
+  const runtime = asRuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>(virtualNode)
+
+  /*
+   * 组件在旧实现中可能带有额外的「首尾锚点」：
+   * - 若存在锚点，应优先以锚点表达区间起点，避免插入锚点落入组件区间内部。
+   * - 当锚点体系被移除后，将自然退化为「递归到 subTree」的 Vue3 风格。
+   */
+  if (typeof virtualNode.type === 'function' && virtualNode.type !== Fragment) {
+    const instance = runtime.component
+
+    if (instance?.startAnchor) {
+      return instance.startAnchor as HostNode
+    }
+
+    const subTree = instance?.subTree
+
+    if (subTree) {
+      return getFirstHostNode<HostNode, HostElement, HostFragment>(subTree)
+    }
+  }
+
+  return runtime.el
+}
+
+/**
+ * 获取 `virtualNode` 对应的最后一个宿主节点（区间尾部）。
+ *
+ * @remarks
+ * - Element/Text/Comment：返回 `runtime.el`。
+ * - Fragment：返回片段结束锚点 `runtime.anchor`。
+ * - Component：优先使用组件结束锚点（若存在），否则递归读取 `instance.subTree`（逐步对齐 Vue3）。
+ */
+export function getLastHostNode<
+  HostNode,
+  HostElement extends HostNode & WeakKey = HostNode & WeakKey,
+  HostFragment extends HostNode = HostNode,
+>(virtualNode: NormalizedVirtualNode): HostNode | undefined {
+  const runtime = asRuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>(virtualNode)
+
+  /*
+   * 组件在旧实现中可能带有额外的「首尾锚点」：
+   * - 若存在锚点，应优先以锚点表达区间尾部，避免把尾锚点误当成「组件之后的节点」。
+   * - 当锚点体系被移除后，将自然退化为「递归到 subTree」的 Vue3 风格。
+   */
+  if (typeof virtualNode.type === 'function' && virtualNode.type !== Fragment) {
+    const instance = runtime.component
+
+    if (instance?.endAnchor) {
+      return instance.endAnchor as HostNode
+    }
+
+    const subTree = instance?.subTree
+
+    if (subTree) {
+      const last = getLastHostNode<HostNode, HostElement, HostFragment>(subTree)
+
+      if (last) {
+        return last
+      }
+    }
+
+    return runtime.anchor ?? runtime.el
+  }
+
+  if (virtualNode.type === Fragment) {
+    return runtime.anchor ?? runtime.el
+  }
+
+  return runtime.el
+}
+
+/**
+ * 获取 `virtualNode` 之后的下一个宿主节点（用于计算插入锚点）。
+ *
+ * @remarks
+ * - Element/Text/Comment：返回 `hostNextSibling(el)`。
+ * - Fragment：返回 `hostNextSibling(anchor)`（对齐 Vue3：以区间尾锚点作为边界）。
+ * - Component：优先从结束锚点计算 nextSibling（若存在），否则递归到 `instance.subTree`（逐步对齐 Vue3）。
+ */
+export function getNextHostNode<
+  HostNode,
+  HostElement extends HostNode & WeakKey,
+  HostFragment extends HostNode,
+>(
+  options: RendererOptions<HostNode, HostElement, HostFragment>,
+  virtualNode: NormalizedVirtualNode,
+): HostNode | undefined {
+  const runtime = asRuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>(virtualNode)
+
+  /*
+   * 组件在旧实现中可能带有额外的「首尾锚点」：
+   * - 若存在尾锚点，组件之后的节点应从 `endAnchor` 的 nextSibling 计算。
+   * - 当锚点体系被移除后，将自然退化为「递归到 subTree」的 Vue3 风格。
+   */
+  if (typeof virtualNode.type === 'function' && virtualNode.type !== Fragment) {
+    const instance = runtime.component
+    const endAnchor = instance?.endAnchor as HostNode | undefined
+
+    if (endAnchor) {
+      return options.nextSibling(endAnchor)
+    }
+
+    const subTree = instance?.subTree
+
+    if (subTree) {
+      return getNextHostNode(options, subTree)
+    }
+
+    const tailNode = runtime.anchor ?? runtime.el
+
+    return tailNode ? options.nextSibling(tailNode) : undefined
+  }
+
+  /* Fragment 的尾边界是 `anchor`：下一个宿主节点应从尾锚点的 nextSibling 获取。 */
+  if (virtualNode.type === Fragment) {
+    const endAnchor = runtime.anchor
+
+    return endAnchor ? options.nextSibling(endAnchor) : undefined
+  }
+
+  return runtime.el ? options.nextSibling(runtime.el) : undefined
 }
 
 /**
@@ -84,7 +220,7 @@ export function moveNodes<
  * 从 `children` 的指定位置向后寻找「下一个可用锚点」。
  *
  * @remarks
- * - 使用 `runtime.handle.nodes[0]` 作为锚点，因为一个 `virtualNode` 可能对应多宿主节点（如 `Fragment`）。
+ * - 使用 `vnode.el` 作为锚点来源：对齐 Vue3 的「宿主范围由 `el/anchor` 表达」策略。
  * - 找不到时返回 `fallback`（通常来自父级传入的 `anchor`）。
  * - 该函数用于 `keyed`/`unkeyed` diff 中确定新节点的插入位置。
  */

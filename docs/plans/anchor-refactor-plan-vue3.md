@@ -14,7 +14,7 @@
 [x] 引入 `Comment` VNode（对齐 Vue3 的空渲染占位）：在 `src/jsx-foundation/constants.ts`/`factory.ts`/`types.ts` 增加 `Comment` 标识与 `createCommentVirtualNode`，并从 `src/jsx-foundation/index.ts` 导出。
 [x] 调整 normalize 策略区分“根卸载”与“内部空渲染”：normalize 层对所有 `null/boolean` 子节点都生成 `Comment` vnode（完全对齐 Vue3），但根级 `render(undefined)` 仍保持卸载语义（可通过 `src/runtime-core/renderer.ts` 先判空再 normalize，或拆分 `normalizeVNode`/`normalizeRoot` 两套入口于 `src/runtime-core/normalize.ts`）。
 [x] 让 mount 路径真正“在最终位置插入”：给 `mountVirtualNode`/`mountElement`/`mountComponent` 增加 `anchor` 透传，删除 `src/runtime-core/mount/child.ts` 里“先 mount 再整体 move 到父 anchor”的补偿逻辑。
-[ ] 实现 Vue3 风格的宿主范围辅助：新增/重写 `getFirstHostNode`/`getLastHostNode`/`getNextHostNode`（Fragment 用 `anchor`，Component 递归到 `instance.subTree`，其余用 `el` + `nextSibling`），集中放在 `src/runtime-core/patch/utils.ts`（或新文件）。
+[x] 实现 Vue3 风格的宿主范围辅助：新增/重写 `getFirstHostNode`/`getLastHostNode`/`getNextHostNode`（Fragment 用 `anchor`，Component 递归到 `instance.subTree`，其余用 `el` + `nextSibling`），集中放在 `src/runtime-core/patch/utils.ts`（或新文件）。
 [ ] 实现统一的 `move(vnode, container, anchor)`：Element/Text/Comment 移动单节点；Fragment 用 `nextSibling` 遍历 `[start..end]`；Component 递归 move `instance.subTree`，并更新相应运行时元数据一致性。
 [ ] 改造组件更新锚点来源：在 `src/runtime-core/component/render-effect.ts` 的更新分支中，用 `getNextHostNode(previousSubTree)` 作为 `patchChild(..., anchor)` 的插入锚点，逐步去除对 `instance.endAnchor` 的依赖。
 [ ] 改造 keyed/unkeyed children diff 的移动实现：把 `src/runtime-core/patch/keyed-children.ts`/`driver.ts` 从 “move nodes array（依赖 `handle.nodes`）” 切到 “move vnode（依赖 `el/anchor + nextSibling`）”；相应地让 `findNextAnchor` 优先基于 `vnode.el`（而不是 `handle.nodes[0]`）。
@@ -71,8 +71,8 @@
 
 - 已存在：Fragment/数组在 mount 时总是生成首尾注释边界，见 `src/runtime-core/mount/child.ts` 的 `mountArrayChild(...)`。
 - 已存在：`vnode.el/anchor/handle/component` 以 `RuntimeVirtualNode` 形态维护，见 `src/runtime-core/virtual-node.ts` 与各 mount/patch 分支。
-- 缺失：normalize 会把 `null/boolean` 直接归一为 `undefined`（不产生任何 vnode），见 `src/runtime-core/normalize.ts`。
-- 差异：当前插入锚点主要依赖 `findNextAnchor(...)` → `getFirstHostNode(...)` → `runtime.handle.nodes[0]`，而非 DOM/宿主的 `nextSibling` 遍历，见 `src/runtime-core/patch/utils.ts`。
+- 已解决：normalize 对 `null/boolean` 归一为 `Comment`（空渲染占位），同时保留根级 `render(undefined)` 的卸载语义，见 `src/runtime-core/normalize.ts` + `src/runtime-core/renderer.ts`。
+- 差异：当前插入锚点主要依赖 `findNextAnchor(...)` → `getFirstHostNode(...)` → `vnode.el/anchor`（组件仍兼容旧的 start/endAnchor），仍未切到「基于宿主 `nextSibling` 的区间遍历」，见 `src/runtime-core/patch/utils.ts`。
 - 差异：keyed 移动是“搬移 `handle.nodes` 数组”，见 `src/runtime-core/patch/keyed-children.ts` + `src/runtime-core/patch/driver.ts`。
 
 ### 当前实现的冲突/冗余点（相对 Vue3 目标）

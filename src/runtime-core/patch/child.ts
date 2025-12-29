@@ -5,7 +5,7 @@ import type { RendererOptions } from '../renderer.ts'
 import type { PatchEnvironment } from './children-environment.ts'
 import { patchChildren } from './children.ts'
 import { mountChildInEnvironment } from './insertion.ts'
-import { asRuntimeNormalizedVirtualNode } from './runtime-virtual-node.ts'
+import { asRuntimeNormalizedVirtualNode, getHostNodes } from './runtime-virtual-node.ts'
 import type { PatchResult } from './types.ts'
 import { isComponentVirtualNode, isTextVirtualNode } from './types.ts'
 import { isSameVirtualNode, syncRuntimeMetadata, unmount } from './utils.ts'
@@ -150,6 +150,31 @@ function patchExisting<
       context: environment.context,
     })
 
+    if (runtimeNext.handle) {
+      const nodes: HostNode[] = []
+      const childHostNodes: HostNode[] = []
+
+      if (runtimeNext.anchor && runtimeNext.el && runtimeNext.el !== runtimeNext.anchor) {
+        nodes.push(runtimeNext.el as HostNode)
+      }
+
+      for (const child of runtimeNext.children) {
+        childHostNodes.push(...getHostNodes<HostNode, HostElement, HostFragment>(child))
+      }
+
+      if (!runtimeNext.anchor && childHostNodes.length === 0 && runtimeNext.el) {
+        nodes.push(runtimeNext.el as HostNode)
+      }
+
+      nodes.push(...childHostNodes)
+
+      if (runtimeNext.anchor && nodes.at(-1) !== runtimeNext.anchor) {
+        nodes.push(runtimeNext.anchor as HostNode)
+      }
+
+      runtimeNext.handle.nodes.splice(0, runtimeNext.handle.nodes.length, ...nodes)
+    }
+
     return { ok: true }
   }
 
@@ -263,6 +288,8 @@ function patchComponent<
       usedAnchor: environment.anchor,
     }
   }
+
+  instance.latestHostAnchor = environment.anchor
 
   /* 复用旧组件实例：同步宿主引用，并将 `next` 绑定到同一个 `component` 上。 */
   syncRuntimeMetadata(runtimePrevious, runtimeNext, { component: instance })

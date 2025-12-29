@@ -1,3 +1,4 @@
+import styles from './todo-item.module.css'
 import type { SetupComponent } from '@/index.ts'
 
 export interface Todo {
@@ -5,8 +6,30 @@ export interface Todo {
   text: string
 }
 
-export const TodoItem: SetupComponent<{ todo: Todo }> = (props) => {
+export const TodoItem: SetupComponent<{
+  todo: Todo
+  show?: boolean
+  color?: string
+}> = (props) => {
   return () => {
-    return <li>{props.todo?.text}</li>
+    if (props.show === false) {
+      return undefined
+    }
+
+    let style: { '--item-color': string } | undefined
+
+    if (props.color) {
+      style = {
+        '--item-color': props.color,
+      } satisfies Record<string, string>
+    } else {
+      style = undefined
+    }
+
+    return (
+      <li class={styles.item} style={style}>
+        {props.todo?.text}
+      </li>
+    )
   }
 }

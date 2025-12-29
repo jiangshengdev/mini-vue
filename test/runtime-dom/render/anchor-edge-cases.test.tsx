@@ -46,7 +46,7 @@ describe('runtime-dom render: 锚点边界用例', () => {
 
     render(<App />, container)
     expect(
-      Array.from(container.querySelectorAll('span')).map((node) => {
+      [...container.querySelectorAll('span')].map((node) => {
         return node.textContent ?? ''
       }),
     ).toEqual(['comp'])
@@ -54,7 +54,7 @@ describe('runtime-dom render: 锚点边界用例', () => {
     phase.set(1)
     await nextTick()
     expect(
-      Array.from(container.querySelectorAll('span')).map((node) => {
+      [...container.querySelectorAll('span')].map((node) => {
         return node.textContent ?? ''
       }),
     ).toEqual(['comp', 'tail'])
@@ -62,7 +62,7 @@ describe('runtime-dom render: 锚点边界用例', () => {
     phase.set(2)
     await nextTick()
     expect(
-      Array.from(container.querySelectorAll('span')).map((node) => {
+      [...container.querySelectorAll('span')].map((node) => {
         return node.textContent ?? ''
       }),
     ).toEqual(['head', 'comp', 'tail'])
@@ -79,8 +79,7 @@ describe('runtime-dom render: 锚点边界用例', () => {
             {order.get().map((key) => {
               return (
                 <Fragment key={key}>
-                  {show.get() ? <li>{`${key}-1`}</li> : null}
-                  {show.get() ? <li>{`${key}-2`}</li> : null}
+                  {show.get() && [<li>{`${key}-1`}</li>, <li>{`${key}-2`}</li>]}
                 </Fragment>
               )
             })}
@@ -93,7 +92,7 @@ describe('runtime-dom render: 锚点边界用例', () => {
 
     render(<App />, container)
     expect(
-      Array.from(container.querySelectorAll('li')).map((node) => {
+      [...container.querySelectorAll('li')].map((node) => {
         return node.textContent ?? ''
       }),
     ).toEqual(['a-1', 'a-2', 'b-1', 'b-2', 'c-1', 'c-2'])
@@ -109,7 +108,7 @@ describe('runtime-dom render: 锚点边界用例', () => {
     show.set(true)
     await nextTick()
 
-    const texts = Array.from(container.querySelectorAll('li')).map((node) => {
+    const texts = [...container.querySelectorAll('li')].map((node) => {
       return node.textContent ?? ''
     })
 
@@ -117,4 +116,3 @@ describe('runtime-dom render: 锚点边界用例', () => {
     expect(new Set(texts).size).toBe(texts.length)
   })
 })
-

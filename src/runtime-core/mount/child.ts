@@ -45,7 +45,7 @@ export function mountChild<
     return undefined
   }
 
-  /* 数组/`Fragment` 子节点以锚点包裹，避免共享 `DocumentFragment`；单个或空数组则直接复用子节点策略。 */
+  /* 数组/`Fragment` 子节点统一用首尾锚点包裹，对齐 Vue3 `Fragment` 语义，保证区间边界稳定。 */
   if (Array.isArray(child)) {
     return mountArrayChild(options, child as VirtualNodeChild[], environment)
   }
@@ -125,9 +125,8 @@ export function mountChild<
  * 挂载数组子节点：为整体生成锚点区间，并逐个交给 `mountChild` 处理。
  *
  * @remarks
- * - 空数组不产生节点。
- * - 单元素数组直接复用子节点策略，无需额外锚点。
- * - 多元素数组使用首尾锚点包裹，保证区间边界清晰。
+ * - 无论子项数量多少，都使用首尾锚点包裹，保证区间边界清晰（更接近 Vue3 `Fragment` 行为）。
+ * - 子项本身是否需要锚点，仅由其在数组内部的位置决定（而非父级的 `shouldUseAnchor`）。
  */
 function mountArrayChild<
   HostNode,
@@ -143,18 +142,6 @@ function mountArrayChild<
   const startComment = __DEV__ ? 'fragment-start' : ''
   const endComment = __DEV__ ? 'fragment-end' : ''
   const childCount = children.length
-
-  if (childCount === 0) {
-    return undefined
-  }
-
-  if (childCount === 1) {
-    return mountChild(options, children[0], {
-      container,
-      context: { ...context, shouldUseAnchor: context?.shouldUseAnchor ?? false },
-      anchor,
-    })
-  }
 
   const startAnchor = createComment(startComment)
   const endAnchor = createComment(endComment)
@@ -195,7 +182,7 @@ function mountArrayChild<
   insert(endAnchor)
   nodes.push(endAnchor)
 
-  const handle: MountedHandle<HostNode> = {
+  return {
     ok,
     nodes,
     /**
@@ -217,12 +204,4 @@ function mountArrayChild<
       remove(endAnchor)
     },
   }
-
-  ;(
-    handle as MountedHandle<HostNode> & {
-      __fragmentBoundaryHandle?: true
-    }
-  ).__fragmentBoundaryHandle = true
-
-  return handle
 }

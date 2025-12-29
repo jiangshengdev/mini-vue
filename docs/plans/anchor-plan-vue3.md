@@ -33,7 +33,8 @@
 - `src/runtime-core/component/anchor.ts`：`ensureComponentAnchors` 支持传入插入锚点；当组件已挂载且需要补锚点时，将 `startAnchor` 插到现有子树首节点之前，`endAnchor` 插到父级锚点之前（或容器尾部）。
 - `src/runtime-core/patch/child.ts`：组件 patch 时更新 `shouldUseAnchor`，必要时 `ensureComponentAnchors(options, instance, environment.anchor)`，并同步句柄与元数据。
 - `src/runtime-core/component/render-effect.ts`：组件 rerender 后调用同步，避免后续移动拿到旧节点引用。
-- `src/runtime-core/mount/child.ts` / `src/runtime-core/patch/child.ts`：为带区间锚点的句柄标记内部标识，并在 `Fragment` patch 后同步 `handle.nodes`，避免旧节点复活。
+- `src/runtime-core/mount/child.ts`：数组/`Fragment` 始终生成首尾锚点（含 0/1 子节点），对齐 Vue3 `Fragment` 语义，保证区间边界稳定。
+- `src/runtime-core/patch/child.ts`：`Fragment` patch 后同步 `handle.nodes = [start, ...childrenNodes, end]`，避免 keyed 重排移动到旧节点引用导致复活。
 - `test/runtime-dom/render/component-anchor-regression.test.tsx`：新增回归覆盖「隐藏 → 重排 → 再显示」。
 - `test/runtime-dom/render/anchor-edge-cases.test.tsx`：新增边界用例覆盖「组件补锚点后再插入」与「Fragment 清空后重排」。
 

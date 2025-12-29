@@ -144,41 +144,37 @@ function patchExisting<
      * - 否则回退到父级传入的 `anchor`。
      * - 显式注入 `patchChild`，避免 `child.ts`/`children.ts` 互相 `import` 造成循环，并便于替换/测试。
      */
-	    patchChildren(options, previous.children, next.children, {
-	      container: environment.container,
-	      patchChild,
-	      anchor: runtimePrevious.anchor ?? environment.anchor,
-	      context: environment.context,
-	    })
+    patchChildren(options, previous.children, next.children, {
+      container: environment.container,
+      patchChild,
+      anchor: runtimePrevious.anchor ?? environment.anchor,
+      context: environment.context,
+    })
 
-	    const handle = runtimeNext.handle
+    const { handle } = runtimeNext
 
-	    if (handle) {
-	      const boundaryHandle = (handle as { __fragmentBoundaryHandle?: true })
-	        .__fragmentBoundaryHandle
-	      const nextChildNodes: HostNode[] = []
+    if (handle) {
+      const nextChildNodes: HostNode[] = []
 
-	      for (const child of next.children) {
-	        nextChildNodes.push(
-	          ...getHostNodesSafely<HostNode, HostElement, HostFragment>(child),
-	        )
-	      }
+      for (const child of next.children) {
+        nextChildNodes.push(...getHostNodesSafely<HostNode, HostElement, HostFragment>(child))
+      }
 
-	      const startNode = handle.nodes[0]
-	      const endNode = handle.nodes.at(-1)
-	      const nextNodes =
-	        boundaryHandle && startNode && endNode
-	          ? ([startNode as HostNode, ...nextChildNodes, endNode as HostNode] as HostNode[])
-	          : nextChildNodes
+      const startNode = handle.nodes[0]
+      const endNode = handle.nodes.at(-1)
+      const nextNodes =
+        startNode && endNode && startNode !== endNode
+          ? ([startNode as HostNode, ...nextChildNodes, endNode as HostNode] as HostNode[])
+          : nextChildNodes
 
-	      handle.nodes.length = 0
-	      handle.nodes.push(...nextNodes)
-	      runtimeNext.el = handle.nodes[0]
-	      runtimeNext.anchor = handle.nodes.at(-1)
-	    }
+      handle.nodes.length = 0
+      handle.nodes.push(...nextNodes)
+      runtimeNext.el = handle.nodes[0]
+      runtimeNext.anchor = handle.nodes.at(-1)
+    }
 
-	    return { ok: true }
-	  }
+    return { ok: true }
+  }
 
   /* 组件与元素的更新能力不同：组件需要驱动 `effect`/子树，元素需要 `patchProps`/`children`/`ref`。 */
   if (isComponentVirtualNode(previous) && isComponentVirtualNode(next)) {
@@ -303,11 +299,11 @@ function patchComponent<
    */
   const nextShouldUseAnchor = environment.context?.shouldUseAnchor ?? instance.shouldUseAnchor
 
-	  instance.shouldUseAnchor = nextShouldUseAnchor
-	
-	  if (nextShouldUseAnchor) {
-	    ensureComponentAnchors(options, instance, environment.anchor)
-	  }
+  instance.shouldUseAnchor = nextShouldUseAnchor
+
+  if (nextShouldUseAnchor) {
+    ensureComponentAnchors(options, instance, environment.anchor)
+  }
 
   syncComponentVirtualNodeHandleNodes(instance)
   /* 组件 `props` 需要走规范化流程（包含默认值/`attrs` 等策略），避免直接透传 raw `props`。 */

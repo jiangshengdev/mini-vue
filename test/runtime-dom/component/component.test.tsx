@@ -176,7 +176,8 @@ describe('runtime-dom component reactivity', () => {
     )
 
     expect(renderSpy).toHaveBeenCalledTimes(1)
-    expect(container).toBeEmptyDOMElement()
+    expect(container.children).toHaveLength(0)
+    expect(container).toHaveTextContent('')
 
     render(<div>next</div>, container)
     expect(container.textContent).toBe('next')

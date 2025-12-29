@@ -176,8 +176,8 @@ describe('patchChildren 有 key diff', () => {
     }
 
     expect(nextOrder.filter(Boolean)).toEqual(['B1', 'A1', 'A2'])
-    /* Fragment B 仅包含一个宿主节点，移动一次即可到位。 */
-    expect(host.counters.insertBefore).toBe(1)
+    /* Fragment 统一带首尾锚点：移动时需搬移 start + 子节点 + end。 */
+    expect(host.counters.insertBefore).toBe(3)
     expect(host.counters.appendChild).toBe(0)
     expect(host.counters.remove).toBe(0)
   })

@@ -7,6 +7,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { CounterDemo } from '../views/counter-demo.tsx'
 import { HelloWorld } from '../views/basic/hello-world.tsx'
+import { AnchorSimpleComponent } from '../views/anchor/index.ts'
 import { NotFound } from '../views/not-found.tsx'
 import { App } from '../app.tsx'
 import { router } from '../router/index.ts'
@@ -58,6 +59,9 @@ describe('playground/router', () => {
 
     router.navigate('/counter')
     expect(router.currentRoute.value.component).toBe(CounterDemo)
+
+    router.navigate('/anchor/simple-component')
+    expect(router.currentRoute.value.component).toBe(AnchorSimpleComponent)
   })
 
   it('未命中路由时应回退到 NotFound', () => {

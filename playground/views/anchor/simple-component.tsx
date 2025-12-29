@@ -4,7 +4,7 @@ import { TodoItem } from './todo-item.tsx'
 import type { SetupComponent } from '@/index.ts'
 import { state } from '@/index.ts'
 
-export const SimpleComponent: SetupComponent = () => {
+export const AnchorSimpleComponent: SetupComponent = () => {
   const groceryList = state<Todo[]>([
     { id: 0, text: '蔬菜' },
     { id: 1, text: '奶酪' },
@@ -46,7 +46,7 @@ export const SimpleComponent: SetupComponent = () => {
 
     return (
       <section class="card">
-        <h2>简单组件</h2>
+        <h2>组件锚点回归</h2>
         <div class={styles.controls}>
           <button class="button" type="button" onClick={shuffle}>
             打乱列表

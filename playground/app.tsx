@@ -35,6 +35,7 @@ const navLinks: NavLinkConfig[] = [
       { to: '/basic/simple-component', label: '简单组件' },
     ],
   },
+  { to: '/anchor/simple-component', label: '组件锚点回归' },
 ]
 
 /**

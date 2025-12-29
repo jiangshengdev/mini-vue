@@ -11,6 +11,7 @@ import {
   HelloWorld,
   SimpleComponent,
 } from '../views/basic/index.ts'
+import { AnchorSimpleComponent } from '../views/anchor/index.ts'
 import type { RouteRecord } from '@/index.ts'
 import { createRouter } from '@/index.ts'
 
@@ -25,6 +26,7 @@ const routes: RouteRecord[] = [
   { path: '/basic/conditionals-and-loops', component: ConditionalsAndLoops },
   { path: '/basic/form-bindings', component: FormBindings },
   { path: '/basic/simple-component', component: SimpleComponent },
+  { path: '/anchor/simple-component', component: AnchorSimpleComponent },
 ]
 
 export const router = createRouter({ routes, fallback: NotFound })

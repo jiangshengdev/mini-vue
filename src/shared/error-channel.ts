@@ -41,6 +41,8 @@ export const errorContexts = {
   computedSetter: 'computedSetter',
   /** DOM 宿主解析容器选择器时抛出的异常。 */
   domContainerResolve: 'domContainerResolve',
+  /** 元素 `ref` 回调或写入阶段的异常。 */
+  elementRef: 'elementRef',
 } as const
 /**
  * 错误来源上下文的联合类型，用于约束上报入口的来源标签。

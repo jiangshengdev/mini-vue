@@ -5,6 +5,7 @@ import type { MountedHandle } from './handle.ts'
 import type { VirtualNode } from '@/jsx-foundation/index.ts'
 import type { Ref } from '@/reactivity/index.ts'
 import { isRef } from '@/reactivity/index.ts'
+import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
 
 /**
  * 创建宿主元素并同步 `props` 与 `children`。
@@ -115,10 +116,26 @@ export function assignElementRef<HostElement>(
   }
 
   if (typeof target === 'function') {
-    target(value)
+    runSilent(
+      () => {
+        target(value)
+      },
+      {
+        origin: errorContexts.elementRef,
+        handlerPhase: errorPhases.sync,
+      },
+    )
 
     return
   }
 
-  target.value = value
+  runSilent(
+    () => {
+      target.value = value
+    },
+    {
+      origin: errorContexts.elementRef,
+      handlerPhase: errorPhases.sync,
+    },
+  )
 }

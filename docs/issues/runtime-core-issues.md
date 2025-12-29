@@ -94,14 +94,14 @@
   - 失败后调用 `unmount()` 不会误触发宿主清理。
 - 测试：`test/runtime-core/app/mount-failure-state.test.tsx`
 
-## 11. 渲染抛错时容器可能残留部分挂载内容且无法通过 `unmount` 清理（待确认）
+## 11. 渲染抛错时容器可能残留部分挂载内容且无法通过 `unmount` 清理（已确认，已修复：ref 场景）
 
-- 位置：`src/runtime-core/create-app.ts`（`mountApp`）
-- 现状：渲染开始前未记录容器引用，`render` 若在挂载中途抛错，`state.container` 仍为 `undefined`，`unmount()` 会直接返回。若宿主已经写入部分节点或注册事件，缺少后续清理路径。
-- 影响：容器可能残留部分 DOM/副作用，且应用实例认为自己未挂载，后续恢复需要手工处理。
-- 可能方案：
-  - 在调用 `render` 前先记录容器引用，并在 catch/finally 中对失败场景执行宿主级清理（例如调用 `config.unmount` 或记录失败状态后允许 `unmount` 生效）。
-  - 或在渲染失败时返回带 `ok=false` 的句柄并缓存到状态中，`unmount` 时无论成功/失败都尝试执行 teardown，确保容器被清空。
+- 位置：
+  - `src/runtime-core/create-app.ts`（`mountApp`）
+  - `src/runtime-core/mount/element.ts`（`assignElementRef`）
+- 现状：挂载中途若同步抛错，应用实例不会进入 mounted 状态，`unmount()` 无法触发宿主清理；同时容器可能已经写入部分节点。
+- 复现：元素 `ref` 回调抛错会中断挂载并留下残留，见 `test/runtime-dom/error/ref.test.tsx`。
+- 修复：`assignElementRef` 通过错误通道隔离 `ref` 赋值异常（新增 `errorContexts.elementRef`），避免打断挂载流程，从而保证后续 `unmount()` 可以清空容器。
 
 ## 12. 测试 Mock 内部文件路径（待优化）
 

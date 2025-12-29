@@ -16,6 +16,7 @@ import { computeLongestIncreasingSubsequence } from './longest-increasing-subseq
 import { getHostNodesSafely } from './runtime-virtual-node.ts'
 import type { IndexMaps, IndexRange, KeyedPatchContext } from './types.ts'
 import { findNextAnchor, isSameVirtualNode } from './utils.ts'
+import { asRuntimeNormalizedVirtualNode } from './runtime-virtual-node.ts'
 
 /**
  * Keyed `children diff`：支持基于 `key` 的复用与移动。
@@ -185,6 +186,13 @@ function moveOrMountChildren<
       context.environment.anchor,
     )
     const mappedValue = maps.newIndexToOldIndexMap[index]
+    const runtimeNext = asRuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>(
+      nextChild,
+    )
+
+    if (runtimeNext.component) {
+      runtimeNext.component.latestHostAnchor = anchorNode
+    }
 
     if (mappedValue === -1) {
       /* 该新节点没有对应旧节点：执行 `mount` 并插入到 `anchorNode` 之前。 */

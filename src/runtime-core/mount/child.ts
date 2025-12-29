@@ -83,10 +83,17 @@ export function mountChild<
       ...context,
       shouldUseAnchor,
     })
+    const runtime = asRuntimeVirtualNode<HostNode, HostElement, HostFragment>(child)
 
-    if (mounted && anchor) {
-      for (const node of mounted.nodes) {
-        insertBefore(container, node, anchor)
+    if (mounted) {
+      if (runtime.component && anchor) {
+        runtime.component.latestHostAnchor = anchor
+      }
+
+      if (anchor) {
+        for (const node of mounted.nodes) {
+          insertBefore(container, node, anchor)
+        }
       }
     }
 

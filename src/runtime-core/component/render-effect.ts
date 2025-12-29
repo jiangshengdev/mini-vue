@@ -182,6 +182,9 @@ function patchLatestSubtree<
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
   previousSubTree: NormalizedVirtualNode | undefined,
 ): void {
+  const runtimeSubTree = instance.subTree
+    ? asRuntimeVirtualNode<HostNode, HostElement, HostFragment>(instance.subTree)
+    : undefined
   const anchor = instance.endAnchor ?? instance.latestHostAnchor
 
   patchChild(options, previousSubTree, instance.subTree, {
@@ -193,13 +196,43 @@ function patchLatestSubtree<
     },
   })
 
-  const runtimeSubTree = instance.subTree
-    ? asRuntimeVirtualNode<HostNode, HostElement, HostFragment>(instance.subTree)
-    : undefined
   let mountedHandle = runtimeSubTree?.handle
 
   if (!mountedHandle || mountedHandle.nodes.length === 0) {
-    mountedHandle = createComponentAnchorPlaceholder(options, instance, anchor)
+    mountedHandle = instance.shouldUseAnchor
+      ? createComponentAnchorPlaceholder(options, instance, anchor)
+      : {
+          ok: true,
+          nodes: [],
+          teardown(): void {
+            /* 空句柄无需清理。 */
+          },
+        }
+  } else if (instance.shouldUseAnchor && instance.startAnchor && instance.endAnchor) {
+    const childHandle = mountedHandle
+    const start = instance.startAnchor as HostNode
+    const end = instance.endAnchor as HostNode
+
+    mountedHandle = {
+      ok: childHandle.ok,
+      nodes: [start, ...childHandle.nodes, end],
+      teardown(skipRemove?: boolean): void {
+        childHandle.teardown(skipRemove)
+
+        if (skipRemove) {
+          return
+        }
+
+        options.remove(start)
+
+        if (end !== start) {
+          options.remove(end)
+        }
+
+        instance.startAnchor = undefined
+        instance.endAnchor = undefined
+      },
+    }
   }
 
   instance.mountedHandle = mountedHandle

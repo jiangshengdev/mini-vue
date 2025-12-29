@@ -1,23 +1,24 @@
 # Plan
 
-修复组件/Fragment 锚点在 render 为空后重排再显示时的错位/重复问题，对齐 Vue3：保持/重建占位锚点，正确回退锚点，确保插入位置稳定。
+修复组件/Fragment 锚点在 render 为空后重排再显示时的错位/重复问题，对齐 Vue3：保持/重建占位锚点，正确回退锚点，确保插入位置稳定。当前实现仍存在「组件移动后注释锚点未随子树移动、handle 不含首尾锚」等问题，需要重新梳理。
 
 ## Scope
 
 - In: 组件/Fragment 锚点的创建、回退、保留逻辑；render 为空后的再挂载行为；相关测试与验证。
 - Out: 与锚点无关的渲染特性、样式/UI 改动、其他优化。
 
-## Action items
+## Action items（更新后）
 
-[x] 梳理锚点生命周期与调用点（mountComponentSubtreeWithAnchors、patchLatestSubtree、findNextAnchor 等），确认何时创建/清理/回退。
-[x] 设计并实现锚点回退：rerender/patch 时优先使用 endAnchor，缺失时回退父级 anchor，插入统一用 insertBefore。
-[x] 处理 render 为空的占位策略：shouldUseAnchor 为真时保留或重建注释锚点，避免下一轮 append 到尾部。
-[x] 对齐 Fragment/数组路径：检查空 children/移动场景下的锚点保留与回退，保持策略一致。
-[x] 补充回归测试：覆盖“隐藏组件 → 打乱顺序 → 再显示”以及有锚/无锚、Fragment 场景，验证无错位/重复。
-[x] 验证改动：运行 `pnpm vitest test/runtime-core/component/anchor-regression.test.tsx`、`pnpm tsc --noEmit`，相关用例通过。
+[ ] 对齐 Vue3 的锚点设计：组件不自创锚，组件 vnode 的 `el/anchor` 透传子树首/尾节点；空渲染时使用单注释占位（`el === anchor`）。
+[ ] 统一组件 handle：`mountedHandle.nodes` 必须包含首尾锚（或占位注释），移动/卸载基于同一序列，杜绝锚点滞留。
+[ ] 收敛锚点来源：优先 `endAnchor`，缺失时回退父级 `anchor`，避免 `latestHostAnchor` 与本地锚分裂；同步移动后及时刷新实例锚点。
+[ ] 简化锚点保留/回收路径：集中到少数入口（mount/patch/teardown），删除冗余分支，保证子树为空/再挂载时锚点可重用。
+[ ] 补充回归测试：组件隐藏→再显示→列表重排，验证注释锚包裹区间连续；覆盖空渲染占位、Fragment/多节点、移动后 rerender 再移动等路径。
+[ ] 验证改动：`pnpm vitest test/runtime-core/component/anchor-regression.test.tsx test/runtime-core/patch/children-keyed.test.tsx`、`pnpm tsc --noEmit`。
 
-## Notes / Decisions
+## Findings / Notes
 
-- SSR/hydration 暂不支持，注释文本一致性无需考虑。
-- 依赖 `handle.nodes[0]` 取锚仅 `findNextAnchor`（通过 `getFirstHostNode`）。
-- 隐藏状态的注释文本需保留（含 DEV 标签），用以保持位置稳定。
+- 组件 rerender 后移动时，现有 `mountedHandle` 只含子节点，不含首尾锚，导致注释节点留在旧位置，浏览器调试视图显示组件未被注释包裹。
+- 锚点创建/回退逻辑分散在 `mountComponentSubtreeWithAnchors`、`patchLatestSubtree`、`createComponentAnchorPlaceholder` 等多个路径，缺少统一约束，维护成本高。
+- Vue3 设计：组件复用子树的 `el/anchor`，Fragment 用注释标记区间，移动时整体搬移 start→end；空渲染用单注释占位。需按此收敛策略。
+- SSR/hydration 暂不支持，注释文本一致性无需考虑；隐藏状态下的注释需保留（含 DEV 标签），用以保持位置稳定。

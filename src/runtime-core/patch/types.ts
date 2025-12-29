@@ -3,7 +3,7 @@ import type { RendererOptions } from '../renderer.ts'
 import type { PatchChildrenEnvironment } from './children-environment.ts'
 import type { PatchDriver } from './driver.ts'
 import type { SetupComponent } from '@/jsx-foundation/index.ts'
-import { Fragment, Text } from '@/jsx-foundation/index.ts'
+import { Comment, Fragment, Text } from '@/jsx-foundation/index.ts'
 
 /**
  * 具名的文本 `virtualNode` 形态，方便在 `patch` 流程中窄化类型。
@@ -23,6 +23,23 @@ export function isTextVirtualNode(
   virtualNode: NormalizedVirtualNode,
 ): virtualNode is NormalizedTextVirtualNode {
   return virtualNode.type === Text
+}
+
+/**
+ * 具名的注释 `virtualNode` 形态，方便在 `patch` 流程中窄化类型。
+ *
+ * @remarks
+ * `Comment` 节点在 `diff` 中用于空渲染占位，通常可复用旧宿主节点并按需更新内容。
+ */
+export type NormalizedCommentVirtualNode = NormalizedVirtualNode<typeof Comment>
+
+/**
+ * 判断当前 `virtualNode` 是否为注释节点。
+ */
+export function isCommentVirtualNode(
+  virtualNode: NormalizedVirtualNode,
+): virtualNode is NormalizedCommentVirtualNode {
+  return virtualNode.type === Comment
 }
 
 /**

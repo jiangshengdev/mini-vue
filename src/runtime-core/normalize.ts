@@ -5,6 +5,7 @@
  * @remarks
  * - 数组输出会包裹为 `Fragment`，统一走 `children` 逻辑。
  * - 文本（`string`/`number`）会转换为 `Text` `virtualNode`，避免 `mount`/`patch` 出现分叉实现。
+ * - `null`/`undefined`/`boolean` 会转换为 `Comment` `virtualNode`，用于空渲染占位（与 Vue3 对齐）。
  * - 归一化后的 `children` 始终是 `virtualNode` 数组，便于 `patchChildren` 只处理一种形态。
  */
 import type {
@@ -15,6 +16,7 @@ import type {
   VirtualNode,
 } from '@/jsx-foundation/index.ts'
 import {
+  createCommentVirtualNode,
   createTextVirtualNode,
   createVirtualNode,
   Fragment,
@@ -39,15 +41,15 @@ export type NormalizedRenderOutput = NormalizedVirtualNode | undefined
  *
  * @remarks
  * 支持的输入类型：
- * - `null`/`undefined`/布尔值：归一为 `undefined`，不产生渲染输出。
+ * - `null`/`undefined`/布尔值：归一为 `Comment`，作为空渲染占位。
  * - 数组：包裹为 `Fragment`，交由后续 `children` 归一化处理。
  * - `VirtualNode`：递归规整内部 `children`。
  * - 原始文本（`string`/`number`）：转为 `Text` `VirtualNode`。
  */
 export function normalizeRenderOutput(output: RenderOutput): NormalizedRenderOutput {
-  /* 空值与布尔值不会产生任何渲染输出，直接归一为空。 */
+  /* 空值与布尔值归一化为注释节点占位，避免出现「0 个宿主节点」。 */
   if (isNil(output) || typeof output === 'boolean') {
-    return undefined
+    return normalizeVirtualNodeForRuntime(createCommentVirtualNode(''))
   }
 
   /* 数组输出包裹为 Fragment，交由后续 children 归一化处理。 */

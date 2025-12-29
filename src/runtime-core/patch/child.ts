@@ -8,7 +8,7 @@ import { patchChildren } from './children.ts'
 import { mountChildInEnvironment } from './insertion.ts'
 import { asRuntimeNormalizedVirtualNode, getHostNodesSafely } from './runtime-virtual-node.ts'
 import type { PatchResult } from './types.ts'
-import { isComponentVirtualNode, isTextVirtualNode } from './types.ts'
+import { isCommentVirtualNode, isComponentVirtualNode, isTextVirtualNode } from './types.ts'
 import { isSameVirtualNode, syncRuntimeMetadata, unmount } from './utils.ts'
 import type { ElementProps, SetupComponent } from '@/jsx-foundation/index.ts'
 import { Fragment } from '@/jsx-foundation/index.ts'
@@ -122,6 +122,29 @@ function patchExisting<
 
     if (runtimePrevious.el) {
       /* 仅当旧 `el` 存在时才能 `setText`；否则说明旧节点未正确 `mount`（防御性不报错）。 */
+      options.setText(runtimePrevious.el, next.text ?? '')
+    }
+
+    return { ok: true }
+  }
+
+  /* `Comment` 的宿主节点只有一个：复用旧 `el`，并按需更新注释内容即可。 */
+  if (isCommentVirtualNode(previous) && isCommentVirtualNode(next)) {
+    const runtimePrevious = asRuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>(
+      previous,
+    )
+    const runtimeNext = asRuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>(next)
+
+    /* 注释节点不对应组件实例：同步宿主引用并显式清空 `component`/`anchor`。 */
+    syncRuntimeMetadata(runtimePrevious, runtimeNext, { anchor: undefined, component: undefined })
+
+    /* 注释内容未变更时避免重复写入。 */
+    if (previous.text === next.text) {
+      return { ok: true }
+    }
+
+    if (runtimePrevious.el) {
+      /* 复用 `setText` 更新注释节点内容（DOM Comment 同样支持 nodeValue）。 */
       options.setText(runtimePrevious.el, next.text ?? '')
     }
 

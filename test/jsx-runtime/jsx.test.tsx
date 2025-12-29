@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { isVirtualNode, virtualNodeFlag } from '@/jsx-foundation/index.ts'
+import { Comment, isVirtualNode, virtualNodeFlag } from '@/jsx-foundation/index.ts'
 import { jsxDEV } from '@/index.ts'
 
 /**
@@ -14,7 +14,16 @@ describe('jsx-runtime automatic jsx helper', () => {
       </section>
     )
 
-    expect(virtualNode.children).toEqual(['first', 2, 'nested'])
+    expect(virtualNode.children).toHaveLength(6)
+    expect(virtualNode.children[0]).toBe('first')
+    expect(virtualNode.children[1]).toBe(2)
+    expect(isVirtualNode(virtualNode.children[2])).toBe(true)
+    expect((virtualNode.children[2] as { type?: unknown }).type).toBe(Comment)
+    expect(isVirtualNode(virtualNode.children[3])).toBe(true)
+    expect((virtualNode.children[3] as { type?: unknown }).type).toBe(Comment)
+    expect(virtualNode.children[4]).toBe('nested')
+    expect(isVirtualNode(virtualNode.children[5])).toBe(true)
+    expect((virtualNode.children[5] as { type?: unknown }).type).toBe(Comment)
     expect(virtualNode.props).toEqual({ id: 'root', 'data-ctx': 'stub' })
   })
 
@@ -79,10 +88,12 @@ describe('jsx-runtime automatic jsx helper', () => {
     const virtualNode = <ul class="list">{[<li id="a">A</li>, [<li id="b">B</li>], false, 0]}</ul>
 
     expect(virtualNode.props).toEqual({ class: 'list' })
-    expect(virtualNode.children).toHaveLength(3)
+    expect(virtualNode.children).toHaveLength(4)
     expect(isVirtualNode(virtualNode.children[0])).toBe(true)
     expect(isVirtualNode(virtualNode.children[1])).toBe(true)
-    expect(virtualNode.children[2]).toBe(0)
+    expect(isVirtualNode(virtualNode.children[2])).toBe(true)
+    expect((virtualNode.children[2] as { type?: unknown }).type).toBe(Comment)
+    expect(virtualNode.children[3]).toBe(0)
   })
 
   it('支持通过展开语法传入的 key', () => {

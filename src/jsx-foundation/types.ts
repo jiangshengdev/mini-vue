@@ -16,7 +16,7 @@ export type VirtualNodeChild = VirtualNode | string | number
  * @remarks
  * - 由于 lint 规则禁止在类型中显式声明 `null`，这里以 `undefined` 代表「空」。
  * - 运行时（`normalizeChildren`/`mountChild`）仍会照常处理 `null` 并视为可忽略节点。
- * - 布尔值同样会在运行时被当作空节点忽略，便于条件渲染场景（如 `{flag && <Comp />}`）。
+ * - 布尔值与空值会在运行时被归一化为 `Comment` 节点占位，便于条件渲染场景（如 `{flag && <Comp />}`）。
  */
 export type ComponentChildren = VirtualNodeChild | VirtualNodeChild[] | boolean | undefined
 
@@ -25,7 +25,7 @@ export type ComponentChildren = VirtualNodeChild | VirtualNodeChild[] | boolean 
  *
  * @remarks
  * - 组件的 `render` 函数可返回单个节点、节点数组或空值。
- * - 返回 `undefined`/`null`/`boolean` 时渲染层会忽略，不产生 DOM 输出。
+ * - 返回 `undefined`/`null`/`boolean` 时渲染层会生成 `Comment` 占位（不产生可见 DOM 输出）。
  */
 export type RenderOutput = ComponentChildren
 

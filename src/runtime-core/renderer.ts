@@ -11,6 +11,7 @@ import type { RenderOutput } from '@/jsx-foundation/index.ts'
 import { isVirtualNode } from '@/jsx-foundation/index.ts'
 import { runtimeCoreInvalidContainer } from '@/messages/index.ts'
 import type { PropsShape } from '@/shared/index.ts'
+import { isNil } from '@/shared/index.ts'
 
 /**
  * 宿主环境需要提供的渲染原语集合。
@@ -122,7 +123,10 @@ export function createRenderer<
     const containerKey = asContainerKey(container)
     const previousState = rootRenderStateByContainer.get(containerKey)
     const previous = previousState?.vnode
-    const normalized = normalizeRenderOutput(virtualNode)
+    const normalized =
+      isNil(virtualNode) || typeof virtualNode === 'boolean'
+        ? undefined
+        : normalizeRenderOutput(virtualNode)
     const normalizedAppContext = isVirtualNode(normalized)
       ? (normalized as { appContext?: AppContext }).appContext
       : undefined

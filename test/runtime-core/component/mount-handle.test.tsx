@@ -16,8 +16,8 @@ describe('runtime-core mountComponent handle ok flag', () => {
 
     expect(mounted).toBeDefined()
     expect(mounted?.ok).toBe(true)
-    expect(mounted?.nodes).toEqual([])
-    expect(container.childNodes.length).toBe(0)
+    expect(mounted?.nodes).toHaveLength(1)
+    expect(container.childNodes.length).toBe(1)
 
     mounted?.teardown()
   })

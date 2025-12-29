@@ -4,7 +4,7 @@ import { asRuntimeVirtualNode } from '../virtual-node.ts'
 import type { MountedHandle } from './handle.ts'
 import { mountVirtualNode } from './virtual-node.ts'
 import type { RenderOutput, VirtualNodeChild } from '@/jsx-foundation/index.ts'
-import { isVirtualNode, Text } from '@/jsx-foundation/index.ts'
+import { Comment, isVirtualNode, Text } from '@/jsx-foundation/index.ts'
 import { runtimeCoreObjectChildWarning } from '@/messages/index.ts'
 import { __DEV__, isNil } from '@/shared/index.ts'
 
@@ -30,7 +30,7 @@ export function mountChild<
   const { container, context, anchor } = environment
   /* `shouldUseAnchor` 表示「当前节点之后是否还有兄弟」，用于决定是否需要占位锚点来保序。 */
   const shouldUseAnchor = context?.shouldUseAnchor ?? false
-  const { appendChild, insertBefore, createText, remove } = options
+  const { appendChild, insertBefore, createComment, createText, remove } = options
   /* 有锚点时直接在最终位置插入，避免先 append 再移动。 */
   const insert = (node: HostNode): void => {
     if (anchor) {
@@ -72,6 +72,33 @@ export function mountChild<
       }
 
       runtime.el = textNode
+      runtime.handle = handle
+      runtime.anchor = undefined
+      runtime.component = undefined
+
+      return handle
+    }
+
+    if (child.type === Comment) {
+      const commentNode = createComment(child.text ?? '')
+      const runtime = asRuntimeVirtualNode<HostNode, HostElement, HostFragment>(child)
+
+      insert(commentNode)
+
+      const handle: MountedHandle<HostNode> = {
+        ok: true,
+        nodes: [commentNode],
+        /** 卸载注释节点：仅需从宿主树中移除即可。 */
+        teardown(skipRemove?: boolean): void {
+          if (skipRemove) {
+            return
+          }
+
+          remove(commentNode)
+        },
+      }
+
+      runtime.el = commentNode
       runtime.handle = handle
       runtime.anchor = undefined
       runtime.component = undefined

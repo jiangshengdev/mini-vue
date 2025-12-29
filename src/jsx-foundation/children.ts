@@ -1,5 +1,6 @@
 import { isVirtualNode } from './guards.ts'
-import type { VirtualNodeChild } from './types.ts'
+import { Comment, virtualNodeFlag } from './constants.ts'
+import type { VirtualNode, VirtualNodeChild } from './types.ts'
 import { jsxUnsupportedChildWarning } from '@/messages/index.ts'
 import { __DEV__, isNil } from '@/shared/index.ts'
 
@@ -24,7 +25,7 @@ function warnUnsupportedChild(child: unknown): void {
  * 将任意形式的 `children` 归一化为扁平的 `VirtualNodeChild` 数组。
  *
  * @remarks
- * - 过滤掉 `null`/`undefined`/`boolean` 等「可忽略」值，这些值在渲染层不产生输出。
+ * - `null`/`undefined`/`boolean` 会被归一化为 `Comment` `virtualNode`，用于空渲染占位（与 Vue3 对齐）。
  * - 递归展开嵌套数组 `children`，并保持原始顺序不变。
  * - 字符串与数字保留原样，由渲染层按需包装为文本节点。
  *
@@ -52,8 +53,17 @@ export function normalizeChildren(rawChildren: unknown): VirtualNodeChild[] {
  * @param accumulator - 收集结果的目标数组
  */
 function flattenChild(rawChild: unknown, accumulator: VirtualNodeChild[]): void {
-  /* `null`、`undefined`、`boolean` 等空值在渲染层会被忽略，直接跳过 */
+  /* `null`、`undefined`、`boolean` 等空值归一化为注释占位，避免出现「0 节点」区间。 */
   if (isNil(rawChild) || typeof rawChild === 'boolean') {
+    const placeholder: VirtualNode<typeof Comment> = {
+      [virtualNodeFlag]: true,
+      type: Comment,
+      props: undefined,
+      children: [],
+      text: '',
+    }
+
+    accumulator.push(placeholder)
     return
   }
 

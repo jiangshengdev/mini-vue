@@ -5,7 +5,7 @@ import { normalizeRenderOutput } from '../normalize.ts'
 import { patchChild } from '../patch/index.ts'
 import { queueSchedulerJob } from '../scheduler.ts'
 import { asRuntimeVirtualNode } from '../virtual-node.ts'
-import { createComponentAnchorPlaceholder, mountComponentSubtreeWithAnchors } from './anchor.ts'
+import { mountComponentSubtreeWithAnchors } from './anchor.ts'
 import type { ComponentInstance } from './context.ts'
 import { teardownComponentInstance } from './teardown.ts'
 import type { SetupComponent } from '@/jsx-foundation/index.ts'
@@ -182,43 +182,20 @@ function patchLatestSubtree<
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
   previousSubTree: NormalizedVirtualNode | undefined,
 ): void {
-  const anchor = instance.endAnchor ?? instance.latestHostAnchor
-
   patchChild(options, previousSubTree, instance.subTree, {
     container: instance.container,
-    anchor,
+    anchor: instance.endAnchor,
     context: {
       parent: instance,
       appContext: instance.appContext,
     },
   })
 
-  const runtimeSubTree = instance.subTree
-    ? asRuntimeVirtualNode<HostNode, HostElement, HostFragment>(instance.subTree)
-    : undefined
-  let mountedHandle = runtimeSubTree?.handle
-
-  if (!mountedHandle) {
-    if (instance.shouldUseAnchor) {
-      mountedHandle = createComponentAnchorPlaceholder(options, instance, anchor)
-    } else {
-      mountedHandle = {
-        ok: true,
-        nodes: [],
-        teardown(): void {
-          /* 空占位无需额外清理。 */
-        },
-      }
-    }
-  }
-
-  instance.mountedHandle = mountedHandle
-
-  if (instance.rootHandle) {
-    instance.rootHandle.nodes.splice(
-      0,
-      instance.rootHandle.nodes.length,
-      ...(mountedHandle?.nodes ?? []),
-    )
+  if (instance.subTree) {
+    instance.mountedHandle = asRuntimeVirtualNode<HostNode, HostElement, HostFragment>(
+      instance.subTree,
+    ).handle
+  } else {
+    instance.mountedHandle = undefined
   }
 }

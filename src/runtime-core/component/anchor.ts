@@ -96,7 +96,6 @@ function ensureComponentAnchors<
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
-  anchor?: HostNode,
 ): void {
   /* 已经创建过锚点时复用旧节点，避免重复插入。 */
   if (instance.startAnchor && instance.endAnchor) {
@@ -109,61 +108,9 @@ function ensureComponentAnchors<
   const start = options.createComment(startLabel)
   const end = options.createComment(endLabel)
 
-  if (anchor) {
-    options.insertBefore(instance.container, start, anchor)
-    options.insertBefore(instance.container, end, anchor)
-  } else {
-    options.appendChild(instance.container, start)
-    options.appendChild(instance.container, end)
-  }
+  options.appendChild(instance.container, start)
+  options.appendChild(instance.container, end)
 
   instance.startAnchor = start
   instance.endAnchor = end
-}
-
-/**
- * 仅保留组件锚点的占位句柄，供 render 为空或清空子树时复用。
- */
-export function createComponentAnchorPlaceholder<
-  HostNode,
-  HostElement extends HostNode & WeakKey,
-  HostFragment extends HostNode,
-  T extends SetupComponent,
->(
-  options: RendererOptions<HostNode, HostElement, HostFragment>,
-  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
-  anchor?: HostNode,
-): MountedHandle<HostNode> {
-  ensureComponentAnchors(options, instance, anchor)
-
-  const nodes: HostNode[] = []
-
-  if (instance.startAnchor) {
-    nodes.push(instance.startAnchor)
-  }
-
-  if (instance.endAnchor && instance.endAnchor !== instance.startAnchor) {
-    nodes.push(instance.endAnchor)
-  }
-
-  return {
-    ok: true,
-    nodes,
-    teardown(skipRemove?: boolean): void {
-      if (skipRemove) {
-        return
-      }
-
-      if (instance.startAnchor) {
-        options.remove(instance.startAnchor as HostNode)
-      }
-
-      if (instance.endAnchor && instance.endAnchor !== instance.startAnchor) {
-        options.remove(instance.endAnchor as HostNode)
-      }
-
-      instance.startAnchor = undefined
-      instance.endAnchor = undefined
-    },
-  }
 }

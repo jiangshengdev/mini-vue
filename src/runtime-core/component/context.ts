@@ -62,10 +62,6 @@ export interface ComponentInstance<
   startAnchor?: HostNode
   /** 组件在父容器中的尾锚点，用于保持兄弟顺序。 */
   endAnchor?: HostNode
-  /** 组件根级句柄（绑定在父级 `virtualNode` 上），用于移动或获取宿主节点。 */
-  rootHandle?: MountedHandle<HostNode>
-  /** 父级传入的最新锚点，缺失 endAnchor 时可回退用于插入定位。 */
-  latestHostAnchor?: HostNode
   /** 是否需要为组件维护锚点以保序（非最后一个兄弟时为 `true`）。 */
   shouldUseAnchor: boolean
   /** 注册的外部清理任务，在卸载时逐一执行。 */

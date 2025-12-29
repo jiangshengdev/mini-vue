@@ -65,7 +65,8 @@ export function mountComponent<
   )
 
   runtime.handle = initialRender
-  const componentHandle: MountedHandle<HostNode> = {
+
+  return {
     ok: initialRender.ok,
     nodes: initialRender.nodes,
     /**
@@ -75,8 +76,4 @@ export function mountComponent<
       teardownComponentInstance(options, instance, skipRemove)
     },
   }
-
-  instance.rootHandle = componentHandle
-
-  return componentHandle
 }

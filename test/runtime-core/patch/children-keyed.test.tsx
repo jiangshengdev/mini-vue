@@ -428,10 +428,10 @@ describe('patchChildren 有 key diff', () => {
 
     const runtimeB = asRuntimeVirtualNode(nextChildren[0])
     const runtimeA = asRuntimeVirtualNode(nextChildren[1])
-    const anchorABefore = runtimeA.component?.endAnchor
+    const anchorA = runtimeA.component?.endAnchor
 
     expect(host.container.children[0]).toBe(runtimeB.el)
-    expect(anchorABefore && host.container.children.at(-1)).toBe(anchorABefore)
+    expect(anchorA && host.container.children.at(-1)).toBe(anchorA)
 
     componentA.expand()
 
@@ -446,9 +446,6 @@ describe('patchChildren 有 key diff', () => {
       })
 
     expect(elementOrder).toEqual(['B', 'A-1', 'A-2'])
-
-    const anchorAAfter = runtimeA.component?.endAnchor
-
-    expect(anchorAAfter && host.container.children.at(-1)).toBe(anchorAAfter)
+    expect(anchorA && host.container.children.at(-1)).toBe(anchorA)
   })
 })

@@ -10,7 +10,7 @@
 ## Action items
 
 [x] 明确目标不变量并对齐现状：整理 Vue3 的 `el/anchor + Comment 占位 + getNextHostNode + move(vnode)` 数据流，并标注当前实现中与之冲突/冗余的点（`shouldUseAnchor`、组件锚点、`handle.nodes` 同步点）。
-[ ] 扩展宿主接口以支持“按区间遍历/移动”：在 `src/runtime-core/renderer.ts` 的 `RendererOptions` 增加 `nextSibling(node)`（必要时再加 `parentNode(node)`），同步更新 `src/runtime-dom/renderer-options.ts` 与 `test/runtime-core/patch/host-utils.ts`。
+[x] 扩展宿主接口以支持“按区间遍历/移动”：在 `src/runtime-core/renderer.ts` 的 `RendererOptions` 增加 `nextSibling(node)`（必要时再加 `parentNode(node)`），同步更新 `src/runtime-dom/renderer-options.ts` 与 `test/runtime-core/host-utils.ts`。
 [ ] 引入 `Comment` VNode（对齐 Vue3 的空渲染占位）：在 `src/jsx-foundation/constants.ts`/`factory.ts`/`types.ts` 增加 `Comment` 标识与 `createCommentVirtualNode`，并从 `src/jsx-foundation/index.ts` 导出。
 [ ] 调整 normalize 策略区分“根卸载”与“内部空渲染”：normalize 层对所有 `null/boolean` 子节点都生成 `Comment` vnode（完全对齐 Vue3），但根级 `render(undefined)` 仍保持卸载语义（可通过 `src/runtime-core/renderer.ts` 先判空再 normalize，或拆分 `normalizeVNode`/`normalizeRoot` 两套入口于 `src/runtime-core/normalize.ts`）。
 [ ] 让 mount 路径真正“在最终位置插入”：给 `mountVirtualNode`/`mountElement`/`mountComponent` 增加 `anchor` 透传，删除 `src/runtime-core/mount/child.ts` 里“先 mount 再整体 move 到父 anchor”的补偿逻辑。

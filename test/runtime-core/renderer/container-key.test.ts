@@ -44,6 +44,7 @@ function createMinimalRendererOptions(): RendererOptions<
     setText: vi.fn(),
     appendChild: vi.fn(),
     insertBefore: vi.fn(),
+    nextSibling: vi.fn(),
     clear: vi.fn(),
     remove: vi.fn(),
     patchProps: vi.fn(),

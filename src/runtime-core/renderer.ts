@@ -38,6 +38,14 @@ export interface RendererOptions<
   appendChild(parent: HostElement | HostFragment, child: HostNode): void
   /** 将子节点插入到指定父节点且位于锚点节点之前（`runtime-core` 不会传入 `HostFragment` 作为 `child`）。 */
   insertBefore(parent: HostElement | HostFragment, child: HostNode, anchor?: HostNode): void
+  /**
+   * 读取指定节点的下一个兄弟节点，用于按区间遍历与移动（如 `Fragment` 的范围操作）。
+   *
+   * @remarks
+   * - 找不到兄弟节点时返回 `undefined`。
+   * - 该原语用于对齐 Vue3 的 `hostNextSibling` 能力。
+   */
+  nextSibling(node: HostNode): HostNode | undefined
   /** 清空容器内容，在新一轮渲染前使用。 */
   clear(container: HostElement): void
   /** 将宿主节点从其父容器中移除。 */

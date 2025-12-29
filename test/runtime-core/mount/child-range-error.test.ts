@@ -46,6 +46,9 @@ function createMockRendererOptions(): RendererOptions<MockNode, MockContainer, M
 
       parent.children.splice(index, 0, child)
     },
+    nextSibling() {
+      return undefined
+    },
     clear(container) {
       container.children.length = 0
     },

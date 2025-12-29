@@ -71,6 +71,10 @@ export const domRendererOptions: RendererOptions<Node, Element, DocumentFragment
 
     anchorNode.before(child)
   },
+  /** 读取指定节点的下一个兄弟节点，用于区间遍历与移动。 */
+  nextSibling(node): Node | undefined {
+    return node.nextSibling ?? undefined
+  },
   /** 清空容器内所有内容，通过设置 textContent 实现。 */
   clear(container): void {
     container.textContent = ''

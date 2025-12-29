@@ -118,6 +118,21 @@ export function createHostRenderer(hooks: HostRendererHooks = {}): HostRenderer 
     },
     appendChild,
     insertBefore,
+    nextSibling(node): TestNode | undefined {
+      const parent = node.parent
+
+      if (!parent) {
+        return undefined
+      }
+
+      const index = parent.children.indexOf(node)
+
+      if (index === -1) {
+        return undefined
+      }
+
+      return parent.children[index + 1]
+    },
     clear(target): void {
       target.children = []
     },

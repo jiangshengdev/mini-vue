@@ -3,6 +3,7 @@ import type { MountedHandle } from '../mount/handle.ts'
 import type { NormalizedVirtualNode } from '../normalize.ts'
 import { normalizeRenderOutput } from '../normalize.ts'
 import { patchChild } from '../patch/index.ts'
+import { getNextHostNode } from '../patch/utils.ts'
 import { queueSchedulerJob } from '../scheduler.ts'
 import { asRuntimeVirtualNode } from '../virtual-node.ts'
 import { mountComponentSubtreeWithAnchors, syncComponentVirtualNodeHandleNodes } from './anchor.ts'
@@ -187,9 +188,18 @@ function patchLatestSubtree<
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
   previousSubTree: NormalizedVirtualNode | undefined,
 ): void {
+  /*
+   * 组件更新的插入锚点应来自「旧子树之后的下一个宿主节点」：
+   * - 对齐 Vue3：`getNextHostNode(prevSubTree)`。
+   * - 兼容旧组件锚点体系：当 prevSubTree 不存在时回退到 `instance.endAnchor`。
+   */
+  const insertionAnchor = previousSubTree
+    ? getNextHostNode(options, previousSubTree)
+    : instance.endAnchor
+
   patchChild(options, previousSubTree, instance.subTree, {
     container: instance.container,
-    anchor: instance.endAnchor,
+    anchor: insertionAnchor,
     context: {
       parent: instance,
       appContext: instance.appContext,

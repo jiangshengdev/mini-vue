@@ -1,0 +1,42 @@
+.controls {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.listWrapper {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.column {
+  flex: 1 1 50%;
+}
+
+.columnTitle {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.parentList,
+.childList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+}
+
+.childList {
+  list-style: none;
+}
+
+.item {
+  padding: 8px 10px;
+  border-radius: 6px;
+  display: block;
+  min-height: 32px;
+  background-color: hsl(0, 0%, 92%);
+}

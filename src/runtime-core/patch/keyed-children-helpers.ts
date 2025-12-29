@@ -38,11 +38,7 @@ export function syncFromStart<
       context.nextChildren[range.newStart],
     )
   ) {
-    const childEnvironment = createChildEnvironment(
-      context.environment,
-      range.newStart,
-      context.nextChildren.length,
-    )
+    const childEnvironment = createChildEnvironment(context.environment)
 
     context.environment.patchChild(
       context.options,
@@ -73,11 +69,7 @@ export function syncFromEnd<
     range.newStart <= range.newEnd &&
     isSameVirtualNode(context.previousChildren[range.oldEnd], context.nextChildren[range.newEnd])
   ) {
-    const childEnvironment = createChildEnvironment(
-      context.environment,
-      range.newEnd,
-      context.nextChildren.length,
-    )
+    const childEnvironment = createChildEnvironment(context.environment)
 
     context.environment.patchChild(
       context.options,
@@ -115,11 +107,7 @@ export function insertRemainingChildren<
    * - 逐个 `mount` 后再 `move`，可避免 `mountChild` 对插入位置的不同宿主实现差异。
    */
   for (let index = range.newStart; index <= range.newEnd; index += 1) {
-    const childEnvironment = createChildEnvironment(
-      context.environment,
-      index,
-      context.nextChildren.length,
-    )
+    const childEnvironment = createChildEnvironment(context.environment)
 
     context.driver.mountNew(context.nextChildren[index], {
       anchor: insertAnchor,

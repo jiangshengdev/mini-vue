@@ -36,11 +36,8 @@ describe('patchChildren 有 key diff', () => {
       normalize(<div key="c">c</div>),
     ]
 
-    for (const [index, child] of previousChildren.entries()) {
-      mountChild(host.options, child, {
-        container: host.container,
-        context: { shouldUseAnchor: index < previousChildren.length - 1 },
-      })
+    for (const child of previousChildren) {
+      mountChild(host.options, child, { container: host.container })
     }
 
     const previousRuntime = previousChildren.map((child) => {
@@ -222,11 +219,8 @@ describe('patchChildren 有 key diff', () => {
     const host = createHostRenderer()
     const previousChildren = [normalize(<div key="a">old</div>), normalize(<div key="b">b</div>)]
 
-    for (const [index, child] of previousChildren.entries()) {
-      mountChild(host.options, child, {
-        container: host.container,
-        context: { shouldUseAnchor: index < previousChildren.length - 1 },
-      })
+    for (const child of previousChildren) {
+      mountChild(host.options, child, { container: host.container })
     }
 
     const previousRuntime = previousChildren.map((child) => {
@@ -268,11 +262,8 @@ describe('patchChildren 有 key diff', () => {
 
     const previousChildren = [normalize(textA), normalize(textB)]
 
-    for (const [index, child] of previousChildren.entries()) {
-      mountChild(host.options, child, {
-        container: host.container,
-        context: { shouldUseAnchor: index < previousChildren.length - 1 },
-      })
+    for (const child of previousChildren) {
+      mountChild(host.options, child, { container: host.container })
     }
 
     const previousRuntime = previousChildren.map((child) => {
@@ -428,10 +419,10 @@ describe('patchChildren 有 key diff', () => {
 
     const runtimeB = asRuntimeVirtualNode(nextChildren[0])
     const runtimeA = asRuntimeVirtualNode(nextChildren[1])
-    const anchorA = runtimeA.component?.endAnchor
+    const tailA = runtimeA.anchor ?? runtimeA.el
 
     expect(host.container.children[0]).toBe(runtimeB.el)
-    expect(anchorA && host.container.children.at(-1)).toBe(anchorA)
+    expect(host.container.children.at(-1)).toBe(tailA)
 
     componentA.expand()
 
@@ -446,6 +437,6 @@ describe('patchChildren 有 key diff', () => {
       })
 
     expect(elementOrder).toEqual(['B', 'A-1', 'A-2'])
-    expect(anchorA && host.container.children.at(-1)).toBe(anchorA)
+    expect(host.container.children.at(-1)).toBe(runtimeA.anchor ?? runtimeA.el)
   })
 })

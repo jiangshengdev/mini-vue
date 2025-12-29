@@ -28,17 +28,12 @@ export function mountVirtualNode<
   context?: MountContext,
   anchor?: HostNode,
 ): MountedHandle<HostNode> | undefined {
-  const shouldUseAnchor = context?.shouldUseAnchor ?? false
-
   /* `Fragment` 直接展开自身 `children`，不走组件路径。 */
   if (virtualNode.type === Fragment) {
     const mounted = mountChild(options, virtualNode.children, {
       container,
       anchor,
-      context: {
-        ...context,
-        shouldUseAnchor,
-      },
+      context,
     })
     const runtime = asRuntimeVirtualNode<HostNode, HostElement, HostFragment>(virtualNode)
 
@@ -54,10 +49,13 @@ export function mountVirtualNode<
 
   /* 函数组件通过 `mountComponent` 执行并挂载其返回值。 */
   if (typeof virtualNode.type === 'function') {
-    const mounted = mountComponent(options, virtualNode as VirtualNode<SetupComponent>, container, {
-      ...context,
-      shouldUseAnchor,
-    }, anchor)
+    const mounted = mountComponent(
+      options,
+      virtualNode as VirtualNode<SetupComponent>,
+      container,
+      context,
+      anchor,
+    )
 
     const runtime = asRuntimeVirtualNode<HostNode, HostElement, HostFragment>(virtualNode)
 

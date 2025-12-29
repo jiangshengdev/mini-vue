@@ -2,11 +2,10 @@ import type { RendererOptions } from '../index.ts'
 import type { MountedHandle } from '../mount/handle.ts'
 import type { NormalizedVirtualNode } from '../normalize.ts'
 import { normalizeRenderOutput } from '../normalize.ts'
-import { patchChild } from '../patch/index.ts'
-import { getNextHostNode } from '../patch/utils.ts'
+import { mountChildInEnvironment, patchChild } from '../patch/index.ts'
+import { getFirstHostNode, getLastHostNode, getNextHostNode } from '../patch/utils.ts'
 import { queueSchedulerJob } from '../scheduler.ts'
 import { asRuntimeVirtualNode } from '../virtual-node.ts'
-import { mountComponentSubtreeWithAnchors, syncComponentVirtualNodeHandleNodes } from './anchor.ts'
 import type { ComponentInstance } from './context.ts'
 import { teardownComponentInstance } from './teardown.ts'
 import type { SetupComponent } from '@/jsx-foundation/index.ts'
@@ -43,7 +42,14 @@ export function performInitialRender<
       const subtree = instance.effect!.run()
 
       /* 子树由通用 `mountChild` 继续挂载到宿主容器。 */
-      mounted = mountComponentSubtreeWithAnchors(options, instance, subtree, anchor)
+      mounted = mountChildInEnvironment(options, subtree, {
+        container: instance.container,
+        anchor,
+        context: {
+          parent: instance,
+          appContext: instance.appContext,
+        },
+      })
 
       instance.mountedHandle = mounted
 
@@ -56,7 +62,7 @@ export function performInitialRender<
       afterRun(token) {
         if (token?.error) {
           ok = false
-          teardownComponentInstance(options, instance)
+          teardownComponentInstance(instance)
         }
       },
     },
@@ -191,11 +197,8 @@ function patchLatestSubtree<
   /*
    * 组件更新的插入锚点应来自「旧子树之后的下一个宿主节点」：
    * - 对齐 Vue3：`getNextHostNode(prevSubTree)`。
-   * - 兼容旧组件锚点体系：当 prevSubTree 不存在时回退到 `instance.endAnchor`。
    */
-  const insertionAnchor = previousSubTree
-    ? getNextHostNode(options, previousSubTree)
-    : instance.endAnchor
+  const insertionAnchor = previousSubTree ? getNextHostNode(options, previousSubTree) : undefined
 
   patchChild(options, previousSubTree, instance.subTree, {
     container: instance.container,
@@ -214,6 +217,37 @@ function patchLatestSubtree<
     instance.mountedHandle = undefined
   }
 
-  /* 子树 patch 结束后同步组件 vnode 句柄，避免父级 keyed 重排移动到旧节点引用。 */
-  syncComponentVirtualNodeHandleNodes(instance)
+  /* 子树 patch 结束后同步组件 vnode 的宿主引用：对齐 Vue3（组件范围来源于 subTree）。 */
+  syncComponentVirtualNodeHost(instance)
+}
+
+/**
+ * 将组件 `virtualNode` 的宿主范围同步为最新 `subTree` 的范围。
+ *
+ * @remarks
+ * - Vue3 语义：组件 vnode 的 `el/anchor` 来源于其 `subTree`。
+ * - 当 `subTree` 不存在时（仅可能来自不合法输出），保守清空宿主引用。
+ */
+function syncComponentVirtualNodeHost<
+  HostNode,
+  HostElement extends HostNode & WeakKey,
+  HostFragment extends HostNode,
+  T extends SetupComponent,
+>(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): void {
+  const runtime = instance.virtualNode
+
+  if (!runtime) {
+    return
+  }
+
+  const subTree = instance.subTree
+
+  if (!subTree) {
+    runtime.el = undefined
+    runtime.anchor = undefined
+    return
+  }
+
+  runtime.el = getFirstHostNode<HostNode>(subTree)
+  runtime.anchor = getLastHostNode<HostNode>(subTree)
 }

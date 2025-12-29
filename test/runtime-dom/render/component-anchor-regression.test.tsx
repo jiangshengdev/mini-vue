@@ -63,4 +63,58 @@ describe('runtime-dom render: 组件锚点回归', () => {
     expect(texts).toEqual(['人类应该吃的其他东西', '蔬菜', '奶酪'])
     expect(new Set(texts).size).toBe(texts.length)
   })
+
+  it('空渲染占位（Comment）→ keyed 重排 → 再渲染多节点，顺序应正确且不重复', async () => {
+    const order = state(['a', 'b', 'c'])
+    const show = state(true)
+
+    const Item: SetupComponent<{ id: string; show: boolean }> = (props) => {
+      return () => {
+        if (!props.show) {
+          return false
+        }
+
+        return [<li>{`${props.id}-1`}</li>, <li>{`${props.id}-2`}</li>]
+      }
+    }
+
+    const App: SetupComponent = () => {
+      return () => {
+        return (
+          <ol>
+            {order.get().map((id) => {
+              return <Item key={id} id={id} show={show.get()} />
+            })}
+          </ol>
+        )
+      }
+    }
+
+    const container = createTestContainer()
+
+    render(<App />, container)
+    expect(
+      [...container.querySelectorAll('li')].map((node) => {
+        return node.textContent ?? ''
+      }),
+    ).toEqual(['a-1', 'a-2', 'b-1', 'b-2', 'c-1', 'c-2'])
+
+    show.set(false)
+    await nextTick()
+    expect(container.querySelectorAll('li')).toHaveLength(0)
+
+    order.set(['c', 'a', 'b'])
+    await nextTick()
+    expect(container.querySelectorAll('li')).toHaveLength(0)
+
+    show.set(true)
+    await nextTick()
+
+    const texts = [...container.querySelectorAll('li')].map((node) => {
+      return node.textContent ?? ''
+    })
+
+    expect(texts).toEqual(['c-1', 'c-2', 'a-1', 'a-2', 'b-1', 'b-2'])
+    expect(new Set(texts).size).toBe(texts.length)
+  })
 })

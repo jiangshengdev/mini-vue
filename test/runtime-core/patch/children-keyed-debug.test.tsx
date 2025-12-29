@@ -20,10 +20,9 @@ import {
  * 辅助函数：挂载 children 列表并返回运行时节点
  */
 function mountChildren(host: HostRenderer, children: NormalizedVirtualNode[]) {
-  for (const [index, child] of children.entries()) {
+  for (const child of children) {
     mountChild(host.options, child, {
       container: host.container,
-      context: { shouldUseAnchor: index < children.length - 1 },
     })
   }
 

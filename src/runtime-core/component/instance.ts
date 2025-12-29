@@ -32,7 +32,6 @@ export function createComponentInstance<
    * - `appContext`：用于「根级 `provides`」的稳定传播（组件外 `app.provide` 的入口）。
    */
   const parent = context?.parent
-  const shouldUseAnchor = context?.shouldUseAnchor ?? false
   const appContext = parent?.appContext ?? context?.appContext ?? getCurrentAppContext()
   const { props, propsSource } = propsState
   const componentName = __DEV__ ? component.name || 'AnonymousComponent' : undefined
@@ -65,9 +64,6 @@ export function createComponentInstance<
     cleanupTasks: [],
     setupContext: {},
     scope: effectScope(true),
-    startAnchor: undefined,
-    endAnchor: undefined,
-    shouldUseAnchor,
   }
 }
 

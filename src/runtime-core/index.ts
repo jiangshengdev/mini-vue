@@ -5,7 +5,6 @@ export type { ComponentInstance } from './component/index.ts'
 export {
   getCurrentInstance,
   mountComponent,
-  mountComponentSubtreeWithAnchors,
 } from './component/index.ts'
 export type { AppHostDriver, AppInstance } from './create-app.ts'
 export { createAppInstance } from './create-app.ts'

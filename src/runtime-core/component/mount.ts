@@ -31,15 +31,11 @@ export function mountComponent<
   context?: MountContext,
   anchor?: HostNode,
 ): MountedHandle<HostNode> | undefined {
-  const shouldUseAnchor = context?.shouldUseAnchor ?? false
   /* 准备实例前先规整 `props`，以免 `setup` 阶段读到旧引用。 */
   const props = resolveComponentProps(virtualNode)
   const propsState = createComponentPropsState(props)
   const component = virtualNode.type
-  const instance = createComponentInstance(component, propsState, container, {
-    ...context,
-    shouldUseAnchor,
-  })
+  const instance = createComponentInstance(component, propsState, container, context)
   const runtime = asRuntimeVirtualNode<HostNode, HostElement, HostFragment>(virtualNode)
 
   /* 让 `virtualNode` 拥有实例引用，方便调试或测试检索。 */
@@ -47,16 +43,12 @@ export function mountComponent<
   runtime.component = instance as never
   /* 缓存当前组件对应的运行时 vnode 引用，便于更新阶段同步 `el`/`anchor`/`handle.nodes`。 */
   instance.virtualNode = runtime as never
-  const { startAnchor, endAnchor } = instance
-
-  runtime.el = startAnchor ? (startAnchor as HostNode) : undefined
-  runtime.anchor = endAnchor ? (endAnchor as HostNode) : undefined
 
   const setupSucceeded = setupComponent(instance)
 
   if (!setupSucceeded) {
     /* `setup` 阶段失败时直接清理实例并跳过挂载。 */
-    teardownComponentInstance(options, instance)
+    teardownComponentInstance(instance)
 
     return undefined
   }
@@ -77,7 +69,7 @@ export function mountComponent<
      * 卸载组件：统一走实例 `teardown`，内部会 stop `scope`/`effect` 并清理已挂载子树。
      */
     teardown(skipRemove?: boolean): void {
-      teardownComponentInstance(options, instance, skipRemove)
+      teardownComponentInstance(instance, skipRemove)
     },
   }
 

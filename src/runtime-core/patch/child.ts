@@ -1,4 +1,3 @@
-import { ensureComponentAnchors, syncComponentVirtualNodeHandleNodes } from '../component/anchor.ts'
 import { resolveComponentProps } from '../component/props.ts'
 import { assignElementRef, resolveElementRefBinding } from '../mount/element.ts'
 import type { NormalizedVirtualNode } from '../normalize.ts'
@@ -6,10 +5,10 @@ import type { RendererOptions } from '../renderer.ts'
 import type { PatchEnvironment } from './children-environment.ts'
 import { patchChildren } from './children.ts'
 import { mountChildInEnvironment } from './insertion.ts'
-import { asRuntimeNormalizedVirtualNode, getHostNodesSafely } from './runtime-virtual-node.ts'
+import { asRuntimeNormalizedVirtualNode } from './runtime-virtual-node.ts'
 import type { PatchResult } from './types.ts'
 import { isCommentVirtualNode, isComponentVirtualNode, isTextVirtualNode } from './types.ts'
-import { isSameVirtualNode, syncRuntimeMetadata, unmount } from './utils.ts'
+import { getNextHostNode, isSameVirtualNode, syncRuntimeMetadata, unmount } from './utils.ts'
 import type { ElementProps, SetupComponent } from '@/jsx-foundation/index.ts'
 import { Fragment } from '@/jsx-foundation/index.ts'
 
@@ -71,18 +70,25 @@ export function patchChild<
     return patchExisting(options, previous, next, environment)
   }
 
+  /*
+   * 替换路径需要一个稳定插入锚点：
+   * - 对齐 Vue3：以 `getNextHostNode(previous)` 作为新节点的插入位置。
+   * - 若拿不到（极端防御场景）再回退到父级传入的 `environment.anchor`。
+   */
+  const replacementAnchor = getNextHostNode(options, previous) ?? environment.anchor
+
   /* 替换路径：旧节点 `teardown` 后再 `mount` 新节点，避免残留事件/副作用引用。 */
   unmount(options, previous)
 
   const mounted = mountChildInEnvironment(options, next, {
     container: environment.container,
-    anchor: environment.anchor,
+    anchor: replacementAnchor,
     context: environment.context,
   })
 
   return {
     ok: mounted?.ok,
-    usedAnchor: environment.anchor,
+    usedAnchor: replacementAnchor,
   }
 }
 
@@ -173,37 +179,6 @@ function patchExisting<
       anchor: runtimePrevious.anchor ?? environment.anchor,
       context: environment.context,
     })
-
-    /*
-     * `Fragment` 更新后需要同步 `handle.nodes`：
-     * - 子项可能被卸载/新挂载（例如从「有节点」变为「空」）。
-     * - 若 `handle.nodes` 仍指向旧节点集合，父级 keyed 重排会把旧节点重新插回 DOM，导致重复/复活。
-     */
-    const { handle } = runtimeNext
-
-    if (handle) {
-      const nextChildNodes: HostNode[] = []
-
-      /* 将 `next.children` 的运行时节点句柄展平成宿主节点列表，用于重建区间。 */
-      for (const child of next.children) {
-        nextChildNodes.push(...getHostNodesSafely<HostNode, HostElement, HostFragment>(child))
-      }
-
-      /* 保留 `Fragment` 的首尾锚点，并用最新子项节点重建 `handle.nodes` 区间。 */
-      const startNode = handle.nodes[0]
-      const endNode = handle.nodes.at(-1)
-      const nextNodes =
-        startNode && endNode && startNode !== endNode
-          ? ([startNode as HostNode, ...nextChildNodes, endNode as HostNode] as HostNode[])
-          : nextChildNodes
-
-      /* 原地更新 `handle.nodes`，避免父级 keyed diff 持有的句柄对象失效。 */
-      handle.nodes.length = 0
-      handle.nodes.push(...nextNodes)
-      /* 同步运行时元数据，确保 `vnode.el`/`vnode.anchor` 与最新区间一致。 */
-      runtimeNext.el = handle.nodes[0]
-      runtimeNext.anchor = handle.nodes.at(-1)
-    }
 
     return { ok: true }
   }
@@ -323,21 +298,6 @@ function patchComponent<
   syncRuntimeMetadata(runtimePrevious, runtimeNext, { component: instance })
   instance.virtualNode = runtimeNext
   instance.vnodeHandle = runtimeNext.handle
-
-  /*
-   * 组件在同级列表中的位置可能发生变化（例如 keyed 重排）：
-   * - `shouldUseAnchor` 需要随本轮 `patch` 的位置更新。
-   * - 需要锚点但缺失时，应立刻补齐，避免后续重排/插入把旧节点错误复活。
-   */
-  const nextShouldUseAnchor = environment.context?.shouldUseAnchor ?? instance.shouldUseAnchor
-
-  instance.shouldUseAnchor = nextShouldUseAnchor
-
-  if (nextShouldUseAnchor) {
-    ensureComponentAnchors(options, instance, environment.anchor)
-  }
-
-  syncComponentVirtualNodeHandleNodes(instance)
   /* 组件 `props` 需要走规范化流程（包含默认值/`attrs` 等策略），避免直接透传 raw `props`。 */
   const nextProps = resolveComponentProps(next)
 

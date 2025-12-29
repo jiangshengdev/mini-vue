@@ -1,4 +1,3 @@
-import type { RendererOptions } from '../index.ts'
 import type { ComponentInstance } from './context.ts'
 import type { SetupComponent } from '@/jsx-foundation/index.ts'
 import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
@@ -32,9 +31,8 @@ export function teardownMountedSubtree<
  * @remarks
  * 清理顺序：
  * 1. 卸载已挂载的子树（`mountedHandle.teardown`）。
- * 2. 移除首尾锚点占位符。
- * 3. 停止 `scope` 以回收所有 `setup` 内创建的副作用。
- * 4. 执行外部注册的清理任务（`cleanupTasks`）。
+ * 2. 停止 `scope` 以回收所有 `setup` 内创建的副作用。
+ * 3. 执行外部注册的清理任务（`cleanupTasks`）。
  */
 export function teardownComponentInstance<
   HostNode,
@@ -42,27 +40,10 @@ export function teardownComponentInstance<
   HostFragment extends HostNode,
   T extends SetupComponent,
 >(
-  options: RendererOptions<HostNode, HostElement, HostFragment>,
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
   skipRemove?: boolean,
 ): void {
   teardownMountedSubtree(instance, skipRemove)
-
-  /* 去除锚点占位符，避免容器残留空文本节点。 */
-  if (instance.startAnchor ?? instance.endAnchor) {
-    if (!skipRemove) {
-      if (instance.startAnchor) {
-        options.remove(instance.startAnchor)
-      }
-
-      if (instance.endAnchor) {
-        options.remove(instance.endAnchor)
-      }
-    }
-
-    instance.startAnchor = undefined
-    instance.endAnchor = undefined
-  }
 
   /* 停止 `scope` 以统一回收所有 `setup` 内创建的副作用。 */
   instance.scope.stop()

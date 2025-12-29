@@ -28,8 +28,6 @@ export function mountChild<
   environment: ChildEnvironment<HostNode, HostElement, HostFragment>,
 ): MountedHandle<HostNode> | undefined {
   const { container, context, anchor } = environment
-  /* `shouldUseAnchor` 表示「当前节点之后是否还有兄弟」，用于决定是否需要占位锚点来保序。 */
-  const shouldUseAnchor = context?.shouldUseAnchor ?? false
   const { appendChild, insertBefore, createComment, createText, remove } = options
   /* 有锚点时直接在最终位置插入，避免先 append 再移动。 */
   const insert = (node: HostNode): void => {
@@ -110,10 +108,7 @@ export function mountChild<
       options,
       child,
       container,
-      {
-        ...context,
-        shouldUseAnchor,
-      },
+      context,
       anchor,
     )
 
@@ -153,7 +148,6 @@ export function mountChild<
  *
  * @remarks
  * - 无论子项数量多少，都使用首尾锚点包裹，保证区间边界清晰（更接近 Vue3 `Fragment` 行为）。
- * - 子项本身是否需要锚点，仅由其在数组内部的位置决定（而非父级的 `shouldUseAnchor`）。
  */
 function mountArrayChild<
   HostNode,
@@ -168,7 +162,6 @@ function mountArrayChild<
   const { container, context, anchor } = environment
   const startComment = __DEV__ ? 'fragment-start' : ''
   const endComment = __DEV__ ? 'fragment-end' : ''
-  const childCount = children.length
 
   const startAnchor = createComment(startComment)
   const endAnchor = createComment(endComment)
@@ -187,11 +180,11 @@ function mountArrayChild<
 
   insert(startAnchor)
 
-  /* 同层子项按声明顺序判断是否有后续兄弟，决定是否需要锚点。 */
-  for (const [index, item] of children.entries()) {
+  /* 同层子项按声明顺序逐个挂载。 */
+  for (const item of children) {
     const mounted = mountChild(options, item, {
       container,
-      context: { ...context, shouldUseAnchor: index < childCount - 1 },
+      context,
       anchor,
     })
 

@@ -16,11 +16,8 @@ describe('patchChildren keyed diff 回归用例（当前应失败）', () => {
       normalize(<div>second</div>),
     ]
 
-    for (const [index, child] of previousChildren.entries()) {
-      mountChild(host.options, child, {
-        container: host.container,
-        context: { shouldUseAnchor: index < previousChildren.length - 1 },
-      })
+    for (const child of previousChildren) {
+      mountChild(host.options, child, { container: host.container })
     }
 
     const previousRuntime = previousChildren.map((child) => {
@@ -63,11 +60,8 @@ describe('patchChildren keyed diff 回归用例（当前应失败）', () => {
       normalize(<div key="dup">old-b</div>),
     ]
 
-    for (const [index, child] of previousChildren.entries()) {
-      mountChild(host.options, child, {
-        container: host.container,
-        context: { shouldUseAnchor: index < previousChildren.length - 1 },
-      })
+    for (const child of previousChildren) {
+      mountChild(host.options, child, { container: host.container })
     }
 
     const previousRuntime = previousChildren.map((child) => {

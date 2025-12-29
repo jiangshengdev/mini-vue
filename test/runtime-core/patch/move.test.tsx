@@ -51,7 +51,7 @@ describe('runtime-core patch utils: move', () => {
     expect(host.container.children).toEqual([tailNode!, start!, oneNode, twoNode, end!])
   })
 
-  it('Component：有组件锚点时整体搬移锚点区间', () => {
+  it('Component：移动时递归搬移 subTree（移动到父 Fragment 的 end anchor 之前）', () => {
     const host = createHostRenderer()
 
     const Foo: SetupComponent = () => {
@@ -66,30 +66,21 @@ describe('runtime-core patch utils: move', () => {
 
     mountChild(host.options, fragment, { container: host.container })
 
-    expect(host.container.children).toHaveLength(6)
+    expect(host.container.children).toHaveLength(4)
 
     const fragmentStart = getFirstHostNode<TestNode>(fragment)!
     const fragmentEnd = getLastHostNode<TestNode>(fragment)!
     const afterNode = getFirstHostNode<TestNode>(afterVNode)!
-    const componentStart = getFirstHostNode<TestNode>(componentVNode)!
-    const componentEnd = getLastHostNode<TestNode>(componentVNode)!
     const spanNode = host.container.children.find((node) => {
       return node.kind === 'element' && node.tag === 'span'
     })!
 
     move(host.options, componentVNode, host.container, fragmentEnd)
 
-    expect(host.container.children).toEqual([
-      fragmentStart,
-      afterNode,
-      componentStart,
-      spanNode,
-      componentEnd,
-      fragmentEnd,
-    ])
+    expect(host.container.children).toEqual([fragmentStart, afterNode, spanNode, fragmentEnd])
   })
 
-  it('Component：无组件锚点时递归搬移 subTree', () => {
+  it('Component：移动到指定锚点之前', () => {
     const host = createHostRenderer()
 
     const Foo: SetupComponent = () => {

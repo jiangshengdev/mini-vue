@@ -3,8 +3,6 @@ import type { AppContext } from './create-app.ts'
 
 /** 挂载与 patch 共享的上下文信息。 */
 export interface MountContext {
-  /** 当前子树是否需要锚点以保持兄弟顺序（非最后一个兄弟时为 `true`）。 */
-  shouldUseAnchor?: boolean
   /** 当前挂载/更新发生在哪个父组件实例下，用于 `provide`/`inject` 的原型链继承。 */
   parent?: UnknownComponentInstance
   /** 当前挂载所属的应用上下文，用于 root `provides` 的稳定传播。 */
@@ -34,23 +32,4 @@ export interface ChildEnvironment<
   anchor?: HostNode
   /** 父组件与 `appContext` 等上下文，向下透传到 `mount`/`patch`。 */
   context?: MountContext
-}
-
-/**
- * 根据子节点位置补充 `shouldUseAnchor`，用于在同级批量插入时决定锚点策略。
- */
-export function deriveChildContext(
-  context: MountContext | undefined,
-  index: number,
-  total: number,
-): MountContext {
-  return {
-    parent: context?.parent,
-    appContext: context?.appContext,
-    /*
-     * `children patch` 中，若当前节点后面仍有兄弟节点，则后续插入/移动需要锚点保证相对顺序。
-     * 最后一个节点不需要 `anchor`（它天然落在末尾）。
-     */
-    shouldUseAnchor: index < total - 1,
-  }
 }

@@ -32,7 +32,7 @@ describe('runtime-core patch utils: host range helpers', () => {
     expect(getNextHostNode(host.options, fragment)).toBe(host.container.children[4])
   })
 
-  it('组件：存在组件锚点时，first/last/next 以锚点区间为准', () => {
+  it('组件：first/last 来源于 subTree，next 为其后继节点', () => {
     const host = createHostRenderer()
 
     const Foo: SetupComponent = () => {
@@ -51,10 +51,9 @@ describe('runtime-core patch utils: host range helpers', () => {
     const componentLast = getLastHostNode<TestNode>(componentVNode)
     const afterFirst = getFirstHostNode<TestNode>(afterVNode)
 
-    expect(componentFirst?.kind).toBe('comment')
-    expect(componentLast?.kind).toBe('comment')
+    expect(componentFirst?.kind).toBe('element')
+    expect(componentLast?.kind).toBe('element')
     expect(afterFirst?.kind).toBe('element')
     expect(getNextHostNode(host.options, componentVNode)).toBe(afterFirst)
   })
 })
-

@@ -1,5 +1,4 @@
 import type { ChildEnvironment, MountContext } from '../environment.ts'
-import { deriveChildContext } from '../environment.ts'
 import type { NormalizedVirtualNode } from '../normalize.ts'
 import type { RendererOptions } from '../renderer.ts'
 import type { PatchResult } from './types.ts'
@@ -48,11 +47,11 @@ export interface PatchChildrenEnvironment<
 
 /**
  * 基于父环境为当前子节点派生环境：
- * - 根据位置计算 `shouldUseAnchor`，用于同级批量插入的锚点策略。
+ * - 当前实现不再使用 `shouldUseAnchor` 这类位置推断开关。
  *
  * @remarks
- * - `shouldUseAnchor` 为 `true` 表示当前节点后面还有兄弟，需要锚点保序。
- * - 最后一个节点不需要锚点（它天然落在末尾）。
+ * - 插入位置完全由调用方显式传入的 `environment.anchor` 决定。
+ * - 子节点的顺序保证由 `patchChildren`（keyed/unkeyed diff）计算锚点并按需传入。
  */
 export function createChildEnvironment<
   HostNode,
@@ -60,12 +59,10 @@ export function createChildEnvironment<
   HostFragment extends HostNode,
 >(
   environment: PatchChildrenEnvironment<HostNode, HostElement, HostFragment>,
-  index: number,
-  length: number,
-): PatchEnvironment<HostNode, HostElement, HostFragment> & { context: MountContext } {
+): PatchEnvironment<HostNode, HostElement, HostFragment> & { context?: MountContext } {
   return {
     container: environment.container,
     anchor: environment.anchor,
-    context: deriveChildContext(environment.context, index, length),
+    context: environment.context,
   }
 }

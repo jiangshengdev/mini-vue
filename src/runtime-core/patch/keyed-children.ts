@@ -138,11 +138,7 @@ function patchAlignedChildren<
 
       /* 记录新索引对应的旧索引，供后续倒序移动/挂载阶段判断是否需要 `mount`。 */
       maps.newIndexToOldIndexMap[newIndexOffset] = index
-      const childEnvironment = createChildEnvironment(
-        context.environment,
-        newIndex,
-        context.nextChildren.length,
-      )
+      const childEnvironment = createChildEnvironment(context.environment)
 
       context.environment.patchChild(
         context.options,
@@ -187,11 +183,7 @@ function moveOrMountChildren<
 
     if (mappedValue === -1) {
       /* 该新节点没有对应旧节点：执行 `mount` 并插入到 `anchorNode` 之前。 */
-      const childEnvironment = createChildEnvironment(
-        context.environment,
-        newIndex,
-        context.nextChildren.length,
-      )
+      const childEnvironment = createChildEnvironment(context.environment)
 
       context.driver.mountNew(nextChild, {
         anchor: anchorNode,

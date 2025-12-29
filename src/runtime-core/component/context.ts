@@ -75,12 +75,6 @@ export interface ComponentInstance<
    * - 该句柄由 `mountComponent` 创建并回写，生命周期与组件 vnode 保持一致。
    */
   vnodeHandle?: MountedHandle<HostNode>
-  /** 组件在父容器中的首锚点，用于保持兄弟顺序。 */
-  startAnchor?: HostNode
-  /** 组件在父容器中的尾锚点，用于保持兄弟顺序。 */
-  endAnchor?: HostNode
-  /** 是否需要为组件维护锚点以保序（非最后一个兄弟时为 `true`）。 */
-  shouldUseAnchor: boolean
   /** 注册的外部清理任务，在卸载时逐一执行。 */
   cleanupTasks: Array<() => void>
   /** `setup` 暴露的状态对象，供模板或渲染函数读取。 */

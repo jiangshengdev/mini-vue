@@ -30,8 +30,7 @@ export function patchUnkeyedChildren<
 
   /* 公共部分逐个 `patch`：`unkeyed` 场景下「同索引」即认为是同位置节点。 */
   for (let index = 0; index < commonLength; index += 1) {
-    /* 使用 nextChildren.length 计算 shouldUseAnchor：只有不是最后一个兄弟时才需要锚点插入策略。 */
-    const childEnvironment = createChildEnvironment(environment, index, nextChildren.length)
+    const childEnvironment = createChildEnvironment(environment)
 
     environment.patchChild(options, previousChildren[index], nextChildren[index], childEnvironment)
   }
@@ -46,7 +45,7 @@ export function patchUnkeyedChildren<
        * - 否则回退到父级 anchor（可能为空，交由宿主实现决定默认插入位置）。
        */
       const nextAnchor = findNextAnchor(nextChildren, index + 1, environment.anchor)
-      const childEnvironment = createChildEnvironment(environment, index, nextChildren.length)
+      const childEnvironment = createChildEnvironment(environment)
 
       driver.mountNew(next, {
         anchor: nextAnchor,

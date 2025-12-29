@@ -10,10 +10,12 @@ describe('patchChildren 无 key diff', () => {
     const nextChildren = [normalize(<p>a1</p>), normalize(<p>b1</p>)]
     const anchor = host.options.createText('tail-anchor')
     const patchSpy = vi.fn()
+    const context = {}
 
     patchChildren(host.options, previousChildren, nextChildren, {
       container: host.container,
       anchor,
+      context,
       patchChild: patchSpy,
     })
 
@@ -21,9 +23,9 @@ describe('patchChildren 无 key diff', () => {
     const [firstCall, secondCall] = patchSpy.mock.calls
 
     expect(firstCall?.[3]?.anchor).toBe(anchor)
-    expect(firstCall?.[3]?.context?.shouldUseAnchor).toBe(true)
+    expect(firstCall?.[3]?.context).toBe(context)
     expect(secondCall?.[3]?.anchor).toBe(anchor)
-    expect(secondCall?.[3]?.context?.shouldUseAnchor).toBe(false)
+    expect(secondCall?.[3]?.context).toBe(context)
   })
 
   it('追加新子节点时优先插入到父级锚点之前', () => {
@@ -55,11 +57,8 @@ describe('patchChildren 无 key diff', () => {
     const previousChildren = [normalize(<div>kept</div>), normalize(<p>drop</p>)]
     const nextChildren = [normalize(<div>kept</div>)]
 
-    for (const [index, child] of previousChildren.entries()) {
-      mountChild(host.options, child, {
-        container: host.container,
-        context: { shouldUseAnchor: index < previousChildren.length - 1 },
-      })
+    for (const child of previousChildren) {
+      mountChild(host.options, child, { container: host.container })
     }
 
     host.resetCounts()

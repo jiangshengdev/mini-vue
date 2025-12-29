@@ -372,4 +372,35 @@ describe('readonly', () => {
     expect(observed).toBe(true)
     expect(readonlyList.includes(a)).toBe(false)
   })
+
+  it('readonly() 支持 Ref 目标并返回只读 Ref', () => {
+    const source = ref(1)
+    const proxy = readonly(source)
+
+    warn.mockClear()
+
+    expect(isRef(proxy)).toBe(true)
+    expect(proxy.value).toBe(1)
+
+    proxy.value = 2
+
+    expect(warn).toHaveBeenCalled()
+    expect(proxy.value).toBe(1)
+    expect(source.value).toBe(1)
+    expect(readonly(proxy)).toBe(proxy)
+  })
+
+  it('readonly(ref(object)) 会对 value 返回只读视图', () => {
+    const source = ref({ count: 1 })
+    const proxy = readonly(source)
+
+    warn.mockClear()
+
+    expect(proxy.value.count).toBe(1)
+    ;(proxy.value as { count: number }).count = 2
+
+    expect(warn).toHaveBeenCalled()
+    expect(proxy.value.count).toBe(1)
+    expect(source.value.count).toBe(1)
+  })
 })

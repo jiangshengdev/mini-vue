@@ -53,9 +53,14 @@
   - `test/reactivity/reactive.test.ts`
   - `test/reactivity/shallow.test.ts`
 
-## 6. `readonly()` 不接受 Ref 目标（与文档不符，待修复）
+## 6. `readonly()` 不接受 Ref 目标（与文档不符，已修复）
 
 - 位置：`src/reactivity/reactive.ts` 与 `src/reactivity/to-raw.ts`
-- 现状：内部通过 `isSupportedTarget` 限制，仅允许普通对象或数组；传入 Ref 会抛出不支持的类型错误。
-- 影响：违背官方 API「接受对象或 Ref」的约定，无法对 Ref 创建只读代理或只读 Ref。
-- 提示：放宽目标类型检测以支持 Ref，或在 `readonly` 创建前检测并处理 Ref。
+- 现状（修复前）：内部通过 `isSupportedTarget` 限制，仅允许普通对象或数组；传入 Ref 会抛出不支持的类型错误。
+- 影响：违背官方 API「接受对象或 Ref」的约定，无法对 Ref 创建只读视图。
+- 修复：
+  - `readonly(ref)` / `shallowReadonly(ref)` 现在会返回只读 Ref 包装，读取正常透传，写入在开发态警告并忽略。
+  - `isReadonly` 对 Ref 增加分支识别，与 Vue 3 对齐。
+- 测试：
+  - `test/reactivity/reactive.test.ts`
+  - `test/reactivity/shallow.test.ts`

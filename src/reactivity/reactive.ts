@@ -6,17 +6,19 @@
  * - 不同代理类型使用独立的缓存，避免相互干扰。
  */
 import type { ReactiveRawTarget, ReactiveTarget } from './contracts/index.ts'
-import { reactiveFlag, readonlyFlag } from './contracts/index.ts'
+import { reactiveFlag, readonlyFlag, refFlag } from './contracts/index.ts'
 import {
   mutableHandlers,
   readonlyHandlers,
   shallowReactiveHandlers,
   shallowReadonlyHandlers,
 } from './internals/index.ts'
+import type { Ref } from './ref/types.ts'
 import { isSupportedTarget } from './to-raw.ts'
 import type { Reactive, ReadonlyReactive } from './types.ts'
-import { reactivityUnsupportedType } from '@/messages/index.ts'
-import { isObject } from '@/shared/index.ts'
+import { reactivityReadonlyWarning, reactivityUnsupportedType } from '@/messages/index.ts'
+import type { PlainObject } from '@/shared/index.ts'
+import { __DEV__, isObject, isPlainObject } from '@/shared/index.ts'
 
 /** 响应式代理缓存类型：使用 WeakMap 避免内存泄漏。 */
 type ProxyCache = WeakMap<ReactiveRawTarget, ReactiveTarget>
@@ -32,6 +34,55 @@ const shallowReactiveCache: ProxyCache = new WeakMap()
 
 /** `shallowReadonly` 代理缓存。 */
 const shallowReadonlyCache: ProxyCache = new WeakMap()
+
+function isRefTarget(value: unknown): value is Ref {
+  if (!isObject(value)) {
+    return false
+  }
+
+  return Object.hasOwn(value, refFlag)
+}
+
+class ReadonlyRefImpl<T> implements Ref<T> {
+  readonly [refFlag] = true as const
+
+  readonly [readonlyFlag] = true as const
+
+  private readonly source: Ref<T>
+
+  private readonly shallow: boolean
+
+  constructor(source: Ref<T>, shallow: boolean) {
+    this.source = source
+    this.shallow = shallow
+  }
+
+  get value(): T {
+    const current = this.source.value
+
+    if (this.shallow) {
+      return current
+    }
+
+    if (Array.isArray(current) || isPlainObject(current)) {
+      return readonly(current) as T
+    }
+
+    return current
+  }
+
+  set value(newValue: T) {
+    if (__DEV__) {
+      const payload = {
+        target: this.source,
+        key: 'value',
+        value: newValue,
+      } satisfies PlainObject
+
+      console.warn(reactivityReadonlyWarning, payload)
+    }
+  }
+}
 
 /**
  * 创建响应式代理的内部实现，统一处理缓存、类型检查与代理创建。
@@ -148,6 +199,14 @@ export function shallowReadonly<T extends readonly unknown[]>(target: T): Readon
 export function shallowReadonly<T>(target: T): Readonly<T>
 
 export function shallowReadonly(target: unknown): unknown {
+  if (isRefTarget(target)) {
+    if (Reflect.get(target, readonlyFlag) === true) {
+      return target
+    }
+
+    return new ReadonlyRefImpl(target, true)
+  }
+
   return createProxy(target, shallowReadonlyHandlers, shallowReadonlyCache, {
     skipReadonlyCheck: true,
   })
@@ -168,6 +227,14 @@ export function readonly<T extends readonly unknown[]>(target: T): ReadonlyReact
 export function readonly<T>(target: T): ReadonlyReactive<T>
 
 export function readonly(target: unknown): unknown {
+  if (isRefTarget(target)) {
+    if (Reflect.get(target, readonlyFlag) === true) {
+      return target
+    }
+
+    return new ReadonlyRefImpl(target, false)
+  }
+
   return createProxy(target, readonlyHandlers, readonlyCache, { skipReadonlyCheck: true })
 }
 
@@ -212,6 +279,10 @@ export function isReactive(target: unknown): target is ReactiveTarget {
 export function isReadonly(target: unknown): target is ReactiveTarget {
   if (!isObject(target)) {
     return false
+  }
+
+  if (isRefTarget(target)) {
+    return Reflect.get(target, readonlyFlag) === true
   }
 
   if (!isSupportedTarget(target)) {

@@ -107,4 +107,20 @@ describe('shallowReadonly', () => {
     expect(isReadonly(proxy)).toBe(true)
     expect(isReadonly({})).toBe(false)
   })
+
+  it('shallowReadonly() 支持 Ref 目标并返回只读 Ref', () => {
+    const source = ref(1)
+    const proxy = shallowReadonly(source)
+
+    warn.mockClear()
+
+    expect(isRef(proxy)).toBe(true)
+    expect(proxy.value).toBe(1)
+    ;(proxy as unknown as { value: number }).value = 2
+
+    expect(warn).toHaveBeenCalled()
+    expect(proxy.value).toBe(1)
+    expect(source.value).toBe(1)
+    expect(shallowReadonly(proxy)).toBe(proxy)
+  })
 })

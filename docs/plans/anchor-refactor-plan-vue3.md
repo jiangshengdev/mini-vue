@@ -17,7 +17,7 @@
 [x] 实现 Vue3 风格的宿主范围辅助：新增/重写 `getFirstHostNode`/`getLastHostNode`/`getNextHostNode`（Fragment 用 `anchor`，Component 递归到 `instance.subTree`，其余用 `el` + `nextSibling`），集中放在 `src/runtime-core/patch/utils.ts`（或新文件）。
 [x] 实现统一的 `move(vnode, container, anchor)`：Element/Text/Comment 移动单节点；Fragment 用 `nextSibling` 遍历 `[start..end]`；Component 递归 move `instance.subTree`，并更新相应运行时元数据一致性。
 [x] 改造组件更新锚点来源：在 `src/runtime-core/component/render-effect.ts` 的更新分支中，用 `getNextHostNode(previousSubTree)` 作为 `patchChild(..., anchor)` 的插入锚点，逐步去除对 `instance.endAnchor` 的依赖。
-[ ] 改造 keyed/unkeyed children diff 的移动实现：把 `src/runtime-core/patch/keyed-children.ts`/`driver.ts` 从 “move nodes array（依赖 `handle.nodes`）” 切到 “move vnode（依赖 `el/anchor + nextSibling`）”；相应地让 `findNextAnchor` 优先基于 `vnode.el`（而不是 `handle.nodes[0]`）。
+[x] 改造 keyed/unkeyed children diff 的移动实现：把 `src/runtime-core/patch/keyed-children.ts`/`driver.ts` 从 “move nodes array（依赖 `handle.nodes`）” 切到 “move vnode（依赖 `el/anchor + nextSibling`）”；相应地让 `findNextAnchor` 优先基于 `vnode.el`（而不是 `handle.nodes[0]`）。
 [ ] 清理旧锚点体系并验证：在新路径通过后，删除/收敛 `shouldUseAnchor`、`ensureComponentAnchors`、`mountComponentSubtreeWithAnchors` 及相关实例字段；跑 `pnpm run test`，重点回归 `test/runtime-dom/render/component-anchor-regression.test.tsx`、`test/runtime-dom/render/anchor-edge-cases.test.tsx`、`test/runtime-core/patch/children-keyed.test.tsx`，补齐“空渲染占位 + keyed 重排 + 再显示”的边界用例。
 
 ## Decisions
@@ -72,8 +72,8 @@
 - 已存在：Fragment/数组在 mount 时总是生成首尾注释边界，见 `src/runtime-core/mount/child.ts` 的 `mountArrayChild(...)`。
 - 已存在：`vnode.el/anchor/handle/component` 以 `RuntimeVirtualNode` 形态维护，见 `src/runtime-core/virtual-node.ts` 与各 mount/patch 分支。
 - 已解决：normalize 对 `null/boolean` 归一为 `Comment`（空渲染占位），同时保留根级 `render(undefined)` 的卸载语义，见 `src/runtime-core/normalize.ts` + `src/runtime-core/renderer.ts`。
-- 差异：当前插入锚点主要依赖 `findNextAnchor(...)` → `getFirstHostNode(...)` → `vnode.el/anchor`（组件仍兼容旧的 start/endAnchor），仍未切到「基于宿主 `nextSibling` 的区间遍历」，见 `src/runtime-core/patch/utils.ts`。
-- 差异：keyed 移动是“搬移 `handle.nodes` 数组”，见 `src/runtime-core/patch/keyed-children.ts` + `src/runtime-core/patch/driver.ts`。
+- 已解决：已引入基于 `nextSibling` 的宿主区间遍历能力（`getNextHostNode`/`move(vnode)`），并以 `vnode.el/anchor` 表达范围，见 `src/runtime-core/patch/utils.ts`。
+- 已解决：keyed 移动已切换为“移动 `vnode`”（依赖 `el/anchor + nextSibling`），见 `src/runtime-core/patch/keyed-children.ts` + `src/runtime-core/patch/driver.ts`。
 
 ### 当前实现的冲突/冗余点（相对 Vue3 目标）
 
@@ -83,10 +83,11 @@
 2. 组件锚点（`instance.startAnchor/endAnchor` + `ensureComponentAnchors`）
    - 这是为解决“组件在非末尾时需要稳定边界 + 空渲染可能 0 节点 + mount 不支持 insertionAnchor”而引入的补丁系统。
    - Vue3 方向：组件 vnode 的范围来自 `subTree`（空渲染是 Comment，Fragment 自带边界），因此组件不需要独立的“外层锚点体系”。
-3. `handle.nodes` 的同步点过多且语义脆弱
-   - Fragment patch 后必须重建 `handle.nodes`，否则 keyed move 会把旧节点引用插回 DOM（“复活旧节点”），见 `src/runtime-core/patch/child.ts` 的 Fragment 分支。
-   - 组件 rerender/patch 后必须同步 `instance.vnodeHandle.nodes`，见 `src/runtime-core/component/render-effect.ts` 与 `src/runtime-core/component/anchor.ts`。
-   - Vue3 方向：移动应基于 `vnode.el/anchor + hostNextSibling` 的“真实区间”，从根上消除“移动依赖快照数组”带来的同步负担。
+3. `handle.nodes` 的同步点过多且语义脆弱（已开始收敛）
+   - keyed move 已切到 `move(vnode)`，因此不再依赖 `handle.nodes` 的快照数组。
+   - Fragment patch 后目前仍重建 `handle.nodes`（主要用于 `teardown/unmount` 的范围正确性），见 `src/runtime-core/patch/child.ts` 的 Fragment 分支。
+   - 组件 rerender/patch 后目前仍同步 `instance.vnodeHandle.nodes`，见 `src/runtime-core/component/render-effect.ts` 与 `src/runtime-core/component/anchor.ts`。
+   - Vue3 方向：进一步让卸载/移动也仅依赖 `vnode.el/anchor + hostNextSibling` 的“真实区间”，即可逐步删掉这些同步点。
 4. mount 后再 move（已解决）
    - 已让 `mountVirtualNode`/`mountElement`/`mountComponent` 透传 `anchor` 并在最终位置插入，删除了 `mountChild` 的二次移动补偿逻辑。
    - 后续仍需把移动与插入锚点统一收敛到 Vue3 的 `getNextHostNode + move(vnode)`，才能进一步删掉 `shouldUseAnchor` 与 `handle.nodes` 同步点。

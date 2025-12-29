@@ -4,7 +4,7 @@ import type { RendererOptions } from '../renderer.ts'
 import type { PatchChildrenEnvironment } from './children-environment.ts'
 import { mountChildInEnvironment } from './insertion.ts'
 import type { PatchResult } from './types.ts'
-import { moveNodes, unmount } from './utils.ts'
+import { move, unmount } from './utils.ts'
 
 /**
  * `children diff` 期间的宿主驱动，统一封装新增/替换/卸载/移动操作。
@@ -48,9 +48,12 @@ export interface PatchDriver<
   /** 仅卸载指定 `virtualNode`，不进行替换或重新挂载。 */
   unmountOnly(virtualNode: NormalizedVirtualNode): PatchResult<HostNode>
   /**
-   * 将一组宿主节点移动到给定锚点之前，保持节点顺序。
+   * 将 `virtualNode` 对应的宿主范围移动到给定锚点之前。
+   *
+   * @remarks
+   * - 对齐 Vue3：移动以 `vnode` 为单位，而不是依赖 `handle.nodes` 的快照数组。
    */
-  moveNodesToAnchor(nodes: HostNode[], anchor?: HostNode): PatchResult<HostNode>
+  moveToAnchor(virtualNode: NormalizedVirtualNode, anchor?: HostNode): PatchResult<HostNode>
 }
 
 /**
@@ -102,24 +105,12 @@ export function createPatchDriver<
       }
     },
     /**
-     * 将节点序列搬移到锚点位置：
+     * 将 `virtualNode` 对应的宿主范围搬移到锚点位置：
      * - 无锚点时追加到容器末尾。
-     * - 有锚点时按原顺序插入，保持兄弟顺序不变。
+     * - 有锚点时插入到锚点之前。
      */
-    moveNodesToAnchor(nodes, anchor = environment.anchor) {
-      if (!anchor) {
-        for (const node of nodes) {
-          options.appendChild(container, node)
-        }
-
-        return {
-          ok: true,
-          moved: true,
-          usedAnchor: anchor,
-        }
-      }
-
-      moveNodes(options, nodes, container, anchor)
+    moveToAnchor(virtualNode, anchor = environment.anchor) {
+      move(options, virtualNode, container, anchor)
 
       return {
         ok: true,

@@ -13,7 +13,6 @@ import {
   syncFromStart,
 } from './keyed-children-helpers.ts'
 import { computeLongestIncreasingSubsequence } from './longest-increasing-subsequence.ts'
-import { getHostNodesSafely } from './runtime-virtual-node.ts'
 import type { IndexMaps, IndexRange, KeyedPatchContext } from './types.ts'
 import { findNextAnchor, isSameVirtualNode } from './utils.ts'
 
@@ -205,18 +204,12 @@ function moveOrMountChildren<
         continue
       }
 
-      /* 该新节点可复用旧节点：直接把旧节点的宿主 `nodes` 移动到 `anchorNode` 之前。 */
-      const previousIndex = mappedValue
-      const nodes = getHostNodesSafely<HostNode, HostElement, HostFragment>(
-        context.previousChildren[previousIndex],
-      )
-
       /*
-       * 直接移动宿主节点而不是重新 patch：
+       * 直接移动 vnode 而不是重新 patch：
        * - patchAlignedChildren 已完成复用节点的内容更新。
        * - 这里仅负责把「已更新的旧节点」放到正确位置。
        */
-      context.driver.moveNodesToAnchor(nodes, anchorNode)
+      context.driver.moveToAnchor(nextChild, anchorNode)
     }
   }
 }

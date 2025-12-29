@@ -86,8 +86,10 @@ function createRenderEffect<
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
 ): ReactiveEffect<NormalizedVirtualNode | undefined> {
+  /* 缓存调度器提供的「本轮 render job」，用于合并多次依赖触发。 */
   let pendingRenderJob: (() => void) | undefined
 
+  /* 组件更新调度入口：取出本轮 job 并驱动一次 rerender。 */
   const componentUpdateJob = (): void => {
     const job = pendingRenderJob
 
@@ -102,6 +104,7 @@ function createRenderEffect<
   }
 
   const effect = new ReactiveEffect<NormalizedVirtualNode | undefined>(
+    /* 渲染 runner：执行 `render()` 并缓存最新 `subTree`，供后续 `patch`/移动同步使用。 */
     () => {
       /* 每次渲染时记录最新子树，供后续挂载或复用。 */
       const subtree = normalizeRenderOutput(instance.render())
@@ -110,6 +113,7 @@ function createRenderEffect<
 
       return subtree
     },
+    /* 调度器回调：保存本轮 job，并提交到全局 scheduler 以合并执行。 */
     (renderSchedulerJob) => {
       pendingRenderJob = renderSchedulerJob
       queueSchedulerJob(componentUpdateJob)
@@ -199,5 +203,6 @@ function patchLatestSubtree<
     instance.mountedHandle = undefined
   }
 
+  /* 子树 patch 结束后同步组件 vnode 句柄，避免父级 keyed 重排移动到旧节点引用。 */
   syncComponentVirtualNodeHandleNodes(instance)
 }

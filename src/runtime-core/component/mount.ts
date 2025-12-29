@@ -44,6 +44,7 @@ export function mountComponent<
   /* 让 `virtualNode` 拥有实例引用，方便调试或测试检索。 */
   attachInstanceToVirtualNode(virtualNode, instance)
   runtime.component = instance as never
+  /* 缓存当前组件对应的运行时 vnode 引用，便于更新阶段同步 `el`/`anchor`/`handle.nodes`。 */
   instance.virtualNode = runtime as never
   const { startAnchor, endAnchor } = instance
 
@@ -78,6 +79,7 @@ export function mountComponent<
     },
   }
 
+  /* 记录组件 vnode 句柄，供父级 keyed diff 在移动/卸载时复用。 */
   instance.vnodeHandle = vnodeHandle
 
   return vnodeHandle

@@ -37,6 +37,7 @@ export function mountComponentSubtreeWithAnchors<
   /* 需要锚点时先准备首尾占位符，便于保持区间。 */
   ensureComponentAnchors(options, instance)
 
+  /* 锚点创建失败时退化为普通挂载，避免影响渲染结果。 */
   if (!instance.startAnchor || !instance.endAnchor) {
     return mountChild<HostNode, HostElement, HostFragment>(options, child, {
       container: instance.container,
@@ -67,6 +68,7 @@ export function mountComponentSubtreeWithAnchors<
   return {
     ok: mounted?.ok ?? true,
     nodes,
+    /** 卸载组件子树：先转调子树 `teardown`，再按需移除首尾锚点。 */
     teardown(skipRemove?: boolean): void {
       mounted?.teardown(skipRemove)
 
@@ -110,6 +112,11 @@ export function ensureComponentAnchors<
   const start = options.createComment(startLabel)
   const end = options.createComment(endLabel)
 
+  /*
+   * 锚点插入策略：
+   * - 组件已挂载过子树时，`start` 必须插到「当前首个宿主节点」之前，才能正确包裹区间。
+   * - `end` 需要插到父级传入的 `anchor` 之前（或容器末尾），保证后续兄弟仍位于组件区间之外。
+   */
   const firstMountedNode = instance.vnodeHandle?.nodes[0] ?? instance.mountedHandle?.nodes[0]
 
   if (firstMountedNode) {
@@ -145,25 +152,30 @@ export function syncComponentVirtualNodeHandleNodes<
 >(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): void {
   const handle = instance.vnodeHandle
 
+  /* 没有组件 vnode 句柄时无需同步：父级 diff 也不会移动到该组件节点集合。 */
   if (!handle) {
     return
   }
 
+  /* 从组件最新 `subTree` 的句柄中读取宿主节点集合，作为同步来源。 */
   const subtreeNodes = instance.subTree
     ? (asRuntimeVirtualNode<HostNode, HostElement, HostFragment>(instance.subTree).handle?.nodes ??
       [])
     : []
   const nodes: HostNode[] = []
 
+  /* 组件带锚点时 `nodes` 必须包含区间边界，保证父级移动/插入能稳定定位。 */
   if (instance.startAnchor && instance.endAnchor) {
     nodes.push(instance.startAnchor, ...subtreeNodes, instance.endAnchor)
   } else {
     nodes.push(...subtreeNodes)
   }
 
+  /* 原地更新 `handle.nodes` 引用，避免父级 keyed diff 持有的句柄对象失效。 */
   handle.nodes.length = 0
   handle.nodes.push(...nodes)
 
+  /* 同步运行时 vnode 元数据，确保 `vnode.el`/`vnode.anchor` 与 `handle.nodes` 一致。 */
   if (instance.virtualNode) {
     instance.virtualNode.el = handle.nodes[0]
     instance.virtualNode.anchor = handle.nodes.at(-1)

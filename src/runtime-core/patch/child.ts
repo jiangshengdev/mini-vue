@@ -151,15 +151,22 @@ function patchExisting<
       context: environment.context,
     })
 
+    /*
+     * `Fragment` 更新后需要同步 `handle.nodes`：
+     * - 子项可能被卸载/新挂载（例如从「有节点」变为「空」）。
+     * - 若 `handle.nodes` 仍指向旧节点集合，父级 keyed 重排会把旧节点重新插回 DOM，导致重复/复活。
+     */
     const { handle } = runtimeNext
 
     if (handle) {
       const nextChildNodes: HostNode[] = []
 
+      /* 将 `next.children` 的运行时节点句柄展平成宿主节点列表，用于重建区间。 */
       for (const child of next.children) {
         nextChildNodes.push(...getHostNodesSafely<HostNode, HostElement, HostFragment>(child))
       }
 
+      /* 保留 `Fragment` 的首尾锚点，并用最新子项节点重建 `handle.nodes` 区间。 */
       const startNode = handle.nodes[0]
       const endNode = handle.nodes.at(-1)
       const nextNodes =
@@ -167,8 +174,10 @@ function patchExisting<
           ? ([startNode as HostNode, ...nextChildNodes, endNode as HostNode] as HostNode[])
           : nextChildNodes
 
+      /* 原地更新 `handle.nodes`，避免父级 keyed diff 持有的句柄对象失效。 */
       handle.nodes.length = 0
       handle.nodes.push(...nextNodes)
+      /* 同步运行时元数据，确保 `vnode.el`/`vnode.anchor` 与最新区间一致。 */
       runtimeNext.el = handle.nodes[0]
       runtimeNext.anchor = handle.nodes.at(-1)
     }
@@ -343,11 +352,13 @@ function syncComponentProps(
   target: ElementProps<SetupComponent>,
   nextProps: ElementProps<SetupComponent>,
 ): void {
+  /* 先移除旧 `props` 中已不存在的键，保证渲染读取不到过期字段。 */
   for (const key of Object.keys(target)) {
     if (!(key in nextProps)) {
       Reflect.deleteProperty(target, key)
     }
   }
 
+  /* 再合并新 `props`，保持引用稳定以兼容渲染闭包/响应式追踪。 */
   Object.assign(target, nextProps)
 }

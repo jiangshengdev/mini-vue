@@ -240,11 +240,12 @@ function syncComponentVirtualNodeHost<
     return
   }
 
-  const subTree = instance.subTree
+  const { subTree } = instance
 
   if (!subTree) {
     runtime.el = undefined
     runtime.anchor = undefined
+
     return
   }
 

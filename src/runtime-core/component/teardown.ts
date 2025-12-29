@@ -39,10 +39,7 @@ export function teardownComponentInstance<
   HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
   T extends SetupComponent,
->(
-  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
-  skipRemove?: boolean,
-): void {
+>(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>, skipRemove?: boolean): void {
   teardownMountedSubtree(instance, skipRemove)
 
   /* 停止 `scope` 以统一回收所有 `setup` 内创建的副作用。 */

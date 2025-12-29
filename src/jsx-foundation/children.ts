@@ -1,5 +1,5 @@
-import { isVirtualNode } from './guards.ts'
 import { Comment, virtualNodeFlag } from './constants.ts'
+import { isVirtualNode } from './guards.ts'
 import type { VirtualNode, VirtualNodeChild } from './types.ts'
 import { jsxUnsupportedChildWarning } from '@/messages/index.ts'
 import { __DEV__, isNil } from '@/shared/index.ts'
@@ -64,6 +64,7 @@ function flattenChild(rawChild: unknown, accumulator: VirtualNodeChild[]): void 
     }
 
     accumulator.push(placeholder)
+
     return
   }
 

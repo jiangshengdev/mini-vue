@@ -1,10 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import type { TestNode } from '../host-utils.ts'
 import { createHostRenderer, normalize } from '../host-utils.ts'
-import { mountChild } from '@/runtime-core/index.ts'
-import { getFirstHostNode, getLastHostNode } from '@/runtime-core/patch/utils.ts'
-import { nextTick, ref } from '@/index.ts'
+import { getFirstHostNode, getLastHostNode, mountChild } from '@/runtime-core/index.ts'
 import type { SetupComponent } from '@/index.ts'
+import { nextTick, ref } from '@/index.ts'
 
 describe('runtime-core component render effect: 更新锚点来源', () => {
   it('组件作为 Fragment 最后一个 child 时，rerender 新增节点应插入到父 Fragment 的 endAnchor 之前', async () => {
@@ -46,4 +45,3 @@ describe('runtime-core component render effect: 更新锚点来源', () => {
     expect(spanTexts).toEqual(['one', 'two'])
   })
 })
-

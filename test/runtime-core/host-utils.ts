@@ -119,7 +119,7 @@ export function createHostRenderer(hooks: HostRendererHooks = {}): HostRenderer 
     appendChild,
     insertBefore,
     nextSibling(node): TestNode | undefined {
-      const parent = node.parent
+      const { parent } = node
 
       if (!parent) {
         return undefined

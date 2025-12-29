@@ -69,7 +69,13 @@ export function mountVirtualNode<
   }
 
   /* 普通标签名直接走元素挂载逻辑。 */
-  const mounted = mountElement(options, virtualNode as VirtualNode<string>, container, context, anchor)
+  const mounted = mountElement(
+    options,
+    virtualNode as VirtualNode<string>,
+    container,
+    context,
+    anchor,
+  )
   const runtime = asRuntimeVirtualNode<HostNode, HostElement, HostFragment>(virtualNode)
 
   runtime.el = mounted.nodes[0]

@@ -104,13 +104,7 @@ export function mountChild<
       return handle
     }
 
-    const mounted = mountVirtualNode(
-      options,
-      child,
-      container,
-      context,
-      anchor,
-    )
+    const mounted = mountVirtualNode(options, child, container, context, anchor)
 
     return mounted
   }

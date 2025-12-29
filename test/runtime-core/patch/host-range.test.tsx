@@ -1,8 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import type { TestNode } from '../host-utils.ts'
 import { createHostRenderer, normalize } from '../host-utils.ts'
-import { mountChild } from '@/runtime-core/index.ts'
-import { getFirstHostNode, getLastHostNode, getNextHostNode } from '@/runtime-core/patch/utils.ts'
+import {
+  getFirstHostNode,
+  getLastHostNode,
+  getNextHostNode,
+  mountChild,
+} from '@/runtime-core/index.ts'
 import type { SetupComponent } from '@/index.ts'
 
 describe('runtime-core patch utils: host range helpers', () => {
@@ -42,18 +46,18 @@ describe('runtime-core patch utils: host range helpers', () => {
     }
 
     const fragment = normalize([<Foo />, <div>after</div>])
-    const componentVNode = fragment.children[0]
-    const afterVNode = fragment.children[1]
+    const componentVirtualNode = fragment.children[0]
+    const afterVirtualNode = fragment.children[1]
 
     mountChild(host.options, fragment, { container: host.container })
 
-    const componentFirst = getFirstHostNode<TestNode>(componentVNode)
-    const componentLast = getLastHostNode<TestNode>(componentVNode)
-    const afterFirst = getFirstHostNode<TestNode>(afterVNode)
+    const componentFirst = getFirstHostNode<TestNode>(componentVirtualNode)
+    const componentLast = getLastHostNode<TestNode>(componentVirtualNode)
+    const afterFirst = getFirstHostNode<TestNode>(afterVirtualNode)
 
     expect(componentFirst?.kind).toBe('element')
     expect(componentLast?.kind).toBe('element')
     expect(afterFirst?.kind).toBe('element')
-    expect(getNextHostNode(host.options, componentVNode)).toBe(afterFirst)
+    expect(getNextHostNode(host.options, componentVirtualNode)).toBe(afterFirst)
   })
 })

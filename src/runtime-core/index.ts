@@ -2,10 +2,7 @@
  * `runtime-core` 对外入口，聚合平台无关的运行时能力。
  */
 export type { ComponentInstance } from './component/index.ts'
-export {
-  getCurrentInstance,
-  mountComponent,
-} from './component/index.ts'
+export { getCurrentInstance, mountComponent } from './component/index.ts'
 export type { AppHostDriver, AppInstance } from './create-app.ts'
 export { createAppInstance } from './create-app.ts'
 export { mountChild } from './mount/index.ts'
@@ -14,7 +11,11 @@ export { normalizeRenderOutput } from './normalize.ts'
 export type { PatchEnvironment } from './patch/index.ts'
 export {
   computeLongestIncreasingSubsequence,
+  getFirstHostNode,
   getHostNodesSafely,
+  getLastHostNode,
+  getNextHostNode,
+  move,
   patchChild,
   patchChildren,
 } from './patch/index.ts'

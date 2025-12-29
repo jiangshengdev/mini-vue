@@ -164,7 +164,7 @@ function createHostOptionsWithSpies(): {
     appendChild,
     insertBefore,
     nextSibling(node): TestNode | undefined {
-      const parent = node.parent
+      const { parent } = node
 
       if (!parent) {
         return undefined

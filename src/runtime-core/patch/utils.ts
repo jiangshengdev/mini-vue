@@ -174,7 +174,7 @@ export function move<
     let current: HostNode | undefined = start
 
     while (current) {
-      const next = current === end ? undefined : options.nextSibling(current)
+      const next: HostNode | undefined = current === end ? undefined : options.nextSibling(current)
 
       insert(current)
 

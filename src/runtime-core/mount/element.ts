@@ -40,6 +40,7 @@ export function mountElement<
   const ok = mountedHandles.every((handle) => {
     return handle.ok
   })
+
   /* 最终把元素插入到父容器中完成挂载。 */
   if (anchor) {
     insertBefore(container, element, anchor)

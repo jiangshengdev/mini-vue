@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { TestNode } from '../host-utils.ts'
 import { createHostRenderer, normalize } from '../host-utils.ts'
-import { mountChild } from '@/runtime-core/index.ts'
-import { getFirstHostNode, getLastHostNode, move } from '@/runtime-core/patch/utils.ts'
+import { getFirstHostNode, getLastHostNode, mountChild, move } from '@/runtime-core/index.ts'
 import type { SetupComponent } from '@/index.ts'
 
 describe('runtime-core patch utils: move', () => {
@@ -61,8 +60,8 @@ describe('runtime-core patch utils: move', () => {
     }
 
     const fragment = normalize([<Foo />, <div>after</div>])
-    const componentVNode = fragment.children[0]
-    const afterVNode = fragment.children[1]
+    const componentVirtualNode = fragment.children[0]
+    const afterVirtualNode = fragment.children[1]
 
     mountChild(host.options, fragment, { container: host.container })
 
@@ -70,12 +69,12 @@ describe('runtime-core patch utils: move', () => {
 
     const fragmentStart = getFirstHostNode<TestNode>(fragment)!
     const fragmentEnd = getLastHostNode<TestNode>(fragment)!
-    const afterNode = getFirstHostNode<TestNode>(afterVNode)!
+    const afterNode = getFirstHostNode<TestNode>(afterVirtualNode)!
     const spanNode = host.container.children.find((node) => {
       return node.kind === 'element' && node.tag === 'span'
     })!
 
-    move(host.options, componentVNode, host.container, fragmentEnd)
+    move(host.options, componentVirtualNode, host.container, fragmentEnd)
 
     expect(host.container.children).toEqual([fragmentStart, afterNode, spanNode, fragmentEnd])
   })
@@ -90,8 +89,8 @@ describe('runtime-core patch utils: move', () => {
     }
 
     const fragment = normalize([<div>before</div>, <Foo />])
-    const beforeVNode = fragment.children[0]
-    const componentVNode = fragment.children[1]
+    const beforeVirtualNode = fragment.children[0]
+    const componentVirtualNode = fragment.children[1]
 
     mountChild(host.options, fragment, { container: host.container })
 
@@ -99,12 +98,12 @@ describe('runtime-core patch utils: move', () => {
 
     const fragmentStart = getFirstHostNode<TestNode>(fragment)!
     const fragmentEnd = getLastHostNode<TestNode>(fragment)!
-    const beforeNode = getFirstHostNode<TestNode>(beforeVNode)!
+    const beforeNode = getFirstHostNode<TestNode>(beforeVirtualNode)!
     const spanNode = host.container.children.find((node) => {
       return node.kind === 'element' && node.tag === 'span'
     })!
 
-    move(host.options, componentVNode, host.container, beforeNode)
+    move(host.options, componentVirtualNode, host.container, beforeNode)
 
     expect(host.container.children).toEqual([fragmentStart, spanNode, beforeNode, fragmentEnd])
   })

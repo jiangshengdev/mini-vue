@@ -76,7 +76,7 @@ export interface VirtualNode<T extends ElementType = ElementType> {
 - 提示：测试应关注外部行为（如 `key` 是否起作用），尽量减少对非公开属性状态的直接断言。
 - 状态：🟢 **已优化**（移除默认值断言，新增通过 `render`/DOM 复用与移动验证 `key` 语义的黑盒用例）
 
-## 5. 组件类型被限定为 `(props: never)`，导致 ElementType 无法接受正常组件（待修复）
+## 5. 组件类型被限定为 `(props: never)`，导致 ElementType 无法接受正常组件（已修复）
 
 - 位置：
   - `src/jsx-foundation/types.ts`（`ComponentLike`、`ElementType`、`ElementProps` 推导链）
@@ -94,12 +94,21 @@ export interface VirtualNode<T extends ElementType = ElementType> {
   - 具体组件（`SetupComponent<P>` 或显式 `(props: P) => RenderFunction`）在 TSX 下仍能正确推导 `P` 并得到 props 提示。
   - 动态/擦除组件（如 `ElementType` 容器）在 TSX 下至少不应“拒绝所有 props”；允许降级为宽松校验，而不是推成 `never`。
   - 避免引入 `any`（保持项目“禁用 any”的设计取向）。
+- 方案落地（类型层，已实现）：
+  - `src/jsx-foundation/types.ts`
+    - `ComponentLike` 使用 bivariance hack 替代 `(props: never)`，让窄 `props` 的 `SetupComponent<P>` 可赋值到 `ElementType` 上界。
+    - `InferComponentProps<T>` 在 `infer Props = unknown` 时回退到 `PropsWithChildren<PropsShape>`，避免擦除后 `props` 推导丢失可用形态。
+  - `src/jsx-shim.d.ts`
+    - 增补 `JSX.LibraryManagedAttributes<C, P>`：当 `C extends ElementType`（非 intrinsic）时，将 TSX props 校验统一映射到 `ElementProps<C>` 推导链，避免“擦除后 props = never”。
+  - `test/jsx-foundation/element-type.types.test.tsx`
+    - 增加类型回归：覆盖 `const X: ElementType = Foo; <X msg="..." />` 与 `h(type: ElementType, props)` 的可用性。
 - 推荐方案（类型层）：引入“可接住任意组件，但 props 退化为宽松”的 `AnySetupComponent`，替代 `(props: never)`。
   - 做法要点：使用 React typings 常用的 **bivariance hack** 构造一个“参数位双向”的组件上界，使 `SetupComponent<P>` 可赋值给它，同时它自身不会把 `props` 推成 `never`。
   - 预期效果：
     - 具体组件：仍通过 `T extends SetupComponent<infer P>` 分支精确推导 `ElementProps<T>`。
     - 擦除组件：`ElementProps<AnySetupComponent>` 回退到 `PropsShape`（或 `PropsWithChildren<PropsShape>`），保证 TSX 不会直接拒绝一切 props。
   - 参考伪代码（仅表达思路，最终以 `types.ts` 现有工具类型为准）：
+
     ```ts
     type AnySetupComponent = {
       bivarianceHack(props: PropsShape & { children?: ComponentChildren }): RenderFunction
@@ -114,6 +123,7 @@ export interface VirtualNode<T extends ElementType = ElementType> {
           ? PropsShape & { children?: ComponentChildren }
           : PropsShape
     ```
+
 - 可选方案（运行时类型断言收敛）：
   - `runtime-core` 里的 `instance as never` / `runtime as never` 多半是为了绕开“运行时 vnode ↔ instance 双向引用 + 泛型递归”导致的类型不匹配/类型爆炸。
   - 可考虑：

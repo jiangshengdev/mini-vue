@@ -1,4 +1,8 @@
-import type { ElementType as VirtualNodeType, VirtualNode } from '@/jsx-foundation/index.ts'
+import type {
+  ElementProps,
+  ElementType as VirtualNodeType,
+  VirtualNode,
+} from '@/jsx-foundation/index.ts'
 import type { ElementRef } from '@/runtime-dom/index.ts'
 import type { Ref } from '@/reactivity/index.ts'
 import type { PropsShape } from '@/shared/index.ts'
@@ -72,6 +76,21 @@ declare global {
 
     /** `JSX` 标签名可以是原生标签、组件或 `Fragment`。 */
     type ElementType = VirtualNodeType
+
+    /**
+     * 将组件类型映射为其可接受的 `props` 类型。
+     *
+     * @remarks
+     * - 该类型用于驱动 TSX 的属性检查：当标签为组件（非 intrinsic）时，TS 会通过它规整最终 `props`。
+     * - 这里统一复用 `jsx-foundation` 的 `ElementProps` 推导链：
+     *   - 具体组件：保留精确 `props` 推导（如 `SetupComponent<{ msg: string }>`）。
+     *   - 动态/擦除组件（如 `ElementType` 容器）：回退为宽松 `PropsShape`，避免 `never/unknown` 阻断。
+     */
+    type LibraryManagedAttributes<C, P> = C extends string
+      ? P
+      : C extends VirtualNodeType
+        ? ElementProps<C>
+        : P
 
     /** 标记 `children` 对应的 `props` 键名，供 TS 推导使用。 */
     interface ElementChildrenAttribute {

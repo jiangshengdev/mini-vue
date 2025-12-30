@@ -57,20 +57,25 @@ export interface FragmentProps extends ComponentPropsBase {
 }
 
 /**
- * 用于约束组件类型的函数签名，供 `ElementType` 统一推导。
- *
- * @remarks
- * - 使用 `never` 作为 `props` 类型，表示该签名仅用于类型层面的约束。
- */
-type ComponentLike = (props: never) => RenderFunction
-
-/**
  * 为任意 `props` 类型补充可选 `children` 字段。
  *
  * @remarks
  * - JSX 转换时 `children` 会被自动注入到 `props` 中，该类型确保类型推导正确。
  */
 type PropsWithChildren<P> = P & { children?: ComponentChildren }
+
+/**
+ * 用于约束组件类型的函数签名，供 `ElementType` 统一推导。
+ *
+ * @remarks
+ * - 该类型用于承载「任意 `props` 的函数组件」这一上界（类似 `∃P. SetupComponent<P>`）。
+ * - 在 `strictFunctionTypes` 下，函数参数默认是逆变检查；直接用 `(props: PropsWithChildren<PropsShape>) => ...`
+ *   会导致 `SetupComponent<{ msg: string }>` 等窄 `props` 组件无法赋值到该上界。
+ * - 使用 bivariance hack，让 `SetupComponent<P>` 可赋值到该上界，同时避免 `(props: never)` 造成的坍缩。
+ */
+type ComponentLike = {
+  bivarianceHack(props: unknown): RenderFunction
+}['bivarianceHack']
 
 /**
  * `setup` + `render` 语义的函数组件类型，默认 `props` 为通用对象。
@@ -115,7 +120,9 @@ export type ElementType = string | ComponentLike | FragmentType | typeof Text | 
  */
 type InferComponentProps<T> =
   T extends SetupComponent<infer Props>
-    ? PropsWithChildren<Props>
+    ? unknown extends Props
+      ? PropsWithChildren<ComponentPropsBase>
+      : PropsWithChildren<Props>
     : T extends (props: infer Props) => RenderFunction
       ? Props
       : ComponentPropsBase

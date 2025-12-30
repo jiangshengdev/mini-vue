@@ -63,11 +63,11 @@
 
 ### Phase 4：必要时的 “testing seam” 方案（需二次确认后落地）
 
-[ ] 设计并确认稳定的测试接缝出口（择一或组合）：
-  - A. `src/**/testing.ts`：对外暴露最小化的“可观测/可注入”能力（非 public API，文档注明仅测试使用）。
-  - B. 依赖注入：在关键路径（如 router/useRouter、runtime-core patch）引入可选依赖参数，仅在测试中使用。
-  - C. `__DEV__` 分支调试接口：仅开发态提供 debug 信息/钩子，生产构建 tree-shaking 掉。
-[ ] 以最小试点验证：先选 1 个最难替代的内部 mock/白盒点落地 seam（建议从 `reactivity` 或 `runtime-core patch` 选一个），确认收益与维护成本。
+[x] 设计并确认稳定的测试接缝出口（择一或组合）：
+  - ✅ A（默认）：`src/<boundary>/testing.ts` 定义 seam 能力，`src/<boundary>/index.ts` 仅做转发；根入口 `src/index.ts` 不导出；导出名使用 `__` 前缀并在注释中声明「仅测试使用，不保证稳定」。
+  - B（仅在必要时）：注入型需求优先通过 `testing.ts` 暴露 setter/override，而不是在 public API 上添加可选依赖参数；确需依赖注入时再二次确认接口边界。
+  - C（按需）：若 seam 可能引入生产开销/暴露调试信息，可在实现中使用 `__DEV__`/`__INTERNAL_DEV__` 做开发态保护，以便构建时摇树。
+[x] 以最小试点验证：已在 `reactivity` 落地 `__hasDependencyBucket`（`src/reactivity/testing.ts` -> `src/reactivity/index.ts`），用于替代测试对内部模块路径的 mock，并保持对“无活跃 effect 不创建依赖桶”的覆盖。
 
 ### Phase 5：复用测试工具与收尾
 
@@ -83,6 +83,6 @@
 
 ## 待确认（动手前再确认一次）
 
-1. 全局清理采用 `test/setup.ts` 的 `afterEach`，还是改为 Vitest 配置项（如 `restoreMocks: true`/`unstubGlobals: true`）？两者也可组合，但需要统一约定避免重复与误解。
-2. 是否接受引入 `src/**/testing.ts` 作为稳定 testing seam（默认不从 `src/index.ts` 导出，避免误用）？
+1. （已确认）全局清理采用 `test/setup.ts` 的 `afterEach`；暂不迁移到 Vitest 配置项（如 `restoreMocks: true`/`unstubGlobals: true`），避免约定分散导致误解；后续如需迁移再单独评估。
+2. （已确认）接受引入 `src/<boundary>/testing.ts` 作为稳定 testing seam：仅通过 `src/<boundary>/index.ts` 转发，根入口 `src/index.ts` 不导出，避免误用。
 3. 是否允许移动/重分配个别用例到更合适的模块（例如将“remove 次数”类测试迁移到 runtime-core host 渲染器用例）以减少 DOM 全局污染？

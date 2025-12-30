@@ -59,6 +59,7 @@
 - 现状（修复前）：内部通过 `isSupportedTarget` 限制，仅允许普通对象或数组；传入 Ref 会抛出不支持的类型错误。
 - 影响：违背官方 API「接受对象或 Ref」的约定，无法对 Ref 创建只读视图。
 - 修复：
+  - `reactive(ref)` / `shallowReactive(ref)` 现在不会报错，直接返回 Ref 本体。
   - `readonly(ref)` / `shallowReadonly(ref)` 现在会返回只读 Ref 包装，读取正常透传，写入在开发态警告并忽略。
   - `isReadonly` 对 Ref 增加分支识别，与 Vue 3 对齐。
 - 测试：

@@ -139,6 +139,18 @@ describe('reactive', () => {
     expect(toRaw(raw)).toBe(raw)
   })
 
+  it('reactive() 支持 Ref 目标（返回 Ref 本体）', () => {
+    const source = ref(1)
+    const proxy = reactive(source)
+
+    expect(proxy).toBe(source)
+    expect(isRef(proxy)).toBe(true)
+    expect(proxy.value).toBe(1)
+
+    proxy.value = 2
+    expect(source.value).toBe(2)
+  })
+
   it('非普通内建对象会报错', () => {
     const factories = [
       [

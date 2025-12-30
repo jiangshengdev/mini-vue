@@ -49,6 +49,18 @@ describe('shallowReactive', () => {
     expect(wrapped).toBe(proxy1)
   })
 
+  it('shallowReactive() 支持 Ref 目标（返回 Ref 本体）', () => {
+    const source = ref(1)
+    const proxy = shallowReactive(source)
+
+    expect(proxy).toBe(source)
+    expect(isRef(proxy)).toBe(true)
+    expect(proxy.value).toBe(1)
+
+    proxy.value = 2
+    expect(source.value).toBe(2)
+  })
+
   it('不支持的内建对象会报错', () => {
     const value: unknown = new Map()
 

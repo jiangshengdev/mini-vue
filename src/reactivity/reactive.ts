@@ -161,6 +161,10 @@ export function reactive<T extends readonly unknown[]>(target: T): Reactive<T>
 export function reactive<T>(target: T): T
 
 export function reactive(target: unknown): unknown {
+  if (isRefTarget(target)) {
+    return target
+  }
+
   return createProxy(target, mutableHandlers, reactiveCache, { skipReactiveCheck: true })
 }
 
@@ -179,6 +183,10 @@ export function shallowReactive<T extends readonly unknown[]>(target: T): T
 export function shallowReactive<T>(target: T): T
 
 export function shallowReactive(target: unknown): unknown {
+  if (isRefTarget(target)) {
+    return target
+  }
+
   return createProxy(target, shallowReactiveHandlers, shallowReactiveCache, {
     skipReactiveCheck: true,
   })

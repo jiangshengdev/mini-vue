@@ -2,6 +2,11 @@ import { describe, expect, it } from 'vitest'
 import { effect, reactive, toRaw } from '@/index.ts'
 import { __hasDependencyBucket, effectStack } from '@/reactivity/index.ts'
 
+/**
+ * 约定：
+ * - 标题前缀 `[测试接缝]` 表示该用例依赖内部 testing seam（如 `__*` 导出），用于覆盖难以通过纯行为断言验证的内部优化点。
+ * - 若未来存在等价的公开观测手段，应优先迁移为纯黑盒断言。
+ */
 describe('effect 基础行为', () => {
   it('注册后会立刻执行一次副作用', () => {
     const state = reactive({ count: 0 })
@@ -256,7 +261,7 @@ describe('effect 基础行为', () => {
     expect(third).toBe(-1)
   })
 
-  it('无活跃 effect 读取不会创建空依赖桶', () => {
+  it('[测试接缝] 无活跃 effect 读取不会创建空依赖桶', () => {
     const state = reactive({ count: 0 })
     const raw = toRaw(state)
 

@@ -109,12 +109,11 @@
 - 修复：移除对 `@/runtime-core/patch/children.ts` 的 mock，改为通过宿主树插入顺序断言「新增子节点插入在 Fragment 结束锚点之前」，以验证 Fragment patch 锚点选择正确。
 - 收益：不再依赖内部文件路径与调用栈，测试更抗重构。
 
-## 13. 测试辅助函数重复定义（待优化）
+## 13. 测试辅助函数重复定义（已优化）
 
 - 位置：`test/runtime-core/patch/insertion.test.ts`
-- 现状：文件内定义了 `createHostOptionsWithSpies` 辅助函数，其逻辑与 `patch/test-utils.ts` 中的 `createHostRenderer` 高度重复。
-- 影响：增加了维护成本，逻辑分散。
-- 提示：建议统一复用测试工具库 `test-utils.ts`。
+- 修复：移除文件内重复的 `createHostOptionsWithSpies`，统一复用 `test/runtime-core/host-utils.ts` 的 `createHostRenderer()` 与计数器。
+- 收益：host options 构造集中维护，测试更抗重构，减少重复样板。
 
 ## 14. 测试白盒断言内部状态（已优化）
 

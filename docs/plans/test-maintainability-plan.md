@@ -71,9 +71,11 @@
 
 ### Phase 5：复用测试工具与收尾
 
-[ ] `test/runtime-core/patch/insertion.test.ts`：复用 `test/runtime-core/host-utils.ts` 的 `createHostRenderer()` 与计数器，删除重复的 host options 构造（对应 `docs/issues/runtime-core-issues.md` #13）。
-[ ] 为白盒用例建立统一标注规范（例如 `describe('[白盒] ...')` / `it('[白盒] ...')`），并在文件顶部用简短说明阐明白盒原因与可替代方向。
-[ ] 同步更新 `docs/issues/*-issues.md`：将已完成项标记为已优化，并补充“采用的替代方案/测试接缝”说明，便于后续维护。
+[x] `test/runtime-core/patch/insertion.test.ts`：复用 `test/runtime-core/host-utils.ts` 的 `createHostRenderer()` 与计数器，删除重复的 host options 构造（对应 `docs/issues/runtime-core-issues.md` #13）。
+[x] 为白盒/测试接缝用例建立统一标注规范：
+  - `it('[白盒] ...')`：确需断言内部实现细节时使用，并在文件顶部用简短说明阐明白盒原因与可替代方向。
+  - `it('[测试接缝] ...')`：使用 `src/<boundary>/testing.ts`（`__*` 导出）观测/注入内部行为时使用，避免测试直接依赖内部文件路径。
+[x] 同步更新 `docs/issues/*-issues.md`：将已完成项标记为已优化，并补充“采用的替代方案/测试接缝”说明，便于后续维护。
 
 ## 验证与质量门禁
 

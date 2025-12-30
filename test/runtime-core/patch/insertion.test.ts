@@ -1,6 +1,6 @@
 import { spyOnConsole } from '$/test-utils/mocks.ts'
 import { describe, expect, it } from 'vitest'
-import type { RendererOptions } from '@/runtime-core/index.ts'
+import { createHostRenderer, type TestElement, type TestFragment, type TestNode } from '../host-utils.ts'
 import {
   getHostNodesSafely,
   mountChild,
@@ -10,25 +10,9 @@ import {
 import { createTextVirtualNode } from '@/jsx-foundation/index.ts'
 import { __DEV__ } from '@/shared/index.ts'
 
-interface TestNode {
-  kind: 'element' | 'text' | 'comment' | 'fragment'
-  children: TestNode[]
-  parent?: TestNode
-  text?: string
-  tag?: string
-}
-
-interface TestElement extends TestNode {
-  kind: 'element'
-}
-
-interface TestFragment extends TestNode {
-  kind: 'fragment'
-}
-
 describe('patch 插入与诊断', () => {
   it('mountChild 在 anchor 处插入，不额外调用 append', () => {
-    const host = createHostOptionsWithSpies()
+    const host = createHostRenderer()
     const anchor = host.options.createText('anchor')
 
     host.options.appendChild(host.container, anchor)
@@ -49,7 +33,7 @@ describe('patch 插入与诊断', () => {
   })
 
   it('patchChild 新节点使用 anchor 单次插入', () => {
-    const host = createHostOptionsWithSpies()
+    const host = createHostRenderer()
     const anchor = host.options.createText('anchor')
 
     host.options.appendChild(host.container, anchor)
@@ -85,114 +69,3 @@ describe('patch 插入与诊断', () => {
     }
   })
 })
-
-function createHostOptionsWithSpies(): {
-  options: RendererOptions<TestNode, TestElement, TestFragment>
-  container: TestElement
-  counters: { appendChild: number; insertBefore: number }
-  resetCounts(): void
-} {
-  const counters = { appendChild: 0, insertBefore: 0 }
-
-  const removeFromParent = (node: TestNode): void => {
-    if (!node.parent) {
-      return
-    }
-
-    const siblings = node.parent.children
-    const index = siblings.indexOf(node)
-
-    if (index !== -1) {
-      siblings.splice(index, 1)
-    }
-
-    node.parent = undefined
-  }
-
-  const appendChild = (parent: TestElement | TestFragment, child: TestNode): void => {
-    counters.appendChild += 1
-    removeFromParent(child)
-    parent.children.push(child)
-    child.parent = parent
-  }
-
-  const insertBefore = (
-    parent: TestElement | TestFragment,
-    child: TestNode,
-    anchor?: TestNode,
-  ): void => {
-    counters.insertBefore += 1
-    removeFromParent(child)
-
-    if (!anchor) {
-      appendChild(parent, child)
-
-      return
-    }
-
-    const index = parent.children.indexOf(anchor)
-
-    if (index === -1) {
-      throw new Error('anchor not found in parent')
-    }
-
-    parent.children.splice(index, 0, child)
-    child.parent = parent
-  }
-
-  const container: TestElement = { kind: 'element', children: [], tag: 'root' }
-
-  const options: RendererOptions<TestNode, TestElement, TestFragment> = {
-    createElement(type): TestElement {
-      return { kind: 'element', children: [], tag: type }
-    },
-    createText(text): TestNode {
-      return { kind: 'text', children: [], text }
-    },
-    createComment(text): TestNode {
-      return { kind: 'comment', children: [], text }
-    },
-    createFragment(): TestFragment {
-      return { kind: 'fragment', children: [] }
-    },
-    setText(node, text): void {
-      node.text = text
-    },
-    appendChild,
-    insertBefore,
-    nextSibling(node): TestNode | undefined {
-      const { parent } = node
-
-      if (!parent) {
-        return undefined
-      }
-
-      const index = parent.children.indexOf(node)
-
-      if (index === -1) {
-        return undefined
-      }
-
-      return parent.children[index + 1]
-    },
-    clear(target): void {
-      target.children = []
-    },
-    remove(node): void {
-      removeFromParent(node)
-    },
-    patchProps(): void {
-      /* No-op for tests */
-    },
-  }
-
-  return {
-    options,
-    container,
-    counters,
-    resetCounts(): void {
-      counters.appendChild = 0
-      counters.insertBefore = 0
-    },
-  }
-}

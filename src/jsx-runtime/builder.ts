@@ -3,8 +3,11 @@
  *
  * 本模块是 `jsx`/`jsxs`/`jsxDEV`/`h` 的底层实现，主要职责：
  * 1. 从 `props` 中提取并归一化 `key`（显式参数优先于 `props.key`）
- * 2. 应用 `v-model` 转换（将声明式绑定转换为受控属性与事件）
+ * 2. 应用组件 `v-model` 转换（生成 `modelValue` + `onUpdate:modelValue`）
  * 3. 调用 `createVirtualNode` 创建最终的 VirtualNode
+ *
+ * @remarks
+ * DOM 表单元素的 `v-model` 由宿主层（如 `runtime-dom`）消费，不在 `jsx-runtime` 层转换。
  */
 import { transformModelBindingProps } from './transform/index.ts'
 import type {

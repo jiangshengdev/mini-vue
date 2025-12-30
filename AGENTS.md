@@ -17,6 +17,7 @@
 ## 代码风格与命名
 
 - TypeScript + ESM，内部导入可用 `@/` 别名避免相对路径穿越；模块优先使用具名导出与 index barrel。
+- 导出约定：除仓库顶级入口文件（如 `src/index.ts`、`src/jsx-runtime.ts`、`src/jsx-dev-runtime.ts`）外，跨文件的重导出**只能**写在同级 `index.ts` 中；其他任何命名文件禁止通过 `export ... from` / `export * from` 重导出其他模块实现（含类型与值）。需要聚合导出时请新增/调整对应目录的 `index.ts`。
 - 格式化由 Prettier（2 空格、单引号）控制，ESLint/Stylistic、oxlint、XO 共同约束风格；提交前请先格式化，否则 CI 会拒绝。
 - 目录/文件名用 kebab-case，变量/函数 camelCase，类型 PascalCase；测试目录与源码保持平行以满足 `scripts/check` 边界规则。
 

@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import ts from 'typescript'
-import { resolveFromImportMeta } from '../_shared/paths.ts'
+import { resolveFromImportMeta } from '../_shared/index.ts'
 import type { Position } from '../_shared/ts-check.ts'
 import {
   createBoundaryModuleSpecifierChecker,

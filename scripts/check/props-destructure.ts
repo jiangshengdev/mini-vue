@@ -1,7 +1,7 @@
 import path from 'node:path'
 import ts from 'typescript'
 import { createSourceFileChecker, getPosition, runTsCheck } from './_shared/ts-check.ts'
-import { resolveFromImportMeta } from './_shared/paths.ts'
+import { resolveFromImportMeta } from './_shared/index.ts'
 
 interface Finding {
   filePath: string

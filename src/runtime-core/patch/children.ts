@@ -5,8 +5,6 @@ import { patchKeyedChildren } from './keyed-children.ts'
 import { patchUnkeyedChildren } from './unkeyed-children.ts'
 import { hasKeys } from './utils.ts'
 
-export type { PatchEnvironment } from './children-environment.ts'
-
 /**
  * `patch` 一组 `children`：
  * - 若存在 `key`（任一侧有 `key`），走 `keyed diff` 以支持移动与复用。

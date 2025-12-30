@@ -4,14 +4,14 @@ import userEvent from '@testing-library/user-event'
 import { renderIntoNewContainer } from '$/index.ts'
 import { spyOnConsole } from '$/test-utils/mocks.ts'
 import type { Ref, SetupComponent } from '@/index.ts'
-import { nextTick, ref } from '@/index.ts'
+import { h, nextTick, ref } from '@/index.ts'
 import {
   jsxModelBindingConflictWarning,
   jsxModelBindingNonFormWarning,
   jsxModelBindingReadonlyTarget,
 } from '@/messages/index.ts'
 
-describe('runtime-dom JSX v-model', () => {
+describe('runtime-dom v-model', () => {
   it('文本输入使用 onInput 双向绑定值', async () => {
     const text = ref('hello')
 
@@ -41,6 +41,33 @@ describe('runtime-dom JSX v-model', () => {
     await user.type(input, '!')
 
     expect(text.value).toBe('patched!')
+  })
+
+  it('支持在 render 中手写 h() 的 v-model', async () => {
+    const text = ref('hello')
+
+    const InputBinder: SetupComponent = () => {
+      return () => {
+        return h('input', { 'aria-label': 'h-text', 'v-model': text })
+      }
+    }
+
+    const container = renderIntoNewContainer(<InputBinder />)
+
+    const input = within(container).getByLabelText<HTMLInputElement>('h-text')
+
+    expect(input.value).toBe('hello')
+
+    input.value = 'next'
+    input.dispatchEvent(new Event('input'))
+
+    expect(text.value).toBe('next')
+
+    text.value = 'patched'
+
+    await nextTick()
+
+    expect(input.value).toBe('patched')
   })
 
   it('checkbox 支持布尔模型', async () => {

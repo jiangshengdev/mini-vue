@@ -1,18 +1,23 @@
 # JSX v-model 转换实现稿（运行时兜底）
 
-在 `jsx-runtime` 层实现运行时 `v-model` 语法糖转换（无修饰符、严格等于），即便未来有编译期转换也保留兜底，涵盖动态标签与第三方产物。
+在 `runtime-dom` 层实现运行时 `v-model` 语法糖兜底（无修饰符、严格等于）：将 VirtualNode props 中的 `'v-model'` 转换为 DOM 表单受控所需的 property + 事件绑定。即便未来有编译期转换，DOM 宿主仍保留该运行时兜底能力，涵盖动态标签与第三方产物。
 
 ## 转换入口与范围
 
-- 进展：转换入口已接入 `src/jsx-runtime/builder.ts`，按下述规则在运行时生效。
-- 入口：`src/jsx-runtime/builder.ts`，在抽取 `key`/`children` 前对 `rawProps` 调用 `transformModelBindingProps(type, rawProps)`。
-- 适用：原生表单标签（`input`/`textarea`/`select`/`option`），其他标签如出现 `v-model` 在 Dev 环境 `warn`。
-- 行为：将 `v-model` 转换为对应的 DOM property + 事件（`value/checked` + `onInput/onChange`），移除原始 `v-model` 字段。
+- 进展：DOM 表单 `v-model` 已从 `jsx-runtime` 迁移到 `runtime-dom`，只要使用 `runtime-dom` 渲染器（不管 JSX 还是手写 `h`）都能生效。
+- 入口：`src/runtime-dom/props/patch-props.ts`（在 props diff 前接管 `v-model`），具体转换逻辑在 `src/runtime-dom/props/v-model/transform.ts`。
+- 适用：原生表单标签（`input`/`textarea`/`select`），其他标签如出现 `v-model` 在 Dev 环境 `warn` 并忽略。
+- 行为：将 `v-model` 转换为对应的 DOM property + 事件（`value/checked` + `onInput/onChange`），并移除原始 `'v-model'` 字段，避免落入 attribute patching。
+
+## 与 jsx-runtime 的关系
+
+- 组件 v-model：在 `jsx-runtime` 中将 `'v-model'` 转换为 `modelValue` + `onUpdate:modelValue`（Vue3 默认协议）。
+- DOM 表单 v-model：`jsx-runtime` 不再转换，但会在构建阶段“触发一次读取”以收集响应式依赖，确保 `Ref` 变更能触发组件 re-render，从而驱动 DOM 层更新。
 
 ## 覆盖规则（显式 props 与 v-model 同时出现时）
 
 - `v-model` 优先生成受控 prop/事件；显式 `value/checked/onInput/onChange` 被覆盖时 Dev 下 `warn`。
-- `value` 作为候选值仍会被读取（如 checkbox/radio/option 使用 `value` 判断/回推），示例能兼容官方的“多 checkbox 绑定同一数组”场景。
+- `value` 作为候选值仍会被读取（如 checkbox/radio 使用 `value` 判断/回推），示例能兼容官方的“多 checkbox 绑定同一数组”场景。
 - 不支持修饰符，`true-value/false-value` 也不实现；自定义 handler 请自行绑定事件。
 
 ## 元素映射与逻辑（严格等于）

@@ -1,7 +1,7 @@
 import path from 'node:path'
 import process from 'node:process'
 import ts from 'typescript'
-import { resolveFromImportMeta } from '../_shared/paths.ts'
+import { resolveFromImportMeta } from '../_shared/index.ts'
 import type { Position } from '../_shared/ts-check.ts'
 import { createSourceFileChecker, getPosition, listTsFilesInDir } from '../_shared/ts-check.ts'
 

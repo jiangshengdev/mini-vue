@@ -10,6 +10,11 @@ import type { PropsShape } from '@/shared/index.ts'
 /** `v-model` 仅支持可写 `Ref` 作为绑定目标。 */
 type ModelBinding = Ref
 
+/** 组件 `v-model` 语法糖注入的 props（默认 `modelValue` 协议）。 */
+interface ComponentModelBindingProps {
+  'v-model'?: ModelBinding
+}
+
 /** JSX 属性接受的宽松取值集合，交由运行时做最终处理。 */
 type AttributeValue<T> = T | string | number | boolean | undefined
 
@@ -89,7 +94,7 @@ declare global {
     type LibraryManagedAttributes<C, P> = C extends string
       ? P
       : C extends VirtualNodeType
-        ? ElementProps<C>
+        ? ElementProps<C> & ComponentModelBindingProps
         : P
 
     /** 标记 `children` 对应的 `props` 键名，供 TS 推导使用。 */

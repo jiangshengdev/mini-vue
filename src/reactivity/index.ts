@@ -39,7 +39,7 @@ export type {
   WritableComputedOptions,
 } from './ref/index.ts'
 export { computed, isRef, ref, state, toRef, unref } from './ref/index.ts'
-export { __hasDependencyBucket } from './testing.ts'
+export { __hasDependencyBucket } from './testing/index.ts'
 export { toRaw } from './to-raw.ts'
 export type { DeepReadonly, Reactive, ReadonlyReactive } from './types.ts'
 export { createWatch } from './watch/index.ts'

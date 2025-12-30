@@ -20,7 +20,12 @@ import { handleEventProp } from './event.ts'
 import { handleFormStateProp } from './form.ts'
 import { ignoreRefProp } from './ref.ts'
 import { handleStyleProp } from './style.ts'
+import { transformDomModelBindingProps } from './v-model/index.ts'
 import type { PropsShape } from '@/shared/index.ts'
+
+const domModelBindingCacheKey = Symbol('domModelBindingCache')
+
+type ElementWithModelBindingCache = Element & { [domModelBindingCacheKey]?: PropsShape }
 
 /**
  * 将 VirtualNode 的 props 差异应用到真实 DOM 元素。
@@ -34,8 +39,13 @@ export function patchProps(
   previousProps?: PropsShape,
   nextProps?: PropsShape,
 ): void {
-  const previous = previousProps ?? {}
-  const next = nextProps ?? {}
+  const rawPrevious = previousProps ?? {}
+  const rawNext = nextProps ?? {}
+  const cacheHost = element as ElementWithModelBindingCache
+  const cachedPrevious = cacheHost[domModelBindingCacheKey]
+  const previous = cachedPrevious ?? rawPrevious
+  const shouldApplyModelBinding = Object.hasOwn(rawNext, 'v-model')
+  const next = shouldApplyModelBinding ? transformDomModelBindingProps(element, rawNext) : rawNext
   /* 同步遍历前后所有 `prop` `key`，确保新增与删除都被覆盖。 */
   const keys = new Set([...Object.keys(previous), ...Object.keys(next)])
 
@@ -71,5 +81,12 @@ export function patchProps(
 
     /* 其余普通属性直接映射到 DOM attribute。 */
     patchDomAttr(element, key, previousValue, nextValue)
+  }
+
+  /* 对于 DOM 表单 v-model，缓存「上一次实际生效的 props」，避免 diff 时丢失旧值。 */
+  if (shouldApplyModelBinding) {
+    cacheHost[domModelBindingCacheKey] = next
+  } else if (cachedPrevious) {
+    Reflect.deleteProperty(cacheHost, domModelBindingCacheKey)
   }
 }

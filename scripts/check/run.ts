@@ -1,5 +1,5 @@
 import { runAllScriptsInDir } from './_shared/run-all.ts'
-import { resolveFromImportMeta } from './_shared/paths.ts'
+import { resolveFromImportMeta } from './_shared/index.ts'
 
 const checkDir = resolveFromImportMeta(import.meta.url, '.')
 

@@ -68,12 +68,13 @@ export interface VirtualNode<T extends ElementType = ElementType> {
 - 修复：统一通过 `spyOnConsole('warn')`（`test/test-utils/mocks.ts`）创建 spy，并依赖 `test/setup.ts` 的 `vi.restoreAllMocks()` 在 `afterEach` 自动恢复，不再手动 restore。
 - 收益：降低 mock 泄漏导致的串扰风险，提升用例可读性与一致性。
 
-## 4. 测试显式依赖内部实现细节（待优化）
+## 4. 测试显式依赖内部实现细节（已优化）
 
 - 位置：`test/jsx-runtime/h.test.ts`
-- 现状：测试用例 '支持省略 props 直接传入可变 children' 显式断言 `expect(virtualNode.key).toBeUndefined()`。
+- 现状：测试用例曾显式断言 `expect(virtualNode.key).toBeUndefined()`，属于对 `h` 内部默认值处理的实现细节依赖。
 - 影响：虽然目前行为正确，但这过度依赖了 `h` 函数如何处理 `undefined` props 的内部实现。
 - 提示：测试应关注外部行为（如 `key` 是否起作用），尽量减少对非公开属性状态的直接断言。
+- 状态：🟢 **已优化**（移除默认值断言，新增通过 `render`/DOM 复用与移动验证 `key` 语义的黑盒用例）
 
 ## 5. 组件类型被限定为 `(props: never)`，导致 ElementType 无法接受正常组件（待修复）
 

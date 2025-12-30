@@ -1,5 +1,5 @@
 import { mountComponent } from '../component/index.ts'
-import type { MountContext } from '../environment.ts'
+import type { ChildEnvironment } from '../environment.ts'
 import type { RendererOptions } from '../index.ts'
 import { asRuntimeVirtualNode } from '../virtual-node.ts'
 import { mountChild } from './child.ts'
@@ -24,17 +24,11 @@ export function mountVirtualNode<
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   virtualNode: VirtualNode,
-  container: HostElement | HostFragment,
-  context?: MountContext,
-  anchor?: HostNode,
+  environment: ChildEnvironment<HostNode, HostElement, HostFragment>,
 ): MountedHandle<HostNode> | undefined {
   /* `Fragment` 直接展开自身 `children`，不走组件路径。 */
   if (virtualNode.type === Fragment) {
-    const mounted = mountChild(options, virtualNode.children, {
-      container,
-      anchor,
-      context,
-    })
+    const mounted = mountChild(options, virtualNode.children, environment)
     const runtime = asRuntimeVirtualNode<HostNode, HostElement, HostFragment>(virtualNode)
 
     if (mounted) {
@@ -49,13 +43,7 @@ export function mountVirtualNode<
 
   /* 函数组件通过 `mountComponent` 执行并挂载其返回值。 */
   if (typeof virtualNode.type === 'function') {
-    const mounted = mountComponent(
-      options,
-      virtualNode as VirtualNode<SetupComponent>,
-      container,
-      context,
-      anchor,
-    )
+    const mounted = mountComponent(options, virtualNode as VirtualNode<SetupComponent>, environment)
 
     const runtime = asRuntimeVirtualNode<HostNode, HostElement, HostFragment>(virtualNode)
 
@@ -69,13 +57,7 @@ export function mountVirtualNode<
   }
 
   /* 普通标签名直接走元素挂载逻辑。 */
-  const mounted = mountElement(
-    options,
-    virtualNode as VirtualNode<string>,
-    container,
-    context,
-    anchor,
-  )
+  const mounted = mountElement(options, virtualNode as VirtualNode<string>, environment)
   const runtime = asRuntimeVirtualNode<HostNode, HostElement, HostFragment>(virtualNode)
 
   runtime.el = mounted.nodes[0]

@@ -1,4 +1,4 @@
-import type { MountContext } from '../environment.ts'
+import type { ChildEnvironment } from '../environment.ts'
 import type { RendererOptions } from '../index.ts'
 import type { MountedHandle } from '../mount/handle.ts'
 import { asRuntimeVirtualNode } from '../virtual-node.ts'
@@ -27,10 +27,10 @@ export function mountComponent<
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   virtualNode: VirtualNode<SetupComponent>,
-  container: HostElement | HostFragment,
-  context?: MountContext,
-  anchor?: HostNode,
+  environment: ChildEnvironment<HostNode, HostElement, HostFragment>,
 ): MountedHandle<HostNode> | undefined {
+  const { container, context, anchor } = environment
+
   /* 准备实例前先规整 `props`，以免 `setup` 阶段读到旧引用。 */
   const props = resolveComponentProps(virtualNode)
   const propsState = createComponentPropsState(props)

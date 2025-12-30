@@ -10,6 +10,12 @@ import {
 } from '@/index.ts'
 import { errorContexts } from '@/shared/index.ts'
 
+function createCountTracker(state: { count: number }, collected: number[]): () => void {
+  return function trackCount() {
+    collected.push(state.count)
+  }
+}
+
 describe('effectScope 生命周期与清理', () => {
   afterEach(() => {
     setErrorHandler(undefined)
@@ -126,15 +132,11 @@ describe('effectScope 生命周期与清理', () => {
       second = effectScope()
 
       first.run(function registerFirstEffect() {
-        effect(function trackFirstEffect() {
-          firstValues.push(state.count)
-        })
+        effect(createCountTracker(state, firstValues))
       })
 
       second.run(function registerSecondEffect() {
-        effect(function trackSecondEffect() {
-          secondValues.push(state.count)
-        })
+        effect(createCountTracker(state, secondValues))
       })
     })
 
@@ -152,9 +154,7 @@ describe('effectScope 生命周期与清理', () => {
       third = effectScope()
 
       third.run(function registerThirdEffect() {
-        effect(function trackThirdEffect() {
-          thirdValues.push(state.count)
-        })
+        effect(createCountTracker(state, thirdValues))
       })
     })
 

@@ -27,7 +27,7 @@ export function mountChild<
   child: RenderOutput | undefined,
   environment: ChildEnvironment<HostNode, HostElement, HostFragment>,
 ): MountedHandle<HostNode> | undefined {
-  const { container, context, anchor } = environment
+  const { container, anchor } = environment
   const { appendChild, insertBefore, createComment, createText, remove } = options
   /* 有锚点时直接在最终位置插入，避免先 append 再移动。 */
   const insert = (node: HostNode): void => {
@@ -104,7 +104,7 @@ export function mountChild<
       return handle
     }
 
-    const mounted = mountVirtualNode(options, child, container, context, anchor)
+    const mounted = mountVirtualNode(options, child, environment)
 
     return mounted
   }

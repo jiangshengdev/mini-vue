@@ -1,4 +1,4 @@
-import type { MountContext } from '../environment.ts'
+import type { ChildEnvironment } from '../environment.ts'
 import type { RendererOptions } from '../index.ts'
 import { mountElementChildren } from './children.ts'
 import type { MountedHandle } from './handle.ts'
@@ -25,10 +25,9 @@ export function mountElement<
 >(
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   virtualNode: VirtualNode<string>,
-  container: HostElement | HostFragment,
-  context?: MountContext,
-  anchor?: HostNode,
+  environment: ChildEnvironment<HostNode, HostElement, HostFragment>,
 ): MountedHandle<HostNode> {
+  const { container, context, anchor } = environment
   const { createElement, patchProps, appendChild, insertBefore, remove } = options
   const element = createElement(virtualNode.type)
   const { props } = virtualNode

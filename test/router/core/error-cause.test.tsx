@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { ErrorHandler } from '@/index.ts'
+import { createRouter, render, setErrorHandler, useRouter } from '@/index.ts'
 import { createRenderlessComponent, createTestContainer } from '$/index.ts'
 import { routerDuplicateInstallOnApp, routerNotFound } from '@/messages/index.ts'
-import { createRouter, render, setErrorHandler, useRouter } from '@/index.ts'
 import { routerInjectionKey } from '@/router/index.ts'
 
 describe('router 错误 cause', () => {

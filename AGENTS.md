@@ -25,6 +25,7 @@
 - 在 `test/<子域>/` 下为对应的 `src/<子域>/` 模块补齐用例，文件名 `*.test.ts` / `*.spec.ts`，使用 `describe/it`。
 - 回归案例优先，涉及 DOM/渲染的特性同步补充浏览器套件。必要时用 `expectTypeOf` 断言类型预期。
 - 新功能至少跑 `pnpm run test`；如触及 DOM/renderer，补跑 `pnpm run test:browser`。
+- Vitest 过滤（只跑某个文件）：`pnpm run test test/jsx-runtime/h.test.ts`（注意不要写成 `pnpm run test -- test/jsx-runtime/h.test.ts`）。
 
 ## 提交与 Pull Request
 

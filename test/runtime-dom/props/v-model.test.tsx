@@ -1,7 +1,8 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { within } from '@testing-library/dom'
 import userEvent from '@testing-library/user-event'
 import { renderIntoNewContainer } from '$/index.ts'
+import { spyOnConsole } from '$/test-utils/mocks.ts'
 import type { Ref, SetupComponent } from '@/index.ts'
 import { nextTick, ref } from '@/index.ts'
 import {
@@ -212,9 +213,7 @@ describe('runtime-dom JSX v-model', () => {
   })
 
   it('开发期对非表单元素与冲突属性给出警告', () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {
-      return undefined
-    })
+    const warn = spyOnConsole('warn')
     const text = ref('x')
 
     renderIntoNewContainer(<div v-model={text} />)
@@ -240,14 +239,10 @@ describe('runtime-dom JSX v-model', () => {
       jsxModelBindingConflictWarning('input', ['value', 'onInput']),
       expect.any(Object),
     )
-
-    warn.mockRestore()
   })
 
   it('绑定到非 ref 目标时写入会警告', () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {
-      return undefined
-    })
+    const warn = spyOnConsole('warn')
     const container = renderIntoNewContainer(
       <input aria-label="readonly" v-model={'fixed' as unknown as Ref} />,
     )
@@ -260,7 +255,5 @@ describe('runtime-dom JSX v-model', () => {
       modelBinding: 'fixed',
       value: 'next',
     })
-
-    warn.mockRestore()
   })
 })

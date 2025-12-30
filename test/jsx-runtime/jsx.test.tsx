@@ -1,4 +1,5 @@
-import { describe, expect, it, vi } from 'vitest'
+import { spyOnConsole } from '$/test-utils/mocks.ts'
+import { describe, expect, it } from 'vitest'
 import { Comment, isVirtualNode, virtualNodeFlag } from '@/jsx-foundation/index.ts'
 import { jsxDEV } from '@/index.ts'
 
@@ -28,9 +29,7 @@ describe('jsx-runtime automatic jsx helper', () => {
   })
 
   it('忽略对象与函数等不可渲染的 children', () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
-      return undefined
-    })
+    const warnSpy = spyOnConsole('warn')
 
     const rawObject = { foo: 'bar' }
     const fnChild = () => {
@@ -38,33 +37,28 @@ describe('jsx-runtime automatic jsx helper', () => {
     }
 
     const symbolChild = Symbol('skip-me')
+    const virtualNode = (
+      <div>
+        {[
+          'text',
+          rawObject,
+          fnChild,
+          symbolChild,
+          <span id="label">label</span>,
+          0,
+          [{ nested: true }, ['inner']],
+        ]}
+      </div>
+    )
 
-    try {
-      const virtualNode = (
-        <div>
-          {[
-            'text',
-            rawObject,
-            fnChild,
-            symbolChild,
-            <span id="label">label</span>,
-            0,
-            [{ nested: true }, ['inner']],
-          ]}
-        </div>
-      )
+    expect(virtualNode.children).toHaveLength(4)
+    const [textChild, spanChild, zeroChild, innerChild] = virtualNode.children
 
-      expect(virtualNode.children).toHaveLength(4)
-      const [textChild, spanChild, zeroChild, innerChild] = virtualNode.children
-
-      expect(textChild).toBe('text')
-      expect(isVirtualNode(spanChild)).toBe(true)
-      expect(zeroChild).toBe(0)
-      expect(innerChild).toBe('inner')
-      expect(warnSpy).toHaveBeenCalledTimes(4)
-    } finally {
-      warnSpy.mockRestore()
-    }
+    expect(textChild).toBe('text')
+    expect(isVirtualNode(spanChild)).toBe(true)
+    expect(zeroChild).toBe(0)
+    expect(innerChild).toBe('inner')
+    expect(warnSpy).toHaveBeenCalledTimes(4)
   })
 
   it('将 key 从 jsx 属性提升为 virtualNode.key', () => {

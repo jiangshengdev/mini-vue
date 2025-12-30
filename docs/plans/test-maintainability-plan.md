@@ -39,9 +39,9 @@
 
 ### Phase 0：基线与护栏（最高优先级）
 
-[ ] 在 `test/setup.ts` 增加全局清理：`vi.restoreAllMocks()` + `vi.unstubAllGlobals()`（与现有 `cleanupTestContainers()` 并存），并确认不会破坏依赖跨用例共享 mock 的测试（原则上不允许共享）。
-[ ] 补充一个轻量测试工具模块（建议 `test/test-utils/mocks.ts` 或扩展 `test/helpers.ts`）：统一封装 `spyOnConsole('warn'|'error')`、`stubGlobalQueueMicrotask` 等常用能力，避免每个用例手写 try/finally。
-[ ] 将现有“手动 restore”的用例迁移到全局清理：删除重复的 try/finally，仅保留必要的局部 `mockClear()`/断言。
+[x] 在 `test/setup.ts` 增加全局清理：`vi.restoreAllMocks()` + `vi.unstubAllGlobals()`（与现有 `cleanupTestContainers()` 并存），并确认不会破坏依赖跨用例共享 mock 的测试（原则上不允许共享）。
+[x] 补充一个轻量测试工具模块（建议 `test/test-utils/mocks.ts` 或扩展 `test/helpers.ts`）：统一封装 `spyOnConsole('warn'|'error')`、`stubGlobalQueueMicrotask` 等常用能力，避免每个用例手写 try/finally。
+[x] 将现有“手动 restore”的用例迁移到全局清理：删除重复的 try/finally，仅保留必要的局部 `mockClear()`/断言。
 
 ### Phase 1：消除全局污染（并发风险）
 
@@ -86,4 +86,3 @@
 1. 全局清理采用 `test/setup.ts` 的 `afterEach`，还是改为 Vitest 配置项（如 `restoreMocks: true`/`unstubGlobals: true`）？两者也可组合，但需要统一约定避免重复与误解。
 2. 是否接受引入 `src/**/testing.ts` 作为稳定 testing seam（默认不从 `src/index.ts` 导出，避免误用）？
 3. 是否允许移动/重分配个别用例到更合适的模块（例如将“remove 次数”类测试迁移到 runtime-core host 渲染器用例）以减少 DOM 全局污染？
-

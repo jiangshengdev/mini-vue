@@ -61,7 +61,5 @@ describe('runtime-dom class 归一化', () => {
     render(<div class={['foo', 'bar']}>text</div>, container)
 
     expect(setSpy).not.toHaveBeenCalled()
-
-    setSpy.mockRestore()
   })
 })

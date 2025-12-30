@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { within } from '@testing-library/dom'
 import { createTestContainer, renderIntoNewContainer } from '$/index.ts'
+import { spyOnConsole } from '$/test-utils/mocks.ts'
 import { render } from '@/index.ts'
 import { runtimeDomUnsupportedAttrValue } from '@/messages/index.ts'
 
@@ -31,9 +32,7 @@ describe('runtime-dom attrs props', () => {
   })
 
   it('不支持的属性值会被忽略，并在开发期给出警告', () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {
-      return undefined
-    })
+    const warn = spyOnConsole('warn')
     const payload = { nested: true }
 
     const container = renderIntoNewContainer(<div title={payload as unknown as string} />)
@@ -45,8 +44,6 @@ describe('runtime-dom attrs props', () => {
       element,
       value: payload,
     })
-
-    warn.mockRestore()
   })
 
   it('空值 style 会移除 style 属性', () => {
@@ -74,8 +71,5 @@ describe('runtime-dom attrs props', () => {
 
     expect(setSpy).not.toHaveBeenCalled()
     expect(removeSpy).not.toHaveBeenCalled()
-
-    setSpy.mockRestore()
-    removeSpy.mockRestore()
   })
 })

@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { within } from '@testing-library/dom'
 import { createTestContainer, renderIntoNewContainer } from '$/index.ts'
+import { spyOnConsole } from '$/test-utils/mocks.ts'
 import { render } from '@/index.ts'
 import { runtimeDomInvalidStyleValue } from '@/messages/index.ts'
 
@@ -30,26 +31,20 @@ describe('runtime-dom style props', () => {
   })
 
   it('对象 style 忽略非字符串/数字值并在开发期警告', () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
-      return undefined
-    })
+    const warnSpy = spyOnConsole('warn')
     const payload: unknown = { x: 1 }
 
-    try {
-      const container = renderIntoNewContainer(<div style={{ color: payload as string }}>text</div>)
+    const container = renderIntoNewContainer(<div style={{ color: payload as string }}>text</div>)
 
-      const element = within(container).getByText('text')
+    const element = within(container).getByText('text')
 
-      expect(element.getAttribute('style')).toBeNull()
-      expect(element.style.color).toBe('')
-      expect(warnSpy).toHaveBeenCalledTimes(1)
-      expect(warnSpy).toHaveBeenCalledWith(runtimeDomInvalidStyleValue('color', typeof payload), {
-        element,
-        value: payload,
-      })
-    } finally {
-      warnSpy.mockRestore()
-    }
+    expect(element.getAttribute('style')).toBeNull()
+    expect(element.style.color).toBe('')
+    expect(warnSpy).toHaveBeenCalledTimes(1)
+    expect(warnSpy).toHaveBeenCalledWith(runtimeDomInvalidStyleValue('color', typeof payload), {
+      element,
+      value: payload,
+    })
   })
 
   it('相同 style 对象更新不会重复写入 DOM', () => {
@@ -65,8 +60,5 @@ describe('runtime-dom style props', () => {
 
     expect(setColor).not.toHaveBeenCalled()
     expect(setFontSize).not.toHaveBeenCalled()
-
-    setColor.mockRestore()
-    setFontSize.mockRestore()
   })
 })

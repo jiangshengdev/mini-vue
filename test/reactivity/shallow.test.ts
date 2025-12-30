@@ -1,5 +1,6 @@
 import type { MockInstance } from 'vitest'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
+import { spyOnConsole } from '$/test-utils/mocks.ts'
 import {
   isReactive,
   isReadonly,
@@ -74,13 +75,7 @@ describe('shallowReadonly', () => {
   let warn: MockInstance<Console['warn']>
 
   beforeEach(() => {
-    warn = vi.spyOn(console, 'warn').mockImplementation(() => {
-      return undefined
-    })
-  })
-
-  afterEach(() => {
-    warn.mockRestore()
+    warn = spyOnConsole('warn')
   })
 
   it('阻止写入且会解包顶层 Ref', () => {

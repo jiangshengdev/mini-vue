@@ -1,4 +1,5 @@
-import { describe, expect, it, vi } from 'vitest'
+import { spyOnConsole } from '$/test-utils/mocks.ts'
+import { describe, expect, it } from 'vitest'
 import type { RendererOptions } from '@/runtime-core/index.ts'
 import {
   getHostNodesSafely,
@@ -73,9 +74,7 @@ describe('patch 插入与诊断', () => {
 
   it('getHostNodesSafely 在 DEV 模式下当运行时节点缺失时发出警告', () => {
     const virtualNode = normalizeRenderOutput(createTextVirtualNode('lonely'))!
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {
-      return undefined
-    })
+    const warn = spyOnConsole('warn')
 
     getHostNodesSafely<TestNode, TestElement, TestFragment>(virtualNode)
 
@@ -84,8 +83,6 @@ describe('patch 插入与诊断', () => {
     } else {
       expect(warn).not.toHaveBeenCalled()
     }
-
-    warn.mockRestore()
   })
 })
 

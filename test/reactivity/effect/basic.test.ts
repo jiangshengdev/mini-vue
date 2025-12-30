@@ -272,7 +272,5 @@ describe('effect 基础行为', () => {
     state.count = 1
 
     expect(triggerSpy).not.toHaveBeenCalled()
-
-    triggerSpy.mockRestore()
   })
 })

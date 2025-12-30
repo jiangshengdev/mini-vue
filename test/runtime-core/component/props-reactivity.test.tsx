@@ -1,21 +1,13 @@
-import type { MockInstance } from 'vitest'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { spyOnConsole } from '$/test-utils/mocks.ts'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { createHostRenderer, findHostElementByTag, getHostElementText } from '../host-utils.ts'
 import type { SetupComponent } from '@/index.ts'
 import { effect, isReactive, nextTick, ref } from '@/index.ts'
 import { createRenderer } from '@/runtime-core/index.ts'
 
 describe('runtime-core 组件 props 响应式', () => {
-  let warn: MockInstance<Console['warn']>
-
   beforeEach(() => {
-    warn = vi.spyOn(console, 'warn').mockImplementation(() => {
-      return undefined
-    })
-  })
-
-  afterEach(() => {
-    warn.mockRestore()
+    spyOnConsole('warn')
   })
 
   it('props 为浅只读响应式，依赖追踪随父级更新', async () => {

@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { within } from '@testing-library/dom'
 import userEvent from '@testing-library/user-event'
 import { createTestContainer, renderIntoNewContainer } from '$/index.ts'
+import { spyOnConsole } from '$/test-utils/mocks.ts'
 import type { SetupComponent } from '@/index.ts'
 import { Fragment, nextTick, reactive, render } from '@/index.ts'
 import { runtimeCoreObjectChildWarning } from '@/messages/index.ts'
@@ -115,9 +116,7 @@ describe('runtime-dom 基础渲染', () => {
   })
 
   it('不可渲染子节点在开发期警告并忽略渲染', () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
-      return undefined
-    })
+    const warnSpy = spyOnConsole('warn')
     const container = createTestContainer()
 
     /* 构造多种非法 child 形态，逐个喂给 render 并比对 warning 与空容器。 */
@@ -129,21 +128,17 @@ describe('runtime-dom 基础渲染', () => {
       Symbol('skip'),
     ]
 
-    try {
-      for (const payload of payloads) {
-        render(payload as never, container)
+    for (const payload of payloads) {
+      render(payload as never, container)
 
-        expect(container).toBeEmptyDOMElement()
-      }
+      expect(container).toBeEmptyDOMElement()
+    }
 
-      expect(warnSpy).toHaveBeenCalledTimes(payloads.length)
+    expect(warnSpy).toHaveBeenCalledTimes(payloads.length)
 
-      for (const [index, payload] of payloads.entries()) {
-        expect(warnSpy.mock.calls[index]?.[0]).toBe(runtimeCoreObjectChildWarning)
-        expect(warnSpy.mock.calls[index]?.[1]).toMatchObject({ child: payload })
-      }
-    } finally {
-      warnSpy.mockRestore()
+    for (const [index, payload] of payloads.entries()) {
+      expect(warnSpy.mock.calls[index]?.[0]).toBe(runtimeCoreObjectChildWarning)
+      expect(warnSpy.mock.calls[index]?.[1]).toMatchObject({ child: payload })
     }
   })
 

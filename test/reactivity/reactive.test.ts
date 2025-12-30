@@ -1,5 +1,6 @@
 import type { MockInstance } from 'vitest'
-import { afterEach, beforeEach, describe, expect, expectTypeOf, it, vi } from 'vitest'
+import { beforeEach, describe, expect, expectTypeOf, it } from 'vitest'
+import { spyOnConsole } from '$/test-utils/mocks.ts'
 import type { Ref } from '@/index.ts'
 import { effect, isReactive, isReadonly, isRef, reactive, readonly, ref, toRaw } from '@/index.ts'
 import { reactivityUnsupportedType } from '@/messages/index.ts'
@@ -212,13 +213,7 @@ describe('readonly', () => {
   let warn: MockInstance<Console['warn']>
 
   beforeEach(() => {
-    warn = vi.spyOn(console, 'warn').mockImplementation(() => {
-      return undefined
-    })
-  })
-
-  afterEach(() => {
-    warn.mockRestore()
+    warn = spyOnConsole('warn')
   })
 
   it('创建只读代理并阻止写入', () => {

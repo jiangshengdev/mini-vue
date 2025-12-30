@@ -34,3 +34,8 @@
 
 - 在 `src/jsx-shim.d.ts` 为表单标签补充 `v-model?: unknown` 声明（TODO：收紧类型与事件签名）。
 - 组件继续使用 `modelValue/onUpdate:modelValue` 协议，非原生表单组件接入放后续迭代。
+
+## 后续演进（面向非 DOM 宿主）
+
+- 为支持非 DOM 宿主渲染器，DOM 表单 `v-model` 适配应尽早从 `jsx-runtime` 抽离到宿主层（优先 `runtime-dom`），避免在平台无关路径里固化 `Event/HTMLInputElement` 等 DOM 语义。
+- 组件 `v-model` 运行时转换（默认 `modelValue` + `onUpdate:modelValue`）的计划见 `docs/plans/plan-v-model-component.md`。

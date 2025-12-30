@@ -19,7 +19,11 @@
 
 ## Open questions
 
-- 非原生表单元素何时接入 `modelValue/onUpdate:modelValue` 支持，是否按后续迭代分步推进？
+- 组件 `v-model`（默认 `modelValue` + `onUpdate:modelValue`）的运行时转换计划已单独拆分，详见 [plan-v-model-component](./plan-v-model-component.md)。
+
+## 后续收敛（面向非 DOM 宿主）
+
+- 由于计划支持非 DOM 宿主渲染器，DOM 表单 `v-model` 适配应尽早从 `jsx-runtime` 抽离到宿主层（优先落在 `runtime-dom`），避免平台无关层隐式依赖 DOM 事件/元素语义。
 
 ## 与 Vue 官方的对齐与收敛
 

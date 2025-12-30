@@ -149,6 +149,23 @@ class DependencyRegistry {
   }
 
   /**
+   * 测试用：判断目标字段是否已经创建依赖桶（不关心桶内是否有活跃 effect）。
+   *
+   * @remarks
+   * - 用于验证「无活跃 effect 读取」不会创建空依赖桶，避免测试通过 mock 内部模块实现断言。
+   * - 该方法不应被业务逻辑依赖，仅供测试观测内部状态。
+   */
+  hasDependencyBucket(target: ReactiveRawTarget, key: PropertyKey): boolean {
+    const depsMap = this.targetMap.get(target)
+
+    if (!depsMap) {
+      return false
+    }
+
+    return depsMap.has(key)
+  }
+
+  /**
    * 确保目标字段具备依赖集合，不存在时创建新集合。
    *
    * @param target - 响应式代理的原始目标对象
@@ -173,23 +190,6 @@ class DependencyRegistry {
     }
 
     return dependencyBucket
-  }
-
-  /**
-   * 测试用：判断目标字段是否已经创建依赖桶（不关心桶内是否有活跃 effect）。
-   *
-   * @remarks
-   * - 用于验证「无活跃 effect 读取」不会创建空依赖桶，避免测试通过 mock 内部模块实现断言。
-   * - 该方法不应被业务逻辑依赖，仅供测试观测内部状态。
-   */
-  hasDependencyBucket(target: ReactiveRawTarget, key: PropertyKey): boolean {
-    const depsMap = this.targetMap.get(target)
-
-    if (!depsMap) {
-      return false
-    }
-
-    return depsMap.has(key)
   }
 }
 

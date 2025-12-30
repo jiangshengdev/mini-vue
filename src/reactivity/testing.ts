@@ -6,4 +6,3 @@
  * - 为避免测试直接 import 内部模块路径，通过 `index.ts` 统一转发这些能力。
  */
 export { __hasDependencyBucket } from './internals/operations.ts'
-

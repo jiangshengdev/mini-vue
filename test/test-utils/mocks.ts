@@ -3,14 +3,16 @@ import { vi } from 'vitest'
 
 type ConsoleMethod = 'debug' | 'error' | 'info' | 'log' | 'warn'
 
-export function spyOnConsole<T extends ConsoleMethod>(
-  method: T,
-): MockInstance<Console[T]> {
-  return vi
-    .spyOn(console, method)
-    .mockImplementation(() => {
-      return undefined
-    }) as MockInstance<Console[T]>
+type ConsoleProcedure = (message?: unknown, ...optionalParameters: unknown[]) => void
+
+export function spyOnConsole(method: ConsoleMethod): MockInstance<ConsoleProcedure> {
+  const spy = vi.spyOn(console, method) as unknown as MockInstance<ConsoleProcedure>
+
+  spy.mockImplementation((..._args: unknown[]) => {
+    /* No-op */
+  })
+
+  return spy
 }
 
 export function stubGlobalQueueMicrotask(): {
@@ -26,4 +28,3 @@ export function stubGlobalQueueMicrotask(): {
 
   return { callbacks, queueMicrotask: queueMicrotaskSpy }
 }
-

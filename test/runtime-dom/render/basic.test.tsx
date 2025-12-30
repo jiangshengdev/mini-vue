@@ -144,6 +144,7 @@ describe('runtime-dom 基础渲染', () => {
 
   it('卸载元素时不会对子节点重复调用 remove', () => {
     const container = createTestContainer()
+
     render(
       <div data-testid="parent">
         <span data-testid="first" />

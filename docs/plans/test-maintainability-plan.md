@@ -64,18 +64,20 @@
 ### Phase 4：必要时的 “testing seam” 方案（需二次确认后落地）
 
 [x] 设计并确认稳定的测试接缝出口（择一或组合）：
-  - ✅ A（默认）：`src/<boundary>/testing.ts` 定义 seam 能力，`src/<boundary>/index.ts` 仅做转发；根入口 `src/index.ts` 不导出；导出名使用 `__` 前缀并在注释中声明「仅测试使用，不保证稳定」。
-  - B（仅在必要时）：注入型需求优先通过 `testing.ts` 暴露 setter/override，而不是在 public API 上添加可选依赖参数；确需依赖注入时再二次确认接口边界。
-  - C（按需）：若 seam 可能引入生产开销/暴露调试信息，可在实现中使用 `__DEV__`/`__INTERNAL_DEV__` 做开发态保护，以便构建时摇树。
-[x] 以最小试点验证：已在 `reactivity` 落地 `__hasDependencyBucket`（`src/reactivity/testing.ts` -> `src/reactivity/index.ts`），用于替代测试对内部模块路径的 mock，并保持对“无活跃 effect 不创建依赖桶”的覆盖。
+
+- ✅ A（默认）：`src/<boundary>/testing.ts` 定义 seam 能力，`src/<boundary>/index.ts` 仅做转发；根入口 `src/index.ts` 不导出；导出名使用 `__` 前缀并在注释中声明「仅测试使用，不保证稳定」。
+- B（仅在必要时）：注入型需求优先通过 `testing.ts` 暴露 setter/override，而不是在 public API 上添加可选依赖参数；确需依赖注入时再二次确认接口边界。
+- C（按需）：若 seam 可能引入生产开销/暴露调试信息，可在实现中使用 `__DEV__`/`__INTERNAL_DEV__` 做开发态保护，以便构建时摇树。
+  [x] 以最小试点验证：已在 `reactivity` 落地 `__hasDependencyBucket`（`src/reactivity/testing.ts` -> `src/reactivity/index.ts`），用于替代测试对内部模块路径的 mock，并保持对“无活跃 effect 不创建依赖桶”的覆盖。
 
 ### Phase 5：复用测试工具与收尾
 
 [x] `test/runtime-core/patch/insertion.test.ts`：复用 `test/runtime-core/host-utils.ts` 的 `createHostRenderer()` 与计数器，删除重复的 host options 构造（对应 `docs/issues/runtime-core-issues.md` #13）。
 [x] 为白盒/测试接缝用例建立统一标注规范：
-  - `it('[白盒] ...')`：确需断言内部实现细节时使用，并在文件顶部用简短说明阐明白盒原因与可替代方向。
-  - `it('[测试接缝] ...')`：使用 `src/<boundary>/testing.ts`（`__*` 导出）观测/注入内部行为时使用，避免测试直接依赖内部文件路径。
-[x] 同步更新 `docs/issues/*-issues.md`：将已完成项标记为已优化，并补充“采用的替代方案/测试接缝”说明，便于后续维护。
+
+- `it('[白盒] ...')`：确需断言内部实现细节时使用，并在文件顶部用简短说明阐明白盒原因与可替代方向。
+- `it('[测试接缝] ...')`：使用 `src/<boundary>/testing.ts`（`__*` 导出）观测/注入内部行为时使用，避免测试直接依赖内部文件路径。
+  [x] 同步更新 `docs/issues/*-issues.md`：将已完成项标记为已优化，并补充“采用的替代方案/测试接缝”说明，便于后续维护。
 
 ## 验证与质量门禁
 

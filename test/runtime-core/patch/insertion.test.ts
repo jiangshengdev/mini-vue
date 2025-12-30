@@ -1,6 +1,7 @@
-import { spyOnConsole } from '$/test-utils/mocks.ts'
 import { describe, expect, it } from 'vitest'
-import { createHostRenderer, type TestElement, type TestFragment, type TestNode } from '../host-utils.ts'
+import type { TestElement, TestFragment, TestNode } from '../host-utils.ts'
+import { createHostRenderer } from '../host-utils.ts'
+import { spyOnConsole } from '$/test-utils/mocks.ts'
 import {
   getHostNodesSafely,
   mountChild,

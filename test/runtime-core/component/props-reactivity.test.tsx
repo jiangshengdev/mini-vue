@@ -1,6 +1,6 @@
-import { spyOnConsole } from '$/test-utils/mocks.ts'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { createHostRenderer, findHostElementByTag, getHostElementText } from '../host-utils.ts'
+import { spyOnConsole } from '$/test-utils/mocks.ts'
 import type { SetupComponent } from '@/index.ts'
 import { effect, isReactive, nextTick, ref } from '@/index.ts'
 import { createRenderer } from '@/runtime-core/index.ts'

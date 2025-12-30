@@ -1,5 +1,5 @@
-import { spyOnConsole } from '$/test-utils/mocks.ts'
 import { describe, expect, it } from 'vitest'
+import { spyOnConsole } from '$/test-utils/mocks.ts'
 import { Comment, isVirtualNode, virtualNodeFlag } from '@/jsx-foundation/index.ts'
 import { jsxDEV } from '@/index.ts'
 

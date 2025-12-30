@@ -2,7 +2,14 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { within } from '@testing-library/dom'
 import { createTestContainer } from '$/index.ts'
 import type { ErrorHandler, SetupComponent } from '@/index.ts'
-import { createWatch, nextTick, onScopeDispose, reactive, render, setErrorHandler } from '@/index.ts'
+import {
+  createWatch,
+  nextTick,
+  onScopeDispose,
+  reactive,
+  render,
+  setErrorHandler,
+} from '@/index.ts'
 import { errorContexts } from '@/shared/index.ts'
 
 describe('runtime-dom component reactivity', () => {

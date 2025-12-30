@@ -1,33 +1,34 @@
-import { describe, expect, it, vi } from 'vitest'
-import { createRenderlessComponent } from '$/index.ts'
+import type { ErrorHandler } from '@/index.ts'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { createRenderlessComponent, createTestContainer } from '$/index.ts'
 import { routerDuplicateInstallOnApp, routerNotFound } from '@/messages/index.ts'
-import { createRouter, useRouter } from '@/index.ts'
+import { createRouter, render, setErrorHandler, useRouter } from '@/index.ts'
 import { routerInjectionKey } from '@/router/index.ts'
 
-vi.mock('@/runtime-core/index.ts', async () => {
-  const actual = await vi.importActual('@/runtime-core/index.ts')
-
-  return {
-    ...actual,
-    inject: vi.fn(() => {
-      return undefined
-    }),
-  }
-})
-
 describe('router 错误 cause', () => {
+  afterEach(() => {
+    setErrorHandler(undefined)
+  })
+
   it('useRouter 未注入 router 时抛错并在 cause 中暴露注入 key', () => {
-    let caught: unknown
+    const handler = vi.fn<ErrorHandler>()
 
-    try {
+    setErrorHandler(handler)
+
+    const Consumer = createRenderlessComponent(() => {
       useRouter()
-    } catch (error) {
-      caught = error
-    }
+    })
+    const container = createTestContainer()
 
-    expect(caught).toBeInstanceOf(Error)
-    expect((caught as Error).message).toBe(routerNotFound)
-    expect((caught as Error & { cause: unknown }).cause).toBe(routerInjectionKey)
+    render(<Consumer />, container)
+
+    expect(handler).toHaveBeenCalledTimes(1)
+
+    const [error] = handler.mock.calls[0]
+
+    expect(error).toBeInstanceOf(Error)
+    expect(error.message).toBe(routerNotFound)
+    expect((error as Error & { cause: unknown }).cause).toBe(routerInjectionKey)
   })
 
   it('router.install 重复调用时在 cause 中携带 app', () => {

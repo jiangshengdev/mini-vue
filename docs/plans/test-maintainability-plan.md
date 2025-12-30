@@ -51,9 +51,9 @@
 
 ### Phase 2：减少 Mock 内部路径（结构耦合）
 
-[ ] `test/router/core/error-cause.test.tsx`：移除 `vi.mock('@/runtime-core/index.ts')`，改为在组件 `setup()` 上下文内调用 `useRouter()` 来触发“未注入 router”的真实路径（不再依赖 runtime-core 模块结构）。
-[ ] `test/runtime-core/patch/child.test.tsx`：移除对 `@/runtime-core/patch/children.ts` 的 mock，改为断言最终宿主树结果与插入顺序（用外部行为验证“Fragment patch 使用片段锚点”），避免对内部调用栈与文件路径耦合。
-[ ] `test/reactivity/effect/basic.test.ts`：评估是否可用公开行为（依赖收集/触发次数/清理时机）替代对 `@/reactivity/internals/dependency.ts` 的 mock；若确需观测内部行为，引入明确的 testing seam（见 Phase 4）。
+[x] `test/router/core/error-cause.test.tsx`：移除 `vi.mock('@/runtime-core/index.ts')`，改为在组件 `setup()` 上下文内调用 `useRouter()` 来触发“未注入 router”的真实路径（不再依赖 runtime-core 模块结构）。
+[x] `test/runtime-core/patch/child.test.tsx`：移除对 `@/runtime-core/patch/children.ts` 的 mock，改为断言最终宿主树结果与插入顺序（用外部行为验证“Fragment patch 使用片段锚点”），避免对内部调用栈与文件路径耦合。
+[x] `test/reactivity/effect/basic.test.ts`：评估是否可用公开行为（依赖收集/触发次数/清理时机）替代对 `@/reactivity/internals/dependency.ts` 的 mock；若确需观测内部行为，引入明确的 testing seam（见 Phase 4）。
 
 ### Phase 3：降低白盒断言（实现耦合）
 

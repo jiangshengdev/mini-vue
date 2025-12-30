@@ -6,12 +6,11 @@
 - 现状：`RouterLink` 渲染 `href` 时用 `normalizePath(to)`，会去掉 query/hash；`target="_blank"`/修饰键点击不会被拦截，浏览器直接使用截断后的 `href`。
 - 解决：`RouterLink` 通过 `normalizePath(to) + getQueryAndHash(to)` 生成完整 `href`，在不拦截场景下仍能保留 query/hash；补充 `_blank` 场景断言 `href` 包含 query/hash 且默认导航仍由浏览器处理。
 
-## 2. 测试通过 Mock 内部模块模拟 `inject`（待优化）
+## 2. 测试通过 Mock 内部模块模拟 `inject`（已优化）
 
 - 位置：`test/router/core/error-cause.test.tsx`
-- 现状：使用 `vi.mock('@/runtime-core/index.ts', ...)` 来 mock `inject` 函数。
-- 影响：导致测试依赖于 `runtime-core` 的模块结构，增加了跨模块的隐式耦合。
-- 提示：建议考虑通过依赖注入（DI）或在测试配置层模拟注入失败，而非直接 Mock 底层模块导出。
+- 修复：移除对 `@/runtime-core/index.ts` 的 mock，改为在组件 `setup()` 内调用 `useRouter()` 走真实注入路径，并通过 `setErrorHandler` 捕获错误以断言 message/cause。
+- 收益：不再依赖 `runtime-core` 的模块结构，测试更接近真实调用链。
 
 ## 3. 未命中路由时 `RouterView` 未渲染 fallback 组件（按设计，无需修复）
 

@@ -103,12 +103,11 @@
 - 复现：元素 `ref` 回调抛错会中断挂载并留下残留，见 `test/runtime-dom/error/ref.test.tsx`。
 - 修复：`assignElementRef` 通过错误通道隔离 `ref` 赋值异常（新增 `errorContexts.elementRef`），避免打断挂载流程，从而保证后续 `unmount()` 可以清空容器。
 
-## 12. 测试 Mock 内部文件路径（待优化）
+## 12. 测试 Mock 内部文件路径（已优化）
 
 - 位置：`test/runtime-core/patch/child.test.tsx`
-- 现状：使用 `vi.mock('@/runtime-core/patch/children.ts', { spy: true })` mock 内部文件。
-- 影响：对内部目录结构的硬编码依赖。
-- 提示：降低对文件结构的耦合。
+- 修复：移除对 `@/runtime-core/patch/children.ts` 的 mock，改为通过宿主树插入顺序断言「新增子节点插入在 Fragment 结束锚点之前」，以验证 Fragment patch 锚点选择正确。
+- 收益：不再依赖内部文件路径与调用栈，测试更抗重构。
 
 ## 13. 测试辅助函数重复定义（待优化）
 

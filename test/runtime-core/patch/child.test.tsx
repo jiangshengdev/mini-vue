@@ -1,13 +1,10 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import type { TestElement, TestNode } from '../host-utils.ts'
 import { createHostRenderer, normalize } from '../host-utils.ts'
 import type { NormalizedVirtualNode } from '@/runtime-core/index.ts'
 import { asRuntimeVirtualNode, mountChild, patchChild } from '@/runtime-core/index.ts'
 import type { SetupComponent } from '@/index.ts'
 import { nextTick } from '@/index.ts'
-import * as patchChildrenModule from '@/runtime-core/patch/children.ts'
-
-vi.mock('@/runtime-core/patch/children.ts', { spy: true })
 
 describe('patchChild 元素/Fragment/组件 patch 行为', () => {
   it('复用元素宿主并保证先更新 props 再 children 且重新绑定 ref', () => {
@@ -70,26 +67,35 @@ describe('patchChild 元素/Fragment/组件 patch 行为', () => {
   it('Fragment 子节点 patch 应优先使用片段锚点而非父级锚点', () => {
     const host = createHostRenderer()
     const parentAnchor = host.options.createText('parent-anchor')
-    const previous = normalize(['left', 'right'])
-    const next = normalize(['left', 'updated'])
+    const previous = normalize(['left'])
+    const next = normalize(['left', 'inserted'])
 
     host.options.appendChild(host.container, parentAnchor)
     mountChild(host.options, previous, { container: host.container, anchor: parentAnchor })
     const runtimePrevious = asRuntimeVirtualNode<TestNode, TestElement, never>(previous)
-    const patchChildrenSpy = vi.mocked(patchChildrenModule.patchChildren)
-
-    patchChildrenSpy.mockClear()
 
     patchChild(host.options, previous, next, {
       container: host.container,
       anchor: parentAnchor,
     })
 
-    expect(patchChildrenSpy).toHaveBeenCalledTimes(1)
-    const patchArgs = patchChildrenSpy.mock.calls[0]
+    const fragmentAnchor = runtimePrevious.anchor
 
-    expect(patchArgs[3]?.anchor).toBe(runtimePrevious.anchor)
-    expect(runtimePrevious.anchor).not.toBe(parentAnchor)
+    if (!fragmentAnchor) {
+      throw new Error('expected fragment anchor')
+    }
+
+    const insertedIndex = host.container.children.findIndex((node) => {
+      return node.text === 'inserted'
+    })
+    const fragmentAnchorIndex = host.container.children.indexOf(fragmentAnchor)
+    const parentAnchorIndex = host.container.children.indexOf(parentAnchor)
+
+    expect(insertedIndex).toBeGreaterThan(-1)
+    expect(fragmentAnchorIndex).toBeGreaterThan(-1)
+    expect(parentAnchorIndex).toBeGreaterThan(-1)
+    expect(insertedIndex).toBeLessThan(fragmentAnchorIndex)
+    expect(fragmentAnchorIndex).toBeLessThan(parentAnchorIndex)
   })
 
   it('组件重渲染抛错时保持旧子树不被替换', async () => {

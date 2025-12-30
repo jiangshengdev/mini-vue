@@ -36,19 +36,17 @@
   - 也无法兼容更通用的渲染器约定：很多渲染器会允许 `anchor === null` 表示追加到末尾（此时当前实现会因访问 `null.before` 而抛错）。
 - 提示：优先使用 `parent.insertBefore(child, anchor)` 作为宿主实现；如未来要支持 `anchor === null`，可在宿主层分支到 `appendChild`。
 
-## 5. 测试访问组件实例私有属性（待优化）
+## 5. 测试访问组件实例私有属性（已优化）
 
 - 位置：`test/runtime-dom/component/component.test.tsx`
-- 现状：直接访问 `instance.cleanupTasks`。
-- 影响：这是组件实例的内部属性，属于白盒测试，增加了与内部实现细节的耦合。
-- 提示：应测试清理逻辑的副作用（如 spy 是否被调用），而非检查内部任务队列。
+- 修复：不再直接访问 `instance.cleanupTasks`，改为在组件 `setup()` 中使用 `onScopeDispose` 注册清理任务，并在卸载时通过副作用断言清理顺序与错误处理器调用。
+- 收益：降低与组件实例私有实现细节的耦合，同时保留卸载清理链路的覆盖。
 
-## 6. 测试修改全局原型（待优化）
+## 6. 测试修改全局原型（已优化）
 
 - 位置：`test/runtime-dom/render/basic.test.tsx`
-- 现状：修改 `Element.prototype.remove` 原型方法进行 spy。
-- 影响：虽然在 `finally` 中恢复了，但在并发测试环境下修改全局对象原型存在风险，且可能干扰其他测试。
-- 提示：建议使用 `vi.spyOn` 针对特定实例或使用更安全的 mock 方式。
+- 修复：不再改写 `Element.prototype.remove`，改为仅覆写本次渲染到的具体 DOM 实例的 `remove` 并做调用断言。
+- 收益：避免全局原型污染带来的并发风险，减少用例间相互影响的可能性。
 
 ## 7. 无 DOM/SSR 环境下 import 即抛错（待修复）
 

@@ -2,8 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { within } from '@testing-library/dom'
 import { createTestContainer } from '$/index.ts'
 import type { ErrorHandler, SetupComponent } from '@/index.ts'
-import { createWatch, nextTick, reactive, render, setErrorHandler } from '@/index.ts'
-import { getCurrentInstance } from '@/runtime-core/index.ts'
+import { createWatch, nextTick, onScopeDispose, reactive, render, setErrorHandler } from '@/index.ts'
 import { errorContexts } from '@/shared/index.ts'
 
 describe('runtime-dom component reactivity', () => {
@@ -227,7 +226,7 @@ describe('runtime-dom component reactivity', () => {
     expect(watchSpy).toHaveBeenCalledTimes(2)
   })
 
-  it('组件 cleanupTasks 抛错时不会阻塞后续清理', () => {
+  it('组件卸载时 scope cleanup 抛错不会阻塞后续清理', () => {
     const container = createTestContainer()
     const handler = vi.fn<ErrorHandler>()
     const cleanupOrder: string[] = []
@@ -235,14 +234,12 @@ describe('runtime-dom component reactivity', () => {
     setErrorHandler(handler)
 
     const WithCleanup: SetupComponent = () => {
-      const instance = getCurrentInstance()
-
-      instance?.cleanupTasks.push(() => {
+      onScopeDispose(() => {
         cleanupOrder.push('first')
         throw new Error('component cleanup failed')
       })
 
-      instance?.cleanupTasks.push(() => {
+      onScopeDispose(() => {
         cleanupOrder.push('second')
       })
 
@@ -262,6 +259,6 @@ describe('runtime-dom component reactivity', () => {
     const [error, context] = handler.mock.calls[0]
 
     expect(error.message).toBe('component cleanup failed')
-    expect(context).toBe(errorContexts.componentCleanup)
+    expect(context).toBe(errorContexts.effectScopeCleanup)
   })
 })

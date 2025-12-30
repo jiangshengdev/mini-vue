@@ -116,12 +116,11 @@
 - 影响：增加了维护成本，逻辑分散。
 - 提示：建议统一复用测试工具库 `test-utils.ts`。
 
-## 14. 测试白盒断言内部状态（待优化）
+## 14. 测试白盒断言内部状态（已优化）
 
 - 位置：`test/runtime-core/provide-inject/provide-inject.test.ts`
-- 现状：断言错误 cause 中包含 `{ currentInstance: undefined }`。
-- 影响：`currentInstance` 是内部状态，测试其具体值属于白盒测试，若重构内部状态管理可能会导致测试误报。
-- 提示：应关注公开的错误行为或错误类型，而非内部状态快照。
+- 修复：不再断言 `cause` 的具体快照（如 `{ currentInstance: undefined }`），仅断言会抛错且错误信息正确，并对 `cause` 做存在性/类型校验。
+- 收益：减少对内部状态形状的依赖，避免重构实例上下文管理时测试误报。
 
 ## 15. keyed diff 对重复 key/逆序场景会残留多余节点（已修复）
 

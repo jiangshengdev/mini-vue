@@ -10,14 +10,6 @@ import {
 } from '@/index.ts'
 import { errorContexts } from '@/shared/index.ts'
 
-const positionInParentKey = 'positionInParent' as const
-
-function getPositionInParent(scope: EffectScope): number | undefined {
-  const value: unknown = Reflect.get(scope, positionInParentKey)
-
-  return typeof value === 'number' ? value : undefined
-}
-
 describe('effectScope 生命周期与清理', () => {
   afterEach(() => {
     setErrorHandler(undefined)
@@ -119,23 +111,73 @@ describe('effectScope 生命周期与清理', () => {
     expect(context).toBe(errorContexts.effectScopeRun)
   })
 
-  it('子 scope 被移除后 positionInParent 会被重置', () => {
+  it('子 scope 停止后不会破坏剩余子 scope 的生命周期管理', () => {
+    const state = reactive({ count: 0 })
     const parent = effectScope()
     let first!: EffectScope
     let second!: EffectScope
+    let third!: EffectScope
+    const firstValues: number[] = []
+    const secondValues: number[] = []
+    const thirdValues: number[] = []
 
     parent.run(function createChildren() {
       first = effectScope()
       second = effectScope()
+
+      first.run(function registerFirstEffect() {
+        effect(function trackFirstEffect() {
+          firstValues.push(state.count)
+        })
+      })
+
+      second.run(function registerSecondEffect() {
+        effect(function trackSecondEffect() {
+          secondValues.push(state.count)
+        })
+      })
     })
 
-    expect(getPositionInParent(first)).toBe(0)
-    expect(getPositionInParent(second)).toBe(1)
+    expect(firstValues).toEqual([0])
+    expect(secondValues).toEqual([0])
+
+    state.count = 1
+
+    expect(firstValues).toEqual([0, 1])
+    expect(secondValues).toEqual([0, 1])
 
     first.stop()
 
-    expect(getPositionInParent(first)).toBeUndefined()
-    expect(getPositionInParent(second)).toBe(0)
+    parent.run(function createThirdChild() {
+      third = effectScope()
+
+      third.run(function registerThirdEffect() {
+        effect(function trackThirdEffect() {
+          thirdValues.push(state.count)
+        })
+      })
+    })
+
+    expect(thirdValues).toEqual([1])
+
+    state.count = 2
+
+    expect(firstValues).toEqual([0, 1])
+    expect(secondValues).toEqual([0, 1, 2])
+    expect(thirdValues).toEqual([1, 2])
+
+    second.stop()
+
+    state.count = 3
+
+    expect(secondValues).toEqual([0, 1, 2])
+    expect(thirdValues).toEqual([1, 2, 3])
+
+    parent.stop()
+
+    state.count = 4
+
+    expect(thirdValues).toEqual([1, 2, 3])
   })
 
   it('detached scope 不受父级 stop 影响且可单独清理', () => {

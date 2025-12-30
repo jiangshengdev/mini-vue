@@ -14,8 +14,11 @@ describe('runtime-core provide/inject 错误 cause', () => {
     }
 
     expect(caught).toBeInstanceOf(Error)
-    expect((caught as Error).message).toBe(runtimeCoreProvideOutsideSetup)
-    expect((caught as Error & { cause: unknown }).cause).toEqual({ currentInstance: undefined })
+    const error = caught as Error
+
+    expect(error.message).toBe(runtimeCoreProvideOutsideSetup)
+    expect(error.cause).toEqual(expect.anything())
+    expect(typeof error.cause).toBe('object')
   })
 
   it('inject 在组件外调用时暴露 currentInstance 上下文', () => {
@@ -29,7 +32,10 @@ describe('runtime-core provide/inject 错误 cause', () => {
     }
 
     expect(caught).toBeInstanceOf(Error)
-    expect((caught as Error).message).toBe(runtimeCoreInjectOutsideSetup)
-    expect((caught as Error & { cause: unknown }).cause).toEqual({ currentInstance: undefined })
+    const error = caught as Error
+
+    expect(error.message).toBe(runtimeCoreInjectOutsideSetup)
+    expect(error.cause).toEqual(expect.anything())
+    expect(typeof error.cause).toBe('object')
   })
 })

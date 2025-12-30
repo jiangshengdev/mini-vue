@@ -57,9 +57,9 @@
 
 ### Phase 3：降低白盒断言（实现耦合）
 
-[ ] `test/runtime-core/provide-inject/provide-inject.test.ts`：将 `cause` 的断言从精确快照（如 `{ currentInstance: undefined }`）调整为更稳定的行为断言（例如仅断言会抛错且错误信息正确；`cause` 仅校验存在/类型），或将该用例标注为白盒并解释原因。
-[ ] `test/reactivity/effect-scope/lifecycle.test.ts`：减少 `Reflect.get` 读取私有状态；优先用公开行为验证（父子 scope 关系、stop 后清理效果）。若无法替代，标注白盒并考虑引入 testing seam。
-[ ] `test/runtime-dom/component/component.test.tsx`：将直接操作 `instance.cleanupTasks` 改为使用公开的清理注册方式（例如 `onScopeDispose`）来验证“清理抛错不阻塞后续清理 + error handler 被调用”，避免依赖组件实例私有字段。
+[x] `test/runtime-core/provide-inject/provide-inject.test.ts`：将 `cause` 的断言从精确快照（如 `{ currentInstance: undefined }`）调整为更稳定的行为断言（例如仅断言会抛错且错误信息正确；`cause` 仅校验存在/类型），或将该用例标注为白盒并解释原因。
+[x] `test/reactivity/effect-scope/lifecycle.test.ts`：减少 `Reflect.get` 读取私有状态；优先用公开行为验证（父子 scope 关系、stop 后清理效果）。若无法替代，标注白盒并考虑引入 testing seam。
+[x] `test/runtime-dom/component/component.test.tsx`：将直接操作 `instance.cleanupTasks` 改为使用公开的清理注册方式（例如 `onScopeDispose`）来验证“清理抛错不阻塞后续清理 + error handler 被调用”，避免依赖组件实例私有字段。
 
 ### Phase 4：必要时的 “testing seam” 方案（需二次确认后落地）
 

@@ -1,11 +1,10 @@
 # Reactivity 模块问题记录
 
-## 1. 测试访问私有内部状态（待优化）
+## 1. 测试访问私有内部状态（已优化）
 
 - 位置：`test/reactivity/effect-scope/lifecycle.test.ts`
-- 现状：测试用例 '子 scope 被移除后 positionInParent 会被重置' 使用 `Reflect.get(scope, positionInParentKey)` 访问私有内部状态 `positionInParent`。
-- 影响：这属于白盒测试，导致测试与内部实现细节紧密耦合。若内部重构（如重命名属性或改变存储结构），测试将破损。
-- 提示：建议仅通过观察公共行为（如 scope 是否正确分离、effect 是否停止等）来验证，或将其明确标记为白盒测试。
+- 修复：移除 `Reflect.get` 对私有字段的读取，改用外部行为验证「子 scope 停止/移除后不会破坏剩余子 scope 的生命周期管理」。
+- 收益：测试不再依赖私有字段命名与存储结构，更抗内部重构。
 
 ## 2. 测试 Mock 内部模块路径（已优化）
 

@@ -1,8 +1,7 @@
 # Shared 模块问题记录
 
-## 1. 测试修改全局对象（待优化）
+## 1. 测试修改全局对象（已优化）
 
 - 位置：`test/shared/error-channel.test.ts`
-- 现状：修改 `globalThis.queueMicrotask` 进行 spy。
-- 影响：虽然在 `finally` 中恢复了，但在并发测试环境下修改全局对象存在风险。
-- 提示：建议使用 `vi.spyOn` 或 Vitest 提供的 timer 控制能力，避免直接替换全局方法。
+- 修复：使用 `vi.stubGlobal('queueMicrotask', ...)`（封装为 `stubGlobalQueueMicrotask()`）替代直接覆盖全局方法，并依赖 `test/setup.ts` 的 `vi.unstubAllGlobals()` 在 `afterEach` 自动恢复。
+- 收益：避免全局对象写入带来的并发串扰风险，减少手写 try/finally 样板。

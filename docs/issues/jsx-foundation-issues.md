@@ -62,12 +62,11 @@ export interface VirtualNode<T extends ElementType = ElementType> {
   - 直接将 `null` 纳入 `ComponentChildren`/`RenderOutput` 联合类型（如 `VirtualNodeChild | VirtualNodeChild[] | boolean | null | undefined`），与运行时处理保持一致。
   - 若 lint 规则限制显式 `null`，可通过别名封装（如 `type NullableChild = VirtualNodeChild | null`）或调整规则配置，仅对类型声明放宽，以避免在调用方层面出现类型报错。
 
-## 3. 测试用例手动管理 `console.warn` mock（待优化）
+## 3. 测试用例手动管理 `console.warn` mock（已优化）
 
 - 位置：`test/jsx-runtime/jsx.test.tsx`
-- 现状：测试用例 '忽略对象与函数等不可渲染的 children' 中手动管理 `console.warn` 的 mock 和 restore。
-- 影响：若在 `try` 块之外发生错误，可能导致 `console.warn` 未被 restore，污染导致其他测试失败或噪音。
-- 提示：建议使用 `vi.mocked` 或 `afterEach` 全局清理机制来管理 mock 状态。
+- 修复：统一通过 `spyOnConsole('warn')`（`test/test-utils/mocks.ts`）创建 spy，并依赖 `test/setup.ts` 的 `vi.restoreAllMocks()` 在 `afterEach` 自动恢复，不再手动 restore。
+- 收益：降低 mock 泄漏导致的串扰风险，提升用例可读性与一致性。
 
 ## 4. 测试显式依赖内部实现细节（待优化）
 

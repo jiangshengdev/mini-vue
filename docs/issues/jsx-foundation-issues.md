@@ -78,9 +78,48 @@ export interface VirtualNode<T extends ElementType = ElementType> {
 
 ## 5. 组件类型被限定为 `(props: never)`，导致 ElementType 无法接受正常组件（待修复）
 
-- 位置：`src/jsx-foundation/types.ts`
-- 现状：`ComponentLike` 定义为 `(props: never) => RenderFunction`，`ElementType` 因此只接受该签名，正常的函数组件或 `SetupComponent<P>` 都会在 TSX 中报类型错误，`h`/`jsx` 无法与组件联动。
-- 影响：组件类型在类型层面完全不可用，外部使用 TSX 传入组件会直接类型报错，阻断基础用法。
-- 可能方案：
-  - 将 `ComponentLike` 改为与 `SetupComponent` 对齐的签名（如 `<P = PropsShape>(props: PropsWithChildren<P>) => RenderFunction`），或直接复用 `SetupComponent`。
-  - 调整 `ElementType`/`ElementProps` 推导链，确保组件 props 能按实际签名推导，配合 `jsx-shim`/顶层导出同步更新。
+- 位置：
+  - `src/jsx-foundation/types.ts`（`ComponentLike`、`ElementType`、`ElementProps` 推导链）
+  - `src/jsx-shim.d.ts`（`JSX.ElementType` 绑定到 `ElementType`）
+  - （可选）`src/runtime-core/component/mount.ts`（`as never` 类型断言）
+- 现状：`ComponentLike` 定义为 `(props: never) => RenderFunction`，用作组件类型的“上界”。
+  - 好处：在 `strictFunctionTypes` 下，`never` 参数位能“接住”几乎所有 `(props: P) => RenderFunction` 的组件实现。
+  - 问题：一旦组件被“擦除”为 `ElementType`/`ComponentLike`，其 `props` 会在类型层坍缩为 `never`，导致：
+    - `const X: ElementType = Foo` 之后，`<X msg="..."/>` 这类写法在 TSX 中无法通过（因为 `X` 的 props 被视为 `never`）。
+    - `const Foo: ElementType = (props) => ...` 这类声明会触发“上下文类型化”，使 `props` 在组件实现内部直接被推成 `never`，进一步放大可用性问题。
+- 根因（核心是 TS 的函数参数变型 + 缺少存在类型）：
+  - 在 `strictFunctionTypes` 下，函数参数是逆变检查；想表达“任意 props 的组件集合”本质需要 `∃P. SetupComponent<P>` 这类存在类型，但 TS 无法直接表达。
+  - 用 `(props: never)` 作为上界属于“技巧性绕路”，能扩大可赋值集合，但会把被擦除后的 props 信息完全抹掉。
+- 目标：
+  - 具体组件（`SetupComponent<P>` 或显式 `(props: P) => RenderFunction`）在 TSX 下仍能正确推导 `P` 并得到 props 提示。
+  - 动态/擦除组件（如 `ElementType` 容器）在 TSX 下至少不应“拒绝所有 props”；允许降级为宽松校验，而不是推成 `never`。
+  - 避免引入 `any`（保持项目“禁用 any”的设计取向）。
+- 推荐方案（类型层）：引入“可接住任意组件，但 props 退化为宽松”的 `AnySetupComponent`，替代 `(props: never)`。
+  - 做法要点：使用 React typings 常用的 **bivariance hack** 构造一个“参数位双向”的组件上界，使 `SetupComponent<P>` 可赋值给它，同时它自身不会把 `props` 推成 `never`。
+  - 预期效果：
+    - 具体组件：仍通过 `T extends SetupComponent<infer P>` 分支精确推导 `ElementProps<T>`。
+    - 擦除组件：`ElementProps<AnySetupComponent>` 回退到 `PropsShape`（或 `PropsWithChildren<PropsShape>`），保证 TSX 不会直接拒绝一切 props。
+  - 参考伪代码（仅表达思路，最终以 `types.ts` 现有工具类型为准）：
+    ```ts
+    type AnySetupComponent = {
+      bivarianceHack(props: PropsShape & { children?: ComponentChildren }): RenderFunction
+    }['bivarianceHack']
+
+    type ComponentLike = AnySetupComponent
+
+    type InferComponentProps<T> =
+      T extends SetupComponent<infer P>
+        ? P & { children?: ComponentChildren }
+        : T extends AnySetupComponent
+          ? PropsShape & { children?: ComponentChildren }
+          : PropsShape
+    ```
+- 可选方案（运行时类型断言收敛）：
+  - `runtime-core` 里的 `instance as never` / `runtime as never` 多半是为了绕开“运行时 vnode ↔ instance 双向引用 + 泛型递归”导致的类型不匹配/类型爆炸。
+  - 可考虑：
+    - 让 `RuntimeVirtualNode` 参数化 `T extends SetupComponent` 并让 `asRuntimeVirtualNode()` 保留 `T`，从而让 `runtime.component` 与 `instance.virtualNode` 在类型层自然对齐，减少断言。
+    - 或引入 `UnknownRuntimeVirtualNode` / 复用 `UnknownComponentInstance`，刻意断开泛型链，避免类型系统深度递归。
+- 回归用例建议（类型用例优先，避免仅靠运行时测试）：
+  - 精确 props：`const Foo: SetupComponent<{ msg: string }>` 时，`<Foo msg="x" />` 通过且有提示。
+  - 擦除降级：`const X: ElementType = Foo` 时，`<X msg="x" />` 允许（提示可降级为宽松），但不应报 “props 为 never”。
+  - `h()` 同步覆盖：`h(Foo, { msg: 'x' })` 精确；`h(X, { msg: 'x' })` 宽松但可用。

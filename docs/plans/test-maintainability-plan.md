@@ -45,9 +45,9 @@
 
 ### Phase 1：消除全局污染（并发风险）
 
-[ ] `test/runtime-dom/render/basic.test.tsx`：将修改 `Element.prototype.remove` 改为“只覆写具体实例”的 `remove`（同时对 `child.remove` 做 0 次断言），避免全局原型污染。
-[ ] `test/shared/error-channel.test.ts`：将直接覆盖 `globalThis.queueMicrotask` 改为 `vi.spyOn`/`vi.stubGlobal`，并依赖全局 `afterEach` 自动恢复。
-[ ] `test/jsx-runtime/jsx.test.tsx` 等：统一使用 `vi.spyOn(console, 'warn')` 并依赖全局恢复，避免手动管理导致泄漏。
+[x] `test/runtime-dom/render/basic.test.tsx`：将修改 `Element.prototype.remove` 改为“只覆写具体实例”的 `remove`（同时对 `child.remove` 做 0 次断言），避免全局原型污染。
+[x] `test/shared/error-channel.test.ts`：将直接覆盖 `globalThis.queueMicrotask` 改为 `vi.spyOn`/`vi.stubGlobal`，并依赖全局 `afterEach` 自动恢复。
+[x] `test/jsx-runtime/jsx.test.tsx` 等：统一使用 `vi.spyOn(console, 'warn')` 并依赖全局恢复，避免手动管理导致泄漏。
 
 ### Phase 2：减少 Mock 内部路径（结构耦合）
 

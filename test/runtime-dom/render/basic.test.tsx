@@ -144,32 +144,45 @@ describe('runtime-dom 基础渲染', () => {
 
   it('卸载元素时不会对子节点重复调用 remove', () => {
     const container = createTestContainer()
-    const ElementCtor = container.ownerDocument.defaultView!.Element
-    const originalRemove = ElementCtor.prototype.remove
-    const removeSpy = vi.fn(function remove(this: InstanceType<typeof ElementCtor>) {
-      originalRemove.call(this)
+    render(
+      <div data-testid="parent">
+        <span data-testid="first" />
+        <span data-testid="second" />
+      </div>,
+      container,
+    )
+
+    const parent = container.querySelector<HTMLElement>('[data-testid="parent"]')
+    const first = container.querySelector<HTMLElement>('[data-testid="first"]')
+    const second = container.querySelector<HTMLElement>('[data-testid="second"]')
+
+    if (!parent || !first || !second) {
+      throw new Error('expected rendered elements')
+    }
+
+    const originalParentRemove = parent.remove
+    const originalFirstRemove = first.remove
+    const originalSecondRemove = second.remove
+
+    const parentRemoveSpy = vi.fn(function remove(this: HTMLElement) {
+      originalParentRemove.call(this)
+    })
+    const firstRemoveSpy = vi.fn(function remove(this: HTMLElement) {
+      originalFirstRemove.call(this)
+    })
+    const secondRemoveSpy = vi.fn(function remove(this: HTMLElement) {
+      originalSecondRemove.call(this)
     })
 
-    ElementCtor.prototype.remove = removeSpy
+    parent.remove = parentRemoveSpy
+    first.remove = firstRemoveSpy
+    second.remove = secondRemoveSpy
 
-    try {
-      render(
-        <div data-testid="parent">
-          <span data-testid="first" />
-          <span data-testid="second" />
-        </div>,
-        container,
-      )
+    render(undefined, container)
 
-      render(undefined, container)
-
-      expect(removeSpy).toHaveBeenCalledTimes(1)
-      const removedNode = removeSpy.mock.instances[0]
-
-      expect(removedNode).toBeInstanceOf(Element)
-      expect((removedNode as HTMLElement).dataset.testid).toBe('parent')
-    } finally {
-      ElementCtor.prototype.remove = originalRemove
-    }
+    expect(parentRemoveSpy).toHaveBeenCalledTimes(1)
+    expect(firstRemoveSpy).not.toHaveBeenCalled()
+    expect(secondRemoveSpy).not.toHaveBeenCalled()
+    expect(parentRemoveSpy.mock.instances[0]).toBe(parent)
   })
 })

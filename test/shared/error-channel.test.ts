@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { stubGlobalQueueMicrotask } from '$/test-utils/mocks.ts'
 import type { ErrorHandler } from '@/index.ts'
 import { setErrorHandler } from '@/index.ts'
 import { sharedRunnerNoPromise } from '@/messages/index.ts'
@@ -350,43 +351,25 @@ describe('runtime-error-channel', () => {
 
   it('handler 未注册且 handlerPhase 为 async 时会异步抛错', () => {
     const error = new Error('async scheduler crash')
-    const originalQueueMicrotask = globalThis.queueMicrotask
-    const callbacks: Array<() => void> = []
-    const queueSpy = vi.fn<(callback: () => void) => void>((callback) => {
-      callbacks.push(callback)
-    })
+    const { callbacks, queueMicrotask } = stubGlobalQueueMicrotask()
 
-    ;(
-      globalThis as typeof globalThis & {
-        queueMicrotask: (callback: () => void) => void
-      }
-    ).queueMicrotask = queueSpy
+    expect(() => {
+      runSilent(
+        () => {
+          throw error
+        },
+        {
+          origin: errorContexts.scheduler,
+          handlerPhase: errorPhases.async,
+        },
+      )
+    }).not.toThrow()
 
-    try {
-      expect(() => {
-        runSilent(
-          () => {
-            throw error
-          },
-          {
-            origin: errorContexts.scheduler,
-            handlerPhase: errorPhases.async,
-          },
-        )
-      }).not.toThrow()
+    expect(queueMicrotask).toHaveBeenCalledTimes(2)
+    expect(callbacks).toHaveLength(2)
 
-      expect(queueSpy).toHaveBeenCalledTimes(2)
-      expect(callbacks).toHaveLength(2)
+    const queuedCallback = callbacks.at(-1)!
 
-      const queuedCallback = callbacks.at(-1)!
-
-      expect(queuedCallback).toThrow(error)
-    } finally {
-      ;(
-        globalThis as typeof globalThis & {
-          queueMicrotask: (callback: () => void) => void
-        }
-      ).queueMicrotask = originalQueueMicrotask
-    }
+    expect(queuedCallback).toThrow(error)
   })
 })

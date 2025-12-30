@@ -22,14 +22,13 @@
 - [ ] 拆分 `v-model` 转换层级：
   - [ ] 平台无关：组件 `v-model`（保留在 `jsx-runtime` 或更底层）。
   - [ ] DOM 宿主：表单元素 `v-model`（迁移到 `runtime-dom`，与 `props` patching 贴近）。
-- [ ] 迁移 DOM 表单 `v-model` 的落点方案（二选一，优先 A）：
-  - [ ] A：在 `runtime-dom/props` 中识别并消费 `v-model`（不再要求 `jsx-runtime` 预先改写为 `value/checked + onXxx`）。
-  - [ ] B：由 `runtime-dom` 在创建应用/渲染器时注入一段 props transform pipeline（让 `jsx-runtime` 可保持平台无关）。
+- [ ] 在 `runtime-dom/props` 中识别并消费 DOM 表单 `v-model`（保证只要使用 `runtime-dom`，不管 JSX 还是手写 `h` 都能生效）。
+- [ ] 迁移完成后，从 `jsx-runtime` 移除 DOM 表单 `v-model` 转换（不再允许 `jsx-runtime` 层转换）。
 - [ ] 更新类型：在 `src/jsx-shim.d.ts` 中补齐组件 `v-model`、以及 `onUpdate:modelValue` 的事件签名提示（先宽松、后续再逐步收紧）。
 - [ ] 补测试：覆盖组件 v-model 的 props 产物形态、Ref 写入、只读目标告警、冲突属性覆盖告警等（`test/jsx-runtime/**`）。
 - [ ] 更新文档与 Playground：补一个最小组件 v-model 示例，并写清与 DOM v-model 的差异与限制（`README.md` / `docs/**` / `playground/**`）。
 
-## Open questions
+## 行为约定
 
-- 组件 `v-model` 冲突覆盖策略：当用户显式传入 `modelValue`/`onUpdate:modelValue` 时，是否与 DOM v-model 一样发出 Dev 告警并覆盖？
-- DOM 表单 `v-model` 迁移到 `runtime-dom` 后，是否需要保持“第三方产物兜底”（即仍允许 `jsx-runtime` 层转换作为兼容）？
+- 组件冲突覆盖：当用户同时传入 `v-model` 与显式 `modelValue`/`onUpdate:modelValue` 时，Dev 环境发出告警，并以 `v-model` 生成的 `modelValue`/`onUpdate:modelValue` 覆盖显式值。
+- DOM 表单归属：DOM 表单 `v-model` 仅由宿主层（`runtime-dom`）转换；迁移完成后不再允许 `jsx-runtime` 层转换。

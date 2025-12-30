@@ -1,6 +1,6 @@
 # JSX v-model 设计计划
 
-为 JSX 增加 `v-model` 语法糖：在无编译期的前提下，把 `<input v-model={x}>` 等转换为对应的 DOM property + 事件绑定，覆盖常见表单元素，简化表单绑定样板。仅接受单一 `v-model` prop，不支持修饰符；自定义 handler 请直接用显式事件。即便未来有编译期转换，运行时仍保留兜底转换，覆盖动态标签与第三方产物。
+为 JSX 增加 `v-model` 语法糖：在无编译期的前提下，把 `<input v-model={x}>` 等转换为对应的 DOM property + 事件绑定，覆盖常见表单元素，简化表单绑定样板。仅接受单一 `v-model` prop，不支持修饰符；自定义 handler 请直接用显式事件。即便未来有编译期转换，DOM 宿主仍保留运行时兜底转换（由 `runtime-dom` 负责），覆盖动态标签与第三方产物。
 
 ## Scope
 
@@ -23,7 +23,7 @@
 
 ## 后续收敛（面向非 DOM 宿主）
 
-- 由于计划支持非 DOM 宿主渲染器，DOM 表单 `v-model` 适配应尽早从 `jsx-runtime` 抽离到宿主层（优先落在 `runtime-dom`），避免平台无关层隐式依赖 DOM 事件/元素语义。
+- 由于计划支持非 DOM 宿主渲染器，DOM 表单 `v-model` 适配应迁移到宿主层（优先 `runtime-dom`），并在迁移完成后移除 `jsx-runtime` 的 DOM 转换；这样只要使用 `runtime-dom`，不管 JSX 还是手写 `h` 都能使用 DOM 表单 `v-model`。
 
 ## 与 Vue 官方的对齐与收敛
 

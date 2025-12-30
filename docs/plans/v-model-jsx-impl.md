@@ -38,4 +38,5 @@
 ## 后续演进（面向非 DOM 宿主）
 
 - 为支持非 DOM 宿主渲染器，DOM 表单 `v-model` 适配应尽早从 `jsx-runtime` 抽离到宿主层（优先 `runtime-dom`），避免在平台无关路径里固化 `Event/HTMLInputElement` 等 DOM 语义。
+- 迁移完成后不再允许 `jsx-runtime` 层转换：DOM 表单 `v-model` 由 `runtime-dom` 统一消费，因此只要使用 `runtime-dom`（不管 JSX 还是手写 `h`）都能获得一致行为。
 - 组件 `v-model` 运行时转换（默认 `modelValue` + `onUpdate:modelValue`）的计划见 `docs/plans/plan-v-model-component.md`。

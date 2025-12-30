@@ -107,4 +107,27 @@ describe('watch - deep 行为', () => {
     expect(newValue).toEqual({ value: 2 })
     expect(oldValue).toEqual({ value: 1 })
   })
+
+  it('watch reactive 源显式 deep: false 仍能追踪顶层字段变更', () => {
+    const state = reactive({ nested: { value: 0 }, count: 0 })
+    const spy = vi.fn<(payload: { sameRef: boolean }) => void>()
+
+    createWatch(
+      state,
+      function onChange(newValue, oldValue) {
+        spy({ sameRef: newValue === oldValue })
+      },
+      { deep: false },
+    )
+
+    state.nested.value = 1
+    expect(spy).toHaveBeenCalledTimes(0)
+
+    state.count = 1
+    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy).toHaveBeenLastCalledWith({ sameRef: true })
+
+    state.nested = { value: 2 }
+    expect(spy).toHaveBeenCalledTimes(2)
+  })
 })

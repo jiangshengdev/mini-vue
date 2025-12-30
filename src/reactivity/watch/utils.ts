@@ -80,9 +80,9 @@ export function createGetter<T>(source: WatchSource<T>, deep: boolean): () => T 
       }
     }
 
-    /* 浅监听仅返回原对象，沿用 `Proxy` 的依赖收集。 */
+    /* 浅监听需要访问一层键来建立依赖，否则仅返回对象本身不会触发 track。 */
     return () => {
-      return source as T
+      return traverse(source, 1) as T
     }
   }
 
@@ -108,9 +108,9 @@ export function createGetter<T>(source: WatchSource<T>, deep: boolean): () => T 
  * - 遇到 ref 时继续深入其 `value`，保持与响应式对象一致。
  * - 仅遍历可枚举自有键，包含字符串与 Symbol。
  */
-function traverse<T>(target: T, seen = new Set<unknown>()): T {
+function traverse<T>(target: T, depth = Number.POSITIVE_INFINITY, seen = new Set<unknown>()): T {
   /* 非对象或已访问过的节点直接返回，防止无限递归。 */
-  if (!isObject(target) || seen.has(target)) {
+  if (!isObject(target) || seen.has(target) || depth <= 0) {
     return target
   }
 
@@ -118,7 +118,7 @@ function traverse<T>(target: T, seen = new Set<unknown>()): T {
 
   /* 遇到 `ref` 时继续深入其 `value`，保持与响应式对象一致。 */
   if (isRef(target)) {
-    traverse(target.value, seen)
+    traverse(target.value, depth - 1, seen)
 
     return target
   }
@@ -126,7 +126,11 @@ function traverse<T>(target: T, seen = new Set<unknown>()): T {
   /* 仅遍历可枚举自有键，包含字符串与 `Symbol`。 */
   for (const key of Reflect.ownKeys(target)) {
     if (Object.prototype.propertyIsEnumerable.call(target, key)) {
-      traverse(target[key], seen)
+      const value = target[key]
+
+      if (depth > 1) {
+        traverse(value, depth - 1, seen)
+      }
     }
   }
 

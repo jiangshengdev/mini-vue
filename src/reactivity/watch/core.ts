@@ -1,6 +1,7 @@
 import type { ReactiveRawTarget } from '../contracts/index.ts'
 import { recordEffectScope, recordScopeCleanup } from '../effect-scope.ts'
 import { effectStack, ReactiveEffect } from '../effect.ts'
+import { isReactive } from '../reactive.ts'
 import type { Ref } from '../ref/types.ts'
 import { createGetter, resolveDeepOption } from './utils.ts'
 import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
@@ -121,6 +122,7 @@ export function createWatch<T>(
   const flush = options.flush ?? 'sync'
   const deep = resolveDeepOption(source, options.deep)
   const getter = createGetter(source, deep)
+  const forceTrigger = isReactive(source)
   let cleanup: WatchCleanup | undefined
   let oldValue: T | undefined
   let hasOldValue = false
@@ -154,7 +156,7 @@ export function createWatch<T>(
     const newValue = runner.run()
 
     /* 浅监听且值未变更时跳过回调，提高性能。 */
-    if (!deep && hasOldValue && Object.is(newValue, oldValue)) {
+    if (!deep && !forceTrigger && hasOldValue && Object.is(newValue, oldValue)) {
       return
     }
 

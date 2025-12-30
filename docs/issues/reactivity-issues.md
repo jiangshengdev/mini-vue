@@ -14,14 +14,16 @@
 - 影响：硬编码了内部文件路径，若项目重构改变目录结构，测试将无法运行。
 - 提示：应尽量避免 Mock 内部模块，或者通过依赖注入/公共 API 间接测试相关逻辑。
 
-## 3. `watch` 对响应式对象显式 `deep: false` 时不收集依赖（待修复）
+## 3. `watch` 对响应式对象显式 `deep: false` 时不收集依赖（已修复）
 
-- 位置：`src/reactivity/watch/utils.ts`
-- 现状：当源是响应式对象且显式传入 `deep: false` 时，`createGetter` 只返回源对象本身，不访问任何属性，导致未收集依赖，回调永远不触发。
-- 影响：浅监听直接失效，调用方难以感知，违背「不深度遍历但应跟踪顶层字段变更」的预期。
-- 可能方案：
-  - 在浅模式下对响应式对象至少访问一次自身或顶层键以建立依赖，例如读取 `Object.keys`/`iterateDependencyKey` 或逐个访问顶层属性。
-  - 通过 `effect`/`track` 辅助方法触发顶层依赖收集，并补充用例覆盖 `deep: false` + 响应式对象场景。
+- 位置：
+  - `src/reactivity/watch/utils.ts`
+  - `src/reactivity/watch/core.ts`
+- 现状（修复前）：当源是响应式对象且显式传入 `deep: false` 时，`createGetter` 只返回源对象本身，不访问任何属性，导致未收集依赖，回调永远不触发。
+- 修复：
+  - reactive 源 + `deep: false` 时改为遍历一层顶层键以建立依赖（不再深度递归）。
+  - reactive 源在浅模式下启用 `forceTrigger`，避免 `newValue === oldValue` 时被短路跳过回调。
+- 测试：`test/reactivity/watch/deep.test.ts`
 
 ## 4. `readonly` 访问仍收集依赖（与 Vue 3 不一致，已修复）
 

@@ -5,6 +5,7 @@ import {
   emitVueDevtoolsAppUnmount,
   getVueDevtoolsGlobalHook,
 } from './hook.ts'
+import { registerMiniVueDevtoolsInspector } from './inspector.ts'
 import { registerMiniVueDevtoolsTab } from './tab.ts'
 import { __DEV__ } from '@/shared/index.ts'
 import type { PluginDefinition, PluginInstallApp } from '@/shared/index.ts'
@@ -48,6 +49,8 @@ function tryConnectVueDevtools(appState: PatchedMountState, mountTarget: unknown
       version: payload.version,
       types: payload.types,
     })
+
+    registerMiniVueDevtoolsInspector({ hook, app: payload.app })
   }
 
   registerMiniVueDevtoolsTab()

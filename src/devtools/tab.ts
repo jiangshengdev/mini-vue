@@ -58,7 +58,7 @@ function createPlaceholderTabSrc(): string {
   </head>
   <body>
     <h2>Mini Vue</h2>
-    <p>Mini Vue Devtools 插件已接入（占位）。</p>
+    <p>Hello World</p>
   </body>
 </html>`
 

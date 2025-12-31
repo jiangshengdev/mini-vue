@@ -1,19 +1,23 @@
-import type { PluginDefinition, PluginInstallApp } from '@/shared/index.ts'
-import { __DEV__ } from '@/shared/index.ts'
-import { miniVueDevtoolsPluginName } from './constants.ts'
 import { createMiniVueDevtoolsAppInitPayload } from './app-shim.ts'
-import { getVueDevtoolsGlobalHook, emitVueDevtoolsAppInit, emitVueDevtoolsAppUnmount } from './hook.ts'
+import { miniVueDevtoolsPluginName } from './constants.ts'
+import {
+  emitVueDevtoolsAppInit,
+  emitVueDevtoolsAppUnmount,
+  getVueDevtoolsGlobalHook,
+} from './hook.ts'
 import { registerMiniVueDevtoolsTab } from './tab.ts'
+import { __DEV__ } from '@/shared/index.ts'
+import type { PluginDefinition, PluginInstallApp } from '@/shared/index.ts'
 
 interface PatchedMountState {
   originalMount: (target: unknown) => unknown
   devtoolsApp?: unknown
 }
 
-const patchedStateByApp = new WeakMap<object, PatchedMountState>()
+const patchedStateByApp = new WeakMap<WeakKey, PatchedMountState>()
 
-function isObject(value: unknown): value is object {
-  return typeof value === 'object' && value !== null
+function isWeakKey(value: unknown): value is WeakKey {
+  return (typeof value === 'object' && value !== null) || typeof value === 'function'
 }
 
 function tryConnectVueDevtools(appState: PatchedMountState, mountTarget: unknown): void {
@@ -22,6 +26,16 @@ function tryConnectVueDevtools(appState: PatchedMountState, mountTarget: unknown
   if (!hook) {
     return
   }
+
+  /*
+   * Vue Devtools（Chrome 扩展）在 detector 中使用 `window.__VUE__` 判断是否“检测到 Vue”。
+   * mini-vue 没有该标记，这里仅在 Devtools hook 存在时补一个最小占位，避免 popup 显示 “Vue.js not detected”。
+   *
+   * 注意：该标记仅用于 Devtools 检测，不参与 mini-vue 运行时语义。
+   */
+  const globalObject = globalThis as { __VUE__?: unknown }
+
+  globalObject.__VUE__ ??= true
 
   if (!appState.devtoolsApp) {
     const payload = createMiniVueDevtoolsAppInitPayload({ mountTarget })
@@ -39,14 +53,14 @@ function tryConnectVueDevtools(appState: PatchedMountState, mountTarget: unknown
   registerMiniVueDevtoolsTab()
 }
 
-export const MiniVueDevtoolsPlugin: PluginDefinition<PluginInstallApp> = {
+const miniVueDevtoolsPlugin: PluginDefinition<PluginInstallApp> = {
   name: miniVueDevtoolsPluginName,
   install(app) {
     if (!__DEV__) {
       return
     }
 
-    if (!isObject(app)) {
+    if (!isWeakKey(app)) {
       return
     }
 
@@ -54,7 +68,7 @@ export const MiniVueDevtoolsPlugin: PluginDefinition<PluginInstallApp> = {
       mount?: (target: unknown) => unknown
     }
 
-    const mount = appWithMount.mount
+    const { mount } = appWithMount
 
     if (typeof mount !== 'function') {
       return
@@ -80,7 +94,7 @@ export const MiniVueDevtoolsPlugin: PluginDefinition<PluginInstallApp> = {
     }
   },
   uninstall(app) {
-    if (!isObject(app)) {
+    if (!isWeakKey(app)) {
       return
     }
 
@@ -106,3 +120,4 @@ export const MiniVueDevtoolsPlugin: PluginDefinition<PluginInstallApp> = {
   },
 }
 
+export { miniVueDevtoolsPlugin as MiniVueDevtoolsPlugin }

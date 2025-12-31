@@ -5,10 +5,12 @@
  * - JSX 运行时：`h`、`jsx`、`jsxs`、`jsxDEV`、`Fragment`
  * - 响应式系统：`reactive`、`ref`、`computed`、`effect`、`watch` 等
  * - 路由系统：`createRouter`、`RouterLink`、`RouterView`、`useRouter`
+ * - Devtools：`MiniVueDevtoolsPlugin`
  * - 应用创建：`createApp`、`render`
  * - 依赖注入：`provide`、`inject`
  * - 错误处理：`setErrorHandler`
  */
+export { MiniVueDevtoolsPlugin } from '@/devtools/index.ts'
 export type { ElementType, SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
 export { Fragment } from '@/jsx-foundation/index.ts'
 export { h, jsx, jsxDEV, jsxs } from '@/jsx-runtime/index.ts'

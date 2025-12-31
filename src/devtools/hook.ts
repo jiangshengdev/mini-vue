@@ -32,7 +32,9 @@ export function emitVueDevtoolsAppInit(options: {
   options.hook.emit('app:init', options.app, options.version, options.types)
 }
 
-export function emitVueDevtoolsAppUnmount(options: { hook: VueDevtoolsGlobalHook; app: unknown }): void {
+export function emitVueDevtoolsAppUnmount(options: {
+  hook: VueDevtoolsGlobalHook
+  app: unknown
+}): void {
   options.hook.emit('app:unmount', options.app)
 }
-

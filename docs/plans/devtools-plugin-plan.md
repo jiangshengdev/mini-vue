@@ -20,6 +20,7 @@
 - **Devtools 面板是否出现取决于 `hook.apps.length`**：`packages/chrome-extension/src/devtools-background.ts` 仅在 `window.__VUE_DEVTOOLS_GLOBAL_HOOK__` 存在且 `hook.Vue || hook.apps.length` 为真时创建 “Vue” 面板；mini-vue 需要让 `apps.length > 0`。
 - **让扩展“识别到 app”的最小条件是发 `app:init`**：扩展注入的 devtools-kit backend 会监听 `app:init` 并把 app 推入 `hook.apps`（见 `packages/devtools-kit/src/core/index.ts`），因此 mini-vue 只需在 mount 后调用 `__VUE_DEVTOOLS_GLOBAL_HOOK__.emit('app:init', appShim, version, types)` 即可触发识别。
 - **`addCustomTab` 与 Vue runtime 解耦**：`packages/devtools-kit/src/ctx/state.ts` 的 `addCustomTab` 只是写入 `__VUE_DEVTOOLS_KIT_CUSTOM_TABS__` 并触发 state 更新；因此可以在 mini-vue 中通过动态 `import('@vue/devtools-api')` 调用 `addCustomTab` 注册 SFC 面板，不依赖真实 Vue runtime。
+- **浏览器工具栏 popup 的“Vue 检测”依赖 `window.__VUE__`**：`packages/chrome-extension/src/detector.ts` 使用 `window.__VUE__` 判定 `vueDetected`；mini-vue 没有该标记，开发态可在 hook 存在时补一个最小占位以避免 popup 显示 “Vue.js not detected”。
 
 ## Action items
 
@@ -29,7 +30,7 @@
 [x] 设计并实现 app shim：提供最小 `MiniVueDevtoolsApp` 与 root instance shim，并用注释说明其仅用于 Devtools 读取兼容（第一版落地在 `src/devtools/app-shim.ts`）。
 [x] 插件接入点：在 `install(app)` 中包装 `app.mount` 触发 init；在 `uninstall` 中恢复包装并触发 unmount（第一版落地在 `src/devtools/plugin.ts`）。
 [x] 自定义面板（SFC）：注册 “Mini Vue” Tab，SFC 先显示占位文案（第一版通过写入 `__VUE_DEVTOOLS_KIT_CUSTOM_TABS__` 注册，落地在 `src/devtools/tab.ts`，后续可替换为 `@vue/devtools-api`）。
-[ ] Playground 验证：在 `playground` 中开发态启用插件，并写明验证步骤（打开 Vue Devtools → 看到 “Mini Vue” 自定义 Tab）。
+[x] Playground 接入：在 `playground` 中开发态启用插件，并写明验证步骤（打开 Vue Devtools → 看到 “Mini Vue” 自定义 Tab）。
 [ ] 测试：在 `test/devtools/**` 模拟注入 hook，断言 mount/unmount 事件与 Tab 注册调用；保证测试不依赖真实浏览器扩展运行。
 
 ## 已确认（原 Open questions）

@@ -65,7 +65,11 @@ export function registerMiniVueDevtoolsTab(): void {
     return
   }
 
-  if (tabs.some((tab) => (tab as { name?: unknown }).name === miniVueDevtoolsTabName)) {
+  if (
+    tabs.some((tab) => {
+      return (tab as { name?: unknown }).name === miniVueDevtoolsTabName
+    })
+  ) {
     return
   }
 
@@ -79,4 +83,3 @@ export function registerMiniVueDevtoolsTab(): void {
 
   ;(tabs as DevtoolsCustomTab[]).push(tab)
 }
-

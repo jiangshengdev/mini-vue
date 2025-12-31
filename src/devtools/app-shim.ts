@@ -7,7 +7,7 @@ export interface MiniVueDevtoolsAppInitPayload {
   types: Record<string, unknown>
 }
 
-interface MiniVueDevtoolsVNodeShim {
+interface MiniVueDevtoolsVnodeShim {
   type?: unknown
   el?: Node
   children?: unknown[]
@@ -19,6 +19,8 @@ interface MiniVueDevtoolsAppContextShim {
   app: MiniVueDevtoolsAppShim
   /** 仅用于 Devtools 推断组件名，模拟 Vue3 `appContext.components`。 */
   components?: Record<string, unknown>
+  /** 仅用于 Devtools 读取：Vue3 `appContext.mixins`，用于 merged options 计算。 */
+  mixins: unknown[]
 }
 
 interface MiniVueDevtoolsComponentInstanceShim {
@@ -27,9 +29,26 @@ interface MiniVueDevtoolsComponentInstanceShim {
   parent?: MiniVueDevtoolsComponentInstanceShim
   root: MiniVueDevtoolsComponentInstanceShim
   appContext: MiniVueDevtoolsAppContextShim
-  subTree: MiniVueDevtoolsVNodeShim
-  vnode?: { key?: unknown }
+  subTree: MiniVueDevtoolsVnodeShim
+  vnode?: { key?: unknown; props?: Record<string, unknown> }
   isUnmounted: boolean
+  /**
+   * 以下字段为 Vue Devtools 兼容占位（仅用于 Devtools 读取）。
+   *
+   * @remarks
+   * - Devtools 的组件 inspector 会在读取实例 state 时访问这些字段。
+   * - 这里统一提供“空对象/空数组”，避免 Devtools 后端因缺失字段而报错。
+   * - 它们不参与 mini-vue 运行时语义。
+   */
+  props: Record<string, unknown>
+  data: Record<string, unknown>
+  renderContext: Record<string, unknown>
+  setupState: Record<string, unknown>
+  devtoolsRawSetupState: Record<string, unknown>
+  attrs: Record<string, unknown>
+  provides: Record<PropertyKey, unknown>
+  ctx: Record<PropertyKey, unknown>
+  refs: Record<string, unknown>
 }
 
 export interface MiniVueDevtoolsAppShim {
@@ -61,15 +80,21 @@ function resolveDomContainer(target: unknown): Element | undefined {
   return target instanceof Element ? target : undefined
 }
 
-function createRootInstanceShim(app: MiniVueDevtoolsAppShim, container?: Element): MiniVueDevtoolsComponentInstanceShim {
+function createRootInstanceShim(
+  app: MiniVueDevtoolsAppShim,
+  container?: Element,
+): MiniVueDevtoolsComponentInstanceShim {
   const rootNode = container?.firstChild ?? container
 
-  const instance = {
+  const instance: Omit<MiniVueDevtoolsComponentInstanceShim, 'root'> & {
+    root?: MiniVueDevtoolsComponentInstanceShim
+  } = {
     uid: 0,
     type: { name: 'MiniVueRoot' },
     appContext: {
       app,
-      components: Object.create(null) as Record<string, unknown>,
+      components: {},
+      mixins: [],
     },
     subTree: {
       el: rootNode ?? undefined,
@@ -77,7 +102,16 @@ function createRootInstanceShim(app: MiniVueDevtoolsAppShim, container?: Element
     },
     vnode: { key: undefined },
     isUnmounted: false,
-  } as Omit<MiniVueDevtoolsComponentInstanceShim, 'root'> & { root?: MiniVueDevtoolsComponentInstanceShim }
+    props: {},
+    data: {},
+    renderContext: {},
+    setupState: {},
+    devtoolsRawSetupState: {},
+    attrs: {},
+    provides: {},
+    ctx: {},
+    refs: {},
+  }
 
   instance.root = instance as MiniVueDevtoolsComponentInstanceShim
 
@@ -93,21 +127,26 @@ export function createMiniVueDevtoolsAppInitPayload(options: {
     _instance: undefined as unknown as MiniVueDevtoolsComponentInstanceShim,
     _container: container,
     _component: { name: 'MiniVueApp' },
-    config: { globalProperties: Object.create(null) as Record<string, unknown> },
+    config: { globalProperties: {} },
   } satisfies Omit<MiniVueDevtoolsAppShim, '_instance'> & {
     _instance: MiniVueDevtoolsComponentInstanceShim
   }
 
   app._instance = createRootInstanceShim(app, container)
 
+  const fragmentTypeKey = 'Fragment'
+  const textTypeKey = 'Text'
+  const commentTypeKey = 'Comment'
+
+  const types: Record<string, unknown> = {
+    [fragmentTypeKey]: Fragment,
+    [textTypeKey]: Text,
+    [commentTypeKey]: Comment,
+  }
+
   return {
     app,
     version: miniVueDevtoolsAppVersion,
-    types: {
-      Fragment,
-      Text,
-      Comment,
-    },
+    types,
   }
 }
-

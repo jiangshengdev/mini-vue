@@ -25,7 +25,7 @@
 - **统一 server 模式**：本地与 CI 一律走 `pnpm run play:build && pnpm run play:preview --strictPort --port 4173 --host 127.0.0.1`，避免 dev server 与产物行为差异。
 - **默认无头**：`playwright.config.ts` 的 `use.headless` 固定为 `true`；需要有头时仅通过脚本追加 `--headed`。
 - **入口最小但可组合**：默认入口跑 chromium（快速），回归入口跑三浏览器；其他能力（UI/筛选）走 Playwright CLI 参数，不再维护多份配置文件。
-- **过滤与调试友好**：对外统一示例：`pnpm run test:e2e -- e2e/playground-basic.spec.ts`、`pnpm run test:e2e:all -- -g "表单绑定"` 等。
+- **过滤与调试友好**：对外统一示例：`pnpm run test:e2e e2e/playground-basic.spec.ts`、`pnpm run test:e2e:all --grep "表单绑定"` 等。
 
 ## 建议脚本清单（规划）
 
@@ -37,12 +37,11 @@
 - `test:e2e:ui`：Playwright UI（默认 chromium）。
 - `test:e2e:list`：列出用例（避免启动完整执行）。
 
-## Action items（待落地）
+## Action items（已落地）
 
-- [ ] 调整 `playwright.config.ts`：恢复三浏览器 projects、默认 `headless: true`、`webServer` 固定 preview（4173 + 127.0.0.1 + strictPort），并移除本地/CI 分支差异。
-- [ ] 调整 `package.json`：增加上述脚本入口，并确保所有入口都走同一份 `playwright.config.ts`。
-- [ ] 新增文档（建议 `docs/wiki/e2e-playwright.md`）：解释每个脚本用途、常见过滤写法、如何查看报告/trace。
-- [ ] 若存在 CI 工作流：改为调用 `pnpm run test:e2e:all`（与本地一致）。
+- [x] 调整 `playwright.config.ts`：恢复三浏览器 projects、默认 `headless: true`、`webServer` 固定 preview（4173 + 127.0.0.1 + strictPort），并移除本地/CI 分支差异。
+- [x] 调整 `package.json`：增加脚本入口（quick / all / headed / ui / list），并确保所有入口都走同一份 `playwright.config.ts`。
+- [ ] 新增文档（可选，后续再做）：解释每个脚本用途、常见过滤写法、如何查看报告/trace。
 
 ## 验证（落地后）
 

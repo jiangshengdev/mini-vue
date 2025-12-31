@@ -35,13 +35,13 @@ export default defineConfig({
     actionTimeout: 0,
     /* Base URL to use in actions like `await page.goto('/')`. */
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    baseURL: process.env.CI ? 'http://127.0.0.1:4173' : 'http://127.0.0.1:5173',
+    baseURL: 'http://127.0.0.1:4173',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
 
-    /* Only on CI systems run the tests headless */
-    headless: Boolean(process.env.CI),
+    /* 默认无头；需要有头时通过脚本追加 --headed */
+    headless: true,
   },
 
   /* Configure projects for major browsers */
@@ -50,6 +50,18 @@ export default defineConfig({
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
+      },
+    },
+    {
+      name: 'firefox',
+      use: {
+        ...devices['Desktop Firefox'],
+      },
+    },
+    {
+      name: 'webkit',
+      use: {
+        ...devices['Desktop Safari'],
       },
     },
 
@@ -88,14 +100,12 @@ export default defineConfig({
   /* Run your local dev server before starting the tests */
   webServer: {
     /**
-     * Use the dev server by default for faster feedback loop.
-     * Use the preview server on CI for more realistic testing.
-     * Playwright will re-use the local server if there is already a dev-server running.
+     * 本地与 CI 统一走 preview（更贴近产物），避免 dev server 与产物行为差异。
+     * 使用 strictPort + 不复用现有 server，防止误连到非预期进程。
      */
-    command: process.env.CI
-      ? 'pnpm run play:build && pnpm run play:preview --strictPort --port 4173 --host 127.0.0.1'
-      : 'pnpm run play --strictPort --port 5173 --host 127.0.0.1',
-    port: process.env.CI ? 4173 : 5173,
-    reuseExistingServer: !process.env.CI,
+    command:
+      'pnpm run play:build && pnpm run play:preview --strictPort --port 4173 --host 127.0.0.1',
+    port: 4173,
+    reuseExistingServer: false,
   },
 })

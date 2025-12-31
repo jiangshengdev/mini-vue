@@ -8,31 +8,11 @@
  * - 内部使用 mini-vue 的 `state` 实现响应式，确保状态变更自动触发视图更新。
  */
 
-import type { StateManager, StateRef, VisualizationState } from '../types.ts'
+import type { StateManager, VisualizationState } from '../types.ts'
 import { state } from '@/index.ts'
 
 /** 默认播放速度（毫秒），控制自动播放时每步之间的间隔。 */
 const defaultSpeed = 500
-
-/**
- * 创建状态引用包装器，将 mini-vue 的 `state` 适配为 `StateRef` 接口。
- *
- * @remarks
- * - `StateRef` 提供统一的 `get`/`set` 访问模式，隐藏底层响应式实现细节。
- * - 便于在不同上下文中传递和使用响应式状态。
- */
-function createStateRef<T>(initialValue: T): StateRef<T> {
-  const s = state(initialValue)
-
-  return {
-    get() {
-      return s.get()
-    },
-    set(value: T) {
-      s.set(value)
-    },
-  }
-}
 
 /**
  * 创建状态管理器，初始化所有响应式状态并提供统一的管理接口。
@@ -47,14 +27,14 @@ function createStateRef<T>(initialValue: T): StateRef<T> {
  */
 export function createStateManager(defaultInput: number[]): StateManager {
   /* 创建所有响应式状态，每个状态对应可视化的一个维度。 */
-  const inputState = createStateRef<number[]>([...defaultInput])
-  const isPlayingState = createStateRef(false)
-  const speedState = createStateRef(defaultSpeed)
-  const hoveredChainIndexesState = createStateRef<number[]>([])
-  const hoveredChainInfoState = createStateRef<{ chainIndex: number } | undefined>(undefined)
-  const isSequenceHoveredState = createStateRef(false)
-  const isPredecessorsHoveredState = createStateRef(false)
-  const navigatorVersionState = createStateRef(0)
+  const inputState = state<number[]>([...defaultInput])
+  const isPlayingState = state<boolean>(false)
+  const speedState = state<number>(defaultSpeed)
+  const hoveredChainIndexesState = state<number[]>([])
+  const hoveredChainInfoState = state<{ chainIndex: number } | undefined>(undefined)
+  const isSequenceHoveredState = state<boolean>(false)
+  const isPredecessorsHoveredState = state<boolean>(false)
+  const navigatorVersionState = state<number>(0)
 
   /* 保存初始值的副本，用于 `resetState` 时恢复。 */
   const initialInput = [...defaultInput]

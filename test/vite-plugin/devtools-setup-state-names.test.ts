@@ -15,7 +15,11 @@ async function transformWithPlugin(parameters: { code: string; id: string }) {
   }
 
   const result = await (
-    handler as unknown as (this: { warn: (message: string) => void }, code: string, id: string) => unknown
+    handler as unknown as (
+      this: { warn: (message: string) => void },
+      code: string,
+      id: string,
+    ) => unknown
   ).call({ warn: vi.fn() }, parameters.code, parameters.id)
 
   return result as { code?: string } | undefined

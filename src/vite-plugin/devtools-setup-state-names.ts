@@ -30,17 +30,22 @@ type TypeScriptApi = typeof import('typescript')
 
 let cachedTs: TypeScriptApi | undefined
 
-async function resolveTypeScript(ctx: { warn: (message: string) => void }): Promise<TypeScriptApi | undefined> {
+async function resolveTypeScript(ctx: {
+  warn: (message: string) => void
+}): Promise<TypeScriptApi | undefined> {
   if (cachedTs) {
     return cachedTs
   }
 
   try {
     const module = await import('typescript')
+
     cachedTs = module
+
     return cachedTs
   } catch {
     ctx.warn('[mini-vue] TSX 编译期改写插件需要安装 typescript 才能工作，已自动跳过。')
+
     return undefined
   }
 }
@@ -64,16 +69,21 @@ function resolveUniqueName(used: Map<string, number>, base: string): string {
 
   if (current === undefined) {
     used.set(base, 0)
+
     return base
   }
 
   const next = current + 1
 
   used.set(base, next)
+
   return `${base}$${next}`
 }
 
-function unwrapExpression(ts: TypeScriptApi, expression: import('typescript').Expression): import('typescript').Expression {
+function unwrapExpression(
+  ts: TypeScriptApi,
+  expression: import('typescript').Expression,
+): import('typescript').Expression {
   let current = expression
 
   while (true) {
@@ -94,7 +104,9 @@ function unwrapExpression(ts: TypeScriptApi, expression: import('typescript').Ex
 }
 
 function resolveImportText(node: import('typescript').Expression): string | undefined {
-  return typeof node === 'object' && 'text' in node ? String((node as { text?: unknown }).text) : undefined
+  return typeof node === 'object' && 'text' in node
+    ? String((node as { text?: unknown }).text)
+    : undefined
 }
 
 function resolveRegisterLocalName(parameters: {
@@ -391,7 +403,13 @@ export function miniVueDevtoolsSetupStateNamesPlugin(
       }
 
       const scriptKind = isTsx ? ts.ScriptKind.TSX : ts.ScriptKind.TS
-      const sourceFile = ts.createSourceFile(cleanId, code, ts.ScriptTarget.Latest, true, scriptKind)
+      const sourceFile = ts.createSourceFile(
+        cleanId,
+        code,
+        ts.ScriptTarget.Latest,
+        true,
+        scriptKind,
+      )
 
       const factoryLocals = resolveMiniVueFactoryLocals({ ts, sourceFile, importSource })
 
@@ -427,7 +445,9 @@ export function miniVueDevtoolsSetupStateNamesPlugin(
         if (importInsertion) {
           insertions.push(importInsertion)
         } else {
-          insertions.push(insertNewImport({ ts, sourceFile, importSource, localName: registerName }))
+          insertions.push(
+            insertNewImport({ ts, sourceFile, importSource, localName: registerName }),
+          )
         }
       }
 

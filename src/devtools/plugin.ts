@@ -1,4 +1,5 @@
 import { createMiniVueDevtoolsAppInitPayload } from './app-shim.ts'
+import type { MiniVueDevtoolsApp } from './app-shim.ts'
 import { miniVueDevtoolsPluginName } from './constants.ts'
 import {
   emitVueDevtoolsAppInit,
@@ -11,7 +12,7 @@ import type { PluginDefinition, PluginInstallApp } from '@/shared/index.ts'
 
 interface PatchedMountState {
   originalMount: (target: unknown) => unknown
-  devtoolsApp?: unknown
+  devtoolsApp?: MiniVueDevtoolsApp
 }
 
 const patchedStateByApp = new WeakMap<WeakKey, PatchedMountState>()
@@ -20,7 +21,11 @@ function isWeakKey(value: unknown): value is WeakKey {
   return (typeof value === 'object' && value !== null) || typeof value === 'function'
 }
 
-function tryConnectVueDevtools(appState: PatchedMountState, mountTarget: unknown): void {
+function tryConnectVueDevtools(
+  appState: PatchedMountState,
+  app: PluginInstallApp,
+  mountTarget: unknown,
+): void {
   const hook = getVueDevtoolsGlobalHook()
 
   if (!hook) {
@@ -38,7 +43,11 @@ function tryConnectVueDevtools(appState: PatchedMountState, mountTarget: unknown
   globalObject.__VUE__ ??= true
 
   if (!appState.devtoolsApp) {
-    const payload = createMiniVueDevtoolsAppInitPayload({ mountTarget })
+    const payload = createMiniVueDevtoolsAppInitPayload({ app, mountTarget })
+
+    if (!payload) {
+      return
+    }
 
     appState.devtoolsApp = payload.app
 
@@ -88,7 +97,7 @@ const miniVueDevtoolsPlugin: PluginDefinition<PluginInstallApp> = {
     appWithMount.mount = (target: unknown) => {
       const result = appState.originalMount.call(appWithMount, target)
 
-      tryConnectVueDevtools(appState, target)
+      tryConnectVueDevtools(appState, appWithMount, target)
 
       return result
     }

@@ -11,7 +11,7 @@ import type { RenderOutput } from '@/jsx-foundation/index.ts'
 import { isVirtualNode } from '@/jsx-foundation/index.ts'
 import { runtimeCoreInvalidContainer } from '@/messages/index.ts'
 import type { PropsShape } from '@/shared/index.ts'
-import { isNil } from '@/shared/index.ts'
+import { __DEV__, isNil } from '@/shared/index.ts'
 
 /**
  * 宿主环境需要提供的渲染原语集合。
@@ -103,6 +103,28 @@ export function createRenderer<
   const rootRenderStateByContainer = new WeakMap<WeakKey, RootRenderState>()
 
   /**
+   * 仅开发态：对齐 Vue3 行为，将根 vnode 暴露在 `container._vnode` 上，便于 Devtools 取到 root instance。
+   *
+   * @remarks
+   * - 该字段仅用于 Devtools 读取，不参与 mini-vue 运行时语义。
+   * - 生产构建应可被摇树，不产生任何写入。
+   */
+  function updateDevtoolsContainerVnode(
+    container: HostElement,
+    vnode: NormalizedVirtualNode | undefined,
+  ): void {
+    if (!__DEV__) {
+      return
+    }
+
+    const containerWithVnode = container as unknown as {
+      _vnode?: NormalizedVirtualNode | undefined
+    }
+
+    containerWithVnode._vnode = vnode
+  }
+
+  /**
    * 将宿主容器断言为对象键，便于复用 `WeakMap` 存储。
    */
   function asContainerKey(container: HostElement): WeakKey {
@@ -139,6 +161,7 @@ export function createRenderer<
     /* 首次渲染：清空容器并挂载新子树。 */
     if (!previous) {
       clear(container)
+      updateDevtoolsContainerVnode(container, undefined)
 
       if (!normalized) {
         /* 保留原有行为：不可渲染输出仍交给 `mountChild` 触发开发期警告。 */
@@ -150,6 +173,7 @@ export function createRenderer<
 
       mountChildInEnvironment(options, normalized, { container, context })
       rootRenderStateByContainer.set(containerKey, { vnode: normalized })
+      updateDevtoolsContainerVnode(container, normalized)
 
       return
     }
@@ -162,10 +186,12 @@ export function createRenderer<
 
     if (normalized) {
       rootRenderStateByContainer.set(containerKey, { vnode: normalized })
+      updateDevtoolsContainerVnode(container, normalized)
     } else {
       /* `render(undefined)` 等价于卸载：清理缓存并保持容器空白。 */
       rootRenderStateByContainer.delete(containerKey)
       clear(container)
+      updateDevtoolsContainerVnode(container, undefined)
       /* 仍保留对不可渲染输出的警告能力。 */
       mountChild(options, virtualNode, { container, context })
     }
@@ -184,6 +210,7 @@ export function createRenderer<
     }
 
     clear(container)
+    updateDevtoolsContainerVnode(container, undefined)
   }
 
   return {

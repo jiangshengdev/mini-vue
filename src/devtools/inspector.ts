@@ -1,10 +1,10 @@
-import type { MiniVueDevtoolsAppShim } from './app-shim.ts'
+import type { MiniVueDevtoolsApp } from './app-shim.ts'
 import type { VueDevtoolsGlobalHook } from './hook.ts'
 
 interface DevtoolsPluginDescriptor {
   id: string
   label: string
-  app: MiniVueDevtoolsAppShim
+  app: MiniVueDevtoolsApp
   packageName?: string
   homepage?: string
   logo?: string
@@ -110,7 +110,7 @@ function createHelloWorldInspectorTree(): InspectorNode[] {
  */
 export function registerMiniVueDevtoolsInspector(options: {
   hook: VueDevtoolsGlobalHook
-  app: MiniVueDevtoolsAppShim
+  app: MiniVueDevtoolsApp
 }): void {
   if (!isWeakKey(options.app)) {
     return

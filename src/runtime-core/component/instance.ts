@@ -9,6 +9,35 @@ import { __DEV__ } from '@/shared/index.ts'
 
 let componentUid = 0
 
+function patchComponentInstanceForDevtools<
+  HostNode,
+  HostElement extends HostNode & WeakKey,
+  HostFragment extends HostNode,
+  T extends SetupComponent,
+>(
+  instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
+  parent: ComponentInstance<HostNode, HostElement, HostFragment, T>['parent'],
+): void {
+  /*
+   * Vue Devtools 兼容字段占位（仅用于 Devtools 读取）。
+   *
+   * @remarks
+   * - Devtools 的内置 `Components` 面板会读取这些字段构建组件树与 state。
+   * - 这里统一提供“空对象/指针”以保证不崩溃，它们不参与 mini-vue 运行时语义。
+   */
+  const devtoolsInstance = instance as unknown as Record<string, unknown>
+  const parentRoot = parent ? ((parent as unknown as { root?: unknown }).root ?? parent) : undefined
+
+  devtoolsInstance.root = parentRoot ?? instance
+  devtoolsInstance.data ??= {}
+  devtoolsInstance.renderContext ??= {}
+  devtoolsInstance.setupState ??= {}
+  devtoolsInstance.devtoolsRawSetupState ??= {}
+  devtoolsInstance.attrs ??= {}
+  devtoolsInstance.ctx ??= {}
+  devtoolsInstance.refs ??= {}
+}
+
 /**
  * 创建组件实例与关联的 `effect` 作用域。
  *
@@ -49,7 +78,7 @@ export function createComponentInstance<
     parent?.provides ?? appContext?.provides ?? (Object.create(null) as PlainObject)
 
   /* `render`/`effect` 初始为空，由 `setup` 与 `performInitialRender` 回填。 */
-  return {
+  const instance: ComponentInstance<HostNode, HostElement, HostFragment, T> = {
     uid,
     postOrderId: 0,
     parent,
@@ -76,6 +105,12 @@ export function createComponentInstance<
     beforeUpdateHooks: [],
     updatedHooks: [],
   }
+
+  if (__DEV__) {
+    patchComponentInstanceForDevtools(instance, parent)
+  }
+
+  return instance
 }
 
 /**

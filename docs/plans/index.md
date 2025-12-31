@@ -10,5 +10,6 @@
 - [plan-v-model-component](./plan-v-model-component.md)
 - [v-model-jsx-impl](./v-model-jsx-impl.md)
 - [plugin-registry-plan](./plugin-registry-plan.md)
+- [devtools-plugin-plan](./devtools-plugin-plan.md)
 - [test-maintainability-plan](./test-maintainability-plan.md)
 - [playground-basic-e2e-plan](./playground-basic-e2e-plan.md)

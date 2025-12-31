@@ -1,46 +1,75 @@
 # 下一阶段功能规划
 
-## 1. VirtualNode Diff / Patch（优先级：高）
+> 本文为滚动计划：已落地项会移动到「已完成」以保留决策与上下文。
 
-- 位置：`src/runtime-core/component/render-effect.ts`、`src/runtime-core/mount/`
-- 现状：`rerenderComponent` 每次更新执行 `teardownMountedSubtree → mountLatestSubtree` 全量重建，无任何节点复用逻辑。
-- 影响：
-  - 列表渲染 N 项，改动 1 项需销毁重建 N 个 DOM 节点，性能随 UI 复杂度线性下降。
-  - 丢失 DOM 状态（input focus、scroll position、CSS 动画中间态）。
-  - 无法支持 `key` 属性优化列表项复用。
-- 决策：采用「Vue 3 风格」的 keyed children diff（头尾同步 fast path + key map，中间区间按需移动；LIS 作为可选优化），而不是把「纯双端 diff」当作完整方案。
-- 详细设计稿：见 docs/issues/virtualNode-diff-plan.md
+## 已完成（上一轮）
 
-## 2. 异步调度器 Scheduler（优先级：高）
+### 1. VirtualNode Diff / Patch
 
-- 位置：`src/runtime-core/component/render-effect.ts`、新增 `src/runtime-core/scheduler.ts`
-- 现状：响应式触发同步执行，每次 `ref.value = x` 立即触发组件重渲染。
-- 影响：
-  - 同一事件回调内多次修改状态会触发多次渲染，浪费性能。
-  - 无法提供 `nextTick()` API，开发者难以在 DOM 更新后执行逻辑。
-  - 与 Vue 3 行为不一致，迁移成本高。
-- 建议：
-  - 实现微任务队列，收集同一 tick 内的更新任务并去重。
-  - 暴露 `nextTick(callback?)` API，返回 Promise。
-  - 组件 render effect 的 scheduler 改为入队而非同步执行。
+[x] 组件更新改为 `patchChild`，支持 keyed/unkeyed diff 与 LIS 优化，避免全量卸载重挂。  
+- 关键位置：`src/runtime-core/component/render-effect.ts`、`src/runtime-core/patch/**`
+- 设计稿：`docs/plans/vnode-diff-plan.md`
 
-## 3. 生命周期钩子（优先级：中）
+### 2. 异步调度器 Scheduler
 
-- 位置：`src/runtime-core/component/context.ts`、`src/runtime-core/component/instance.ts`
-- 现状：仅有 `effectScope` 的 `onScopeDispose`，缺少组件级生命周期。
-- 缺失 API：`onMounted`、`onUnmounted`、`onBeforeUpdate`、`onUpdated`。
-- 详细设计稿：`docs/plans/lifecycle-hooks-plan.md`
-- 影响：
-  - 组件无法在挂载完成后执行 DOM 操作（如 focus、测量尺寸）。
-  - 清理副作用缺少明确时机，容易遗漏。
-  - 与 Vue 3 Composition API 不兼容。
-- 建议：
-  - 在 `ComponentInstance` 上增加生命周期回调数组。
-  - `setup` 执行期间通过 `getCurrentInstance()` 注册钩子。
-  - 在 `performInitialRender` 完成后触发 `onMounted`，在 `teardownComponentInstance` 时触发 `onUnmounted`。
+[x] 引入微任务调度队列与 `nextTick(callback?)`，合并同一 tick 内的重复更新并提供 flush 生命周期。  
+- 关键位置：`src/runtime-core/scheduler.ts`
+- 设计稿：`docs/plans/scheduler-plan.md`
 
-## 实施顺序建议
+### 3. 生命周期钩子
 
-1. **Diff/Patch** → 解决最大性能瓶颈，使项目达到"可用"级别
-2. **Scheduler** → 与 Diff 配合，避免批量更新时的重复 patch
-3. **生命周期** → 在前两者稳定后补充，完善组件模型
+[x] 补齐组件级生命周期注册与触发：`onMounted`/`onUnmounted`/`onBeforeUpdate`/`onUpdated`。  
+- 关键位置：`src/runtime-core/component/lifecycle.ts`
+- 设计稿：`docs/plans/lifecycle-hooks-plan.md`
+
+## 下一阶段（不含编译器）
+
+### 1. DOM 渲染器 SVG 完整支持（优先级：高）
+
+- 目标：在 `<svg>` 子树中正确创建/更新 SVG 元素，并避免 `className` 写入导致的异常。
+- 位置：
+  - `src/runtime-dom/renderer-options.ts`（`createElement` 需要处理 namespace）
+  - `src/runtime-dom/props/class.ts`（SVG 元素写入 `class` 应走 `setAttribute`）
+  - `src/runtime-dom/props/attr.ts`（如需支持 `xlink:href` 等带 namespace 的属性）
+- 参考：`docs/issues/runtime-dom-issues.md`
+
+### 2. runtime-dom 在无 DOM/SSR 环境可安全 import（优先级：高）
+
+- 目标：在没有 `document` 的环境中仅 import `runtime-dom` 不应崩溃；需要给出明确错误或延迟到 `mount` 才访问 DOM。
+- 位置：`src/runtime-dom/create-app.ts`
+- 参考：`docs/issues/runtime-dom-issues.md`
+
+### 3. 组件 setup 上下文（emit/attrs/slots/expose）（优先级：中）
+
+- 现状：`SetupComponent` 仅接收 `props`，缺少 `setup(props, ctx)` 的扩展点，无法提供 `emit`/`slots` 等能力。
+- 目标：定义最小 `SetupContext` 并在 `runtime-core` 落地（类型与运行时同步演进）。
+- 可能涉及：
+  - `src/jsx-foundation/types.ts`（组件类型签名）
+  - `src/runtime-core/component/setup.ts`（调用约定与上下文注入）
+
+### 4. JSX v-model 写回策略（优先级：中）
+
+- 现状：仅支持 Ref；非 Ref 绑定目标只在开发期警告但不会写回，容易造成“UI 与数据不同步”的隐性问题。
+- 目标：明确并固化策略：要么在类型/运行时层面强制“仅支持 Ref”，要么引入安全的可写目标协议（如 setter）。
+- 参考：`docs/issues/jsx-runtime-issues.md`
+
+### 5. children 类型与运行时对齐（优先级：低）
+
+- 现状：运行时接受 `null` 并视为可忽略节点，但类型层面不允许（项目内部约定不使用 `null`）。
+- 目标：在类型层兼容常见外部写法，同时保持仓库内部统一使用 `undefined` 表示“空/缺省”。
+- 参考：`docs/issues/jsx-foundation-issues.md`
+
+### 6. 测试容器清理策略（优先级：低）
+
+- 现状：`cleanupTestContainers()` 会清空整个 `document.body`，潜在误删非本用例创建的 fixture。
+- 目标：只清理由测试创建的容器节点，避免全局副作用。
+- 参考：`docs/issues/top-level-issues.md`
+
+## 实施顺序建议（不含编译器）
+
+1. **SVG 支持** → 补齐 DOM 宿主能力缺口，避免“渲染成功但不显示/直接报错”的陷阱
+2. **SSR/无 DOM import 安全** → 解耦模块加载与运行时依赖，提升可复用性
+3. **setup ctx** → 完善组件模型的扩展点，为后续能力（如 slots/emit）铺路
+4. **JSX v-model 策略** → 降低误用成本，提升一致性
+5. **children 类型对齐** → 提升外部使用体验（迁移/学习成本）
+6. **测试清理优化** → 降低未来用例维护风险

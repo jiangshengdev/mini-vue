@@ -15,6 +15,11 @@
 export { ContextStack } from './context-stack.ts'
 export { createDebugLogger } from './debug.ts'
 export type { DebugLogger } from './debug.ts'
+export type { DevtoolsSetupStateCollector, DevtoolsSetupStateKind } from './devtools-setup-state.ts'
+export {
+  collectDevtoolsSetupState,
+  withDevtoolsSetupStateCollector,
+} from './devtools-setup-state.ts'
 export { __DEV__, __INTERNAL_DEV__, isDevDebugEnvironment } from './env.ts'
 export {
   dispatchError,

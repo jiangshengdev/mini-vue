@@ -5,7 +5,57 @@ import {
   runtimeCoreAsyncSetupNotSupported,
   runtimeCoreSetupMustReturnRender,
 } from '@/messages/index.ts'
-import { errorContexts, errorPhases, isThenable, runSilent } from '@/shared/index.ts'
+import type {
+  DevtoolsSetupStateCollector,
+  DevtoolsSetupStateKind,
+  PlainObject,
+} from '@/shared/index.ts'
+import {
+  errorContexts,
+  errorPhases,
+  isThenable,
+  runSilent,
+  withDevtoolsSetupStateCollector,
+} from '@/shared/index.ts'
+
+function createDevtoolsSetupStateCollector(instance: unknown): DevtoolsSetupStateCollector {
+  const counters: Record<DevtoolsSetupStateKind, number> = {
+    computed: 0,
+    reactive: 0,
+    ref: 0,
+    unknown: 0,
+  }
+
+  const recorded = new WeakSet()
+
+  return {
+    collect(value, kind) {
+      if (!value || typeof value !== 'object') {
+        return
+      }
+
+      if (recorded.has(value)) {
+        return
+      }
+
+      recorded.add(value)
+
+      const devtoolsInstance = instance as {
+        setupState?: PlainObject
+        devtoolsRawSetupState?: PlainObject
+      }
+
+      devtoolsInstance.setupState ??= {}
+      devtoolsInstance.devtoolsRawSetupState ??= {}
+
+      const index = counters[kind]++
+      const key = `${kind}${index}`
+
+      devtoolsInstance.setupState[key] = value
+      devtoolsInstance.devtoolsRawSetupState[key] = value
+    },
+  }
+}
 
 /**
  * 初始化组件，创建 `setup` 阶段与渲染闭包。
@@ -50,12 +100,15 @@ function invokeSetup<
   T extends SetupComponent,
 >(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): RenderFunction | undefined {
   let setupFailed = false
+  const devtoolsSetupStateCollector = createDevtoolsSetupStateCollector(instance)
 
   /* 在组件专属 `scope` 内运行 `setup`，便于后续统一 `stop`。 */
   const render = instance.scope.run(() => {
     return runSilent(
       () => {
-        return instance.type(instance.props)
+        return withDevtoolsSetupStateCollector(devtoolsSetupStateCollector, () => {
+          return instance.type(instance.props)
+        })
       },
       {
         origin: errorContexts.componentSetup,

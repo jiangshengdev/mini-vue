@@ -7,6 +7,7 @@ import type { Ref } from './types.ts'
 import { reactivityComputedReadonly } from '@/messages/index.ts'
 import {
   __INTERNAL_DEV__,
+  collectDevtoolsSetupState,
   createDebugLogger,
   errorContexts,
   errorPhases,
@@ -255,11 +256,19 @@ export function computed<T>(
 ): Ref<T> {
   /* 直接传函数时创建只读 computed，避免误写。 */
   if (typeof getterOrOptions === 'function') {
-    return new ComputedRefImpl(getterOrOptions, createReadonlySetter<T>())
+    const computedRef = new ComputedRefImpl(getterOrOptions, createReadonlySetter<T>())
+
+    collectDevtoolsSetupState(computedRef, 'computed')
+
+    return computedRef
   }
 
   const { get, set } = getterOrOptions
 
   /* 结构出自定义 getter/setter，以构造具备写入能力的 computed。 */
-  return new ComputedRefImpl(get, set)
+  const computedRef = new ComputedRefImpl(get, set)
+
+  collectDevtoolsSetupState(computedRef, 'computed')
+
+  return computedRef
 }

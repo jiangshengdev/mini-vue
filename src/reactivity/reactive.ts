@@ -18,7 +18,7 @@ import { isSupportedTarget } from './to-raw.ts'
 import type { Reactive, ReadonlyReactive } from './types.ts'
 import { reactivityReadonlyWarning, reactivityUnsupportedType } from '@/messages/index.ts'
 import type { PlainObject } from '@/shared/index.ts'
-import { __DEV__, isObject, isPlainObject } from '@/shared/index.ts'
+import { __DEV__, collectDevtoolsSetupState, isObject, isPlainObject } from '@/shared/index.ts'
 
 /** 响应式代理缓存类型：使用 WeakMap 避免内存泄漏。 */
 type ProxyCache = WeakMap<ReactiveRawTarget, ReactiveTarget>
@@ -176,7 +176,11 @@ export function reactive(target: unknown): unknown {
     return target
   }
 
-  return createProxy(target, mutableHandlers, reactiveCache, { skipReactiveCheck: true })
+  const proxy = createProxy(target, mutableHandlers, reactiveCache, { skipReactiveCheck: true })
+
+  collectDevtoolsSetupState(proxy, 'reactive')
+
+  return proxy
 }
 
 /**
@@ -198,9 +202,13 @@ export function shallowReactive(target: unknown): unknown {
     return target
   }
 
-  return createProxy(target, shallowReactiveHandlers, shallowReactiveCache, {
+  const proxy = createProxy(target, shallowReactiveHandlers, shallowReactiveCache, {
     skipReactiveCheck: true,
   })
+
+  collectDevtoolsSetupState(proxy, 'reactive')
+
+  return proxy
 }
 
 /**

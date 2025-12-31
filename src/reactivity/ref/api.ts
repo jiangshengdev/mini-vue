@@ -5,7 +5,7 @@ import { isReactive } from '../reactive.ts'
 import { toRaw } from '../to-raw.ts'
 import { ObjectRefImpl, RefImpl } from './impl.ts'
 import type { Ref } from './types.ts'
-import { isObject } from '@/shared/index.ts'
+import { collectDevtoolsSetupState, isObject } from '@/shared/index.ts'
 
 /**
  * 将任意值转换为 Ref，若已经是 Ref 则原样返回。
@@ -25,7 +25,11 @@ export function ref<T>(value: T | Ref<T>): Ref<T> {
     return value
   }
 
-  return new RefImpl(value)
+  const refInstance = new RefImpl(value)
+
+  collectDevtoolsSetupState(refInstance, 'ref')
+
+  return refInstance
 }
 
 /**
@@ -103,5 +107,9 @@ export function toRef<T extends ReactiveRawTarget, K extends keyof T>(
   const isTargetReactive = isReactive(target)
 
   /* 否则创建新的 `ObjectRefImpl`，将读写直接代理到原对象属性上。 */
-  return new ObjectRefImpl(target, key, !isTargetReactive)
+  const refInstance = new ObjectRefImpl(target, key, !isTargetReactive)
+
+  collectDevtoolsSetupState(refInstance, 'ref')
+
+  return refInstance
 }

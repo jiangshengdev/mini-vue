@@ -29,6 +29,7 @@
 - 位置：`src/runtime-core/component/context.ts`、`src/runtime-core/component/instance.ts`
 - 现状：仅有 `effectScope` 的 `onScopeDispose`，缺少组件级生命周期。
 - 缺失 API：`onMounted`、`onUnmounted`、`onBeforeUpdate`、`onUpdated`。
+- 详细设计稿：`docs/plans/lifecycle-hooks-plan.md`
 - 影响：
   - 组件无法在挂载完成后执行 DOM 操作（如 focus、测量尺寸）。
   - 清理副作用缺少明确时机，容易遗漏。

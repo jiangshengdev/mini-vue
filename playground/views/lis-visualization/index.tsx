@@ -15,7 +15,6 @@ import {
 } from './components/index.ts'
 import {
   createHoverManager,
-  createKeyboardHandler,
   createPlaybackController,
   createStateManager,
 } from './controllers/index.ts'
@@ -26,7 +25,7 @@ import layoutStyles from './styles/layout.module.css'
 import { traceLongestIncreasingSubsequence } from './trace.ts'
 import type { StepNavigator } from './types.ts'
 import type { SetupComponent } from '@/index.ts'
-import { onMounted, onUnmounted } from '@/index.ts'
+import { onUnmounted } from '@/index.ts'
 
 /* 合并样式对象，便于在 JSX 中统一引用 */
 const styles = { ...sharedStyles, ...layoutStyles }
@@ -115,49 +114,20 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
     updateStep,
   })
 
-  /* ========================================================================
-   * 初始化键盘处理器
-   * ======================================================================== */
-  const keyboardHandler = createKeyboardHandler({
-    onPrevious: eventHandlers.handlePrevious,
-    onNext: eventHandlers.handleNext,
-    onReset: eventHandlers.handleReset,
-    /* 跳转到最后一步 */
-    onGoToEnd() {
-      playbackController.stop()
+  const handleGoToEnd = (): void => {
+    playbackController.stop()
 
-      const navState = navigator.getState()
+    const navState = navigator.getState()
 
-      navigator.goTo(navState.totalSteps - 1)
-      updateStep()
-    },
-    onTogglePlay: eventHandlers.handleTogglePlay,
-    /* 加快播放速度（减少间隔时间） */
-    onSpeedUp() {
-      const currentSpeed = state.speed.get()
-      const newSpeed = Math.max(100, currentSpeed - 100)
-
-      eventHandlers.handleSpeedChange(newSpeed)
-    },
-    /* 减慢播放速度（增加间隔时间） */
-    onSpeedDown() {
-      const currentSpeed = state.speed.get()
-      const newSpeed = Math.min(2000, currentSpeed + 100)
-
-      eventHandlers.handleSpeedChange(newSpeed)
-    },
-  })
-
-  onMounted(() => {
-    keyboardHandler.register()
-  })
+    navigator.goTo(navState.totalSteps - 1)
+    updateStep()
+  }
 
   /* ========================================================================
    * 清理函数：组件卸载时释放所有资源
    * ======================================================================== */
   onUnmounted(() => {
     playbackController.dispose()
-    keyboardHandler.dispose()
     stateManager.dispose()
   })
 
@@ -215,6 +185,7 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
             onPrev={eventHandlers.handlePrevious}
             onNext={eventHandlers.handleNext}
             onReset={eventHandlers.handleReset}
+            onGoToEnd={handleGoToEnd}
             onTogglePlay={eventHandlers.handleTogglePlay}
             onSpeedChange={eventHandlers.handleSpeedChange}
           />

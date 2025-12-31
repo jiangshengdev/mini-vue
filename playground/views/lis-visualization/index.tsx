@@ -26,7 +26,7 @@ import layoutStyles from './styles/layout.module.css'
 import { traceLongestIncreasingSubsequence } from './trace.ts'
 import type { StepNavigator } from './types.ts'
 import type { SetupComponent } from '@/index.ts'
-import { onScopeDispose } from '@/index.ts'
+import { onMounted, onUnmounted } from '@/index.ts'
 
 /* 合并样式对象，便于在 JSX 中统一引用 */
 const styles = { ...sharedStyles, ...layoutStyles }
@@ -148,13 +148,14 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
     },
   })
 
-  /* 注册键盘事件监听 */
-  keyboardHandler.register()
+  onMounted(() => {
+    keyboardHandler.register()
+  })
 
   /* ========================================================================
    * 清理函数：组件卸载时释放所有资源
    * ======================================================================== */
-  onScopeDispose(() => {
+  onUnmounted(() => {
     playbackController.dispose()
     keyboardHandler.dispose()
     stateManager.dispose()

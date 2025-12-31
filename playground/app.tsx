@@ -5,7 +5,7 @@ import {
   handleWindowResize,
 } from './controllers/drawer-state.ts'
 import type { SetupComponent } from '@/index.ts'
-import { onScopeDispose, RouterLink, RouterView } from '@/index.ts'
+import { onMounted, onUnmounted, RouterLink, RouterView } from '@/index.ts'
 
 /**
  * 导航链接配置
@@ -107,12 +107,12 @@ export const App: SetupComponent = () => {
     handleWindowResize(window.innerWidth, drawer)
   }
 
-  // 注册事件监听器
-  document.addEventListener('keydown', handleKeyDown)
-  window.addEventListener('resize', handleResize)
+  onMounted(() => {
+    document.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('resize', handleResize)
+  })
 
-  // 使用 onScopeDispose 在组件卸载时清理事件监听器
-  onScopeDispose(() => {
+  onUnmounted(() => {
     document.removeEventListener('keydown', handleKeyDown)
     window.removeEventListener('resize', handleResize)
   })

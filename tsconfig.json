@@ -33,6 +33,7 @@
     "env.d.ts",
     "eslint.config.ts",
     "playground",
+    "playwright.config.ts",
     "scripts",
     "src",
     "test",

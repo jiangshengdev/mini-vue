@@ -12,7 +12,7 @@ export const SimpleComponent: SetupComponent = () => {
 
   return () => {
     return (
-      <section class="card">
+      <section class="card" data-testid="basic-simple-component">
         <h2>简单组件</h2>
         <ol>
           {groceryList.get().map((item) => {

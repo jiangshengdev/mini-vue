@@ -24,7 +24,7 @@ export const ConditionalsAndLoops: SetupComponent = () => {
   const renderList = () => {
     if (show.get() && list.get().length > 0) {
       return (
-        <ul>
+        <ul data-testid="conditionals-and-loops-list">
           {list.get().map((item) => {
             return <li key={item}>{item}</li>
           })}
@@ -33,27 +33,27 @@ export const ConditionalsAndLoops: SetupComponent = () => {
     }
 
     if (list.get().length > 0) {
-      return <p>列表非空，但已隐藏。</p>
+      return <p data-testid="conditionals-and-loops-hidden">列表非空，但已隐藏。</p>
     }
 
-    return <p>列表为空。</p>
+    return <p data-testid="conditionals-and-loops-empty">列表为空。</p>
   }
 
   return () => {
     return (
-      <section class="card">
+      <section class="card" data-testid="basic-conditionals-and-loops">
         <h2>条件与循环</h2>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-          <button type="button" onClick={toggleShow}>
+          <button data-testid="conditionals-and-loops-toggle" type="button" onClick={toggleShow}>
             切换列表
           </button>
-          <button type="button" onClick={pushNumber}>
+          <button data-testid="conditionals-and-loops-push" type="button" onClick={pushNumber}>
             追加数字
           </button>
-          <button type="button" onClick={popNumber}>
+          <button data-testid="conditionals-and-loops-pop" type="button" onClick={popNumber}>
             移除数字
           </button>
-          <button type="button" onClick={reverseList}>
+          <button data-testid="conditionals-and-loops-reverse" type="button" onClick={reverseList}>
             反转列表
           </button>
         </div>

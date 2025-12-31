@@ -17,15 +17,25 @@ export const AttributeBindings: SetupComponent = () => {
 
   return () => {
     return (
-      <section class="card">
+      <section class="card" data-testid="basic-attribute-bindings">
         <h2>属性绑定</h2>
         <p>
-          <span title={message.get()}>鼠标悬停几秒查看动态绑定的 title 属性！</span>
+          <span data-testid="attribute-bindings-title" title={message.get()}>
+            鼠标悬停几秒查看动态绑定的 title 属性！
+          </span>
         </p>
-        <p class={{ [styles.red]: isRed.get() }} onClick={toggleRed}>
+        <p
+          data-testid="attribute-bindings-toggle-red"
+          class={{ [styles.red]: isRed.get() }}
+          onClick={toggleRed}
+        >
           这里应该是红色……点击切换颜色。
         </p>
-        <p style={{ color: color.get() }} onClick={toggleColor}>
+        <p
+          data-testid="attribute-bindings-toggle-color"
+          style={{ color: color.get() }}
+          onClick={toggleColor}
+        >
           这里应该是绿色，点击后在 green 和 blue 之间切换。
         </p>
       </section>

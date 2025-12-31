@@ -13,19 +13,25 @@ export const FormBindings: SetupComponent = () => {
     return (
       <section
         class="card"
+        data-testid="basic-form-bindings"
         style={{ display: 'flex', flexDirection: 'column', gap: '1rem', textAlign: 'left' }}
       >
         <h2>表单绑定</h2>
 
         <div>
           <h3>文本输入</h3>
-          <input v-model={text} />
-          <p>当前值：{text.get()}</p>
+          <input data-testid="form-bindings-text-input" v-model={text} />
+          <p data-testid="form-bindings-text-output">当前值：{text.get()}</p>
         </div>
 
         <div>
           <h3>复选框</h3>
-          <input type="checkbox" id="checkbox" v-model={checked} />
+          <input
+            data-testid="form-bindings-single-checkbox"
+            type="checkbox"
+            id="checkbox"
+            v-model={checked}
+          />
           <label for="checkbox">已勾选：{String(checked.get())}</label>
         </div>
 
@@ -37,7 +43,9 @@ export const FormBindings: SetupComponent = () => {
           <label for="john">John</label>
           <input type="checkbox" id="mike" value="Mike" v-model={checkedNames} />
           <label for="mike">Mike</label>
-          <p>已勾选姓名：{checkedNames.get().join(', ') || '无'}</p>
+          <p data-testid="form-bindings-checked-names-output">
+            已勾选姓名：{checkedNames.get().join(', ') || '无'}
+          </p>
         </div>
 
         <div>
@@ -52,7 +60,7 @@ export const FormBindings: SetupComponent = () => {
 
         <div>
           <h3>下拉选择</h3>
-          <select v-model={selected}>
+          <select data-testid="form-bindings-single-select" v-model={selected}>
             <option disabled value="">
               请选择一项
             </option>
@@ -60,17 +68,24 @@ export const FormBindings: SetupComponent = () => {
             <option value="B">B</option>
             <option value="C">C</option>
           </select>
-          <p>已选择：{selected.get()}</p>
+          <p data-testid="form-bindings-single-select-output">已选择：{selected.get()}</p>
         </div>
 
         <div>
           <h3>多选下拉</h3>
-          <select multiple style={{ width: '100px' }} v-model={multiSelected}>
+          <select
+            data-testid="form-bindings-multi-select"
+            multiple
+            style={{ width: '100px' }}
+            v-model={multiSelected}
+          >
             <option value="A">A</option>
             <option value="B">B</option>
             <option value="C">C</option>
           </select>
-          <p>已选择：{multiSelected.get().join(', ') || '无'}</p>
+          <p data-testid="form-bindings-multi-select-output">
+            已选择：{multiSelected.get().join(', ') || '无'}
+          </p>
         </div>
       </section>
     )

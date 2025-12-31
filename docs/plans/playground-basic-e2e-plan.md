@@ -43,12 +43,10 @@
 - `/basic/simple-component`
   - 断言列表渲染出默认 grocery items（至少覆盖 1–2 条关键文案）。
 
-## Action items（规划，不在本次执行）
+## Action items（已落地）
 
-- [ ] 梳理每个页面的最小稳定断言点与交互点，明确选择器策略（优先 role/text/id，必要时补 `data-testid`）。
-- [ ] 设计 `e2e/` 用例结构：单文件 `e2e/basic.spec.ts` 或拆分为 `e2e/basic/*.spec.ts`（按路由分组）。
-- [ ] 规划 `playwright.config.ts` 调整：
-  - [ ] `projects` 默认只保留 `chromium`。
-  - [ ] `webServer.command`：本地 `pnpm run play`；CI `pnpm run play:build && pnpm run play:preview`。
-- [ ] 规划 handling-user-input 的 `dialog` 处理方式（`page.once('dialog', ...)`），避免 `alert` 导致用例挂起。
-- [ ] 规划 flake 控制策略：只对“最终可见结果”断言，避免依赖内部实现与时间窗口；必要时用 `expect(...).toHaveText/toHaveCount/toHaveCSS` 的内置等待。
+- [x] 梳理每个页面的最小稳定断言点与交互点，明确选择器策略（优先 role/text/id，必要时补 `data-testid`）。
+- [x] 落地 `e2e/` 用例结构：使用单文件 `e2e/playground-basic.spec.ts`（按路由分组）。
+- [x] 落地 `playwright.config.ts` 调整：仅保留 `chromium`，并让 `webServer.command` 对齐 playground（本地 `pnpm run play`；CI `pnpm run play:build && pnpm run play:preview`）。
+- [x] 落地 handling-user-input 的 `dialog` 处理方式：使用 `page.waitForEvent('dialog')` + `click({ noWaitAfter: true })`，避免 `alert` 阻塞导致用例挂起。
+- [x] 落地 flake 控制策略：使用 `data-testid` + Playwright 内置等待（`toHaveText`/`toHaveCSS` 等）对最终 UI 行为做断言。

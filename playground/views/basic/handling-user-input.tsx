@@ -21,16 +21,33 @@ export const HandlingUserInput: SetupComponent = () => {
 
   return () => {
     return (
-      <section class="card">
+      <section class="card" data-testid="basic-handling-user-input">
         <h2>处理用户输入</h2>
-        <h1 class={styles.message}>{message.get()}</h1>
-        <button type="button" class={styles.item} onClick={reverseMessage}>
+        <h1 data-testid="basic-handling-user-input-message" class={styles.message}>
+          {message.get()}
+        </h1>
+        <button
+          data-testid="basic-handling-user-input-reverse"
+          type="button"
+          class={styles.item}
+          onClick={reverseMessage}
+        >
           反转消息
         </button>
-        <button type="button" class={styles.item} onClick={appendExclamation}>
+        <button
+          data-testid="basic-handling-user-input-append"
+          type="button"
+          class={styles.item}
+          onClick={appendExclamation}
+        >
           追加 "！"
         </button>
-        <a href="https://vuejs.org" class={styles.item} onClick={notify}>
+        <a
+          data-testid="basic-handling-user-input-prevent-default"
+          href="https://vuejs.org"
+          class={styles.item}
+          onClick={notify}
+        >
           带 e.preventDefault() 的链接
         </a>
       </section>

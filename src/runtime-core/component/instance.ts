@@ -3,7 +3,7 @@ import type { MountContext } from '../environment.ts'
 import type { ComponentInstance } from './context.ts'
 import type { ComponentPropsState } from './props.ts'
 import type { SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
-import { effectScope, toRaw } from '@/reactivity/index.ts'
+import { effectScope, isRef, toRaw } from '@/reactivity/index.ts'
 import type { PlainObject } from '@/shared/index.ts'
 import { __DEV__ } from '@/shared/index.ts'
 
@@ -132,6 +132,31 @@ function patchComponentInstanceForDevtools<
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
   parent: ComponentInstance<HostNode, HostElement, HostFragment, T>['parent'],
 ): void {
+  const createDevtoolsSetupStateProxy = (rawSetupState: PlainObject): PlainObject => {
+    /*
+     * 对齐 Vue3：setupState 使用 proxyRefs 语义，便于 Devtools 在展示 setup state 时直接得到 `.value`。
+     * raw 版本保留在 `devtoolsRawSetupState`，供 Devtools 识别 Ref/Computed/Reactive 类型与编辑回写定位。
+     */
+    return new Proxy(rawSetupState, {
+      get(target, key, receiver) {
+        const value: unknown = Reflect.get(target, key, receiver)
+
+        return isRef(value) ? value.value : value
+      },
+      set(target, key, value, receiver) {
+        const previousValue: unknown = Reflect.get(target, key, receiver)
+
+        if (isRef(previousValue) && !isRef(value)) {
+          previousValue.value = value
+
+          return true
+        }
+
+        return Reflect.set(target, key, value, receiver)
+      },
+    })
+  }
+
   /*
    * Vue Devtools 兼容字段占位（仅用于 Devtools 读取）。
    *
@@ -145,8 +170,10 @@ function patchComponentInstanceForDevtools<
   devtoolsInstance.root = parentRoot ?? instance
   devtoolsInstance.data ??= {}
   devtoolsInstance.renderContext ??= {}
-  devtoolsInstance.setupState ??= {}
   devtoolsInstance.devtoolsRawSetupState ??= {}
+  devtoolsInstance.setupState = createDevtoolsSetupStateProxy(
+    devtoolsInstance.devtoolsRawSetupState as PlainObject,
+  )
   devtoolsInstance.attrs ??= {}
   devtoolsInstance.ctx ??= {}
   devtoolsInstance.refs ??= {}

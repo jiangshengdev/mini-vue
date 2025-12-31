@@ -5,7 +5,7 @@
 ## Status
 
 - v1 已落地：组件树可见且不崩溃（dev-only），并已通过 `pnpm run ci`。
-- v2 已落地：组件树自动刷新（`component:added/updated/removed`）+ reactivity `__v_*` 兼容（避免 structured clone 失败的最小补齐）+ setup state 自动收集（Ref/Reactive/Computed 可见）。
+- v2 进行中：在保持 dev-only 的前提下，补齐“自动刷新 + setup state 展示”的最小闭环。
 - 实现笔记（含关键读取路径与最小字段清单）：`docs/plans/devtools-components-builtin-minimal-plan-v1.md`。
 
 ## Scope
@@ -54,7 +54,8 @@ Vue Devtools 扩展注入的 devtools-kit 会在收到 `app:init` 后自动启�
 
 - [x] 将 `instance.vnode` 映射到 `instance.virtualNode`（只读兼容），补齐 `key/props` 读取链路。
 - [x] 兼容 mini-vue 响应式代理：补齐 Vue 私有标记（如 `__v_raw` / `__v_isRef`），让 devtools-kit 能正确 `toRaw/unref`，避免 structured clone 失败。
-- [x] setup state 自动收集：在组件 `setup()` 执行期间，自动把创建的 `ref/reactive/computed` 挂到 `instance.setupState/devtoolsRawSetupState`（键名为 `ref0/reactive0/...`）。
+- [x] setup state 自动收集：在组件 `setup()` 执行期间，自动把创建的 `ref/reactive/computed` 挂到 `instance.devtoolsRawSetupState`（键名为 `ref0/reactive0/...`）。
+- [ ] setup state 展示对齐 Vue3：`instance.setupState` 使用 `proxyRefs`（Ref/Computed 直接展示 `.value`），`instance.devtoolsRawSetupState` 保留 raw（供类型识别与编辑定位）。
 - [ ] 若仍存在 structured clone 失败：对 `instance.props/setupState` 等做只读快照兜底，并明确不支持编辑回写。
 - [ ] 视需要补齐 `instance.proxy` 的最小替代（仅用于 computed 读取，不参与运行时语义）。
 - [x] 若树刷新体验不足：补发 `component:added/updated/removed` 事件触发 devtools 侧刷新（仍不做完整事件/性能追踪）。
@@ -63,3 +64,4 @@ Vue Devtools 扩展注入的 devtools-kit 会在收到 `app:init` 后自动启�
 
 - v2 组件树刷新策略已确认：通过 `component:added/updated/removed` 自动刷新。
 - v2 状态序列化策略已确认：优先对齐 Vue `__v_*` 标记（让 devtools-kit 自行 `toRaw/unref`）；若仍失败再加“只读快照”兜底。
+- v2 setup state 命名策略已确认：不做变量名推导；仅收集 `setup()` 执行期间创建的状态，并用 `ref0/reactive0/...` 的默认键名展示（忽略非顶层/异步创建的状态）。

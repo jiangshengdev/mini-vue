@@ -6,7 +6,7 @@ import { reactive } from '../reactive.ts'
 import { toRaw } from '../to-raw.ts'
 import type { Ref } from './types.ts'
 import type { PlainObject } from '@/shared/index.ts'
-import { isPlainObject } from '@/shared/index.ts'
+import { isPlainObject, withDevtoolsSetupStateCollectionPaused } from '@/shared/index.ts'
 
 /**
  * `RefImpl` 负责封装普通值的响应式访问器，实现依赖收集与触发。
@@ -235,11 +235,15 @@ export class ObjectRefImpl<T extends ReactiveRawTarget, K extends keyof T> imple
 function maybeReactiveValue<T>(value: T): T {
   /* 仅针对普通对象或数组递归创建响应式代理，其他对象原样返回。 */
   if (Array.isArray(value)) {
-    return reactive(value) as T
+    return withDevtoolsSetupStateCollectionPaused(() => {
+      return reactive(value)
+    }) as T
   }
 
   if (isPlainObject(value)) {
-    return reactive(value as PlainObject) as T
+    return withDevtoolsSetupStateCollectionPaused(() => {
+      return reactive(value as PlainObject)
+    }) as T
   }
 
   return value

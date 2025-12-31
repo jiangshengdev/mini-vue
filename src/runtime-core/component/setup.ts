@@ -46,13 +46,17 @@ function createDevtoolsSetupStateCollector(instance: unknown): DevtoolsSetupStat
         devtoolsRawSetupState?: PlainObject
       }
 
-      devtoolsInstance.setupState ??= {}
       devtoolsInstance.devtoolsRawSetupState ??= {}
+
+      /*
+       * `setupState` 可能在实例创建时被 Devtools 适配层替换为 proxyRefs 版本；
+       * 这里仅在缺失时兜底，避免收集逻辑在非标准路径下失效。
+       */
+      devtoolsInstance.setupState ??= devtoolsInstance.devtoolsRawSetupState
 
       const index = counters[kind]++
       const key = `${kind}${index}`
 
-      devtoolsInstance.setupState[key] = value
       devtoolsInstance.devtoolsRawSetupState[key] = value
     },
   }

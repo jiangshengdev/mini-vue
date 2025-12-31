@@ -7,6 +7,7 @@ export interface DevtoolsSetupStateCollector {
 }
 
 let currentCollector: DevtoolsSetupStateCollector | undefined
+let pausedCollectDepth = 0
 
 export function withDevtoolsSetupStateCollector<T>(
   collector: DevtoolsSetupStateCollector,
@@ -27,8 +28,26 @@ export function withDevtoolsSetupStateCollector<T>(
   }
 }
 
+export function withDevtoolsSetupStateCollectionPaused<T>(fn: () => T): T {
+  if (!__DEV__) {
+    return fn()
+  }
+
+  pausedCollectDepth += 1
+
+  try {
+    return fn()
+  } finally {
+    pausedCollectDepth -= 1
+  }
+}
+
 export function collectDevtoolsSetupState(value: unknown, kind: DevtoolsSetupStateKind): void {
   if (!__DEV__) {
+    return
+  }
+
+  if (pausedCollectDepth > 0) {
     return
   }
 

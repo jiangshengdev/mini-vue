@@ -19,6 +19,7 @@ export type { DevtoolsSetupStateCollector, DevtoolsSetupStateKind } from './devt
 export {
   collectDevtoolsSetupState,
   withDevtoolsSetupStateCollector,
+  withDevtoolsSetupStateCollectionPaused,
 } from './devtools-setup-state.ts'
 export { __DEV__, __INTERNAL_DEV__, isDevDebugEnvironment } from './env.ts'
 export {

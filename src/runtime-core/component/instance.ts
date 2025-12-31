@@ -3,11 +3,125 @@ import type { MountContext } from '../environment.ts'
 import type { ComponentInstance } from './context.ts'
 import type { ComponentPropsState } from './props.ts'
 import type { SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
-import { effectScope } from '@/reactivity/index.ts'
+import { effectScope, toRaw } from '@/reactivity/index.ts'
 import type { PlainObject } from '@/shared/index.ts'
 import { __DEV__ } from '@/shared/index.ts'
 
 let componentUid = 0
+
+function isEmitListenerKey(key: string): boolean {
+  if (!key.startsWith('on')) {
+    return false
+  }
+
+  if (key.length <= 2) {
+    return false
+  }
+
+  const code = key.codePointAt(2)
+
+  if (code === undefined) {
+    return false
+  }
+
+  /* 第三个字符为大写字母才视为事件监听（对齐 Vue 的 isOn 语义）。 */
+  return code >= 65 && code <= 90
+}
+
+function normalizeEmitNameFromListenerKey(key: string): string | undefined {
+  if (!isEmitListenerKey(key)) {
+    return undefined
+  }
+
+  const name = key.slice(2)
+
+  if (!name) {
+    return undefined
+  }
+
+  return name[0].toLowerCase() + name.slice(1)
+}
+
+function hyphenateEmitName(name: string): string {
+  return name.replaceAll(/\B([A-Z])/g, '-$1').toLowerCase()
+}
+
+function createAutoDeclaredEmitsFromProps(props: unknown): string[] {
+  if (!props || typeof props !== 'object') {
+    return []
+  }
+
+  const rawProps = toRaw(props)
+
+  if (!rawProps || typeof rawProps !== 'object') {
+    return []
+  }
+
+  const eventNames = new Set<string>()
+
+  for (const [key, value] of Object.entries(rawProps as Record<string, unknown>)) {
+    if (value === undefined) {
+      continue
+    }
+
+    const emitName = normalizeEmitNameFromListenerKey(key)
+
+    if (!emitName) {
+      continue
+    }
+
+    eventNames.add(hyphenateEmitName(emitName))
+  }
+
+  return [...eventNames]
+}
+
+function patchComponentTypeEmitsForDevtools(componentType: SetupComponent, props: unknown): void {
+  const declaredEmits = createAutoDeclaredEmitsFromProps(props)
+
+  if (declaredEmits.length === 0) {
+    return
+  }
+
+  const typeWithEmits = componentType as unknown as { emits?: unknown }
+
+  if (!typeWithEmits.emits) {
+    typeWithEmits.emits = declaredEmits
+
+    return
+  }
+
+  if (Array.isArray(typeWithEmits.emits)) {
+    const existing = new Set(
+      typeWithEmits.emits.filter((value): value is string => {
+        return typeof value === 'string'
+      }),
+    )
+
+    for (const name of declaredEmits) {
+      if (existing.has(name)) {
+        continue
+      }
+
+      existing.add(name)
+      typeWithEmits.emits.push(name)
+    }
+
+    return
+  }
+
+  if (typeof typeWithEmits.emits === 'object') {
+    const emitsRecord = typeWithEmits.emits as Record<string, unknown>
+
+    for (const name of declaredEmits) {
+      if (Object.hasOwn(emitsRecord, name)) {
+        continue
+      }
+
+      emitsRecord[name] = true
+    }
+  }
+}
 
 function patchComponentInstanceForDevtools<
   HostNode,
@@ -36,6 +150,15 @@ function patchComponentInstanceForDevtools<
   devtoolsInstance.attrs ??= {}
   devtoolsInstance.ctx ??= {}
   devtoolsInstance.refs ??= {}
+
+  /*
+   * Devtools 会读取 `instance.type.emits` 判断事件监听是否“已声明”。
+   *
+   * @remarks
+   * mini-vue 函数组件没有 `emits` 选项；这里采取更激进的策略：从 props 上的 `onXxx` 监听器反推 emits。
+   * 仅用于消除 Devtools 中 “⚠️ Not declared” 的提示，不影响运行时语义。
+   */
+  patchComponentTypeEmitsForDevtools(instance.type as SetupComponent, instance.propsSource)
 
   if (!Object.hasOwn(devtoolsInstance, 'vnode')) {
     /*

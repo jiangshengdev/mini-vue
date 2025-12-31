@@ -2,7 +2,18 @@
 
 > 目的：把「组件更新全量卸载重建」改为「复用旧子树并在原地 patch」，并为后续 scheduler/nextTick/lifecycle 留出合理接口。
 
-## 背景与现状
+## 实现状态
+
+- 状态：已完成
+- 关键落地：
+  - `src/runtime-core/patch/**`：`patchChild`、children diff、移动与 LIS 优化等
+  - `src/runtime-core/component/render-effect.ts`：组件更新改为 `patchChild`，并接入 scheduler
+  - `src/runtime-core/renderer.ts`：根级 render 缓存前后 vnode 并走 patch（不再每次 clear）
+  - `src/runtime-dom/props/patch-props.ts`：`patchProps(prev, next)`，含事件 invoker 等可逆更新
+  - `src/runtime-dom/renderer-options.ts`：提供 `setText` 等 patch 所需宿主原语
+- 覆盖用例：`test/runtime-core/patch/**`、`test/runtime-dom/render/patch-diff.test.tsx`
+
+## 背景与现状（实现前）
 
 - 当前组件更新路径：`rerenderComponent` 会 `teardownMountedSubtree(instance)` 后再 `mountLatestSubtree(...)`，导致 DOM/子组件实例全部重建。
 - 当前根渲染路径：`createRenderer.render()` 会 `clear(container)`，没有 root 级 patch。

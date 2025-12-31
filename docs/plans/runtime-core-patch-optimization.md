@@ -13,7 +13,7 @@
 - [x] 文本/属性短路：为 `setText`、`patchProps` 内的 attr/class/style/事件绑定增加「前后相等跳过」策略，避免重复写入宿主。
 - [x] props 等值短路替代 DOM 读取：基于 previous/next props 直接判断 class/style/attr 是否需要更新，减少对宿主的读取依赖，并补充覆盖用例。
 - [x] 子树移动检查：查看 Fragment/children diff 是否存在无差别移动或写入，记录是否需要调整。
-- [ ] 如需改动，更新 `src/runtime-core/patch/*.ts` 实现，保持类型与接口稳定。
+- [x] 如需改动，更新 `src/runtime-core/patch/*.ts` 实现，保持类型与接口稳定（本轮无需额外改动）。
 - [x] 补充或调整单测（Text、attr/class/style、事件更新等），覆盖「未变更不触发 DOM 写」的断言。
 - [x] 运行相关测试（至少 runtime-core patch 及 runtime-dom props/text 渲染用例），确认无回归。
 

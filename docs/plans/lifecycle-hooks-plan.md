@@ -7,12 +7,20 @@
 - In: Hook 注册 API、实例存储结构、挂载/更新/卸载触发点接入、错误处理策略、测试与文档补齐。
 - Out: Options API 生命周期、KeepAlive（activated/deactivated）、异步 setup、SSR/水合特化实现。
 
+## 实现状态
+
+- 状态：已完成
+- 关键实现：`src/runtime-core/component/lifecycle.ts`、`src/runtime-core/component/render-effect.ts`、`src/runtime-core/component/teardown.ts`
+- 测试：`test/runtime-core/component/lifecycle-hooks.test.tsx`
+- 汇总入口：`docs/plans/next-features-plan.md`
+
 ## 背景与现状
 
 - 位置：`src/runtime-core/component/context.ts`、`src/runtime-core/component/instance.ts`
-- 现状：
-  - 仅有 `effectScope` 的 `onScopeDispose` 与实例级 `cleanupTasks`，缺少组件级生命周期钩子。
-  - `render-effect.ts` 已预留 `onBeforeUpdate`/`onUpdated` 的占位注释，但未实现 hook 注册与触发。
+- 进展：
+  - 已补齐组件级生命周期注册与触发：`onMounted`/`onUnmounted`/`onBeforeUpdate`/`onUpdated`。
+  - `onMounted`/`onUpdated`/`onUnmounted` 走 scheduler 的 post flush；`onBeforeUpdate` 在 patch 前同步触发。
+  - 卸载会标记已入队的 mounted/updated job 为 disposed，避免同 tick “先卸载后 mounted/updated”。
 - 影响：
   - 组件无法在挂载完成后执行 DOM 操作（如 focus、测量尺寸）。
   - 清理副作用缺少明确时机（timer、订阅、外部库实例），容易遗漏。
@@ -44,7 +52,7 @@
 ### 错误处理
 
 - Hook 触发必须被错误通道隔离：单个 hook 抛错不应中断同批次其它 hook/组件更新。
-- 暂不允许 hook 返回 Promise：若 hook 返回 thenable，直接走错误通道上报并跳过其余逻辑（文档明确约束）。
+- hook 类型约束为同步函数；运行时不消费返回值（返回 Promise 会被忽略），不建议依赖异步 hook。
 
 ## Vue 3 关键保证点（基于 `vuejs/core`）
 
@@ -63,23 +71,23 @@
 - `onUnmounted` 走 `post` 队列：对齐 Vue 3 行为，确保 DOM/子树卸载完成后再执行清理逻辑。
 - 需要过期防护：沿用 Vue 3 的 `SchedulerJobFlags.DISPOSED` 思路，组件卸载后跳过已入队但尚未执行的 `onMounted/onUpdated`（例如同 tick “先入队后卸载”）；实现形态对齐 Vue3：以“函数 job + 挂载 `flags/id` 元数据”为主（类似 `SchedulerJob`）。
 - hook 抛错策略：都继续执行，其它组件/队列任务不受影响，错误通道统一上报。
-- 暂不支持 hook 返回 Promise（thenable）：直接报错并在文档中声明。
+- hook 类型为同步函数：运行时不消费返回值（返回 Promise 会被忽略），不建议依赖异步 hook。
 - 需要递归更新保护：在 `scheduler` 层引入「同一 tick 内的递归更新计数与上限」，避免 `onBeforeUpdate` 等 hook 内同步写入响应式状态导致更新风暴或栈溢出；超限时走错误通道上报并跳过该 job（策略参考 Vue 3 的 `RECURSION_LIMIT`）。
 - 首渲染失败（`performInitialRender` 触发 teardown）时不触发 `onMounted`。
 - 更新渲染失败（`rerenderComponent` 回滚 `subTree`）时不触发 `onBeforeUpdate/onUpdated`。
 
 ## Action items
 
-[ ] 增补设计稿与实现清单：将本计划链接到 `docs/plans/next-features-plan.md` 的「## 3. 生命周期钩子」并补齐关键决策点。  
-[ ] 扩展 `ComponentInstance`：增加 hook 回调数组与必要状态位（例如 mounted/unmounted 标记），并在 `createComponentInstance` 初始化。  
-[ ] 新增 hook 注册模块（建议 `src/runtime-core/component/lifecycle.ts`）：实现 `onMounted/onUnmounted/onBeforeUpdate/onUpdated`，基于 `getCurrentInstance()` 注册到实例。  
-[ ] 扩展调度器：以「函数 job + `flags/id` 元数据」形式引入 flags（至少 `DISPOSED`/`QUEUED`），flush 时跳过 `DISPOSED`，并加入递归更新保护（同 tick 计数 + 上限 + 错误通道上报）。  
-[ ] 接入挂载时机：在 `performInitialRender` 挂载子树成功后触发 `onMounted`（建议 `queuePostFlushCb`）。  
-[ ] 接入更新时机：在 `rerenderComponent` 的 patch 前触发 `onBeforeUpdate`，patch 完成后触发 `onUpdated`（建议 `queuePostFlushCb`）。  
-[ ] 接入卸载时机：在 `teardownComponentInstance` 执行 `scope.stop`/清理子树后触发 `onUnmounted`（建议 `queuePostFlushCb`）。  
-[ ] 对外导出：按重导出约束仅通过 `src/runtime-core/component/index.ts`（如需）与 `src/runtime-core/index.ts`、`src/index.ts` 聚合导出 API。  
-[ ] 补充测试：覆盖 hook 触发次数、同 tick 合并时序、父子顺序、卸载与错误分支；至少新增 `test/runtime-core/component/lifecycle-hooks.test.tsx`。  
-[ ] 运行回归：`pnpm run test test/runtime-core/component/lifecycle-hooks.test.tsx`，并视变更范围补跑相关 runtime-core 用例。
+[x] 增补设计稿与实现清单：将本计划链接到 `docs/plans/next-features-plan.md` 的「## 3. 生命周期钩子」并补齐关键决策点。  
+[x] 扩展 `ComponentInstance`：增加 hook 回调数组与必要状态位（例如 mounted/unmounted 标记），并在 `createComponentInstance` 初始化。  
+[x] 新增 hook 注册模块（建议 `src/runtime-core/component/lifecycle.ts`）：实现 `onMounted/onUnmounted/onBeforeUpdate/onUpdated`，基于 `getCurrentInstance()` 注册到实例。  
+[x] 扩展调度器：以「函数 job + `flags/id` 元数据」形式引入 flags（至少 `DISPOSED`/`QUEUED`），flush 时跳过 `DISPOSED`，并加入递归更新保护（同 tick 计数 + 上限 + 错误通道上报）。  
+[x] 接入挂载时机：在 `performInitialRender` 挂载子树成功后触发 `onMounted`（建议 `queuePostFlushCb`）。  
+[x] 接入更新时机：在 `rerenderComponent` 的 patch 前触发 `onBeforeUpdate`，patch 完成后触发 `onUpdated`（建议 `queuePostFlushCb`）。  
+[x] 接入卸载时机：在 `teardownComponentInstance` 执行 `scope.stop`/清理子树后触发 `onUnmounted`（建议 `queuePostFlushCb`）。  
+[x] 对外导出：按重导出约束仅通过 `src/runtime-core/component/index.ts`（如需）与 `src/runtime-core/index.ts`、`src/index.ts` 聚合导出 API。  
+[x] 补充测试：覆盖 hook 触发次数、同 tick 合并时序、父子顺序、卸载与错误分支；至少新增 `test/runtime-core/component/lifecycle-hooks.test.tsx`。  
+[x] 运行回归：`pnpm run test test/runtime-core/component/lifecycle-hooks.test.tsx`，并视变更范围补跑相关 runtime-core 用例。
 
 ## Vue 3 参考（用于对齐语义，不作为实现依赖）
 

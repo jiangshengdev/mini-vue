@@ -13,7 +13,7 @@
 [x] 设计微任务调度器：任务队列去重、flush 时序、错误处理与递归更新防护；确定微任务实现方式（`Promise`/`queueMicrotask`）。  
 [x] 实现 `nextTick(callback?)`，复用同一 flush，返回 Promise，覆盖 callback/await 用法。  
 [x] 将组件 render effect 的 scheduler 接入新调度器，确保同一 tick 多次触发只执行一次渲染，同时保持首渲染同步。  
-[x] 预留/插入 `onBeforeUpdate`/`onUpdated` 钩子执行时机（只留 TODO/占位，不实现钩子），防止调度栈溢出或无限循环。  
+[x] 为生命周期钩子提供调度基础：`onBeforeUpdate` 在 patch 前同步触发，`onUpdated` 进入 post flush；并依赖递归更新保护避免更新风暴。  
 [x] 补充测试：调度去重、嵌套触发、错误不破坏队列、`nextTick` 顺序、组件更新批量合并等。  
 [x] 评估边界风险：大批量任务、错误传播、SSR/无 DOM 环境兼容；无需宏任务降级（目标环境具备微任务）。  
 [x] 运行相关测试套件（至少 `pnpm run test`）验证无回归。
@@ -26,6 +26,6 @@
 
 ## 决策与约束
 
-- 生命周期钩子本轮仅预留占位，不实现具体逻辑。
+- 生命周期钩子具体实现见 `docs/plans/lifecycle-hooks-plan.md`；本计划仅关注 scheduler 的队列/去重/过期与递归更新防护等基础设施。
 - 不暴露公共调度 API（如 `queueJob`），调度器内部使用。
 - 目标环境具备微任务能力，暂不考虑宏任务降级与无 DOM/SSR 场景。

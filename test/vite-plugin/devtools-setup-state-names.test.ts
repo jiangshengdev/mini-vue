@@ -61,7 +61,7 @@ export const App: SetupComponent = () => {
     expect(result?.code).toContain("registerDevtoolsSetupStateName(count, 'count$1')")
   })
 
-  it('非 SetupComponent 形态不做处理', async () => {
+  it('普通函数体内也会注入 register 调用', async () => {
     const code = `
 import { ref } from '@/index.ts'
 
@@ -73,7 +73,34 @@ export const foo = () => {
 
     const result = await transformWithPlugin({ code, id: '/src/foo.ts' })
 
-    expect(result).toBeUndefined()
+    expect(result?.code).toMatch(
+      /import\s*\{[^}]*\bref\b[^}]*\bregisterDevtoolsSetupStateName\b[^}]*\}\s*from\s*'@\/index\.ts'/,
+    )
+    expect(result?.code).toContain("registerDevtoolsSetupStateName(count, 'count')")
+  })
+
+  it('在 composable 内注入 register 调用', async () => {
+    const code = `
+import type { SetupComponent } from '@/index.ts'
+import { state } from '@/index.ts'
+
+export const App: SetupComponent = () => {
+  const drawer = createDrawerStateManager()
+  return () => <div />
+}
+
+export function createDrawerStateManager(initialOpen = false) {
+  const isOpen = state(initialOpen)
+  return { isOpen }
+}
+`
+
+    const result = await transformWithPlugin({ code, id: '/src/app.tsx' })
+
+    expect(result?.code).toMatch(
+      /import\s*\{[^}]*\bstate\b[^}]*\bregisterDevtoolsSetupStateName\b[^}]*\}\s*from\s*'@\/index\.ts'/,
+    )
+    expect(result?.code).toContain("registerDevtoolsSetupStateName(isOpen, 'isOpen')")
   })
 
   it('仅识别从指定 importSource 引入的 ref/reactive/computed/state', async () => {

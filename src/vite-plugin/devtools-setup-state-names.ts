@@ -93,60 +93,6 @@ function unwrapExpression(ts: TypeScriptApi, expression: import('typescript').Ex
   return current
 }
 
-function isSetupComponentType(
-  ts: TypeScriptApi,
-  typeNode: import('typescript').TypeNode | undefined,
-): boolean {
-  if (!typeNode) {
-    return false
-  }
-
-  if (!ts.isTypeReferenceNode(typeNode)) {
-    return false
-  }
-
-  const { typeName } = typeNode
-
-  if (ts.isIdentifier(typeName)) {
-    return typeName.text === 'SetupComponent'
-  }
-
-  if (ts.isQualifiedName(typeName)) {
-    return ts.isIdentifier(typeName.right) && typeName.right.text === 'SetupComponent'
-  }
-
-  return false
-}
-
-function getSetupComponentFunction(
-  ts: TypeScriptApi,
-  declaration: import('typescript').VariableDeclaration,
-): import('typescript').FunctionExpression | import('typescript').ArrowFunction | undefined {
-  const { initializer } = declaration
-  const typedByDeclaration = isSetupComponentType(ts, declaration.type)
-
-  if (!initializer) {
-    return undefined
-  }
-
-  const typedByInitializer =
-    ts.isAsExpression(initializer) || ts.isSatisfiesExpression(initializer)
-      ? isSetupComponentType(ts, initializer.type)
-      : false
-
-  if (!typedByDeclaration && !typedByInitializer) {
-    return undefined
-  }
-
-  const unwrapped = unwrapExpression(ts, initializer)
-
-  if (ts.isFunctionExpression(unwrapped) || ts.isArrowFunction(unwrapped)) {
-    return unwrapped
-  }
-
-  return undefined
-}
-
 function resolveImportText(node: import('typescript').Expression): string | undefined {
   return typeof node === 'object' && 'text' in node ? String((node as { text?: unknown }).text) : undefined
 }
@@ -286,8 +232,26 @@ function insertNamedImport(parameters: {
 
   for (let pos = end - 1; pos >= namedBindings.pos; pos -= 1) {
     if (code[pos] === '}') {
-      const hasElements = (namedBindings as unknown as { elements: unknown[] }).elements.length > 0
-      const prefix = hasElements ? ', ' : ''
+      let lastMeaningfulChar: string | undefined
+
+      for (let scan = pos - 1; scan >= namedBindings.pos; scan -= 1) {
+        const char = code[scan]
+
+        if (char === ' ' || char === '\t' || char === '\n' || char === '\r') {
+          continue
+        }
+
+        lastMeaningfulChar = char
+        break
+      }
+
+      let prefix = ', '
+
+      if (lastMeaningfulChar === '{') {
+        prefix = ''
+      } else if (lastMeaningfulChar === ',') {
+        prefix = ' '
+      }
 
       return { pos, text: `${prefix}${importName}` }
     }
@@ -331,78 +295,67 @@ function collectRegisterInsertions(parameters: {
 
   const insertions: InsertOperation[] = []
 
-  ts.forEachChild(sourceFile, (node) => {
-    if (!ts.isVariableStatement(node)) {
-      return
-    }
+  const visit = (
+    node: import('typescript').Node,
+    context: { insideFunction: boolean; usedNames?: Map<string, number> },
+  ): void => {
+    const isFunctionLike = ts.isFunctionLike(node)
+    const nextContext = isFunctionLike
+      ? { insideFunction: true, usedNames: new Map<string, number>() }
+      : context
 
-    for (const declaration of node.declarationList.declarations) {
-      const fn = getSetupComponentFunction(ts, declaration)
+    if (nextContext.insideFunction && ts.isVariableStatement(node)) {
+      const calls: string[] = []
+      const usedNames = nextContext.usedNames ?? new Map<string, number>()
 
-      if (!fn || !ts.isBlock(fn.body)) {
-        continue
-      }
-
-      const usedNames = new Map<string, number>()
-
-      const visit = (child: import('typescript').Node, insideNestedFunction: boolean): void => {
-        if (!insideNestedFunction && ts.isVariableStatement(child)) {
-          const calls: string[] = []
-
-          for (const declarator of child.declarationList.declarations) {
-            if (!ts.isIdentifier(declarator.name)) {
-              continue
-            }
-
-            if (!declarator.initializer) {
-              continue
-            }
-
-            const unwrapped = unwrapExpression(ts, declarator.initializer)
-
-            if (!ts.isCallExpression(unwrapped)) {
-              continue
-            }
-
-            if (!ts.isIdentifier(unwrapped.expression)) {
-              continue
-            }
-
-            const callee = unwrapped.expression.text
-
-            if (!factoryLocals.has(callee)) {
-              continue
-            }
-
-            const variableName = declarator.name.text
-            const registeredName = resolveUniqueName(usedNames, variableName)
-            const indent = resolveIndent(code, child.getStart(sourceFile))
-
-            calls.push(`${indent}${registerLocalName}(${variableName}, '${registeredName}')`)
-          }
-
-          if (calls.length > 0) {
-            const pos = child.end
-            const after = code[pos]
-            const needsTrailingNewline = after !== '\n' && after !== '\r'
-            const text = `\n${calls.join('\n')}${needsTrailingNewline ? '\n' : ''}`
-
-            insertions.push({ pos, text })
-          }
+      for (const declarator of node.declarationList.declarations) {
+        if (!ts.isIdentifier(declarator.name)) {
+          continue
         }
 
-        const nextInside = insideNestedFunction || ts.isFunctionLike(child)
+        if (!declarator.initializer) {
+          continue
+        }
 
-        ts.forEachChild(child, (grandChild) => {
-          visit(grandChild, nextInside)
-        })
+        const unwrapped = unwrapExpression(ts, declarator.initializer)
+
+        if (!ts.isCallExpression(unwrapped)) {
+          continue
+        }
+
+        if (!ts.isIdentifier(unwrapped.expression)) {
+          continue
+        }
+
+        const callee = unwrapped.expression.text
+
+        if (!factoryLocals.has(callee)) {
+          continue
+        }
+
+        const variableName = declarator.name.text
+        const registeredName = resolveUniqueName(usedNames, variableName)
+        const indent = resolveIndent(code, node.getStart(sourceFile))
+
+        calls.push(`${indent}${registerLocalName}(${variableName}, '${registeredName}')`)
       }
 
-      ts.forEachChild(fn.body, (child) => {
-        visit(child, false)
-      })
+      if (calls.length > 0) {
+        const pos = node.end
+        const after = code[pos]
+        const needsTrailingNewline = after !== '\n' && after !== '\r'
+        const text = `\n${calls.join('\n')}${needsTrailingNewline ? '\n' : ''}`
+
+        insertions.push({ pos, text })
+      }
     }
-  })
+
+    ts.forEachChild(node, (child) => {
+      visit(child, nextContext)
+    })
+  }
+
+  visit(sourceFile, { insideFunction: false })
 
   return insertions
 }

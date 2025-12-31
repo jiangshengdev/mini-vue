@@ -47,13 +47,13 @@
 
 注入位置：
 
-- 严格限定在 `SetupComponent` 形态组件的函数体内：在变量声明之后紧跟一行
+- 严格限定在“函数体内部”（不处理模块顶层）：在变量声明之后紧跟一行
   `registerDevtoolsSetupStateName(<id>, '<id>')`。
+- 运行时 collector 只在组件 `setup` 阶段激活，因此实际效果仍然限定在 setup 的同步调用链里（`useXxx`/state manager 等辅助函数也可覆盖）。
 
 识别范围：
 
-- 严格限定为 `SetupComponent` 形态组件的函数体内声明，避免模块顶层/任意函数内的 ref 被误当成 setup state。
-- `SetupComponent` 形态以“显式类型标注”为准：`const Comp: SetupComponent<...> = (props) => { ... }`（含 `export const`）。
+- 仅处理“函数体内”的变量声明，避免模块顶层的无意义注入。
 - 仅处理 `VariableDeclarator.id` 为 `Identifier` 的简单声明，跳过解构与模式匹配。
 - 仅处理被调用的 callee 确认为目标 API：
   - 优先支持来自 `@/index.ts` 的具名导入（如 `import { ref } from '@/index.ts'`）
@@ -97,7 +97,7 @@
 
 - AST 识别的导入来源会影响正确性：需要先以“项目内部使用的导入写法”为主，逐步扩展。
 - 多个变量指向同一对象（别名）时的命名优先级需要明确（建议“后写覆盖”）。
-- 仅对 setup 内声明生效：模块顶层响应式值不纳入 setupState 命名（可作为后续扩展点）。
+- 仅对 setup 调用链生效：插件只在函数体内注入，但运行时 collector 仅在 setup 阶段开启，模块顶层/渲染阶段创建的响应式值不纳入 setupState（可作为后续扩展点）。
 
 ## 已确认
 
@@ -107,7 +107,7 @@
 - dev gate 策略：不在注入语句上额外加 `import.meta.env.DEV`，完全依赖 helper 内部 `__DEV__` 做 no-op。
 - 覆盖策略：同一对象多次登记名称时采用“后写覆盖”。
 - 命名冲突策略：同一组件内出现同名变量时，自动追加后缀去重（如 `count$1`）。
-- 注入范围：严格限定在 `SetupComponent` 形态组件的函数体内。
+- 注入范围：严格限定在函数体内（不处理模块顶层），实际效果由运行时 collector 决定（仅 setup 同步调用链内生效）。
 
 ## Open questions
 

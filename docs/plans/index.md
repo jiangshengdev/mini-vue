@@ -13,3 +13,4 @@
 - [devtools-plugin-plan](./devtools-plugin-plan.md)
 - [test-maintainability-plan](./test-maintainability-plan.md)
 - [playground-basic-e2e-plan](./playground-basic-e2e-plan.md)
+- [playwright-e2e-scripts-plan](./playwright-e2e-scripts-plan.md)

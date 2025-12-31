@@ -1,6 +1,6 @@
 # Plan：Vue Devtools 插件（mini-vue）
 
-以“官方 Vue Devtools 扩展 + Plugins API”为目标，先做最小闭环：在开发态让扩展识别到 mini-vue，并展示一个自定义面板（SFC 视图，先放占位文案）。整体参考 Pinia 的“插件面板”体验，但不追求官方 `Components` 面板可用。
+以“官方 Vue Devtools 扩展 + Plugins API”为目标，先做最小闭环：在开发态让扩展识别到 mini-vue，并展示一个自定义面板（先放占位文案）。整体参考 Pinia 的“插件面板”体验，但不追求官方 `Components` 面板可用。
 
 ## Scope
 
@@ -11,6 +11,7 @@
 
 - **开发态启用**：所有 devtools 逻辑必须以 `__DEV__` 保护；生产构建应可被摇树，且不产生副作用。
 - **先识别后扩展**：先确保扩展能识别到“一个 app”，再注册自定义 Tab；初期 Tab 仅显示占位文案与基础信息。
+- **Chrome 扩展 CSP 限制**：Vue Devtools Chrome 扩展为 Manifest V3，默认 CSP 不允许 `unsafe-eval`；因此 `sfc` 视图（运行时编译依赖 `new Function`）会导致面板空白。最小可用阶段先用 `iframe` 视图占位，后续若上游提供无 eval 的 SFC 方案再切回。
 - **桥接层隔离**：devtools 适配代码集中在 `src/devtools/**`，避免在核心渲染/响应式路径里分散 hook 逻辑。
 - **App shim（兼容读字段）**：为避免 Devtools 后端读取字段时报错，允许在 devtools 专用对象上增加少量 “Vue-like 字段占位”；但必须在代码处写明这些字段仅用于 Devtools 兼容，不参与运行时语义。
 
@@ -29,7 +30,7 @@
 [x] 设计 devtools bridge：提供 `getDevtoolsHook()`、`emitAppInit(appShim)`、`emitAppUnmount(appShim)`；要求幂等、hook 缺失时完全 no-op（第一版落地在 `src/devtools/hook.ts`）。
 [x] 设计并实现 app shim：提供最小 `MiniVueDevtoolsApp` 与 root instance shim，并用注释说明其仅用于 Devtools 读取兼容（第一版落地在 `src/devtools/app-shim.ts`）。
 [x] 插件接入点：在 `install(app)` 中包装 `app.mount` 触发 init；在 `uninstall` 中恢复包装并触发 unmount（第一版落地在 `src/devtools/plugin.ts`）。
-[x] 自定义面板（SFC）：注册 “Mini Vue” Tab，SFC 先显示占位文案（第一版通过写入 `__VUE_DEVTOOLS_KIT_CUSTOM_TABS__` 注册，落地在 `src/devtools/tab.ts`，后续可替换为 `@vue/devtools-api`）。
+[x] 自定义面板（iframe 占位）：注册 “Mini Vue” Tab，先显示占位文案（Chrome 扩展 MV3 下 `sfc` 视图会触发 CSP；第一版通过写入 `__VUE_DEVTOOLS_KIT_CUSTOM_TABS__` 注册，落地在 `src/devtools/tab.ts`，后续可替换为 `@vue/devtools-api`）。
 [x] Playground 接入：在 `playground` 中开发态启用插件，并写明验证步骤（打开 Vue Devtools → 看到 “Mini Vue” 自定义 Tab）。
 [ ] 测试：在 `test/devtools/**` 模拟注入 hook，断言 mount/unmount 事件与 Tab 注册调用；保证测试不依赖真实浏览器扩展运行。
 
@@ -37,7 +38,7 @@
 
 - 插件默认随库导出：通过 `src/index.ts` 暴露给用户使用。
 - 允许为了“不报错”给 app shim 增加少量 “Vue-like 字段占位”：必须写注释说明其仅用于 Devtools 读取兼容。
-- 自定义面板使用 SFC 视图：优先走 `addCustomTab`，先显示占位文案，后续再扩展交互。
+- 自定义面板优先走 `addCustomTab`：Chrome 扩展 MV3 下先用 `iframe` 占位（避免 CSP 的 `unsafe-eval`），后续再扩展交互（或在上游支持无 eval SFC 后切回 `sfc`）。
 - 兼容范围锁定 Vue Devtools 扩展 `>= 7.3.0`：不向下兼容更旧版本。
 - `@vue/devtools-api` 作为 `devDependency` 引入：运行时使用动态 `import()` 以避免生产构建引入不必要依赖。
 
@@ -50,5 +51,5 @@
 - `src/devtools/index.ts`：唯一跨文件重导出入口，面向 `src/index.ts` 聚合导出。
 - `src/devtools/plugin.ts`：`MiniVueDevtoolsPlugin` 对象式插件（包装 `app.mount`，负责触发接入流程）。
 - `src/devtools/hook.ts`：`__VUE_DEVTOOLS_GLOBAL_HOOK__` 获取与 `app:init/app:unmount` 发射封装。
-- `src/devtools/tab.ts`：自定义 Tab 注册与占位 SFC 内容（当前通过写入 `__VUE_DEVTOOLS_KIT_CUSTOM_TABS__` 注册）。
+- `src/devtools/tab.ts`：自定义 Tab 注册与占位内容（当前使用 `iframe` + `data:` URL，避免 Chrome 扩展 CSP；通过写入 `__VUE_DEVTOOLS_KIT_CUSTOM_TABS__` 注册）。
 - `src/devtools/app-shim.ts`：最小 app shim 与 root instance shim（用于让 Devtools 后端不报错并完成识别）。

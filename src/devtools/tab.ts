@@ -4,31 +4,66 @@ import {
   miniVueDevtoolsTabTitle,
 } from './constants.ts'
 
-interface DevtoolsCustomTabViewSfc {
-  type: 'sfc'
-  sfc: string
+interface DevtoolsCustomTabViewIframe {
+  type: 'iframe'
+  src: string
+  persistent?: boolean
 }
 
 interface DevtoolsCustomTab {
   name: string
   title: string
   icon?: string
-  view: DevtoolsCustomTabViewSfc
+  view: DevtoolsCustomTabViewIframe
   category?: string
 }
 
-const placeholderSfc = /* vue */ `
-<script setup lang="ts">
-const message = 'Mini Vue Devtools 插件已接入（占位）。'
-</script>
+function createPlaceholderTabSrc(): string {
+  /**
+   * 注意：Vue Devtools Chrome 扩展（MV3）不允许 `unsafe-eval`。
+   * `sfc` 视图依赖运行时编译（`new Function`），会被 CSP 拦截导致面板空白。
+   *
+   * 因此这里用 `iframe` + `data:` URL 作为最小可用占位实现，避免 eval。
+   */
+  const html = `<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mini Vue</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto;
+      }
 
-<template>
-  <div style="padding: 12px; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto;">
-    <h2 style="margin: 0 0 8px; font-size: 16px; font-weight: 600;">Mini Vue</h2>
-    <p style="margin: 0; font-size: 13px; opacity: 0.8;">{{ message }}</p>
-  </div>
-</template>
-`
+      body {
+        margin: 0;
+        padding: 12px;
+      }
+
+      h2 {
+        margin: 0 0 8px;
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      p {
+        margin: 0;
+        font-size: 13px;
+        opacity: 0.8;
+        line-height: 1.6;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Mini Vue</h2>
+    <p>Mini Vue Devtools 插件已接入（占位）。</p>
+  </body>
+</html>`
+
+  return `data:text/html;charset=utf-8,${encodeURIComponent(html)}`
+}
 
 function isUrlString(input: string): boolean {
   try {
@@ -77,7 +112,7 @@ export function registerMiniVueDevtoolsTab(): void {
     name: miniVueDevtoolsTabName,
     title: miniVueDevtoolsTabTitle,
     icon: resolveDevtoolsIcon('baseline-extension'),
-    view: { type: 'sfc', sfc: placeholderSfc },
+    view: { type: 'iframe', src: createPlaceholderTabSrc() },
     category: miniVueDevtoolsTabCategory,
   }
 

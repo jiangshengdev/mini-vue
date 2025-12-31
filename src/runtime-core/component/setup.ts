@@ -27,7 +27,46 @@ function createDevtoolsSetupStateCollector(instance: unknown): DevtoolsSetupStat
     unknown: 0,
   }
 
-  const recorded = new WeakSet()
+  const recorded = new WeakSet<object>()
+  const named = new WeakMap<object, string>()
+  const valueToKey = new WeakMap<object, string>()
+
+  const resolveDevtoolsRawSetupState = (): Record<string, unknown> => {
+    const devtoolsInstance = instance as {
+      setupState?: PlainObject
+      devtoolsRawSetupState?: PlainObject
+    }
+
+    devtoolsInstance.devtoolsRawSetupState ??= {}
+
+    /*
+     * `setupState` 可能在实例创建时被 Devtools 适配层替换为 proxyRefs 版本；
+     * 这里仅在缺失时兜底，避免收集逻辑在非标准路径下失效。
+     */
+    devtoolsInstance.setupState ??= devtoolsInstance.devtoolsRawSetupState
+
+    return devtoolsInstance.devtoolsRawSetupState as Record<string, unknown>
+  }
+
+  const resolveUniqueKey = (parameters: {
+    state: Record<string, unknown>
+    base: string
+    value: object
+  }): string => {
+    const { state, base, value } = parameters
+
+    if (!Object.hasOwn(state, base) || state[base] === value) {
+      return base
+    }
+
+    for (let index = 1; ; index += 1) {
+      const candidate = `${base}$${index}`
+
+      if (!Object.hasOwn(state, candidate) || state[candidate] === value) {
+        return candidate
+      }
+    }
+  }
 
   return {
     collect(value, kind) {
@@ -41,23 +80,46 @@ function createDevtoolsSetupStateCollector(instance: unknown): DevtoolsSetupStat
 
       recorded.add(value)
 
-      const devtoolsInstance = instance as {
-        setupState?: PlainObject
-        devtoolsRawSetupState?: PlainObject
+      const state = resolveDevtoolsRawSetupState()
+      const index = counters[kind]++
+      const unnamedKey = `${kind}${index}`
+      const preferredKey = named.get(value) ?? unnamedKey
+      const resolvedKey = resolveUniqueKey({ state, base: preferredKey, value })
+
+      state[resolvedKey] = value
+      valueToKey.set(value, resolvedKey)
+    },
+    registerName(value, name) {
+      if (!value || typeof value !== 'object') {
+        return
       }
 
-      devtoolsInstance.devtoolsRawSetupState ??= {}
+      if (!name) {
+        return
+      }
 
-      /*
-       * `setupState` 可能在实例创建时被 Devtools 适配层替换为 proxyRefs 版本；
-       * 这里仅在缺失时兜底，避免收集逻辑在非标准路径下失效。
-       */
-      devtoolsInstance.setupState ??= devtoolsInstance.devtoolsRawSetupState
+      named.set(value, name)
 
-      const index = counters[kind]++
-      const key = `${kind}${index}`
+      const existingKey = valueToKey.get(value)
 
-      devtoolsInstance.devtoolsRawSetupState[key] = value
+      if (!existingKey) {
+        return
+      }
+
+      const state = resolveDevtoolsRawSetupState()
+      const nextKey = resolveUniqueKey({ state, base: name, value })
+
+      if (nextKey === existingKey) {
+        return
+      }
+
+      state[nextKey] = value
+
+      if (state[existingKey] === value) {
+        Reflect.deleteProperty(state, existingKey)
+      }
+
+      valueToKey.set(value, nextKey)
     },
   }
 }

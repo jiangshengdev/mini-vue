@@ -1,9 +1,14 @@
 import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
+import { miniVueDevtoolsSetupStateNamesPlugin } from './src/vite-plugin/index.ts'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [],
+  plugins: [
+    miniVueDevtoolsSetupStateNamesPlugin({
+      importSource: '@/index.ts',
+    }),
+  ],
   resolve: {
     alias: [
       {

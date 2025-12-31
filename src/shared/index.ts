@@ -18,6 +18,7 @@ export type { DebugLogger } from './debug.ts'
 export type { DevtoolsSetupStateCollector, DevtoolsSetupStateKind } from './devtools-setup-state.ts'
 export {
   collectDevtoolsSetupState,
+  registerDevtoolsSetupStateName,
   withDevtoolsSetupStateCollectionPaused,
   withDevtoolsSetupStateCollector,
 } from './devtools-setup-state.ts'

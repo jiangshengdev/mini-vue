@@ -4,6 +4,7 @@ export type DevtoolsSetupStateKind = 'computed' | 'reactive' | 'ref' | 'unknown'
 
 export interface DevtoolsSetupStateCollector {
   collect: (value: unknown, kind: DevtoolsSetupStateKind) => void
+  registerName?: (value: unknown, name: string) => void
 }
 
 let currentCollector: DevtoolsSetupStateCollector | undefined
@@ -52,4 +53,20 @@ export function collectDevtoolsSetupState(value: unknown, kind: DevtoolsSetupSta
   }
 
   currentCollector?.collect(value, kind)
+}
+
+export function registerDevtoolsSetupStateName(value: unknown, name: string): void {
+  if (!__DEV__) {
+    return
+  }
+
+  if (!name) {
+    return
+  }
+
+  if (!value || typeof value !== 'object') {
+    return
+  }
+
+  currentCollector?.registerName?.(value, name)
 }

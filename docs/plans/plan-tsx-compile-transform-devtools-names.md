@@ -24,7 +24,7 @@
 建议语义：
 
 - 仅在组件 setup 执行期间生效（或至少只影响当前 collector），避免全局污染。
-- 多次注册同一对象时，按“首次优先”或“后写覆盖”二选一（建议“后写覆盖”，便于用户/插件修正）。
+- 多次注册同一对象时，采用“后写覆盖”，便于插件与用户在必要时修正名字。
 - 支持三类目标：
   - Ref/Computed（对象实例）
   - reactive 代理（Proxy）
@@ -47,12 +47,13 @@
 
 注入位置：
 
-- 变量声明之后紧跟一行 `__DEV__ && registerDevtoolsSetupStateName(<id>, '<id>')`
-- 或更严格：在组件 `setup` 函数体内，确保注入只发生在 setup 期间。
+- 严格限定在 `SetupComponent` 形态组件的函数体内：在变量声明之后紧跟一行
+  `registerDevtoolsSetupStateName(<id>, '<id>')`。
 
 识别范围：
 
-- 仅处理 `setup()`（或 `SetupComponent`）函数体内的声明（避免模块顶层 ref 被误当成 setup state）。
+- 严格限定为 `SetupComponent` 形态组件的函数体内声明，避免模块顶层/任意函数内的 ref 被误当成 setup state。
+- `SetupComponent` 形态以“显式类型标注”为准：`const Comp: SetupComponent<...> = (props) => { ... }`（含 `export const`）。
 - 仅处理 `VariableDeclarator.id` 为 `Identifier` 的简单声明，跳过解构与模式匹配。
 - 仅处理被调用的 callee 确认为目标 API：
   - 优先支持来自 `@/index.ts` 的具名导入（如 `import { ref } from '@/index.ts'`）
@@ -63,6 +64,8 @@
 
 - 使用 `magic-string` 或 oxc/ts AST printer 保持 source map（至少在 dev 下可调试）。
 - 插件仅对 `.ts/.tsx` 生效；对依赖（node_modules）默认不处理。
+- 插件自动注入 `registerDevtoolsSetupStateName` 的 import（优先复用已有 import，缺失时再新增）。
+- import 源可配置：默认从包名 `@jiangshengdev/mini-vue` 引入；仓库内调试/测试可配置为从 `@/index.ts` 引入，避免“项目自己引用自己”。
 
 ### 3) 命名写入策略（避免双份）
 
@@ -96,8 +99,21 @@
 - 多个变量指向同一对象（别名）时的命名优先级需要明确（建议“后写覆盖”）。
 - 仅对 setup 内声明生效：模块顶层响应式值不纳入 setupState 命名（可作为后续扩展点）。
 
+## 已确认
+
+- 插件目录：新建 `src/vite-plugin/**` 承载该 Vite 插件实现。
+- 插件发布形态：从库的顶级入口（index）导出，外部项目只要安装并使用该包即可使用插件。
+- import 注入：插件自动注入 `registerDevtoolsSetupStateName` 的 import；外部项目默认从包名 `@jiangshengdev/mini-vue` 引入，仓库内可配置为从 `@/index.ts` 引入。
+- dev gate 策略：不在注入语句上额外加 `import.meta.env.DEV`，完全依赖 helper 内部 `__DEV__` 做 no-op。
+- 覆盖策略：同一对象多次登记名称时采用“后写覆盖”。
+- 命名冲突策略：同一组件内出现同名变量时，自动追加后缀去重（如 `count$1`）。
+- 注入范围：严格限定在 `SetupComponent` 形态组件的函数体内。
+
+## Open questions
+
+- 无（关键决策已确认）。
+
 ## 后续扩展（不在本计划内）
 
 - 编译期 `v-model` 改写：把 `v-model={obj.foo}` 自动变换为 `v-model={toRef(obj, 'foo')}` 或直接展开为 `modelValue/onUpdate`，以支持非 Ref 左值写回。
 - 更复杂的命名提取：解构、对象模式、函数返回值命名、跨语句流动分析等。
-

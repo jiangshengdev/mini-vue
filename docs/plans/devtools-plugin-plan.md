@@ -14,9 +14,16 @@
 - **桥接层隔离**：devtools 适配代码集中在 `src/devtools/**`，避免在核心渲染/响应式路径里分散 hook 逻辑。
 - **App shim（兼容读字段）**：为避免 Devtools 后端读取字段时报错，允许在 devtools 专用对象上增加少量 “Vue-like 字段占位”；但必须在代码处写明这些字段仅用于 Devtools 兼容，不参与运行时语义。
 
+## 调研结论（基于 `~/GitHub/devtools` 最新代码）
+
+- **Chrome 扩展会在所有页面注入 devtools backend**：`packages/chrome-extension/manifest.json` 的 `content_scripts` 会在 `document_start` 注入 `dist/prepare.js`（MAIN world），其源码 `packages/chrome-extension/src/prepare.ts` 会执行 `devtools.init()`，因此扩展安装后页面内始终存在 `__VUE_DEVTOOLS_GLOBAL_HOOK__`（由 devtools-kit 创建）。
+- **Devtools 面板是否出现取决于 `hook.apps.length`**：`packages/chrome-extension/src/devtools-background.ts` 仅在 `window.__VUE_DEVTOOLS_GLOBAL_HOOK__` 存在且 `hook.Vue || hook.apps.length` 为真时创建 “Vue” 面板；mini-vue 需要让 `apps.length > 0`。
+- **让扩展“识别到 app”的最小条件是发 `app:init`**：扩展注入的 devtools-kit backend 会监听 `app:init` 并把 app 推入 `hook.apps`（见 `packages/devtools-kit/src/core/index.ts`），因此 mini-vue 只需在 mount 后调用 `__VUE_DEVTOOLS_GLOBAL_HOOK__.emit('app:init', appShim, version, types)` 即可触发识别。
+- **`addCustomTab` 与 Vue runtime 解耦**：`packages/devtools-kit/src/ctx/state.ts` 的 `addCustomTab` 只是写入 `__VUE_DEVTOOLS_KIT_CUSTOM_TABS__` 并触发 state 更新；因此可以在 mini-vue 中通过动态 `import('@vue/devtools-api')` 调用 `addCustomTab` 注册 SFC 面板，不依赖真实 Vue runtime。
+
 ## Action items
 
-[ ] 调研并锁定接入路径：优先使用 `@vue/devtools-api`（v7.3+ 兼容 v6 plugin API）；若 `addCustomTab` 无法在非 Vue runtime 下工作，则回退为“直接与 `__VUE_DEVTOOLS_GLOBAL_HOOK__` 通信”的最小实现（仅用于让扩展识别到 app）。
+[x] 调研并锁定接入路径：通过 `__VUE_DEVTOOLS_GLOBAL_HOOK__.emit('app:init', ...)` 触发扩展识别；通过动态 `import('@vue/devtools-api')` 调用 `addCustomTab` 注册 SFC 面板（若动态 import 失败，再回退到直接写入 `__VUE_DEVTOOLS_KIT_CUSTOM_TABS__` 的兜底方案）。
 [ ] 设计 `src/devtools/**` 目录结构：实现 `MiniVueDevtoolsPlugin`（对象式插件），并提供 `index.ts` 聚合导出以满足重导出约束。
 [ ] 设计 devtools bridge：`getDevtoolsHook()`、`emitAppInit(appShim)`、`emitAppUnmount(appShim)`；要求幂等、hook 缺失时完全 no-op。
 [ ] 设计并实现 app shim：定义 `MiniVueDevtoolsApp` 结构（name/version/appContext 等），列出需要的 “Vue-like 字段占位” 清单与注释模板，明确哪些字段可保持 `undefined`。

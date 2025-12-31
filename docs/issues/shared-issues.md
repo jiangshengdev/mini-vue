@@ -1,6 +1,6 @@
 # Shared 模块问题记录
 
-## 1. 测试修改全局对象（已优化）
+## 1. 测试修改全局对象（状态：已解决）
 
 - 位置：`test/shared/error-channel.test.ts`
 - 修复：使用 `vi.stubGlobal('queueMicrotask', ...)`（封装为 `stubGlobalQueueMicrotask()`）替代直接覆盖全局方法，并依赖 `test/setup.ts` 的 `vi.unstubAllGlobals()` 在 `afterEach` 自动恢复。

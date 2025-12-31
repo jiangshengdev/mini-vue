@@ -1,18 +1,18 @@
 # Reactivity 模块问题记录
 
-## 1. 测试访问私有内部状态（已优化）
+## 1. 测试访问私有内部状态（状态：已解决）
 
 - 位置：`test/reactivity/effect-scope/lifecycle.test.ts`
 - 修复：移除 `Reflect.get` 对私有字段的读取，改用外部行为验证「子 scope 停止/移除后不会破坏剩余子 scope 的生命周期管理」。
 - 收益：测试不再依赖私有字段命名与存储结构，更抗内部重构。
 
-## 2. 测试 Mock 内部模块路径（已优化）
+## 2. 测试 Mock 内部模块路径（状态：已解决）
 
 - 位置：`test/reactivity/effect/basic.test.ts`
 - 修复：移除对 `@/reactivity/internals/dependency.ts` 的 mock，引入稳定的 testing seam：`@/reactivity/index.ts` 导出 `__hasDependencyBucket`（来自 `src/reactivity/testing.ts`），用其直接断言「无活跃 effect 读取」不会创建依赖桶。
 - 收益：避免硬编码内部文件路径，同时保留对内部优化点的覆盖。
 
-## 3. `watch` 对响应式对象显式 `deep: false` 时不收集依赖（已修复）
+## 3. `watch` 对响应式对象显式 `deep: false` 时不收集依赖（状态：已解决）
 
 - 位置：
   - `src/reactivity/watch/utils.ts`
@@ -23,7 +23,7 @@
   - reactive 源在浅模式下启用 `forceTrigger`，避免 `newValue === oldValue` 时被短路跳过回调。
 - 测试：`test/reactivity/watch/deep.test.ts`
 
-## 4. `readonly` 访问仍收集依赖（与 Vue 3 不一致，已修复）
+## 4. `readonly` 访问仍收集依赖（状态：已解决；备注：与 Vue 3 不一致）
 
 - 位置：`src/reactivity/internals/base-handlers.ts`
 - 现状（修复前）：
@@ -39,7 +39,7 @@
   - `src/reactivity/contracts/constants.ts`
 - 测试：`test/reactivity/reactive.test.ts`
 
-## 5. `readonly` 读取 Ref 未解包（与文档不符，已修复）
+## 5. `readonly` 读取 Ref 未解包（状态：已解决；备注：与文档不符）
 
 - 位置：`src/reactivity/internals/base-handlers.ts`
 - 现状（修复前）：只读代理读取属性值为 Ref 时直接返回 Ref 对象，而不是像 `reactive` 那样解包成值。
@@ -53,7 +53,7 @@
   - `test/reactivity/reactive.test.ts`
   - `test/reactivity/shallow.test.ts`
 
-## 6. `readonly()` 不接受 Ref 目标（与文档不符，已修复）
+## 6. `readonly()` 不接受 Ref 目标（状态：已解决；备注：与文档不符）
 
 - 位置：`src/reactivity/reactive.ts` 与 `src/reactivity/to-raw.ts`
 - 现状（修复前）：内部通过 `isSupportedTarget` 限制，仅允许普通对象或数组；传入 Ref 会抛出不支持的类型错误。

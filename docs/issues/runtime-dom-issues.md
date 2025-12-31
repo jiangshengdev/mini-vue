@@ -1,6 +1,6 @@
 # Runtime DOM 模块问题记录
 
-## 1. DOM 渲染器未处理 SVG namespace（待修复）
+## 1. DOM 渲染器未处理 SVG namespace（状态：待解决）
 
 - 位置：`src/runtime-dom/renderer-options.ts`
 - 现状：`createElement()` 无论节点类型都调用 `document.createElement(type)`，没有在 SVG 子树中切换到 `createElementNS`。
@@ -10,9 +10,9 @@
   - 在 `renderer-options` 内区分当前父节点 namespace（可借助 `parent.namespaceURI` 判断），SVG 子树使用 `document.createElementNS(svgNS, type)` 创建。
   - `patchProps` 同步对 `xlink:href` 等需要命名空间的属性做适配，避免创建正确元素却因属性缺失导致渲染异常。
 
-## 2. SVG 元素写入 className 会抛出异常（待修复）
+## 2. SVG 元素写入 className 会抛出异常（状态：待解决）
 
-- 位置：`src/runtime-dom/props/index.ts`
+- 位置：`src/runtime-dom/props/class.ts`
 - 现状：`class`/`className` 分支直接对 `element.className` 赋字符串；但在 SVG 元素上该属性为只读 `SVGAnimatedString`。
 - 影响：带有 `class` 属性的 `<svg>` 节点在 patch 阶段会触发 `TypeError`，导致整次渲染失败，无法继续创建后续 DOM。
 - 提示：需要在处理 SVG 元素时改用 `setAttribute('class', ...)` 等通用路径，或基于 `ownerSVGElement` 判断写入方式。
@@ -20,14 +20,14 @@
   - 在 `class`/`className` 分支检测 `element instanceof SVGElement`（或检查 `namespaceURI`），SVG 节点统一走 `setAttribute('class', normalizedClass)`。
   - 若后续扩展 style/attr 逻辑，也应基于 namespace 选择合适的写入 API，避免 SVG 特有属性走 HTMLElement 路径。
 
-## 3. 字符串容器选择器为非法 CSS 时会直接抛出异常（已修复）
+## 3. 字符串容器选择器为非法 CSS 时会直接抛出异常（状态：已解决）
 
 - 位置：`src/runtime-dom/create-app.ts`
 - 现状：`resolveContainer()` 在 `target` 为字符串时直接调用 `document.querySelector(target)`；当 `target` 是非法 CSS 选择器（如 `'#app['`）会抛出 `SyntaxError`，目前未捕获。
 - 影响：`createApp().mount(selector)` 会同步崩溃，且错误并非 「未找到容器」 的语义，导致定位成本较高。
 - 提示：对 `querySelector` 添加 try/catch（至少捕获 `SyntaxError`）并转换为更友好的错误信息或返回 `undefined` 走现有 「未找到容器」 分支。
 
-## 4. insertBefore 忽略 parent 且不兼容 anchor 为 null 的标准语义（已修复）
+## 4. insertBefore 忽略 parent 且不兼容 anchor 为 null 的标准语义（状态：已解决）
 
 - 位置：`src/runtime-dom/renderer-options.ts`
 - 现状：`insertBefore(_parent, child, anchor)` 直接调用 `(anchor as ChildNode).before(child)`，忽略 `parent` 参数。
@@ -36,19 +36,19 @@
   - 也无法兼容更通用的渲染器约定：很多渲染器会允许 `anchor === null` 表示追加到末尾（此时当前实现会因访问 `null.before` 而抛错）。
 - 提示：优先使用 `parent.insertBefore(child, anchor)` 作为宿主实现；如未来要支持 `anchor === null`，可在宿主层分支到 `appendChild`。
 
-## 5. 测试访问组件实例私有属性（已优化）
+## 5. 测试访问组件实例私有属性（状态：已解决）
 
 - 位置：`test/runtime-dom/component/component.test.tsx`
 - 修复：不再直接访问 `instance.cleanupTasks`，改为在组件 `setup()` 中使用 `onScopeDispose` 注册清理任务，并在卸载时通过副作用断言清理顺序与错误处理器调用。
 - 收益：降低与组件实例私有实现细节的耦合，同时保留卸载清理链路的覆盖。
 
-## 6. 测试修改全局原型（已优化）
+## 6. 测试修改全局原型（状态：已解决）
 
 - 位置：`test/runtime-dom/render/basic.test.tsx`
 - 修复：不再改写 `Element.prototype.remove`，改为仅覆写本次渲染到的具体 DOM 实例的 `remove` 并做调用断言。
 - 收益：避免全局原型污染带来的并发风险，减少用例间相互影响的可能性。
 
-## 7. 无 DOM/SSR 环境下 import 即抛错（待修复）
+## 7. 无 DOM/SSR 环境下 import 即抛错（状态：待解决）
 
 - 位置：`src/runtime-dom/create-app.ts`
 - 现状：模块加载阶段直接依赖 `document`、`import.meta.hot` 与 DOM 原语；在 SSR、Node 或无 DOM 的测试环境中仅 import 模块就会抛 `ReferenceError`/`TypeError`，无法按需降级或延迟加载。

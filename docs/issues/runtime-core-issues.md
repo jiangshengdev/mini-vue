@@ -4,13 +4,13 @@
 
 - 修复：「`shouldUseAnchor` 在 Fragment/数组子树中传染为 `true`，导致锚点滥用」，详见第 16 条。
 
-## 1. 组件更新采用「卸载后重挂」导致状态丢失（已修复）
+## 1. 组件更新采用「卸载后重挂」导致状态丢失（状态：已解决）
 
 - 位置：`src/runtime-core/component/render-effect.ts`
 - 修复：组件 `effect` 记录最新子树后，`rerenderComponent` 直接通过 `patchChild` 对新旧子树做 diff 并更新 `mountedHandle`，不再在更新前执行 teardown/remount；调度失败会回滚到旧子树，成功则复用已有宿主节点与子组件实例。
 - 结果：组件更新可复用子树与 DOM，子组件状态、焦点/滚动等宿主态不再因重挂而丢失。
 
-## 2. 更新流程在 render 成功前就卸载旧子树，失败时无法回滚（已修复）
+## 2. 更新流程在 render 成功前就卸载旧子树，失败时无法回滚（状态：已解决）
 
 - 位置：`src/runtime-core/component/render-effect.ts`
 - 现状：`rerenderComponent` 在执行 `renderSchedulerJob` 生成新子树之前就卸载旧子树；若 `renderSchedulerJob` 抛错，会标记 `rerenderFailed` 并直接 `teardownComponentInstance`。
@@ -18,7 +18,7 @@
 - 提示：应当先尝试生成新子树（或至少确保 render 成功）后再替换挂载结果；若 render 失败，应保留旧子树与旧 DOM（或实现回滚策略）。
 - 修复：rerender 时先运行 render 生成新子树，成功后再 teardown 旧子树并挂载；render 抛错会保留旧子树与 DOM。
 
-## 3. 首次渲染失败时 `mountComponent` 仍返回「空句柄」，可能误导调用方（已修复）
+## 3. 首次渲染失败时 `mountComponent` 仍返回「空句柄」，可能误导调用方（状态：已解决）
 
 - 位置：
   - `src/runtime-core/mount/handle.ts`
@@ -39,7 +39,7 @@
     - 首渲染抛错：`ok === false` 且 `nodes.length === 0`（仍返回句柄以确保可清理 scope/effect）
 - 测试：`test/runtime-core/component/mount-handle.test.tsx`
 
-## 4. 未显式拒绝异步 `setup`，错误提示不够准确（已修复）
+## 4. 未显式拒绝异步 `setup`，错误提示不够准确（状态：已解决）
 
 - 位置：
   - `src/runtime-core/component/setup.ts`
@@ -50,7 +50,7 @@
   - `setup` 入口同时引入 thenable 识别兜底，避免误落入「必须返回渲染函数」的通用分支。
 - 测试：`test/runtime-core/component/mount-handle.test.tsx`
 
-## 5. `mountComponentSubtreeWithAnchors` 依赖宿主对 Fragment 插入语义的隐式契约，类型未约束（已修复）
+## 5. `mountComponentSubtreeWithAnchors` 依赖宿主对 Fragment 插入语义的隐式契约，类型未约束（状态：已解决）
 
 - 位置：`src/runtime-core/component/anchor.ts`、`src/runtime-core/renderer.ts`
 - 现状：当需要锚点时，`mountComponentSubtreeWithAnchors` 会创建 `HostFragment`，把子树挂载到 fragment 上，再调用 `options.insertBefore(container, fragment, anchor)`。
@@ -60,33 +60,33 @@
   - `RendererOptions.insertBefore` 注释明确 runtime-core 不会传入 `HostFragment` 作为 child。
 - 测试：`test/runtime-core/component/anchor.test.ts`
 
-## 6. `mountElement` 卸载阶段存在冗余 DOM remove（已修复）
+## 6. `mountElement` 卸载阶段存在冗余 DOM remove（状态：已解决）
 
 - 位置：`src/runtime-core/mount/element.ts`
 - 现状：`teardown` 中会先遍历 `mountedHandles` 并执行每个子句柄的 `teardown()`（子路径通常会调用宿主 `remove`），最后再对父元素本身执行一次 `remove(element)`。
 - 影响：在 DOM 宿主下，移除父元素即可把整棵子树从 DOM 树摘除；此时对子节点逐个执行 remove 会产生额外的 $O(N)$ DOM 操作开销（仍需要保留子 teardown 的「逻辑清理」语义，如 ref/effect 等）。
 - 提示：应区分「逻辑清理」与「DOM 摘除」，避免对子节点做重复的 DOM remove。
 
-## 7. `mountChild` 数组分支的 `push(...nodes)` 在超大列表下可能触发 RangeError（已修复）
+## 7. `mountChild` 数组分支的 `push(...nodes)` 在超大列表下可能触发 RangeError（状态：已解决）
 
 - 位置：`src/runtime-core/mount/child.ts`
 - 现状：数组分支在收集子句柄节点时使用 `nodes.push(...mounted.nodes)`。
 - 影响：当单个子项返回的 `mounted.nodes` 数量非常大时，展开运算符可能触发 JS 引擎的参数数量/栈限制，导致 `RangeError`（表现为「Maximum call stack size exceeded」或类似错误），属于输入规模相关的稳定性风险。
 - 修复：改为逐个 `push` 收集子节点，避免对潜在大数组使用展开运算符。
 
-## 8. `mountChild` 对象兜底渲染为 `[object Object]`，缺少开发期提示（已修复）
+## 8. `mountChild` 对象兜底渲染为 `[object Object]`，缺少开发期提示（状态：已解决）
 
 - 位置：`src/runtime-core/mount/child.ts`
 - 修复：在开发模式下检测到对象子节点兜底渲染时输出警告，指引用户修正渲染输出，兜底行为仍保持字符串化。
 
-## 9. `createRenderer` 使用 WeakMap 缓存容器句柄，限制 HostElement 必须为对象（已修复）
+## 9. `createRenderer` 使用 WeakMap 缓存容器句柄，限制 HostElement 必须为对象（状态：已解决）
 
 - 位置：`src/runtime-core/renderer.ts`
 - 现状：渲染器内部用 `WeakMap` 以容器作为 key 缓存挂载句柄；`WeakMap` 的 key 必须是对象。
 - 影响：若宿主环境将容器抽象为字符串/数字（例如终端渲染器、某些自定义渲染器），会在运行时报错 `Invalid value used as weak map key`，破坏「平台无关」的承诺。
 - 修复：将 `HostElement` 类型约束为 `object`，并在运行期对非对象容器抛出明确错误提示，避免 WeakMap 报错。
 
-## 10. 挂载失败时应用状态可能处于「空闲但已缓存容器」的不一致态（已修复）
+## 10. 挂载失败时应用状态可能处于「空闲但已缓存容器」的不一致态（状态：已解决）
 
 - 位置：`src/runtime-core/create-app.ts`
 - 修复：
@@ -94,7 +94,7 @@
   - 失败后调用 `unmount()` 不会误触发宿主清理。
 - 测试：`test/runtime-core/app/mount-failure-state.test.tsx`
 
-## 11. 渲染抛错时容器可能残留部分挂载内容且无法通过 `unmount` 清理（已确认，已修复：ref 场景）
+## 11. 渲染抛错时容器可能残留部分挂载内容且无法通过 `unmount` 清理（状态：已解决；备注：ref 场景）
 
 - 位置：
   - `src/runtime-core/create-app.ts`（`mountApp`）
@@ -103,25 +103,25 @@
 - 复现：元素 `ref` 回调抛错会中断挂载并留下残留，见 `test/runtime-dom/error/ref.test.tsx`。
 - 修复：`assignElementRef` 通过错误通道隔离 `ref` 赋值异常（新增 `errorContexts.elementRef`），避免打断挂载流程，从而保证后续 `unmount()` 可以清空容器。
 
-## 12. 测试 Mock 内部文件路径（已优化）
+## 12. 测试 Mock 内部文件路径（状态：已解决）
 
 - 位置：`test/runtime-core/patch/child.test.tsx`
 - 修复：移除对 `@/runtime-core/patch/children.ts` 的 mock，改为通过宿主树插入顺序断言「新增子节点插入在 Fragment 结束锚点之前」，以验证 Fragment patch 锚点选择正确。
 - 收益：不再依赖内部文件路径与调用栈，测试更抗重构。
 
-## 13. 测试辅助函数重复定义（已优化）
+## 13. 测试辅助函数重复定义（状态：已解决）
 
 - 位置：`test/runtime-core/patch/insertion.test.ts`
 - 修复：移除文件内重复的 `createHostOptionsWithSpies`，统一复用 `test/runtime-core/host-utils.ts` 的 `createHostRenderer()` 与计数器。
 - 收益：host options 构造集中维护，测试更抗重构，减少重复样板。
 
-## 14. 测试白盒断言内部状态（已优化）
+## 14. 测试白盒断言内部状态（状态：已解决）
 
 - 位置：`test/runtime-core/provide-inject/provide-inject.test.ts`
 - 修复：不再断言 `cause` 的具体快照（如 `{ currentInstance: undefined }`），仅断言会抛错且错误信息正确，并对 `cause` 做存在性/类型校验。
 - 收益：减少对内部状态形状的依赖，避免重构实例上下文管理时测试误报。
 
-## 15. keyed diff 对重复 key/逆序场景会残留多余节点（已修复）
+## 15. keyed diff 对重复 key/逆序场景会残留多余节点（状态：已解决）
 
 - 位置：
   - `src/runtime-core/patch/keyed-children.ts`（`patchAlignedChildren`）
@@ -129,7 +129,7 @@
 - 修复：`patchAlignedChildren` 写入 `newIndexToOldIndexMap` 前会检查占用，重复命中时卸载当前旧节点；`findUnkeyedMatch` 兜底复用无 key 节点时跳过已占用的新索引，避免同一新节点被多次复用，最终移动阶段按正确映射插入/复用。
 - 回归验证：`test/runtime-core/patch/children-keyed.test.tsx`、`test/runtime-core/patch/children-keyed-regression.test.tsx` 覆盖重复 key 及逆序场景，确认不会残留额外宿主节点。
 
-## 16. `shouldUseAnchor` 在 Fragment/数组路径下会被继承为全局 `true`（已修复）
+## 16. `shouldUseAnchor` 在 Fragment/数组路径下会被继承为全局 `true`（状态：已解决）
 
 - 位置：
   - `src/runtime-core/mount/child.ts`（`mountChild`/`mountArrayChild`）

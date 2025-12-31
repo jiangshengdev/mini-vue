@@ -1,6 +1,6 @@
 # JSX Foundation 模块问题记录
 
-## 1. `createTextVirtualNode` 返回类型与 VirtualNode 接口定义不一致（已修复）
+## 1. `createTextVirtualNode` 返回类型与 VirtualNode 接口定义不一致（状态：已解决）
 
 ### 问题描述
 
@@ -44,14 +44,14 @@ export interface VirtualNode<T extends ElementType = ElementType> {
 
 ### 状态
 
-🟢 **已修复**
+**状态：已解决**
 
 - 为 `VirtualNode` 增补可选 `text` 字段。
 - `mountChild` 直接复用 `child.text`，移除类型断言。
 
 ---
 
-## 2. `ComponentChildren` 不接受 `null` 导致类型/运行时不一致（待修复）
+## 2. `ComponentChildren` 不接受 `null` 导致类型/运行时不一致（状态：待解决）
 
 - 位置：`src/jsx-foundation/types.ts`（`ComponentChildren`、`RenderOutput`）
 - 现状：类型仅允许 `boolean | undefined` 表示空值，显式的 `null` 被排除；但运行时的 `normalizeChildren` / `normalizeRenderOutput` 会把 `null` 视为可忽略节点并正常处理。
@@ -62,21 +62,21 @@ export interface VirtualNode<T extends ElementType = ElementType> {
   - 直接将 `null` 纳入 `ComponentChildren`/`RenderOutput` 联合类型（如 `VirtualNodeChild | VirtualNodeChild[] | boolean | null | undefined`），与运行时处理保持一致。
   - 若 lint 规则限制显式 `null`，可通过别名封装（如 `type NullableChild = VirtualNodeChild | null`）或调整规则配置，仅对类型声明放宽，以避免在调用方层面出现类型报错。
 
-## 3. 测试用例手动管理 `console.warn` mock（已优化）
+## 3. 测试用例手动管理 `console.warn` mock（状态：已解决）
 
 - 位置：`test/jsx-runtime/jsx.test.tsx`
 - 修复：统一通过 `spyOnConsole('warn')`（`test/test-utils/mocks.ts`）创建 spy，并依赖 `test/setup.ts` 的 `vi.restoreAllMocks()` 在 `afterEach` 自动恢复，不再手动 restore。
 - 收益：降低 mock 泄漏导致的串扰风险，提升用例可读性与一致性。
 
-## 4. 测试显式依赖内部实现细节（已优化）
+## 4. 测试显式依赖内部实现细节（状态：已解决）
 
 - 位置：`test/jsx-runtime/h.test.ts`
 - 现状：测试用例曾显式断言 `expect(virtualNode.key).toBeUndefined()`，属于对 `h` 内部默认值处理的实现细节依赖。
 - 影响：虽然目前行为正确，但这过度依赖了 `h` 函数如何处理 `undefined` props 的内部实现。
 - 提示：测试应关注外部行为（如 `key` 是否起作用），尽量减少对非公开属性状态的直接断言。
-- 状态：🟢 **已优化**（移除默认值断言，新增通过 `render`/DOM 复用与移动验证 `key` 语义的黑盒用例）
+- 状态：已解决（备注：移除默认值断言，新增通过 `render`/DOM 复用与移动验证 `key` 语义的黑盒用例）
 
-## 5. 组件类型被限定为 `(props: never)`，导致 ElementType 无法接受正常组件（已修复）
+## 5. 组件类型被限定为 `(props: never)`，导致 ElementType 无法接受正常组件（状态：已解决）
 
 - 位置：
   - `src/jsx-foundation/types.ts`（`ComponentLike`、`ElementType`、`ElementProps` 推导链）

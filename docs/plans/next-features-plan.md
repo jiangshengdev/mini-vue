@@ -6,19 +6,22 @@
 
 ### 1. VirtualNode Diff / Patch
 
-[x] 组件更新改为 `patchChild`，支持 keyed/unkeyed diff 与 LIS 优化，避免全量卸载重挂。  
+[x] 组件更新改为 `patchChild`，支持 keyed/unkeyed diff 与 LIS 优化，避免全量卸载重挂。
+
 - 关键位置：`src/runtime-core/component/render-effect.ts`、`src/runtime-core/patch/**`
 - 设计稿：`docs/plans/vnode-diff-plan.md`
 
 ### 2. 异步调度器 Scheduler
 
-[x] 引入微任务调度队列与 `nextTick(callback?)`，合并同一 tick 内的重复更新并提供 flush 生命周期。  
+[x] 引入微任务调度队列与 `nextTick(callback?)`，合并同一 tick 内的重复更新并提供 flush 生命周期。
+
 - 关键位置：`src/runtime-core/scheduler.ts`
 - 设计稿：`docs/plans/scheduler-plan.md`
 
 ### 3. 生命周期钩子
 
-[x] 补齐组件级生命周期注册与触发：`onMounted`/`onUnmounted`/`onBeforeUpdate`/`onUpdated`。  
+[x] 补齐组件级生命周期注册与触发：`onMounted`/`onUnmounted`/`onBeforeUpdate`/`onUpdated`。
+
 - 关键位置：`src/runtime-core/component/lifecycle.ts`
 - 设计稿：`docs/plans/lifecycle-hooks-plan.md`
 

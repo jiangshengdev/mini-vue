@@ -11,6 +11,7 @@ import type {
   PlainObject,
 } from '@/shared/index.ts'
 import {
+  __DEV__,
   errorContexts,
   errorPhases,
   isThenable,
@@ -100,15 +101,21 @@ function invokeSetup<
   T extends SetupComponent,
 >(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): RenderFunction | undefined {
   let setupFailed = false
-  const devtoolsSetupStateCollector = createDevtoolsSetupStateCollector(instance)
+  const devtoolsSetupStateCollector = __DEV__
+    ? createDevtoolsSetupStateCollector(instance)
+    : undefined
 
   /* 在组件专属 `scope` 内运行 `setup`，便于后续统一 `stop`。 */
   const render = instance.scope.run(() => {
     return runSilent(
       () => {
-        return withDevtoolsSetupStateCollector(devtoolsSetupStateCollector, () => {
-          return instance.type(instance.props)
-        })
+        if (__DEV__ && devtoolsSetupStateCollector) {
+          return withDevtoolsSetupStateCollector(devtoolsSetupStateCollector, () => {
+            return instance.type(instance.props)
+          })
+        }
+
+        return instance.type(instance.props)
       },
       {
         origin: errorContexts.componentSetup,

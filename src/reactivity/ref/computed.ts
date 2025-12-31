@@ -6,6 +6,7 @@ import { trackEffect, triggerEffects } from '../internals/index.ts'
 import type { Ref } from './types.ts'
 import { reactivityComputedReadonly } from '@/messages/index.ts'
 import {
+  __DEV__,
   __INTERNAL_DEV__,
   collectDevtoolsSetupState,
   createDebugLogger,
@@ -258,7 +259,9 @@ export function computed<T>(
   if (typeof getterOrOptions === 'function') {
     const computedRef = new ComputedRefImpl(getterOrOptions, createReadonlySetter<T>())
 
-    collectDevtoolsSetupState(computedRef, 'computed')
+    if (__DEV__) {
+      collectDevtoolsSetupState(computedRef, 'computed')
+    }
 
     return computedRef
   }
@@ -268,7 +271,9 @@ export function computed<T>(
   /* 结构出自定义 getter/setter，以构造具备写入能力的 computed。 */
   const computedRef = new ComputedRefImpl(get, set)
 
-  collectDevtoolsSetupState(computedRef, 'computed')
+  if (__DEV__) {
+    collectDevtoolsSetupState(computedRef, 'computed')
+  }
 
   return computedRef
 }

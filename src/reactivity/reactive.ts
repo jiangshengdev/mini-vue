@@ -178,7 +178,9 @@ export function reactive(target: unknown): unknown {
 
   const proxy = createProxy(target, mutableHandlers, reactiveCache, { skipReactiveCheck: true })
 
-  collectDevtoolsSetupState(proxy, 'reactive')
+  if (__DEV__) {
+    collectDevtoolsSetupState(proxy, 'reactive')
+  }
 
   return proxy
 }
@@ -206,7 +208,9 @@ export function shallowReactive(target: unknown): unknown {
     skipReactiveCheck: true,
   })
 
-  collectDevtoolsSetupState(proxy, 'reactive')
+  if (__DEV__) {
+    collectDevtoolsSetupState(proxy, 'reactive')
+  }
 
   return proxy
 }

@@ -24,11 +24,11 @@
 ## Action items
 
 [x] 调研并锁定接入路径：通过 `__VUE_DEVTOOLS_GLOBAL_HOOK__.emit('app:init', ...)` 触发扩展识别；通过动态 `import('@vue/devtools-api')` 调用 `addCustomTab` 注册 SFC 面板（若动态 import 失败，再回退到直接写入 `__VUE_DEVTOOLS_KIT_CUSTOM_TABS__` 的兜底方案）。
-[ ] 设计 `src/devtools/**` 目录结构：实现 `MiniVueDevtoolsPlugin`（对象式插件），并提供 `index.ts` 聚合导出以满足重导出约束。
-[ ] 设计 devtools bridge：`getDevtoolsHook()`、`emitAppInit(appShim)`、`emitAppUnmount(appShim)`；要求幂等、hook 缺失时完全 no-op。
-[ ] 设计并实现 app shim：定义 `MiniVueDevtoolsApp` 结构（name/version/appContext 等），列出需要的 “Vue-like 字段占位” 清单与注释模板，明确哪些字段可保持 `undefined`。
-[ ] 插件接入点：在 `install(app)` 中包装 `app.mount/app.unmount`（或订阅内部 mount 信号）以触发 init/unmount，并在 `uninstall` 中恢复包装与清理（对齐现有插件注册表的清理策略）。
-[ ] 自定义面板（SFC）：用 `addCustomTab({ view: { type: 'sfc', sfc } })` 注册 “Mini Vue” Tab，SFC 初期仅显示占位文案（可附带版本/环境信息）。
+[x] 设计 `src/devtools/**` 目录结构：实现 `MiniVueDevtoolsPlugin`（对象式插件），并提供 `index.ts` 聚合导出以满足重导出约束。
+[x] 设计 devtools bridge：提供 `getDevtoolsHook()`、`emitAppInit(appShim)`、`emitAppUnmount(appShim)`；要求幂等、hook 缺失时完全 no-op（第一版落地在 `src/devtools/hook.ts`）。
+[x] 设计并实现 app shim：提供最小 `MiniVueDevtoolsApp` 与 root instance shim，并用注释说明其仅用于 Devtools 读取兼容（第一版落地在 `src/devtools/app-shim.ts`）。
+[x] 插件接入点：在 `install(app)` 中包装 `app.mount` 触发 init；在 `uninstall` 中恢复包装并触发 unmount（第一版落地在 `src/devtools/plugin.ts`）。
+[x] 自定义面板（SFC）：注册 “Mini Vue” Tab，SFC 先显示占位文案（第一版通过写入 `__VUE_DEVTOOLS_KIT_CUSTOM_TABS__` 注册，落地在 `src/devtools/tab.ts`，后续可替换为 `@vue/devtools-api`）。
 [ ] Playground 验证：在 `playground` 中开发态启用插件，并写明验证步骤（打开 Vue Devtools → 看到 “Mini Vue” 自定义 Tab）。
 [ ] 测试：在 `test/devtools/**` 模拟注入 hook，断言 mount/unmount 事件与 Tab 注册调用；保证测试不依赖真实浏览器扩展运行。
 
@@ -43,3 +43,11 @@
 ## Open questions
 
 - 无（关键决策已确认）。
+
+## 已落地目录结构（第一版）
+
+- `src/devtools/index.ts`：唯一跨文件重导出入口，面向 `src/index.ts` 聚合导出。
+- `src/devtools/plugin.ts`：`MiniVueDevtoolsPlugin` 对象式插件（包装 `app.mount`，负责触发接入流程）。
+- `src/devtools/hook.ts`：`__VUE_DEVTOOLS_GLOBAL_HOOK__` 获取与 `app:init/app:unmount` 发射封装。
+- `src/devtools/tab.ts`：自定义 Tab 注册与占位 SFC 内容（当前通过写入 `__VUE_DEVTOOLS_KIT_CUSTOM_TABS__` 注册）。
+- `src/devtools/app-shim.ts`：最小 app shim 与 root instance shim（用于让 Devtools 后端不报错并完成识别）。

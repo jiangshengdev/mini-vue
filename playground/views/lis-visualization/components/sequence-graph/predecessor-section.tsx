@@ -61,6 +61,7 @@ export const PredecessorSection: SetupComponent<PredecessorSectionProps> = (prop
     return (
       <div
         class={mergedStyles.stateCompareSection}
+        data-testid="lis-predecessors-section"
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
       >

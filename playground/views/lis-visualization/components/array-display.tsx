@@ -54,13 +54,13 @@ export const ArrayDisplay: SetupComponent<ArrayDisplayProps> = (props) => {
 
   return () => {
     return (
-      <div class={mergedStyles.arrayDisplay}>
+      <div class={mergedStyles.arrayDisplay} data-testid="lis-array-display">
         <h3 class={mergedStyles.sectionTitle}>输入数组</h3>
         <div class={mergedStyles.arrayLegend}>
           <span class={mergedStyles.legendItem}>上方: value（值）</span>
           <span class={mergedStyles.legendItem}>下方: index（索引）</span>
         </div>
-        <div class={mergedStyles.arrayContainer}>
+        <div class={mergedStyles.arrayContainer} data-testid="lis-array-container">
           {props.input.map((value, index) => {
             /* 计算当前单元格的各种高亮状态 */
             const isCurrent = index === props.currentIndex
@@ -82,6 +82,7 @@ export const ArrayDisplay: SetupComponent<ArrayDisplayProps> = (props) => {
             return (
               <div
                 key={index}
+                data-testid={`lis-array-cell-${index}`}
                 class={cellClasses}
                 onClick={handleClick(index)}
                 title={`点击跳转到第 ${index + 1} 步`}

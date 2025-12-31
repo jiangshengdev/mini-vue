@@ -92,10 +92,11 @@ export const StepControls: SetupComponent<StepControlsProps> = (props) => {
 
   return () => {
     return (
-      <div class={styles.stepControls}>
+      <div class={styles.stepControls} data-testid="lis-step-controls">
         {/* 控制按钮行 */}
         <div class={styles.controlsRow}>
           <button
+            data-testid="lis-prev"
             type="button"
             class={styles.controlButton}
             onClick={props.onPrev}
@@ -106,11 +107,17 @@ export const StepControls: SetupComponent<StepControlsProps> = (props) => {
             上一步
           </button>
 
-          <span class={styles.stepIndicator}>
+          <span
+            class={styles.stepIndicator}
+            data-testid="lis-step-indicator"
+            data-current-step={`${props.currentStep}`}
+            data-last-step={`${props.totalSteps - 1}`}
+          >
             第 {props.currentStep} 步 / 共 {props.totalSteps - 1} 步
           </span>
 
           <button
+            data-testid="lis-next"
             type="button"
             class={styles.controlButton}
             onClick={props.onNext}
@@ -122,6 +129,7 @@ export const StepControls: SetupComponent<StepControlsProps> = (props) => {
           </button>
 
           <button
+            data-testid="lis-reset"
             type="button"
             class={styles.controlButton}
             onClick={props.onReset}
@@ -132,6 +140,7 @@ export const StepControls: SetupComponent<StepControlsProps> = (props) => {
           </button>
 
           <button
+            data-testid="lis-toggle-play"
             type="button"
             class={`${styles.controlButton} ${props.isPlaying ? styles.playing : ''}`}
             onClick={props.onTogglePlay}
@@ -156,6 +165,7 @@ export const StepControls: SetupComponent<StepControlsProps> = (props) => {
           <label class={styles.speedLabel}>
             速度：{props.speed}ms
             <input
+              data-testid="lis-speed-slider"
               type="range"
               class={styles.speedSlider}
               min="100"

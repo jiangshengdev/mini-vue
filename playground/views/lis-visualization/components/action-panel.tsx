@@ -144,7 +144,7 @@ export const ActionPanel: SetupComponent<ActionPanelProps> = (props) => {
     /* 无操作时显示等待状态 */
     if (!props.action) {
       return (
-        <div class={mergedStyles.actionPanel}>
+        <div class={mergedStyles.actionPanel} data-testid="lis-action-panel">
           <h3 class={mergedStyles.sectionTitle}>操作</h3>
           <div class={mergedStyles.actionContent}>（等待开始）</div>
         </div>
@@ -169,7 +169,7 @@ export const ActionPanel: SetupComponent<ActionPanelProps> = (props) => {
     }
 
     return (
-      <div class={mergedStyles.actionPanel}>
+      <div class={mergedStyles.actionPanel} data-testid="lis-action-panel">
         <h3 class={mergedStyles.sectionTitle}>操作</h3>
         <div class={`${mergedStyles.actionContent} ${actionClass}`}>
           <span class={mergedStyles.actionType}>{actionTypeMap[props.action.type]}</span>

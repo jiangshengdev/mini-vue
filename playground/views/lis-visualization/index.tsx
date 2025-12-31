@@ -147,7 +147,7 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
     /* 处理空输入的情况：显示简化界面 */
     if (input.length === 0) {
       return (
-        <div class={`${styles.container} ${styles.lisTheme}`}>
+        <div class={`${styles.container} ${styles.lisTheme}`} data-testid="lis-visualization">
           <header class={styles.header}>
             <h1 class={styles.title}>LIS 算法可视化</h1>
             <p class={styles.intro}>
@@ -158,7 +158,9 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
             <InputEditor input={input} onInputChange={eventHandlers.handleInputChange} />
           </header>
           <main class={styles.main}>
-            <div class={styles.emptyState}>请输入数组以开始可视化</div>
+            <div class={styles.emptyState} data-testid="lis-empty-state">
+              请输入数组以开始可视化
+            </div>
           </main>
         </div>
       )
@@ -166,7 +168,7 @@ export const LongestIncreasingSubsequenceVisualization: SetupComponent = () => {
 
     /* 正常渲染：完整的可视化界面 */
     return (
-      <div class={`${styles.container} ${styles.lisTheme}`}>
+      <div class={`${styles.container} ${styles.lisTheme}`} data-testid="lis-visualization">
         <header class={styles.header}>
           <h1 class={styles.title}>LIS 算法可视化</h1>
           <p class={styles.intro}>

@@ -97,11 +97,12 @@ export const InputEditor: SetupComponent<InputEditorProps> = (props) => {
     const currentError = error.get()
 
     return (
-      <div class={styles.inputEditor}>
+      <div class={styles.inputEditor} data-testid="lis-input-editor">
         <label class={styles.inputLabel}>
           输入数组（逗号或空格分隔，-1 表示新节点，重复值自动转为 -1）
           <div class={styles.inputRow}>
             <input
+              data-testid="lis-input"
               type="text"
               class={`${styles.inputField} ${currentError ? styles.inputError : ''}`}
               value={inputText.get()}
@@ -110,6 +111,7 @@ export const InputEditor: SetupComponent<InputEditorProps> = (props) => {
             />
             <div class={styles.inputActions}>
               <button
+                data-testid="lis-input-clear"
                 type="button"
                 class={styles.inputActionButton}
                 onClick={handleClear}
@@ -118,6 +120,7 @@ export const InputEditor: SetupComponent<InputEditorProps> = (props) => {
                 <span class={styles.iconClear} />
               </button>
               <button
+                data-testid="lis-input-reset"
                 type="button"
                 class={styles.inputActionButton}
                 onClick={handleReset}
@@ -126,6 +129,7 @@ export const InputEditor: SetupComponent<InputEditorProps> = (props) => {
                 <span class={styles.iconReplay} />
               </button>
               <button
+                data-testid="lis-input-random"
                 type="button"
                 class={styles.inputActionButton}
                 onClick={handleRandom}
@@ -136,7 +140,11 @@ export const InputEditor: SetupComponent<InputEditorProps> = (props) => {
             </div>
           </div>
         </label>
-        {currentError && <div class={styles.errorMessage}>{currentError}</div>}
+        {currentError && (
+          <div class={styles.errorMessage} data-testid="lis-input-error">
+            {currentError}
+          </div>
+        )}
       </div>
     )
   }

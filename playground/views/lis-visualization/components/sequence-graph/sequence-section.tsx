@@ -73,6 +73,7 @@ export const SequenceSection: SetupComponent<SequenceSectionProps> = (props) => 
     return (
       <div
         class={mergedStyles.stateCompareSection}
+        data-testid="lis-sequence-section"
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
       >

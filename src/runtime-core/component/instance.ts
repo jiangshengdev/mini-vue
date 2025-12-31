@@ -36,6 +36,22 @@ function patchComponentInstanceForDevtools<
   devtoolsInstance.attrs ??= {}
   devtoolsInstance.ctx ??= {}
   devtoolsInstance.refs ??= {}
+
+  if (!Object.hasOwn(devtoolsInstance, 'vnode')) {
+    /*
+     * 兼容 Devtools 读取 `instance.vnode.key/props`：将其映射到 mini-vue 的 `instance.virtualNode`。
+     *
+     * @remarks
+     * - Devtools 会用它展示 renderKey 与事件监听等信息。
+     * - 只读映射，避免与 mini-vue 的运行时语义耦合。
+     */
+    Object.defineProperty(devtoolsInstance, 'vnode', {
+      get() {
+        return (instance as unknown as { virtualNode?: unknown }).virtualNode
+      },
+      configurable: true,
+    })
+  }
 }
 
 /**

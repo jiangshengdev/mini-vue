@@ -24,6 +24,44 @@ import { __DEV__, isArrayIndex, isObject } from '@/shared/index.ts'
 /** Proxy get 拦截器类型。 */
 type Getter = ProxyHandler<ReactiveRawTarget>['get']
 
+function getVueDevtoolsInternalFlagValue({
+  isReadonly,
+  shallow,
+  target,
+  key,
+}: {
+  isReadonly: boolean
+  shallow: boolean
+  target: ReactiveRawTarget
+  key: PropertyKey
+}): unknown | undefined {
+  if (!__DEV__) {
+    return undefined
+  }
+
+  switch (key) {
+    case '__v_isReactive': {
+      return !isReadonly
+    }
+
+    case '__v_isReadonly': {
+      return isReadonly
+    }
+
+    case '__v_isShallow': {
+      return shallow
+    }
+
+    case '__v_raw': {
+      return target
+    }
+
+    default: {
+      return undefined
+    }
+  }
+}
+
 /**
  * 响应式 Proxy 的 get 拦截器工厂函数。
  *
@@ -62,6 +100,23 @@ function createGetter({
 
     if (key === rawKey) {
       return target
+    }
+
+    /*
+     * Vue Devtools 会依赖 Vue 私有标记（`__v_*`）识别 reactive/readonly/shallow，并通过 `__v_raw` 做 toRaw。
+     *
+     * @remarks
+     * mini-vue 内部使用 Symbol 标记以避免与用户属性冲突；这里在开发态补齐同语义的字符串标记，仅用于 Devtools 读取。
+     */
+    const devtoolsFlagValue = getVueDevtoolsInternalFlagValue({
+      isReadonly,
+      shallow,
+      target,
+      key,
+    })
+
+    if (devtoolsFlagValue !== undefined) {
+      return devtoolsFlagValue
     }
 
     /*

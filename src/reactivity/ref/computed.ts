@@ -72,6 +72,17 @@ class ComputedRefImpl<T> implements Ref<T> {
   readonly [refFlag] = true as const
 
   /**
+   * Vue Devtools 兼容：通过 `__v_isRef` 识别 Ref。
+   *
+   * @remarks
+   * Devtools 会基于该标记对 Ref 做 unref，避免把包含内部字段（如 effect）的 computed 实例直接序列化导致 structured clone 失败。
+   */
+  // eslint-disable-next-line no-useless-computed-key
+  get ['__v_isRef'](): true {
+    return true
+  }
+
+  /**
    * 内部 effect，用于追踪 getter 的依赖并在依赖变更时标记脏值。
    */
   private readonly effect: ReactiveEffect<T>

@@ -5,6 +5,7 @@
 ## Status
 
 - v1 已落地：组件树可见且不崩溃（dev-only），并已通过 `pnpm run ci`。
+- v2 已落地：组件树自动刷新（`component:added/updated/removed`）+ reactivity `__v_*` 兼容（避免 structured clone 失败的最小补齐）。
 - 实现笔记（含关键读取路径与最小字段清单）：`docs/plans/devtools-components-builtin-minimal-plan-v1.md`。
 
 ## Scope
@@ -13,11 +14,11 @@
   - 仅开发态：在检测到 `__VUE_DEVTOOLS_GLOBAL_HOOK__` 时启用（生产构建不接入 devtools）。
   - `Components` 面板可见：能看到根组件与子组件的层级树与名称（函数名）。
   - 稳定性优先：展开/切换/点击节点不触发 devtools 后端报错（必要时用空对象占位字段兜底）。
+  - 组件树自动刷新：组件 mount/update/unmount 时增量通知 Devtools 刷新。
 - Out:
   - 不做组件高亮、DOM 定位、源码跳转、时间线、事件追踪、性能标记。
   - 不做 state/props 的“正确展示”（仅保证不崩溃，不追求内容完整）。
   - 不做 `.displayName`、不做生产环境兼容。
-  - 不做自动刷新（`component:added/updated/removed`）的增量同步。
 
 ## 方案概览（最小化）
 
@@ -31,17 +32,15 @@ Vue Devtools 扩展注入的 devtools-kit 会在收到 `app:init` 后自动启�
 - [x] 调研并锁定 devtools-kit 的最小字段访问路径：`createAppRecord()` 如何获取 root、`ComponentWalker` 读取哪些实例字段（仅列清单，不扩展能力）。
 
 - [x] 选定 rootInstance 暴露方式（最小改动优先）：
-
-- 推荐：在渲染器根渲染时写入 `container._vnode = <root vnode>`（dev-only），并在 devtools 插件侧设置 `app._container = container` 后发 `app:init`。
-- 备选：直接设置 `app._instance = rootInstance`（仍需能拿到 rootInstance 引用）。
+  - 推荐：在渲染器根渲染时写入 `container._vnode = <root vnode>`（dev-only），并在 devtools 插件侧设置 `app._container = container` 后发 `app:init`。
+  - 备选：直接设置 `app._instance = rootInstance`（仍需能拿到 rootInstance 引用）。
 
 - [x] 规划并实现 `app` 的 Vue-like 字段（dev-only，占位且加注释说明仅用于 Devtools 读取）：至少包含 `_container/_component/config.globalProperties`，满足 `createAppRecord()` 的取根逻辑与命名逻辑。
 
 - [x] 规划并实现组件实例的最小 Devtools 兼容字段（dev-only，占位且加注释说明仅用于 Devtools 读取）：
-
-- 树遍历必须：`uid/parent/root/subTree/appContext.app`。
-- 防崩溃必须：`appContext.mixins: []`，以及点击节点时会被读取的 `setupState/attrs/refs/devtoolsRawSetupState` 等空对象占位。
-- vnode 关联：确保 `instance.vnode` 可读（可映射到现有 `instance.virtualNode`）。
+  - 树遍历必须：`uid/parent/root/subTree/appContext.app`。
+  - 防崩溃必须：`appContext.mixins: []`，以及点击节点时会被读取的 `setupState/attrs/refs/devtoolsRawSetupState` 等空对象占位。
+  - vnode 关联：确保 `instance.vnode` 可读（可映射到现有 `instance.virtualNode`）。
 
 - [x] 调整 `MiniVueDevtoolsPlugin` 的 `app:init` 发射策略：从“shim app”切换为“真实 app + 真实 rootInstance 链路”，保证 `Components` 可构建真实树。
 
@@ -53,11 +52,13 @@ Vue Devtools 扩展注入的 devtools-kit 会在收到 `app:init` 后自动启�
 
 目标：在保持 dev-only 的前提下，让 `Components` 面板在“点击节点后”的详情展示更接近 Vue3（仍以“不崩”为第一优先）。
 
-- [ ] 将 `instance.vnode` 映射到 `instance.virtualNode`（只读兼容），补齐 `key/props` 读取链路。
-- [ ] 将 `instance.props/setupState` 等值序列化为只读快照（避免 structured clone 失败），并明确不支持编辑回写。
+- [x] 将 `instance.vnode` 映射到 `instance.virtualNode`（只读兼容），补齐 `key/props` 读取链路。
+- [x] 兼容 mini-vue 响应式代理：补齐 Vue 私有标记（如 `__v_raw` / `__v_isRef`），让 devtools-kit 能正确 `toRaw/unref`，避免 structured clone 失败。
+- [ ] 若仍存在 structured clone 失败：对 `instance.props/setupState` 等做只读快照兜底，并明确不支持编辑回写。
 - [ ] 视需要补齐 `instance.proxy` 的最小替代（仅用于 computed 读取，不参与运行时语义）。
-- [ ] 若树刷新体验不足：补发 `component:added/updated/removed` 事件触发 devtools 侧刷新（仍不做完整事件/性能追踪）。
+- [x] 若树刷新体验不足：补发 `component:added/updated/removed` 事件触发 devtools 侧刷新（仍不做完整事件/性能追踪）。
 
 ## Open questions
 
-- 无（最小版本仅要求“树可见且不崩溃”，其余能力后续再开新计划）。
+- v2 组件树刷新策略已确认：通过 `component:added/updated/removed` 自动刷新。
+- v2 状态序列化策略已确认：优先对齐 Vue `__v_*` 标记（让 devtools-kit 自行 `toRaw/unref`）；若仍失败再加“只读快照”兜底。

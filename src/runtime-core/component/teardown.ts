@@ -1,4 +1,5 @@
 import type { ComponentInstance } from './context.ts'
+import { emitDevtoolsComponentRemoved } from './devtools.ts'
 import { invalidateLifecyclePostJobs, queueUnmountedHooks } from './lifecycle.ts'
 import type { SetupComponent } from '@/jsx-foundation/index.ts'
 import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
@@ -68,5 +69,6 @@ export function teardownComponentInstance<
     }
   }
 
+  emitDevtoolsComponentRemoved(instance)
   queueUnmountedHooks(instance)
 }

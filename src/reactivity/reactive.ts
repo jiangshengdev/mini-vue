@@ -48,6 +48,17 @@ class ReadonlyRefImpl<T> implements Ref<T> {
 
   readonly [readonlyFlag] = true as const
 
+  /**
+   * Vue Devtools 兼容：通过 `__v_isRef` 识别 Ref。
+   *
+   * @remarks
+   * Devtools 会基于该标记对 Ref 做 unref，避免把只读 Ref 实例直接序列化导致 structured clone 失败。
+   */
+  // eslint-disable-next-line no-useless-computed-key
+  get ['__v_isRef'](): true {
+    return true
+  }
+
   private readonly source: Ref<T>
 
   private readonly shallow: boolean

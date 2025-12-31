@@ -8,6 +8,7 @@ import type { SchedulerJob } from '../scheduler.ts'
 import { queueSchedulerJob } from '../scheduler.ts'
 import { asRuntimeVirtualNode } from '../virtual-node.ts'
 import type { ComponentInstance } from './context.ts'
+import { emitDevtoolsComponentAdded, emitDevtoolsComponentUpdated } from './devtools.ts'
 import {
   invokeBeforeUpdateHooks,
   markComponentMounted,
@@ -66,6 +67,7 @@ export function performInitialRender<
         instance.isMounted = true
         markComponentMounted(instance)
         queueMountedHooks(instance)
+        emitDevtoolsComponentAdded(instance)
       }
     },
     {
@@ -189,6 +191,8 @@ function rerenderComponent<
   invokeBeforeUpdateHooks(instance)
 
   patchLatestSubtree(options, instance, previousSubTree)
+
+  emitDevtoolsComponentUpdated(instance)
 
   queueUpdatedHooks(instance)
 }

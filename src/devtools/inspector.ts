@@ -63,6 +63,17 @@ const miniVueInspectorId = 'mini-vue'
 const helloNodeId = 'hello'
 const helloMessage = 'Hello World'
 
+function createMiniVueLogo(): string {
+  /**
+   * 作为 devtools 插件 logo 的最小占位图标。
+   *
+   * @remarks
+   * - Vue Devtools 客户端仅把 `/` 或 `http(s)://` 识别为图片 URL（`data:` URL 会被当成 class 使用，导致左侧导航不显示图标）。
+   * - 图标来源：`public/material-design-icons/dashboard/materialiconsoutlined/24px.svg`（通过 GitHub Raw 以 https URL 形式提供）。
+   */
+  return 'https://raw.githubusercontent.com/jiangshengdev/mini-vue/main/public/material-design-icons/dashboard/materialiconsoutlined/24px.svg'
+}
+
 function isWeakKey(value: unknown): value is WeakKey {
   return (typeof value === 'object' && value !== null) || typeof value === 'function'
 }
@@ -116,6 +127,7 @@ export function registerMiniVueDevtoolsInspector(options: {
     label: 'Mini Vue',
     app: options.app,
     packageName: 'mini-vue',
+    logo: createMiniVueLogo(),
     homepage: 'https://github.com/jiangshengdev/mini-vue',
   }
 
@@ -123,7 +135,7 @@ export function registerMiniVueDevtoolsInspector(options: {
     api.addInspector({
       id: miniVueInspectorId,
       label: 'Mini Vue',
-      icon: 'extension',
+      icon: 'dashboard',
       treeFilterPlaceholder: '搜索（占位）',
       stateFilterPlaceholder: '过滤（占位）',
       noSelectionText: '请选择左侧节点',

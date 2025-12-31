@@ -111,7 +111,7 @@ export function registerMiniVueDevtoolsTab(): void {
   const tab: DevtoolsCustomTab = {
     name: miniVueDevtoolsTabName,
     title: miniVueDevtoolsTabTitle,
-    icon: resolveDevtoolsIcon('baseline-extension'),
+    icon: resolveDevtoolsIcon('baseline-dashboard'),
     view: { type: 'iframe', src: createPlaceholderTabSrc() },
     category: miniVueDevtoolsTabCategory,
   }

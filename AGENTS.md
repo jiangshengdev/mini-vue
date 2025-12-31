@@ -20,6 +20,7 @@
 - 导出约定：除仓库顶级入口文件（如 `src/index.ts`、`src/jsx-runtime.ts`、`src/jsx-dev-runtime.ts`）外，跨文件的重导出**只能**写在同级 `index.ts` 中；其他任何命名文件禁止通过 `export ... from` / `export * from` 重导出其他模块实现（含类型与值）。需要聚合导出时请新增/调整对应目录的 `index.ts`。
 - 格式化由 Prettier（2 空格、单引号）控制，ESLint/Stylistic、oxlint、XO 共同约束风格；提交前请先格式化，否则 CI 会拒绝。
 - 目录/文件名用 kebab-case，变量/函数 camelCase，类型 PascalCase；测试目录与源码保持平行以满足 `scripts/check` 边界规则。
+- 空值约定：项目不使用 `null`，统一使用 `undefined` 表示「空/缺省」。
 
 ## 测试准则
 

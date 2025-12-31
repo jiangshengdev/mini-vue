@@ -1,0 +1,49 @@
+# Plan：启用 Vue Devtools 内置 Components（最小可用）
+
+目标：让 Chrome Vue Devtools（扩展 `>= 7.3.0`）的内置 `Components` 面板能够识别并展示 mini-vue 的**组件名称树**，且在开发态使用过程中不崩溃。
+
+## Scope
+
+- In:
+  - 仅开发态：在检测到 `__VUE_DEVTOOLS_GLOBAL_HOOK__` 时启用（生产构建不接入 devtools）。
+  - `Components` 面板可见：能看到根组件与子组件的层级树与名称（函数名）。
+  - 稳定性优先：展开/切换/点击节点不触发 devtools 后端报错（必要时用空对象占位字段兜底）。
+- Out:
+  - 不做组件高亮、DOM 定位、源码跳转、时间线、事件追踪、性能标记。
+  - 不做 state/props 的“正确展示”（仅保证不崩溃，不追求内容完整）。
+  - 不做 `.displayName`、不做生产环境兼容。
+  - 不做自动刷新（`component:added/updated/removed`）的增量同步。
+
+## 方案概览（最小化）
+
+Vue Devtools 扩展注入的 devtools-kit 会在收到 `app:init` 后自动启用内置 `components` inspector，并用 `ComponentWalker` 从 `appRecord.rootInstance` 递归遍历 `instance.subTree.children[].component` 来构建树。mini-vue 的最小策略是：
+
+1. `app:init` 发射的 **app 对象**必须能让 devtools-kit 拿到真实 `rootInstance`（`app._instance` 或 `app._container._vnode.component`）。
+2. mini-vue 的 **组件实例对象**需要具备 devtools-kit 遍历所需的最小字段（`uid/parent/root/appContext/subTree/vnode` 等），并补齐 `appContext.mixins` 避免 `mixins.length` 崩溃。
+
+## Action items
+
+[ ] 调研并锁定 devtools-kit 的最小字段访问路径：`createAppRecord()` 如何获取 root、`ComponentWalker` 读取哪些实例字段（仅列清单，不扩展能力）。
+
+[ ] 选定 rootInstance 暴露方式（最小改动优先）：
+
+- 推荐：在渲染器根渲染时写入 `container._vnode = <root vnode>`（dev-only），并在 devtools 插件侧设置 `app._container = container` 后发 `app:init`。
+- 备选：直接设置 `app._instance = rootInstance`（仍需能拿到 rootInstance 引用）。
+
+[ ] 规划并实现 `app` 的 Vue-like 字段（dev-only，占位且加注释说明仅用于 Devtools 读取）：至少包含 `_container/_component/config.globalProperties`，满足 `createAppRecord()` 的取根逻辑与命名逻辑。
+
+[ ] 规划并实现组件实例的最小 Devtools 兼容字段（dev-only，占位且加注释说明仅用于 Devtools 读取）：
+
+- 树遍历必须：`uid/parent/root/subTree/appContext.app`。
+- 防崩溃必须：`appContext.mixins: []`，以及点击节点时会被读取的 `setupState/attrs/refs/devtoolsRawSetupState` 等空对象占位。
+- vnode 关联：确保 `instance.vnode` 可读（可映射到现有 `instance.virtualNode`）。
+
+[ ] 调整 `MiniVueDevtoolsPlugin` 的 `app:init` 发射策略：从“shim app”切换为“真实 app + 真实 rootInstance 链路”，保证 `Components` 可构建真实树。
+
+[ ] Playground 验证用例规划：准备一个 2–3 层组件嵌套示例（含至少 1 个条件分支），并记录手动验证步骤（打开 Devtools → Components → 能看到名称树、展开/点击不报错）。
+
+[ ] 验证与回归标准：`pnpm run ci` 通过；开发态手动验证通过；不引入生产构建副作用（dev-only 守卫明确）。
+
+## Open questions
+
+- 无（最小版本仅要求“树可见且不崩溃”，其余能力后续再开新计划）。

@@ -36,6 +36,10 @@ export {
   runtimeCoreInvalidPlugin,
   runtimeCoreMissingHostNodes,
   runtimeCoreObjectChildWarning,
+  runtimeCoreOnBeforeUpdateOutsideSetup,
+  runtimeCoreOnMountedOutsideSetup,
+  runtimeCoreOnUnmountedOutsideSetup,
+  runtimeCoreOnUpdatedOutsideSetup,
   runtimeCoreProvideOutsideSetup,
   runtimeCoreSetupMustReturnRender,
 } from './runtime-core.ts'

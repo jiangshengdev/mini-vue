@@ -1,6 +1,11 @@
-import { getCurrentInstance } from './component/context.ts'
+import {
+  getCurrentInstance,
+  getCurrentInstanceScope,
+  getCurrentSetupInstance,
+} from './component/context.ts'
 import { runtimeCoreInjectOutsideSetup, runtimeCoreProvideOutsideSetup } from '@/messages/index.ts'
 import type { InjectionToken } from '@/shared/index.ts'
+import { __DEV__ } from '@/shared/index.ts'
 
 /**
  * 在当前组件实例上提供依赖，供后代组件通过 `inject()` 读取。
@@ -17,11 +22,19 @@ export function provide<T>(key: InjectionToken<T>, value: T): void
 
 export function provide(key: InjectionToken, value: unknown): void {
   /* 依赖注入容器位于「当前组件实例」上，因此必须处于 setup 执行窗口期。 */
-  const instance = getCurrentInstance()
+  const instance = getCurrentSetupInstance()
+  const currentInstance = getCurrentInstance()
+  const scope = getCurrentInstanceScope()
 
   /* 没有实例通常意味着在组件外调用（例如模块顶层或事件回调中）。 */
   if (!instance) {
-    throw new Error(runtimeCoreProvideOutsideSetup, { cause: { currentInstance: instance } })
+    if (__DEV__ && currentInstance && scope === 'hook') {
+      console.warn(
+        '[runtime-core] provide: 只能在组件 setup 期间调用（检测到在生命周期钩子执行期调用）',
+      )
+    }
+
+    throw new Error(runtimeCoreProvideOutsideSetup, { cause: { currentInstance } })
   }
 
   /* 通过 provides 写入：后代组件将沿着原型链读取到该值。 */
@@ -48,11 +61,19 @@ export function inject<T>(key: InjectionToken<T>, defaultValue: T): T
 
 export function inject<T>(key: InjectionToken<T>, defaultValue?: T): T | undefined {
   /* 与 provide 一致：注入只能在 setup 阶段发生，避免隐式的全局状态。 */
-  const instance = getCurrentInstance()
+  const instance = getCurrentSetupInstance()
+  const currentInstance = getCurrentInstance()
+  const scope = getCurrentInstanceScope()
 
   /* 不在 setup 期间调用时直接抛错，避免读到不确定的上下文。 */
   if (!instance) {
-    throw new Error(runtimeCoreInjectOutsideSetup, { cause: { currentInstance: instance } })
+    if (__DEV__ && currentInstance && scope === 'hook') {
+      console.warn(
+        '[runtime-core] inject: 只能在组件 setup 期间调用（检测到在生命周期钩子执行期调用）',
+      )
+    }
+
+    throw new Error(runtimeCoreInjectOutsideSetup, { cause: { currentInstance } })
   }
 
   const { provides } = instance

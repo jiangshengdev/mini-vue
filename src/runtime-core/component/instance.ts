@@ -7,6 +7,8 @@ import { effectScope } from '@/reactivity/index.ts'
 import type { PlainObject } from '@/shared/index.ts'
 import { __DEV__ } from '@/shared/index.ts'
 
+let componentUid = 0
+
 /**
  * 创建组件实例与关联的 `effect` 作用域。
  *
@@ -35,6 +37,7 @@ export function createComponentInstance<
   const appContext = parent?.appContext ?? context?.appContext ?? getCurrentAppContext()
   const { props, propsSource } = propsState
   const componentName = __DEV__ ? component.name || 'AnonymousComponent' : undefined
+  const uid = componentUid++
 
   /*
    * `provides` 采用原型链：
@@ -47,6 +50,8 @@ export function createComponentInstance<
 
   /* `render`/`effect` 初始为空，由 `setup` 与 `performInitialRender` 回填。 */
   return {
+    uid,
+    postOrderId: 0,
     parent,
     appContext,
     provides: Object.create(providesSource) as PlainObject,
@@ -64,6 +69,12 @@ export function createComponentInstance<
     cleanupTasks: [],
     setupContext: {},
     scope: effectScope(true),
+    isMounted: false,
+    isUnmounted: false,
+    mountedHooks: [],
+    unmountedHooks: [],
+    beforeUpdateHooks: [],
+    updatedHooks: [],
   }
 }
 

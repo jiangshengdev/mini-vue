@@ -4,9 +4,16 @@ import type { NormalizedVirtualNode } from '../normalize.ts'
 import { normalizeRenderOutput } from '../normalize.ts'
 import { mountChildInEnvironment, patchChild } from '../patch/index.ts'
 import { getFirstHostNode, getLastHostNode, getNextHostNode } from '../patch/utils.ts'
+import type { SchedulerJob } from '../scheduler.ts'
 import { queueSchedulerJob } from '../scheduler.ts'
 import { asRuntimeVirtualNode } from '../virtual-node.ts'
 import type { ComponentInstance } from './context.ts'
+import {
+  invokeBeforeUpdateHooks,
+  markComponentMounted,
+  queueMountedHooks,
+  queueUpdatedHooks,
+} from './lifecycle.ts'
 import { teardownComponentInstance } from './teardown.ts'
 import type { SetupComponent } from '@/jsx-foundation/index.ts'
 import { ReactiveEffect, recordEffectScope } from '@/reactivity/index.ts'
@@ -54,6 +61,12 @@ export function performInitialRender<
       instance.mountedHandle = mounted
 
       ok &&= mounted?.ok ?? true
+
+      if (ok && mounted) {
+        instance.isMounted = true
+        markComponentMounted(instance)
+        queueMountedHooks(instance)
+      }
     },
     {
       origin: errorContexts.effectRunner,
@@ -98,7 +111,7 @@ function createRenderEffect<
   let pendingRenderJob: (() => void) | undefined
 
   /* 组件更新调度入口：取出本轮 job 并驱动一次 rerender。 */
-  const componentUpdateJob = (): void => {
+  const componentUpdateJob: SchedulerJob = () => {
     const job = pendingRenderJob
 
     pendingRenderJob = undefined
@@ -110,6 +123,9 @@ function createRenderEffect<
 
     rerenderComponent(options, instance, job)
   }
+
+  /* 对齐 Vue3：组件更新任务按 uid 排序，保证父组件先于子组件执行。 */
+  componentUpdateJob.id = instance.uid
 
   const effect = new ReactiveEffect<NormalizedVirtualNode | undefined>(
     /* 渲染 runner：执行 `render()` 并缓存最新 `subTree`，供后续 `patch`/移动同步使用。 */
@@ -170,11 +186,11 @@ function rerenderComponent<
     return
   }
 
-  /* 预留 onBeforeUpdate 生命周期钩子触发时机。 */
+  invokeBeforeUpdateHooks(instance)
 
   patchLatestSubtree(options, instance, previousSubTree)
 
-  /* 预留 onUpdated 生命周期钩子触发时机。 */
+  queueUpdatedHooks(instance)
 }
 
 /**

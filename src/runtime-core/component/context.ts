@@ -4,11 +4,15 @@
 import type { AppContext } from '../create-app.ts'
 import type { MountedHandle } from '../mount'
 import type { NormalizedVirtualNode } from '../normalize.ts'
+import type { SchedulerJob } from '../scheduler.ts'
 import type { RuntimeVirtualNode } from '../virtual-node.ts'
 import type { ElementProps, RenderFunction, SetupComponent } from '@/jsx-foundation/index.ts'
 import type { EffectScope, ReactiveEffect } from '@/reactivity/index.ts'
 import type { PlainObject } from '@/shared/index.ts'
 import { ContextStack } from '@/shared/index.ts'
+
+/** 组件生命周期钩子的函数签名（当前仅支持同步函数）。 */
+export type LifecycleHook = () => void
 
 /**
  * 组件实例的依赖注入容器类型。
@@ -33,6 +37,16 @@ export interface ComponentInstance<
   HostFragment extends HostNode,
   T extends SetupComponent,
 > {
+  /** 组件唯一 id，用于 scheduler 排序与调试（对齐 Vue3 uid）。 */
+  uid: number
+  /**
+   * 组件树的 post-order 序号，用于 post flush 生命周期的稳定父子顺序。
+   *
+   * @remarks
+   * - 在「挂载完成」时分配，保证子组件先于父组件（子 → 父）。
+   * - 用于对齐 Vue3 对 mounted/updated/unmounted 的父子顺序关键保证点。
+   */
+  postOrderId: number
   /** 父组件实例引用，用于依赖注入与上下文继承。 */
   parent?: UnknownComponentInstance
   /** 应用级上下文（root `provides` 等），沿组件树结构稳定传播。 */
@@ -81,13 +95,38 @@ export interface ComponentInstance<
   setupState?: PlainObject
   /** 组合式 API 使用的上下文容器。 */
   setupContext: PlainObject
+  /** 组件是否已完成首轮挂载（用于区分 mount/update 语义）。 */
+  isMounted: boolean
+  /** 组件是否已完成卸载（用于过期防护与跳过重复调度）。 */
+  isUnmounted: boolean
+  /** `onMounted` 注册的回调（按注册顺序执行）。 */
+  mountedHooks: LifecycleHook[]
+  /** `onUnmounted` 注册的回调（按注册顺序执行）。 */
+  unmountedHooks: LifecycleHook[]
+  /** `onBeforeUpdate` 注册的回调（按注册顺序执行）。 */
+  beforeUpdateHooks: LifecycleHook[]
+  /** `onUpdated` 注册的回调（按注册顺序执行）。 */
+  updatedHooks: LifecycleHook[]
+  /** `onMounted` 对应的 post 队列 job（用于过期防护）。 */
+  mountedHookJob?: SchedulerJob
+  /** `onUpdated` 对应的 post 队列 job（用于去重与过期防护）。 */
+  updatedHookJob?: SchedulerJob
+  /** `onUnmounted` 对应的 post 队列 job（用于去重）。 */
+  unmountedHookJob?: SchedulerJob
 }
 
 /** 兼容任意宿主类型的组件实例别名，简化当前实例管理与跨模块传递。 */
 export type UnknownComponentInstance = ComponentInstance<unknown, WeakKey, unknown, SetupComponent>
 
-/** 当前 `setup` 调用栈正在处理的实例引用，支持嵌套组件的 `setup` 调用。 */
-const instanceStack = new ContextStack<UnknownComponentInstance>()
+export type CurrentInstanceScope = 'setup' | 'hook'
+
+interface CurrentInstanceContext {
+  readonly instance: UnknownComponentInstance
+  readonly scope: CurrentInstanceScope
+}
+
+/** 当前调用栈正在处理的实例引用，支持嵌套组件的 setup/hook 上下文。 */
+const instanceStack = new ContextStack<CurrentInstanceContext>()
 
 /**
  * 设置当前运行中的组件实例，供 `setup` 期间通过 `getCurrentInstance()` 访问。
@@ -102,7 +141,23 @@ export function setCurrentInstance<
   HostFragment extends HostNode,
   T extends SetupComponent,
 >(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): void {
-  instanceStack.push(instance as UnknownComponentInstance)
+  instanceStack.push({ instance: instance as UnknownComponentInstance, scope: 'setup' })
+}
+
+/**
+ * 设置当前运行中的组件实例，供生命周期钩子执行期间通过 `getCurrentInstance()` 访问。
+ *
+ * @remarks
+ * - 与 Vue3 行为对齐：hook 执行期间同样暴露 currentInstance，便于高级用法读取实例上下文。
+ * - setup-only API 需自行通过 `getCurrentSetupInstance()` 做时机校验。
+ */
+export function setCurrentInstanceForHook<
+  HostNode,
+  HostElement extends HostNode & WeakKey,
+  HostFragment extends HostNode,
+  T extends SetupComponent,
+>(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>): void {
+  instanceStack.push({ instance: instance as UnknownComponentInstance, scope: 'hook' })
 }
 
 /**
@@ -119,9 +174,28 @@ export function unsetCurrentInstance(): void {
  * 读取当前组件实例，仅供内部组合式能力使用。
  *
  * @remarks
- * - 仅在 `setup()` 执行期间返回有效实例。
- * - 在 `setup()` 外部调用（如事件回调、异步任务）会返回 `undefined`。
+ * - 在 `setup()` 与生命周期钩子执行期间返回有效实例。
+ * - 在组件外部调用（如模块顶层、事件回调、异步任务）会返回 `undefined`。
  */
 export function getCurrentInstance(): UnknownComponentInstance | undefined {
-  return instanceStack.current
+  return instanceStack.current?.instance
+}
+
+/**
+ * 读取当前实例所在的上下文类型。
+ *
+ * @remarks
+ * - 主要用于实现「setup-only API」在 hook 执行期的告警/报错分流。
+ */
+export function getCurrentInstanceScope(): CurrentInstanceScope | undefined {
+  return instanceStack.current?.scope
+}
+
+/**
+ * 仅在 `setup()` 执行期间读取当前实例（setup-only API 使用）。
+ */
+export function getCurrentSetupInstance(): UnknownComponentInstance | undefined {
+  const { current } = instanceStack
+
+  return current?.scope === 'setup' ? current.instance : undefined
 }

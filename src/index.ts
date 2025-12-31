@@ -57,7 +57,16 @@ export type {
   RouterLinkProps,
   RouterViewProps,
 } from '@/router/index.ts'
-export { inject, nextTick, provide, watch } from '@/runtime-core/index.ts'
+export {
+  inject,
+  nextTick,
+  onBeforeUpdate,
+  onMounted,
+  onUnmounted,
+  onUpdated,
+  provide,
+  watch,
+} from '@/runtime-core/index.ts'
 export type { DomAppInstance, ElementRef } from '@/runtime-dom/index.ts'
 export { createApp, render } from '@/runtime-dom/index.ts'
 export type {

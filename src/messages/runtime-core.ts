@@ -27,6 +27,28 @@ export const runtimeCoreProvideOutsideSetup = 'provide: 只能在组件 setup �
 export const runtimeCoreInjectOutsideSetup = 'inject: 只能在组件 setup 期间调用'
 
 /**
+ * `onMounted()` 在组件 setup 外调用的错误
+ *
+ * 生命周期钩子注入 API 依赖当前组件实例上下文，仅允许在 `setup()` 执行期间注册。
+ */
+export const runtimeCoreOnMountedOutsideSetup = 'onMounted: 只能在组件 setup 期间调用'
+
+/**
+ * `onUnmounted()` 在组件 setup 外调用的错误
+ */
+export const runtimeCoreOnUnmountedOutsideSetup = 'onUnmounted: 只能在组件 setup 期间调用'
+
+/**
+ * `onBeforeUpdate()` 在组件 setup 外调用的错误
+ */
+export const runtimeCoreOnBeforeUpdateOutsideSetup = 'onBeforeUpdate: 只能在组件 setup 期间调用'
+
+/**
+ * `onUpdated()` 在组件 setup 外调用的错误
+ */
+export const runtimeCoreOnUpdatedOutsideSetup = 'onUpdated: 只能在组件 setup 期间调用'
+
+/**
  * 应用重复挂载的错误
  *
  * `createApp()` 返回的应用实例只能调用一次 `mount()`；

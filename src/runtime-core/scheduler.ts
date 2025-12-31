@@ -1,27 +1,135 @@
 import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
 
-type SchedulerJob = () => void
+export interface SchedulerJob {
+  (): void
+  /** 用于排序的稳定 id（如组件 uid），缺省视为 Infinity。 */
+  id?: number
+  /** 标记任务是否已在当前队列入队，用于去重。 */
+  queued?: boolean
+  /** 标记任务是否已被标记为过期（组件卸载后跳过已入队的 hook 等）。 */
+  disposed?: boolean
+}
 
-/** 等待执行的调度任务队列，使用数组保持触发顺序。 */
+/** 等待执行的调度任务队列，使用数组保持稳定顺序。 */
 const jobQueue: SchedulerJob[] = []
-/** 去重集合，保证同一任务在一次 flush 中只会运行一次。 */
-const pendingJobSet = new Set<SchedulerJob>()
-/** 渲染前的回调队列与去重集合（如 `watch` flush: pre）。 */
+/** 渲染前的回调队列（如 `watch` flush: pre）。 */
 const preFlushQueue: SchedulerJob[] = []
-const pendingPreFlushSet = new Set<SchedulerJob>()
-/** 渲染后的回调队列与去重集合（如 `watch` flush: post）。 */
+/** 渲染后的回调队列（如 `watch` flush: post、生命周期 hook）。 */
 const postFlushQueue: SchedulerJob[] = []
-const pendingPostFlushSet = new Set<SchedulerJob>()
+
+/** 当前 main queue 正在处理的索引，用于 flush 期间插入排序。 */
+let flushIndex = -1
 
 /** 标记是否已安排过本轮微任务 flush。 */
 let isFlushPending = false
-/** 标记是否正在执行 flush，防止重复调度。 */
+/** 标记是否正在执行 flush，供内部状态判断。 */
 let isFlushing = false
 
 /** 共用的已解析 Promise，用于创建微任务。 */
 const resolvedPromise = Promise.resolve()
 /** 当前 flush 对应的 Promise，供 `nextTick` 复用。 */
 let currentFlushPromise: Promise<void> | undefined
+
+/** 同一轮 flush 内允许单个 job 递归执行的最大次数（对齐 Vue3）。 */
+const recursionLimit = 100
+
+type RecursionCountMap = Map<SchedulerJob, number>
+
+function getJobId(job: SchedulerJob): number {
+  return job.id ?? Infinity
+}
+
+function markJobQueued(job: SchedulerJob): void {
+  job.queued = true
+}
+
+function clearJobQueued(job: SchedulerJob): void {
+  job.queued = false
+}
+
+function isJobQueued(job: SchedulerJob): boolean {
+  return job.queued === true
+}
+
+function isJobDisposed(job: SchedulerJob): boolean {
+  return job.disposed === true
+}
+
+function findInsertionIndex(id: number): number {
+  let start = flushIndex + 1
+  let end = jobQueue.length
+
+  while (start < end) {
+    const middle = Math.floor((start + end) / 2)
+    const middleJobId = getJobId(jobQueue[middle])
+
+    if (middleJobId < id) {
+      start = middle + 1
+    } else {
+      end = middle
+    }
+  }
+
+  return start
+}
+
+function queueJobToMainQueue(job: SchedulerJob): void {
+  const jobId = getJobId(job)
+  const last = jobQueue.at(-1)
+
+  if (!last || jobId >= getJobId(last)) {
+    jobQueue.push(job)
+
+    return
+  }
+
+  jobQueue.splice(findInsertionIndex(jobId), 0, job)
+}
+
+function checkRecursiveUpdates(seen: RecursionCountMap, job: SchedulerJob): boolean {
+  const count = seen.get(job) ?? 0
+
+  if (count >= recursionLimit) {
+    runSilent(
+      () => {
+        throw new Error(
+          `[scheduler] 检测到可能的递归更新：同一任务在一次 flush 中执行超过 ${recursionLimit} 次`,
+        )
+      },
+      {
+        origin: errorContexts.scheduler,
+        handlerPhase: errorPhases.async,
+      },
+    )
+
+    return true
+  }
+
+  seen.set(job, count + 1)
+
+  return false
+}
+
+/**
+ * 标记调度器当前是否处于 flush 阶段。
+ *
+ * @remarks
+ * - 供 runtime-core 在「同步 patch」与「异步调度 flush」之间选择错误阶段标记使用。
+ */
+export function isSchedulerFlushing(): boolean {
+  return isFlushing
+}
+
+/**
+ * 将任务标记为过期（常用于组件卸载后跳过已入队的 post hooks）。
+ */
+export function disposeSchedulerJob(job: SchedulerJob | undefined): void {
+  if (!job) {
+    return
+  }
+
+  job.disposed = true
+}
 
 /**
  * 将渲染任务入队，使用微任务批量执行并去重。
@@ -31,10 +139,12 @@ let currentFlushPromise: Promise<void> | undefined
  * - flush 过程中触发的新任务会被加入当前队列，确保同一轮内完成。
  */
 export function queueSchedulerJob(job: SchedulerJob): void {
-  if (!pendingJobSet.has(job)) {
-    pendingJobSet.add(job)
-    jobQueue.push(job)
+  if (isJobDisposed(job) || isJobQueued(job)) {
+    return
   }
+
+  markJobQueued(job)
+  queueJobToMainQueue(job)
 
   queueFlush()
 }
@@ -43,10 +153,12 @@ export function queueSchedulerJob(job: SchedulerJob): void {
  * 将回调加入渲染前队列，按插入顺序执行并去重。
  */
 export function queuePreFlushCb(job: SchedulerJob): void {
-  if (!pendingPreFlushSet.has(job)) {
-    pendingPreFlushSet.add(job)
-    preFlushQueue.push(job)
+  if (isJobDisposed(job) || isJobQueued(job)) {
+    return
   }
+
+  markJobQueued(job)
+  preFlushQueue.push(job)
 
   queueFlush()
 }
@@ -55,10 +167,12 @@ export function queuePreFlushCb(job: SchedulerJob): void {
  * 将回调加入渲染后队列，按插入顺序执行并去重。
  */
 export function queuePostFlushCb(job: SchedulerJob): void {
-  if (!pendingPostFlushSet.has(job)) {
-    pendingPostFlushSet.add(job)
-    postFlushQueue.push(job)
+  if (isJobDisposed(job) || isJobQueued(job)) {
+    return
   }
+
+  markJobQueued(job)
+  postFlushQueue.push(job)
 
   queueFlush()
 }
@@ -104,40 +218,29 @@ function flushJobs(): void {
   isFlushPending = false
   isFlushing = true
 
-  let jobIndex = 0
+  const seen: RecursionCountMap = new Map()
 
   try {
-    do {
-      flushPreFlushCbs()
-
-      while (jobIndex < jobQueue.length) {
-        const job = jobQueue[jobIndex]
-
-        runSilent(job, {
-          origin: errorContexts.scheduler,
-          handlerPhase: errorPhases.async,
-        })
-
-        jobIndex += 1
-      }
-    } while (preFlushQueue.length > 0)
-
-    while (postFlushQueue.length > 0) {
-      flushPostFlushCbs()
+    /*
+     * Flush 过程中 post 队列可能再次触发更新（如 `onMounted` 内写状态），
+     * 因此需要循环直到三类队列都清空，避免吞掉后续任务。
+     */
+    while (jobQueue.length > 0 || preFlushQueue.length > 0 || postFlushQueue.length > 0) {
+      flushPreFlushCbs(seen)
+      flushMainQueue(seen)
+      flushPostFlushCbs(seen)
     }
   } finally {
     jobQueue.length = 0
-    pendingJobSet.clear()
     preFlushQueue.length = 0
-    pendingPreFlushSet.clear()
     postFlushQueue.length = 0
-    pendingPostFlushSet.clear()
     isFlushing = false
     currentFlushPromise = undefined
+    flushIndex = -1
   }
 }
 
-function flushPreFlushCbs(): void {
+function flushPreFlushCbs(seen: RecursionCountMap): void {
   if (preFlushQueue.length === 0) {
     return
   }
@@ -146,6 +249,13 @@ function flushPreFlushCbs(): void {
 
   while (preIndex < preFlushQueue.length) {
     const job = preFlushQueue[preIndex]
+
+    clearJobQueued(job)
+
+    if (isJobDisposed(job) || checkRecursiveUpdates(seen, job)) {
+      preIndex += 1
+      continue
+    }
 
     runSilent(job, {
       origin: errorContexts.scheduler,
@@ -158,23 +268,51 @@ function flushPreFlushCbs(): void {
   preFlushQueue.length = 0
 }
 
-function flushPostFlushCbs(): void {
-  if (postFlushQueue.length === 0) {
+function flushMainQueue(seen: RecursionCountMap): void {
+  if (jobQueue.length === 0) {
     return
   }
 
-  let postIndex = 0
+  for (flushIndex = 0; flushIndex < jobQueue.length; flushIndex += 1) {
+    const job = jobQueue[flushIndex]
 
-  while (postIndex < postFlushQueue.length) {
-    const job = postFlushQueue[postIndex]
+    clearJobQueued(job)
+
+    if (isJobDisposed(job) || checkRecursiveUpdates(seen, job)) {
+      continue
+    }
 
     runSilent(job, {
       origin: errorContexts.scheduler,
       handlerPhase: errorPhases.async,
     })
-
-    postIndex += 1
   }
 
+  jobQueue.length = 0
+  flushIndex = -1
+}
+
+function flushPostFlushCbs(seen: RecursionCountMap): void {
+  if (postFlushQueue.length === 0) {
+    return
+  }
+
+  const jobs = [...postFlushQueue].sort((a, b) => {
+    return getJobId(a) - getJobId(b)
+  })
+
   postFlushQueue.length = 0
+
+  for (const job of jobs) {
+    clearJobQueued(job)
+
+    if (isJobDisposed(job) || checkRecursiveUpdates(seen, job)) {
+      continue
+    }
+
+    runSilent(job, {
+      origin: errorContexts.scheduler,
+      handlerPhase: errorPhases.async,
+    })
+  }
 }

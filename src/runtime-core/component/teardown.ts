@@ -1,4 +1,5 @@
 import type { ComponentInstance } from './context.ts'
+import { invalidateLifecyclePostJobs, queueUnmountedHooks } from './lifecycle.ts'
 import type { SetupComponent } from '@/jsx-foundation/index.ts'
 import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
 
@@ -40,6 +41,12 @@ export function teardownComponentInstance<
   HostFragment extends HostNode,
   T extends SetupComponent,
 >(instance: ComponentInstance<HostNode, HostElement, HostFragment, T>, skipRemove?: boolean): void {
+  if (instance.isUnmounted) {
+    return
+  }
+
+  instance.isUnmounted = true
+  invalidateLifecyclePostJobs(instance)
   teardownMountedSubtree(instance, skipRemove)
 
   /* 停止 `scope` 以统一回收所有 `setup` 内创建的副作用。 */
@@ -60,4 +67,6 @@ export function teardownComponentInstance<
       })
     }
   }
+
+  queueUnmountedHooks(instance)
 }

@@ -79,7 +79,7 @@
 [ ] 接入卸载时机：在 `teardownComponentInstance` 执行 `scope.stop`/清理子树后触发 `onUnmounted`（建议 `queuePostFlushCb`）。  
 [ ] 对外导出：按重导出约束仅通过 `src/runtime-core/component/index.ts`（如需）与 `src/runtime-core/index.ts`、`src/index.ts` 聚合导出 API。  
 [ ] 补充测试：覆盖 hook 触发次数、同 tick 合并时序、父子顺序、卸载与错误分支；至少新增 `test/runtime-core/component/lifecycle-hooks.test.tsx`。  
-[ ] 运行回归：`pnpm run test test/runtime-core/component/lifecycle-hooks.test.tsx`，并视变更范围补跑相关 runtime-core 用例。  
+[ ] 运行回归：`pnpm run test test/runtime-core/component/lifecycle-hooks.test.tsx`，并视变更范围补跑相关 runtime-core 用例。
 
 ## Vue 3 参考（用于对齐语义，不作为实现依赖）
 

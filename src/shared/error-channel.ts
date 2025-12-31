@@ -33,6 +33,8 @@ export const errorContexts = {
   watchCleanup: 'watchCleanup',
   /** 组件 setup 阶段出错。 */
   componentSetup: 'componentSetup',
+  /** 生命周期钩子执行阶段出错（如 mounted/updated/unmounted）。 */
+  componentLifecycleHook: 'componentLifecycleHook',
   /** 组件卸载或 cleanup 阶段出错。 */
   componentCleanup: 'componentCleanup',
   /** 应用层插件安装（app.use/app.provide 等）阶段出错。 */

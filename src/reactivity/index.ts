@@ -23,6 +23,7 @@ export {
 } from './effect-scope.ts'
 export type { EffectScope } from './effect-scope.ts'
 export { effect, effectStack, ReactiveEffect } from './effect.ts'
+export { pauseTracking, restoreTracking, withoutTracking } from './internals/index.ts'
 export {
   isReactive,
   isReadonly,

@@ -5,7 +5,9 @@ export type { ComponentInstance } from './component/index.ts'
 export {
   getCurrentInstance,
   mountComponent,
+  onActivated,
   onBeforeUpdate,
+  onDeactivated,
   onMounted,
   onUnmounted,
   onUpdated,
@@ -32,3 +34,4 @@ export type { Renderer, RendererOptions, RootRenderFunction } from './renderer.t
 export { nextTick, queueSchedulerJob } from './scheduler.ts'
 export { asRuntimeVirtualNode } from './virtual-node.ts'
 export { watch } from './watch.ts'
+export { KeepAlive } from './components/index.ts'

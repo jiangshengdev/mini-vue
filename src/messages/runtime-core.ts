@@ -49,6 +49,16 @@ export const runtimeCoreOnBeforeUpdateOutsideSetup = 'onBeforeUpdate: 只能在�
 export const runtimeCoreOnUpdatedOutsideSetup = 'onUpdated: 只能在组件 setup 期间调用'
 
 /**
+ * `onActivated()` 在组件 setup 外调用的错误
+ */
+export const runtimeCoreOnActivatedOutsideSetup = 'onActivated: 只能在组件 setup 期间调用'
+
+/**
+ * `onDeactivated()` 在组件 setup 外调用的错误
+ */
+export const runtimeCoreOnDeactivatedOutsideSetup = 'onDeactivated: 只能在组件 setup 期间调用'
+
+/**
  * 应用重复挂载的错误
  *
  * `createApp()` 返回的应用实例只能调用一次 `mount()`；
@@ -113,3 +123,13 @@ export const runtimeCoreObjectChildWarning = '[runtime-core] 检测到无法渲�
  */
 export const runtimeCoreMissingHostNodes =
   '[runtime-core] 当前 virtualNode 未记录宿主节点，无法进行移动或锚点解析：'
+
+/**
+ * KeepAlive 收到多个子节点的警告
+ */
+export const runtimeCoreKeepAliveMultipleChildren = 'KeepAlive 只接受单个组件子节点'
+
+/**
+ * KeepAlive 收到非组件子节点的警告
+ */
+export const runtimeCoreKeepAliveInvalidChild = 'KeepAlive 子节点必须是组件，已忽略当前输出'

@@ -1,4 +1,6 @@
+import { cacheKeepAliveSubtree, createKeepAliveContext, isKeepAliveType } from '../components/keep-alive.ts'
 import type { ChildEnvironment } from '../environment.ts'
+import type { RuntimeNormalizedVirtualNode } from '../patch/runtime-virtual-node.ts'
 import type { RendererOptions } from '../index.ts'
 import type { MountedHandle } from '../mount/handle.ts'
 import { asRuntimeVirtualNode } from '../virtual-node.ts'
@@ -38,6 +40,10 @@ export function mountComponent<
   const instance = createComponentInstance(component, propsState, container, context)
   const runtime = asRuntimeVirtualNode<HostNode, HostElement, HostFragment>(virtualNode)
 
+  if (isKeepAliveType(component)) {
+    instance.keepAliveContext = createKeepAliveContext(options)
+  }
+
   /* 让 `virtualNode` 拥有实例引用，方便调试或测试检索。 */
   attachInstanceToVirtualNode(virtualNode, instance)
   runtime.component = instance as never
@@ -75,6 +81,13 @@ export function mountComponent<
 
   /* 记录组件 vnode 句柄，供父级 keyed diff 在移动/卸载时复用。 */
   instance.vnodeHandle = vnodeHandle
+
+  if (runtime.shouldKeepAlive && runtime.keepAliveInstance) {
+    instance.keepAliveContext = runtime.keepAliveInstance
+    cacheKeepAliveSubtree(
+      runtime as unknown as RuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>,
+    )
+  }
 
   return vnodeHandle
 }

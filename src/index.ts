@@ -60,9 +60,12 @@ export type {
   RouterViewProps,
 } from '@/router/index.ts'
 export {
+  KeepAlive,
   inject,
   nextTick,
+  onActivated,
   onBeforeUpdate,
+  onDeactivated,
   onMounted,
   onUnmounted,
   onUpdated,

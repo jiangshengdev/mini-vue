@@ -47,6 +47,7 @@ export function teardownComponentInstance<
   }
 
   instance.isUnmounted = true
+  instance.isDeactivated = false
   invalidateLifecyclePostJobs(instance)
   teardownMountedSubtree(instance, skipRemove)
 

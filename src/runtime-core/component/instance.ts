@@ -266,8 +266,11 @@ export function createComponentInstance<
     scope: effectScope(true),
     isMounted: false,
     isUnmounted: false,
+    isDeactivated: false,
     mountedHooks: [],
     unmountedHooks: [],
+    activatedHooks: [],
+    deactivatedHooks: [],
     beforeUpdateHooks: [],
     updatedHooks: [],
   }

@@ -48,7 +48,6 @@ export function performInitialRender<
   runSilent(
     () => {
       const subtree = instance.effect!.run()
-
       /* 子树由通用 `mountChild` 继续挂载到宿主容器。 */
       mounted = mountChildInEnvironment(options, subtree, {
         container: instance.container,

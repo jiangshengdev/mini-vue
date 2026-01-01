@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { miniVueCompilerPlugin } from '@/index.ts'
+import { readVitePluginFixture } from './_fixtures.ts'
 
 async function transformWithCompilerPlugin(parameters: {
   code: string
@@ -54,15 +55,7 @@ async function transformWithCompilerPlugin(parameters: {
 
 describe('vite-plugin transform props destructure', () => {
   it('改写顶层解构引用为 props 访问并移除声明', async () => {
-    const code = `
-import type { SetupComponent } from '@/index.ts'
-
-export const App: SetupComponent = (props) => {
-  const { foo } = props
-  const value = foo + 1
-  return () => <div>{foo}{value}</div>
-}
-`
+    const code = readVitePluginFixture('props-destructure/top-level.tsx')
 
     const { result } = await transformWithCompilerPlugin({
       code,
@@ -76,18 +69,7 @@ export const App: SetupComponent = (props) => {
   })
 
   it('在嵌套函数与返回 render 闭包内改写且处理作用域遮蔽', async () => {
-    const code = `
-import type { SetupComponent } from '@/index.ts'
-
-export const App: SetupComponent = (props) => {
-  const { foo } = props
-  const render = () => {
-    const foo = 1
-    return foo
-  }
-  return () => <div>{foo}{render()}</div>
-}
-`
+    const code = readVitePluginFixture('props-destructure/nested-shadow.tsx')
 
     const { result } = await transformWithCompilerPlugin({
       code,
@@ -99,16 +81,7 @@ export const App: SetupComponent = (props) => {
   })
 
   it('在 watch/toRef 直接使用解构变量时输出 warning', async () => {
-    const code = `
-import type { SetupComponent } from '@/index.ts'
-
-export const App: SetupComponent = (props) => {
-  const { foo } = props
-  watch(foo, () => {})
-  toRef(foo)
-  return () => <div>{foo}</div>
-}
-`
+    const code = readVitePluginFixture('props-destructure/watch-toRef-warning.tsx')
 
     const { result, warn } = await transformWithCompilerPlugin({
       code,
@@ -121,14 +94,7 @@ export const App: SetupComponent = (props) => {
   })
 
   it('支持多字段与 alias 解构', async () => {
-    const code = `
-import type { SetupComponent } from '@/index.ts'
-
-export const App: SetupComponent = (props) => {
-  const { foo, bar: baz } = props
-  return () => <div>{foo}{baz}</div>
-}
-`
+    const code = readVitePluginFixture('props-destructure/multi-alias.tsx')
 
     const { result } = await transformWithCompilerPlugin({
       code,
@@ -140,13 +106,7 @@ export const App: SetupComponent = (props) => {
   })
 
   it('支持参数解构改写', async () => {
-    const code = `
-import type { SetupComponent } from '@/index.ts'
-
-export const App: SetupComponent = ({ foo, bar }) => {
-  return () => <div>{foo}{bar}</div>
-}
-`
+    const code = readVitePluginFixture('props-destructure/param-destructure.tsx')
 
     const { result } = await transformWithCompilerPlugin({
       code,
@@ -158,17 +118,7 @@ export const App: SetupComponent = ({ foo, bar }) => {
   })
 
   it('识别 watch/toRef 的导入别名并发出 warning', async () => {
-    const code = `
-import type { SetupComponent } from '@/index.ts'
-import { watch as w, toRef as r } from '@/index.ts'
-
-export const App: SetupComponent = (props) => {
-  const { foo } = props
-  w(foo, () => {})
-  r(foo)
-  return () => <div>{foo}</div>
-}
-`
+    const code = readVitePluginFixture('props-destructure/import-alias.tsx')
 
     const { result, warn } = await transformWithCompilerPlugin({
       code,
@@ -181,17 +131,7 @@ export const App: SetupComponent = (props) => {
   })
 
   it('嵌套 block 内的解构会提示 warning 并跳过改写', async () => {
-    const code = `
-import type { SetupComponent } from '@/index.ts'
-
-export const App: SetupComponent = (props) => {
-  if (true) {
-    const { foo } = props
-    return () => <div>{foo}</div>
-  }
-  return () => <div>{props.foo}</div>
-}
-`
+    const code = readVitePluginFixture('props-destructure/nested-block.tsx')
 
     const { result, warn } = await transformWithCompilerPlugin({
       code,
@@ -203,14 +143,7 @@ export const App: SetupComponent = (props) => {
   })
 
   it('支持非 identifier 的 prop key 改写', async () => {
-    const code = `
-import type { SetupComponent } from '@/index.ts'
-
-export const App: SetupComponent = (props) => {
-  const { 'foo.bar': fooBar, ['baz']: baz } = props
-  return () => <div>{fooBar}{baz}</div>
-}
-`
+    const code = readVitePluginFixture('props-destructure/non-identifier-keys.tsx')
 
     const { result } = await transformWithCompilerPlugin({
       code,
@@ -221,15 +154,7 @@ export const App: SetupComponent = (props) => {
   })
 
   it('写入解构变量会报错', async () => {
-    const code = `
-import type { SetupComponent } from '@/index.ts'
-
-export const App: SetupComponent = (props) => {
-  const { foo } = props
-  foo = 1
-  return () => <div />
-}
-`
+    const code = readVitePluginFixture('props-destructure/write-to-destructured.tsx')
 
     await expect(
       transformWithCompilerPlugin({
@@ -240,12 +165,7 @@ export const App: SetupComponent = (props) => {
   })
 
   it('非 SetupComponent 或未命中模式不做改写', async () => {
-    const code = `
-export const App = (props: { foo: string }) => {
-  const { foo } = props
-  return () => <div>{foo}</div>
-}
-`
+    const code = readVitePluginFixture('props-destructure/non-setupcomponent.tsx')
 
     const { result } = await transformWithCompilerPlugin({
       code,

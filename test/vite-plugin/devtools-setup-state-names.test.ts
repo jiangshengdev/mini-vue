@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { miniVueDevtoolsSetupStateNamesPlugin } from '@/index.ts'
+import { readVitePluginFixture } from './_fixtures.ts'
 
 async function transformWithPlugin(parameters: { code: string; id: string }) {
   const plugin = miniVueDevtoolsSetupStateNamesPlugin({
@@ -27,15 +28,9 @@ async function transformWithPlugin(parameters: { code: string; id: string }) {
 
 describe('vite-plugin devtools setup state names', () => {
   it('在 SetupComponent 内注入 register 调用并补齐 import', async () => {
-    const code = `
-import type { SetupComponent } from '@/index.ts'
-import { ref } from '@/index.ts'
-
-export const App: SetupComponent = () => {
-  const count = ref(0)
-  return () => <div />
-}
-`
+    const code = readVitePluginFixture(
+      'devtools-setup-state-names/setupcomponent-inject.tsx',
+    )
 
     const result = await transformWithPlugin({ code, id: '/src/app.tsx' })
 
@@ -46,18 +41,9 @@ export const App: SetupComponent = () => {
   })
 
   it('同名变量会注入 $1 后缀', async () => {
-    const code = `
-import type { SetupComponent } from '@/index.ts'
-import { ref } from '@/index.ts'
-
-export const App: SetupComponent = () => {
-  const count = ref(0)
-  if (true) {
-    const count = ref(1)
-  }
-  return () => <div />
-}
-`
+    const code = readVitePluginFixture(
+      'devtools-setup-state-names/same-name-suffix.tsx',
+    )
 
     const result = await transformWithPlugin({ code, id: '/src/app.tsx' })
 
@@ -66,14 +52,7 @@ export const App: SetupComponent = () => {
   })
 
   it('普通函数体内也会注入 register 调用', async () => {
-    const code = `
-import { ref } from '@/index.ts'
-
-export const foo = () => {
-  const count = ref(0)
-  return count
-}
-`
+    const code = readVitePluginFixture('devtools-setup-state-names/normal-fn.ts')
 
     const result = await transformWithPlugin({ code, id: '/src/foo.ts' })
 
@@ -84,20 +63,7 @@ export const foo = () => {
   })
 
   it('在 composable 内注入 register 调用', async () => {
-    const code = `
-import type { SetupComponent } from '@/index.ts'
-import { state } from '@/index.ts'
-
-export const App: SetupComponent = () => {
-  const drawer = createDrawerStateManager()
-  return () => <div />
-}
-
-export function createDrawerStateManager(initialOpen = false) {
-  const isOpen = state(initialOpen)
-  return { isOpen }
-}
-`
+    const code = readVitePluginFixture('devtools-setup-state-names/composable.tsx')
 
     const result = await transformWithPlugin({ code, id: '/src/app.tsx' })
 
@@ -108,15 +74,9 @@ export function createDrawerStateManager(initialOpen = false) {
   })
 
   it('仅识别从指定 importSource 引入的 ref/reactive/computed/state', async () => {
-    const code = `
-import type { SetupComponent } from '@/index.ts'
-import { ref } from 'vue'
-
-export const App: SetupComponent = () => {
-  const count = ref(0)
-  return () => <div />
-}
-`
+    const code = readVitePluginFixture(
+      'devtools-setup-state-names/import-source-mismatch.tsx',
+    )
 
     const result = await transformWithPlugin({ code, id: '/src/app.tsx' })
 

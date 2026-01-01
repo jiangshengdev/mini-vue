@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { miniVueCompilerPlugin } from '@/index.ts'
+import { readVitePluginFixture } from './_fixtures.ts'
 
 async function transformWithVmodelPlugin(parameters: { code: string; id: string }) {
   const plugins = miniVueCompilerPlugin({
@@ -48,16 +49,7 @@ async function transformWithVmodelPlugin(parameters: { code: string; id: string 
 
 describe('vite-plugin v-model writeback', () => {
   it('组件 v-model 展开为 modelValue 与写回闭包', async () => {
-    const code = `
-import { ref } from '@/index.ts'
-
-const ModelComp = (props: { modelValue: string; 'onUpdate:modelValue': (value: string) => void }) => {
-  return <div>{props.modelValue}</div>
-}
-
-const model = ref('text')
-const node = <ModelComp v-model={model.value} />
-`
+    const code = readVitePluginFixture('v-model-writeback/basic.tsx')
 
     const { result } = await transformWithVmodelPlugin({
       code,
@@ -70,10 +62,7 @@ const node = <ModelComp v-model={model.value} />
   })
 
   it('支持静态深层路径与字符串下标', async () => {
-    const code = `
-const state = { form: { foo: { bar: 'baz' } } }
-const node = <ModelComp v-model={state.form['foo'].bar} />
-`
+    const code = readVitePluginFixture('v-model-writeback/deep-path.tsx')
 
     const { result } = await transformWithVmodelPlugin({
       code,
@@ -87,10 +76,7 @@ const node = <ModelComp v-model={state.form['foo'].bar} />
   })
 
   it('跳过内置标签的 v-model', async () => {
-    const code = `
-const value = 'text'
-const node = <input v-model={value} />
-`
+    const code = readVitePluginFixture('v-model-writeback/builtin-skip.tsx')
 
     const { result, warn } = await transformWithVmodelPlugin({
       code,
@@ -102,11 +88,7 @@ const node = <input v-model={value} />
   })
 
   it('动态 key 输出 warning 并跳过改写', async () => {
-    const code = `
-const key = 'foo'
-const state = { foo: 'bar' }
-const node = <ModelComp v-model={state[key]} />
-`
+    const code = readVitePluginFixture('v-model-writeback/dynamic-key.tsx')
 
     const { result, warn } = await transformWithVmodelPlugin({
       code,

@@ -11,12 +11,13 @@
  */
 
 /**
- * `reactive()` 不支持的类型错误
+ * `reactive()` 不支持的类型警告
  *
  * `reactive()` 仅支持普通对象（plain object）和数组，
  * 对 Map、Set、WeakMap、WeakSet 等集合类型或原始值会抛出此错误。
  */
-export const reactivityUnsupportedType = 'reactive 目前仅支持普通对象或数组'
+export const reactivityUnsupportedType =
+  '当前响应式 API 仅支持普通对象、数组或 Ref，已直接返回原值'
 
 /**
  * 只读 `computed` 被写入时的错误

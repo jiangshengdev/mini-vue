@@ -24,6 +24,17 @@ import { __DEV__, isArrayIndex, isObject } from '@/shared/index.ts'
 /** Proxy get 拦截器类型。 */
 type Getter = ProxyHandler<ReactiveRawTarget>['get']
 
+/**
+ * 处理 Ref 目标的 receiver：确保 getter/setter 的 this 指向原始 Ref 实例。
+ */
+function normalizeReceiver(target: ReactiveRawTarget, receiver: unknown): unknown {
+  if (isRef(target)) {
+    return target
+  }
+
+  return receiver
+}
+
 function getVueDevtoolsInternalFlagValue({
   isReadonly,
   shallow,
@@ -141,16 +152,19 @@ function createGetter({
       return arraySearchWrappers[key]
     }
 
+    const receiverTarget = normalizeReceiver(target, receiver)
     /* 使用 Reflect 读取原始值，保持与原生访问一致的 this 绑定与行为 */
-    const rawValue = Reflect.get(target, key, receiver) as unknown
+    const rawValue = Reflect.get(target, key, receiverTarget) as unknown
 
-    /*
-     * 读取属性同时收集依赖，连接目标字段与当前副作用。
-     *
-     * @remarks
-     * - deep readonly 不追踪依赖（避免收集无意义依赖桶）。
-     * - shallowReadonly（如 props）仍需要追踪以响应上游更新。
-     */
+    if (shallow) {
+      if (shouldTrack) {
+        track(target, key)
+      }
+
+      return rawValue
+    }
+
+    /* 仅在可变代理上收集依赖，readonly/shallowReadonly 跳过。 */
     if (shouldTrack) {
       track(target, key)
     }
@@ -170,7 +184,7 @@ function createGetter({
        * - shallowReadonly 仅做浅层只读：不对解包结果做深层 readonly 包装。
        * - deep readonly 需要对对象值返回 readonly 视图，避免通过 Ref 逃逸写入。
        */
-      if (isReadonly && !shallow && isObject(unwrapped)) {
+      if (isReadonly && isObject(unwrapped)) {
         return readonly(unwrapped)
       }
 
@@ -178,11 +192,6 @@ function createGetter({
     }
 
     if (isObject(rawValue)) {
-      /* `shallow` 直接返回原值，深层模式递归创建对应代理 */
-      if (shallow) {
-        return rawValue
-      }
-
       return isReadonly ? readonly(rawValue) : reactive(rawValue)
     }
 
@@ -213,11 +222,12 @@ const mutableSet: ProxyHandler<ReactiveRawTarget>['set'] = (target, key, value, 
    * - 若通过 receiver 触发了访问器 getter，getter 内部的 reactive 读取可能会把依赖收集到当前 effect。
    *   因此这里需要显式禁用依赖收集，避免出现「写入时意外建立依赖」。
    */
+  const receiverTarget = normalizeReceiver(target, receiver)
   const previousValue = withoutTracking(() => {
-    return Reflect.get(target, key, receiver) as unknown
+    return Reflect.get(target, key, receiverTarget) as unknown
   })
   /* 调用 Reflect 完成赋值，确保符合原生语义 */
-  const wasApplied = Reflect.set(target, key, value, receiver)
+  const wasApplied = Reflect.set(target, key, value, receiverTarget)
 
   /* 赋值可能因为只读属性或代理限制而失败，此时无需触发依赖。 */
   if (!wasApplied) {
@@ -350,13 +360,14 @@ export const shallowReactiveHandlers = {
  *
  * @remarks
  * - 仅顶层属性为只读，嵌套对象保持原样可写。
+ * - 不收集 in/Object.keys 依赖，保持与 readonly 一致的“只读视图”语义。
  */
 export const shallowReadonlyHandlers = {
-  get: createGetter({ isReadonly: true, shallow: true, shouldTrack: true }),
+  get: createGetter({ isReadonly: true, shallow: true, shouldTrack: false }),
   set: readonlySet,
   deleteProperty: readonlyDeleteProperty,
-  has: createHas(true),
-  ownKeys: createOwnKeys(true),
+  has: createHas(false),
+  ownKeys: createOwnKeys(false),
 } satisfies ProxyHandler<ReactiveRawTarget>
 
 /**

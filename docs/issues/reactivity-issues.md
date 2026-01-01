@@ -31,8 +31,7 @@
   - `in` / `Object.keys` 等结构读取与数组查询方法（`includes/indexOf/lastIndexOf`）同样会建立依赖。
 - 影响：会出现「effect 里读 readonly，但 reactive 写入也会触发重跑」的意外联动；同时还会产生无意义的依赖桶占用内存。
 - 修复：
-  - deep `readonly` 访问不再收集依赖。
-  - 为兼容 runtime-core `props` 的更新语义，`shallowReadonly` 仍保持依赖追踪能力。
+  - deep `readonly` 与 `shallowReadonly` 访问不再收集依赖。
   - 新增内部标记 `shallowFlag` 用于区分 shallow/deep 代理；数组查询包装基于该标记决定是否 `track`。
 - 位置补充：
   - `src/reactivity/array/search.ts`
@@ -59,9 +58,15 @@
 - 现状（修复前）：内部通过 `isSupportedTarget` 限制，仅允许普通对象或数组；传入 Ref 会抛出不支持的类型错误。
 - 影响：违背官方 API「接受对象或 Ref」的约定，无法对 Ref 创建只读视图。
 - 修复：
-  - `reactive(ref)` / `shallowReactive(ref)` 现在不会报错，直接返回 Ref 本体。
-  - `readonly(ref)` / `shallowReadonly(ref)` 现在会返回只读 Ref 包装，读取正常透传，写入在开发态警告并忽略。
-  - `isReadonly` 对 Ref 增加分支识别，与 Vue 3 对齐。
+  - `reactive(ref)` / `shallowReactive(ref)` 现在会返回基于 Ref 的 Proxy，保持 `isRef` 为 `true`。
+  - `readonly(ref)` / `shallowReadonly(ref)` 现在走 Proxy 统一模型，读取正常透传，写入在开发态警告并忽略。
+  - `isReadonly` 与 `isReactive` 均可在只读包装下识别 Ref/代理，贴近 Vue 3。
+
+## 7. 不支持类型策略（状态：已解决；备注：短期仅支持 plain object/Array/Ref）
+
+- 位置：`src/reactivity/reactive.ts`
+- 行为：原始值、不可扩展对象以及 Map/Set/Date 等暂不支持观测的类型会在开发态警告并原样返回（不再抛错）。
+- 说明：保持 API 可用性的同时标注限制，便于后续按需扩展集合类型等能力。
 - 测试：
   - `test/reactivity/reactive.test.ts`
   - `test/reactivity/shallow.test.ts`

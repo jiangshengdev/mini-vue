@@ -1,4 +1,5 @@
 import type { rawKey, reactiveFlag, readonlyFlag, shallowFlag } from './constants.ts'
+import type { Ref } from '../ref/types.ts'
 import type { PlainObject } from '@/shared/index.ts'
 
 /**
@@ -123,8 +124,8 @@ export interface ReactiveProxyInternals {
   readonly [rawKey]?: ReactiveRawTarget
 }
 
-/** 支持响应式代理的原生目标类型，目前覆盖普通对象与数组。 */
-export type ReactiveRawTarget = PlainObject | unknown[]
+/** 支持响应式代理的原生目标类型，目前覆盖普通对象、数组与 Ref。 */
+export type ReactiveRawTarget = PlainObject | unknown[] | Ref
 
 /** 将原生目标类型与内部标记接口合并，形成完整的响应式目标类型。 */
 type ReactiveTargetBase<T extends ReactiveRawTarget> = T & ReactiveProxyInternals

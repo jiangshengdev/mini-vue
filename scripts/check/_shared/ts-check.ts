@@ -116,9 +116,18 @@ export function runTsCheck<Finding>(parameters: {
   filter?: (filePath: string) => boolean
   extensions?: string[]
   includeGlobs?: string[]
+  exitOnFinding?: boolean
 }): void {
-  const { dirs, checkFile, formatFinding, successMessage, filter, extensions, includeGlobs } =
-    parameters
+  const {
+    dirs,
+    checkFile,
+    formatFinding,
+    successMessage,
+    filter,
+    extensions,
+    includeGlobs,
+    exitOnFinding = true,
+  } = parameters
   let hasMissingDir = false
   const files: string[] = []
 
@@ -156,7 +165,9 @@ export function runTsCheck<Finding>(parameters: {
       console.error(formatFinding(finding))
     }
 
-    process.exitCode = 1
+    if (exitOnFinding) {
+      process.exitCode = 1
+    }
 
     return
   }

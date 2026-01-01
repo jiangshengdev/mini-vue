@@ -204,10 +204,10 @@ function formatFinding(finding: Finding): string {
   const positionText = `${finding.filePath}:${finding.line}:${finding.column}`
 
   if (finding.kind === 'param') {
-    return `${positionText} [props-destructure] 禁止在 SetupComponent 参数直接解构 props`
+    return `${positionText} [props-destructure] 禁止在 SetupComponent 参数直接解构 props（启用 miniVueCompilerPlugin 后会自动改写，此提示仅作信息告知）`
   }
 
-  return `${positionText} [props-destructure] 禁止在 SetupComponent 顶层解构 props（会丢失响应式）`
+  return `${positionText} [props-destructure] 禁止在 SetupComponent 顶层解构 props（启用 miniVueCompilerPlugin 后会自动改写，此提示仅作信息告知）`
 }
 
 runTsCheck<Finding>({
@@ -215,4 +215,5 @@ runTsCheck<Finding>({
   checkFile,
   formatFinding,
   successMessage: 'props 顶层解构检查通过。',
+  exitOnFinding: false,
 })

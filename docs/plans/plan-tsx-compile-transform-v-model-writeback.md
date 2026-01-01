@@ -15,13 +15,14 @@
 
 ## Action items
 
-[ ] 盘点现状与对齐点：记录 mini-vue 当前写回限制（`src/jsx-runtime/transform/v-model/model.ts` 与 `src/runtime-dom/props/v-model/model.ts`），并在文档中对齐 Vue3 官方“编译期生成 assigner + 运行时触发”原则（Vue3 `compiler-core`/`compiler-dom`/`runtime-dom` 的 `vModel` 链路）。  
-[ ] 固化产物约定：将 TSX 的 `v-model` 统一展开为 `modelValue` + `...{ 'onUpdate:modelValue': (...) => ... }`（通过对象 spread 注入 `'onUpdate:modelValue'`，避免 TSX attribute 语法限制）。  
-[ ] P0：支持静态深层路径写回（低风险形态）。
+[x] 盘点现状与对齐点：记录 mini-vue 当前写回限制（`src/jsx-runtime/transform/v-model/model.ts` 与 `src/runtime-dom/props/v-model/model.ts`），并在文档中对齐 Vue3 官方“编译期生成 assigner + 运行时触发”原则（Vue3 `compiler-core`/`compiler-dom`/`runtime-dom` 的 `vModel` 链路）。  
+[x] 固化产物约定：将 TSX 的 `v-model` 统一展开为 `modelValue` + `...{ 'onUpdate:modelValue': (...) => ... }`（通过对象 spread 注入 `'onUpdate:modelValue'`，避免 TSX attribute 语法限制）。  
+[x] P0：支持静态深层路径写回（低风险形态）。
 
 - 支持：`ref.value`、`obj.foo`、`obj.foo.bar`、`obj['foo']`、`obj['foo'].bar`。
 - 不支持并诊断：`obj[key]`/`arr[index]` 等动态 key、可选链、非左值表达式。
-- 诊断建议：给出显式替代写法（`computed({ get, set })` 或手写 `modelValue` + `'onUpdate:modelValue'`）。  
+- 诊断建议：给出显式替代写法（`computed({ get, set })` 或手写 `modelValue` + `'onUpdate:modelValue'`）。
+- 实现：新增 `mini-vue:transform-v-model-writeback`（默认随 `miniVueCompilerPlugin` 启用），在组件标签命中静态路径时生成 `modelValue` 与 `'onUpdate:modelValue'` 写回闭包；不命中路径会输出警告并保留运行时只写 Ref 的兜底行为。  
   [ ] P1：支持动态 key 的 `ElementAccessExpression`，并先定清楚“缓存/求值”语义。
   - 支持：`obj[key]`、`arr[index]`、`obj[nested.key]` 等动态访问。
   - 约定（对齐 Vue3）：默认不缓存 key，写回闭包在事件触发时实时读取 key；是否允许 base/key 有副作用（默认先拒绝）。
@@ -29,8 +30,14 @@
     [ ] P2：支持复杂 base/key（含调用/副作用），引入“单次求值”策略稳定语义。
   - 约束：对 base/key 生成临时变量，确保 render 阶段只求值一次；写回闭包引用临时变量。
   - 明确：事件触发时写回使用的是“哪一轮 render 生成的 handler”（依赖 props patch 更新语义）。  
-    [ ] 补齐落盘与互链：在 `docs/issues/jsx-runtime-issues.md` 更新“非 Ref 目标不写回”的约束与推荐方案，并在 `docs/plans/plan-v-model-component.md` 互链该计划。  
-    [ ] 明确验证清单（用于后续实现）：列出 P0/P1/P2 的最小回归场景（静态链/动态 key/副作用求值/不支持形态诊断），以及预期新增的单测位置（`test/vite-plugin/**`、`test/runtime-dom/**`、`test/jsx-runtime/**`）。
+    [x] 补齐落盘与互链：在 `docs/issues/jsx-runtime-issues.md` 更新“非 Ref 目标不写回”的约束与推荐方案，并在 `docs/plans/plan-v-model-component.md` 互链该计划。  
+    [x] 明确验证清单（用于后续实现）：列出 P0/P1/P2 的最小回归场景（静态链/动态 key/副作用求值/不支持形态诊断），以及预期新增的单测位置（`test/vite-plugin/**`、`test/runtime-dom/**`、`test/jsx-runtime/**`）。
+
+验证清单（P0 已覆盖）：
+
+- 组件 TSX 静态路径展开与写回闭包生成：`test/vite-plugin/v-model-writeback.test.ts`
+- DOM/运行时兜底行为：`test/runtime-dom/props/v-model.test.tsx`
+- 不支持的动态 key/可选链告警：`test/vite-plugin/v-model-writeback.test.ts`
 
 ## Open questions
 

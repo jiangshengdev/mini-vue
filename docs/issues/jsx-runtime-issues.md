@@ -16,11 +16,9 @@
   - 在 `onRender`/绑定阶段遍历 `options`，按模型数组严格等于匹配设置 `option.selected`，或手动同步 `selectedOptions`。
   - 调整事件处理保持严格等于，增补对应用例覆盖初始化与变更。
 
-## 3. 非 ref 绑定目标无法写回模型（状态：待设计）
+## 3. 非 ref 绑定目标无法写回模型（状态：部分解决）
 
 - 位置：`src/jsx-runtime/transform/v-model/model.ts`
-- 现状：`setModelValue` 仅在目标为 `ref` 时写回；非 `ref` 情况只发出 `console.warn` 且不更新值，导致绑定普通变量时 UI 与数据永远不同步。
-- 影响：`v-model` 仅对 `ref` 生效，开发者可能在运行时才发现数据未更新，体验与 Vue 预期不符。
-- 可能方案：
-  - 明确限定支持（仅 ref）并在 Dev 下抛更明显的异常，或在安全前提下允许对可写对象路径（如 `{ value }`）进行赋值。
-  - 在文档/类型上注明限制，同时补充用例覆盖 ref/非 ref 场景，避免静默失败。
+- 现状：运行时兜底的 `setModelValue` 仍只支持 `ref` 写回，其他目标只告警。编译期已新增写回闭包生成（`src/vite-plugin/transform-v-model-writeback.ts`），支持静态可写路径（`ref.value`、`obj.foo`、`obj['foo']` 等）并展开为 `modelValue` + `'onUpdate:modelValue'`，对齐 Vue3 “编译期生成 assigner + 运行时触发”链路。
+- 影响：未经过编译期改写的场景仍只对 `ref` 生效；动态 key/可选链/含副作用的左值尚未支持，需要后续 P1/P2 设计。
+- 建议：在 TSX 中启用编译期改写；若命中不支持的动态左值，改用 `computed({ get, set })` 或手写 `modelValue` + `'onUpdate:modelValue'`。

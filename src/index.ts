@@ -91,4 +91,7 @@ export {
   type MiniVueTransformPropsDestructureDiagnosticsOptions,
   miniVueTransformPropsDestructurePlugin,
   type MiniVueTransformPropsDestructurePluginOptions,
+  miniVueTransformVmodelWritebackPlugin,
+  miniVueTransformVmodelWritebackPluginName,
+  type MiniVueTransformVmodelWritebackPluginOptions,
 } from '@/vite-plugin/index.ts'

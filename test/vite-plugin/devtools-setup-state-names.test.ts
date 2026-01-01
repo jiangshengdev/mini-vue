@@ -40,7 +40,7 @@ export const App: SetupComponent = () => {
     const result = await transformWithPlugin({ code, id: '/src/app.tsx' })
 
     expect(result?.code).toMatch(
-      /import\s*\{[^}]*\bref\b[^}]*\bregisterDevtoolsSetupStateName\b[^}]*\}\s*from\s*'@\/index\.ts'/,
+      /import\s*{[^}]*\bref\b[^}]*\bregisterDevtoolsSetupStateName\b[^}]*}\s*from\s*'@\/index\.ts'/,
     )
     expect(result?.code).toContain("registerDevtoolsSetupStateName(count, 'count')")
   })
@@ -78,7 +78,7 @@ export const foo = () => {
     const result = await transformWithPlugin({ code, id: '/src/foo.ts' })
 
     expect(result?.code).toMatch(
-      /import\s*\{[^}]*\bref\b[^}]*\bregisterDevtoolsSetupStateName\b[^}]*\}\s*from\s*'@\/index\.ts'/,
+      /import\s*{[^}]*\bref\b[^}]*\bregisterDevtoolsSetupStateName\b[^}]*}\s*from\s*'@\/index\.ts'/,
     )
     expect(result?.code).toContain("registerDevtoolsSetupStateName(count, 'count')")
   })
@@ -102,7 +102,7 @@ export function createDrawerStateManager(initialOpen = false) {
     const result = await transformWithPlugin({ code, id: '/src/app.tsx' })
 
     expect(result?.code).toMatch(
-      /import\s*\{[^}]*\bstate\b[^}]*\bregisterDevtoolsSetupStateName\b[^}]*\}\s*from\s*'@\/index\.ts'/,
+      /import\s*{[^}]*\bstate\b[^}]*\bregisterDevtoolsSetupStateName\b[^}]*}\s*from\s*'@\/index\.ts'/,
     )
     expect(result?.code).toContain("registerDevtoolsSetupStateName(isOpen, 'isOpen')")
   })

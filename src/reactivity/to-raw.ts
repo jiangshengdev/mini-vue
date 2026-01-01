@@ -17,7 +17,7 @@ export function isSupportedTarget(target: unknown): target is ReactiveRawTarget 
     return false
   }
 
-  if (!Object.isExtensible(target as object)) {
+  if (!Object.isExtensible(target)) {
     return false
   }
 
@@ -25,7 +25,7 @@ export function isSupportedTarget(target: unknown): target is ReactiveRawTarget 
     return true
   }
 
-  return Object.hasOwn(target as object, refFlag)
+  return Object.hasOwn(target, refFlag)
 }
 
 /**

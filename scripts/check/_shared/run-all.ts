@@ -43,7 +43,9 @@ function listScripts(dirPath: string): string[] {
 }
 
 function runScript(filePath: string): number {
-  const result = spawnSync(process.execPath, [filePath], { stdio: 'inherit' })
+  const result = spawnSync(process.execPath, ['--import', 'tsx', filePath], {
+    stdio: 'inherit',
+  })
 
   if (typeof result.status === 'number') {
     return result.status

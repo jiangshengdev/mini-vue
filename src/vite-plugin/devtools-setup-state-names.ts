@@ -1,3 +1,4 @@
+import type * as Ts from 'typescript'
 import type { Plugin } from 'vite'
 
 export interface MiniVueDevtoolsSetupStateNamesPluginOptions {
@@ -26,7 +27,7 @@ const defaultImportSource = '@jiangshengdev/mini-vue'
 const registerName = 'registerDevtoolsSetupStateName'
 const supportedFactories = new Set(['computed', 'reactive', 'ref', 'state'])
 
-type TypeScriptApi = typeof import('typescript')
+type TypeScriptApi = typeof Ts
 
 let cachedTs: TypeScriptApi | undefined
 
@@ -38,9 +39,7 @@ async function resolveTypeScript(ctx: {
   }
 
   try {
-    const module = await import('typescript')
-
-    cachedTs = module
+    cachedTs = await import('typescript')
 
     return cachedTs
   } catch {
@@ -53,13 +52,17 @@ async function resolveTypeScript(ctx: {
 function stripQuery(id: string): string {
   const queryIndex = id.indexOf('?')
 
-  return queryIndex >= 0 ? id.slice(0, queryIndex) : id
+  if (queryIndex === -1) {
+    return id
+  }
+
+  return id.slice(0, queryIndex)
 }
 
 function resolveIndent(text: string, pos: number): string {
   const lineStart = text.lastIndexOf('\n', pos - 1) + 1
   const leading = text.slice(lineStart, pos)
-  const match = leading.match(/^[\t ]+/)
+  const match = /^[\t ]+/.exec(leading)
 
   return match?.[0] ?? ''
 }
@@ -80,10 +83,7 @@ function resolveUniqueName(used: Map<string, number>, base: string): string {
   return `${base}$${next}`
 }
 
-function unwrapExpression(
-  ts: TypeScriptApi,
-  expression: import('typescript').Expression,
-): import('typescript').Expression {
+function unwrapExpression(ts: TypeScriptApi, expression: Ts.Expression): Ts.Expression {
   let current = expression
 
   while (true) {
@@ -103,21 +103,25 @@ function unwrapExpression(
   return current
 }
 
-function resolveImportText(node: import('typescript').Expression): string | undefined {
+function resolveImportText(node: Ts.Expression): string | undefined {
   return typeof node === 'object' && 'text' in node
     ? String((node as { text?: unknown }).text)
     : undefined
 }
 
+function isTypeOnlyImportClause(ts: TypeScriptApi, importClause: Ts.ImportClause): boolean {
+  return importClause.phaseModifier === ts.SyntaxKind.TypeKeyword
+}
+
 function resolveRegisterLocalName(parameters: {
   ts: TypeScriptApi
-  sourceFile: import('typescript').SourceFile
+  sourceFile: Ts.SourceFile
   importSource: string
-}): { localName?: string; augmentImport?: import('typescript').ImportDeclaration } {
+}): { localName?: string; augmentImport?: Ts.ImportDeclaration } {
   const { ts, sourceFile, importSource } = parameters
 
   let localName: string | undefined
-  let augmentImport: import('typescript').ImportDeclaration | undefined
+  let augmentImport: Ts.ImportDeclaration | undefined
 
   for (const statement of sourceFile.statements) {
     if (!ts.isImportDeclaration(statement)) {
@@ -132,7 +136,7 @@ function resolveRegisterLocalName(parameters: {
 
     const { importClause } = statement
 
-    if (!importClause || importClause.isTypeOnly) {
+    if (!importClause || isTypeOnlyImportClause(ts, importClause)) {
       continue
     }
 
@@ -164,7 +168,7 @@ function resolveRegisterLocalName(parameters: {
 
 function resolveMiniVueFactoryLocals(parameters: {
   ts: TypeScriptApi
-  sourceFile: import('typescript').SourceFile
+  sourceFile: Ts.SourceFile
   importSource: string
 }): Set<string> {
   const { ts, sourceFile, importSource } = parameters
@@ -184,7 +188,7 @@ function resolveMiniVueFactoryLocals(parameters: {
 
     const { importClause } = statement
 
-    if (!importClause || importClause.isTypeOnly) {
+    if (!importClause || isTypeOnlyImportClause(ts, importClause)) {
       continue
     }
 
@@ -223,30 +227,31 @@ function applyInsertions(code: string, insertions: InsertOperation[]): string {
 }
 
 function insertNamedImport(parameters: {
+  ts: TypeScriptApi
   code: string
-  importDecl: import('typescript').ImportDeclaration
+  importDecl: Ts.ImportDeclaration
   importName: string
 }): InsertOperation | undefined {
-  const { code, importDecl, importName } = parameters
-  const importClause = importDecl.importClause
+  const { ts, code, importDecl, importName } = parameters
+  const { importClause } = importDecl
 
-  if (!importClause || importClause.isTypeOnly) {
+  if (!importClause || isTypeOnlyImportClause(ts, importClause)) {
     return undefined
   }
 
-  const namedBindings = importClause.namedBindings
+  const { namedBindings } = importClause
 
   if (!namedBindings || !('elements' in namedBindings)) {
     return undefined
   }
 
-  const end = namedBindings.end
+  const { end, pos } = namedBindings
 
-  for (let pos = end - 1; pos >= namedBindings.pos; pos -= 1) {
-    if (code[pos] === '}') {
+  for (let scanPos = end - 1; scanPos >= pos; scanPos -= 1) {
+    if (code[scanPos] === '}') {
       let lastMeaningfulChar: string | undefined
 
-      for (let scan = pos - 1; scan >= namedBindings.pos; scan -= 1) {
+      for (let scan = scanPos - 1; scan >= pos; scan -= 1) {
         const char = code[scan]
 
         if (char === ' ' || char === '\t' || char === '\n' || char === '\r') {
@@ -265,7 +270,7 @@ function insertNamedImport(parameters: {
         prefix = ' '
       }
 
-      return { pos, text: `${prefix}${importName}` }
+      return { pos: scanPos, text: `${prefix}${importName}` }
     }
   }
 
@@ -274,7 +279,7 @@ function insertNamedImport(parameters: {
 
 function insertNewImport(parameters: {
   ts: TypeScriptApi
-  sourceFile: import('typescript').SourceFile
+  sourceFile: Ts.SourceFile
   importSource: string
   localName: string
 }): InsertOperation {
@@ -298,7 +303,7 @@ function insertNewImport(parameters: {
 
 function collectRegisterInsertions(parameters: {
   ts: TypeScriptApi
-  sourceFile: import('typescript').SourceFile
+  sourceFile: Ts.SourceFile
   code: string
   registerLocalName: string
   factoryLocals: Set<string>
@@ -308,7 +313,7 @@ function collectRegisterInsertions(parameters: {
   const insertions: InsertOperation[] = []
 
   const visit = (
-    node: import('typescript').Node,
+    node: Ts.Node,
     context: { insideFunction: boolean; usedNames?: Map<string, number> },
   ): void => {
     const isFunctionLike = ts.isFunctionLike(node)
@@ -439,7 +444,7 @@ export function miniVueDevtoolsSetupStateNamesPlugin(
 
       if (!existingRegisterLocalName) {
         const importInsertion = augmentImport
-          ? insertNamedImport({ code, importDecl: augmentImport, importName: registerName })
+          ? insertNamedImport({ ts, code, importDecl: augmentImport, importName: registerName })
           : undefined
 
         if (importInsertion) {

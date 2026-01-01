@@ -11,10 +11,6 @@
  * - 错误处理：`setErrorHandler`
  */
 export { MiniVueDevtoolsPlugin } from '@/devtools/index.ts'
-export {
-  miniVueDevtoolsSetupStateNamesPlugin,
-  type MiniVueDevtoolsSetupStateNamesPluginOptions,
-} from '@/vite-plugin/index.ts'
 export type { ElementType, SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
 export { Fragment } from '@/jsx-foundation/index.ts'
 export { h, jsx, jsxDEV, jsxs } from '@/jsx-runtime/index.ts'
@@ -86,3 +82,7 @@ export type {
   PropsShape,
 } from '@/shared/index.ts'
 export { registerDevtoolsSetupStateName, setErrorHandler } from '@/shared/index.ts'
+export {
+  miniVueDevtoolsSetupStateNamesPlugin,
+  type MiniVueDevtoolsSetupStateNamesPluginOptions,
+} from '@/vite-plugin/index.ts'

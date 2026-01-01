@@ -1,7 +1,16 @@
 import type { MockInstance } from 'vitest'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { spyOnConsole } from '$/test-utils/mocks.ts'
-import { isReactive, isReadonly, isRef, reactive, ref, shallowReactive, shallowReadonly } from '@/index.ts'
+import {
+  effect,
+  isReactive,
+  isReadonly,
+  isRef,
+  reactive,
+  ref,
+  shallowReactive,
+  shallowReadonly,
+} from '@/index.ts'
 import type { PlainObject } from '@/shared/index.ts'
 
 describe('shallowReactive', () => {
@@ -91,7 +100,7 @@ describe('shallowReadonly', () => {
     readonlyState.foo = 2
 
     expect(state.foo).toBe(1)
-    expect(isReactive(readonlyState)).toBe(false)
+    expect(isReactive(readonlyState)).toBe(true)
   })
 
   it('对只读浅代理再次调用保持幂等', () => {

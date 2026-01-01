@@ -87,7 +87,7 @@ export const KeepAlive: SetupComponent<KeepAliveProps> = (props) => {
       return child
     }
 
-    const cachedEntry = cacheKey ? keepAliveContext.cache.get(cacheKey) : undefined
+    const cachedEntry = keepAliveContext.cache.get(cacheKey)
     const keepAliveChild = asRuntimeVirtualNode<unknown, WeakKey, unknown>(child as VirtualNode)
 
     keepAliveChild.shouldKeepAlive = true
@@ -323,7 +323,7 @@ function resolveChildren(children: RenderOutput | undefined): {
   }
 }
 
-function isComponentChild(child: VirtualNode): boolean {
+function isComponentChild(child: VirtualNode): child is VirtualNode<SetupComponent> {
   return typeof child.type === 'function' && child.type !== Fragment
 }
 
@@ -371,16 +371,12 @@ function matchesPattern(name: string | undefined, pattern: KeepAlivePattern): bo
   return pattern.test(name)
 }
 
-function resolveCacheKey(child: VirtualNode): KeepAliveCacheKey | undefined {
+function resolveCacheKey(child: VirtualNode<SetupComponent>): KeepAliveCacheKey {
   if (child.key !== undefined) {
     return child.key
   }
 
-  if (typeof child.type === 'function') {
-    return child.type
-  }
-
-  return undefined
+  return child.type
 }
 
 function refreshKeyOrder(keys: Set<KeepAliveCacheKey>, key: KeepAliveCacheKey): void {

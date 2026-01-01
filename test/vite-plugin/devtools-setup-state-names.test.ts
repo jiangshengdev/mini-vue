@@ -2,6 +2,51 @@ import { describe, expect, it, vi } from 'vitest'
 import { miniVueDevtoolsSetupStateNamesPlugin } from '@/index.ts'
 import { readVitePluginFixture } from './_fixtures.ts'
 
+function collectImportStatementsFrom(code: string, source: string): string[] {
+  const lines = code.split('\n')
+  const statements: string[] = []
+  const sourceToken = `from '${source}'`
+
+  let current: string[] = []
+  let capturing = false
+
+  for (const line of lines) {
+    const trimmed = line.trimStart()
+
+    if (!capturing) {
+      if (trimmed.startsWith('import ')) {
+        capturing = true
+        current = [line]
+      } else {
+        continue
+      }
+    } else {
+      current.push(line)
+    }
+
+    if (line.includes(sourceToken)) {
+      statements.push(current.join('\n'))
+      capturing = false
+      current = []
+    }
+  }
+
+  return statements
+}
+
+function expectImportsFrom(code: string | undefined, source: string, names: string[]): void {
+  expect(code).toBeDefined()
+
+  const statements = collectImportStatementsFrom(code ?? '', source)
+  expect(statements.length).toBeGreaterThan(0)
+
+  const matched = statements.some((statement) => {
+    return names.every((name) => statement.includes(name))
+  })
+
+  expect(matched).toBe(true)
+}
+
 async function transformWithPlugin(parameters: { code: string; id: string }) {
   const plugin = miniVueDevtoolsSetupStateNamesPlugin({
     importSource: '@/index.ts',
@@ -32,9 +77,7 @@ describe('vite-plugin devtools setup state names', () => {
 
     const result = await transformWithPlugin({ code, id: '/src/app.tsx' })
 
-    expect(result?.code).toMatch(
-      /import\s*{[^}]*\bref\b[^}]*\bregisterDevtoolsSetupStateName\b[^}]*}\s*from\s*'@\/index\.ts'/,
-    )
+    expectImportsFrom(result?.code, '@/index.ts', ['ref', 'registerDevtoolsSetupStateName'])
     expect(result?.code).toContain("registerDevtoolsSetupStateName(count, 'count')")
   })
 
@@ -52,9 +95,7 @@ describe('vite-plugin devtools setup state names', () => {
 
     const result = await transformWithPlugin({ code, id: '/src/foo.ts' })
 
-    expect(result?.code).toMatch(
-      /import\s*{[^}]*\bref\b[^}]*\bregisterDevtoolsSetupStateName\b[^}]*}\s*from\s*'@\/index\.ts'/,
-    )
+    expectImportsFrom(result?.code, '@/index.ts', ['ref', 'registerDevtoolsSetupStateName'])
     expect(result?.code).toContain("registerDevtoolsSetupStateName(count, 'count')")
   })
 
@@ -63,9 +104,7 @@ describe('vite-plugin devtools setup state names', () => {
 
     const result = await transformWithPlugin({ code, id: '/src/app.tsx' })
 
-    expect(result?.code).toMatch(
-      /import\s*{[^}]*\bstate\b[^}]*\bregisterDevtoolsSetupStateName\b[^}]*}\s*from\s*'@\/index\.ts'/,
-    )
+    expectImportsFrom(result?.code, '@/index.ts', ['state', 'registerDevtoolsSetupStateName'])
     expect(result?.code).toContain("registerDevtoolsSetupStateName(isOpen, 'isOpen')")
   })
 

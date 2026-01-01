@@ -1,7 +1,7 @@
 import type { SetupComponent } from '@/index.ts'
 
 export const App: SetupComponent = (props) => {
-  if (true) {
+  if (props.foo) {
     const { foo } = props
     return () => <div>{foo}</div>
   }

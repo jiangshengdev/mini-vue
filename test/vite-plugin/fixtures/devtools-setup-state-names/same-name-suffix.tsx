@@ -3,8 +3,9 @@ import { ref } from '@/index.ts'
 
 export const App: SetupComponent = () => {
   const count = ref(0)
-  if (true) {
+  if (count.value === 0) {
     const count = ref(1)
+    void count
   }
-  return () => <div />
+  return () => <div>{count.value}</div>
 }

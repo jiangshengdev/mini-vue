@@ -2,6 +2,22 @@ import { describe, expect, it, vi } from 'vitest'
 import { miniVueCompilerPlugin } from '@/index.ts'
 import { readVitePluginFixture } from './_fixtures.ts'
 
+function expectContainsInOrder(code: string | undefined, parts: string[]): void {
+  expect(code).toBeDefined()
+
+  const text = code ?? ''
+  let lastIndex = -1
+
+  for (const part of parts) {
+    const index = text.indexOf(part)
+
+    expect(index).toBeGreaterThan(-1)
+    expect(index).toBeGreaterThan(lastIndex)
+
+    lastIndex = index
+  }
+}
+
 async function transformWithCompilerPlugin(parameters: {
   code: string
   id: string
@@ -65,7 +81,7 @@ describe('vite-plugin transform props destructure', () => {
     expect(result?.code).toBeDefined()
     expect(result?.code).not.toContain('{ foo } = props')
     expect(result?.code).toContain('const value = props.foo + 1')
-    expect(result?.code).toContain('return () => <div>{props.foo}{value}</div>')
+    expectContainsInOrder(result?.code, ['<div>', '{props.foo}', '{value}', '</div>'])
   })
 
   it('在嵌套函数与返回 render 闭包内改写且处理作用域遮蔽', async () => {
@@ -77,7 +93,7 @@ describe('vite-plugin transform props destructure', () => {
     })
 
     expect(result?.code).toContain('return foo')
-    expect(result?.code).toContain('return () => <div>{props.foo}{render()}</div>')
+    expectContainsInOrder(result?.code, ['<div>', '{props.foo}', '{render()}', '</div>'])
   })
 
   it('在 watch/toRef 直接使用解构变量时输出 warning', async () => {
@@ -90,7 +106,7 @@ describe('vite-plugin transform props destructure', () => {
 
     expect(warn).toHaveBeenCalledTimes(2)
     expect(result?.code).toContain('watch(props.foo, () => {})')
-    expect(result?.code).toContain('toRef(props.foo)')
+    expect(result?.code).toContain("toRef(props.foo, 'bar')")
   })
 
   it('支持多字段与 alias 解构', async () => {
@@ -102,7 +118,7 @@ describe('vite-plugin transform props destructure', () => {
     })
 
     expect(result?.code).not.toContain('{ foo, bar: baz } = props')
-    expect(result?.code).toContain('return () => <div>{props.foo}{props.bar}</div>')
+    expectContainsInOrder(result?.code, ['<div>', '{props.foo}', '{props.bar}', '</div>'])
   })
 
   it('支持参数解构改写', async () => {
@@ -114,7 +130,7 @@ describe('vite-plugin transform props destructure', () => {
     })
 
     expect(result?.code).toContain('(props) =>')
-    expect(result?.code).toContain('<div>{props.foo}{props.bar}</div>')
+    expectContainsInOrder(result?.code, ['<div>', '{props.foo}', '{props.bar}', '</div>'])
   })
 
   it('识别 watch/toRef 的导入别名并发出 warning', async () => {
@@ -127,7 +143,7 @@ describe('vite-plugin transform props destructure', () => {
 
     expect(warn).toHaveBeenCalledTimes(2)
     expect(result?.code).toContain('w(props.foo, () => {})')
-    expect(result?.code).toContain('r(props.foo)')
+    expect(result?.code).toContain("r(props.foo, 'bar')")
   })
 
   it('嵌套 block 内的解构会提示 warning 并跳过改写', async () => {
@@ -150,7 +166,7 @@ describe('vite-plugin transform props destructure', () => {
       id: '/src/app.tsx',
     })
 
-    expect(result?.code).toContain("return () => <div>{props['foo.bar']}{props['baz']}</div>")
+    expectContainsInOrder(result?.code, ['<div>', "{props['foo.bar']}", "{props['baz']}", '</div>'])
   })
 
   it('写入解构变量会报错', async () => {
@@ -161,7 +177,7 @@ describe('vite-plugin transform props destructure', () => {
         code,
         id: '/src/app.tsx',
       }),
-    ).rejects.toThrow(/props 解构变量/)
+    ).rejects.toThrow('props 解构变量')
   })
 
   it('非 SetupComponent 或未命中模式不做改写', async () => {

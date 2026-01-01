@@ -3,7 +3,7 @@ import { state } from '@/index.ts'
 
 export const App: SetupComponent = () => {
   const drawer = createDrawerStateManager()
-  return () => <div />
+  return () => <div>{drawer.isOpen.value ? 'open' : 'closed'}</div>
 }
 
 export function createDrawerStateManager(initialOpen = false) {

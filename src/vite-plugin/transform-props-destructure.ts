@@ -41,6 +41,17 @@ interface SetupComponentContext {
   nestedWarnTargets: Ts.Node[]
 }
 
+interface CollectTopLevelDestructureResult {
+  bindings: Map<string, BindingInfo>
+  removeRanges: RemoveRange[]
+  nestedWarnTargets: Ts.Node[]
+}
+
+interface ResolveWatchToRefLocalsResult {
+  watch: Set<string>
+  toRef: Set<string>
+}
+
 interface TransformContext {
   ts: TypeScriptApi
   sourceFile: Ts.SourceFile
@@ -191,8 +202,8 @@ function resolvePropsParameter(
   fn: Ts.SignatureDeclaration,
   hoistedNames: Set<string>,
 ):
-    | { propsName: string; bindings: Map<string, BindingInfo>; replacement?: Replacement }
-    | undefined {
+  | { propsName: string; bindings: Map<string, BindingInfo>; replacement?: Replacement }
+  | undefined {
   const firstParameter = fn.parameters[0]
 
   if (!firstParameter) {
@@ -270,11 +281,7 @@ function collectTopLevelDestructure(
   sourceFile: Ts.SourceFile,
   fn: Ts.FunctionExpression | Ts.ArrowFunction,
   propsName: string,
-  ): {
-    bindings: Map<string, BindingInfo>
-    removeRanges: RemoveRange[]
-    nestedWarnTargets: Ts.Node[]
-  } {
+): CollectTopLevelDestructureResult {
   const bindings = new Map<string, BindingInfo>()
   const removeRanges: RemoveRange[] = []
   const nestedWarnTargets: Ts.Node[] = []
@@ -679,8 +686,11 @@ function visitFunctionForTransform(
     rootScope[0]?.names.delete(name)
   }
 
-  const shouldSkipVisit = (node: Ts.Node): boolean =>
-    isWithinRanges(node.getStart(sourceFile), node.getEnd(), removeRanges) || ts.isTypeNode(node)
+  const shouldSkipVisit = (node: Ts.Node): boolean => {
+    return (
+      isWithinRanges(node.getStart(sourceFile), node.getEnd(), removeRanges) || ts.isTypeNode(node)
+    )
+  }
 
   const tryVisitNestedFunctionLike = (node: Ts.Node, scopes: ScopeFrame[]): boolean => {
     if (!ts.isFunctionLike(node) || node === fn) {
@@ -819,7 +829,11 @@ function visitFunctionForTransform(
   }
 
   const checkWriteBinary = (node: Ts.Node, scopes: ScopeFrame[]): void => {
-    if (!ts.isBinaryExpression(node) || !ts.isIdentifier(node.left) || !bindings.has(node.left.text)) {
+    if (
+      !ts.isBinaryExpression(node) ||
+      !ts.isIdentifier(node.left) ||
+      !bindings.has(node.left.text)
+    ) {
       return
     }
 
@@ -841,8 +855,9 @@ function visitFunctionForTransform(
     )
   }
 
-  const isIncOrDecOperator = (operator: Ts.SyntaxKind): boolean =>
-    operator === ts.SyntaxKind.PlusPlusToken || operator === ts.SyntaxKind.MinusMinusToken
+  const isIncOrDecOperator = (operator: Ts.SyntaxKind): boolean => {
+    return operator === ts.SyntaxKind.PlusPlusToken || operator === ts.SyntaxKind.MinusMinusToken
+  }
 
   const checkWriteUnary = (node: Ts.Node, scopes: ScopeFrame[]): void => {
     if (!ts.isPrefixUnaryExpression(node) && !ts.isPostfixUnaryExpression(node)) {
@@ -985,10 +1000,7 @@ function collectSetupComponentContexts(
 function resolveWatchToRefLocals(
   ts: TypeScriptApi,
   sourceFile: Ts.SourceFile,
-  ): {
-    watch: Set<string>
-    toRef: Set<string>
-  } {
+): ResolveWatchToRefLocalsResult {
   const watch = new Set<string>(['watch'])
   const toRef = new Set<string>(['toRef'])
 

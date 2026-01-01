@@ -28,17 +28,6 @@ export class RefImpl<T> implements Ref<T> {
   readonly [refFlag] = true as const
 
   /**
-   * Vue Devtools 兼容：通过 `__v_isRef` 识别 Ref。
-   *
-   * @remarks
-   * Devtools 会基于该标记对 Ref 做 unref，避免把包含内部字段的 Ref 实例直接序列化导致 structured clone 失败。
-   */
-  // eslint-disable-next-line no-useless-computed-key
-  get ['__v_isRef'](): true {
-    return true
-  }
-
-  /**
    * 最近一次写入的原始值（已 `toRaw`），用于 `Object.is` 判等与避免重复触发。
    */
   private rawValue: T
@@ -58,6 +47,17 @@ export class RefImpl<T> implements Ref<T> {
 
     this.rawValue = rawValue
     this.innerValue = maybeReactiveValue(rawValue)
+  }
+
+  /**
+   * Vue Devtools 兼容：通过 `__v_isRef` 识别 Ref。
+   *
+   * @remarks
+   * Devtools 会基于该标记对 Ref 做 unref，避免把包含内部字段的 Ref 实例直接序列化导致 structured clone 失败。
+   */
+  // eslint-disable-next-line no-useless-computed-key
+  get ['__v_isRef'](): true {
+    return true
   }
 
   /**
@@ -113,17 +113,6 @@ export class ObjectRefImpl<T extends ReactiveRawTarget, K extends keyof T> imple
   readonly [refFlag] = true as const
 
   /**
-   * Vue Devtools 兼容：通过 `__v_isRef` 识别 Ref。
-   *
-   * @remarks
-   * Devtools 会基于该标记对 Ref 做 unref，避免把包含内部字段的 Ref 实例直接序列化导致 structured clone 失败。
-   */
-  // eslint-disable-next-line no-useless-computed-key
-  get ['__v_isRef'](): true {
-    return true
-  }
-
-  /**
    * 被代理的目标对象，读写会直接落到 `target[key]`。
    */
   private readonly target: T
@@ -155,6 +144,17 @@ export class ObjectRefImpl<T extends ReactiveRawTarget, K extends keyof T> imple
     if (needsLocalDep) {
       this.dependencyBucket = new Set()
     }
+  }
+
+  /**
+   * Vue Devtools 兼容：通过 `__v_isRef` 识别 Ref。
+   *
+   * @remarks
+   * Devtools 会基于该标记对 Ref 做 unref，避免把包含内部字段的 Ref 实例直接序列化导致 structured clone 失败。
+   */
+  // eslint-disable-next-line no-useless-computed-key
+  get ['__v_isRef'](): true {
+    return true
   }
 
   /**

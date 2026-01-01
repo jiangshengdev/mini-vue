@@ -1,5 +1,5 @@
-import { createMiniVueDevtoolsAppInitPayload } from './app-shim.ts'
 import type { MiniVueDevtoolsApp } from './app-shim.ts'
+import { createMiniVueDevtoolsAppInitPayload } from './app-shim.ts'
 import { miniVueDevtoolsPluginName } from './constants.ts'
 import {
   emitVueDevtoolsAppInit,
@@ -7,8 +7,8 @@ import {
   getVueDevtoolsGlobalHook,
 } from './hook.ts'
 import { registerMiniVueDevtoolsInspector } from './inspector.ts'
-import { __DEV__ } from '@/shared/index.ts'
 import type { PluginDefinition, PluginInstallApp } from '@/shared/index.ts'
+import { __DEV__ } from '@/shared/index.ts'
 
 interface PatchedMountState {
   originalMount: (target: unknown) => unknown

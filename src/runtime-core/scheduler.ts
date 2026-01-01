@@ -1,13 +1,14 @@
 import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
 
 export interface SchedulerJob {
-  (): void
   /** 用于排序的稳定 id（如组件 uid），缺省视为 Infinity。 */
   id?: number
   /** 标记任务是否已在当前队列入队，用于去重。 */
   queued?: boolean
   /** 标记任务是否已被标记为过期（组件卸载后跳过已入队的 hook 等）。 */
   disposed?: boolean
+
+  (): void
 }
 
 /** 等待执行的调度任务队列，使用数组保持稳定顺序。 */

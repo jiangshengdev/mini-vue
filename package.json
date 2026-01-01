@@ -43,7 +43,7 @@
     "check:test-prefer-root-index": "node scripts/check/import/check-test-prefer-root-index.ts",
     "check:test-src-import-style": "node scripts/check/import/check-test-src-import-style.ts",
     "check:import": "node scripts/check/import/run.ts",
-    "check": "tsx scripts/check/run.ts",
+    "check": "node --experimental-strip-types scripts/check/run.ts",
     "dev": "tsdown --watch",
     "play": "vite",
     "play:build": "tsc && vite build",

@@ -43,9 +43,17 @@ function warnUnsupportedTarget(api: string, target: unknown): void {
     return
   }
 
+  const payload =
+    isObject(target) && target !== null
+      ? {
+          api,
+          targetType: target.constructor?.name ?? 'Object',
+          extensible: Object.isExtensible(target),
+        }
+      : { api, target }
+
   console.warn(reactivityUnsupportedType, {
-    api,
-    target,
+    ...payload,
   })
 }
 
@@ -82,7 +90,7 @@ function resolveBaseTarget(
   sourceTarget: object,
   isReadonly: boolean,
 ): ReactiveRawTarget {
-  if (isReadonly && Reflect.get(target as ReactiveTarget, reactiveFlag) === true) {
+  if (isReadonly && Reflect.get(target, reactiveFlag) === true) {
     return target as ReactiveRawTarget
   }
 

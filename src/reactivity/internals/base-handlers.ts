@@ -360,6 +360,7 @@ export const shallowReactiveHandlers = {
  *
  * @remarks
  * - 仅顶层属性为只读，嵌套对象保持原样可写。
+ * - 不收集 in/Object.keys 依赖，保持与 readonly 一致的“只读视图”语义。
  */
 export const shallowReadonlyHandlers = {
   get: createGetter({ isReadonly: true, shallow: true, shouldTrack: false }),

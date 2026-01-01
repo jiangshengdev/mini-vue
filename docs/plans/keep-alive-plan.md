@@ -9,7 +9,7 @@
 
 ## Action items
 
-[ ] 梳理现有 `mount/patch/unmount/scheduler` 与生命周期实现，确定 KeepAlive 介入点与运行时字段设计（`src/runtime-core/mount/**`、`src/runtime-core/patch/**`、`src/runtime-core/component/**`）。  
+[x] 梳理现有 `mount/patch/unmount/scheduler` 与生命周期实现，确定 KeepAlive 介入点与运行时字段设计（`src/runtime-core/mount/**`、`src/runtime-core/patch/**`、`src/runtime-core/component/**`）。  
 [ ] 扩展运行时 vnode 元数据：为 keep-alive 增加最小字段（如 `shouldKeepAlive/keptAlive/keepAliveInstance`）与类型/守卫（`src/runtime-core/virtual-node.ts` 等）。  
 [ ] 扩展组件生命周期：新增 `onActivated/onDeactivated` 注册 API、实例存储结构与 post flush 调度（`src/runtime-core/component/context.ts`、`src/runtime-core/component/lifecycle.ts`、`src/runtime-core/component/index.ts`、`src/runtime-core/index.ts`、`src/index.ts`）。  
 [ ] 实现 `KeepAlive` 组件本体：维护 `cache: Map` + `keys: Set`（LRU），支持最小 `max/include/exclude`（可拆阶段），并在渲染期为子组件 vnode 写入 keep-alive 标记（建议新增 `src/runtime-core/components/keep-alive.ts` + `src/runtime-core/components/index.ts`）。  

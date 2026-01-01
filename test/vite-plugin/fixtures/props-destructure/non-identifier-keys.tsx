@@ -1,13 +1,13 @@
 import type { SetupComponent } from '@/index.ts'
 
 export const App: SetupComponent = (props) => {
-  const { 'foo.bar': fooBar, baz } = props
+  const { 'foo.bar': fooBar, 'baz-qux': bazQux } = props
 
   return () => {
     return (
       <div>
         {fooBar}
-        {baz}
+        {bazQux}
       </div>
     )
   }

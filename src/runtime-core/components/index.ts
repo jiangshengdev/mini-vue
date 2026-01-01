@@ -1,1 +1,1 @@
-export { KeepAlive } from './keep-alive.ts'
+export { KeepAlive } from './keep-alive.tsx'

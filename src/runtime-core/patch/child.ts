@@ -1,5 +1,5 @@
 import { resolveComponentProps } from '../component/props.ts'
-import { activateKeepAlive } from '../components/keep-alive.ts'
+import { activateKeepAlive } from '../components/keep-alive.tsx'
 import { assignElementRef, resolveElementRefBinding } from '../mount/element.ts'
 import type { NormalizedVirtualNode } from '../normalize.ts'
 import type { RendererOptions } from '../renderer.ts'

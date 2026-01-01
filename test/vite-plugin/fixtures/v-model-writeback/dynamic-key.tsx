@@ -1,7 +1,4 @@
-const ModelComp = (props: {
-  modelValue?: string
-  'onUpdate:modelValue'?: (value: string) => void
-}) => {
+const ModelComp = (props: { [key: string]: unknown; modelValue?: string }) => {
   return () => {
     return <div>{props.modelValue}</div>
   }

@@ -2,11 +2,11 @@ import {
   cacheKeepAliveSubtree,
   createKeepAliveContext,
   isKeepAliveType,
-} from '../components/keep-alive.ts'
+} from '../components/keep-alive.tsx'
 import type { ChildEnvironment } from '../environment.ts'
-import type { RuntimeNormalizedVirtualNode } from '../patch/runtime-virtual-node.ts'
 import type { RendererOptions } from '../index.ts'
 import type { MountedHandle } from '../mount/handle.ts'
+import type { RuntimeNormalizedVirtualNode } from '../patch/runtime-virtual-node.ts'
 import { asRuntimeVirtualNode } from '../virtual-node.ts'
 import type { ComponentInstance } from './context.ts'
 import { attachInstanceToVirtualNode, createComponentInstance } from './instance.ts'

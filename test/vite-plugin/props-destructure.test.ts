@@ -97,7 +97,7 @@ describe('vite-plugin transform props destructure', () => {
   })
 
   it('在 watch/toRef 直接使用解构变量时输出 warning', async () => {
-    const code = readVitePluginFixture('props-destructure/watch-toRef-warning.tsx')
+    const code = readVitePluginFixture('props-destructure/watch-to-ref-warning.tsx')
 
     const { result, warn } = await transformWithCompilerPlugin({
       code,
@@ -105,7 +105,8 @@ describe('vite-plugin transform props destructure', () => {
     })
 
     expect(warn).toHaveBeenCalledTimes(2)
-    expect(result?.code).toContain('watch(props.foo, () => {})')
+    expect(result?.code).toContain('watch(props.foo,')
+    expect(result?.code).not.toContain('watch(foo,')
     expect(result?.code).toContain("toRef(props.foo, 'bar')")
   })
 
@@ -142,7 +143,8 @@ describe('vite-plugin transform props destructure', () => {
     })
 
     expect(warn).toHaveBeenCalledTimes(2)
-    expect(result?.code).toContain('w(props.foo, () => {})')
+    expect(result?.code).toContain('w(props.foo,')
+    expect(result?.code).not.toContain('w(foo,')
     expect(result?.code).toContain("r(props.foo, 'bar')")
   })
 
@@ -166,7 +168,12 @@ describe('vite-plugin transform props destructure', () => {
       id: '/src/app.tsx',
     })
 
-    expectContainsInOrder(result?.code, ['<div>', "{props['foo.bar']}", "{props['baz']}", '</div>'])
+    expectContainsInOrder(result?.code, [
+      '<div>',
+      "{props['foo.bar']}",
+      "{props['baz-qux']}",
+      '</div>',
+    ])
   })
 
   it('写入解构变量会报错', async () => {

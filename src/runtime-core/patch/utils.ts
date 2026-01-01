@@ -1,6 +1,6 @@
+import { deactivateKeepAlive } from '../components/keep-alive.tsx'
 import type { NormalizedChildren, NormalizedVirtualNode } from '../normalize.ts'
 import type { RendererOptions } from '../renderer.ts'
-import { deactivateKeepAlive } from '../components/keep-alive.ts'
 import type { RuntimeNormalizedVirtualNode } from './runtime-virtual-node.ts'
 import { asRuntimeNormalizedVirtualNode } from './runtime-virtual-node.ts'
 import { Fragment, Text } from '@/jsx-foundation/index.ts'

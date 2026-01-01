@@ -1,5 +1,5 @@
-import type { KeepAliveCacheKey, KeepAliveContext } from './components/keep-alive-context.ts'
 import type { ComponentInstance } from './component/context.ts'
+import type { KeepAliveCacheKey, KeepAliveContext } from './components/keep-alive-context.ts'
 import type { MountedHandle } from './mount/handle.ts'
 import type { SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
 

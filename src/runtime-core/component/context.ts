@@ -1,12 +1,12 @@
 /**
  * 组件实例的共享定义与当前实例管理工具。
  */
+import type { KeepAliveContext } from '../components/keep-alive-context.ts'
 import type { AppContext } from '../create-app.ts'
 import type { MountedHandle } from '../mount'
 import type { NormalizedVirtualNode } from '../normalize.ts'
 import type { SchedulerJob } from '../scheduler.ts'
 import type { RuntimeVirtualNode } from '../virtual-node.ts'
-import type { KeepAliveContext } from '../components/keep-alive-context.ts'
 import type { ElementProps, RenderFunction, SetupComponent } from '@/jsx-foundation/index.ts'
 import type { EffectScope, ReactiveEffect } from '@/reactivity/index.ts'
 import type { PlainObject } from '@/shared/index.ts'

@@ -12,6 +12,7 @@ export {
   onUnmounted,
   onUpdated,
 } from './component/index.ts'
+export { KeepAlive } from './components/index.ts'
 export type { AppHostDriver, AppInstance } from './create-app.ts'
 export { createAppInstance } from './create-app.ts'
 export { mountChild } from './mount/index.ts'
@@ -34,4 +35,3 @@ export type { Renderer, RendererOptions, RootRenderFunction } from './renderer.t
 export { nextTick, queueSchedulerJob } from './scheduler.ts'
 export { asRuntimeVirtualNode } from './virtual-node.ts'
 export { watch } from './watch.ts'
-export { KeepAlive } from './components/index.ts'

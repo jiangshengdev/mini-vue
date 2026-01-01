@@ -69,9 +69,9 @@ describe('vite-plugin v-model writeback', () => {
       id: '/src/app.tsx',
     })
 
-    expect(result?.code).toContain("modelValue={state.form['foo'].bar}")
+    expect(result?.code).toContain("modelValue={state.form['foo-bar'].bar}")
     expect(result?.code).toContain(
-      "{ 'onUpdate:modelValue': (value) => { state.form['foo'].bar = value } }",
+      "{ 'onUpdate:modelValue': (value) => { state.form['foo-bar'].bar = value } }",
     )
   })
 

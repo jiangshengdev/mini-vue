@@ -1,20 +1,23 @@
-# Repository Guidelines
+# Copilot 编码指南（mini-vue）
 
-本文件与 `.github/copilot-instructions.md` 规则保持同步（修改任一文件，请同步更新另一份）。
+本仓库是简化版 Vue 3 运行时：响应式 + 平台无关渲染器 + DOM 宿主 glue + JSX 运行时。目标是让改动能快速落到正确分层与现有模式中。
 
-## 项目结构与模块划分
+本文件与 `AGENTS.md`、`.github/copilot-instructions.md` 规则保持同步（修改任一文件，请同步更新另一份）。
 
-- `src/`：TypeScript 源码；核心分区有 `runtime-core/`、`runtime-dom/`、`reactivity/`、`router/`、`jsx-foundation/`、`jsx-runtime/`、`messages/`、`shared/`，对外入口为 `src/index.ts`（JSX 入口：`src/jsx-runtime.ts` / `src/jsx-dev-runtime.ts`）。
-- `test/`：与 `src` 结构一一对应的 Vitest 用例（如 `test/reactivity/reactive.test.ts`），全局初始化在 `test/setup.ts`。
+## 项目结构与模块划分（先找这些文件）
+
+- 对外入口：`src/index.ts`（所有用户可见 API 从这里导出）。
+- JSX 入口：`src/jsx-runtime.ts` / `src/jsx-dev-runtime.ts`，实现位于 `src/jsx-runtime/**` 与 `src/jsx-foundation/**`。
+- `src/jsx-foundation/**`：virtualNode 工厂与 children 归一化等基础能力。
+- `src/jsx-runtime/**`：`h`/`jsx`/`jsxs`/`jsxDEV` 等运行时封装。
+- `src/reactivity/**`：响应式系统（effect/ref/computed/watch/effectScope 等）。
+- `src/runtime-core/**`：平台无关渲染核心与组件/挂载流程。
+- `src/runtime-dom/**`：DOM 宿主 glue（createApp、renderer options、props 映射等）。
+- `src/router/**`：简化路由实现与组件（`RouterLink`/`RouterView`）。
+- `src/shared/**`：跨子域共享工具与错误通道（内部 runner + 对外 `setErrorHandler`）。
+- `src/messages/**`：按子域集中管理错误/警告文案，统一由 `src/messages/index.ts` 导出。
+- `test/**`：按子域组织的 Vitest 用例（reactivity/runtime-dom/runtime-core/jsx-runtime/shared 等），全局 setup 在 `test/setup.ts`。
 - 其他目录：`docs/`（VitePress 文档）、`playground/`（Vite 试玩与手动验证）、`scripts/`（导入/边界检查脚本）、`dist/`（构建产物）、`public/`（静态资源）。
-
-## 构建、测试与开发命令
-
-- 安装：`pnpm install`。
-- 开发/构建：`pnpm run dev`（tsdown watch）、`pnpm run build`（tsdown + JSX shim 生成）。
-- Playground：`pnpm run play`（开发）、`pnpm run play:build` + `pnpm run play:preview`（验证产物）。
-- 测试：`pnpm run test`（Vitest + jsdom）、`pnpm run test:browser`（Vitest Browser + Playwright）、`pnpm run test:e2e`（Playwright E2E）、`pnpm run test:inspect`（调试）。
-- 质量门禁：`pnpm run fmt`（Prettier）、`pnpm run lint`（oxlint + ESLint）、`pnpm run xo`、`pnpm run typecheck`（tsc）、`pnpm run check`（导入/边界规则）。提 PR 前建议跑 `pnpm run preflight` 或 `pnpm run ci`。
 
 ## 本项目特有约定（TS / 导入 / 边界）
 
@@ -23,6 +26,14 @@
 - `src` 一级目录视为边界：在同一边界内部禁止用 `@/当前边界/...`，必须用相对路径（对应检查：`scripts/check/import/check-src-import-boundary.ts`）。
   - ✅ `src/reactivity/**` 内：`import { isNil } from '@/shared/index.ts'`
   - ❌ `src/reactivity/**` 内：`import { reactive } from '@/reactivity/index.ts'`
+
+## 构建、测试与开发命令
+
+- 安装：`pnpm install`。
+- 开发/构建：`pnpm run dev`（tsdown watch）、`pnpm run build`（tsdown + JSX shim 生成）。
+- Playground：`pnpm run play`（开发）、`pnpm run play:build` + `pnpm run play:preview`（验证产物）。
+- 测试：`pnpm run test`（Vitest + jsdom）、`pnpm run test:browser`（Vitest Browser + Playwright）、`pnpm run test:e2e`（Playwright E2E）、`pnpm run test:inspect`（调试）。
+- 质量门禁：`pnpm run fmt`（Prettier）、`pnpm run lint`（oxlint + ESLint）、`pnpm run xo`、`pnpm run typecheck`（tsc）、`pnpm run check`（导入/边界规则）。提 PR 前建议跑 `pnpm run preflight` 或 `pnpm run ci`。
 
 ## 环境判断与 CI
 
@@ -52,22 +63,15 @@
 - 遵循 Conventional Commits：`type(scope): summary`，破坏性改动加 `!`（参见 `refactor(runtime-core)!`）。`scope` 采用小写简洁名，如 `reactivity`、`runtime-dom`、`docs`。
 - PR 需说明目的、关联 issue、列出主要改动，并附测试命令与结果；若行为变更，请更新文档或 playground。发起评审前确保 `pnpm run preflight` 与 `pnpm run check` 通过。
 
-## 其他
+## Agent 执行约束
 
-- 更完整的 Agent 行为规范见 [`.github/copilot-instructions.md`](.github/copilot-instructions.md)；自动化/工具链细节请保持同步更新两份文档。
-- 不要主动运行格式化/静态检查命令（`pnpm run fmt`/`pnpm run lint`/`pnpm run typecheck`/`pnpm run xo`/`pnpm run preflight`/`pnpm run ci`/`pnpm run check`）；测试允许执行。
+- 不要主动运行格式化/静态检查命令（`pnpm run fmt`/`pnpm run format`/`pnpm run lint`/`pnpm run typecheck`/`pnpm run xo`/`pnpm run preflight`/`pnpm run ci`/`pnpm run check`）；测试允许执行。
 - 生成/建议提交信息时，遵循提交规范：[`/.copilot-commit-message-instructions.md`](.copilot-commit-message-instructions.md)
 - 删除文件/目录必须走命令行 `rm`/`rm -r`，且只能使用从仓库根目录起算的相对路径。
+- 文件写入约束（最高优先级）：禁止写入仓库外路径；如需使用 `~/.codex` 等路径，统一改为写入仓库内的 `.codex/` 目录。
+- 若本次任务是从某个 plan 文档开始执行（例如用户指定了 `docs/plans/*.md`），则每次完成任务后必须同步更新对应 plan 文件：将已完成事项的 `[ ]` 更新为 `[x]`（必要时补充简短说明），确保计划状态与实际实现一致。
+- 代码注释、日志输出、对话内容统一使用简体中文；说明性注释中若包含代码片段，请用反引号包裹以突出代码内容。
 - Vitest 浏览器模式限制：
   - 禁用会阻塞线程的同步弹窗（`alert`/`confirm` 等）；Vitest 会提供默认 mock，建议用自定义 mock 保持可控。
   - ESM 模块命名空间不可被 `vi.spyOn`，需要 `vi.mock(path, { spy: true })` 再通过 `vi.mocked` 调整实现；若要改写导出的可变值，请暴露 setter 方法。
-- 文件写入约束（最高优先级）：禁止写入仓库外路径；如需使用 `~/.codex` 等路径，统一改为写入仓库内的 `.codex/` 目录。
-
-## 任务流程
-
-- 若本次任务是从某个 plan 文档开始执行（例如用户指定了 `docs/plans/*.md`），则每次完成任务后必须同步更新对应 plan 文件：将已完成事项的 `[ ]` 更新为 `[x]`（必要时补充简短说明），确保计划状态与实际实现一致。
-
-## 交流与输出
-
-- 代码注释、日志输出、对话内容统一使用 **简体中文**。
-- 说明性注释中若包含代码片段，请用反引号包裹以突出代码内容。
+- 更完整的 Agent 约定见：[`AGENTS.md`](AGENTS.md) 与 [`.github/copilot-instructions.md`](.github/copilot-instructions.md)；自动化/工具链细节请保持同步更新两份文档。

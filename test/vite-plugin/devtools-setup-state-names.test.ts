@@ -28,9 +28,7 @@ async function transformWithPlugin(parameters: { code: string; id: string }) {
 
 describe('vite-plugin devtools setup state names', () => {
   it('在 SetupComponent 内注入 register 调用并补齐 import', async () => {
-    const code = readVitePluginFixture(
-      'devtools-setup-state-names/setupcomponent-inject.tsx',
-    )
+    const code = readVitePluginFixture('devtools-setup-state-names/setupcomponent-inject.tsx')
 
     const result = await transformWithPlugin({ code, id: '/src/app.tsx' })
 
@@ -41,9 +39,7 @@ describe('vite-plugin devtools setup state names', () => {
   })
 
   it('同名变量会注入 $1 后缀', async () => {
-    const code = readVitePluginFixture(
-      'devtools-setup-state-names/same-name-suffix.tsx',
-    )
+    const code = readVitePluginFixture('devtools-setup-state-names/same-name-suffix.tsx')
 
     const result = await transformWithPlugin({ code, id: '/src/app.tsx' })
 
@@ -74,9 +70,7 @@ describe('vite-plugin devtools setup state names', () => {
   })
 
   it('仅识别从指定 importSource 引入的 ref/reactive/computed/state', async () => {
-    const code = readVitePluginFixture(
-      'devtools-setup-state-names/import-source-mismatch.tsx',
-    )
+    const code = readVitePluginFixture('devtools-setup-state-names/import-source-mismatch.tsx')
 
     const result = await transformWithPlugin({ code, id: '/src/app.tsx' })
 

@@ -6,5 +6,10 @@ export const App: SetupComponent = (props) => {
     const foo = 1
     return foo
   }
-  return () => <div>{foo}{render()}</div>
+  return () => (
+    <div>
+      {foo}
+      {render()}
+    </div>
+  )
 }

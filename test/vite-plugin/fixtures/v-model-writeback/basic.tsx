@@ -1,6 +1,9 @@
 import { ref } from '@/index.ts'
 
-const ModelComp = (props: { modelValue: string; 'onUpdate:modelValue': (value: string) => void }) => {
+const ModelComp = (props: {
+  modelValue: string
+  'onUpdate:modelValue': (value: string) => void
+}) => {
   return <div>{props.modelValue}</div>
 }
 

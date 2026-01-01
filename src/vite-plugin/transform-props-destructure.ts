@@ -38,6 +38,7 @@ interface SetupComponentContext {
   bindings: Map<string, BindingInfo>
   removeRanges: RemoveRange[]
   initialReplacements: Replacement[]
+  nestedWarnTargets: Ts.Node[]
 }
 
 interface TransformContext {
@@ -48,6 +49,8 @@ interface TransformContext {
   id: string
   warn: (warning: { message: string; id?: string; pos?: number }) => void
   error: (error: { message: string; id?: string; pos?: number }) => void
+  watchLikeLocals: Set<string>
+  toRefLikeLocals: Set<string>
 }
 
 type TypeScriptApi = typeof Ts
@@ -253,21 +256,22 @@ function collectObjectBindings(
     })
   }
 
-  return bindings
-}
+    return bindings
+  }
 
 function collectTopLevelDestructure(
   ts: TypeScriptApi,
   sourceFile: Ts.SourceFile,
   fn: Ts.FunctionExpression | Ts.ArrowFunction,
   propsName: string,
-): { bindings: Map<string, BindingInfo>; removeRanges: RemoveRange[] } {
+): { bindings: Map<string, BindingInfo>; removeRanges: RemoveRange[]; nestedWarnTargets: Ts.Node[] } {
   const bindings = new Map<string, BindingInfo>()
   const removeRanges: RemoveRange[] = []
+  const nestedWarnTargets: Ts.Node[] = []
   const { body } = fn
 
   if (!body || !ts.isBlock(body)) {
-    return { bindings, removeRanges }
+    return { bindings, removeRanges, nestedWarnTargets }
   }
 
   for (const statement of body.statements) {
@@ -313,7 +317,27 @@ function collectTopLevelDestructure(
     })
   }
 
-  return { bindings, removeRanges }
+  const visitNested = (node: Ts.Node): void => {
+    if (ts.isFunctionLike(node) && node !== fn) {
+      return
+    }
+
+    if (ts.isVariableDeclaration(node) && isPropsDestructurePattern(ts, node, propsName)) {
+      if (!removeRanges.some((range) => node.getStart() >= range.start && node.getEnd() <= range.end)) {
+        nestedWarnTargets.push(node.name)
+      }
+    }
+
+    ts.forEachChild(node, (child) => {
+      visitNested(child)
+    })
+  }
+
+  ts.forEachChild(body, (child) => {
+    visitNested(child)
+  })
+
+  return { bindings, removeRanges, nestedWarnTargets }
 }
 
 function applyReplacements(code: string, replacements: Replacement[]): string {
@@ -453,6 +477,24 @@ function isIdentifierPropertyName(ts: TypeScriptApi, node: Ts.Identifier): boole
   return false
 }
 
+function isPropsDestructurePattern(
+  ts: TypeScriptApi,
+  declaration: Ts.VariableDeclaration,
+  propsName: string,
+): boolean {
+  if (!ts.isObjectBindingPattern(declaration.name)) {
+    return false
+  }
+
+  if (!declaration.initializer) {
+    return false
+  }
+
+  const initializer = unwrapExpression(ts, declaration.initializer)
+
+  return ts.isIdentifier(initializer) && initializer.text === propsName
+}
+
 function isShadowed(name: string, scopes: ScopeFrame[]): boolean {
   for (let i = scopes.length - 1; i >= 0; i -= 1) {
     if (scopes[i]?.names.has(name)) {
@@ -495,9 +537,15 @@ function createReplacementForIdentifier(parameters: {
   const parent = identifier.parent
   const start = identifier.getStart(sourceFile)
   const end = identifier.getEnd()
-  const accessText = /^[$_a-zA-Z][$_\w]*$/.test(propKey)
-    ? `${propsName}.${propKey}`
-    : `${propsName}[${propKey}]`
+  let accessText: string
+
+  if (/^[$_a-zA-Z][$_\w]*$/.test(propKey)) {
+    accessText = `${propsName}.${propKey}`
+  } else if (propKey.startsWith('[') && propKey.endsWith(']')) {
+    accessText = `${propsName}${propKey}`
+  } else {
+    accessText = `${propsName}[${propKey}]`
+  }
 
   if (parent && ts.isShorthandPropertyAssignment(parent) && parent.name === identifier) {
     return {
@@ -576,14 +624,23 @@ function visitFunctionForTransform(
   replacements: Replacement[],
 ): void {
   const { ts, sourceFile, diagnostics } = ctx
-  const { fn, propsName, bindings, removeRanges, initialReplacements } = target
+  const { fn, propsName, bindings, removeRanges, initialReplacements, nestedWarnTargets } = target
 
-  if (bindings.size === 0) {
+  if (bindings.size === 0 && nestedWarnTargets.length === 0) {
     return
   }
 
   for (const replacement of initialReplacements) {
     replacements.push(replacement)
+  }
+
+  for (const warnTarget of nestedWarnTargets) {
+    emitDiagnostic(
+      ctx,
+      diagnostics.watchOrToRef,
+      warnTarget,
+      `[mini-vue] 仅顶层支持 props 解构，已跳过嵌套位置的解构：${propsName}`,
+    )
   }
 
   const rootScope: ScopeFrame[] = [
@@ -647,6 +704,10 @@ function visitFunctionForTransform(
         },
       ]
 
+      if (ts.isVariableStatement(node.parent)) {
+        // handled in variable declaration branch
+      }
+
       ts.forEachChild(node, (child) => {
         visit(child, nextScope)
       })
@@ -696,7 +757,10 @@ function visitFunctionForTransform(
     if (ts.isCallExpression(node)) {
       const callee = unwrapExpression(ts, node.expression)
 
-      if (ts.isIdentifier(callee) && (callee.text === 'watch' || callee.text === 'toRef')) {
+      if (
+        ts.isIdentifier(callee) &&
+        (ctx.watchLikeLocals.has(callee.text) || ctx.toRefLikeLocals.has(callee.text))
+      ) {
         const [firstArg] = node.arguments
 
         if (
@@ -714,6 +778,14 @@ function visitFunctionForTransform(
             `[mini-vue] 直接将 props 解构变量 ${firstArg.text} 传入 ${callee.text}，请改为使用 props.${info?.propKey ?? firstArg.text} 或 getter。`,
           )
         }
+      }
+
+      if (
+        ts.isIdentifier(callee) &&
+        ctx.watchLikeLocals.has(callee.text) &&
+        ctx.toRefLikeLocals.has(callee.text)
+      ) {
+        // no-op, sets are disjoint; keep branch separate for clarity
       }
     }
 
@@ -805,7 +877,7 @@ function collectSetupComponentContexts(ts: TypeScriptApi, sourceFile: Ts.SourceF
 
       const { bindings: paramBindings, propsName, replacement } = propsInfo
 
-      const { bindings: variableBindings, removeRanges } = collectTopLevelDestructure(
+      const { bindings: variableBindings, removeRanges, nestedWarnTargets } = collectTopLevelDestructure(
         ts,
         sourceFile,
         fn,
@@ -822,27 +894,59 @@ function collectSetupComponentContexts(ts: TypeScriptApi, sourceFile: Ts.SourceF
         bindings.set(key, value)
       }
 
-      if (bindings.size === 0) {
-        continue
-      }
-
       const initialReplacements: Replacement[] = []
 
       if (replacement) {
         initialReplacements.push(replacement)
       }
 
-      contexts.push({
-        fn,
-        propsName,
-        bindings,
-        removeRanges,
-        initialReplacements,
-      })
+      if (bindings.size > 0 || nestedWarnTargets.length > 0) {
+        contexts.push({
+          fn,
+          propsName,
+          bindings,
+          removeRanges,
+          initialReplacements,
+          nestedWarnTargets,
+        })
+      }
     }
   })
 
   return contexts
+}
+
+function resolveWatchToRefLocals(ts: TypeScriptApi, sourceFile: Ts.SourceFile): {
+  watch: Set<string>
+  toRef: Set<string>
+} {
+  const watch = new Set<string>(['watch'])
+  const toRef = new Set<string>(['toRef'])
+
+  for (const statement of sourceFile.statements) {
+    if (!ts.isImportDeclaration(statement)) {
+      continue
+    }
+
+    const { importClause } = statement
+
+    if (!importClause || !importClause.namedBindings || !ts.isNamedImports(importClause.namedBindings)) {
+      continue
+    }
+
+    for (const element of importClause.namedBindings.elements) {
+      const imported = element.propertyName?.text ?? element.name.text
+      const local = element.name.text
+
+      if (imported === 'watch') {
+        watch.add(local)
+      } else if (imported === 'toRef') {
+        toRef.add(local)
+      }
+    }
+  }
+
+  return { watch, toRef }
 }
 
 export function miniVueTransformPropsDestructurePlugin(
@@ -882,6 +986,7 @@ export function miniVueTransformPropsDestructurePlugin(
         true,
         isTsx ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
       )
+      const { watch, toRef } = resolveWatchToRefLocals(ts, sourceFile)
       const contexts = collectSetupComponentContexts(ts, sourceFile)
 
       if (contexts.length === 0) {
@@ -897,6 +1002,8 @@ export function miniVueTransformPropsDestructurePlugin(
         id: cleanId,
         warn: this.warn,
         error: this.error,
+        watchLikeLocals: watch,
+        toRefLikeLocals: toRef,
       }
 
       for (const context of contexts) {

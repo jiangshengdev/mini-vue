@@ -150,6 +150,69 @@ export const App: SetupComponent = ({ foo, bar }) => {
     expect(result?.code).toContain('<div>{props.foo}{props.bar}</div>')
   })
 
+  it('识别 watch/toRef 的导入别名并发出 warning', async () => {
+    const code = `
+import type { SetupComponent } from '@/index.ts'
+import { watch as w, toRef as r } from '@/index.ts'
+
+export const App: SetupComponent = (props) => {
+  const { foo } = props
+  w(foo, () => {})
+  r(foo)
+  return () => <div>{foo}</div>
+}
+`
+
+    const { result, warn } = await transformWithCompilerPlugin({
+      code,
+      id: '/src/app.tsx',
+    })
+
+    expect(warn).toHaveBeenCalledTimes(2)
+    expect(result?.code).toContain('w(props.foo, () => {})')
+    expect(result?.code).toContain('r(props.foo)')
+  })
+
+  it('嵌套 block 内的解构会提示 warning 并跳过改写', async () => {
+    const code = `
+import type { SetupComponent } from '@/index.ts'
+
+export const App: SetupComponent = (props) => {
+  if (true) {
+    const { foo } = props
+    return () => <div>{foo}</div>
+  }
+  return () => <div>{props.foo}</div>
+}
+`
+
+    const { result, warn } = await transformWithCompilerPlugin({
+      code,
+      id: '/src/app.tsx',
+    })
+
+    expect(warn).toHaveBeenCalledOnce()
+    expect(result).toBeUndefined()
+  })
+
+  it('支持非 identifier 的 prop key 改写', async () => {
+    const code = `
+import type { SetupComponent } from '@/index.ts'
+
+export const App: SetupComponent = (props) => {
+  const { 'foo.bar': fooBar, ['baz']: baz } = props
+  return () => <div>{fooBar}{baz}</div>
+}
+`
+
+    const { result } = await transformWithCompilerPlugin({
+      code,
+      id: '/src/app.tsx',
+    })
+
+    expect(result?.code).toContain('return () => <div>{props[\'foo.bar\']}{props[\'baz\']}</div>')
+  })
+
   it('写入解构变量会报错', async () => {
     const code = `
 import type { SetupComponent } from '@/index.ts'

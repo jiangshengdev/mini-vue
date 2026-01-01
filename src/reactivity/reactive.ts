@@ -70,6 +70,23 @@ function toRawTarget(target: object): object {
 }
 
 /**
+ * 确定 Proxy 使用的基础目标：
+ * - readonly 包裹 reactive 时直接使用已有 reactive 代理，便于 isReactive 透传。
+ * - 其他场景使用提取出的原始目标，保持缓存键一致。
+ */
+function resolveBaseTarget(
+  target: object,
+  sourceTarget: object,
+  isReadonly: boolean,
+): ReactiveRawTarget {
+  if (isReadonly && Reflect.get(target as ReactiveTarget, reactiveFlag) === true) {
+    return target as ReactiveRawTarget
+  }
+
+  return sourceTarget as ReactiveRawTarget
+}
+
+/**
  * 创建响应式代理的内部实现，统一处理缓存、类型检查与代理创建。
  *
  * @param target - 要代理的目标对象
@@ -90,11 +107,7 @@ function createReactiveObject(
   }
 
   const sourceTarget = toRawTarget(target)
-  let baseTarget: ReactiveRawTarget = sourceTarget as ReactiveRawTarget
-
-  if (isReadonly && Reflect.get(target as ReactiveTarget, reactiveFlag) === true) {
-    baseTarget = target as ReactiveRawTarget
-  }
+  const baseTarget = resolveBaseTarget(target, sourceTarget, isReadonly)
 
   if (!isReadonly && Reflect.get(target as ReactiveTarget, readonlyFlag) === true) {
     return target

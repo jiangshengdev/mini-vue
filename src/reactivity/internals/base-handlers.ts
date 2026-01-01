@@ -24,6 +24,17 @@ import { __DEV__, isArrayIndex, isObject } from '@/shared/index.ts'
 /** Proxy get 拦截器类型。 */
 type Getter = ProxyHandler<ReactiveRawTarget>['get']
 
+/**
+ * 处理 Ref 目标的 receiver：确保 getter/setter 的 this 指向原始 Ref 实例。
+ */
+function normalizeReceiver(target: ReactiveRawTarget, receiver: unknown): unknown {
+  if (isRef(target)) {
+    return target
+  }
+
+  return receiver
+}
+
 function getVueDevtoolsInternalFlagValue({
   isReadonly,
   shallow,
@@ -141,7 +152,7 @@ function createGetter({
       return arraySearchWrappers[key]
     }
 
-    const receiverTarget = isRef(target) ? target : receiver
+    const receiverTarget = normalizeReceiver(target, receiver)
     /* 使用 Reflect 读取原始值，保持与原生访问一致的 this 绑定与行为 */
     const rawValue = Reflect.get(target, key, receiverTarget) as unknown
 
@@ -213,7 +224,7 @@ const mutableSet: ProxyHandler<ReactiveRawTarget>['set'] = (target, key, value, 
    * - 若通过 receiver 触发了访问器 getter，getter 内部的 reactive 读取可能会把依赖收集到当前 effect。
    *   因此这里需要显式禁用依赖收集，避免出现「写入时意外建立依赖」。
    */
-  const receiverTarget = isRef(target) ? target : receiver
+  const receiverTarget = normalizeReceiver(target, receiver)
   const previousValue = withoutTracking(() => {
     return Reflect.get(target, key, receiverTarget) as unknown
   })

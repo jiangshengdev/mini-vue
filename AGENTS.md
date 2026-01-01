@@ -57,6 +57,9 @@
 - 回归案例优先，涉及 DOM/渲染的特性同步补充浏览器套件。必要时用 `expectTypeOf` 断言类型预期。
 - 新功能至少跑 `pnpm run test`；如触及 DOM/renderer，补跑 `pnpm run test:browser`。
 - Vitest 过滤（只跑某个文件）：`pnpm run test test/jsx-runtime/h.test.ts`（注意不要写成 `pnpm run test -- test/jsx-runtime/h.test.ts`）。
+- 测试执行必须使用一次性 `run` 模式，禁止进入 watch：
+  - 使用 Vitest CLI 时必须带 `--run`（例如：`pnpm -s vitest --run ...`）。
+  - 使用工具层（如 VS Code 的 `runTests`）默认视为 `run` 模式，可直接使用。
 
 ## 提交与 Pull Request
 
@@ -66,6 +69,7 @@
 ## Agent 执行约束
 
 - 不要主动运行格式化/静态检查命令（`pnpm run fmt`/`pnpm run format`/`pnpm run lint`/`pnpm run typecheck`/`pnpm run xo`/`pnpm run preflight`/`pnpm run ci`/`pnpm run check`）；测试允许执行。
+- 允许执行测试，但必须使用一次性 `run` 模式，避免启动 watch 常驻进程（Vitest CLI 需要 `--run`）。
 - 生成/建议提交信息时，遵循提交规范：[`/.copilot-commit-message-instructions.md`](.copilot-commit-message-instructions.md)
 - 删除文件/目录必须走命令行 `rm`/`rm -r`，且只能使用从仓库根目录起算的相对路径。
 - 文件写入约束（最高优先级）：禁止写入仓库外路径；如需使用 `~/.codex` 等路径，统一改为写入仓库内的 `.codex/` 目录。

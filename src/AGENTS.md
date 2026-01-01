@@ -62,7 +62,11 @@
 
 ### 测试
 
-- 测试是允许执行的；更推荐使用浏览器模式：`pnpm test:browser`。
+- 测试是允许执行的。
+- 测试执行必须使用一次性 `run` 模式，禁止进入 watch：
+	- 使用 Vitest CLI 时必须带 `--run`（例如：`pnpm -s vitest --run ...`）。
+	- 使用工具层（如 VS Code 的 `runTests`）默认视为 `run` 模式，可直接使用。
+- 如需浏览器模式，推荐：`pnpm run test:browser`（同样保持 run 模式）。
 
 ## 交流与输出
 

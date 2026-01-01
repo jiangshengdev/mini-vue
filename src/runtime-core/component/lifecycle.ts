@@ -1,3 +1,9 @@
+/**
+ * runtime-core 组件生命周期钩子：
+ * - 在 `setup()` 中注册钩子；
+ * - 在挂载/更新/卸载时由渲染流程触发；
+ * - 依赖 scheduler 的 post 队列保证父子顺序与去重。
+ */
 import type { SchedulerJob } from '../scheduler.ts'
 import { disposeSchedulerJob, isSchedulerFlushing, queuePostFlushCb } from '../scheduler.ts'
 import type { LifecycleHook, UnknownComponentInstance } from './context.ts'
@@ -36,10 +42,19 @@ type HookStorageKey =
 
 let componentPostOrderId = 0
 
+/**
+ * 根据当前是否处于 scheduler flush 阶段选择错误标记阶段。
+ *
+ * @remarks
+ * - 生命周期 hook 可能在同步 patch 中直接触发，也可能在 post 队列异步触发。
+ */
 function resolveHookPhase() {
   return isSchedulerFlushing() ? errorPhases.async : errorPhases.sync
 }
 
+/**
+ * 仅开发态：为错误通道提供 hook 上下文信息，便于定位出错组件与钩子类型。
+ */
 function resolveHookMeta(instance: UnknownComponentInstance, hook: LifecycleHookType) {
   if (!__DEV__) {
     return undefined
@@ -52,6 +67,13 @@ function resolveHookMeta(instance: UnknownComponentInstance, hook: LifecycleHook
   }
 }
 
+/**
+ * 安全调用单个生命周期 hook。
+ *
+ * @remarks
+ * - hook 执行期间需要暴露 currentInstance（对齐 Vue3），便于高级用法读取实例上下文。
+ * - 使用 `withoutTracking` 避免 hook 内部读取响应式状态意外被当前渲染 effect 收集。
+ */
 function invokeHook(
   instance: UnknownComponentInstance,
   hook: LifecycleHook,
@@ -72,6 +94,9 @@ function invokeHook(
   })
 }
 
+/**
+ * 按注册顺序依次执行同类 hook。
+ */
 function invokeHooks(
   instance: UnknownComponentInstance,
   hooks: LifecycleHook[],
@@ -82,6 +107,13 @@ function invokeHooks(
   }
 }
 
+/**
+ * 向当前组件实例注入生命周期 hook（setup-only）。
+ *
+ * @remarks
+ * - 生命周期注册严格限定在 `setup()` 执行窗口期，避免组件外注册带来的隐式全局状态。
+ * - 抛错时附带 `currentInstance` 作为 cause，便于调试定位调用来源。
+ */
 function injectLifecycleHook(key: HookStorageKey, hook: LifecycleHook, message: string): void {
   const instance = getCurrentSetupInstance()
 
@@ -92,30 +124,51 @@ function injectLifecycleHook(key: HookStorageKey, hook: LifecycleHook, message: 
   instance[key].push(hook)
 }
 
+/**
+ * 注册 `onMounted` 钩子：组件完成首次挂载后在 post 队列触发。
+ */
 export function onMounted(hook: LifecycleHook): void {
   injectLifecycleHook('mountedHooks', hook, runtimeCoreOnMountedOutsideSetup)
 }
 
+/**
+ * 注册 `onUnmounted` 钩子：组件卸载完成后在 post 队列触发。
+ */
 export function onUnmounted(hook: LifecycleHook): void {
   injectLifecycleHook('unmountedHooks', hook, runtimeCoreOnUnmountedOutsideSetup)
 }
 
+/**
+ * 注册 `onActivated` 钩子：KeepAlive 组件被激活后在 post 队列触发。
+ */
 export function onActivated(hook: LifecycleHook): void {
   injectLifecycleHook('activatedHooks', hook, runtimeCoreOnActivatedOutsideSetup)
 }
 
+/**
+ * 注册 `onDeactivated` 钩子：KeepAlive 组件被失活后在 post 队列触发。
+ */
 export function onDeactivated(hook: LifecycleHook): void {
   injectLifecycleHook('deactivatedHooks', hook, runtimeCoreOnDeactivatedOutsideSetup)
 }
 
+/**
+ * 注册 `onBeforeUpdate` 钩子：组件更新 patch 之前同步触发。
+ */
 export function onBeforeUpdate(hook: LifecycleHook): void {
   injectLifecycleHook('beforeUpdateHooks', hook, runtimeCoreOnBeforeUpdateOutsideSetup)
 }
 
+/**
+ * 注册 `onUpdated` 钩子：组件更新完成后在 post 队列触发。
+ */
 export function onUpdated(hook: LifecycleHook): void {
   injectLifecycleHook('updatedHooks', hook, runtimeCoreOnUpdatedOutsideSetup)
 }
 
+/**
+ * 将已入队的生命周期 post jobs 标记为过期，避免卸载后仍执行旧回调。
+ */
 export function invalidateLifecyclePostJobs(instance: UnknownComponentInstance): void {
   disposeSchedulerJob(instance.mountedHookJob)
   disposeSchedulerJob(instance.activatedHookJob)
@@ -127,6 +180,13 @@ export function invalidateLifecyclePostJobs(instance: UnknownComponentInstance):
   instance.deactivatedHookJob = undefined
 }
 
+/**
+ * 为组件分配稳定的 post-order id，保证 post 队列生命周期的父子顺序。
+ *
+ * @remarks
+ * - 在组件“首次挂载完成”时调用，序号单调递增。
+ * - post 队列 job 使用该 id 排序，从而保证子组件先于父组件执行。
+ */
 export function markComponentMounted(instance: UnknownComponentInstance): void {
   if (instance.postOrderId !== 0) {
     return
@@ -136,6 +196,9 @@ export function markComponentMounted(instance: UnknownComponentInstance): void {
   instance.postOrderId = componentPostOrderId
 }
 
+/**
+ * 将 `mountedHooks` 合并为一个 post job 入队，并以 postOrderId 排序。
+ */
 export function queueMountedHooks(instance: UnknownComponentInstance): void {
   if (instance.isUnmounted || instance.mountedHooks.length === 0) {
     return
@@ -160,6 +223,9 @@ export function queueMountedHooks(instance: UnknownComponentInstance): void {
   queuePostFlushCb(instance.mountedHookJob)
 }
 
+/**
+ * 将 `activatedHooks` 合并为一个 post job 入队，并保证与 `deactivated` 互斥。
+ */
 export function queueActivatedHooks(instance: UnknownComponentInstance): void {
   if (instance.isUnmounted || instance.activatedHooks.length === 0) {
     return
@@ -187,6 +253,9 @@ export function queueActivatedHooks(instance: UnknownComponentInstance): void {
   queuePostFlushCb(instance.activatedHookJob)
 }
 
+/**
+ * 在组件更新 patch 之前同步执行 `beforeUpdateHooks`。
+ */
 export function invokeBeforeUpdateHooks(instance: UnknownComponentInstance): void {
   if (instance.isUnmounted || instance.beforeUpdateHooks.length === 0) {
     return
@@ -195,6 +264,9 @@ export function invokeBeforeUpdateHooks(instance: UnknownComponentInstance): voi
   invokeHooks(instance, instance.beforeUpdateHooks, 'beforeUpdate')
 }
 
+/**
+ * 将 `updatedHooks` 合并为一个 post job 入队，确保同一轮更新只触发一次。
+ */
 export function queueUpdatedHooks(instance: UnknownComponentInstance): void {
   if (instance.isUnmounted || !instance.isMounted || instance.updatedHooks.length === 0) {
     return
@@ -219,6 +291,9 @@ export function queueUpdatedHooks(instance: UnknownComponentInstance): void {
   queuePostFlushCb(instance.updatedHookJob)
 }
 
+/**
+ * 将 `unmountedHooks` 合并为一个 post job 入队。
+ */
 export function queueUnmountedHooks(instance: UnknownComponentInstance): void {
   if (!instance.isMounted || instance.unmountedHooks.length === 0) {
     return
@@ -238,6 +313,9 @@ export function queueUnmountedHooks(instance: UnknownComponentInstance): void {
   queuePostFlushCb(instance.unmountedHookJob)
 }
 
+/**
+ * 将 `deactivatedHooks` 合并为一个 post job 入队，并保证与 `activated` 互斥。
+ */
 export function queueDeactivatedHooks(instance: UnknownComponentInstance): void {
   if (instance.isUnmounted || !instance.isMounted || instance.deactivatedHooks.length === 0) {
     return

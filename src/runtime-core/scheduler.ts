@@ -1,5 +1,19 @@
+/**
+ * runtime-core 的调度器实现：以微任务批量 flush 的方式合并更新任务。
+ *
+ * @remarks
+ * - 设计目标与 Vue3 scheduler 类似：支持按 id 排序、去重、递归更新上限与 pre/post 队列。
+ * - 该模块仅负责“何时执行”，不关心任务的具体语义（组件更新、watch 回调、生命周期 hook 等）。
+ */
 import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
 
+/**
+ * 调度器任务的最小接口。
+ *
+ * @remarks
+ * - `id` 用于稳定排序（常用组件 uid / postOrderId）；缺省按 Infinity 处理。
+ * - `queued`/`disposed` 由调度器内部维护，用于去重与卸载后的过期防护。
+ */
 export interface SchedulerJob {
   /** 用于排序的稳定 id（如组件 uid），缺省视为 Infinity。 */
   id?: number
@@ -241,6 +255,9 @@ function flushJobs(): void {
   }
 }
 
+/**
+ * Flush 渲染前队列：保持插入顺序执行，并允许回调在执行时继续入队本轮 pre 队列。
+ */
 function flushPreFlushCbs(seen: RecursionCountMap): void {
   if (preFlushQueue.length === 0) {
     return
@@ -269,6 +286,9 @@ function flushPreFlushCbs(seen: RecursionCountMap): void {
   preFlushQueue.length = 0
 }
 
+/**
+ * Flush 主队列：按 id 顺序执行已入队的更新任务，并允许 flush 期间插入新任务。
+ */
 function flushMainQueue(seen: RecursionCountMap): void {
   if (jobQueue.length === 0) {
     return
@@ -293,6 +313,13 @@ function flushMainQueue(seen: RecursionCountMap): void {
   flushIndex = -1
 }
 
+/**
+ * Flush 后置队列：复制并按 id 排序后执行，避免本轮追加导致遍历错乱。
+ *
+ * @remarks
+ * - 常用于生命周期 hook、watch flush: post 等需要在“渲染后”触发的回调。
+ * - 复制 + 清空策略允许回调在执行时再次入队下一轮任务。
+ */
 function flushPostFlushCbs(seen: RecursionCountMap): void {
   if (postFlushQueue.length === 0) {
     return

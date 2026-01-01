@@ -24,7 +24,6 @@ export function cleanupTestContainers(): void {
   }
 
   mountedContainers.clear()
-  document.body.innerHTML = ''
 }
 
 /** 创建不渲染内容的组件，用于触发 setup/生命周期但不产出 DOM。 */

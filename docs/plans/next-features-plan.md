@@ -64,7 +64,7 @@
 
 ### 6. 测试容器清理策略（优先级：低）
 
-- 现状：`cleanupTestContainers()` 会清空整个 `document.body`，潜在误删非本用例创建的 fixture。
+- 现状（已修复）：`cleanupTestContainers()` 不再清空整个 `document.body`，仅清理由测试创建并登记的容器节点。
 - 目标：只清理由测试创建的容器节点，避免全局副作用。
 - 参考：`docs/issues/top-level-issues.md`
 

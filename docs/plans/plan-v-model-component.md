@@ -4,6 +4,8 @@
 
 同时为非 DOM 宿主铺路：尽早把“DOM 表单适配”从 `jsx-runtime` 抽离到宿主层（优先落在 `runtime-dom`），避免 `jsx-runtime` 隐式依赖 DOM 事件/元素语义，阻碍跨宿主渲染器。
 
+> 编译期写回增强计划：`docs/plans/plan-tsx-compile-transform-v-model-writeback.md`（默认随 `miniVueCompilerPlugin` 启用 P0 静态路径写回）。
+
 ## Scope
 
 - In:

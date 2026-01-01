@@ -7,8 +7,8 @@ import type { ElementRef } from '@/runtime-dom/index.ts'
 import type { Ref } from '@/reactivity/index.ts'
 import type { PropsShape } from '@/shared/index.ts'
 
-/** `v-model` 仅支持可写 `Ref` 作为绑定目标。 */
-type ModelBinding = Ref
+/** `v-model` 支持可写 `Ref` 或可写左值，编译期会为非 Ref 生成写回闭包。 */
+type ModelBinding = Ref | unknown
 
 /** 组件 `v-model` 语法糖注入的 props（默认 `modelValue` 协议）。 */
 interface ComponentModelBindingProps {

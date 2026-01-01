@@ -1,7 +1,6 @@
 import type { PatchEnvironment } from '../patch/children-environment.ts'
 import type { PatchResult } from '../patch/types.ts'
 import { move, unmount as unmountVirtualNode } from '../patch/utils.ts'
-import type { KeepAliveCacheKey, KeepAliveContext } from './keep-alive-context.ts'
 import type { ComponentInstance } from '../component/context.ts'
 import { getCurrentInstance } from '../component/context.ts'
 import { onUnmounted, queueActivatedHooks, queueDeactivatedHooks } from '../component/lifecycle.ts'
@@ -9,9 +8,10 @@ import type { NormalizedVirtualNode } from '../normalize.ts'
 import type { RendererOptions } from '../renderer.ts'
 import type { RuntimeNormalizedVirtualNode } from '../patch/runtime-virtual-node.ts'
 import { asRuntimeVirtualNode } from '../virtual-node.ts'
+import { watch } from '../watch.ts'
+import type { KeepAliveCacheKey, KeepAliveContext } from './keep-alive-context.ts'
 import type { RenderOutput, SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
 import { Comment, Fragment, isVirtualNode } from '@/jsx-foundation/index.ts'
-import { watch } from '../watch.ts'
 import {
   runtimeCoreKeepAliveInvalidChild,
   runtimeCoreKeepAliveMultipleChildren,
@@ -30,25 +30,27 @@ export const KeepAlive: SetupComponent<KeepAliveProps> = (props) => {
   const instance = getCurrentInstance() as
     | ComponentInstance<unknown, WeakKey, unknown, SetupComponent>
     | undefined
-  const keepAliveContext = instance?.keepAliveContext as
-    | KeepAliveContext<unknown, WeakKey, unknown>
-    | undefined
+  const keepAliveContext = instance?.keepAliveContext
 
   if (keepAliveContext) {
     keepAliveContext.max = resolveMax(props.max)
 
     watch(
-      () => [props.include, props.exclude],
       () => {
-        pruneCache(keepAliveContext, (name) =>
-          shouldIncludeComponent(name, props.include, props.exclude),
-        )
+        return [props.include, props.exclude]
+      },
+      () => {
+        pruneCache(keepAliveContext, (name) => {
+          return shouldIncludeComponent(name, props.include, props.exclude)
+        })
       },
       { flush: 'post' },
     )
 
     onUnmounted(() => {
-      pruneCache(keepAliveContext, () => false)
+      pruneCache(keepAliveContext, () => {
+        return false
+      })
     })
   }
 
@@ -144,14 +146,7 @@ export function cacheKeepAliveSubtree<
   setCacheEntry(runtimeVNode.keepAliveInstance, cacheKey, runtimeVNode)
 
   if (runtimeVNode.component) {
-    queueKeepAliveActivated(
-      runtimeVNode.component as ComponentInstance<
-        HostNode,
-        HostElement,
-        HostFragment,
-        SetupComponent
-      >,
-    )
+    queueKeepAliveActivated(runtimeVNode.component)
   }
 }
 
@@ -203,9 +198,7 @@ export function activateKeepAlive<
   setCacheEntry(keepAliveContext, cacheKey, next)
 
   if (instance) {
-    queueKeepAliveActivated(
-      instance as ComponentInstance<HostNode, HostElement, HostFragment, SetupComponent>,
-    )
+    queueKeepAliveActivated(instance)
   }
 
   return result
@@ -238,9 +231,7 @@ export function deactivateKeepAlive<
   if (instance) {
     instance.isDeactivated = true
     instance.container = keepAliveInstance.storageContainer
-    queueKeepAliveDeactivated(
-      instance as ComponentInstance<HostNode, HostElement, HostFragment, SetupComponent>,
-    )
+    queueKeepAliveDeactivated(instance)
   }
 }
 
@@ -279,9 +270,7 @@ function queueComponentSubTreeHooks<
     HostElement,
     HostFragment
   >
-  const childInstance = runtimeSubTree.component as
-    | ComponentInstance<HostNode, HostElement, HostFragment, SetupComponent>
-    | undefined
+  const childInstance = runtimeSubTree.component
 
   if (childInstance) {
     queue(childInstance)
@@ -357,13 +346,17 @@ function matchesPattern(name: string | undefined, pattern: KeepAlivePattern): bo
   }
 
   if (Array.isArray(pattern)) {
-    return pattern.some((item) => matchesPattern(name, item as KeepAlivePattern))
+    return pattern.some((item) => {
+      return matchesPattern(name, item as KeepAlivePattern)
+    })
   }
 
   if (typeof pattern === 'string') {
     return pattern
       .split(',')
-      .map((value) => value.trim())
+      .map((value) => {
+        return value.trim()
+      })
       .filter(Boolean)
       .includes(name)
   }
@@ -397,7 +390,7 @@ function setCacheEntry<
   refreshKeyOrder(context.keys, key)
 
   if (context.max !== undefined && context.cache.size > context.max) {
-    const oldestKey = context.keys.values().next().value as KeepAliveCacheKey | undefined
+    const oldestKey = context.keys.values().next().value
 
     if (oldestKey !== undefined && oldestKey !== key) {
       pruneCacheEntry(context, oldestKey)

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
-import { miniVueCompilerPlugin } from '@/index.ts'
 import { readVitePluginFixture } from './_fixtures.ts'
+import { miniVueCompilerPlugin } from '@/index.ts'
 
 function expectContainsInOrder(code: string | undefined, parts: string[]): void {
   expect(code).toBeDefined()

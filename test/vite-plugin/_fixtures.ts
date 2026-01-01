@@ -9,7 +9,7 @@ export function readVitePluginFixture(path: string): string {
   const raw = fixtureModules[key]
 
   if (typeof raw !== 'string') {
-    throw new Error(`未找到 fixture: ${path}`)
+    throw new TypeError(`未找到 fixture: ${path}`)
   }
 
   let content = raw

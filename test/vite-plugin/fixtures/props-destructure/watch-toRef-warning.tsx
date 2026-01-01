@@ -3,7 +3,11 @@ import { toRef, watch } from '@/index.ts'
 
 export const App: SetupComponent<{ foo: { bar: number } }> = (props) => {
   const { foo } = props
+
   watch(foo, () => {})
   toRef(foo, 'bar')
-  return () => <div>{foo.bar}</div>
+
+  return () => {
+    return <div>{foo.bar}</div>
+  }
 }

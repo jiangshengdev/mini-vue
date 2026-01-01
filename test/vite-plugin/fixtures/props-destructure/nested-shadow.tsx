@@ -4,12 +4,16 @@ export const App: SetupComponent = (props) => {
   const { foo } = props
   const render = () => {
     const foo = 1
+
     return foo
   }
-  return () => (
-    <div>
-      {foo}
-      {render()}
-    </div>
-  )
+
+  return () => {
+    return (
+      <div>
+        {foo}
+        {render()}
+      </div>
+    )
+  }
 }

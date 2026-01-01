@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
-import { miniVueDevtoolsSetupStateNamesPlugin } from '@/index.ts'
 import { readVitePluginFixture } from './_fixtures.ts'
+import { miniVueDevtoolsSetupStateNamesPlugin } from '@/index.ts'
 
 function collectImportStatementsFrom(code: string, source: string): string[] {
   const lines = code.split('\n')
@@ -13,15 +13,13 @@ function collectImportStatementsFrom(code: string, source: string): string[] {
   for (const line of lines) {
     const trimmed = line.trimStart()
 
-    if (!capturing) {
-      if (trimmed.startsWith('import ')) {
-        capturing = true
-        current = [line]
-      } else {
-        continue
-      }
-    } else {
+    if (capturing) {
       current.push(line)
+    } else if (trimmed.startsWith('import ')) {
+      capturing = true
+      current = [line]
+    } else {
+      continue
     }
 
     if (line.includes(sourceToken)) {
@@ -38,10 +36,13 @@ function expectImportsFrom(code: string | undefined, source: string, names: stri
   expect(code).toBeDefined()
 
   const statements = collectImportStatementsFrom(code ?? '', source)
+
   expect(statements.length).toBeGreaterThan(0)
 
   const matched = statements.some((statement) => {
-    return names.every((name) => statement.includes(name))
+    return names.every((name) => {
+      return statement.includes(name)
+    })
   })
 
   expect(matched).toBe(true)

@@ -1,8 +1,10 @@
 # Repository Guidelines
 
+本文件与 `.github/copilot-instructions.md` 规则保持同步（修改任一文件，请同步更新另一份）。
+
 ## 项目结构与模块划分
 
-- `src/`：TypeScript 源码；核心分区有 `runtime-core/`、`runtime-dom/`、`reactivity/`、`router/`、`jsx-runtime/`，通用工具在 `shared/`，对外入口为 `src/index.ts`。
+- `src/`：TypeScript 源码；核心分区有 `runtime-core/`、`runtime-dom/`、`reactivity/`、`router/`、`jsx-foundation/`、`jsx-runtime/`、`messages/`、`shared/`，对外入口为 `src/index.ts`（JSX 入口：`src/jsx-runtime.ts` / `src/jsx-dev-runtime.ts`）。
 - `test/`：与 `src` 结构一一对应的 Vitest 用例（如 `test/reactivity/reactive.test.ts`），全局初始化在 `test/setup.ts`。
 - 其他目录：`docs/`（VitePress 文档）、`playground/`（Vite 试玩与手动验证）、`scripts/`（导入/边界检查脚本）、`dist/`（构建产物）、`public/`（静态资源）。
 
@@ -11,8 +13,16 @@
 - 安装：`pnpm install`。
 - 开发/构建：`pnpm run dev`（tsdown watch）、`pnpm run build`（tsdown + JSX shim 生成）。
 - Playground：`pnpm run play`（开发）、`pnpm run play:build` + `pnpm run play:preview`（验证产物）。
-- 测试：`pnpm run test`（Vitest + jsdom）、`pnpm run test:browser`（Playwright）、`pnpm run test:inspect`（调试）。
+- 测试：`pnpm run test`（Vitest + jsdom）、`pnpm run test:browser`（Vitest Browser + Playwright）、`pnpm run test:e2e`（Playwright E2E）、`pnpm run test:inspect`（调试）。
 - 质量门禁：`pnpm run fmt`（Prettier）、`pnpm run lint`（oxlint + ESLint）、`pnpm run xo`、`pnpm run typecheck`（tsc）、`pnpm run check`（导入/边界规则）。提 PR 前建议跑 `pnpm run preflight` 或 `pnpm run ci`。
+
+## 本项目特有约定（TS / 导入 / 边界）
+
+- TypeScript ESM：源码内部导入保持显式 `.ts` 扩展名（`allowImportingTsExtensions: true`）。
+- 路径别名：`@/* -> src/*`，`#/* -> playground/src/*`；`jsxImportSource: '@'`。
+- `src` 一级目录视为边界：在同一边界内部禁止用 `@/当前边界/...`，必须用相对路径（对应检查：`scripts/check/import/check-src-import-boundary.ts`）。
+  - ✅ `src/reactivity/**` 内：`import { isNil } from '@/shared/index.ts'`
+  - ❌ `src/reactivity/**` 内：`import { reactive } from '@/reactivity/index.ts'`
 
 ## 环境判断与 CI
 
@@ -24,7 +34,7 @@
 
 ## 代码风格与命名
 
-- TypeScript + ESM，内部导入可用 `@/` 别名避免相对路径穿越；模块优先使用具名导出与 index barrel。
+- TypeScript + ESM；模块优先使用具名导出与 index barrel；跨边界导入可用 `@/` 别名避免相对路径穿越（边界内导入遵循上面的边界规则）。
 - 导出约定：除仓库顶级入口文件（如 `src/index.ts`、`src/jsx-runtime.ts`、`src/jsx-dev-runtime.ts`）外，跨文件的重导出**只能**写在同级 `index.ts` 中；其他任何命名文件禁止通过 `export ... from` / `export * from` 重导出其他模块实现（含类型与值）。需要聚合导出时请新增/调整对应目录的 `index.ts`。
 - 格式化由 Prettier（2 空格、单引号）控制，ESLint/Stylistic、oxlint、XO 共同约束风格；提交前请先格式化，否则 CI 会拒绝。
 - 目录/文件名用 kebab-case，变量/函数 camelCase，类型 PascalCase；测试目录与源码保持平行以满足 `scripts/check` 边界规则。
@@ -45,6 +55,9 @@
 ## 其他
 
 - 更完整的 Agent 行为规范见 [`.github/copilot-instructions.md`](.github/copilot-instructions.md)；自动化/工具链细节请保持同步更新两份文档。
+- 不要主动运行格式化/静态检查命令（`pnpm run fmt`/`pnpm run lint`/`pnpm run typecheck`/`pnpm run xo`/`pnpm run preflight`/`pnpm run ci`/`pnpm run check`）；测试允许执行。
+- 生成/建议提交信息时，遵循提交规范：[`/.copilot-commit-message-instructions.md`](.copilot-commit-message-instructions.md)
+- 删除文件/目录必须走命令行 `rm`/`rm -r`，且只能使用从仓库根目录起算的相对路径。
 - Vitest 浏览器模式限制：
   - 禁用会阻塞线程的同步弹窗（`alert`/`confirm` 等）；Vitest 会提供默认 mock，建议用自定义 mock 保持可控。
   - ESM 模块命名空间不可被 `vi.spyOn`，需要 `vi.mock(path, { spy: true })` 再通过 `vi.mocked` 调整实现；若要改写导出的可变值，请暴露 setter 方法。

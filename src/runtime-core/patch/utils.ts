@@ -1,5 +1,6 @@
 import type { NormalizedChildren, NormalizedVirtualNode } from '../normalize.ts'
 import type { RendererOptions } from '../renderer.ts'
+import { deactivateKeepAlive } from '../components/keep-alive.ts'
 import type { RuntimeNormalizedVirtualNode } from './runtime-virtual-node.ts'
 import { asRuntimeNormalizedVirtualNode } from './runtime-virtual-node.ts'
 import { Fragment, Text } from '@/jsx-foundation/index.ts'
@@ -23,6 +24,17 @@ export function unmount<
 ): void {
   const runtime = asRuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>(virtualNode)
   const { handle } = runtime
+
+  if (
+    runtime.shouldKeepAlive &&
+    runtime.keepAliveInstance &&
+    typeof virtualNode.type === 'function' &&
+    runtime.component
+  ) {
+    deactivateKeepAlive(options, runtime)
+
+    return
+  }
 
   if (handle) {
     /* `handle.teardown` 会统一处理组件 `effect`、事件清理、以及多节点/片段的宿主移除。 */

@@ -1,4 +1,5 @@
 import { resolveComponentProps } from '../component/props.ts'
+import { activateKeepAlive } from '../components/keep-alive.ts'
 import { assignElementRef, resolveElementRefBinding } from '../mount/element.ts'
 import type { NormalizedVirtualNode } from '../normalize.ts'
 import type { RendererOptions } from '../renderer.ts'
@@ -43,6 +44,17 @@ export function patchChild<
   if (!previous) {
     if (!next) {
       return { ok: true }
+    }
+
+    const runtimeNext = asRuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>(next)
+
+    if (runtimeNext.keptAlive && runtimeNext.keepAliveInstance) {
+      const activated = activateKeepAlive(options, runtimeNext, environment, patchChild)
+
+      return {
+        ok: activated.ok,
+        usedAnchor: activated.usedAnchor ?? environment.anchor,
+      }
     }
 
     /* `patch` 阶段复用 `mount` 能力：由 `mountChildInEnvironment` 负责创建宿主节点并一次性插入到锚点前。 */
@@ -297,6 +309,7 @@ function patchComponent<
   /* 复用旧组件实例：同步宿主引用，并将 `next` 绑定到同一个 `component` 上。 */
   syncRuntimeMetadata(runtimePrevious, runtimeNext, { component: instance })
   instance.virtualNode = runtimeNext
+  instance.keepAliveContext = runtimeNext.keepAliveInstance ?? instance.keepAliveContext
   instance.vnodeHandle = runtimeNext.handle
   /* 组件 `props` 需要走规范化流程（包含默认值/`attrs` 等策略），避免直接透传 raw `props`。 */
   const nextProps = resolveComponentProps(next)

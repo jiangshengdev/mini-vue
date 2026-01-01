@@ -6,6 +6,7 @@ import type { MountedHandle } from '../mount'
 import type { NormalizedVirtualNode } from '../normalize.ts'
 import type { SchedulerJob } from '../scheduler.ts'
 import type { RuntimeVirtualNode } from '../virtual-node.ts'
+import type { KeepAliveContext } from '../components/keep-alive-context.ts'
 import type { ElementProps, RenderFunction, SetupComponent } from '@/jsx-foundation/index.ts'
 import type { EffectScope, ReactiveEffect } from '@/reactivity/index.ts'
 import type { PlainObject } from '@/shared/index.ts'
@@ -51,6 +52,8 @@ export interface ComponentInstance<
   parent?: UnknownComponentInstance
   /** 应用级上下文（root `provides` 等），沿组件树结构稳定传播。 */
   appContext?: AppContext
+  /** 若当前组件为 `KeepAlive`，记录其实例上下文。 */
+  keepAliveContext?: KeepAliveContext<HostNode, HostElement, HostFragment>
   /** 依赖注入容器，默认通过原型链继承父/应用级 `provides`。 */
   provides: Provides
   /** 组件定义本身（即 `setup` 函数），保存以便多次渲染重用。 */
@@ -58,7 +61,7 @@ export interface ComponentInstance<
   /** 组件名称（来自函数名），仅用于调试/标注场景。 */
   readonly componentName?: string
   /** 宿主容器或片段引用，挂载子树时作为根。 */
-  readonly container: HostElement | HostFragment
+  container: HostElement | HostFragment
   /** 组件接收到的只读 `props` 代理。 */
   props: ElementProps<T>
   /** 允许内部同步的浅响应式 `props` 源对象。 */
@@ -99,20 +102,30 @@ export interface ComponentInstance<
   isMounted: boolean
   /** 组件是否已完成卸载（用于过期防护与跳过重复调度）。 */
   isUnmounted: boolean
+  /** 组件是否处于 `KeepAlive` 失活状态。 */
+  isDeactivated: boolean
   /** `onMounted` 注册的回调（按注册顺序执行）。 */
   mountedHooks: LifecycleHook[]
   /** `onUnmounted` 注册的回调（按注册顺序执行）。 */
   unmountedHooks: LifecycleHook[]
+  /** `onActivated` 注册的回调（按注册顺序执行）。 */
+  activatedHooks: LifecycleHook[]
+  /** `onDeactivated` 注册的回调（按注册顺序执行）。 */
+  deactivatedHooks: LifecycleHook[]
   /** `onBeforeUpdate` 注册的回调（按注册顺序执行）。 */
   beforeUpdateHooks: LifecycleHook[]
   /** `onUpdated` 注册的回调（按注册顺序执行）。 */
   updatedHooks: LifecycleHook[]
   /** `onMounted` 对应的 post 队列 job（用于过期防护）。 */
   mountedHookJob?: SchedulerJob
+  /** `onActivated` 对应的 post 队列 job。 */
+  activatedHookJob?: SchedulerJob
   /** `onUpdated` 对应的 post 队列 job（用于去重与过期防护）。 */
   updatedHookJob?: SchedulerJob
   /** `onUnmounted` 对应的 post 队列 job（用于去重）。 */
   unmountedHookJob?: SchedulerJob
+  /** `onDeactivated` 对应的 post 队列 job。 */
+  deactivatedHookJob?: SchedulerJob
 }
 
 /** 兼容任意宿主类型的组件实例别名，简化当前实例管理与跨模块传递。 */

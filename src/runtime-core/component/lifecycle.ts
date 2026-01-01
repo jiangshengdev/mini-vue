@@ -8,7 +8,9 @@ import {
   unsetCurrentInstance,
 } from './context.ts'
 import {
+  runtimeCoreOnActivatedOutsideSetup,
   runtimeCoreOnBeforeUpdateOutsideSetup,
+  runtimeCoreOnDeactivatedOutsideSetup,
   runtimeCoreOnMountedOutsideSetup,
   runtimeCoreOnUnmountedOutsideSetup,
   runtimeCoreOnUpdatedOutsideSetup,
@@ -16,9 +18,15 @@ import {
 import { withoutTracking } from '@/reactivity/index.ts'
 import { __DEV__, errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
 
-type LifecycleHookType = 'mounted' | 'unmounted' | 'beforeUpdate' | 'updated'
+type LifecycleHookType = 'mounted' | 'unmounted' | 'beforeUpdate' | 'updated' | 'activated' | 'deactivated'
 
-type HookStorageKey = 'mountedHooks' | 'unmountedHooks' | 'beforeUpdateHooks' | 'updatedHooks'
+type HookStorageKey =
+  | 'mountedHooks'
+  | 'unmountedHooks'
+  | 'beforeUpdateHooks'
+  | 'updatedHooks'
+  | 'activatedHooks'
+  | 'deactivatedHooks'
 
 let componentPostOrderId = 0
 
@@ -86,6 +94,14 @@ export function onUnmounted(hook: LifecycleHook): void {
   injectLifecycleHook('unmountedHooks', hook, runtimeCoreOnUnmountedOutsideSetup)
 }
 
+export function onActivated(hook: LifecycleHook): void {
+  injectLifecycleHook('activatedHooks', hook, runtimeCoreOnActivatedOutsideSetup)
+}
+
+export function onDeactivated(hook: LifecycleHook): void {
+  injectLifecycleHook('deactivatedHooks', hook, runtimeCoreOnDeactivatedOutsideSetup)
+}
+
 export function onBeforeUpdate(hook: LifecycleHook): void {
   injectLifecycleHook('beforeUpdateHooks', hook, runtimeCoreOnBeforeUpdateOutsideSetup)
 }
@@ -96,9 +112,13 @@ export function onUpdated(hook: LifecycleHook): void {
 
 export function invalidateLifecyclePostJobs(instance: UnknownComponentInstance): void {
   disposeSchedulerJob(instance.mountedHookJob)
+  disposeSchedulerJob(instance.activatedHookJob)
   disposeSchedulerJob(instance.updatedHookJob)
+  disposeSchedulerJob(instance.deactivatedHookJob)
   instance.mountedHookJob = undefined
+  instance.activatedHookJob = undefined
   instance.updatedHookJob = undefined
+  instance.deactivatedHookJob = undefined
 }
 
 export function markComponentMounted(instance: UnknownComponentInstance): void {
@@ -132,6 +152,33 @@ export function queueMountedHooks(instance: UnknownComponentInstance): void {
   })()
 
   queuePostFlushCb(instance.mountedHookJob)
+}
+
+export function queueActivatedHooks(instance: UnknownComponentInstance): void {
+  if (instance.isUnmounted || instance.activatedHooks.length === 0) {
+    return
+  }
+
+  disposeSchedulerJob(instance.deactivatedHookJob)
+  instance.deactivatedHookJob = undefined
+
+  instance.activatedHookJob ??= (() => {
+    const job: SchedulerJob = () => {
+      instance.activatedHookJob = undefined
+
+      if (instance.isUnmounted || instance.isDeactivated) {
+        return
+      }
+
+      invokeHooks(instance, instance.activatedHooks, 'activated')
+    }
+
+    job.id = instance.postOrderId
+
+    return job
+  })()
+
+  queuePostFlushCb(instance.activatedHookJob)
 }
 
 export function invokeBeforeUpdateHooks(instance: UnknownComponentInstance): void {
@@ -183,4 +230,26 @@ export function queueUnmountedHooks(instance: UnknownComponentInstance): void {
   })()
 
   queuePostFlushCb(instance.unmountedHookJob)
+}
+
+export function queueDeactivatedHooks(instance: UnknownComponentInstance): void {
+  if (instance.isUnmounted || !instance.isMounted || instance.deactivatedHooks.length === 0) {
+    return
+  }
+
+  disposeSchedulerJob(instance.activatedHookJob)
+  instance.activatedHookJob = undefined
+
+  instance.deactivatedHookJob ??= (() => {
+    const job: SchedulerJob = () => {
+      instance.deactivatedHookJob = undefined
+      invokeHooks(instance, instance.deactivatedHooks, 'deactivated')
+    }
+
+    job.id = instance.postOrderId
+
+    return job
+  })()
+
+  queuePostFlushCb(instance.deactivatedHookJob)
 }

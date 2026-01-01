@@ -1,3 +1,4 @@
+import type { KeepAliveCacheKey, KeepAliveContext } from './components/keep-alive-context.ts'
 import type { ComponentInstance } from './component/context.ts'
 import type { MountedHandle } from './mount/handle.ts'
 import type { SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
@@ -23,6 +24,14 @@ export interface RuntimeVirtualNode<
   component?: ComponentInstance<HostNode, HostElement, HostFragment, SetupComponent>
   /** 当前 `virtualNode` 的挂载句柄，封装节点集合与 `teardown` 能力。 */
   handle?: MountedHandle<HostNode>
+  /** 当前组件是否应被 `KeepAlive` 缓存并在卸载时走 `deactivate`。 */
+  shouldKeepAlive?: boolean
+  /** 当前组件是否来自 `KeepAlive` 缓存（被激活的状态）。 */
+  keptAlive?: boolean
+  /** `KeepAlive` 实例上下文，用于激活/失活与缓存管理。 */
+  keepAliveInstance?: KeepAliveContext<HostNode, HostElement, HostFragment>
+  /** `KeepAlive` 使用的缓存 key。 */
+  keepAliveCacheKey?: KeepAliveCacheKey
 }
 
 /**

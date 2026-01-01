@@ -12,20 +12,34 @@
  */
 import { domRendererOptions } from './renderer-options.ts'
 import type { SetupComponent } from '@/jsx-foundation/index.ts'
-import { runtimeDomContainerNotFound } from '@/messages/index.ts'
+import { runtimeDomContainerNotFound, runtimeDomDocumentUnavailable } from '@/messages/index.ts'
 import type { AppInstance } from '@/runtime-core/index.ts'
 import { createAppInstance, createRenderer } from '@/runtime-core/index.ts'
 import type { PropsShape } from '@/shared/index.ts'
 import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
 
-const { render: renderDomRootImpl, unmount: unmountContainer } = createRenderer(domRendererOptions)
+type DomRenderer = ReturnType<typeof createRenderer<Node, Element, DocumentFragment>>
+
+let cachedDomRenderer: DomRenderer | undefined
+
+function getDomRenderer(): DomRenderer {
+  cachedDomRenderer ??= createRenderer(domRendererOptions)
+
+  return cachedDomRenderer
+}
 
 /**
  * DOM 宿主复用的根级渲染函数，可直接挂载 JSX 或组件树。
  *
  * @public
  */
-export const renderDomRoot = renderDomRootImpl
+export const renderDomRoot: DomRenderer['render'] = (virtualNode, container) => {
+  getDomRenderer().render(virtualNode, container)
+}
+
+function unmountContainer(container: Element): void {
+  getDomRenderer().unmount(container)
+}
 
 /**
  * DOM 宿主应用的内部状态。
@@ -67,6 +81,10 @@ interface DomAppHmrState {
 function resolveContainer(target: string | Element): Element | undefined {
   /* 字符串容器走 querySelector，以支持常见挂载写法如 `#app`。 */
   if (typeof target === 'string') {
+    if (typeof document === 'undefined') {
+      return undefined
+    }
+
     const resolved = runSilent(
       () => {
         return document.querySelector(target) ?? undefined
@@ -84,6 +102,14 @@ function resolveContainer(target: string | Element): Element | undefined {
   return target
 }
 
+function isDomElementLike(value: unknown): value is Element {
+  if (typeof value !== 'object' || value === null) {
+    return false
+  }
+
+  return (value as { nodeType?: unknown }).nodeType === 1
+}
+
 /**
  * DOM 版本的 mount，负责解析容器并委托基础实例挂载。
  *
@@ -92,6 +118,10 @@ function resolveContainer(target: string | Element): Element | undefined {
  * @throws 若容器解析失败则抛出错误
  */
 function mountDomApp(state: DomAppState, target: string | Element): void {
+  if (typeof document === 'undefined' && typeof target === 'string') {
+    throw new TypeError(runtimeDomDocumentUnavailable, { cause: target })
+  }
+
   /* 统一将字符串选择器转换为真实节点，方便后续复用。 */
   const container = resolveContainer(target)
 
@@ -131,8 +161,8 @@ function remountDomApp(state: DomAppState): void {
 
   /* 若节点已断开连接，重新根据字符串选择器解析，保证挂载位置可恢复。 */
   if (
-    target instanceof Element &&
-    !target.isConnected &&
+    isDomElementLike(target) &&
+    (target as { isConnected?: boolean }).isConnected === false &&
     typeof state.lastMountTarget === 'string'
   ) {
     target = state.lastMountTarget
@@ -216,8 +246,14 @@ export function createApp(rootComponent: SetupComponent, rootProps?: PropsShape)
  * @param state - 应用内部状态
  */
 function ensureDomHmrLifecycle(state: DomAppState): void {
-  /* 仅在 Vite Dev 环境下存在 import.meta.hot。 */
-  const { hot } = import.meta
+  /* 仅在 Vite Dev 环境下存在 import.meta.hot；非 Vite/SSR 场景应安全降级。 */
+  let hot: unknown
+
+  try {
+    hot = (import.meta as { hot?: unknown }).hot
+  } catch {
+    return
+  }
 
   /* 当 HMR 环境不存在时无需注册任何回调。 */
   if (!hot) {
@@ -258,12 +294,15 @@ function ensureDomHmrLifecycle(state: DomAppState): void {
   }
 
   /* 针对 Vite 的 before/after 钩子注册挂载/卸载逻辑。 */
-  hot.on('vite:beforeUpdate', prepareRemount)
-  hot.on('vite:beforeFullReload', prepareRemount)
-  hot.on('vite:afterUpdate', remountIfNeeded)
+  ;(hot as { on: (event: string, cb: () => void) => void }).on('vite:beforeUpdate', prepareRemount)
+  ;(hot as { on: (event: string, cb: () => void) => void }).on(
+    'vite:beforeFullReload',
+    prepareRemount,
+  )
+  ;(hot as { on: (event: string, cb: () => void) => void }).on('vite:afterUpdate', remountIfNeeded)
 
   /* Vite 触发 dispose 时若仍挂载，需要显式卸载容器。 */
-  hot.dispose(() => {
+  ;(hot as { dispose: (cb: () => void) => void }).dispose(() => {
     if (!state.isMounted) {
       return
     }

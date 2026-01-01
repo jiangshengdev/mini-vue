@@ -13,6 +13,12 @@ export function createTestContainer(): HTMLDivElement {
 }
 
 export function cleanupTestContainers(): void {
+  if (typeof document === 'undefined') {
+    mountedContainers.clear()
+
+    return
+  }
+
   for (const element of mountedContainers) {
     element.remove()
   }

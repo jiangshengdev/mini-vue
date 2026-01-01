@@ -5,6 +5,10 @@ void jestDom
 
 afterEach(async () => {
   try {
+    if (typeof document === 'undefined') {
+      return
+    }
+
     /* 延迟加载容器清理，避免顶层引入 helpers 触发运行时代码加载。 */
     const { cleanupTestContainers } = await import('./helpers.ts')
 

@@ -49,6 +49,7 @@ export {
 } from './runtime-core.ts'
 export {
   runtimeDomContainerNotFound,
+  runtimeDomDocumentUnavailable,
   runtimeDomInvalidStyleValue,
   runtimeDomUnsupportedAttrValue,
 } from './runtime-dom.ts'

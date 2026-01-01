@@ -17,6 +17,14 @@
 export const runtimeDomContainerNotFound = 'createApp: 未找到可用的挂载容器'
 
 /**
+ * DOM 不可用的错误
+ *
+ * SSR/Node 等无 DOM 环境下，如果用户尝试使用字符串选择器挂载，会触发该错误。
+ */
+export const runtimeDomDocumentUnavailable =
+  'createApp: 当前环境不存在 document，无法使用选择器挂载'
+
+/**
  * Style 值类型不合法的警告
  *
  * 内联 style 的属性值仅支持字符串或数字类型；

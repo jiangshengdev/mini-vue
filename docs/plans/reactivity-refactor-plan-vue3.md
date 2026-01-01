@@ -9,16 +9,16 @@
 
 ## Action items
 
-[ ] 对齐基线：补齐/整理当前实现与 Vue3 的差异清单（以 `core/packages/reactivity/src/reactive.ts`、`core/packages/reactivity/src/baseHandlers.ts` 为参考），明确哪些属于“本次必须对齐”、哪些属于“暂不支持类型”。
-[ ] 重构代理创建：在 `src/reactivity/reactive.ts` 引入 Vue3 风格的 `createReactiveObject`（或等价抽象），统一处理：- 非对象/Invalid：`__DEV__` 下 `warn`，返回原值（不再 `throw`）。- 代理幂等：`reactive(readonly(x))` 返回 `readonly(x)`；`readonly(reactive(x))` 允许创建只读包裹；重复调用复用缓存。- 目标类型：仅放开 `Array`、`isPlainObject`、`Ref`（其余一律 Invalid）。- Invalid 判定对齐：包含 `Object.isExtensible(target) === false`（`preventExtensions`/`seal`/`freeze`）。
-[ ] 调整 `toRaw`：将 `src/reactivity/to-raw.ts` 的 `toRaw` 改为递归解包（对齐 Vue3：`raw ? toRaw(raw) : observed`），并放宽为“只要存在 `rawKey` 就解包”，避免被“支持类型”短路。
-[ ] 对齐 handlers：在 `src/reactivity/internals/base-handlers.ts` 将 get/set 行为向 Vue3 靠拢：- track 规则：仅 mutable/shallowReactive 追踪；readonly/shallowReadonly 不追踪（含 `has`/`ownKeys`）。- shallow 规则：浅层模式应 **提前返回**，从而 “不解包顶层 Ref / 不递归代理嵌套对象”。- Ref receiver：对齐 “proxy wrapping a ref” 的 `Reflect.get/Reflect.set` receiver（`isRef(target) ? target : receiver`），避免 Ref 类方法/访问器被 proxy receiver 干扰。- readonly 解包 Ref：对齐 Vue3，在 deep readonly 下若 `ref.value` 为对象，返回 `readonly(value)`，避免通过 Ref 解包逃逸写入。
-[ ] 放开 `reactive(ref)`：移除 `reactive`/`shallowReactive` 对 Ref 的特判“直接返回 Ref 本体”，改为统一走 proxy（与 Vue3 一致的统一模型）。
-[ ] 对齐 `isReactive`/`isReadonly`：让 `isReactive(readonly(reactive(x))) === true`（对齐 Vue3 的 “readonly 包裹 reactive 仍视为 reactive”），并确保对 Ref 目标同样可用。
-[ ] runtime-core props 改造：调整 `src/runtime-core/component/props.ts` 等路径，使组件内部的 props 源对象为 `shallowReactive`，对外暴露/传递给 render 的为 `shallowReadonly(propsSource)`，从而在 shallowReadonly 不追踪的前提下依然能通过内层 reactive 建立依赖（贴近 Vue3 机制）。
-[ ] 更新单测：重写/新增用例覆盖关键行为变化，重点包含：- `reactive(ref)`/`shallowReactive(ref)` 返回 proxy（且 `isRef` 仍为 true）。- shallowReactive/shallowReadonly 顶层 Ref **不解包**（对象属性与数组索引两类场景）。- Invalid：原始值与不支持对象类型返回原值 + `__DEV__` warn（替换原先 “抛错” 用例）。- `toRaw` 递归：`toRaw(readonly(reactive(x)))`、`toRaw(shallowReadonly(reactive(x)))` 还原到同一 raw。
-[ ] 文档同步：更新 `docs/issues/reactivity-issues.md` 与必要的 API 文档，明确本次行为对齐点与“暂不支持类型”的策略（warn + return 原值），并在需要处用注释标注与 Vue3 的差异/后续扩展计划。
-[ ] 验证回归：跑 `pnpm run test`、`pnpm run ci`，并重点回归 “props 更新触发组件重渲染” 的场景（必要时补充 playground/浏览器套件用例）。
+[x] 对齐基线：补齐/整理当前实现与 Vue3 的差异清单（以 `core/packages/reactivity/src/reactive.ts`、`core/packages/reactivity/src/baseHandlers.ts` 为参考），明确哪些属于“本次必须对齐”、哪些属于“暂不支持类型”。
+[x] 重构代理创建：在 `src/reactivity/reactive.ts` 引入 Vue3 风格的 `createReactiveObject`（或等价抽象），统一处理：- 非对象/Invalid：`__DEV__` 下 `warn`，返回原值（不再 `throw`）。- 代理幂等：`reactive(readonly(x))` 返回 `readonly(x)`；`readonly(reactive(x))` 允许创建只读包裹；重复调用复用缓存。- 目标类型：仅放开 `Array`、`isPlainObject`、`Ref`（其余一律 Invalid）。- Invalid 判定对齐：包含 `Object.isExtensible(target) === false`（`preventExtensions`/`seal`/`freeze`）。
+[x] 调整 `toRaw`：将 `src/reactivity/to-raw.ts` 的 `toRaw` 改为递归解包（对齐 Vue3：`raw ? toRaw(raw) : observed`），并放宽为“只要存在 `rawKey` 就解包”，避免被“支持类型”短路。
+[x] 对齐 handlers：在 `src/reactivity/internals/base-handlers.ts` 将 get/set 行为向 Vue3 靠拢：- track 规则：仅 mutable/shallowReactive 追踪；readonly/shallowReadonly 不追踪（含 `has`/`ownKeys`）。- shallow 规则：浅层模式应 **提前返回**，从而 “不解包顶层 Ref / 不递归代理嵌套对象”。- Ref receiver：对齐 “proxy wrapping a ref” 的 `Reflect.get/Reflect.set` receiver（`isRef(target) ? target : receiver`），避免 Ref 类方法/访问器被 proxy receiver 干扰。- readonly 解包 Ref：对齐 Vue3，在 deep readonly 下若 `ref.value` 为对象，返回 `readonly(value)`，避免通过 Ref 解包逃逸写入。
+[x] 放开 `reactive(ref)`：移除 `reactive`/`shallowReactive` 对 Ref 的特判“直接返回 Ref 本体”，改为统一走 proxy（与 Vue3 一致的统一模型）。
+[x] 对齐 `isReactive`/`isReadonly`：让 `isReactive(readonly(reactive(x))) === true`（对齐 Vue3 的 “readonly 包裹 reactive 仍视为 reactive”），并确保对 Ref 目标同样可用。
+[x] runtime-core props 改造：调整 `src/runtime-core/component/props.ts` 等路径，使组件内部的 props 源对象为 `shallowReactive`，对外暴露/传递给 render 的为 `shallowReadonly(propsSource)`，从而在 shallowReadonly 不追踪的前提下依然能通过内层 reactive 建立依赖（贴近 Vue3 机制）。
+[x] 更新单测：重写/新增用例覆盖关键行为变化，重点包含：- `reactive(ref)`/`shallowReactive(ref)` 返回 proxy（且 `isRef` 仍为 true）。- shallowReactive/shallowReadonly 顶层 Ref **不解包**（对象属性与数组索引两类场景）。- Invalid：原始值与不支持对象类型返回原值 + `__DEV__` warn（替换原先 “抛错” 用例）。- `toRaw` 递归：`toRaw(readonly(reactive(x)))`、`toRaw(shallowReadonly(reactive(x)))` 还原到同一 raw。
+[x] 文档同步：更新 `docs/issues/reactivity-issues.md` 与必要的 API 文档，明确本次行为对齐点与“暂不支持类型”的策略（warn + return 原值），并在需要处用注释标注与 Vue3 的差异/后续扩展计划。
+[x] 验证回归：跑 `pnpm run test`、`pnpm run ci`，并重点回归 “props 更新触发组件重渲染” 的场景（必要时补充 playground/浏览器套件用例）。
 
 ## Decisions
 

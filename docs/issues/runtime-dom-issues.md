@@ -48,12 +48,16 @@
 - 修复：不再改写 `Element.prototype.remove`，改为仅覆写本次渲染到的具体 DOM 实例的 `remove` 并做调用断言。
 - 收益：避免全局原型污染带来的并发风险，减少用例间相互影响的可能性。
 
-## 7. 无 DOM/SSR 环境下 import 即抛错（状态：待解决）
+## 7. 无 DOM/SSR 环境下 import 即抛错（状态：已解决）
 
 - 位置：`src/runtime-dom/create-app.ts`
 - 现状：模块加载阶段直接依赖 `document`、`import.meta.hot` 与 DOM 原语；在 SSR、Node 或无 DOM 的测试环境中仅 import 模块就会抛 `ReferenceError`/`TypeError`，无法按需降级或延迟加载。
 - 影响：阻塞 SSR 构建与无 DOM 环境的单元测试，破坏「平台检测后按需启用」的预期。
-- 可能方案：
-  - 在模块顶层增加环境探测，若不存在 `document` 则提前导出 no-op 的 `render/createApp` 或抛出明确错误，并延迟访问 DOM 对象到运行时。
-  - 将 DOM 依赖收敛到运行时分支，例如在 `mount` 过程中再执行 `document.querySelector`，并用条件判断包装 `import.meta.hot`。
-  - 为无 DOM 环境提供可注入的宿主实现（如通过参数传入自定义 renderer），避免硬编码全局 DOM。
+- 修复：
+  - 将 DOM 渲染器初始化改为惰性创建（仅在首次 `render`/`unmount` 时触发），避免仅 import 就执行依赖 DOM 的初始化逻辑。
+  - `mount(selector)` 延迟访问 `document`；当 `document` 不存在时抛出更明确的错误（`runtimeDomDocumentUnavailable`），避免误报为「未找到挂载容器」。
+  - `import.meta.hot` 的访问改为安全降级：非 Vite/SSR 场景不再在模块加载阶段触发异常。
+- 回归验证：
+  - 新增用例：`test/runtime-dom/ssr/import-no-dom.test.ts`
+    - 所有环境：验证 `import('@/runtime-dom/index.ts')` 与 `import('@/index.ts')` 不抛错。
+    - 无 DOM 可模拟时：验证 `createApp().mount('#app')` 抛出 `runtimeDomDocumentUnavailable`。

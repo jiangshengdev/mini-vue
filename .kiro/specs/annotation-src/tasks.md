@@ -12,8 +12,8 @@
     - 策略：每个目录任务执行时，自行使用 `listDirectory` 读取对应 `src/<子目录>` 的文件列表，无需预先生成静态清单
     - _Requirements: 5.1, 5.2_
 
-- [ ] 2. 注释更新：jsx-foundation
-  - [ ] 2.1 为 `src/jsx-foundation/**` 校正与更新注释
+- [x] 2. 注释更新：jsx-foundation
+  - [x] 2.1 为 `src/jsx-foundation/**` 校正与更新注释
     - 重点：VirtualNode 工厂、children 归一化、类型与边界假设
     - 验收：过时注释已修正，关键逻辑有准确的前置中文注释
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 2.1, 2.2, 2.3, 2.4, 3.1, 3.2, 3.3, 4.1, 4.2_

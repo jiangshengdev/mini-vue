@@ -14,8 +14,8 @@ export type VirtualNodeChild = VirtualNode | string | number
  * 组件接收到的 `children` 类型，支持单个、数组、布尔值或空。
  *
  * @remarks
- * - 由于 lint 规则禁止在类型中显式声明 `null`，这里以 `undefined` 代表「空」。
- * - 运行时（`normalizeChildren`/`mountChild`）仍会照常处理 `null` 并视为可忽略节点。
+ * - 项目约定类型层不出现 `null`，以 `undefined` 表示「空」。
+ * - 运行时（`normalizeChildren`/`mountChild`）仍兼容用户传入的 `null`，并将其视为可忽略节点。
  * - 布尔值与空值会在运行时被归一化为 `Comment` 节点占位，便于条件渲染场景（如 `{flag && <Comp />}`）。
  */
 export type ComponentChildren = VirtualNodeChild | VirtualNodeChild[] | boolean | undefined

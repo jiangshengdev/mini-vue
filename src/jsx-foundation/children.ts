@@ -25,7 +25,8 @@ function warnUnsupportedChild(child: unknown): void {
  * 将任意形式的 `children` 归一化为扁平的 `VirtualNodeChild` 数组。
  *
  * @remarks
- * - `null`/`undefined`/`boolean` 会被归一化为 `Comment` `virtualNode`，用于空渲染占位（与 Vue3 对齐）。
+ * - `null`/`undefined`/`boolean` 会被归一化为 `Comment` `virtualNode`，用于空渲染占位（与 Vue3 行为对齐）。
+ *   - 项目内部约定不使用 `null`，但用户传入的 `children` 仍可能出现 `null`，这里将其视为「空值」一并处理。
  * - 递归展开嵌套数组 `children`，并保持原始顺序不变。
  * - 字符串与数字保留原样，由渲染层按需包装为文本节点。
  *

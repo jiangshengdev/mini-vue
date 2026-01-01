@@ -175,7 +175,17 @@ describe('reactive', () => {
   })
 
   it('非普通内建对象会直接返回原值并告警', () => {
-    const factories = [() => new Map(), () => new Set(), () => new Date()] as const
+    const factories = [
+      () => {
+        return new Map()
+      },
+      () => {
+        return new Set()
+      },
+      () => {
+        return new Date()
+      },
+    ] as const
 
     for (const factory of factories) {
       const value: unknown = factory()

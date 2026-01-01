@@ -65,10 +65,10 @@ export function createGetter<T>(source: WatchSource<T>, deep: boolean): () => T 
   if (isRef(source)) {
     return () => {
       if (deep) {
-        return traverse(source.value)
+        return traverse(source.value) as T
       }
 
-      return source.value
+      return source.value as T
     }
   }
 

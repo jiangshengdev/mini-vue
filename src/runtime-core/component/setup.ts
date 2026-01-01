@@ -19,6 +19,8 @@ import {
   withDevtoolsSetupStateCollector,
 } from '@/shared/index.ts'
 
+/* eslint-disable @typescript-eslint/no-restricted-types -- Devtools 收集需使用宽泛对象键以兼容各类 setup 返回值 */
+
 function createDevtoolsSetupStateCollector(instance: unknown): DevtoolsSetupStateCollector {
   const counters: Record<DevtoolsSetupStateKind, number> = {
     computed: 0,
@@ -27,6 +29,7 @@ function createDevtoolsSetupStateCollector(instance: unknown): DevtoolsSetupStat
     unknown: 0,
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-arguments
   const recorded = new WeakSet<object>()
   const named = new WeakMap<object, string>()
   const valueToKey = new WeakMap<object, string>()
@@ -241,3 +244,5 @@ function invokeSetup<
   /* 始终返回函数，供 `effect` 每次执行时拿到最新子树。 */
   return render
 }
+
+/* eslint-enable @typescript-eslint/no-restricted-types */

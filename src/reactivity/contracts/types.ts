@@ -1,5 +1,5 @@
-import type { rawKey, reactiveFlag, readonlyFlag, shallowFlag } from './constants.ts'
 import type { Ref } from '../ref/types.ts'
+import type { rawKey, reactiveFlag, readonlyFlag, shallowFlag } from './constants.ts'
 import type { PlainObject } from '@/shared/index.ts'
 
 /**

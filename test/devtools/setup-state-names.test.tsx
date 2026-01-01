@@ -71,7 +71,7 @@ describe('devtools setup state 命名', () => {
     const rawSetupState = instance.devtoolsRawSetupState ?? {}
 
     expect(rawSetupState.count).toBe(first)
-    expect(rawSetupState['count$1']).toBe(second)
+    expect(rawSetupState.count$1).toBe(second)
     expect(Object.hasOwn(rawSetupState, 'ref0')).toBe(false)
     expect(Object.hasOwn(rawSetupState, 'ref1')).toBe(false)
   })

@@ -18,6 +18,8 @@ import type { Reactive, ReadonlyReactive } from './types.ts'
 import { reactivityUnsupportedType } from '@/messages/index.ts'
 import { __DEV__, collectDevtoolsSetupState, isObject, isPlainObject } from '@/shared/index.ts'
 
+/* eslint-disable @typescript-eslint/no-restricted-types -- 内部逻辑需要使用宽泛的 object 类型以匹配运行时校验 */
+
 /** 响应式代理缓存类型：使用 WeakMap 避免内存泄漏。 */
 type ProxyCache = WeakMap<object, ReactiveTarget>
 
@@ -33,24 +35,31 @@ const shallowReactiveCache: ProxyCache = new WeakMap()
 /** `shallowReadonly` 代理缓存。 */
 const shallowReadonlyCache: ProxyCache = new WeakMap()
 
-const enum TargetType {
-  invalid,
-  common,
-}
+const targetType = {
+  invalid: 0,
+  common: 1,
+} as const
+
+type TargetType = (typeof targetType)[keyof typeof targetType]
 
 function warnUnsupportedTarget(api: string, target: unknown): void {
   if (!__DEV__) {
     return
   }
 
-  const payload =
-    isObject(target) && target !== null
-      ? {
-          api,
-          targetType: target.constructor?.name ?? 'Object',
-          extensible: Object.isExtensible(target),
-        }
-      : { api, target }
+  let payload:
+    | { api: string; targetType?: string; extensible?: boolean }
+    | { api: string; target: unknown }
+
+  if (isObject(target) && target !== null) {
+    payload = {
+      api,
+      targetType: target.constructor?.name ?? 'Object',
+      extensible: Object.isExtensible(target),
+    }
+  } else {
+    payload = { api, target }
+  }
 
   console.warn(reactivityUnsupportedType, {
     ...payload,
@@ -59,18 +68,18 @@ function warnUnsupportedTarget(api: string, target: unknown): void {
 
 function getTargetType(target: object): TargetType {
   if (!Object.isExtensible(target)) {
-    return TargetType.invalid
+    return targetType.invalid
   }
 
   if (isRef(target)) {
-    return TargetType.common
+    return targetType.common
   }
 
   if (Array.isArray(target) || isPlainObject(target)) {
-    return TargetType.common
+    return targetType.common
   }
 
-  return TargetType.invalid
+  return targetType.invalid
 }
 
 /**
@@ -138,7 +147,7 @@ function createReactiveObject(
     return cached
   }
 
-  if (getTargetType(sourceTarget) === TargetType.invalid) {
+  if (getTargetType(sourceTarget) === targetType.invalid) {
     warnUnsupportedTarget(api, target)
 
     return target
@@ -149,7 +158,7 @@ function createReactiveObject(
   cache.set(sourceTarget, proxy)
 
   if (__DEV__ && collectDevtools && !isReadonly) {
-    collectDevtoolsSetupState(proxy, api)
+    collectDevtoolsSetupState(proxy, 'reactive')
   }
 
   return proxy
@@ -308,3 +317,5 @@ export function isReadonly(target: unknown): target is ReactiveTarget {
 
   return false
 }
+
+/* eslint-enable @typescript-eslint/no-restricted-types */

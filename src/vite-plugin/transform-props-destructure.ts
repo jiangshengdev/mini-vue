@@ -188,11 +188,11 @@ function resolveUniqueName(used: Set<string>, base: string): string {
 function resolvePropsParameter(
   ts: TypeScriptApi,
   sourceFile: Ts.SourceFile,
-  fn: Ts.FunctionLike,
+  fn: Ts.SignatureDeclaration,
   hoistedNames: Set<string>,
 ):
-  | { propsName: string; bindings: Map<string, BindingInfo>; replacement?: Replacement }
-  | undefined {
+    | { propsName: string; bindings: Map<string, BindingInfo>; replacement?: Replacement }
+    | undefined {
   const firstParameter = fn.parameters[0]
 
   if (!firstParameter) {
@@ -270,11 +270,11 @@ function collectTopLevelDestructure(
   sourceFile: Ts.SourceFile,
   fn: Ts.FunctionExpression | Ts.ArrowFunction,
   propsName: string,
-): {
-  bindings: Map<string, BindingInfo>
-  removeRanges: RemoveRange[]
-  nestedWarnTargets: Ts.Node[]
-} {
+  ): {
+    bindings: Map<string, BindingInfo>
+    removeRanges: RemoveRange[]
+    nestedWarnTargets: Ts.Node[]
+  } {
   const bindings = new Map<string, BindingInfo>()
   const removeRanges: RemoveRange[] = []
   const nestedWarnTargets: Ts.Node[] = []
@@ -593,7 +593,7 @@ function collectHoistedBindings(
   }
 
   if (ts.isVariableStatement(node)) {
-    const hoistToFunction = (node.declarationList.flags & ts.NodeFlags.BlockScoped) === 0
+    const hoistToFunction = node.declarationList.flags === ts.NodeFlags.None
 
     if (hoistToFunction) {
       for (const declaration of node.declarationList.declarations) {
@@ -679,154 +679,216 @@ function visitFunctionForTransform(
     rootScope[0]?.names.delete(name)
   }
 
-  const visit = (node: Ts.Node, scopes: ScopeFrame[]): void => {
-    if (isWithinRanges(node.getStart(sourceFile), node.getEnd(), removeRanges)) {
-      return
+  const shouldSkipVisit = (node: Ts.Node): boolean =>
+    isWithinRanges(node.getStart(sourceFile), node.getEnd(), removeRanges) || ts.isTypeNode(node)
+
+  const tryVisitNestedFunctionLike = (node: Ts.Node, scopes: ScopeFrame[]): boolean => {
+    if (!ts.isFunctionLike(node) || node === fn) {
+      return false
     }
 
-    if (ts.isTypeNode(node)) {
-      return
+    if (node.name && ts.isIdentifier(node.name)) {
+      addBindingsToScope(ts, node.name, scopes, true)
     }
 
-    if (ts.isFunctionLike(node) && node !== fn) {
-      if (node.name && ts.isIdentifier(node.name)) {
-        addBindingsToScope(ts, node.name, scopes, true)
-      }
+    const nextScope: ScopeFrame[] = [
+      ...scopes,
+      {
+        names: new Set<string>(),
+        isFunction: true,
+      },
+    ]
 
-      const nextScope: ScopeFrame[] = [
-        ...scopes,
-        {
-          names: new Set<string>(),
-          isFunction: true,
-        },
-      ]
-
-      for (const parameter of node.parameters) {
-        addBindingsToScope(ts, parameter.name, nextScope, true)
-      }
-
-      if ('body' in node && node.body) {
-        visit(node.body, nextScope)
-      }
-
-      return
+    for (const parameter of node.parameters) {
+      addBindingsToScope(ts, parameter.name, nextScope, true)
     }
 
-    if (ts.isBlock(node) && node !== fn.body) {
-      const nextScope: ScopeFrame[] = [
-        ...scopes,
-        {
-          names: new Set<string>(),
-          isFunction: false,
-        },
-      ]
-
-      ts.forEachChild(node, (child) => {
-        visit(child, nextScope)
-      })
-
-      return
+    if ('body' in node && node.body) {
+      visit(node.body, nextScope)
     }
 
+    return true
+  }
+
+  const tryVisitNestedBlock = (node: Ts.Node, scopes: ScopeFrame[]): boolean => {
+    if (!ts.isBlock(node) || node === fn.body) {
+      return false
+    }
+
+    const nextScope: ScopeFrame[] = [
+      ...scopes,
+      {
+        names: new Set<string>(),
+        isFunction: false,
+      },
+    ]
+
+    ts.forEachChild(node, (child) => {
+      visit(child, nextScope)
+    })
+
+    return true
+  }
+
+  const collectNodeBindings = (node: Ts.Node, scopes: ScopeFrame[]): void => {
     if (ts.isVariableDeclarationList(node)) {
-      const hoistToFunction = (node.flags & ts.NodeFlags.BlockScoped) === 0
+      const hoistToFunction = node.flags === ts.NodeFlags.None
 
       for (const declaration of node.declarations) {
         addBindingsToScope(ts, declaration.name, scopes, hoistToFunction)
       }
-    } else if (ts.isCatchClause(node)) {
+
+      return
+    }
+
+    if (ts.isCatchClause(node)) {
       addBindingsToScope(ts, node.variableDeclaration?.name, scopes, false)
-    } else if (ts.isClassLike(node) && node.name && ts.isIdentifier(node.name)) {
+
+      return
+    }
+
+    if (ts.isClassLike(node) && node.name && ts.isIdentifier(node.name)) {
       addBindingsToScope(ts, node.name, scopes, true)
     }
+  }
+
+  const tryReplaceDestructuredIdentifier = (node: Ts.Node, scopes: ScopeFrame[]): void => {
+    if (!ts.isIdentifier(node) || !bindings.has(node.text)) {
+      return
+    }
+
+    if (isIdentifierInType(ts, node) || isIdentifierPropertyName(ts, node)) {
+      return
+    }
+
+    if (isShadowed(node.text, scopes)) {
+      return
+    }
+
+    const info = bindings.get(node.text)
+
+    if (!info) {
+      return
+    }
+
+    const replacement = createReplacementForIdentifier({
+      ts,
+      identifier: node,
+      sourceFile,
+      propsName,
+      propKey: info.propKey,
+    })
+
+    if (replacement) {
+      replacements.push(replacement)
+    }
+  }
+
+  const checkWatchOrToRefCall = (node: Ts.Node, scopes: ScopeFrame[]): void => {
+    if (!ts.isCallExpression(node)) {
+      return
+    }
+
+    const callee = unwrapExpression(ts, node.expression)
 
     if (
-      ts.isIdentifier(node) &&
-      bindings.has(node.text) &&
-      !isIdentifierInType(ts, node) &&
-      !isIdentifierPropertyName(ts, node) &&
-      !isShadowed(node.text, scopes)
+      !ts.isIdentifier(callee) ||
+      (!ctx.watchLikeLocals.has(callee.text) && !ctx.toRefLikeLocals.has(callee.text))
     ) {
-      const info = bindings.get(node.text)
-
-      if (!info) {
-        return
-      }
-
-      const replacement = createReplacementForIdentifier({
-        ts,
-        identifier: node,
-        sourceFile,
-        propsName,
-        propKey: info.propKey,
-      })
-
-      if (replacement) {
-        replacements.push(replacement)
-      }
+      return
     }
 
-    if (ts.isCallExpression(node)) {
-      const callee = unwrapExpression(ts, node.expression)
+    const [firstArg] = node.arguments
 
-      if (
-        ts.isIdentifier(callee) &&
-        (ctx.watchLikeLocals.has(callee.text) || ctx.toRefLikeLocals.has(callee.text))
-      ) {
-        const [firstArg] = node.arguments
-
-        if (
-          firstArg &&
-          ts.isIdentifier(firstArg) &&
-          bindings.has(firstArg.text) &&
-          !isShadowed(firstArg.text, scopes)
-        ) {
-          const info = bindings.get(firstArg.text)
-
-          emitDiagnostic(
-            ctx,
-            diagnostics.watchOrToRef,
-            firstArg,
-            `[mini-vue] 直接将 props 解构变量 ${firstArg.text} 传入 ${callee.text}，请改为使用 props.${info?.propKey ?? firstArg.text} 或 getter。`,
-          )
-        }
-      }
+    if (!firstArg || !ts.isIdentifier(firstArg) || !bindings.has(firstArg.text)) {
+      return
     }
 
-    if (
-      ts.isBinaryExpression(node) &&
-      ts.isIdentifier(node.left) &&
-      bindings.has(node.left.text) &&
-      !isShadowed(node.left.text, scopes) &&
-      isAssignmentOperatorKind(ts, node.operatorToken.kind)
-    ) {
-      const info = bindings.get(node.left.text)
-
-      emitDiagnostic(
-        ctx,
-        diagnostics.write,
-        node.left,
-        `[mini-vue] 禁止对 props 解构变量 ${node.left.text} 赋值或变更，请直接操作 props.${info?.propKey ?? node.left.text}。`,
-      )
+    if (isShadowed(firstArg.text, scopes)) {
+      return
     }
 
-    if (
-      (ts.isPrefixUnaryExpression(node) || ts.isPostfixUnaryExpression(node)) &&
-      (node.operator === ts.SyntaxKind.PlusPlusToken ||
-        node.operator === ts.SyntaxKind.MinusMinusToken) &&
-      ts.isIdentifier(node.operand) &&
-      bindings.has(node.operand.text) &&
-      !isShadowed(node.operand.text, scopes)
-    ) {
-      const info = bindings.get(node.operand.text)
+    const info = bindings.get(firstArg.text)
 
-      emitDiagnostic(
-        ctx,
-        diagnostics.write,
-        node.operand,
-        `[mini-vue] 禁止对 props 解构变量 ${node.operand.text} 赋值或变更，请直接操作 props.${info?.propKey ?? node.operand.text}。`,
-      )
+    emitDiagnostic(
+      ctx,
+      diagnostics.watchOrToRef,
+      firstArg,
+      `[mini-vue] 直接将 props 解构变量 ${firstArg.text} 传入 ${callee.text}，请改为使用 props.${info?.propKey ?? firstArg.text} 或 getter。`,
+    )
+  }
+
+  const checkWriteBinary = (node: Ts.Node, scopes: ScopeFrame[]): void => {
+    if (!ts.isBinaryExpression(node) || !ts.isIdentifier(node.left) || !bindings.has(node.left.text)) {
+      return
     }
+
+    if (isShadowed(node.left.text, scopes)) {
+      return
+    }
+
+    if (!isAssignmentOperatorKind(ts, node.operatorToken.kind)) {
+      return
+    }
+
+    const info = bindings.get(node.left.text)
+
+    emitDiagnostic(
+      ctx,
+      diagnostics.write,
+      node.left,
+      `[mini-vue] 禁止对 props 解构变量 ${node.left.text} 赋值或变更，请直接操作 props.${info?.propKey ?? node.left.text}。`,
+    )
+  }
+
+  const isIncOrDecOperator = (operator: Ts.SyntaxKind): boolean =>
+    operator === ts.SyntaxKind.PlusPlusToken || operator === ts.SyntaxKind.MinusMinusToken
+
+  const checkWriteUnary = (node: Ts.Node, scopes: ScopeFrame[]): void => {
+    if (!ts.isPrefixUnaryExpression(node) && !ts.isPostfixUnaryExpression(node)) {
+      return
+    }
+
+    if (!isIncOrDecOperator(node.operator)) {
+      return
+    }
+
+    if (!ts.isIdentifier(node.operand) || !bindings.has(node.operand.text)) {
+      return
+    }
+
+    if (isShadowed(node.operand.text, scopes)) {
+      return
+    }
+
+    const info = bindings.get(node.operand.text)
+
+    emitDiagnostic(
+      ctx,
+      diagnostics.write,
+      node.operand,
+      `[mini-vue] 禁止对 props 解构变量 ${node.operand.text} 赋值或变更，请直接操作 props.${info?.propKey ?? node.operand.text}。`,
+    )
+  }
+
+  const visit = (node: Ts.Node, scopes: ScopeFrame[]): void => {
+    if (shouldSkipVisit(node)) {
+      return
+    }
+
+    if (tryVisitNestedFunctionLike(node, scopes)) {
+      return
+    }
+
+    if (tryVisitNestedBlock(node, scopes)) {
+      return
+    }
+
+    collectNodeBindings(node, scopes)
+    tryReplaceDestructuredIdentifier(node, scopes)
+    checkWatchOrToRefCall(node, scopes)
+    checkWriteBinary(node, scopes)
+    checkWriteUnary(node, scopes)
 
     ts.forEachChild(node, (child) => {
       visit(child, scopes)
@@ -923,10 +985,10 @@ function collectSetupComponentContexts(
 function resolveWatchToRefLocals(
   ts: TypeScriptApi,
   sourceFile: Ts.SourceFile,
-): {
-  watch: Set<string>
-  toRef: Set<string>
-} {
+  ): {
+    watch: Set<string>
+    toRef: Set<string>
+  } {
   const watch = new Set<string>(['watch'])
   const toRef = new Set<string>(['toRef'])
 

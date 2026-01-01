@@ -19,7 +19,7 @@ export function miniVueCompilerPlugin(options: MiniVueCompilerPluginOptions = {}
   }
 
   if (devtoolsSetupStateNames !== false) {
-    const devtoolsOptions = devtoolsSetupStateNames === undefined ? {} : devtoolsSetupStateNames
+    const devtoolsOptions = devtoolsSetupStateNames ?? {}
 
     plugins.push(
       miniVueDevtoolsSetupStateNamesPlugin({

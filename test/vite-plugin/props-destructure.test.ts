@@ -113,6 +113,43 @@ export const App: SetupComponent = (props) => {
     expect(result?.code).toContain('toRef(props.foo)')
   })
 
+  it('支持多字段与 alias 解构', async () => {
+    const code = `
+import type { SetupComponent } from '@/index.ts'
+
+export const App: SetupComponent = (props) => {
+  const { foo, bar: baz } = props
+  return () => <div>{foo}{baz}</div>
+}
+`
+
+    const { result } = await transformWithCompilerPlugin({
+      code,
+      id: '/src/app.tsx',
+    })
+
+    expect(result?.code).not.toContain('{ foo, bar: baz } = props')
+    expect(result?.code).toContain('return () => <div>{props.foo}{props.bar}</div>')
+  })
+
+  it('支持参数解构改写', async () => {
+    const code = `
+import type { SetupComponent } from '@/index.ts'
+
+export const App: SetupComponent = ({ foo, bar }) => {
+  return () => <div>{foo}{bar}</div>
+}
+`
+
+    const { result } = await transformWithCompilerPlugin({
+      code,
+      id: '/src/app.tsx',
+    })
+
+    expect(result?.code).toContain('(props) =>')
+    expect(result?.code).toContain('<div>{props.foo}{props.bar}</div>')
+  })
+
   it('写入解构变量会报错', async () => {
     const code = `
 import type { SetupComponent } from '@/index.ts'

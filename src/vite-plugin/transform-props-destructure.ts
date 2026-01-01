@@ -28,11 +28,16 @@ interface ScopeFrame {
   isFunction: boolean
 }
 
+interface BindingInfo {
+  propKey: string
+}
+
 interface SetupComponentContext {
   fn: Ts.FunctionExpression | Ts.ArrowFunction
   propsName: string
-  bindings: Map<string, string>
+  bindings: Map<string, BindingInfo>
   removeRanges: RemoveRange[]
+  initialReplacements: Replacement[]
 }
 
 interface TransformContext {
@@ -155,22 +160,109 @@ function getSetupComponentFunction(
   }
 }
 
-function resolvePropsParameterName(ts: TypeScriptApi, fn: Ts.FunctionLike): string | undefined {
+function resolveUniqueName(used: Set<string>, base: string): string {
+  if (!used.has(base)) {
+    used.add(base)
+    return base
+  }
+
+  let index = 1
+
+  while (true) {
+    const candidate = `${base}$${index}`
+
+    if (!used.has(candidate)) {
+      used.add(candidate)
+      return candidate
+    }
+
+    index += 1
+  }
+}
+
+function resolvePropsParameter(
+  ts: TypeScriptApi,
+  sourceFile: Ts.SourceFile,
+  fn: Ts.FunctionLike,
+  hoistedNames: Set<string>,
+): { propsName: string; bindings: Map<string, BindingInfo>; replacement?: Replacement } | undefined {
   const firstParameter = fn.parameters[0]
 
-  if (!firstParameter || !ts.isIdentifier(firstParameter.name)) {
+  if (!firstParameter) {
     return undefined
   }
 
-  return firstParameter.name.text
+  if (ts.isIdentifier(firstParameter.name)) {
+    return {
+      propsName: firstParameter.name.text,
+      bindings: new Map(),
+    }
+  }
+
+  if (!ts.isObjectBindingPattern(firstParameter.name)) {
+    return undefined
+  }
+
+  const bindings = collectObjectBindings(ts, sourceFile, firstParameter.name)
+
+  if (!bindings) {
+    return undefined
+  }
+
+  const propsName = resolveUniqueName(hoistedNames, 'props')
+  const typeText = firstParameter.type ? firstParameter.type.getText(sourceFile) : ''
+  const initializerText = firstParameter.initializer
+    ? ` = ${firstParameter.initializer.getText(sourceFile)}`
+    : ''
+
+  const replacement: Replacement = {
+    start: firstParameter.getStart(sourceFile),
+    end: firstParameter.getEnd(),
+    text: `${propsName}${typeText ? `: ${typeText}` : ''}${initializerText}`,
+  }
+
+  return { propsName, bindings, replacement }
+}
+
+function collectObjectBindings(
+  ts: TypeScriptApi,
+  sourceFile: Ts.SourceFile,
+  pattern: Ts.ObjectBindingPattern,
+): Map<string, BindingInfo> | undefined {
+  const bindings = new Map<string, BindingInfo>()
+
+  for (const element of pattern.elements) {
+    if (ts.isOmittedExpression(element) || element.dotDotDotToken) {
+      return undefined
+    }
+
+    if (!ts.isIdentifier(element.name)) {
+      return undefined
+    }
+
+    const propKeyNode = element.propertyName ?? element.name
+
+    if (ts.isPrivateIdentifier(propKeyNode)) {
+      return undefined
+    }
+
+    const propKey = ts.isIdentifier(propKeyNode) ? propKeyNode.text : propKeyNode.getText(sourceFile)
+
+    bindings.set(element.name.text, {
+      propKey,
+    })
+  }
+
+  return bindings
 }
 
 function collectTopLevelDestructure(
   ts: TypeScriptApi,
+  sourceFile: Ts.SourceFile,
   fn: Ts.FunctionExpression | Ts.ArrowFunction,
   propsName: string,
-): { bindings: Map<string, string>; removeRanges: RemoveRange[] } {
-  const bindings = new Map<string, string>()
+): { bindings: Map<string, BindingInfo>; removeRanges: RemoveRange[] } {
+  const bindings = new Map<string, BindingInfo>()
   const removeRanges: RemoveRange[] = []
   const { body } = fn
 
@@ -195,16 +287,6 @@ function collectTopLevelDestructure(
       continue
     }
 
-    const [element] = declaration.name.elements
-
-    if (!element || element.propertyName || element.dotDotDotToken || !ts.isIdentifier(element.name)) {
-      continue
-    }
-
-    if (declaration.name.elements.length !== 1) {
-      continue
-    }
-
     if (!declaration.initializer) {
       continue
     }
@@ -215,7 +297,16 @@ function collectTopLevelDestructure(
       continue
     }
 
-    bindings.set(element.name.text, element.name.text)
+    const currentBindings = collectObjectBindings(ts, sourceFile, declaration.name)
+
+    if (!currentBindings) {
+      continue
+    }
+
+    for (const [key, value] of currentBindings.entries()) {
+      bindings.set(key, value)
+    }
+
     removeRanges.push({
       start: statement.getFullStart(),
       end: statement.getEnd(),
@@ -404,7 +495,9 @@ function createReplacementForIdentifier(parameters: {
   const parent = identifier.parent
   const start = identifier.getStart(sourceFile)
   const end = identifier.getEnd()
-  const accessText = `${propsName}.${propKey}`
+  const accessText = /^[$_a-zA-Z][$_\w]*$/.test(propKey)
+    ? `${propsName}.${propKey}`
+    : `${propsName}[${propKey}]`
 
   if (parent && ts.isShorthandPropertyAssignment(parent) && parent.name === identifier) {
     return {
@@ -461,8 +554,10 @@ function emitDiagnostic(
   }
 
   const start = node.getStart(ctx.sourceFile)
+  const { line, character } = ctx.sourceFile.getLineAndCharacterOfPosition(start)
+  const positionText = `${ctx.id}:${line + 1}:${character + 1}`
   const payload = {
-    message,
+    message: `${positionText} ${message}`,
     id: ctx.id,
     pos: start,
   }
@@ -481,10 +576,14 @@ function visitFunctionForTransform(
   replacements: Replacement[],
 ): void {
   const { ts, sourceFile, diagnostics } = ctx
-  const { fn, propsName, bindings, removeRanges } = target
+  const { fn, propsName, bindings, removeRanges, initialReplacements } = target
 
   if (bindings.size === 0) {
     return
+  }
+
+  for (const replacement of initialReplacements) {
+    replacements.push(replacement)
   }
 
   const rootScope: ScopeFrame[] = [
@@ -500,6 +599,10 @@ function visitFunctionForTransform(
 
   if (fn.body) {
     collectHoistedBindings(ts, fn.body, rootScope[0]?.names ?? new Set())
+  }
+
+  for (const name of bindings.keys()) {
+    rootScope[0]?.names.delete(name)
   }
 
   const visit = (node: Ts.Node, scopes: ScopeFrame[]): void => {
@@ -570,12 +673,18 @@ function visitFunctionForTransform(
       !isIdentifierPropertyName(ts, node)
     ) {
       if (!isShadowed(node.text, scopes)) {
+        const info = bindings.get(node.text)
+
+        if (!info) {
+          return
+        }
+
         const replacement = createReplacementForIdentifier({
           ts,
           identifier: node,
           sourceFile,
           propsName,
-          propKey: bindings.get(node.text) ?? node.text,
+          propKey: info.propKey,
         })
 
         if (replacement) {
@@ -596,11 +705,13 @@ function visitFunctionForTransform(
           bindings.has(firstArg.text) &&
           !isShadowed(firstArg.text, scopes)
         ) {
+          const info = bindings.get(firstArg.text)
+
           emitDiagnostic(
             ctx,
             diagnostics.watchOrToRef,
             firstArg,
-            `[mini-vue] 直接将 props 解构变量 ${firstArg.text} 传入 ${callee.text}，请改为使用 props.${bindings.get(firstArg.text) ?? firstArg.text} 或 getter。`,
+            `[mini-vue] 直接将 props 解构变量 ${firstArg.text} 传入 ${callee.text}，请改为使用 props.${info?.propKey ?? firstArg.text} 或 getter。`,
           )
         }
       }
@@ -613,11 +724,13 @@ function visitFunctionForTransform(
         !isShadowed(node.left.text, scopes) &&
         isAssignmentOperatorKind(ts, node.operatorToken.kind)
       ) {
+        const info = bindings.get(node.left.text)
+
         emitDiagnostic(
           ctx,
           diagnostics.write,
           node.left,
-          `[mini-vue] 禁止对 props 解构变量 ${node.left.text} 赋值或变更，请直接操作 props.${bindings.get(node.left.text) ?? node.left.text}。`,
+          `[mini-vue] 禁止对 props 解构变量 ${node.left.text} 赋值或变更，请直接操作 props.${info?.propKey ?? node.left.text}。`,
         )
       }
     }
@@ -630,11 +743,13 @@ function visitFunctionForTransform(
         bindings.has(node.operand.text) &&
         !isShadowed(node.operand.text, scopes)
       ) {
+        const info = bindings.get(node.operand.text)
+
         emitDiagnostic(
           ctx,
           diagnostics.write,
           node.operand,
-          `[mini-vue] 禁止对 props 解构变量 ${node.operand.text} 赋值或变更，请直接操作 props.${bindings.get(node.operand.text) ?? node.operand.text}。`,
+          `[mini-vue] 禁止对 props 解构变量 ${node.operand.text} 赋值或变更，请直接操作 props.${info?.propKey ?? node.operand.text}。`,
         )
       }
     }
@@ -672,16 +787,49 @@ function collectSetupComponentContexts(ts: TypeScriptApi, sourceFile: Ts.SourceF
         continue
       }
 
-      const propsName = resolvePropsParameterName(ts, fn)
+      const hoistedNames = new Set<string>()
 
-      if (!propsName) {
+      for (const parameter of fn.parameters) {
+        collectBindingNames(ts, parameter.name, hoistedNames)
+      }
+
+      if (fn.body) {
+        collectHoistedBindings(ts, fn.body, hoistedNames)
+      }
+
+      const propsInfo = resolvePropsParameter(ts, sourceFile, fn, hoistedNames)
+
+      if (!propsInfo) {
         continue
       }
 
-      const { bindings, removeRanges } = collectTopLevelDestructure(ts, fn, propsName)
+      const { bindings: paramBindings, propsName, replacement } = propsInfo
+
+      const { bindings: variableBindings, removeRanges } = collectTopLevelDestructure(
+        ts,
+        sourceFile,
+        fn,
+        propsName,
+      )
+
+      const bindings = new Map<string, BindingInfo>()
+
+      for (const [key, value] of paramBindings.entries()) {
+        bindings.set(key, value)
+      }
+
+      for (const [key, value] of variableBindings.entries()) {
+        bindings.set(key, value)
+      }
 
       if (bindings.size === 0) {
         continue
+      }
+
+      const initialReplacements: Replacement[] = []
+
+      if (replacement) {
+        initialReplacements.push(replacement)
       }
 
       contexts.push({
@@ -689,6 +837,7 @@ function collectSetupComponentContexts(ts: TypeScriptApi, sourceFile: Ts.SourceF
         propsName,
         bindings,
         removeRanges,
+        initialReplacements,
       })
     }
   })

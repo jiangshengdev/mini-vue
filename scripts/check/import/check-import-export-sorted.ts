@@ -21,6 +21,32 @@ function compareAlpha(a: string, b: string): number {
   return a.localeCompare(b, 'en')
 }
 
+function getModuleSpecifierGroupRank(module: string): number {
+  if (module.startsWith('.')) {
+    return 1
+  }
+
+  if (module.startsWith('/')) {
+    return 1
+  }
+
+  if (module.startsWith('@/') || module.startsWith('#/')) {
+    return 1
+  }
+
+  return 0
+}
+
+function compareModuleSpecifiers(a: string, b: string): number {
+  const rank = getModuleSpecifierGroupRank(a) - getModuleSpecifierGroupRank(b)
+
+  if (rank !== 0) {
+    return rank
+  }
+
+  return compareAlpha(a, b)
+}
+
 function compareNamePair(
   a: { localName: string; originalName: string },
   b: { localName: string; originalName: string },
@@ -53,7 +79,7 @@ function checkModuleSpecifiersSorted(parameters: {
   let previousModule: string | undefined
 
   for (const record of moduleSpecifiers) {
-    if (previousModule && compareAlpha(previousModule, record.module) > 0) {
+    if (previousModule && compareModuleSpecifiers(previousModule, record.module) > 0) {
       findings.push({
         filePath: sourceFile.fileName,
         kind,
@@ -224,5 +250,5 @@ runSrcCheck({
   srcDir,
   checkFile,
   formatFinding,
-  successMessage: '✅ 所有 import/export 说明符均已按字母顺序排序。',
+  successMessage: '✅ 所有 import/export 说明符均已按「外部优先、组内字母顺序」排序。',
 })

@@ -1,5 +1,5 @@
 /**
- * runtime-core 的调度器实现：以微任务批量 flush 的方式合并更新任务。
+ * Runtime-core 的调度器实现：以微任务批量 flush 的方式合并更新任务。
  *
  * @remarks
  * - 设计目标与 Vue3 scheduler 类似：支持按 id 排序、去重、递归更新上限与 pre/post 队列。

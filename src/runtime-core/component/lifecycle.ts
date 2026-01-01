@@ -1,5 +1,5 @@
 /**
- * runtime-core 组件生命周期钩子：
+ * Runtime-core 组件生命周期钩子：
  * - 在 `setup()` 中注册钩子；
  * - 在挂载/更新/卸载时由渲染流程触发；
  * - 依赖 scheduler 的 post 队列保证父子顺序与去重。

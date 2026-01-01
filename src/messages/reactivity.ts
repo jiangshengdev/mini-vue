@@ -13,8 +13,10 @@
 /**
  * `reactive()` 不支持的类型警告
  *
- * `reactive()` 仅支持普通对象（plain object）和数组，
- * 对 Map、Set、WeakMap、WeakSet 等集合类型或原始值会抛出此错误。
+ * `reactive()` 仅对「可代理的引用类型」生效（普通对象、数组、Ref 等）。
+ *
+ * @remarks
+ * - 若目标不可代理（如原始值、不可扩展对象、集合类型等），运行时会在开发态输出此警告并直接返回原值。
  */
 export const reactivityUnsupportedType = '当前响应式 API 仅支持普通对象、数组或 Ref，已直接返回原值'
 

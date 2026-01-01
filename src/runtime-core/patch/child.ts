@@ -92,15 +92,20 @@ export function patchChild<
   /* 替换路径：旧节点 `teardown` 后再 `mount` 新节点，避免残留事件/副作用引用。 */
   unmount(options, previous)
 
-  const mounted = mountChildInEnvironment(options, next, {
+  /*
+   * 替换路径的「新节点挂载」也需要走 `patchChild` 的 mount 分支：
+   * - 复用 `keptAlive` 激活逻辑（避免 KeepAlive 缓存命中时退化为全新 mount）。
+   * - 统一锚点策略，保持与「仅新增节点」分支一致。
+   */
+  const mounted = patchChild(options, undefined, next, {
     container: environment.container,
     anchor: replacementAnchor,
     context: environment.context,
   })
 
   return {
-    ok: mounted?.ok,
-    usedAnchor: replacementAnchor,
+    ok: mounted.ok,
+    usedAnchor: mounted.usedAnchor ?? replacementAnchor,
   }
 }
 

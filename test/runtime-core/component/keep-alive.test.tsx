@@ -5,7 +5,7 @@ import { KeepAlive, nextTick, onActivated, onDeactivated, onUnmounted, ref } fro
 import { createRenderer } from '@/runtime-core/index.ts'
 
 describe('runtime-core KeepAlive', () => {
-  it('缓存组件时 deactivate/activate 只移动节点不触发 remove，并复用宿主节点', async () => {
+  it('缓存组件时 deactivate/activate 仅移动节点（Comment 占位除外），并复用宿主节点', async () => {
     const host = createHostRenderer()
     const renderer = createRenderer(host.options)
     const show = ref(true)
@@ -25,18 +25,16 @@ describe('runtime-core KeepAlive', () => {
     renderer.render(<App />, host.container)
     await nextTick()
 
-    console.log(
-      'container children kinds',
-      host.container.children.map((child) => child.kind),
-    )
-
+    expect(host.container.children).toHaveLength(1)
+    expect(host.container.children[0]?.kind).toBe('element')
     const firstChild = host.container.children[0]
 
     host.resetCounts()
     show.value = false
     await nextTick()
 
-    expect(host.container.children).toHaveLength(0)
+    expect(host.container.children).toHaveLength(1)
+    expect(host.container.children[0]?.kind).toBe('comment')
     expect(host.counters.remove).toBe(0)
 
     host.resetCounts()
@@ -44,7 +42,7 @@ describe('runtime-core KeepAlive', () => {
     await nextTick()
 
     expect(host.container.children[0]).toBe(firstChild)
-    expect(host.counters.remove).toBe(0)
+    expect(host.counters.remove).toBe(1)
   })
 
   it('onActivated/onDeactivated 在 KeepAlive 激活/失活时按子先父后顺序触发', async () => {

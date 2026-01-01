@@ -109,7 +109,11 @@ function createReactiveObject(
   target: unknown,
   handlers: ProxyHandler<ReactiveRawTarget>,
   cache: ProxyCache,
-  { api, isReadonly, collectDevtools = false }: { api: string; isReadonly: boolean; collectDevtools?: boolean },
+  {
+    api,
+    isReadonly,
+    collectDevtools = false,
+  }: { api: string; isReadonly: boolean; collectDevtools?: boolean },
 ): unknown {
   if (!isObject(target)) {
     warnUnsupportedTarget(api, target)

@@ -21,4 +21,3 @@
 ## Open questions
 
 - 无（已确认：总入口命名为 `miniVueCompilerPlugin`，`devtoolsSetupStateNames` 在总入口中默认启用）。
-

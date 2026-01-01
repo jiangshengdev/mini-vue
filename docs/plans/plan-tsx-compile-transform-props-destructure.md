@@ -26,6 +26,23 @@
 [ ] P0：补齐测试：新增 `test/vite-plugin/props-destructure.test.ts` 覆盖基础改写、作用域遮蔽、嵌套函数/渲染闭包、watch/toRef warning、禁写入诊断、未命中不改写等场景。
 [ ] P0：验证链路：运行 `pnpm run test`、`pnpm run typecheck`、`pnpm run check`，确保既有插件与边界规则不受影响。
 
+[ ] P1（可选）：支持多字段解构：`const { foo, bar } = props`（同一解构声明收集多个绑定并统一改写引用）。
+[ ] P1（可选）：支持 alias 解构：`const { foo: bar } = props`（将 `bar` 改写为 `props.foo`，并处理局部遮蔽）。
+[ ] P1（可选）：扩大“顶层”的定义：允许在非嵌套函数但位于 block 内（如 `if/for`）的解构声明，或显式拒绝并输出 warning（避免用户误以为已支持）。
+[ ] P1（可选）：增强误用检测：识别 `watch as w` / `toRef as r` 等导入别名，并在 warning 中给出建议写法（例如 `watch(() => foo, ...)`）。
+[ ] P1（可选）：增强诊断可读性：在 `this.warn()` 中输出 `id:line:column`（从 TS `SourceFile` 计算位置），便于快速定位源码。
+[ ] P1（可选）：扩展匹配形态：支持更多显式 `SetupComponent` 标注写法（例如 `export default`、`as/satisfies SetupComponent` 的不同组合），并补齐对应测试用例。
+
+[ ] P2（可选）：支持参数解构 `({ foo }) => {}`：重写函数参数为单一 `props` 标识符并复用同一套“引用改写”逻辑（需要额外处理默认参数与类型注解）。
+[ ] P2（可选）：支持默认值：`const { foo = 1 } = props`（先限定仅支持字面量默认值或明确声明语义差异，再逐步扩展）。
+[ ] P2（可选）：支持 rest：`const { foo, ...rest } = props`（需要引入运行时 helper 或生成 proxy 以保持对 rest 字段的读取仍可追踪）。
+[ ] P2（可选）：支持非 identifier 的 prop key：如 `const { 'foo.bar': fooBar } = props` / `const { ['foo']: foo } = props`（输出 `props['foo.bar']` 等访问表达式）。
+[ ] P2（可选）：支持 multi-variable declaration：`const a = 1, { foo } = props, b = 2`（需要更稳健的源码改写与分号/逗号处理策略）。
+
+[ ] P3（可选）：输出 source map（例如引入 `magic-string` 并声明为直接依赖，或实现最小映射），提升调试体验。
+[ ] P3（可选）：补齐 Playground/浏览器验证：增加一个父子组件示例，验证“props 变更 → 解构引用处读到新值”与 warning 行为符合预期。
+[ ] P3（可选）：文档化与迁移指引：在 docs 中补充推荐写法、已支持/未支持语法列表，以及如何通过 `miniVueCompilerPlugin` 开关此能力。
+
 ## Open questions
 
 - 无（已确认：P0 先只支持 `const { foo } = props`；诊断信息只通过 Vite 插件 `this.warn()` 输出）。

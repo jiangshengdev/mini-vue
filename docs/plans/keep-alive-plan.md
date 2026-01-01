@@ -21,22 +21,22 @@
 ## Open questions
 
 - `include/exclude` 匹配基于什么（函数名 `componentName` / 显式字段），以及首版是否先只做 `max` + `key/type` 缓存？
-	- Vue3 官方：基于 `getComponentName(type)` 的「组件名」做匹配（对 async wrapper 取其已 resolve 的 inner component name）。
-	- Vue3 支持的 pattern：`string | RegExp | (string | RegExp)[]`。
-		- `string`：按逗号分隔后与 name 精确匹配（例如 `'A,B'`）。
-		- `RegExp`：直接 `test(name)`。
-		- `array`：任意元素匹配即命中。
-	- 注意：如果组件没有 name，`include` 将无法命中（表现为不缓存）；`exclude` 只有在 name 存在时才可命中。
+  - Vue3 官方：基于 `getComponentName(type)` 的「组件名」做匹配（对 async wrapper 取其已 resolve 的 inner component name）。
+  - Vue3 支持的 pattern：`string | RegExp | (string | RegExp)[]`。
+    - `string`：按逗号分隔后与 name 精确匹配（例如 `'A,B'`）。
+    - `RegExp`：直接 `test(name)`。
+    - `array`：任意元素匹配即命中。
+  - 注意：如果组件没有 name，`include` 将无法命中（表现为不缓存）；`exclude` 只有在 name 存在时才可命中。
 
 - `deactivated` 期间组件更新策略：继续 patch 到 `storageContainer`，还是暂停 effect 并在 `activate` 时补一次？
-	- Vue3 官方：deactivate 时仅把 vnode 移入 `storageContainer`，并不会“冻结”组件更新；activate 时会把 vnode move 回真实容器，并对比「上次渲染的 instance.vnode」与「这次激活的 vnode」再执行一次 `patch(...)`，以确保 props/slots 等变化被应用。
-	- 细节：deactivate 时会 `invalidateMount(instance.m/instance.a)`，避免把 mounted/activated 相关副作用在失活分支重复触发；同时通过 `isDeactivated` 标记让 `onActivated/onDeactivated` 具备“失活分支不触发”的语义。
+  - Vue3 官方：deactivate 时仅把 vnode 移入 `storageContainer`，并不会“冻结”组件更新；activate 时会把 vnode move 回真实容器，并对比「上次渲染的 instance.vnode」与「这次激活的 vnode」再执行一次 `patch(...)`，以确保 props/slots 等变化被应用。
+  - 细节：deactivate 时会 `invalidateMount(instance.m/instance.a)`，避免把 mounted/activated 相关副作用在失活分支重复触发；同时通过 `isDeactivated` 标记让 `onActivated/onDeactivated` 具备“失活分支不触发”的语义。
 
 - `children` 多个/非组件 child 的行为：仅取第一个组件并开发态警告，还是直接透传不做缓存？
-	- Vue3 官方：要求“恰好一个组件子节点”。如果 `slots.default()` 返回多个 children：开发态 `warn('KeepAlive should contain exactly one component child.')`，并直接返回 children（不做缓存）。
-	- 若唯一 child 不是组件（也不是 Suspense）：直接透传，不做缓存。
+  - Vue3 官方：要求“恰好一个组件子节点”。如果 `slots.default()` 返回多个 children：开发态 `warn('KeepAlive should contain exactly one component child.')`，并直接返回 children（不做缓存）。
+  - 若唯一 child 不是组件（也不是 Suspense）：直接透传，不做缓存。
 
 - 还需要明确的点（建议在实现前定版）
-	- 缓存 key（已定）：首版照抄 Vue3，使用 `vnode.key ?? vnode.type`。
-	- 组件名来源（已定）：只读 `type.name`（不支持 `Component.displayName` / 自定义字段）。
-	- include/exclude 的刷新时机（已定）：与 Vue3 一致，在 include/exclude props 变化后以 `flush: 'post'` 触发 prune。
+  - 缓存 key（已定）：首版照抄 Vue3，使用 `vnode.key ?? vnode.type`。
+  - 组件名来源（已定）：只读 `type.name`（不支持 `Component.displayName` / 自定义字段）。
+  - include/exclude 的刷新时机（已定）：与 Vue3 一致，在 include/exclude props 变化后以 `flush: 'post'` 触发 prune。

@@ -4,7 +4,7 @@ import { miniVueCompilerPlugin } from '@/index.ts'
 async function transformWithCompilerPlugin(parameters: {
   code: string
   id: string
-  diagnostics?: object
+  diagnostics?: Record<string, unknown>
 }) {
   const plugins = miniVueCompilerPlugin({
     importSource: '@/index.ts',

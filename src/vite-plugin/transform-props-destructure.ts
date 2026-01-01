@@ -332,12 +332,14 @@ function collectTopLevelDestructure(
       return
     }
 
-    if (ts.isVariableDeclaration(node) && isPropsDestructurePattern(ts, node, propsName)) {
-      if (
-        !removeRanges.some((range) => node.getStart() >= range.start && node.getEnd() <= range.end)
-      ) {
-        nestedWarnTargets.push(node.name)
-      }
+    if (
+      ts.isVariableDeclaration(node) &&
+      isPropsDestructurePattern(ts, node, propsName) &&
+      !removeRanges.some((range) => {
+        return node.getStart() >= range.start && node.getEnd() <= range.end
+      })
+    ) {
+      nestedWarnTargets.push(node.name)
     }
 
     ts.forEachChild(node, (child) => {
@@ -422,12 +424,12 @@ function addBindingsToScope(
   }
 
   for (const name of names) {
-    scopes[scopes.length - 1]?.names.add(name)
+    scopes.at(-1)?.names.add(name)
   }
 }
 
 function isIdentifierInType(ts: TypeScriptApi, node: Ts.Identifier): boolean {
-  const parent = node.parent
+  const { parent } = node
 
   if (!parent) {
     return false
@@ -453,7 +455,7 @@ function isIdentifierInType(ts: TypeScriptApi, node: Ts.Identifier): boolean {
 }
 
 function isIdentifierPropertyName(ts: TypeScriptApi, node: Ts.Identifier): boolean {
-  const parent = node.parent
+  const { parent } = node
 
   if (!parent) {
     return false
@@ -548,7 +550,7 @@ function createReplacementForIdentifier(parameters: {
   propKey: string
 }): Replacement | undefined {
   const { ts, identifier, sourceFile, propsName, propKey } = parameters
-  const parent = identifier.parent
+  const { parent } = identifier
   const start = identifier.getStart(sourceFile)
   const end = identifier.getEnd()
   let accessText: string
@@ -742,26 +744,25 @@ function visitFunctionForTransform(
       ts.isIdentifier(node) &&
       bindings.has(node.text) &&
       !isIdentifierInType(ts, node) &&
-      !isIdentifierPropertyName(ts, node)
+      !isIdentifierPropertyName(ts, node) &&
+      !isShadowed(node.text, scopes)
     ) {
-      if (!isShadowed(node.text, scopes)) {
-        const info = bindings.get(node.text)
+      const info = bindings.get(node.text)
 
-        if (!info) {
-          return
-        }
+      if (!info) {
+        return
+      }
 
-        const replacement = createReplacementForIdentifier({
-          ts,
-          identifier: node,
-          sourceFile,
-          propsName,
-          propKey: info.propKey,
-        })
+      const replacement = createReplacementForIdentifier({
+        ts,
+        identifier: node,
+        sourceFile,
+        propsName,
+        propKey: info.propKey,
+      })
 
-        if (replacement) {
-          replacements.push(replacement)
-        }
+      if (replacement) {
+        replacements.push(replacement)
       }
     }
 
@@ -792,41 +793,39 @@ function visitFunctionForTransform(
       }
     }
 
-    if (ts.isBinaryExpression(node)) {
-      if (
-        ts.isIdentifier(node.left) &&
-        bindings.has(node.left.text) &&
-        !isShadowed(node.left.text, scopes) &&
-        isAssignmentOperatorKind(ts, node.operatorToken.kind)
-      ) {
-        const info = bindings.get(node.left.text)
+    if (
+      ts.isBinaryExpression(node) &&
+      ts.isIdentifier(node.left) &&
+      bindings.has(node.left.text) &&
+      !isShadowed(node.left.text, scopes) &&
+      isAssignmentOperatorKind(ts, node.operatorToken.kind)
+    ) {
+      const info = bindings.get(node.left.text)
 
-        emitDiagnostic(
-          ctx,
-          diagnostics.write,
-          node.left,
-          `[mini-vue] 禁止对 props 解构变量 ${node.left.text} 赋值或变更，请直接操作 props.${info?.propKey ?? node.left.text}。`,
-        )
-      }
+      emitDiagnostic(
+        ctx,
+        diagnostics.write,
+        node.left,
+        `[mini-vue] 禁止对 props 解构变量 ${node.left.text} 赋值或变更，请直接操作 props.${info?.propKey ?? node.left.text}。`,
+      )
     }
 
-    if (ts.isPrefixUnaryExpression(node) || ts.isPostfixUnaryExpression(node)) {
-      if (
-        (node.operator === ts.SyntaxKind.PlusPlusToken ||
-          node.operator === ts.SyntaxKind.MinusMinusToken) &&
-        ts.isIdentifier(node.operand) &&
-        bindings.has(node.operand.text) &&
-        !isShadowed(node.operand.text, scopes)
-      ) {
-        const info = bindings.get(node.operand.text)
+    if (
+      (ts.isPrefixUnaryExpression(node) || ts.isPostfixUnaryExpression(node)) &&
+      (node.operator === ts.SyntaxKind.PlusPlusToken ||
+        node.operator === ts.SyntaxKind.MinusMinusToken) &&
+      ts.isIdentifier(node.operand) &&
+      bindings.has(node.operand.text) &&
+      !isShadowed(node.operand.text, scopes)
+    ) {
+      const info = bindings.get(node.operand.text)
 
-        emitDiagnostic(
-          ctx,
-          diagnostics.write,
-          node.operand,
-          `[mini-vue] 禁止对 props 解构变量 ${node.operand.text} 赋值或变更，请直接操作 props.${info?.propKey ?? node.operand.text}。`,
-        )
-      }
+      emitDiagnostic(
+        ctx,
+        diagnostics.write,
+        node.operand,
+        `[mini-vue] 禁止对 props 解构变量 ${node.operand.text} 赋值或变更，请直接操作 props.${info?.propKey ?? node.operand.text}。`,
+      )
     }
 
     ts.forEachChild(node, (child) => {
@@ -881,7 +880,7 @@ function collectSetupComponentContexts(
         continue
       }
 
-      const { bindings: paramBindings, propsName, replacement } = propsInfo
+      const { bindings: parameterBindings, propsName, replacement } = propsInfo
 
       const {
         bindings: variableBindings,
@@ -891,7 +890,7 @@ function collectSetupComponentContexts(
 
       const bindings = new Map<string, BindingInfo>()
 
-      for (const [key, value] of paramBindings.entries()) {
+      for (const [key, value] of parameterBindings.entries()) {
         bindings.set(key, value)
       }
 
@@ -938,11 +937,7 @@ function resolveWatchToRefLocals(
 
     const { importClause } = statement
 
-    if (
-      !importClause ||
-      !importClause.namedBindings ||
-      !ts.isNamedImports(importClause.namedBindings)
-    ) {
+    if (!importClause?.namedBindings || !ts.isNamedImports(importClause.namedBindings)) {
       continue
     }
 

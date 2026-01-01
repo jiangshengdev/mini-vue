@@ -1,12 +1,8 @@
-import {
-  miniVueDevtoolsSetupStateNamesPlugin,
-  type MiniVueDevtoolsSetupStateNamesPluginOptions,
-} from './devtools-setup-state-names.ts'
-import {
-  miniVueTransformPropsDestructurePlugin,
-  type MiniVueTransformPropsDestructurePluginOptions,
-} from './transform-props-destructure.ts'
 import type { PluginOption } from 'vite'
+import { miniVueDevtoolsSetupStateNamesPlugin } from './devtools-setup-state-names.ts'
+import type { MiniVueDevtoolsSetupStateNamesPluginOptions } from './devtools-setup-state-names.ts'
+import { miniVueTransformPropsDestructurePlugin } from './transform-props-destructure.ts'
+import type { MiniVueTransformPropsDestructurePluginOptions } from './transform-props-destructure.ts'
 
 export interface MiniVueCompilerPluginOptions {
   importSource?: string

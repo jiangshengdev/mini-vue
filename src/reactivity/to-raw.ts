@@ -6,10 +6,11 @@ import { isObject, isPlainObject } from '@/shared/index.ts'
  * 判断目标是否为当前响应式实现支持的原生结构。
  *
  * @param target - 要检查的值
- * @returns 若为普通对象或数组则返回 `true`
+ * @returns 若为普通对象、数组或 Ref 则返回 `true`
  *
  * @remarks
- * - 当前仅支持普通对象（`isPlainObject`）与数组。
+ * - 当前支持：普通对象（`isPlainObject`）、数组、Ref。
+ * - 目标必须是可扩展对象（`Object.isExtensible` 为 true），否则无法安全挂载依赖与内部标记。
  * - Map、Set、WeakMap、WeakSet 等原生集合暂不支持。
  */
 export function isSupportedTarget(target: unknown): target is ReactiveRawTarget {

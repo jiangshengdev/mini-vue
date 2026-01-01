@@ -14,6 +14,13 @@
 - 测试：`pnpm run test`（Vitest + jsdom）、`pnpm run test:browser`（Playwright）、`pnpm run test:inspect`（调试）。
 - 质量门禁：`pnpm run fmt`（Prettier）、`pnpm run lint`（oxlint + ESLint）、`pnpm run xo`、`pnpm run typecheck`（tsc）、`pnpm run check`（导入/边界规则）。提 PR 前建议跑 `pnpm run preflight` 或 `pnpm run ci`。
 
+## 环境判断与 CI
+
+- 环境判断：如果可用 MCP Server 列表中包含 `github-mcp-server`，视为运行在 GitHub 云端环境。
+- 在 GitHub 云端环境下：每次完成代码修改后，都需要运行并通过 `pnpm run ci`（脚本为 `pnpm run preflight && pnpm run check`）。
+- 规范策略：尽可能不要通过全局禁用 ESLint/XO 规则来“过关”；XO 可能非常严格，确实无法通过时允许使用最小范围的注释禁用，并在最终回复中明确说明必要的豁免或跳过的步骤与原因。
+- 兜底策略：如果已经明确尝试修复但仍无法通过 `pnpm run ci`，则直接停止继续修改，并在最终回复中说明当前失败点与已尝试的处理，交由人工完成后续工作。
+
 ## 代码风格与命名
 
 - TypeScript + ESM，内部导入可用 `@/` 别名避免相对路径穿越；模块优先使用具名导出与 index barrel。

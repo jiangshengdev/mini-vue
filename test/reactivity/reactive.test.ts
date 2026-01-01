@@ -2,11 +2,26 @@ import type { MockInstance } from 'vitest'
 import { beforeEach, describe, expect, expectTypeOf, it } from 'vitest'
 import { spyOnConsole } from '$/test-utils/mocks.ts'
 import type { Ref } from '@/index.ts'
-import { effect, isReactive, isReadonly, isRef, reactive, readonly, ref, toRaw } from '@/index.ts'
-import { reactivityUnsupportedType } from '@/messages/index.ts'
+import {
+  effect,
+  isReactive,
+  isReadonly,
+  isRef,
+  reactive,
+  readonly,
+  ref,
+  shallowReadonly,
+  toRaw,
+} from '@/index.ts'
 import type { PlainObject } from '@/shared/index.ts'
 
 describe('reactive', () => {
+  let warn: MockInstance<Console['warn']>
+
+  beforeEach(() => {
+    warn = spyOnConsole('warn')
+  })
+
   it('创建后可读取和写入属性', () => {
     const raw = { foo: 1 }
     const proxy = reactive(raw)
@@ -55,6 +70,7 @@ describe('reactive', () => {
     const value = 1
 
     expect(reactive(value)).toBe(value)
+    expect(warn).toHaveBeenCalled()
   })
 
   it('数组输入会被成功代理', () => {
@@ -123,28 +139,34 @@ describe('reactive', () => {
     const raw = { foo: 1 }
     const proxy = reactive(raw)
     const arrayProxy = reactive([1])
+    const readonlyProxy = readonly(proxy)
 
     expect(isReactive(proxy)).toBe(true)
     expect(isReactive(arrayProxy)).toBe(true)
+    expect(isReactive(readonlyProxy)).toBe(true)
     expect(isReactive(raw)).toBe(false)
     expect(isReactive(1)).toBe(false)
     expect(isReactive(new Map())).toBe(false)
   })
 
-  it('toRaw 可还原 reactive 代理对应的原始对象', () => {
+  it('toRaw 可递归还原代理对应的原始对象', () => {
     const raw = { nested: { count: 1 } }
     const proxy = reactive(raw)
+    const readonlyProxy = readonly(proxy)
+    const shallowReadonlyProxy = shallowReadonly(proxy)
 
     expect(toRaw(proxy)).toBe(raw)
+    expect(toRaw(readonlyProxy)).toBe(raw)
+    expect(toRaw(shallowReadonlyProxy)).toBe(raw)
     expect(isReactive(toRaw(proxy))).toBe(false)
     expect(toRaw(raw)).toBe(raw)
   })
 
-  it('reactive() 支持 Ref 目标（返回 Ref 本体）', () => {
+  it('reactive() 支持 Ref 目标并返回代理（保持 Ref 标识）', () => {
     const source = ref(1)
     const proxy = reactive(source)
 
-    expect(proxy).toBe(source)
+    expect(proxy).not.toBe(source)
     expect(isRef(proxy)).toBe(true)
     expect(proxy.value).toBe(1)
 
@@ -152,35 +174,17 @@ describe('reactive', () => {
     expect(source.value).toBe(2)
   })
 
-  it('非普通内建对象会报错', () => {
-    const factories = [
-      [
-        'Map',
-        () => {
-          return new Map()
-        },
-      ],
-      [
-        'Set',
-        () => {
-          return new Set()
-        },
-      ],
-      [
-        'Date',
-        () => {
-          return new Date()
-        },
-      ],
-    ] as const
+  it('非普通内建对象会直接返回原值并告警', () => {
+    const factories = [() => new Map(), () => new Set(), () => new Date()] as const
 
-    for (const [, factory] of factories) {
+    for (const factory of factories) {
       const value: unknown = factory()
+      const proxy = reactive(value)
 
-      expect(() => {
-        return reactive(value)
-      }).toThrowError(new TypeError(reactivityUnsupportedType))
+      expect(proxy).toBe(value)
     }
+
+    expect(warn).toHaveBeenCalled()
   })
 
   it('写入阶段读取旧值不会意外收集依赖', () => {

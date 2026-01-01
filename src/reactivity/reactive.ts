@@ -6,22 +6,20 @@
  * - 不同代理类型使用独立的缓存，避免相互干扰。
  */
 import type { ReactiveRawTarget, ReactiveTarget } from './contracts/index.ts'
-import { reactiveFlag, readonlyFlag, refFlag } from './contracts/index.ts'
+import { rawKey, reactiveFlag, readonlyFlag } from './contracts/index.ts'
 import {
   mutableHandlers,
   readonlyHandlers,
   shallowReactiveHandlers,
   shallowReadonlyHandlers,
 } from './internals/index.ts'
-import type { Ref } from './ref/types.ts'
-import { isSupportedTarget } from './to-raw.ts'
+import { isRef } from './ref/api.ts'
 import type { Reactive, ReadonlyReactive } from './types.ts'
-import { reactivityReadonlyWarning, reactivityUnsupportedType } from '@/messages/index.ts'
-import type { PlainObject } from '@/shared/index.ts'
+import { reactivityUnsupportedType } from '@/messages/index.ts'
 import { __DEV__, collectDevtoolsSetupState, isObject, isPlainObject } from '@/shared/index.ts'
 
 /** 响应式代理缓存类型：使用 WeakMap 避免内存泄漏。 */
-type ProxyCache = WeakMap<ReactiveRawTarget, ReactiveTarget>
+type ProxyCache = WeakMap<object, ReactiveTarget>
 
 /** `reactive` 代理缓存。 */
 const reactiveCache: ProxyCache = new WeakMap()
@@ -35,64 +33,40 @@ const shallowReactiveCache: ProxyCache = new WeakMap()
 /** `shallowReadonly` 代理缓存。 */
 const shallowReadonlyCache: ProxyCache = new WeakMap()
 
-function isRefTarget(value: unknown): value is Ref {
-  if (!isObject(value)) {
-    return false
-  }
-
-  return Object.hasOwn(value, refFlag)
+const enum TargetType {
+  invalid,
+  common,
 }
 
-class ReadonlyRefImpl<T> implements Ref<T> {
-  readonly [refFlag] = true as const
-
-  readonly [readonlyFlag] = true as const
-
-  /**
-   * Vue Devtools 兼容：通过 `__v_isRef` 识别 Ref。
-   *
-   * @remarks
-   * Devtools 会基于该标记对 Ref 做 unref，避免把只读 Ref 实例直接序列化导致 structured clone 失败。
-   */
-  // eslint-disable-next-line no-useless-computed-key
-  get ['__v_isRef'](): true {
-    return true
+function warnUnsupportedTarget(api: string, target: unknown): void {
+  if (!__DEV__) {
+    return
   }
 
-  private readonly source: Ref<T>
+  console.warn(reactivityUnsupportedType, {
+    api,
+    target,
+  })
+}
 
-  private readonly shallow: boolean
-
-  constructor(source: Ref<T>, shallow: boolean) {
-    this.source = source
-    this.shallow = shallow
+function getTargetType(target: object): TargetType {
+  if (!Object.isExtensible(target)) {
+    return TargetType.invalid
   }
 
-  get value(): T {
-    const current = this.source.value
-
-    if (this.shallow) {
-      return current
-    }
-
-    if (Array.isArray(current) || isPlainObject(current)) {
-      return readonly(current) as T
-    }
-
-    return current
+  if (isRef(target)) {
+    return TargetType.common
   }
 
-  set value(newValue: T) {
-    if (__DEV__) {
-      const payload = {
-        target: this.source,
-        key: 'value',
-        value: newValue,
-      } satisfies PlainObject
-
-      console.warn(reactivityReadonlyWarning, payload)
-    }
+  if (Array.isArray(target) || isPlainObject(target)) {
+    return TargetType.common
   }
+
+  return TargetType.invalid
+}
+
+function toRawTarget(target: object): object {
+  return (target as ReactiveTarget)[rawKey] ?? target
 }
 
 /**
@@ -101,49 +75,53 @@ class ReadonlyRefImpl<T> implements Ref<T> {
  * @param target - 要代理的目标对象
  * @param handlers - Proxy 处理器
  * @param cache - 代理缓存
- * @param options - 可选配置，控制是否跳过已代理对象的检查
  * @returns 代理对象，若目标不支持代理则返回原值
  */
-function createProxy(
+function createReactiveObject(
   target: unknown,
   handlers: ProxyHandler<ReactiveRawTarget>,
   cache: ProxyCache,
-  {
-    skipReactiveCheck = false,
-    skipReadonlyCheck = false,
-  }: { skipReactiveCheck?: boolean; skipReadonlyCheck?: boolean } = {},
+  { api, isReadonly, collectDevtools = false }: { api: string; isReadonly: boolean; collectDevtools?: boolean },
 ): unknown {
-  /* 非对象值无法建立响应式代理，直接返回原值 */
   if (!isObject(target)) {
+    warnUnsupportedTarget(api, target)
+
     return target
   }
 
-  /* 可选跳过已代理对象，保持 reactive/shallowReactive 的幂等性。 */
-  if (skipReactiveCheck && (target as ReactiveTarget)[reactiveFlag] === true) {
+  const sourceTarget = toRawTarget(target)
+  const baseTarget =
+    isReadonly && Reflect.get(target as ReactiveTarget, reactiveFlag) === true
+      ? (target as ReactiveRawTarget)
+      : (sourceTarget as ReactiveRawTarget)
+
+  if (!isReadonly && Reflect.get(target as ReactiveTarget, readonlyFlag) === true) {
     return target
   }
 
-  if (skipReadonlyCheck && (target as ReactiveTarget)[readonlyFlag] === true) {
+  if (!isReadonly && Reflect.get(target as ReactiveTarget, reactiveFlag) === true) {
     return target
   }
 
-  /* 当前实现仅支持普通对象与数组，其它原生对象直接报错 */
-  if (!isSupportedTarget(target)) {
-    throw new TypeError(reactivityUnsupportedType, { cause: target })
-  }
-
-  const reactiveTarget = target as ReactiveRawTarget
-  const cached = cache.get(reactiveTarget)
+  const cached = cache.get(sourceTarget)
 
   if (cached) {
-    /* 命中缓存即复用已有代理，保持依赖与副作用的一致性。 */
     return cached
   }
 
-  /* 未命中缓存时创建新代理并登记映射 */
-  const proxy = new Proxy(reactiveTarget, handlers)
+  if (getTargetType(sourceTarget) === TargetType.invalid) {
+    warnUnsupportedTarget(api, target)
 
-  cache.set(reactiveTarget, proxy)
+    return target
+  }
+
+  const proxy = new Proxy(baseTarget, handlers)
+
+  cache.set(sourceTarget, proxy)
+
+  if (__DEV__ && collectDevtools && !isReadonly) {
+    collectDevtoolsSetupState(proxy, api)
+  }
 
   return proxy
 }
@@ -172,17 +150,11 @@ export function reactive<T extends readonly unknown[]>(target: T): Reactive<T>
 export function reactive<T>(target: T): T
 
 export function reactive(target: unknown): unknown {
-  if (isRefTarget(target)) {
-    return target
-  }
-
-  const proxy = createProxy(target, mutableHandlers, reactiveCache, { skipReactiveCheck: true })
-
-  if (__DEV__) {
-    collectDevtoolsSetupState(proxy, 'reactive')
-  }
-
-  return proxy
+  return createReactiveObject(target, mutableHandlers, reactiveCache, {
+    api: 'reactive',
+    isReadonly: false,
+    collectDevtools: true,
+  })
 }
 
 /**
@@ -200,19 +172,11 @@ export function shallowReactive<T extends readonly unknown[]>(target: T): T
 export function shallowReactive<T>(target: T): T
 
 export function shallowReactive(target: unknown): unknown {
-  if (isRefTarget(target)) {
-    return target
-  }
-
-  const proxy = createProxy(target, shallowReactiveHandlers, shallowReactiveCache, {
-    skipReactiveCheck: true,
+  return createReactiveObject(target, shallowReactiveHandlers, shallowReactiveCache, {
+    api: 'shallowReactive',
+    isReadonly: false,
+    collectDevtools: true,
   })
-
-  if (__DEV__) {
-    collectDevtoolsSetupState(proxy, 'reactive')
-  }
-
-  return proxy
 }
 
 /**
@@ -230,16 +194,9 @@ export function shallowReadonly<T extends readonly unknown[]>(target: T): Readon
 export function shallowReadonly<T>(target: T): Readonly<T>
 
 export function shallowReadonly(target: unknown): unknown {
-  if (isRefTarget(target)) {
-    if (Reflect.get(target, readonlyFlag) === true) {
-      return target
-    }
-
-    return new ReadonlyRefImpl(target, true)
-  }
-
-  return createProxy(target, shallowReadonlyHandlers, shallowReadonlyCache, {
-    skipReadonlyCheck: true,
+  return createReactiveObject(target, shallowReadonlyHandlers, shallowReadonlyCache, {
+    api: 'shallowReadonly',
+    isReadonly: true,
   })
 }
 
@@ -258,15 +215,10 @@ export function readonly<T extends readonly unknown[]>(target: T): ReadonlyReact
 export function readonly<T>(target: T): ReadonlyReactive<T>
 
 export function readonly(target: unknown): unknown {
-  if (isRefTarget(target)) {
-    if (Reflect.get(target, readonlyFlag) === true) {
-      return target
-    }
-
-    return new ReadonlyRefImpl(target, false)
-  }
-
-  return createProxy(target, readonlyHandlers, readonlyCache, { skipReadonlyCheck: true })
+  return createReactiveObject(target, readonlyHandlers, readonlyCache, {
+    api: 'readonly',
+    isReadonly: true,
+  })
 }
 
 /**
@@ -287,12 +239,15 @@ export function isReactive(target: unknown): target is ReactiveTarget {
     return false
   }
 
-  if (!isSupportedTarget(target)) {
-    /* Map/Set 等未支持的结构不可视为 reactive。 */
-    return false
+  if (Reflect.get(target as ReactiveTarget, readonlyFlag) === true) {
+    const raw = (target as ReactiveTarget)[rawKey]
+
+    if (raw && raw !== target) {
+      return isReactive(raw)
+    }
   }
 
-  return (target as ReactiveTarget)[reactiveFlag] === true
+  return Reflect.get(target as ReactiveTarget, reactiveFlag) === true
 }
 
 /**
@@ -312,13 +267,15 @@ export function isReadonly(target: unknown): target is ReactiveTarget {
     return false
   }
 
-  if (isRefTarget(target)) {
-    return Reflect.get(target, readonlyFlag) === true
+  if (Reflect.get(target as ReactiveTarget, readonlyFlag) === true) {
+    return true
   }
 
-  if (!isSupportedTarget(target)) {
-    return false
+  const raw = (target as ReactiveTarget)[rawKey]
+
+  if (raw && raw !== target) {
+    return isReadonly(raw)
   }
 
-  return (target as ReactiveTarget)[readonlyFlag] === true
+  return false
 }

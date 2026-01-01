@@ -51,7 +51,7 @@ export function createComponentPropsState<T extends SetupComponent>(
   resolvedProps: ElementProps<T>,
 ): ComponentPropsState<T> {
   const propsSource = shallowReactive(resolvedProps)
-  const props = shallowReadonly(resolvedProps) as ElementProps<T>
+  const props = shallowReadonly(propsSource) as ElementProps<T>
 
   return { props, propsSource }
 }

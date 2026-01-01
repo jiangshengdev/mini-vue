@@ -1,5 +1,5 @@
 import type { ReactiveRawTarget, ReactiveTarget } from './contracts/index.ts'
-import { rawKey } from './contracts/index.ts'
+import { rawKey, refFlag } from './contracts/index.ts'
 import { isObject, isPlainObject } from '@/shared/index.ts'
 
 /**
@@ -13,7 +13,19 @@ import { isObject, isPlainObject } from '@/shared/index.ts'
  * - Map、Set、WeakMap、WeakSet 等原生集合暂不支持。
  */
 export function isSupportedTarget(target: unknown): target is ReactiveRawTarget {
-  return Array.isArray(target) || isPlainObject(target)
+  if (!isObject(target)) {
+    return false
+  }
+
+  if (!Object.isExtensible(target as object)) {
+    return false
+  }
+
+  if (Array.isArray(target) || isPlainObject(target)) {
+    return true
+  }
+
+  return Object.hasOwn(target as object, refFlag)
 }
 
 /**
@@ -34,11 +46,11 @@ export function toRaw<T>(target: T): T {
     return target
   }
 
-  if (!isSupportedTarget(target)) {
-    return target
-  }
-
   const raw = (target as ReactiveTarget)[rawKey] as unknown
 
-  return (raw ?? target) as T
+  if (raw) {
+    return toRaw(raw as T)
+  }
+
+  return target
 }

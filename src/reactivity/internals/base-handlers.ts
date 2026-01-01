@@ -156,19 +156,17 @@ function createGetter({
     /* 使用 Reflect 读取原始值，保持与原生访问一致的 this 绑定与行为 */
     const rawValue = Reflect.get(target, key, receiverTarget) as unknown
 
-    /*
-     * 读取属性同时收集依赖，连接目标字段与当前副作用。
-     *
-     * @remarks
-     * - deep readonly 不追踪依赖（避免收集无意义依赖桶）。
-     * - shallowReadonly（如 props）仍需要追踪以响应上游更新。
-     */
-    if (shouldTrack) {
-      track(target, key)
+    if (shallow) {
+      if (shouldTrack) {
+        track(target, key)
+      }
+
+      return rawValue
     }
 
-    if (shallow) {
-      return rawValue
+    /* 仅在可变代理上收集依赖，readonly/shallowReadonly 跳过。 */
+    if (shouldTrack) {
+      track(target, key)
     }
 
     if (isRef(rawValue)) {

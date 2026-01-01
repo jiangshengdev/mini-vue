@@ -65,6 +65,9 @@ function getTargetType(target: object): TargetType {
   return TargetType.invalid
 }
 
+/**
+ * 从可能的代理对象中提取原始目标，若未代理则返回自身。
+ */
 function toRawTarget(target: object): object {
   return (target as ReactiveTarget)[rawKey] ?? target
 }

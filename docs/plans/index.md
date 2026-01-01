@@ -13,6 +13,7 @@
 - [devtools-plugin-plan](./devtools-plugin-plan.md)
 - [devtools-components-plan](./devtools-components-plan.md)
 - [plan-mini-vue-compiler-plugin](./plan-mini-vue-compiler-plugin.md)
+- [plan-tsx-compile-priorities](./plan-tsx-compile-priorities.md)
 - [plan-tsx-compile-transform-devtools-names](./plan-tsx-compile-transform-devtools-names.md)
 - [plan-tsx-compile-transform-props-destructure](./plan-tsx-compile-transform-props-destructure.md)
 - [test-maintainability-plan](./test-maintainability-plan.md)

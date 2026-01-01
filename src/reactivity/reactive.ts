@@ -90,10 +90,11 @@ function createReactiveObject(
   }
 
   const sourceTarget = toRawTarget(target)
-  const baseTarget =
-    isReadonly && Reflect.get(target as ReactiveTarget, reactiveFlag) === true
-      ? (target as ReactiveRawTarget)
-      : (sourceTarget as ReactiveRawTarget)
+  let baseTarget: ReactiveRawTarget = sourceTarget as ReactiveRawTarget
+
+  if (isReadonly && Reflect.get(target as ReactiveTarget, reactiveFlag) === true) {
+    baseTarget = target as ReactiveRawTarget
+  }
 
   if (!isReadonly && Reflect.get(target as ReactiveTarget, readonlyFlag) === true) {
     return target

@@ -7,11 +7,11 @@ import { ref } from '@/reactivity/index.ts'
 import type { PluginInstallApp } from '@/shared/index.ts'
 
 /**
- * 检测当前环境是否为浏览器且支持 `history/popstate` 事件。
+ * 检测当前环境是否为浏览器且可绑定 `popstate` 事件。
  *
  * @remarks
- * - 用于在 SSR 或非浏览器环境下跳过 `history` 相关操作。
- * - 检测 `window.addEventListener` 存在性以确保事件绑定可用。
+ * - 用于在 SSR 或非浏览器环境下跳过事件绑定与 history 操作。
+ * - 以 `window.addEventListener` 作为「可监听导航事件」的最小判定条件。
  */
 const canUseWindowEvents =
   globalThis.window !== undefined && typeof window.addEventListener === 'function'

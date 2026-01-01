@@ -704,10 +704,6 @@ function visitFunctionForTransform(
         },
       ]
 
-      if (ts.isVariableStatement(node.parent)) {
-        // handled in variable declaration branch
-      }
-
       ts.forEachChild(node, (child) => {
         visit(child, nextScope)
       })
@@ -778,14 +774,6 @@ function visitFunctionForTransform(
             `[mini-vue] 直接将 props 解构变量 ${firstArg.text} 传入 ${callee.text}，请改为使用 props.${info?.propKey ?? firstArg.text} 或 getter。`,
           )
         }
-      }
-
-      if (
-        ts.isIdentifier(callee) &&
-        ctx.watchLikeLocals.has(callee.text) &&
-        ctx.toRefLikeLocals.has(callee.text)
-      ) {
-        // no-op, sets are disjoint; keep branch separate for clarity
       }
     }
 

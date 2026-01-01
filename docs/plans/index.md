@@ -14,6 +14,7 @@
 - [devtools-components-plan](./devtools-components-plan.md)
 - [plan-mini-vue-compiler-plugin](./plan-mini-vue-compiler-plugin.md)
 - [plan-tsx-compile-transform-devtools-names](./plan-tsx-compile-transform-devtools-names.md)
+- [plan-tsx-compile-transform-props-destructure](./plan-tsx-compile-transform-props-destructure.md)
 - [test-maintainability-plan](./test-maintainability-plan.md)
 - [playground-basic-e2e-plan](./playground-basic-e2e-plan.md)
 - [playwright-e2e-scripts-plan](./playwright-e2e-scripts-plan.md)

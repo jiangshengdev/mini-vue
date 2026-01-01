@@ -18,6 +18,7 @@
 
 - 环境判断：如果可用 MCP Server 列表中包含 `github-mcp-server`，视为运行在 GitHub 云端环境。
 - 在 GitHub 云端环境下：每次完成代码修改后，都需要运行并通过 `pnpm run ci`（脚本为 `pnpm run preflight && pnpm run check`）。
+- 在 GitHub 云端环境下：`pnpm run ci` 通过后，还需要运行并通过 `pnpm run test:e2e:all`、`pnpm run test`、`pnpm run test:browser` 进行验证。
 - 规范策略：尽可能不要通过全局禁用 ESLint/XO 规则来“过关”；XO 可能非常严格，确实无法通过时允许使用最小范围的注释禁用，并在最终回复中明确说明必要的豁免或跳过的步骤与原因。
 - 兜底策略：如果已经明确尝试修复但仍无法通过 `pnpm run ci`，则直接停止继续修改，并在最终回复中说明当前失败点与已尝试的处理，交由人工完成后续工作。
 

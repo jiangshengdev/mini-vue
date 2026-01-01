@@ -16,11 +16,10 @@
 [ ] 在 `mount` 路径支持 `keptAlive`：命中缓存时不新建实例，改为调用 `activate`（`move` 回实际容器 + 入队 activated hooks），并保持 `handle/nodes` 可复用（`src/runtime-core/mount/virtual-node.ts` 等）。  
 [ ] 在 `unmount` 路径支持 `shouldKeepAlive`：不 teardown、不走宿主 `remove`，改为调用 `deactivate`（`move` 到 `storageContainer` + 入队 deactivated hooks）（`src/runtime-core/patch/utils.ts` 等）。  
 [ ] 补齐缓存淘汰与卸载清理：`max` 超限 `prune` 时强制 teardown 被淘汰实例；KeepAlive 自身卸载时遍历 cache 全量 teardown，避免泄漏与残留标记。  
-[ ] 补充测试与验证：新增 `test/runtime-core/component/keep-alive.test.tsx` 覆盖缓存复用、DOM move 不触发 `remove`、`activated/deactivated` 时序与父子顺序、LRU 淘汰；运行 `pnpm run test test/runtime-core/component/keep-alive.test.tsx`。  
+[ ] 补充测试与验证：新增 `test/runtime-core/component/keep-alive.test.tsx` 覆盖缓存复用、DOM move 不触发 `remove`、`activated/deactivated` 时序与父子顺序、LRU 淘汰；运行 `pnpm run test test/runtime-core/component/keep-alive.test.tsx`。
 
 ## Open questions
 
 - `include/exclude` 匹配基于什么（函数名 `componentName` / 显式字段），以及首版是否先只做 `max` + `key/type` 缓存？
 - `deactivated` 期间组件更新策略：继续 patch 到 `storageContainer`，还是暂停 effect 并在 `activate` 时补一次？
 - `children` 多个/非组件 child 的行为：仅取第一个组件并开发态警告，还是直接透传不做缓存？
-

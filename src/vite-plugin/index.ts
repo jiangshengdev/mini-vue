@@ -14,23 +14,16 @@ export interface MiniVueCompilerPluginOptions {
   transformPropsDestructure?: false | MiniVueTransformPropsDestructurePluginOptions
 }
 
-export function miniVueCompilerPlugin(
-  options: MiniVueCompilerPluginOptions = {},
-): PluginOption[] {
+export function miniVueCompilerPlugin(options: MiniVueCompilerPluginOptions = {}): PluginOption[] {
   const plugins: PluginOption[] = []
   const { importSource, devtoolsSetupStateNames, transformPropsDestructure } = options
 
   if (transformPropsDestructure !== false) {
-    plugins.push(
-      miniVueTransformPropsDestructurePlugin(
-        transformPropsDestructure ?? {},
-      ),
-    )
+    plugins.push(miniVueTransformPropsDestructurePlugin(transformPropsDestructure ?? {}))
   }
 
   if (devtoolsSetupStateNames !== false) {
-    const devtoolsOptions =
-      devtoolsSetupStateNames === undefined ? {} : devtoolsSetupStateNames
+    const devtoolsOptions = devtoolsSetupStateNames === undefined ? {} : devtoolsSetupStateNames
 
     plugins.push(
       miniVueDevtoolsSetupStateNamesPlugin({

@@ -9,10 +9,17 @@ async function transformWithCompilerPlugin(parameters: {
   const plugins = miniVueCompilerPlugin({
     importSource: '@/index.ts',
     devtoolsSetupStateNames: false,
-    transformPropsDestructure: parameters.diagnostics ? { diagnostics: parameters.diagnostics } : {},
+    transformPropsDestructure: parameters.diagnostics
+      ? { diagnostics: parameters.diagnostics }
+      : {},
   })
   const plugin = plugins.find((item) => {
-    return typeof item === 'object' && item && 'name' in item && item.name === 'mini-vue:transform-props-destructure'
+    return (
+      typeof item === 'object' &&
+      item &&
+      'name' in item &&
+      item.name === 'mini-vue:transform-props-destructure'
+    )
   })
 
   const hook = plugin && 'transform' in plugin ? plugin.transform : undefined
@@ -210,7 +217,7 @@ export const App: SetupComponent = (props) => {
       id: '/src/app.tsx',
     })
 
-    expect(result?.code).toContain('return () => <div>{props[\'foo.bar\']}{props[\'baz\']}</div>')
+    expect(result?.code).toContain("return () => <div>{props['foo.bar']}{props['baz']}</div>")
   })
 
   it('写入解构变量会报错', async () => {

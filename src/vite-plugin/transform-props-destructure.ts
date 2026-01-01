@@ -166,6 +166,7 @@ function getSetupComponentFunction(
 function resolveUniqueName(used: Set<string>, base: string): string {
   if (!used.has(base)) {
     used.add(base)
+
     return base
   }
 
@@ -176,6 +177,7 @@ function resolveUniqueName(used: Set<string>, base: string): string {
 
     if (!used.has(candidate)) {
       used.add(candidate)
+
       return candidate
     }
 
@@ -188,7 +190,9 @@ function resolvePropsParameter(
   sourceFile: Ts.SourceFile,
   fn: Ts.FunctionLike,
   hoistedNames: Set<string>,
-): { propsName: string; bindings: Map<string, BindingInfo>; replacement?: Replacement } | undefined {
+):
+  | { propsName: string; bindings: Map<string, BindingInfo>; replacement?: Replacement }
+  | undefined {
   const firstParameter = fn.parameters[0]
 
   if (!firstParameter) {
@@ -249,22 +253,28 @@ function collectObjectBindings(
       return undefined
     }
 
-    const propKey = ts.isIdentifier(propKeyNode) ? propKeyNode.text : propKeyNode.getText(sourceFile)
+    const propKey = ts.isIdentifier(propKeyNode)
+      ? propKeyNode.text
+      : propKeyNode.getText(sourceFile)
 
     bindings.set(element.name.text, {
       propKey,
     })
   }
 
-    return bindings
-  }
+  return bindings
+}
 
 function collectTopLevelDestructure(
   ts: TypeScriptApi,
   sourceFile: Ts.SourceFile,
   fn: Ts.FunctionExpression | Ts.ArrowFunction,
   propsName: string,
-): { bindings: Map<string, BindingInfo>; removeRanges: RemoveRange[]; nestedWarnTargets: Ts.Node[] } {
+): {
+  bindings: Map<string, BindingInfo>
+  removeRanges: RemoveRange[]
+  nestedWarnTargets: Ts.Node[]
+} {
   const bindings = new Map<string, BindingInfo>()
   const removeRanges: RemoveRange[] = []
   const nestedWarnTargets: Ts.Node[] = []
@@ -323,7 +333,9 @@ function collectTopLevelDestructure(
     }
 
     if (ts.isVariableDeclaration(node) && isPropsDestructurePattern(ts, node, propsName)) {
-      if (!removeRanges.some((range) => node.getStart() >= range.start && node.getEnd() <= range.end)) {
+      if (
+        !removeRanges.some((range) => node.getStart() >= range.start && node.getEnd() <= range.end)
+      ) {
         nestedWarnTargets.push(node.name)
       }
     }
@@ -348,7 +360,8 @@ function applyReplacements(code: string, replacements: Replacement[]): string {
   let current = code
 
   for (const replacement of sorted) {
-    current = current.slice(0, replacement.start) + replacement.text + current.slice(replacement.end)
+    current =
+      current.slice(0, replacement.start) + replacement.text + current.slice(replacement.end)
   }
 
   return current
@@ -363,6 +376,7 @@ function isWithinRanges(pos: number, end: number, ranges: RemoveRange[]): boolea
 function collectBindingNames(ts: TypeScriptApi, name: Ts.BindingName, result: Set<string>): void {
   if (ts.isIdentifier(name)) {
     result.add(name.text)
+
     return
   }
 
@@ -612,6 +626,7 @@ function emitDiagnostic(
 
   if (level === 'error') {
     ctx.error(payload)
+
     return
   }
 
@@ -832,7 +847,10 @@ function visitFunctionForTransform(
   }
 }
 
-function collectSetupComponentContexts(ts: TypeScriptApi, sourceFile: Ts.SourceFile): SetupComponentContext[] {
+function collectSetupComponentContexts(
+  ts: TypeScriptApi,
+  sourceFile: Ts.SourceFile,
+): SetupComponentContext[] {
   const contexts: SetupComponentContext[] = []
 
   ts.forEachChild(sourceFile, (node) => {
@@ -865,12 +883,11 @@ function collectSetupComponentContexts(ts: TypeScriptApi, sourceFile: Ts.SourceF
 
       const { bindings: paramBindings, propsName, replacement } = propsInfo
 
-      const { bindings: variableBindings, removeRanges, nestedWarnTargets } = collectTopLevelDestructure(
-        ts,
-        sourceFile,
-        fn,
-        propsName,
-      )
+      const {
+        bindings: variableBindings,
+        removeRanges,
+        nestedWarnTargets,
+      } = collectTopLevelDestructure(ts, sourceFile, fn, propsName)
 
       const bindings = new Map<string, BindingInfo>()
 
@@ -904,7 +921,10 @@ function collectSetupComponentContexts(ts: TypeScriptApi, sourceFile: Ts.SourceF
   return contexts
 }
 
-function resolveWatchToRefLocals(ts: TypeScriptApi, sourceFile: Ts.SourceFile): {
+function resolveWatchToRefLocals(
+  ts: TypeScriptApi,
+  sourceFile: Ts.SourceFile,
+): {
   watch: Set<string>
   toRef: Set<string>
 } {
@@ -918,7 +938,11 @@ function resolveWatchToRefLocals(ts: TypeScriptApi, sourceFile: Ts.SourceFile): 
 
     const { importClause } = statement
 
-    if (!importClause || !importClause.namedBindings || !ts.isNamedImports(importClause.namedBindings)) {
+    if (
+      !importClause ||
+      !importClause.namedBindings ||
+      !ts.isNamedImports(importClause.namedBindings)
+    ) {
       continue
     }
 

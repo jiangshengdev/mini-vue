@@ -1,11 +1,18 @@
-import { readFileSync } from 'node:fs'
-import { dirname, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
-
-const fixturesRoot = resolve(dirname(fileURLToPath(import.meta.url)), 'fixtures')
+const fixtureModules = import.meta.glob<string>('./fixtures/**/*', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+})
 
 export function readVitePluginFixture(path: string): string {
-  let content = readFileSync(resolve(fixturesRoot, path), 'utf8')
+  const key = `./fixtures/${path}`
+  const raw = fixtureModules[key]
+
+  if (typeof raw !== 'string') {
+    throw new Error(`未找到 fixture: ${path}`)
+  }
+
+  let content = raw
 
   if (!content.endsWith('\n')) {
     content += '\n'

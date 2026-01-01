@@ -1,9 +1,11 @@
 /**
  * `v-model` 转换过程中的警告函数。
  *
- * 在开发模式下，当检测到以下情况时发出警告：
- * - 在非表单元素上使用 `v-model`
- * - `v-model` 与现有属性（如 `value`、`checked`、`onChange`）冲突
+ * 在开发模式下，用于输出 `v-model` 相关的提示信息。
+ *
+ * @remarks
+ * - `jsx-runtime` 侧的组件 `v-model` 转换目前仅使用「冲突告警」。
+ * - DOM 表单元素的 `v-model` 适配与「非表单元素」告警由宿主层（如 `runtime-dom`）负责。
  */
 import { jsxModelBindingConflictWarning, jsxModelBindingNonFormWarning } from '@/messages/index.ts'
 import { __DEV__ } from '@/shared/index.ts'
@@ -11,8 +13,8 @@ import { __DEV__ } from '@/shared/index.ts'
 /**
  * 警告：在非表单元素上使用 `v-model`。
  *
- * `v-model` 仅支持原生表单元素（input、textarea、select），
- * 在其他元素上使用时会发出此警告。
+ * @remarks
+ * - 该告警主要由宿主层在处理 DOM `v-model` 时触发；这里保留同名函数便于复用文案与策略。
  *
  * @param type - 元素类型（标签名）
  * @param props - 元素的 props（用于调试输出）

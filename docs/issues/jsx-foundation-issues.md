@@ -51,16 +51,15 @@ export interface VirtualNode<T extends ElementType = ElementType> {
 
 ---
 
-## 2. `ComponentChildren` 不接受 `null` 导致类型/运行时不一致（状态：待解决）
+## 2. `ComponentChildren` 不接受 `null` 导致类型/运行时不一致（状态：按设计）
 
 - 位置：`src/jsx-foundation/types.ts`（`ComponentChildren`、`RenderOutput`）
-- 现状：类型仅允许 `boolean | undefined` 表示空值，显式的 `null` 被排除；但运行时的 `normalizeChildren` / `normalizeRenderOutput` 会把 `null` 视为可忽略节点并正常处理。
-- 影响：
-  - 常见写法如组件 `return null` 或传入 `children: null` 会在 TS 层报错，实际运行时却是合法输入，类型与行为分叉。
-  - 使用 React/Vue 心智的用户容易踩坑，需要额外类型断言或绕过检查，降低易用性。
-- 可能方案：
-  - 直接将 `null` 纳入 `ComponentChildren`/`RenderOutput` 联合类型（如 `VirtualNodeChild | VirtualNodeChild[] | boolean | null | undefined`），与运行时处理保持一致。
-  - 若 lint 规则限制显式 `null`，可通过别名封装（如 `type NullableChild = VirtualNodeChild | null`）或调整规则配置，仅对类型声明放宽，以避免在调用方层面出现类型报错。
+- 结论：这是刻意的设计选择。
+  - 类型层面不支持 `null` 作为 children/渲染结果的“空值”，统一使用 `undefined`（以及既有的 `boolean` 空值语义）。
+  - 运行时对 `null` 的忽略属于“容错行为”，用于兼容/稳健性处理；不保证在类型层面可用。
+- 约定用法：
+  - 组件需要渲染空内容时，使用 `return undefined`（或返回空 children 语义的 `boolean`），不要 `return null`。
+  - 传递 children 时，用省略该字段或 `children: undefined`，不要传 `children: null`。
 
 ## 3. 测试用例手动管理 `console.warn` mock（状态：已解决）
 

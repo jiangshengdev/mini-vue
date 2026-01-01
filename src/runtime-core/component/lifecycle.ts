@@ -18,7 +18,13 @@ import {
 import { withoutTracking } from '@/reactivity/index.ts'
 import { __DEV__, errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
 
-type LifecycleHookType = 'mounted' | 'unmounted' | 'beforeUpdate' | 'updated' | 'activated' | 'deactivated'
+type LifecycleHookType =
+  | 'mounted'
+  | 'unmounted'
+  | 'beforeUpdate'
+  | 'updated'
+  | 'activated'
+  | 'deactivated'
 
 type HookStorageKey =
   | 'mountedHooks'

@@ -40,9 +40,8 @@ export const KeepAlive: SetupComponent<KeepAliveProps> = (props) => {
     watch(
       () => [props.include, props.exclude],
       () => {
-        pruneCache(
-          keepAliveContext,
-          (name) => shouldIncludeComponent(name, props.include, props.exclude),
+        pruneCache(keepAliveContext, (name) =>
+          shouldIncludeComponent(name, props.include, props.exclude),
         )
       },
       { flush: 'post' },
@@ -116,11 +115,9 @@ export function createKeepAliveContext<
   HostNode,
   HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
->(options: RendererOptions<HostNode, HostElement, HostFragment>): KeepAliveContext<
-  HostNode,
-  HostElement,
-  HostFragment
-> {
+>(
+  options: RendererOptions<HostNode, HostElement, HostFragment>,
+): KeepAliveContext<HostNode, HostElement, HostFragment> {
   return {
     rendererOptions: options,
     storageContainer: options.createElement('div'),
@@ -148,7 +145,12 @@ export function cacheKeepAliveSubtree<
 
   if (runtimeVNode.component) {
     queueKeepAliveActivated(
-      runtimeVNode.component as ComponentInstance<HostNode, HostElement, HostFragment, SetupComponent>,
+      runtimeVNode.component as ComponentInstance<
+        HostNode,
+        HostElement,
+        HostFragment,
+        SetupComponent
+      >,
     )
   }
 }
@@ -201,7 +203,9 @@ export function activateKeepAlive<
   setCacheEntry(keepAliveContext, cacheKey, next)
 
   if (instance) {
-    queueKeepAliveActivated(instance as ComponentInstance<HostNode, HostElement, HostFragment, SetupComponent>)
+    queueKeepAliveActivated(
+      instance as ComponentInstance<HostNode, HostElement, HostFragment, SetupComponent>,
+    )
   }
 
   return result
@@ -270,7 +274,11 @@ function queueComponentSubTreeHooks<
     return
   }
 
-  const runtimeSubTree = subTree as RuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>
+  const runtimeSubTree = subTree as RuntimeNormalizedVirtualNode<
+    HostNode,
+    HostElement,
+    HostFragment
+  >
   const childInstance = runtimeSubTree.component as
     | ComponentInstance<HostNode, HostElement, HostFragment, SetupComponent>
     | undefined

@@ -1,14 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { createHostRenderer } from '../host-utils.ts'
 import type { SetupComponent } from '@/index.ts'
-import {
-  KeepAlive,
-  nextTick,
-  onActivated,
-  onDeactivated,
-  onUnmounted,
-  ref,
-} from '@/index.ts'
+import { KeepAlive, nextTick, onActivated, onDeactivated, onUnmounted, ref } from '@/index.ts'
 import { createRenderer } from '@/runtime-core/index.ts'
 
 describe('runtime-core KeepAlive', () => {
@@ -25,18 +18,17 @@ describe('runtime-core KeepAlive', () => {
 
     const App: SetupComponent = () => {
       return () => {
-        return (
-          <KeepAlive>
-            {show.value ? <Child /> : undefined}
-          </KeepAlive>
-        )
+        return <KeepAlive>{show.value ? <Child /> : undefined}</KeepAlive>
       }
     }
 
     renderer.render(<App />, host.container)
     await nextTick()
 
-    console.log('container children kinds', host.container.children.map((child) => child.kind))
+    console.log(
+      'container children kinds',
+      host.container.children.map((child) => child.kind),
+    )
 
     const firstChild = host.container.children[0]
 
@@ -89,11 +81,7 @@ describe('runtime-core KeepAlive', () => {
 
     const App: SetupComponent = () => {
       return () => {
-        return (
-          <KeepAlive>
-            {show.value ? <Parent /> : undefined}
-          </KeepAlive>
-        )
+        return <KeepAlive>{show.value ? <Parent /> : undefined}</KeepAlive>
       }
     }
 

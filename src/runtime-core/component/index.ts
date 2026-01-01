@@ -3,5 +3,12 @@
  */
 export { getCurrentInstance } from './context.ts'
 export type { ComponentInstance } from './context.ts'
-export { onActivated, onBeforeUpdate, onDeactivated, onMounted, onUnmounted, onUpdated } from './lifecycle.ts'
+export {
+  onActivated,
+  onBeforeUpdate,
+  onDeactivated,
+  onMounted,
+  onUnmounted,
+  onUpdated,
+} from './lifecycle.ts'
 export { mountComponent } from './mount.ts'

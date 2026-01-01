@@ -83,6 +83,12 @@ export type {
 } from '@/shared/index.ts'
 export { registerDevtoolsSetupStateName, setErrorHandler } from '@/shared/index.ts'
 export {
+  type DiagnosticLevel,
+  miniVueCompilerPlugin,
+  type MiniVueCompilerPluginOptions,
   miniVueDevtoolsSetupStateNamesPlugin,
   type MiniVueDevtoolsSetupStateNamesPluginOptions,
+  type MiniVueTransformPropsDestructureDiagnosticsOptions,
+  miniVueTransformPropsDestructurePlugin,
+  type MiniVueTransformPropsDestructurePluginOptions,
 } from '@/vite-plugin/index.ts'

@@ -1,14 +1,7 @@
 /**
- * DOM 宿主环境的渲染原语实现。
+ * DOM 宿主环境的渲染原语实现，封装节点创建、插入、清理与属性打补丁的操作。
  *
- * 本模块提供 runtime-core 所需的 DOM 操作原语，包括：
- * - 节点创建：`createElement`、`createText`、`createComment`、`createFragment`
- * - 节点操作：`appendChild`、`insertBefore`、`remove`、`clear`
- * - 文本/注释更新：`setText`
- * - 属性打补丁：`patchProps`
- *
- * 这些原语构成 runtime-core 与 DOM 宿主之间的契约，
- * 使渲染器可以在不同宿主环境（如 DOM、Canvas、Native）间复用。
+ * 作为 runtime-core 与 DOM 的契约，使渲染器可以复用统一的选项生成 DOM 版 renderer。
  */
 import { patchProps } from './props/index.ts'
 import type { RendererOptions } from '@/runtime-core/index.ts'

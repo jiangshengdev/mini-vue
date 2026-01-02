@@ -1,3 +1,6 @@
+/**
+ * 路由相关的类型定义：描述路由记录、定位信息与路由器接口。
+ */
 import type { SetupComponent } from '@/jsx-foundation/index.ts'
 import type { Ref } from '@/reactivity/index.ts'
 import type { PluginInstallApp, PluginObject, PluginUninstall } from '@/shared/index.ts'

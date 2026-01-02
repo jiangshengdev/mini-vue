@@ -76,4 +76,5 @@
     - 要求：提交到仓库时 `.kiro/specs/annotation-src/tasks.md` 保持全部为 `[ ]`
 
 ## Notes
+
 - 本任务为注释整改，不涉及功能代码实现。

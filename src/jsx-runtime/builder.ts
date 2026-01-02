@@ -1,13 +1,7 @@
 /**
- * VirtualNode 构建器，负责将 JSX 调用参数转换为 VirtualNode。
- *
- * 本模块是 `jsx`/`jsxs`/`jsxDEV`/`h` 的底层实现，主要职责：
- * 1. 从 `props` 中提取并归一化 `key`（显式参数优先于 `props.key`）
- * 2. 应用组件 `v-model` 转换（生成 `modelValue` + `onUpdate:modelValue`）
- * 3. 调用 `createVirtualNode` 创建最终的 VirtualNode
- *
- * @remarks
- * DOM 表单元素的 `v-model` 由宿主层（如 `runtime-dom`）消费，不在 `jsx-runtime` 层转换。
+ * VirtualNode 构建器：统一提取 `key`、处理组件 `v-model` 并创建 VirtualNode。
+ * 承接 `jsx`/`jsxs`/`jsxDEV`/`h` 的调用，保证编译态与运行时入口使用同一条构建链路。
+ * 组件 `v-model` 在此转为受控属性与事件；DOM 表单 `v-model` 由宿主层消费，不在此转换。
  */
 import { transformModelBindingProps } from './transform/index.ts'
 import type {
@@ -19,11 +13,7 @@ import type {
 import { createVirtualNode } from '@/jsx-foundation/index.ts'
 import type { PropsShape, WithOptionalProp } from '@/shared/index.ts'
 
-/**
- * `extractKeyedProps` 的返回结果。
- *
- * 记录从 `props` 中剥离 `key` 后的副本与归一化的 `key` 值。
- */
+/** `extractKeyedProps` 的返回结果，记录归一化的 `key` 与剥离后的 props。 */
 interface NormalizedPropsResult<T extends ElementType> {
   /**
    * 组件最终使用的唯一 `key`。
@@ -39,12 +29,6 @@ interface NormalizedPropsResult<T extends ElementType> {
 
 /**
  * 从 `props` 中提取 `key` 并返回剩余属性。
- *
- * `key` 的来源优先级：
- * 1. 显式传入的 `explicitKey` 参数（`jsx` 第三个参数）
- * 2. `props.key` 字段（仅当 `props` 显式声明了 `key` 时才读取）
- *
- * 注意：使用 `Object.hasOwn` 检查 `key` 是否存在，避免误读原型链上的值或解构默认值。
  *
  * @param props - 原始 props 对象
  * @param explicitKey - 显式传入的 key 值（来自 `jsx` 第三个参数）
@@ -79,14 +63,8 @@ function extractKeyedProps<T extends ElementType>(
 }
 
 /**
- * 构建 VirtualNode 的核心函数。
- *
- * 处理流程：
- * 1. 调用 `extractKeyedProps` 提取 `key` 并获取剩余 `props`
- * 2. 调用 `transformModelBindingProps` 处理 `v-model` 绑定
- * 3. 调用 `createVirtualNode` 创建最终的 VirtualNode
- *
- * 此函数是 `jsx`/`jsxs`/`jsxDEV`/`h` 的共同底层实现。
+ * 构建 VirtualNode：抽取 `key`、处理组件 `v-model`，再创建最终节点。
+ * 此函数为 `jsx`/`jsxs`/`jsxDEV`/`h` 的共享底层实现。
  *
  * @param type - 元素类型（原生标签名或组件函数）
  * @param props - 元素属性（可能包含 `key` 和 `v-model`）

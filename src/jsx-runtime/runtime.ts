@@ -1,12 +1,8 @@
 /**
- * JSX 编译器自动调用的运行时函数。
- *
- * 当 TypeScript/Babel 配置 `jsx: "react-jsx"` 时，编译器会将 JSX 语法转换为对
- * `jsx`/`jsxs`/`jsxDEV` 的调用。这些函数是编译器与运行时之间的契约接口。
- *
- * 与 `h` 函数的区别：
- * - `jsx` 系列由编译器自动调用，`children` 已被编译器合并到 `props` 中
- * - `h` 函数供用户手动调用，支持可变 `children` 参数
+ * JSX 编译器自动调用的运行时入口，承接 `react-jsx` 模式的编译产物。
+ * 负责接受编译器合并后的 `props` 与外部传入的 `key`，并交由 VirtualNode 构建器处理。
+ * 与手写 `h` 保持分层：`jsx` 系列专属编译器调用，`children` 已内嵌在 `props` 中。
+ * 保留 `jsx`/`jsxs`/`jsxDEV` 以兼容生产态与开发态的调用约定。
  */
 import { buildVirtualNode } from './builder.ts'
 import type { ElementProps, ElementType, VirtualNode } from '@/jsx-foundation/index.ts'

@@ -11,6 +11,9 @@ import { __DEV__ } from '@/shared/index.ts'
 
 /**
  * 读取 model 绑定的当前值。
+ *
+ * @param modelBinding - `v-model` 绑定目标
+ * @returns 解析得到的当前值
  */
 export function readModelValue(modelBinding: unknown): unknown {
   return isRef(modelBinding) ? modelBinding.value : modelBinding
@@ -18,6 +21,9 @@ export function readModelValue(modelBinding: unknown): unknown {
 
 /**
  * 设置 model 绑定的新值。
+ *
+ * @param modelBinding - `v-model` 绑定目标
+ * @param value - 要写入的值
  */
 export function setModelValue(modelBinding: unknown, value: unknown): void {
   if (isRef(modelBinding)) {

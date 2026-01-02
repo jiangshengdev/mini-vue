@@ -88,6 +88,9 @@ function patchEvent(
 
 /**
  * 获取或初始化当前元素的事件 `invoker` 映射，避免多次创建对象。
+ *
+ * @param element - 宿主元素
+ * @returns 当前元素上的 invoker 映射表
  */
 function getInvokerMap(element: HTMLElement): InvokerMap {
   const record = (element as HTMLElement & { [invokerCacheKey]?: InvokerMap })[invokerCacheKey]
@@ -105,6 +108,9 @@ function getInvokerMap(element: HTMLElement): InvokerMap {
 
 /**
  * 检测 `props` key 是否表示事件绑定（如 `onClick`/`oninput`）。
+ *
+ * @param key - props 键名
+ * @returns 是否符合事件前缀约定
  */
 function isEventProp(key: string): boolean {
   return key.startsWith('on') && key.length > 2

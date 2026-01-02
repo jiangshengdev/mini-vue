@@ -25,6 +25,10 @@ type PropsWithModelBinding = PropsShape & { 'v-model'?: unknown }
  * @remarks
  * - 返回值会移除 `'v-model'`，避免落入 attribute patching。
  * - 若未出现 `'v-model'`，直接返回原 props 引用，减少额外对象创建。
+ *
+ * @param element - 绑定的宿主元素
+ * @param rawProps - 原始 props 对象
+ * @returns 转换后的 props，包含受控属性与事件
  */
 export function transformDomModelBindingProps(element: Element, rawProps: PropsShape): PropsShape {
   if (!Object.hasOwn(rawProps, 'v-model')) {
@@ -39,6 +43,11 @@ export function transformDomModelBindingProps(element: Element, rawProps: PropsS
   Reflect.deleteProperty(nextProps, 'v-model')
 
   const conflicts: string[] = []
+  /**
+   * 记录当前转换中与用户传入冲突的键。
+   *
+   * @param key - 冲突的属性名
+   */
   const trackConflict: TrackConflict = (key) => {
     if (Object.hasOwn(nextProps, key)) {
       conflicts.push(key)

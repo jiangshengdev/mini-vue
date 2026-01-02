@@ -68,6 +68,11 @@ export function handleFormStateProp(
  * @param value - 要设置的值，支持单值或数组
  */
 function applySelectValue(element: HTMLSelectElement, value: unknown): void {
+  /**
+   * 将单个值应用到 select，兼容单选/多选。
+   *
+   * @param next - 要写入的值
+   */
   const applySingleValue = (next: unknown) => {
     let normalized = ''
 

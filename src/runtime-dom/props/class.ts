@@ -43,6 +43,9 @@ export function handleClassProp(
 
 /**
  * 将 class 属性值归一化为字符串，空值返回空字符串。
+ *
+ * @param value - 传入的 class 值
+ * @returns 归一化后的类名字符串
  */
 function normalizeClassProp(value: unknown): string {
   if (isNil(value) || value === false) {
@@ -54,6 +57,9 @@ function normalizeClassProp(value: unknown): string {
 
 /**
  * 将 `class` 相关入参归一化为以空格分隔的字符串。
+ *
+ * @param value - 传入的 class 值
+ * @returns 拼接后的类名字符串
  */
 function normalizeClass(value: unknown): string {
   const tokens: string[] = []
@@ -66,6 +72,9 @@ function normalizeClass(value: unknown): string {
 
 /**
  * 递归收集 `class` 值中的有效标记，支持字符串、数组与对象形式。
+ *
+ * @param source - 原始 class 值
+ * @param tokens - 收集到的类名列表
  */
 function collectClassTokens(source: unknown, tokens: string[]): void {
   /* 空值直接跳过，不参与渲染。 */

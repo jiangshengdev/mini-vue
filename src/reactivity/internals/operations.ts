@@ -91,7 +91,11 @@ class DependencyRegistry {
     /* 通过 Set 去重同一次触发中出现的重复依赖。 */
     const depsToRun = new Set<DependencyBucket>()
 
-    /* 工具函数：跳过空集合并统一去重逻辑。 */
+    /**
+     * 工具函数：跳过空集合并将依赖集合加入本次触发列表。
+     *
+     * @param dependencyBucket - 目标字段对应的依赖集合
+     */
     const addDep = (dependencyBucket?: DependencyBucket) => {
       if (!dependencyBucket) {
         return

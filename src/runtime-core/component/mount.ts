@@ -1,3 +1,6 @@
+/**
+ * 组件挂载与 KeepAlive 入口：创建实例、执行 `setup` 并触发首渲染。
+ */
 import {
   cacheKeepAliveSubtree,
   createKeepAliveContext,

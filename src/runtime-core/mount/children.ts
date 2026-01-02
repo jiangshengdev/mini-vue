@@ -1,3 +1,6 @@
+/**
+ * 元素子节点挂载助手：保持声明顺序逐个调用 `mountChild`。
+ */
 import type { MountContext } from '../environment.ts'
 import type { RendererOptions } from '../index.ts'
 import { mountChild } from './child.ts'

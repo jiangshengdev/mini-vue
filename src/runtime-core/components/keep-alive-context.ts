@@ -1,3 +1,6 @@
+/**
+ * `KeepAlive` 的缓存上下文定义，管理缓存记录与宿主存储容器。
+ */
 import type { RuntimeNormalizedVirtualNode } from '../patch/runtime-virtual-node.ts'
 import type { RendererOptions } from '../renderer.ts'
 import type { SetupComponent } from '@/jsx-foundation/index.ts'

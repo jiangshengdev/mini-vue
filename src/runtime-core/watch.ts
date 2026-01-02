@@ -1,3 +1,6 @@
+/**
+ * 运行时层的 watch 适配：默认接入调度器队列以对齐组件更新批次。
+ */
 import { queuePostFlushCb, queuePreFlushCb } from './scheduler.ts'
 import type {
   WatchCallback,
@@ -30,6 +33,12 @@ export function watch<T>(
   })
 }
 
+/**
+ * 按 `flush` 选项选择调度器，实现 `pre/post/sync` 三种时机。
+ *
+ * @param flush 用户指定的刷新时机。
+ * @returns 对应的调度函数；`sync` 返回 `undefined` 走同步。
+ */
 function resolveScheduler(flush: WatchOptions['flush']): WatchScheduler | undefined {
   if (flush === 'pre') {
     return (job) => {

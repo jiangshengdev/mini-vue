@@ -1,3 +1,6 @@
+/**
+ * 构建 children diff 期间使用的宿主操作驱动，统一封装新增、卸载与移动。
+ */
 import type { ContainerLike, MountContext } from '../environment.ts'
 import type { NormalizedVirtualNode } from '../normalize.ts'
 import type { RendererOptions } from '../renderer.ts'

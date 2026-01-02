@@ -1,3 +1,6 @@
+/**
+ * `virtualNode` 分派入口：根据类型走组件、元素或 `Fragment` 的挂载路径。
+ */
 import { mountComponent } from '../component/index.ts'
 import type { ChildEnvironment } from '../environment.ts'
 import type { RendererOptions } from '../index.ts'

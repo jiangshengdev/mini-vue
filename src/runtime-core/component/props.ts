@@ -1,3 +1,6 @@
+/**
+ * 组件 `props` 归一化与响应式包装工具。
+ */
 import type { ElementProps, SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
 import { shallowReactive, shallowReadonly } from '@/reactivity/index.ts'
 

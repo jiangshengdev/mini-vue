@@ -1,3 +1,6 @@
+/**
+ * Devtools 兼容层：在开发态向 Vue Devtools 发射组件生命周期事件。
+ */
 import type { UnknownComponentInstance } from './context.ts'
 import { __DEV__ } from '@/shared/index.ts'
 
@@ -5,6 +8,9 @@ interface VueDevtoolsGlobalHook {
   emit: (event: string, ...payload: unknown[]) => void
 }
 
+/**
+ * 读取全局 Devtools hook（仅开发态有效）。
+ */
 function getVueDevtoolsGlobalHook(): VueDevtoolsGlobalHook | undefined {
   if (!__DEV__) {
     return undefined
@@ -23,6 +29,9 @@ function getVueDevtoolsGlobalHook(): VueDevtoolsGlobalHook | undefined {
   return hook as VueDevtoolsGlobalHook
 }
 
+/**
+ * 从组件实例推导 Devtools 关联的 app 对象。
+ */
 function getDevtoolsAppFromInstance(instance: UnknownComponentInstance): unknown {
   const context = instance.appContext as unknown
 
@@ -33,6 +42,9 @@ function getDevtoolsAppFromInstance(instance: UnknownComponentInstance): unknown
   return (context as { app?: unknown }).app
 }
 
+/**
+ * 判断 Devtools 是否已为该 app 注册组件记录。
+ */
 function hasDevtoolsAppRecord(app: unknown): boolean {
   if (!app || typeof app !== 'object') {
     return false
@@ -48,6 +60,9 @@ function hasDevtoolsAppRecord(app: unknown): boolean {
   )
 }
 
+/**
+ * 在 Devtools 已就绪时尝试发射组件相关事件。
+ */
 function tryEmitComponentEvent(
   event: 'component:added' | 'component:updated' | 'component:removed',
   instance: UnknownComponentInstance,
@@ -77,14 +92,23 @@ function tryEmitComponentEvent(
   hook.emit(event, app, instance.uid, parentUid, instance)
 }
 
+/**
+ * 向 Devtools 发射组件新增事件。
+ */
 export function emitDevtoolsComponentAdded(instance: UnknownComponentInstance): void {
   tryEmitComponentEvent('component:added', instance)
 }
 
+/**
+ * 向 Devtools 发射组件更新事件。
+ */
 export function emitDevtoolsComponentUpdated(instance: UnknownComponentInstance): void {
   tryEmitComponentEvent('component:updated', instance)
 }
 
+/**
+ * 向 Devtools 发射组件移除事件。
+ */
 export function emitDevtoolsComponentRemoved(instance: UnknownComponentInstance): void {
   tryEmitComponentEvent('component:removed', instance)
 }

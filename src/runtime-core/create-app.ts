@@ -1,3 +1,6 @@
+/**
+ * 应用实例工厂：封装根组件挂载、卸载与插件/依赖注入管理。
+ */
 import { setCurrentAppContext, unsetCurrentAppContext } from './app-context.ts'
 import type { RootRenderFunction } from './renderer.ts'
 import type { ElementProps, SetupComponent } from '@/jsx-foundation/index.ts'
@@ -200,12 +203,18 @@ export function createAppInstance<HostElement extends WeakKey>(
   /** 插件清理回调栈，按安装顺序压栈，卸载时后进先出执行。 */
   const pluginUninstallStack: Array<() => void> = []
 
+  /**
+   * 记录插件提供的卸载回调，保留执行顺序。
+   */
   const registerUninstall = (uninstall: unknown): void => {
     if (typeof uninstall === 'function') {
       pluginUninstallStack.push(uninstall as () => void)
     }
   }
 
+  /**
+   * 逆序执行已安装插件的卸载回调，并清空去重集合。
+   */
   const runPluginUninstalls = (): void => {
     while (pluginUninstallStack.length > 0) {
       const uninstall = pluginUninstallStack.pop()
@@ -223,6 +232,9 @@ export function createAppInstance<HostElement extends WeakKey>(
     installedPluginNames.clear()
   }
 
+  /**
+   * 校验并封装插件的 `uninstall` 方法，保持错误通道一致。
+   */
   const resolvePluginUninstall = (
     plugin: AppPlugin,
     appInstance: AppInstance<HostElement>,
@@ -239,13 +251,19 @@ export function createAppInstance<HostElement extends WeakKey>(
   }
 
   /* 用户态 `mount` 会透传容器给核心挂载逻辑。 */
+  /**
+   * 对外暴露的 `mount` 实例方法。
+   */
   function mount(target: HostElement): void {
     mountApp(state, target)
   }
 
   /* `unmount` 暴露为实例方法，便于控制生命周期。 */
+  /**
+   * 对外暴露的 `unmount` 实例方法。
+   */
   function unmount(): void {
-    /* 宿主卸载仅在存在容器时生效，但插件清理始终执行以回收安装期副作用。 */
+    /** 宿主卸载仅在存在容器时生效，但插件清理始终执行以回收安装期副作用。 */
     unmountApp(state)
     runPluginUninstalls()
   }

@@ -1,3 +1,6 @@
+/**
+ * `keyed diff` 的辅助函数集合：维护索引区间、索引映射与锚点解析。
+ */
 import type { NormalizedChildren, NormalizedVirtualNode } from '../normalize.ts'
 import { createChildEnvironment } from './children-environment.ts'
 import type { IndexMaps, IndexRange, KeyedPatchContext } from './types.ts'

@@ -1,3 +1,6 @@
+/**
+ * 定义挂载与 patch 过程共享的上下文形态，统一封装容器与组件上下文。
+ */
 import type { UnknownComponentInstance } from './component/context.ts'
 import type { AppContext } from './create-app.ts'
 

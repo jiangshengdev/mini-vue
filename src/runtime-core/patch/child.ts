@@ -1,3 +1,6 @@
+/**
+ * 单节点 patch 入口：协调新增、删除、替换与复用逻辑。
+ */
 import { resolveComponentProps } from '../component/props.ts'
 import { activateKeepAlive } from '../components/keep-alive.tsx'
 import { assignElementRef, resolveElementRefBinding } from '../mount/element.ts'

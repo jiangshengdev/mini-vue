@@ -1,3 +1,6 @@
+/**
+ * `patch` 阶段的 runtime vnode 适配，确保持有宿主节点等元信息。
+ */
 import type { NormalizedVirtualNode } from '../normalize.ts'
 import type { RuntimeVirtualNode } from '../virtual-node.ts'
 import { asRuntimeVirtualNode } from '../virtual-node.ts'

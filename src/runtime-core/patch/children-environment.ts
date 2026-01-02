@@ -1,3 +1,6 @@
+/**
+ * 封装 `patch children` 阶段的环境与回调，避免循环依赖并稳定锚点信息。
+ */
 import type { ChildEnvironment, MountContext } from '../environment.ts'
 import type { NormalizedVirtualNode } from '../normalize.ts'
 import type { RendererOptions } from '../renderer.ts'

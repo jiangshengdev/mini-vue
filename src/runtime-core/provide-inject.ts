@@ -1,3 +1,6 @@
+/**
+ * 提供组件内的依赖注入能力，限定在 `setup()` 执行窗口内使用。
+ */
 import {
   getCurrentInstance,
   getCurrentInstanceScope,

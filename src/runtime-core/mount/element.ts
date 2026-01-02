@@ -1,3 +1,6 @@
+/**
+ * 元素挂载逻辑：创建宿主节点并处理 `props` 与 `children`。
+ */
 import type { ChildEnvironment } from '../environment.ts'
 import type { RendererOptions } from '../index.ts'
 import { mountElementChildren } from './children.ts'

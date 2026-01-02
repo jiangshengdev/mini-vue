@@ -1,3 +1,6 @@
+/**
+ * 组件实例创建与 Devtools 适配：生成实例结构并补全调试字段。
+ */
 import { getCurrentAppContext } from '../app-context.ts'
 import type { MountContext } from '../environment.ts'
 import type { ComponentInstance } from './context.ts'
@@ -9,6 +12,9 @@ import { __DEV__ } from '@/shared/index.ts'
 
 let componentUid = 0
 
+/**
+ * 判断 `props` 键是否符合事件监听命名（`onXxx` 且第三位为大写字母）。
+ */
 function isEmitListenerKey(key: string): boolean {
   if (!key.startsWith('on')) {
     return false
@@ -28,6 +34,9 @@ function isEmitListenerKey(key: string): boolean {
   return code >= 65 && code <= 90
 }
 
+/**
+ * 从监听器 key（`onXxx`）提取事件名并转为首字母小写。
+ */
 function normalizeEmitNameFromListenerKey(key: string): string | undefined {
   if (!isEmitListenerKey(key)) {
     return undefined
@@ -42,10 +51,16 @@ function normalizeEmitNameFromListenerKey(key: string): string | undefined {
   return name[0].toLowerCase() + name.slice(1)
 }
 
+/**
+ * 将驼峰事件名转为连字符命名，便于与模板监听名对齐。
+ */
 function hyphenateEmitName(name: string): string {
   return name.replaceAll(/\B([A-Z])/g, '-$1').toLowerCase()
 }
 
+/**
+ * 从 `props` 上的监听器推导 Devtools 所需的 `emits` 声明。
+ */
 function createAutoDeclaredEmitsFromProps(props: unknown): string[] {
   if (!props || typeof props !== 'object') {
     return []
@@ -76,6 +91,9 @@ function createAutoDeclaredEmitsFromProps(props: unknown): string[] {
   return [...eventNames]
 }
 
+/**
+ * 将推导出的事件名写回组件类型的 `emits`，仅供 Devtools 去除未声明提示。
+ */
 function patchComponentTypeEmitsForDevtools(componentType: SetupComponent, props: unknown): void {
   const declaredEmits = createAutoDeclaredEmitsFromProps(props)
 
@@ -123,6 +141,9 @@ function patchComponentTypeEmitsForDevtools(componentType: SetupComponent, props
   }
 }
 
+/**
+ * 为组件实例补充 Devtools 兼容字段，确保组件树与 state 正常展示。
+ */
 function patchComponentInstanceForDevtools<
   HostNode,
   HostElement extends HostNode & WeakKey,
@@ -132,6 +153,7 @@ function patchComponentInstanceForDevtools<
   instance: ComponentInstance<HostNode, HostElement, HostFragment, T>,
   parent: ComponentInstance<HostNode, HostElement, HostFragment, T>['parent'],
 ): void {
+  /** Devtools 展示使用的 setupState 代理，提供 proxyRefs 语义。 */
   const createDevtoolsSetupStateProxy = (rawSetupState: PlainObject): PlainObject => {
     /*
      * 对齐 Vue3：setupState 使用 proxyRefs 语义，便于 Devtools 在展示 setup state 时直接得到 `.value`。
@@ -243,7 +265,7 @@ export function createComponentInstance<
   const providesSource: PlainObject =
     parent?.provides ?? appContext?.provides ?? (Object.create(null) as PlainObject)
 
-  /* `render`/`effect` 初始为空，由 `setup` 与 `performInitialRender` 回填。 */
+  /** `render`/`effect` 初始为空，由 `setup` 与 `performInitialRender` 回填。 */
   const instance: ComponentInstance<HostNode, HostElement, HostFragment, T> = {
     uid,
     postOrderId: 0,

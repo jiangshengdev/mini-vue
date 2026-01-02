@@ -1,3 +1,6 @@
+/**
+ * patch 子域的类型与类型守卫定义，方便在 diff 过程中收窄节点形态。
+ */
 import type { NormalizedChildren, NormalizedVirtualNode } from '../normalize.ts'
 import type { RendererOptions } from '../renderer.ts'
 import type { PatchChildrenEnvironment } from './children-environment.ts'

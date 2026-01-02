@@ -1,3 +1,6 @@
+/**
+ * 统一挂载任意子节点类型：数组、组件、元素、文本与占位注释。
+ */
 import type { ChildEnvironment } from '../environment.ts'
 import type { RendererOptions } from '../index.ts'
 import { asRuntimeVirtualNode } from '../virtual-node.ts'

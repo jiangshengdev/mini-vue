@@ -29,18 +29,11 @@ interface TransformResult<T extends ElementType> {
 }
 
 /**
- * 将 JSX 中的组件 `v-model` 转换为默认的 `modelValue` 协议。
+ * 将组件 `v-model` 语法糖转换为默认的 `modelValue` 协议，并记录被覆盖的字段。
  *
- * 转换规则（组件）：
- * - `modelValue = readModelValue(v-model)`
- * - `onUpdate:modelValue = (value) => setModelValue(v-model, value)`
- *
- * 冲突检测：
- * - 若 props 中已存在 `modelValue` 或 `onUpdate:modelValue`，Dev 下给出告警并覆盖。
- *
- * @param type - 元素类型（原生标签名或组件函数）
- * @param rawProps - 原始 props（可能包含 `v-model`）
- * @returns 转换结果，包含处理后的 props 和冲突列表
+ * @param type - 元素类型（原生标签或组件函数）
+ * @param rawProps - 原始 props（可能携带 `v-model`）
+ * @returns 转换结果及冲突列表
  */
 export function transformModelBindingProps<T extends ElementType>(
   type: T,

@@ -1,10 +1,9 @@
 /**
- * 响应式系统契约层的聚合出口。
+ * 响应式契约层的聚合出口，集中暴露标记常量与公共类型。
  *
  * @remarks
- * - 导出内部标记常量（reactiveFlag、readonlyFlag、rawKey、refFlag、iterateDependencyKey）。
- * - 导出触发操作类型常量（triggerOpTypes）及其类型（TriggerOpType）。
- * - 导出核心接口类型（EffectHandle、EffectInstance、EffectOptions、EffectScheduler、DependencyBucket、ReactiveRawTarget、ReactiveTarget）。
+ * - 作为 reactivity 内部与外部使用者的共享接口层，不承载实现细节。
+ * - 保持符号/类型集中输出，便于运行时 handler 与上层 API 解耦。
  */
 
 export {

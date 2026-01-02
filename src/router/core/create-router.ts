@@ -1,3 +1,6 @@
+/**
+ * 路由器创建入口：封装路径匹配、导航状态与插件安装流程。
+ */
 import { routerInjectionKey } from './injection.ts'
 import { getHash, getQueryAndHash, getSearch, normalizePath } from './paths.ts'
 import type { RouteLocation, Router, RouterConfig, RouteRecord } from './types.ts'
@@ -31,6 +34,8 @@ const appsWithRouter = new WeakSet<PluginInstallApp>()
  * @remarks
  * - 无 `window` 环境时退回根路径 `/`，确保 SSR 场景下有合理默认值。
  * - 包含 `pathname/search/hash`，用于保持地址栏与 `currentRoute` 一致。
+ *
+ * @returns 带查询与 hash 的浏览器当前路径
  */
 function getCurrentBrowserPath(): string {
   if (!canUseWindowEvents) {
@@ -49,6 +54,9 @@ function getCurrentBrowserPath(): string {
  * - 支持作为插件安装到 `app`，自动管理 `popstate` 监听的生命周期。
  * - 路由匹配采用精确匹配策略，未命中时使用 `fallback` 组件。
  * - 当前仅支持单层路由结构，嵌套路由通过 `matched` 数组长度控制。
+ *
+ * @param config - 路由表与兜底组件配置
+ * @returns 封装导航能力的路由器实例
  *
  * @beta
  */
@@ -70,6 +78,9 @@ export function createRouter(config: RouterConfig): Router {
    * - 路径会先经过归一化处理（去 query/hash、补前导斜杠等）。
    * - 未命中任何路由记录时使用 `fallback` 组件。
    * - `matched` 数组当前仅包含单个组件，为嵌套路由预留扩展空间。
+   *
+   * @param rawPath - 原始导航路径
+   * @returns 归一化后的路由定位信息
    */
   const matchRoute = (rawPath: string): RouteLocation => {
     const normalized = normalizePath(rawPath)
@@ -94,6 +105,8 @@ export function createRouter(config: RouterConfig): Router {
    * @remarks
    * - 仅在 `start()` 后生效，`stop()` 后解绑。
    * - 读取当前浏览器路径并更新 `currentRoute`。
+   *
+   * @returns 无返回值
    */
   const onPopState = (): void => {
     currentRoute.value = matchRoute(getCurrentBrowserPath())
@@ -118,6 +131,8 @@ export function createRouter(config: RouterConfig): Router {
    * - 绑定 `popstate` 事件处理器，用户点击浏览器前进/后退按钮时同步路由状态。
    * - 调用时会立即同步一次当前路径，防止在初始化前已有 `pushState` 调用导致状态不一致。
    * - 重复调用或非浏览器环境下会直接返回，不会重复绑定。
+   *
+   * @returns 无返回值
    */
   const start = (): void => {
     /* 无浏览器环境或已监听时直接返回，避免重复绑定。 */
@@ -138,6 +153,8 @@ export function createRouter(config: RouterConfig): Router {
    * - 移除 `popstate` 事件绑定，释放资源。
    * - 通常在所有安装该 `router` 的 `app` 都卸载后自动调用。
    * - 未启动或非浏览器环境下会直接返回。
+   *
+   * @returns 无返回值
    */
   const stop = (): void => {
     /* 若未启动或不在浏览器中则无需处理。 */
@@ -157,6 +174,9 @@ export function createRouter(config: RouterConfig): Router {
    * - 路径中的 `query` 和 `hash` 会保留在 URL 中，但不参与路由匹配。
    * - 若目标 URL 与当前 URL 相同，则跳过 `pushState` 避免产生重复历史记录。
    * - 非浏览器环境下仅更新 `currentRoute`，不操作 `history`。
+   *
+   * @param path - 需要导航到的目标路径
+   * @returns 无返回值
    */
   const navigate = (path: string): void => {
     /* 归一化路径用于路由匹配，保留 query/hash 用于 URL 显示。 */
@@ -183,6 +203,12 @@ export function createRouter(config: RouterConfig): Router {
     navigate,
     start,
     stop,
+    /**
+     * 卸载插件时的清理钩子。
+     *
+     * @param app - 正在卸载的应用实例
+     * @returns 无返回值
+     */
     uninstall(app) {
       installedApps.delete(app)
       appsWithRouter.delete(app)
@@ -197,6 +223,9 @@ export function createRouter(config: RouterConfig): Router {
      * @remarks
      * - 首次 install 时自动 `start`。
      * - 当所有安装该 `router` 的 `app` 都卸载后自动 `stop`。
+     *
+     * @param app - 需要安装路由器的应用实例
+     * @returns 无返回值
      */
     install(app) {
       if (appsWithRouter.has(app)) {

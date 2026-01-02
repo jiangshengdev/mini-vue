@@ -1,3 +1,6 @@
+/**
+ * 路由链接组件：封装 anchor 点击与导航的桥接逻辑。
+ */
 import { useRouter } from '../core/injection.ts'
 import { getQueryAndHash, normalizePath } from '../core/paths.ts'
 import type { Router } from '../core/types.ts'
@@ -30,6 +33,9 @@ export interface RouterLinkProps extends PropsShape {
  * - 拦截点击事件，使用 `router.navigate` 替代浏览器默认跳转。
  * - 支持修饰键（Ctrl/Meta/Shift/Alt）和 `target="_blank"` 时回退到浏览器默认行为。
  *
+ * @param props - 组件的输入属性
+ * @returns 用于渲染链接的函数
+ *
  * @beta
  */
 export const RouterLink: SetupComponent<RouterLinkProps> = (props) => {
@@ -45,6 +51,8 @@ export const RouterLink: SetupComponent<RouterLinkProps> = (props) => {
    *   2. `target="_blank"` 需要新窗口打开
    *   3. 带修饰键点击（Ctrl/Meta/Shift/Alt）通常用于新标签页打开
    *   4. 非左键点击（`button !== 0`）
+   *
+   * @param event - 链接点击事件
    */
   const handleClick = (event?: Event): void => {
     if (event) {
@@ -71,7 +79,11 @@ export const RouterLink: SetupComponent<RouterLinkProps> = (props) => {
     props.onClick?.(event)
   }
 
-  /* 渲染标准 `<a>` 标签，href 使用归一化路径以保持 URL 一致性。 */
+  /**
+   * 渲染标准 `<a>` 标签，href 使用归一化路径以保持 URL 一致性。
+   *
+   * @returns 描述渲染结果的虚拟节点
+   */
   return () => {
     const { to, router: _router, onClick: _onClick, children, ...rest } = props
 

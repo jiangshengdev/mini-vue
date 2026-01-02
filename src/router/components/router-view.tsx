@@ -1,3 +1,6 @@
+/**
+ * 路由视图容器：根据当前匹配结果渲染对应组件，并向下注入深度信息。
+ */
 import { useRouter } from '../core/injection.ts'
 import type { Router } from '../core/types.ts'
 import type { SetupComponent } from '@/jsx-foundation/index.ts'
@@ -57,6 +60,9 @@ export interface RouterViewProps {
  * - 支持嵌套使用：每层 `RouterView` 渲染 `matched` 中对应深度的组件。
  * - 当深度超出 `matched` 长度时渲染为空，避免无限递归。
  *
+ * @param props - 组件的输入属性
+ * @returns 渲染当前路由组件的函数
+ *
  * @beta
  */
 export const RouterView: SetupComponent<RouterViewProps> = (props) => {
@@ -78,7 +84,11 @@ export const RouterView: SetupComponent<RouterViewProps> = (props) => {
   provide(routerViewDepthKey, depth)
   provide(routerViewMatchedKey, getMatched)
 
-  /* 渲染函数：根据深度从 `matched` 中取出对应组件并渲染。 */
+  /**
+   * 渲染函数：根据深度从 `matched` 中取出对应组件并渲染。
+   *
+   * @returns 当前匹配组件的虚拟节点
+   */
   return () => {
     const matchedComponents = getMatched()
     const MatchedComponent = matchedComponents[depth]

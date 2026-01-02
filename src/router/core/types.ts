@@ -1,5 +1,6 @@
 /**
  * 路由相关的类型定义：描述路由记录、定位信息与路由器接口。
+ * 仅承载类型约束，配合核心实现保持路由表、匹配结果与插件协议的边界清晰。
  */
 import type { SetupComponent } from '@/jsx-foundation/index.ts'
 import type { Ref } from '@/reactivity/index.ts'

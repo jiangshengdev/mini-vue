@@ -1,5 +1,6 @@
 /**
  * 路由注入工具：提供注入 `Key` 与读取已安装路由器的助手。
+ * 专注组件树上下文的写入与读取，不涉及路由匹配或导航逻辑。
  */
 import type { Router } from './types.ts'
 import { routerNotFound } from '@/messages/index.ts'

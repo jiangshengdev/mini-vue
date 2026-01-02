@@ -45,6 +45,9 @@ export type NormalizedRenderOutput = NormalizedVirtualNode | undefined
  * - 数组：包裹为 `Fragment`，交由后续 `children` 归一化处理。
  * - `VirtualNode`：递归规整内部 `children`。
  * - 原始文本（`string`/`number`）：转为 `Text` `VirtualNode`。
+ *
+ * @param output - 组件 `render` 的原始输出
+ * @returns 归一化后的渲染结果
  */
 export function normalizeRenderOutput(output: RenderOutput): NormalizedRenderOutput {
   /* 空值与布尔值归一化为注释节点占位，避免出现「0 个宿主节点」。 */
@@ -83,6 +86,9 @@ export function normalizeRenderOutput(output: RenderOutput): NormalizedRenderOut
  * @remarks
  * - 递归归一化子节点，统一 `VirtualNode` 与文本节点的表达方式。
  * - 文本子节点转为 `Text` `VirtualNode`，便于 `diff` 与挂载复用同一路径。
+ *
+ * @param virtualNode - 待规整的虚拟节点
+ * @returns 归一化后的虚拟节点
  */
 function normalizeVirtualNodeForRuntime(virtualNode: VirtualNode): NormalizedVirtualNode {
   /* 递归归一化子节点，统一 VirtualNode 与文本节点的表达方式。 */

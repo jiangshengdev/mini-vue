@@ -42,6 +42,9 @@ export interface RuntimeVirtualNode<
  *
  * @remarks
  * 该函数仅做类型断言，不进行运行时校验；调用方需确保 `virtualNode` 来自合法的渲染流程。
+ *
+ * @param virtualNode - 需要写入运行时元信息的虚拟节点
+ * @returns 增强后的运行时虚拟节点
  */
 export function asRuntimeVirtualNode<
   HostNode,

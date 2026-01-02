@@ -88,6 +88,9 @@ export interface Renderer<HostNode, HostElement extends HostNode & WeakKey> {
 
 /**
  * 创建通用渲染器，通过宿主环境提供的原语完成组件与元素挂载。
+ *
+ * @param options - 宿主平台注入的渲染原语
+ * @returns 具备渲染与卸载能力的渲染器实例
  */
 export function createRenderer<
   HostNode,
@@ -108,6 +111,9 @@ export function createRenderer<
    * @remarks
    * - 该字段仅用于 Devtools 读取，不参与 mini-vue 运行时语义。
    * - 生产构建应可被摇树，不产生任何写入。
+   *
+   * @param container - 宿主容器节点
+   * @param vnode - 当前挂载的根 vnode
    */
   function updateDevtoolsContainerVnode(
     container: HostElement,
@@ -126,6 +132,9 @@ export function createRenderer<
 
   /**
    * 将宿主容器断言为对象键，便于复用 `WeakMap` 存储。
+   *
+   * @param container - 宿主容器
+   * @returns 可用于 `WeakMap` 的容器键
    */
   function asContainerKey(container: HostElement): WeakKey {
     const isObjectLike = typeof container === 'object' && container !== null
@@ -140,6 +149,9 @@ export function createRenderer<
 
   /**
    * 根渲染函数会先清空容器，再挂载整棵子树。
+   *
+   * @param virtualNode - 顶层渲染输出
+   * @param container - 宿主容器
    */
   function render(virtualNode: RenderOutput, container: HostElement): void {
     const containerKey = asContainerKey(container)
@@ -199,6 +211,8 @@ export function createRenderer<
 
   /**
    * 卸载操作只负责清理缓存并复用宿主 `clear` 逻辑。
+   *
+   * @param container - 宿主容器
    */
   function unmount(container: HostElement): void {
     const containerKey = asContainerKey(container)

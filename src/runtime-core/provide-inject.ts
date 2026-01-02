@@ -20,6 +20,8 @@ import { __DEV__ } from '@/shared/index.ts'
  * - 组件外（如 `app.use()` 插件安装、`router.install()`）请改用 `app.provide()`。
  *
  * @throws 当不存在当前组件实例时抛错（通常意味着不在 `setup()` 中调用）。
+ * @param key - 注入键
+ * @param value - 需要提供的值
  */
 export function provide<T>(key: InjectionToken<T>, value: T): void
 
@@ -55,6 +57,9 @@ export function provide(key: InjectionToken, value: unknown): void {
  * - 若传入 `defaultValue` 且 key 不存在，返回 `defaultValue`。
  *
  * @throws 当不存在当前组件实例时抛错（通常意味着不在 `setup()` 中调用）。
+ * @param key - 注入键
+ * @param defaultValue - 可选的兜底值
+ * @returns 匹配的注入值或默认值
  */
 export function inject<T>(key: InjectionToken<T>): T | undefined
 /**

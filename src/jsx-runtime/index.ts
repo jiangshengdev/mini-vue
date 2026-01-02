@@ -1,11 +1,7 @@
 /**
- * `jsx-runtime` 模块的聚合导出入口。
- *
- * 本模块向外暴露两类 JSX 运行时函数：
- * - `jsx/jsxs/jsxDEV`：供 TypeScript/Babel 编译器在 `jsx: "react-jsx"` 模式下自动调用
- * - `h`：供用户在运行时手动构建 VirtualNode（支持可变 children 参数）
- *
- * 两类函数最终都通过 `buildVirtualNode` 创建 VirtualNode，区别在于调用方式与参数形态。
+ * `jsx-runtime` 的聚合出口，统一暴露编译器与用户侧的 JSX 调用入口。
+ * `jsx/jsxs/jsxDEV` 供编译器在 `react-jsx` 模式下自动插入；`h` 供运行时手写 VirtualNode。
+ * 入口函数最终都委托 `buildVirtualNode`，区别仅在调用方与 `children` 的传递方式。
  */
 export { buildVirtualNode, h } from './builder.ts'
 export { jsx, jsxDEV, jsxs } from './runtime.ts'

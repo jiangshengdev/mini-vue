@@ -10,6 +10,9 @@ import { __DEV__ } from '@/shared/index.ts'
 
 /**
  * 警告：在非表单元素上使用 `v-model`。
+ *
+ * @param type - 元素标签名
+ * @param props - 原始 props，便于调试
  */
 export function warnNonFormElement(type: string, props: unknown): void {
   if (__DEV__) {
@@ -19,6 +22,10 @@ export function warnNonFormElement(type: string, props: unknown): void {
 
 /**
  * 警告：`v-model` 与现有属性冲突。
+ *
+ * @param type - 元素标签名
+ * @param conflicts - 冲突的属性列表
+ * @param props - 原始 props，便于调试
  */
 export function warnConflictProps(type: string, conflicts: string[], props: unknown): void {
   if (__DEV__ && conflicts.length > 0) {

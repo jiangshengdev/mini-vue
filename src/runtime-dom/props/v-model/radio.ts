@@ -7,6 +7,10 @@ import type { PropsShape } from '@/shared/index.ts'
 
 /**
  * 为 radio 应用 `v-model` 绑定。
+ *
+ * @param modelBinding - 传入的 v-model 绑定目标
+ * @param props - 待写入的 props 对象
+ * @param trackConflict - 冲突追踪回调
  */
 export function applyRadioModelBinding(
   modelBinding: unknown,

@@ -20,6 +20,9 @@ export type ElementRef = ((element: Element | undefined) => void) | Ref<Element 
 
 /**
  * 判断传入值是否为元素 ref 处理器或响应式 ref。
+ *
+ * @param value - 待判定的值
+ * @returns 是否符合元素 ref 形态
  */
 function isElementRef(value: unknown): value is ElementRef {
   return typeof value === 'function' || isRef<Element | undefined>(value)

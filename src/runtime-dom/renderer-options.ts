@@ -16,34 +16,63 @@ import type { RendererOptions } from '@/runtime-core/index.ts'
 /**
  * DOM 宿主环境完整的渲染原语集合。
  *
- * 实现 `RendererOptions` 接口，供 `createRenderer` 创建 DOM 渲染器。
- * 泛型参数：
- * - `Node`：所有 DOM 节点的基类
- * - `Element`：DOM 元素节点
- * - `DocumentFragment`：DOM 片段节点
- */
+  * 实现 `RendererOptions` 接口，供 `createRenderer` 创建 DOM 渲染器。
+  * 泛型参数：
+  * - `Node`：所有 DOM 节点的基类
+  * - `Element`：DOM 元素节点
+  * - `DocumentFragment`：DOM 片段节点
+  */
 export const domRendererOptions: RendererOptions<Node, Element, DocumentFragment> = {
-  /** 创建指定标签的 HTMLElement。 */
+  /**
+   * 创建指定标签的 HTMLElement。
+   *
+   * @param type - 标签名
+   * @returns 新建的元素节点
+   */
   createElement(type): HTMLElement {
     return document.createElement(type)
   },
-  /** 根据文本内容生成 Text 节点，承载字符串 children。 */
+  /**
+   * 根据文本内容生成 Text 节点，承载字符串 children。
+   *
+   * @param text - 文本内容
+   * @returns 新建的文本节点
+   */
   createText(text): Text {
     return document.createTextNode(text)
   },
-  /** 创建注释节点，用于锚点等不可见占位。 */
+  /**
+   * 创建注释节点，用于锚点等不可见占位。
+   *
+   * @param text - 注释内容
+   * @returns 新建的注释节点
+   */
   createComment(text): Comment {
     return document.createComment(text)
   },
-  /** 更新现有文本节点的内容，避免重新创建节点。 */
+  /**
+   * 更新现有文本节点的内容，避免重新创建节点。
+   *
+   * @param node - 目标文本节点
+   * @param text - 新的文本内容
+   */
   setText(node, text): void {
     ;(node as Text).nodeValue = text
   },
-  /** 创建 DocumentFragment，用于批量插入 children。 */
+  /**
+   * 创建 DocumentFragment，用于批量插入 children。
+   *
+   * @returns 新建的片段节点
+   */
   createFragment(): DocumentFragment {
     return document.createDocumentFragment()
   },
-  /** 将子节点追加到父节点末尾。 */
+  /**
+   * 将子节点追加到父节点末尾。
+   *
+   * @param parent - 父节点
+   * @param child - 要插入的子节点
+   */
   appendChild(parent, child): void {
     parent.append(child)
   },
@@ -52,6 +81,10 @@ export const domRendererOptions: RendererOptions<Node, Element, DocumentFragment
    *
    * 若锚点不存在，则追加到父节点末尾。
    * 若锚点不是父节点的子节点，抛出 DOMException。
+   *
+   * @param parent - 父节点
+   * @param child - 待插入的子节点
+   * @param anchor - 参考锚点
    */
   insertBefore(parent, child, anchor?): void {
     if (!anchor) {
@@ -71,15 +104,28 @@ export const domRendererOptions: RendererOptions<Node, Element, DocumentFragment
 
     anchorNode.before(child)
   },
-  /** 读取指定节点的下一个兄弟节点，用于区间遍历与移动。 */
+  /**
+   * 读取指定节点的下一个兄弟节点，用于区间遍历与移动。
+   *
+   * @param node - 当前节点
+   * @returns 下一个兄弟节点或 undefined
+   */
   nextSibling(node): Node | undefined {
     return node.nextSibling ?? undefined
   },
-  /** 清空容器内所有内容，通过设置 textContent 实现。 */
+  /**
+   * 清空容器内所有内容，通过设置 textContent 实现。
+   *
+   * @param container - 待清空的节点
+   */
   clear(container): void {
     container.textContent = ''
   },
-  /** 将节点从其父容器中移除，兼容 Text、Element 等所有 ChildNode。 */
+  /**
+   * 将节点从其父容器中移除，兼容 Text、Element 等所有 ChildNode。
+   *
+   * @param node - 需要移除的节点
+   */
   remove(node): void {
     ;(node as ChildNode).remove()
   },

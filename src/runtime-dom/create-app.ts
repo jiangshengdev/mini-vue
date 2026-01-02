@@ -22,6 +22,11 @@ type DomRenderer = ReturnType<typeof createRenderer<Node, Element, DocumentFragm
 
 let cachedDomRenderer: DomRenderer | undefined
 
+/**
+ * 懒创建并缓存 DOM 渲染器，避免重复实例化。
+ *
+ * @returns 共享的 DOM 渲染器实例
+ */
 function getDomRenderer(): DomRenderer {
   cachedDomRenderer ??= createRenderer(domRendererOptions)
 
@@ -31,12 +36,19 @@ function getDomRenderer(): DomRenderer {
 /**
  * DOM 宿主复用的根级渲染函数，可直接挂载 JSX 或组件树。
  *
+ * @param virtualNode - 要渲染的虚拟节点
+ * @param container - 挂载目标容器
  * @public
  */
 export const renderDomRoot: DomRenderer['render'] = (virtualNode, container) => {
   getDomRenderer().render(virtualNode, container)
 }
 
+/**
+ * 卸载指定容器内的渲染树。
+ *
+ * @param container - 挂载目标元素
+ */
 function unmountContainer(container: Element): void {
   getDomRenderer().unmount(container)
 }
@@ -102,6 +114,12 @@ function resolveContainer(target: string | Element): Element | undefined {
   return target
 }
 
+/**
+ * 判断入参是否具备 DOM 元素特征。
+ *
+ * @param value - 待校验的值
+ * @returns 是否拥有元素节点的 `nodeType`
+ */
 function isDomElementLike(value: unknown): value is Element {
   if (typeof value !== 'object' || value === null) {
     return false
@@ -201,6 +219,9 @@ export interface DomAppInstance extends AppInstance<Element> {
 /**
  * 创建基于 DOM 宿主的应用实例，实现字符串容器解析等平台差异。
  *
+ * @param rootComponent - 根组件
+ * @param rootProps - 传递给根组件的初始 props
+ * @returns 带 DOM 宿主能力的应用实例
  * @public
  */
 export function createApp(rootComponent: SetupComponent, rootProps?: PropsShape): DomAppInstance {
@@ -217,11 +238,19 @@ export function createApp(rootComponent: SetupComponent, rootProps?: PropsShape)
   ensureDomHmrLifecycle(state)
 
   /* 封装 DOM 版本 mount，让用户可以传入不同类型的容器。 */
+  /**
+   * 将应用挂载到指定容器，支持字符串选择器。
+   *
+   * @param target - CSS 选择器或 DOM 元素
+   */
   function mount(target: string | Element): void {
     mountDomApp(state, target)
   }
 
   /* DOM 版本的 unmount 直接调用基础实例释放资源。 */
+  /**
+   * 卸载当前应用，释放 DOM 副作用。
+   */
   function unmount(): void {
     unmountDomApp(state)
   }
@@ -274,6 +303,9 @@ function ensureDomHmrLifecycle(state: DomAppState): void {
   state.hmr = hmrState
 
   /* 当 HMR 即将替换模块时先记录当前容器并卸载，释放副作用。 */
+  /**
+   * 在 HMR 前置阶段标记需要重挂载并先卸载应用。
+   */
   const prepareRemount = () => {
     if (!state.isMounted) {
       return
@@ -284,6 +316,9 @@ function ensureDomHmrLifecycle(state: DomAppState): void {
   }
 
   /* 模块热更新完成后若需要，重新挂载到同一容器。 */
+  /**
+   * 在 HMR 后置阶段按需重新挂载应用。
+   */
   const remountIfNeeded = () => {
     if (!hmrState.pendingRemount) {
       return

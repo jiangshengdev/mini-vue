@@ -179,6 +179,9 @@ function scheduleDedupeRegistryReset(): void {
  *
  * @remarks
  * - 非 Error 值会被包装为 Error，并通过 cause 保留原始信息。
+ *
+ * @param error - 捕获到的未知异常值
+ * @returns 规范化后的 Error 实例
  */
 function ensureError(error: unknown): Error {
   if (error instanceof Error) {
@@ -190,6 +193,10 @@ function ensureError(error: unknown): Error {
 
 /**
  * 将捕获到的异常交由错误处理器统一上报，并返回调度 token。
+ *
+ * @param error - 捕获到的异常对象
+ * @param dispatchOptions - 错误来源、阶段与元数据配置
+ * @returns 记录本次调度信息的 token
  */
 export function dispatchError(error: Error, dispatchOptions: ErrorDispatchOptions): ErrorToken {
   const alreadyNotified = tickNotifiedErrors.has(error)
@@ -239,6 +246,11 @@ export function dispatchError(error: Error, dispatchOptions: ErrorDispatchOption
  * @remarks
  * - 负责串联 before/after hook，保证无论成功与否都能观察到 token。
  * - 根据传播模式决定是否把规范化后的异常继续同步抛出。
+ *
+ * @param runner - 需要在错误通道保护下执行的回调
+ * @param propagate - 同步抛出或静默吞掉的传播策略
+ * @param options - 错误调度配置，包含来源与钩子
+ * @returns 回调返回值或静默模式下的 `undefined`
  */
 function runWithChannel<T, P extends ErrorPhase>(
   runner: () => T,
@@ -286,6 +298,10 @@ function runWithChannel<T, P extends ErrorPhase>(
 
 /**
  * 同步传播异常，调用方接收原始抛错。
+ *
+ * @param runner - 需要执行的同步回调
+ * @param options - 要求同步阶段调度的错误配置
+ * @returns 回调的返回值
  */
 export function runThrowing<T>(runner: () => T, options: ThrowingErrorRunOptions): T {
   return runWithChannel(runner, errorMode.throw, options) as T
@@ -293,6 +309,10 @@ export function runThrowing<T>(runner: () => T, options: ThrowingErrorRunOptions
 
 /**
  * 静默处理异常，调用方接收 undefined 以继续流程。
+ *
+ * @param runner - 需要执行的同步回调
+ * @param options - 错误调度配置
+ * @returns 回调返回值，或出现异常时的 `undefined`
  */
 export function runSilent<T>(runner: () => T, options: ErrorRunOptions): T | undefined {
   return runWithChannel(runner, errorMode.silent, options)

@@ -46,6 +46,8 @@ let currentErrorHandler: ErrorHandler | undefined
  * @remarks 注册后的处理器会在 effect、effectScope.run、watch 回调、scheduler 以及组件 cleanup 等入口发生异常时被调用；个别入口（如 effect）会在回调完成后继续抛出原始错误。
  *
  * @beta
+ *
+ * @param handler - 自定义错误处理器，传入 undefined 则恢复默认行为
  */
 export function setErrorHandler(handler?: ErrorHandler): void {
   currentErrorHandler = handler
@@ -53,6 +55,10 @@ export function setErrorHandler(handler?: ErrorHandler): void {
 
 /**
  * 在内部捕获异常时调用，统一调度至用户提供的处理器或兜底方案。
+ *
+ * @param error - 捕获到的异常对象
+ * @param payload - 错误的上下文信息
+ * @param shouldRethrowAsync - 是否需要在异步阶段重新抛出异常
  */
 export function handleError(error: Error, payload: ErrorPayload, shouldRethrowAsync = true): void {
   const { origin } = payload
@@ -77,6 +83,8 @@ export function handleError(error: Error, payload: ErrorPayload, shouldRethrowAs
 
 /**
  * 将异常排入微任务队列中异步抛出，避免阻断当前同步流程。
+ *
+ * @param error - 需要重新抛出的异常或未知值
  */
 function rethrowAsync(error: unknown): void {
   /* 使用 queueMicrotask 确保错误在下一个事件循环阶段被宿主捕获。 */

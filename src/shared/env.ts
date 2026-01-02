@@ -22,6 +22,8 @@ export const __INTERNAL_DEV__ = import.meta.env.INTERNAL_DEV === 'true'
 
 /**
  * 检测 Vitest 浏览器运行器是否开启 inspect-brk 调试。
+ *
+ * @returns 若浏览器 runner 开启 inspect 调试则为 true
  */
 function isVitestBrowserInspectActive(): boolean {
   /* Vitest 浏览器 runner 在全局挂载 __vitest_browser_runner__，其中包含调试配置。 */
@@ -39,6 +41,8 @@ function isVitestBrowserInspectActive(): boolean {
 
 /**
  * 解析当前上下文可见的 NODE_OPTIONS，优先兼容 Vitest worker 注入形态。
+ *
+ * @returns 解析到的 NODE_OPTIONS 字符串；若不存在则为 `undefined`
  */
 function resolveNodeOptions(): string | undefined {
   /* Vitest 4.0 将 NODE_OPTIONS 直接挂在 worker 的 metaEnv。 */
@@ -57,6 +61,9 @@ function resolveNodeOptions(): string | undefined {
 
 /**
  * 判断 NODE_OPTIONS 是否包含调试相关标记。
+ *
+ * @param nodeOptions - 需要检查的 NODE_OPTIONS 字符串
+ * @returns 存在调试关键字时返回 true
  */
 function hasDebugFlag(nodeOptions: string): boolean {
   /* 通过关键字匹配覆盖 inspect/debug/debugConnector 等常见调试入口。 */
@@ -69,6 +76,8 @@ function hasDebugFlag(nodeOptions: string): boolean {
 
 /**
  * 汇总 NODE_OPTIONS 调试判定逻辑，存在且包含调试关键字则返回 true。
+ *
+ * @returns 是否检测到调试相关配置
  */
 function hasNodeDebugFlag(): boolean {
   /* 读取 NODE_OPTIONS 判定是否启用 inspect/debug 相关参数。 */
@@ -85,6 +94,8 @@ function hasNodeDebugFlag(): boolean {
 
 /**
  * 在开发模式下判断是否启用了调试能力（inspect/IDE 连接器等）。
+ *
+ * @returns 若当前运行环境处于开发模式且开启调试则为 true
  */
 export function isDevDebugEnvironment(): boolean {
   /* 非开发模式直接短路，避免生产环境误触调试逻辑。 */

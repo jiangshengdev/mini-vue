@@ -1,5 +1,7 @@
 /**
  * 为 TSX 场景提供 mini-vue 的 JSX 类型补充，覆盖 `Fragment`、事件与内置元素属性推导。
+ * 该声明桥接 DOM lib 与运行时虚拟节点类型，保证组件 `children`、`v-model` 等推导一致。
+ * 仅包含类型定义，不引入运行时代码或副作用。
  */
 import type {
   ElementProps,

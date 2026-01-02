@@ -1,14 +1,7 @@
 /**
- * Mini-vue 框架主入口。
+ * Mini-vue 的聚合入口，集中导出 JSX 运行时、响应式、路由、运行时 DOM、共享工具与插件能力。
  *
- * 本模块聚合并导出框架的核心能力，供外部统一引入，包括：
- * - JSX 运行时：`h`、`jsx`、`jsxs`、`jsxDEV`、`Fragment`
- * - 响应式系统：`reactive`、`ref`、`computed`、`effect`、`watch` 等
- * - 路由系统：`createRouter`、`RouterLink`、`RouterView`、`useRouter`
- * - Devtools：`MiniVueDevtoolsPlugin`
- * - 应用创建：`createApp`、`render`
- * - 依赖注入：`provide`、`inject`
- * - 错误处理：`setErrorHandler`
+ * 该文件只做轻量再导出，不引入额外副作用，保持各子域在自身模块内定义边界与职责。
  */
 export { MiniVueDevtoolsPlugin } from '@/devtools/index.ts'
 export type { ElementType, SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'

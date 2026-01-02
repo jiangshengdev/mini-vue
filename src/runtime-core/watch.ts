@@ -1,5 +1,5 @@
 /**
- * 运行时层的 `watch` 适配：默认接入调度器队列以对齐组件更新批次。
+ * 运行时层的 watch 适配：默认接入调度器队列以对齐组件更新批次。
  */
 import { queuePostFlushCb, queuePreFlushCb } from './scheduler.ts'
 import type {

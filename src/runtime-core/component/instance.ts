@@ -265,7 +265,7 @@ export function createComponentInstance<
   const providesSource: PlainObject =
     parent?.provides ?? appContext?.provides ?? (Object.create(null) as PlainObject)
 
-  /* `render`/`effect` 初始为空，由 `setup` 与 `performInitialRender` 回填。 */
+  /** `render`/`effect` 初始为空，由 `setup` 与 `performInitialRender` 回填。 */
   const instance: ComponentInstance<HostNode, HostElement, HostFragment, T> = {
     uid,
     postOrderId: 0,

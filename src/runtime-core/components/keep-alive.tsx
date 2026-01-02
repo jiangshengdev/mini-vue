@@ -33,6 +33,7 @@ export interface KeepAliveProps {
  * 缓存符合规则的子组件实例，支持激活/失活切换的内置组件。
  *
  * @param props 过滤规则与最大缓存数。
+ * @returns 渲染的子节点或片段占位。
  */
 export const KeepAlive: SetupComponent<KeepAliveProps> = (props) => {
   const instance = getCurrentInstance() as

@@ -117,6 +117,8 @@ function createRenderEffect<
 
   /**
    * 组件更新调度入口：取出本轮 job 并驱动一次 rerender。
+   *
+   * @returns 无返回值，依赖调度器执行副作用。
    */
   const componentUpdateJob: SchedulerJob = () => {
     const job = pendingRenderJob

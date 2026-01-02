@@ -263,7 +263,7 @@ export function createAppInstance<HostElement extends WeakKey>(
    * 对外暴露的 `unmount` 实例方法。
    */
   function unmount(): void {
-    /* 宿主卸载仅在存在容器时生效，但插件清理始终执行以回收安装期副作用。 */
+    /** 宿主卸载仅在存在容器时生效，但插件清理始终执行以回收安装期副作用。 */
     unmountApp(state)
     runPluginUninstalls()
   }

@@ -4,7 +4,11 @@
 
 mini-vue 源码经过多次迭代，部分注释已无法与当前逻辑匹配。本需求旨在对 `src` 目录下的中文注释进行**校正与更新**，确保注释准确反映代码的真实行为，同时补充缺失的关键注释。
 
-本需求以 `.github/prompts/annotation.prompt.md` 为唯一权威规则来源。
+本需求以 `.github/prompts/annotation.prompt.md` 为权威规则来源；本文件补充三点执行口径，避免任务目标与进度管理产生歧义：
+
+1. **范围**：仅覆盖 `src/**`。
+2. **覆盖**：每个文件都需要具备可读性（至少 1 段文件级职责注释；每个函数都有职责注释）。
+3. **简洁**：函数“声明前”的职责注释必须短，把实现细节拆到函数体内部的关键代码块之前。
 
 ## Glossary
 
@@ -12,10 +16,21 @@ mini-vue 源码经过多次迭代，部分注释已无法与当前逻辑匹配�
 - **Target_File**: 在任务中被显式点名、允许修改的源码文件
 - **Leading_Comment**: 位于代码行上方的注释（前置注释），包括 `/** */`、`/* */`、`//` 形式
 - **Trailing_Comment**: 位于代码行末尾的注释（行尾注释），本规范禁止使用
+- **Module_Comment**: 位于文件顶部的职责注释，用于说明该文件“做什么/边界是什么/与相邻模块如何连接”
 - **Critical_Block**: 需要读者推理才能理解的分支/循环/策略性代码块
 - **Stale_Comment**: 与当前代码逻辑不匹配的过时注释
 
 ## Requirements
+
+### Requirement 0: 范围与进度模板
+
+**User Story:** As a 项目维护者, I want 注释整改范围与进度记录方式明确, so that 不会误改非目标文件或把一次性进度写回仓库模板。
+
+#### Acceptance Criteria
+
+1. THE Annotation_System SHALL 仅处理 `src/**` 下的源码文件
+2. THE Annotation_System SHALL 仅修改被点名的 Target_File（目录任务需点名该目录下的全部文件清单）
+3. `.kiro/specs/annotation-src/tasks.md` 为可复用模板：仓库内提交时应保持全部为 `[ ]`（不记录完成态）；若需要记录进度，应在 PR/Issue 或另存副本中完成
 
 ### Requirement 1: 过时注释校正
 
@@ -34,9 +49,9 @@ mini-vue 源码经过多次迭代，部分注释已无法与当前逻辑匹配�
 
 #### Acceptance Criteria
 
-1. WHEN 打开任意 `src/**` 下的核心文件 THEN THE Annotation_System SHALL 确保关键函数声明上方有准确的中文职责注释
-2. WHEN 打开任意 `src/**` 下的核心文件 THEN THE Annotation_System SHALL 确保关键类型声明上方有准确的中文职责注释
-3. WHEN 打开任意 `src/**` 下的核心文件 THEN THE Annotation_System SHALL 确保关键类声明上方有准确的中文职责注释
+1. WHEN 打开任意 `src/**` 文件 THEN THE Annotation_System SHALL 确保文件顶部存在至少 1 段准确的 Module_Comment
+2. WHEN 文件中存在函数声明 THEN THE Annotation_System SHALL 确保每个函数声明上方有准确的中文职责注释
+3. WHEN 文件中存在关键类型/类声明 THEN THE Annotation_System SHALL 确保其声明上方有准确的中文职责注释
 4. WHEN 代码存在 Critical_Block THEN THE Annotation_System SHALL 确保该代码块之前有解释意图与策略的 Leading_Comment
 
 ### Requirement 3: 接口与类字段含义清晰
@@ -78,3 +93,13 @@ mini-vue 源码经过多次迭代，部分注释已无法与当前逻辑匹配�
 
 1. WHEN Target_File 中存在需要读者思考才能理解的语句块 THEN THE Annotation_System SHALL 确保其有准确的 Leading_Comment
 2. IF 任何 Critical_Block 缺失注释或注释不准确 THEN THE Annotation_System SHALL 视为任务失败
+
+### Requirement 7: 注释简洁度与分层
+
+**User Story:** As a 代码评审者, I want 函数职责注释简洁而实现细节下沉, so that 注释不啰嗦且能贴近关键控制流。
+
+#### Acceptance Criteria
+
+1. WHEN 为函数添加职责注释 THEN THE Annotation_System SHALL 以 1 句为主（必要时最多 2 句），只写“做什么/为什么存在”，不在函数声明前展开步骤或分支细节
+2. WHEN 需要解释算法/策略/边界 THEN THE Annotation_System SHALL 将说明拆分到函数体内部的关键语句块之前（以 `/* ... */` 或 `// ...` 的前置注释靠近代码）
+3. IF 函数声明前的注释出现大段流程描述/重复参数含义 THEN THE Annotation_System SHALL 视为不符合简洁度要求，需要重写为短职责并把细节下沉到函数体内

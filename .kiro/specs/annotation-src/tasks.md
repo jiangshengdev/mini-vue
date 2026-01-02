@@ -2,79 +2,71 @@
 
 ## Overview
 
-按 `src` 一级子目录拆分任务，每个目录为一个独立任务单元。执行时需显式列出「本次点名要改的文件清单」，以满足注释 agent 的范围约束。重点是**校正过时注释**并**补充缺失注释**。
+本文件是**可复用模板**：仓库内提交时保持全部为 `[ ]`（不记录完成态）。如需记录进度，请在 PR/Issue 的 checklist 或另存副本中完成。
+
+按 `src` 一级子目录拆分任务，每个目录为一个独立任务单元。每个目录任务都以“该目录下**所有文件**”为覆盖目标：保证每个文件至少有文件级职责注释（Module_Comment）、每个函数都有短职责注释，并把复杂说明下沉到函数体内部的关键代码块之前。
 
 ## Tasks
 
 - [ ] 1. 准备与对齐
-  - [ ] 1.1 确认目录级文件读取策略
+  - [ ] 1.1 建立目录级点名清单
     - 约束：只允许修改被点名文件
-    - 策略：每个目录任务执行时，自行使用 `listDirectory` 读取对应 `src/<子目录>` 的文件列表，无需预先生成静态清单
-    - _Requirements: 5.1, 5.2_
+    - 策略：每个目录任务开始时，用 `rg --files src/<子目录>` 或 `find src/<子目录> -type f` 枚举该目录下全部文件，并在任务输入中显式点名这些文件（即本次 Target_File 清单）
 
-- [x] 2. 注释更新：jsx-foundation
-  - [x] 2.1 为 `src/jsx-foundation/**` 校正与更新注释
+- [ ] 2. 注释更新：jsx-foundation
+  - [ ] 2.1 覆盖 `src/jsx-foundation/**` 全部文件
     - 重点：VirtualNode 工厂、children 归一化、类型与边界假设
-    - 验收：过时注释已修正，关键逻辑有准确的前置中文注释
-    - _Requirements: 1.1, 1.2, 1.3, 1.4, 2.1, 2.2, 2.3, 2.4, 3.1, 3.2, 3.3, 4.1, 4.2_
+    - 验收：目录内每个文件满足 `.kiro/specs/annotation-src/requirements.md`（文件级职责注释 + 每函数短职责 + 关键代码块注释），过时注释已修正
 
-- [x] 3. 注释更新：jsx-runtime
-  - [x] 3.1 为 `src/jsx-runtime/**` 校正与更新注释
+- [ ] 3. 注释更新：jsx-runtime
+  - [ ] 3.1 覆盖 `src/jsx-runtime/**` 全部文件
     - 重点：`jsx/jsxs/jsxDEV/h` 的职责差异、开发态信息处理与封装层次
-    - 验收：过时注释已修正，所有导出函数与内部关键分支有准确的前置中文注释
-    - _Requirements: 1.1, 1.2, 1.3, 1.4, 2.1, 2.2, 2.3, 2.4, 3.1, 3.2, 3.3, 4.1, 4.2_
+    - 验收：目录内每个文件满足 `.kiro/specs/annotation-src/requirements.md`，过时注释已修正
 
-- [x] 4. 注释更新：messages
-  - [x] 4.1 为 `src/messages/**` 校正与更新注释
+- [ ] 4. 注释更新：messages
+  - [ ] 4.1 覆盖 `src/messages/**` 全部文件
     - 重点：文案分层、导出策略、不同子域消息的组织方式
-    - 验收：过时注释已修正，索引聚合与各消息文件的职责清晰
-    - _Requirements: 1.1, 1.2, 1.3, 1.4, 2.1, 2.2, 2.3, 2.4, 4.1, 4.2_
+    - 验收：目录内每个文件满足 `.kiro/specs/annotation-src/requirements.md`，过时注释已修正
 
-- [x] 5. 注释更新：reactivity
-  - [x] 5.1 为 `src/reactivity/**` 校正与更新注释
+- [ ] 5. 注释更新：reactivity
+  - [ ] 5.1 覆盖 `src/reactivity/**` 全部文件
     - 重点：依赖收集/触发、effect 生命周期、清理与嵌套 effect、ref/computed/watch 的时序
-    - 验收：过时注释已修正，关键算法路径均有准确的前置中文注释
-    - _Requirements: 1.1, 1.2, 1.3, 1.4, 2.1, 2.2, 2.3, 2.4, 3.1, 3.2, 3.3, 4.1, 4.2_
+    - 验收：目录内每个文件满足 `.kiro/specs/annotation-src/requirements.md`，过时注释已修正
 
-- [x] 6. 注释更新：router
-  - [x] 6.1 为 `src/router/**` 校正与更新注释
+- [ ] 6. 注释更新：router
+  - [ ] 6.1 覆盖 `src/router/**` 全部文件
     - 重点：路径归一化、导航状态机、`RouterLink/RouterView` 渲染与依赖
-    - 验收：过时注释已修正，导航流程关键分支与组件渲染连接点有准确的前置中文注释
-    - _Requirements: 1.1, 1.2, 1.3, 1.4, 2.1, 2.2, 2.3, 2.4, 3.1, 3.2, 3.3, 4.1, 4.2_
+    - 验收：目录内每个文件满足 `.kiro/specs/annotation-src/requirements.md`，过时注释已修正
 
-- [x] 7. 注释更新：runtime-core
-  - [x] 7.1 为 `src/runtime-core/**` 校正与更新注释
+- [ ] 7. 注释更新：runtime-core
+  - [ ] 7.1 覆盖 `src/runtime-core/**` 全部文件
     - 重点：VirtualNode/组件实例关系、mount/patch、provide/inject、错误处理通道
-    - 验收：过时注释已修正，组件挂载/更新的关键控制流有准确的前置中文注释
-    - _Requirements: 1.1, 1.2, 1.3, 1.4, 2.1, 2.2, 2.3, 2.4, 3.1, 3.2, 3.3, 4.1, 4.2_
+    - 验收：目录内每个文件满足 `.kiro/specs/annotation-src/requirements.md`，过时注释已修正
 
 - [ ] 8. 注释更新：runtime-dom
-  - [ ] 8.1 为 `src/runtime-dom/**` 校正与更新注释
+  - [ ] 8.1 覆盖 `src/runtime-dom/**` 全部文件
     - 重点：DOM 宿主 glue、props 映射、事件与属性移除策略、class/style 归一化
-    - 验收：过时注释已修正，宿主契约与关键 DOM 操作策略有准确的前置中文注释
-    - _Requirements: 1.1, 1.2, 1.3, 1.4, 2.1, 2.2, 2.3, 2.4, 3.1, 3.2, 3.3, 4.1, 4.2_
+    - 验收：目录内每个文件满足 `.kiro/specs/annotation-src/requirements.md`，过时注释已修正
 
 - [ ] 9. 注释更新：shared
-  - [ ] 9.1 为 `src/shared/**` 校正与更新注释
+  - [ ] 9.1 覆盖 `src/shared/**` 全部文件
     - 重点：跨子域工具、错误通道、环境检测、注入/插件机制
-    - 验收：过时注释已修正，错误处理链路与注入机制的关键分支有准确的前置中文注释
-    - _Requirements: 1.1, 1.2, 1.3, 1.4, 2.1, 2.2, 2.3, 2.4, 3.1, 3.2, 3.3, 4.1, 4.2_
+    - 验收：目录内每个文件满足 `.kiro/specs/annotation-src/requirements.md`，过时注释已修正
 
 - [ ] 10. 注释更新：src 顶层文件
-  - [ ] 10.1 为 `src/*.ts` 顶层文件校正与更新注释
+  - [ ] 10.1 覆盖 `src/*.ts` 顶层文件
     - 重点：框架主入口导出聚合、JSX 运行时入口的生产态/开发态差异
-    - 验收：过时注释已修正，各入口文件的职责与导出内容有准确的前置中文注释
-    - _Requirements: 1.1, 1.2, 1.3, 1.4, 2.1, 2.2, 2.3, 2.4, 4.1, 4.2_
+    - 验收：每个文件满足 `.kiro/specs/annotation-src/requirements.md`，过时注释已修正
 
 - [ ] 11. 抽样复核与验证
-  - [ ] 11.1 抽样复核（每目录至少 1 个核心文件）
-    - Checklist：无行尾注释；中文；无逻辑变更；关键分支/循环无遗漏；不堆叠块注释；无过时注释
-    - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 6.1, 6.2_
+  - [ ] 11.1 抽样复核（每目录至少 2 个文件：1 个核心文件 + 1 个非核心文件）
+    - Checklist：无行尾注释；中文；无逻辑变更；关键分支/循环无遗漏；函数职责注释不啰嗦（细节下沉到函数体内）；无过时注释
 
   - [ ] 11.2 运行相关测试以降低误改风险
-    - 建议：按目录选择对应 `test/<domain>/**` 运行，而非全量测试
-    - 说明：注释改动理论上不影响行为，但跑测试可防止误触代码结构/编辑器自动改写等问题
-    - _Requirements: 4.4_
+    - 建议：按目录选择对应 `test/<domain>/**` 运行，而非全量测试（参考 `.kiro/specs/annotation-src/design.md` 的示例命令）
+
+  - [ ] 11.3 提交前清理模板状态
+    - 要求：提交到仓库时 `.kiro/specs/annotation-src/tasks.md` 保持全部为 `[ ]`
 
 ## Notes
 

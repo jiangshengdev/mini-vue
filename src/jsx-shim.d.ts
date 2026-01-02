@@ -1,3 +1,6 @@
+/**
+ * 为 TSX 场景提供 mini-vue 的 JSX 类型补充，覆盖 `Fragment`、事件与内置元素属性推导。
+ */
 import type {
   ElementProps,
   ElementType as VirtualNodeType,
@@ -12,6 +15,7 @@ type ModelBinding = Ref | unknown
 
 /** 组件 `v-model` 语法糖注入的 props（默认 `modelValue` 协议）。 */
 interface ComponentModelBindingProps {
+  /** 组件侧接收的 `v-model` 绑定值，支持 Ref 或可写左值。 */
   'v-model'?: ModelBinding
 }
 

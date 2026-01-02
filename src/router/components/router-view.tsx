@@ -4,7 +4,8 @@
 import { useRouter } from '../core/injection.ts'
 import type { Router } from '../core/types.ts'
 import type { SetupComponent } from '@/jsx-foundation/index.ts'
-import { inject, provide } from '@/runtime-core/index.ts'
+import type { KeepAliveProps } from '@/runtime-core/index.ts'
+import { KeepAlive, inject, provide } from '@/runtime-core/index.ts'
 import type { InjectionKey } from '@/shared/index.ts'
 
 /**
@@ -50,6 +51,14 @@ const initialRouterViewDepth = -1
 export interface RouterViewProps {
   /** 提供 `currentRoute` 的路由器实例。 */
   router?: Router
+  /**
+   * 是否使用 `KeepAlive` 缓存当前命中的路由组件。
+   *
+   * @remarks
+   * - `true` 表示启用默认缓存策略。
+   * - 传入对象时会作为 `KeepAlive` 的 `props`，用于配置 `max/include/exclude`。
+   */
+  keepAlive?: boolean | KeepAliveProps
 }
 
 /**
@@ -98,6 +107,16 @@ export const RouterView: SetupComponent<RouterViewProps> = (props) => {
       return undefined
     }
 
-    return <MatchedComponent />
+    const matchedVirtualNode = <MatchedComponent />
+
+    if (!props.keepAlive) {
+      return matchedVirtualNode
+    }
+
+    if (props.keepAlive === true) {
+      return <KeepAlive>{matchedVirtualNode}</KeepAlive>
+    }
+
+    return <KeepAlive {...props.keepAlive}>{matchedVirtualNode}</KeepAlive>
   }
 }

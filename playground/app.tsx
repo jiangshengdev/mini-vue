@@ -149,7 +149,7 @@ export const App: SetupComponent = () => {
             <NavLinks />
           </nav>
           <main class="main">
-            <RouterView />
+            <RouterView keepAlive />
           </main>
         </div>
       </>

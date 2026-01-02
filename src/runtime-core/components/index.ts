@@ -3,3 +3,4 @@
  * 保持与运行时其他子域的解耦，仅转发最终可消费的组件。
  */
 export { KeepAlive } from './keep-alive.tsx'
+export type { KeepAliveProps } from './keep-alive.tsx'

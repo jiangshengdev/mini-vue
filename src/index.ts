@@ -52,6 +52,7 @@ export type {
   RouterLinkProps,
   RouterViewProps,
 } from '@/router/index.ts'
+export type { KeepAliveProps } from '@/runtime-core/index.ts'
 export {
   inject,
   KeepAlive,

@@ -17,6 +17,7 @@
 [x] 在 `unmount` 路径支持 `shouldKeepAlive`：不 teardown、不走宿主 `remove`，改为调用 `deactivate`（`move` 到 `storageContainer` + 入队 deactivated hooks）（`src/runtime-core/patch/utils.ts` 等）。  
 [x] 补齐缓存淘汰与卸载清理：`max` 超限 `prune` 时强制 teardown 被淘汰实例；KeepAlive 自身卸载时遍历 cache 全量 teardown，避免泄漏与残留标记。  
 [x] 补充测试与验证：新增 `test/runtime-core/component/keep-alive.test.tsx` 覆盖缓存复用、DOM move 不触发 `remove`、`activated/deactivated` 时序与父子顺序、LRU 淘汰；运行 `pnpm run test test/runtime-core/component/keep-alive.test.tsx`。
+[x] 在 Playground 路由示例中启用 KeepAlive：为 `RouterView` 增加 `keepAlive` 配置并在 `playground/app.tsx` 开启，用于手动验证路由切换时组件状态可被缓存。
 
 ## Open questions
 

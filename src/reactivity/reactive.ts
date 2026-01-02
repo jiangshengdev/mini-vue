@@ -96,15 +96,21 @@ function getTargetType(target: object): TargetType {
 
 /**
  * 从可能的代理对象中提取原始目标，若未代理则返回自身。
+ *
+ * @param target - 可能带有 `rawKey` 的目标对象
+ * @returns 若包含原始引用则返回原对象，否则返回传入值
  */
 function toRawTarget(target: object): object {
   return (target as ReactiveTarget)[rawKey] ?? target
 }
 
 /**
- * 确定 Proxy 使用的基础目标：
- * - readonly 包裹 reactive 时直接使用已有 reactive 代理，便于 isReactive 透传。
- * - 其他场景使用提取出的原始目标，保持缓存键一致。
+ * 选择 Proxy 的基础目标，保持缓存键一致并兼容只读包裹。
+ *
+ * @param target - 可能已被代理的对象
+ * @param sourceTarget - 提取出的原始目标
+ * @param isReadonly - 是否创建只读代理
+ * @returns 作为 Proxy 基础的对象引用
  */
 function resolveBaseTarget(
   target: object,

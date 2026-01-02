@@ -1,16 +1,9 @@
 /**
- * 响应式系统的对外统一出口。
+ * 响应式系统的对外聚合出口，统一 reactivity/Ref/effect/watch 等 API。
  *
  * @remarks
- * 导出内容分为以下几类：
- *
- * - 响应式代理：`reactive`、`readonly`、`shallowReactive`、`shallowReadonly`、`isReactive`、`isReadonly`、`toRaw`
- * - Ref 相关：`ref`、`isRef`、`unref`、`toRef`、`computed`、`state`
- * - Effect 相关：`effect`、`ReactiveEffect`、`effectStack`
- * - EffectScope 相关：`effectScope`、`getCurrentScope`、`onScopeDispose`、`recordEffectScope`、`recordScopeCleanup`
- * - Watch 相关：`watch`
- * - 数组工具：`arrayUntrackedMutators`、`isArrayMutatorKey`
- * - 类型定义：`Ref`、`State`、`Reactive`、`DeepReadonly`、`ReadonlyReactive`、`EffectHandle`、`EffectOptions`、`EffectScheduler`、`EffectScope`、`ComputedGetter`、`ComputedSetter`、`WritableComputedOptions`、`WatchCallback`、`WatchOptions`、`WatchSource`、`WatchStopHandle`
+ * - 只做导出与类型汇总，不包含运行时实现。
+ * - 作为单点入口供 runtime 与外部用户引用，保持子模块解耦。
  */
 export { arrayUntrackedMutators, isArrayMutatorKey } from './array/index.ts'
 export type { EffectHandle, EffectOptions, EffectScheduler } from './contracts/index.ts'

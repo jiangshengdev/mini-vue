@@ -23,8 +23,10 @@ import { handleStyleProp } from './style.ts'
 import { transformDomModelBindingProps } from './v-model/index.ts'
 import type { PropsShape } from '@/shared/index.ts'
 
+/** DOM 表单 `v-model` 使用的缓存键，记录上一次实际生效的 props。 */
 const domModelBindingCacheKey = Symbol('domModelBindingCache')
 
+/** 扩展元素以挂载 `v-model` 缓存，避免处处断言可选字段。 */
 type ElementWithModelBindingCache = Element & { [domModelBindingCacheKey]?: PropsShape }
 
 /**

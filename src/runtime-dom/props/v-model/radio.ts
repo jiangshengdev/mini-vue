@@ -1,5 +1,8 @@
 /**
- * `<input type="radio">` 的 `v-model` 转换实现。
+ * `<input type="radio">` 的 `v-model` 受控化实现。
+ *
+ * 依据控件 `value` 与绑定值比对，决定选中态并同步回写。
+ * 不处理同组互斥外的逻辑，聚焦单个 radio 控件。
  */
 import { readModelValue, setModelValue } from './model.ts'
 import type { TrackConflict } from './types.ts'
@@ -25,6 +28,7 @@ export function applyRadioModelBinding(
 
   trackConflict('onChange')
 
+  /* 选中即回写自身值，交由同组 radio 互斥控制。 */
   props.onChange = (_event: Event) => {
     setModelValue(modelBinding, controlValue)
   }

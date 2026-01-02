@@ -1,5 +1,8 @@
 /**
- * `<select>` 单选模式的 `v-model` 转换实现。
+ * `<select>` 单选模式的 `v-model` 受控化实现。
+ *
+ * 将绑定值写入 `value`，并在选项变更时回写选中值。
+ * 不处理多选或原生校验，只聚焦单一选项同步。
  */
 import { readModelValue, setModelValue } from './model.ts'
 import type { TrackConflict } from './types.ts'
@@ -22,6 +25,7 @@ export function applySelectSingleModelBinding(
 
   trackConflict('onChange')
 
+  /* 监听选项变更，将当前选中值写回绑定。 */
   props.onChange = (event: Event) => {
     const { target } = event
 

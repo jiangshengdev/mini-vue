@@ -4,6 +4,8 @@
  * `v-model` 支持两种绑定目标：
  * - Ref 对象：通过 `.value` 读写
  * - 普通值：只读，写入时在开发模式下发出警告
+ *
+ * 本模块聚焦值层面的读写与只读告警，不关心控件类型。
  */
 import { jsxModelBindingReadonlyTarget } from '@/messages/index.ts'
 import { isRef } from '@/reactivity/index.ts'
@@ -32,6 +34,7 @@ export function setModelValue(modelBinding: unknown, value: unknown): void {
     return
   }
 
+  /* 非 Ref 无法写入，开发模式下提醒调用方绑定为可写来源。 */
   if (__DEV__) {
     console.warn(jsxModelBindingReadonlyTarget, { modelBinding, value })
   }

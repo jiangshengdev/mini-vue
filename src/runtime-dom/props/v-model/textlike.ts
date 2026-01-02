@@ -1,5 +1,8 @@
 /**
- * 文本类输入元素的 `v-model` 转换实现。
+ * 文本类输入元素（`input`/`textarea`）的 `v-model` 受控化实现。
+ *
+ * 负责将绑定值写入 `value`，并在输入或变更事件中回写 model。
+ * 不处理富文本或文件输入场景，仅聚焦文本与多行文本控件。
  */
 import { readModelValue, setModelValue } from './model.ts'
 import type { TrackConflict } from './types.ts'
@@ -24,6 +27,7 @@ export function applyTextLikeModelBinding(
 
   trackConflict(eventName)
 
+  /* 为输入类控件绑定同步事件，将用户输入回写到 model。 */
   props[eventName] = (event: Event) => {
     const { target } = event
 

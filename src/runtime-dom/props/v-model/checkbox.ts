@@ -1,12 +1,15 @@
 /**
- * `<input type="checkbox">` 的 `v-model` 转换实现。
+ * `<input type="checkbox">` 的 `v-model` 受控化实现。
+ *
+ * 支持布尔绑定与数组绑定：布尔用于单个开关，数组用于多选集合。
+ * 本模块仅负责值同步，不处理原生校验或三态 checkbox。
  */
 import { readModelValue, setModelValue } from './model.ts'
 import type { TrackConflict } from './types.ts'
 import type { PropsShape } from '@/shared/index.ts'
 
 /**
- * 判断输入是否为未知元素数组。
+ * 判断绑定值是否为数组，用于区分集合模式。
  *
  * @param value - 待判定的值
  * @returns 是否为数组
@@ -38,6 +41,7 @@ export function applyCheckboxModelBinding(
 
     trackConflict('onChange')
 
+    /* 集合模式下维护数组：选中追加，取消移除目标值。 */
     props.onChange = (event: Event) => {
       const { target } = event
 
@@ -64,6 +68,7 @@ export function applyCheckboxModelBinding(
         return
       }
 
+      /* 取消勾选时过滤掉当前值，保持其他选项不变。 */
       setModelValue(
         modelBinding,
         current.filter((item) => {
@@ -80,6 +85,7 @@ export function applyCheckboxModelBinding(
 
   trackConflict('onChange')
 
+  /* 布尔模式：按勾选状态写回布尔值。 */
   props.onChange = (event: Event) => {
     const { target } = event
 

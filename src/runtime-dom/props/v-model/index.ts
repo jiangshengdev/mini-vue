@@ -1,6 +1,7 @@
 /**
- * DOM 表单 v-model 子模块入口。
+ * DOM 表单 `v-model` 子模块入口。
  *
- * 仅允许在 `index.ts` 中做聚合导出，保持子模块实现文件职责单一。
+ * 提供 `v-model` 到受控 props 的运行时转换，仅聚合导出子模块。
+ * 禁止在入口外新增导出，保持各具体实现文件职责单一。
  */
 export { transformDomModelBindingProps } from './transform.ts'

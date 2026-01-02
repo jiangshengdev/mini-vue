@@ -1,5 +1,8 @@
 /**
- * `<select multiple>` 多选模式的 `v-model` 转换实现。
+ * `<select multiple>` 多选模式的 `v-model` 受控化实现。
+ *
+ * 使用数组同步选中项，保持 `value` 与 `selectedOptions` 一致。
+ * 不负责去重与校验，交由调用方保证候选项唯一性。
  */
 import { readModelValue, setModelValue } from './model.ts'
 import type { TrackConflict } from './types.ts'
@@ -22,6 +25,7 @@ export function applySelectMultipleModelBinding(
 
   trackConflict('onChange')
 
+  /* 将所有选中项收集为数组写回，保持多选受控。 */
   props.onChange = (event: Event) => {
     const { target } = event
 

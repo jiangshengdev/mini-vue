@@ -58,6 +58,7 @@ export function transformDomModelBindingProps(element: Element, rawProps: PropsS
     case 'input': {
       const inputType = typeof nextProps.type === 'string' ? nextProps.type.toLowerCase() : ''
 
+      /* checkbox/radio 拥有独立的受控策略，其余输入走文本路径。 */
       if (inputType === 'checkbox') {
         applyCheckboxModelBinding(modelBinding, nextProps, trackConflict)
       } else if (inputType === 'radio') {

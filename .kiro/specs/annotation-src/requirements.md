@@ -1,5 +1,12 @@
 # Requirements Document
 
+## 必读（强制）
+
+阅读完本文件后，下一步必须继续阅读以下两份文档：
+
+- [design.md](./design.md)：执行流程与验证方式
+- [tasks.md](./tasks.md)：任务清单与进度记录规则
+
 ## Introduction
 
 mini-vue 源码经过多次迭代，部分注释已无法与当前逻辑匹配。本需求旨在对 `src` 目录下的中文注释进行**校正与更新**，确保注释准确反映代码的真实行为，同时补充缺失的关键注释。
@@ -24,7 +31,7 @@ mini-vue 源码经过多次迭代，部分注释已无法与当前逻辑匹配�
 
 ## Requirements
 
-### Requirement 0: 范围与进度模板
+### Requirement 0: 范围与点名
 
 **User Story:** As a 项目维护者, I want 注释整改范围与进度记录方式明确, so that 不会误改非目标文件或把一次性进度写回仓库模板。
 
@@ -32,7 +39,7 @@ mini-vue 源码经过多次迭代，部分注释已无法与当前逻辑匹配�
 
 1. THE Annotation_System SHALL 仅处理 `src/**` 下的源码文件
 2. THE Annotation_System SHALL 仅修改被点名的 Target_File（目录任务需点名该目录下的全部文件清单）
-3. `.kiro/specs/annotation-src/tasks.md` 默认作为可复用模板：执行过程中允许用 `[x]` 临时记录进度，但提交前应清空回 `[ ]`
+3. 进度记录与提交前清理规则见 [tasks.md](./tasks.md)
 
 ### Requirement 1: 过时注释校正
 

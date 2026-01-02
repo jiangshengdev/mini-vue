@@ -1,10 +1,17 @@
 # Implementation Plan: Src 代码注释更新
 
+## 必读（强制）
+
+阅读完本文件后，下一步必须继续阅读以下两份文档：
+
+- [requirements.md](./requirements.md)：硬约束与验收口径（含注释标杆目录）
+- [design.md](./design.md)：执行流程与验证方式
+
 ## Overview
 
 本文件默认是**可复用模板**：执行过程中允许用 `[x]` 记录进度，但提交前需要清空回 `[ ]`。
 
-按 `src` 一级子目录拆分任务，每个目录为一个独立任务单元。每个目录任务都以“该目录下**所有文件**”为覆盖目标：保证每个文件至少有文件级职责注释（Module_Comment）、每个函数都有短职责注释，并把复杂说明下沉到函数体内部的关键代码块之前。注释风格以 `src/jsx-foundation/**` 作为标杆。
+按 `src` 一级子目录拆分任务，每个目录为一个独立任务单元；具体验收口径以 [requirements.md](./requirements.md) 为准。
 
 ## Tasks
 
@@ -69,7 +76,4 @@
     - 要求：提交到仓库时 `.kiro/specs/annotation-src/tasks.md` 保持全部为 `[ ]`
 
 ## Notes
-
-- 本 spec 为文档/注释工作，不涉及功能代码实现，因此不包含 Property-Based Testing 任务
-- 每个目录任务重点是**校正过时注释**，其次是**补充缺失注释**
-- 验证方式为人工复核 Checklist + 运行相关测试
+- 本任务为注释整改，不涉及功能代码实现。

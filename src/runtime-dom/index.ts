@@ -1,12 +1,7 @@
 /**
- * Runtime-dom 模块入口。
+ * runtime-dom 的入口聚合层，提供绑定 DOM 宿主的应用创建与根级渲染能力。
  *
- * 本模块为 DOM 宿主环境提供完整的渲染能力，包括：
- * - `createApp`：创建基于 DOM 的应用实例，支持字符串选择器挂载
- * - `render`：根级渲染函数，可直接挂载 JSX 或组件树
- * - `domRendererOptions`：DOM 宿主的渲染原语集合
- * - `invokerCacheKey`：事件处理器缓存键，用于复用 invoker
- * - `ElementRef`：元素引用类型，支持回调函数或响应式 ref
+ * 暴露 DOM 渲染原语、事件 invoker 复用的缓存键以及元素引用类型，供宿主渲染器和 props 模块共享。
  */
 export { createApp, renderDomRoot as render } from './create-app.ts'
 export type { DomAppInstance } from './create-app.ts'

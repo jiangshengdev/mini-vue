@@ -32,6 +32,7 @@ export const runtimeDomDocumentUnavailable =
  *
  * @param key - 被写入的 style 属性名（如 `color`、`fontSize`）
  * @param type - 实际传入值的类型描述（如 `object`、`function`）
+ * @returns 包含属性名与类型提示的警告文案
  */
 export const runtimeDomInvalidStyleValue = (key: string, type: string) => {
   return `[runtime-dom] style "${key}" 仅支持字符串/数字值，收到 ${type}，已忽略写入`
@@ -45,6 +46,7 @@ export const runtimeDomInvalidStyleValue = (key: string, type: string) => {
  *
  * @param key - 被设置的属性名
  * @param type - 属性值的类型描述
+ * @returns 提示属性值类型不受支持的警告文案
  */
 export const runtimeDomUnsupportedAttrValue = (key: string, type: string) => {
   return `[runtime-dom] 属性 "${key}" 收到不受支持的值类型：${type}，已忽略写入`

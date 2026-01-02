@@ -23,6 +23,7 @@ export const jsxUnsupportedChildWarning = '[jsx] 检测到无法渲染的 childr
  * 在其他元素上使用时会输出此警告并忽略绑定。
  *
  * @param type - 当前元素的标签名
+ * @returns 说明 v-model 已被忽略的警告文案
  */
 export const jsxModelBindingNonFormWarning = (type: string) => {
   return `[jsx] v-model 仅支持表单元素，在 <${type}> 上已被忽略`
@@ -36,6 +37,7 @@ export const jsxModelBindingNonFormWarning = (type: string) => {
  *
  * @param type - 当前元素的标签名
  * @param keys - 被 v-model 覆盖的属性名列表
+ * @returns 说明被覆盖属性的警告文案
  */
 export const jsxModelBindingConflictWarning = (type: string, keys: string[]) => {
   return `[jsx] v-model 将覆盖 <${type}> 上显式传入的属性：${keys.join(', ')}`

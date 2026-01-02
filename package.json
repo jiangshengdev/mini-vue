@@ -37,6 +37,7 @@
     "check:cross-boundary-import-style": "node scripts/check/import/check-cross-boundary-import-style.ts",
     "check:duplicate-import-export": "node scripts/check/import/check-duplicate-import-export.ts",
     "check:import-export-sorted": "node scripts/check/import/check-import-export-sorted.ts",
+    "check:import-export-type-mixed": "node scripts/check/import/check-import-export-type-mixed.ts",
     "check:index-export-local-only": "node scripts/check/import/check-index-export-local-only.ts",
     "check:props-destructure": "node scripts/check/props-destructure.ts",
     "check:src-import-boundary": "node scripts/check/import/check-src-import-boundary.ts",

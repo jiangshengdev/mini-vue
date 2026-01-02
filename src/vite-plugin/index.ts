@@ -44,18 +44,16 @@ export function miniVueCompilerPlugin(options: MiniVueCompilerPluginOptions = {}
   return plugins
 }
 
-export {
-  miniVueDevtoolsSetupStateNamesPlugin,
-  type MiniVueDevtoolsSetupStateNamesPluginOptions,
-} from './devtools-setup-state-names.ts'
-export {
-  type DiagnosticLevel,
-  type MiniVueTransformPropsDestructureDiagnosticsOptions,
-  miniVueTransformPropsDestructurePlugin,
-  type MiniVueTransformPropsDestructurePluginOptions,
+export { miniVueDevtoolsSetupStateNamesPlugin } from './devtools-setup-state-names.ts'
+export type { MiniVueDevtoolsSetupStateNamesPluginOptions } from './devtools-setup-state-names.ts'
+export { miniVueTransformPropsDestructurePlugin } from './transform-props-destructure.ts'
+export type {
+  DiagnosticLevel,
+  MiniVueTransformPropsDestructureDiagnosticsOptions,
+  MiniVueTransformPropsDestructurePluginOptions,
 } from './transform-props-destructure.ts'
 export {
   miniVueTransformModelBindingWritebackPlugin,
   miniVueTransformModelBindingWritebackPluginName,
-  type MiniVueTransformModelBindingWritebackPluginOptions,
 } from './transform-v-model-writeback.ts'
+export type { MiniVueTransformModelBindingWritebackPluginOptions } from './transform-v-model-writeback.ts'

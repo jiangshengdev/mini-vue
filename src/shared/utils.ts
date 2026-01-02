@@ -1,12 +1,7 @@
 /**
- * 工具函数模块。
- *
- * 本模块提供跨子域共享的工具函数，包括：
- * - `isObject`：判断是否为非 null 对象
- * - `isPlainObject`：判断是否为纯对象（原型为 Object.prototype 或 null）
- * - `isNil`：判断是否为 null 或 undefined
- * - `isArrayIndex`：判断是否为非负整数索引
- * - `isThenable`：判断是否为 Promise/thenable
+ * 跨子域共享的基础判定与类型守卫工具，集中收敛常见的校验逻辑。
+ * 覆盖对象/纯对象/空值/数组索引/thenable 等热路径判断，避免各子域重复实现。
+ * 设计为无副作用的纯函数，可直接用于运行时分支与类型收窄。
  */
 import type { PlainObject } from './types.ts'
 

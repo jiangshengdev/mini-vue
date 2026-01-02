@@ -116,6 +116,7 @@ function isEventProp(key: string): boolean {
   return key.startsWith('on') && key.length > 2
 }
 
+/** 事件包装函数类型，持有当前有效的真实回调。 */
 type EventInvoker = ((event: Event) => void) & { value?: EventListener }
 
 /** 事件名到 invoker 的映射表，挂在元素上复用。 */

@@ -13,3 +13,4 @@
 - [plan-tsx-compile-transform-v-model-dom](./plan-tsx-compile-transform-v-model-dom.md)
 - [plan-tsx-compile-transform-props-destructure](./plan-tsx-compile-transform-props-destructure.md)
 - [playwright-e2e-scripts-plan](./playwright-e2e-scripts-plan.md)
+- [runtime-dom-svg-plan](./runtime-dom-svg-plan.md)

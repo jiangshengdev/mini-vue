@@ -142,12 +142,7 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
    * @throws 原样抛出副作用函数内部的异常，同时会通过 `setErrorHandler` 暴露给统一错误处理器。
    */
   run(): T {
-    /**
-     * 包装副作用执行流程，按需切换依赖收集开关。
-     *
-     * @param shouldTrack - 是否在当前执行中参与依赖收集
-     * @returns 副作用函数的返回值
-     */
+    /* 包装副作用执行流程，按需切换依赖收集开关。 */
     const runEffectFunction = (shouldTrack: boolean): T => {
       return runThrowing(
         () => {

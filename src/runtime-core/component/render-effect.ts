@@ -1,5 +1,8 @@
 /**
  * 组件渲染 effect 执行与调度模块：首渲染与后续 rerender 的核心路径。
+ * 负责创建组件独立的响应式 effect、管理调度 job，并以 patch 方式复用宿主节点。
+ * 将渲染错误隔离在组件级，允许兄弟节点继续挂载或更新。
+ * 仅处理组件子树的 render → patch → teardown 链路，不涉及 vnode 生产。
  */
 import type { RendererOptions } from '../index.ts'
 import type { MountedHandle } from '../mount/handle.ts'

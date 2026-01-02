@@ -1,5 +1,7 @@
 /**
  * Devtools 兼容层：在开发态向 Vue Devtools 发射组件生命周期事件。
+ * 负责读取全局 Devtools hook、校验 appRecord 是否就绪，并携带父子关系发射事件。
+ * 仅在 `__DEV__` 下生效，保证生产构建零开销。
  */
 import type { UnknownComponentInstance } from './context.ts'
 import { __DEV__ } from '@/shared/index.ts'

@@ -1,5 +1,7 @@
 /**
  * 组件 `props` 归一化与响应式包装工具。
+ * 负责克隆 vnode `props`、按 `children` 数量重组 `children` 字段，并封装浅响应式读写视图。
+ * 仅做数据规整与只读代理构建，不涉及组件渲染或实例生命周期。
  */
 import type { ElementProps, SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
 import { shallowReactive, shallowReadonly } from '@/reactivity/index.ts'

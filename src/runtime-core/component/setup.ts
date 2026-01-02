@@ -1,5 +1,7 @@
 /**
  * 组件 `setup` 执行与 Devtools 收集适配，产出渲染闭包并校验返回值。
+ * 负责 currentInstance 切换、Devtools setupState 收集与同步 `setup` 返回值校验。
+ * 仅支持同步 `setup`，异常通过错误通道上报，留给上层决定是否跳过挂载。
  */
 import type { ComponentInstance } from './context.ts'
 import { setCurrentInstance, unsetCurrentInstance } from './context.ts'

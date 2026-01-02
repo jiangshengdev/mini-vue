@@ -1,12 +1,7 @@
 /**
- * `v-model` 转换的核心逻辑。
+ * 处理组件 `v-model` 的运行时转换，将 JSX `'v-model'` 改写为 Vue3 默认的 `modelValue` 协议。
  *
- * 本模块仅负责「组件 v-model」转换：把 JSX 中的 `'v-model'` 语法糖转换为
- * Vue3 默认组件协议 `modelValue` + `onUpdate:modelValue`。
- *
- * @remarks
- * - DOM 表单元素的 `v-model` 适配由宿主层（如 `runtime-dom`）负责消费。
- * - 仅支持默认 `modelValue` 协议，不支持具名 v-model 与 modifiers。
+ * DOM 表单元素的 `v-model` 由宿主层消费，暂不覆盖具名 `v-model` 与 `modifiers`。
  */
 import { readModelValue, setModelValue } from './model.ts'
 import { warnConflictProps } from './warn.ts'
@@ -29,18 +24,11 @@ interface TransformResult<T extends ElementType> {
 }
 
 /**
- * 将 JSX 中的组件 `v-model` 转换为默认的 `modelValue` 协议。
- *
- * 转换规则（组件）：
- * - `modelValue = readModelValue(v-model)`
- * - `onUpdate:modelValue = (value) => setModelValue(v-model, value)`
- *
- * 冲突检测：
- * - 若 props 中已存在 `modelValue` 或 `onUpdate:modelValue`，Dev 下给出告警并覆盖。
+ * 将组件的 `'v-model'` 语法糖转换为 `modelValue`/`onUpdate:modelValue`，并收集可能被覆盖的属性以便告警。
  *
  * @param type - 元素类型（原生标签名或组件函数）
  * @param rawProps - 原始 props（可能包含 `v-model`）
- * @returns 转换结果，包含处理后的 props 和冲突列表
+ * @returns 转换后的 props 及冲突列表
  */
 export function transformModelBindingProps<T extends ElementType>(
   type: T,

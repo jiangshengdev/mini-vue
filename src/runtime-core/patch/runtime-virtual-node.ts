@@ -19,6 +19,9 @@ export type RuntimeNormalizedVirtualNode<
  *
  * @remarks
  * 该函数仅做类型断言，不进行运行时校验；调用方需确保 `virtualNode` 来自合法的渲染流程。
+ *
+ * @param virtualNode - 已 normalize 的 `virtualNode`
+ * @returns 携带运行时元数据的 `virtualNode`
  */
 export function asRuntimeNormalizedVirtualNode<
   HostNode,
@@ -38,6 +41,9 @@ export function asRuntimeNormalizedVirtualNode<
  * @remarks
  * - 通过 `runtime.handle.nodes` 获取，`handle` 在 `mount` 阶段写入。
  * - 若 `handle` 不存在则返回空数组。
+ *
+ * @param virtualNode - 已 normalize 的 `virtualNode`
+ * @returns 对应的宿主节点列表
  */
 export function getHostNodes<
   HostNode,
@@ -55,6 +61,9 @@ export function getHostNodes<
  * @remarks
  * - 对于 `Fragment`/组件，返回其子树的第一个宿主节点。
  * - 对于元素/文本，返回其自身的宿主节点。
+ *
+ * @param virtualNode - 已 normalize 的 `virtualNode`
+ * @returns 第一个宿主节点或 `undefined`
  */
 export function getFirstHostNode<
   HostNode,
@@ -68,6 +77,9 @@ export function getFirstHostNode<
 
 /**
  * 防御性读取宿主节点：当 `handle` 缺失或未写入宿主引用时给出调试提示。
+ *
+ * @param virtualNode - 已 normalize 的 `virtualNode`
+ * @returns 对应的宿主节点列表
  */
 export function getHostNodesSafely<
   HostNode,

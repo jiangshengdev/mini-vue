@@ -16,6 +16,11 @@ import { hasKeys } from './utils.ts'
  * @remarks
  * - `keyed diff` 允许跨索引复用与移动，适用于列表项有稳定标识的场景。
  * - `unkeyed diff` 只按索引对齐，不支持「同节点换位置」的语义，适用于简单列表。
+ *
+ * @param options - 宿主渲染原语集合
+ * @param previousChildren - 旧子节点列表
+ * @param nextChildren - 新子节点列表
+ * @param environment - 容器、锚点与上下文以及单节点 `patch` 回调
  */
 export function patchChildren<
   HostNode,

@@ -21,6 +21,9 @@ export type NormalizedTextVirtualNode = NormalizedVirtualNode<typeof Text>
  *
  * @remarks
  * 用于 `patch` 流程中区分文本节点与其他节点类型。
+ *
+ * @param virtualNode - 已 normalize 的 `virtualNode`
+ * @returns 是否为 `Text` 节点
  */
 export function isTextVirtualNode(
   virtualNode: NormalizedVirtualNode,
@@ -38,6 +41,9 @@ export type NormalizedCommentVirtualNode = NormalizedVirtualNode<typeof Comment>
 
 /**
  * 判断当前 `virtualNode` 是否为注释节点。
+ *
+ * @param virtualNode - 已 normalize 的 `virtualNode`
+ * @returns 是否为 `Comment` 节点
  */
 export function isCommentVirtualNode(
   virtualNode: NormalizedVirtualNode,
@@ -58,6 +64,9 @@ export type NormalizedComponentVirtualNode = NormalizedVirtualNode<SetupComponen
  *
  * @remarks
  * 用于 `patch` 流程中区分组件节点与元素节点。
+ *
+ * @param virtualNode - 已 normalize 的 `virtualNode`
+ * @returns 是否为组件节点
  */
 export function isComponentVirtualNode(
   virtualNode: NormalizedVirtualNode,

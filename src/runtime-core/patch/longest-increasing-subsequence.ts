@@ -12,6 +12,9 @@
  * // 输入 [3, 1, 4, 1, 5, 9, 2, 6]
  * // 返回 [1, 2, 4, 7]（对应值 1, 4, 5, 6）
  * ```
+ *
+ * @param indexes - 新偏移到旧索引的映射数组（-1 表示未复用）
+ * @returns 最长递增子序列对应的索引列表
  */
 export function computeLongestIncreasingSubsequence(indexes: number[]): number[] {
   /* 为即将构建的序列准备初始状态，长度与输入一致。 */
@@ -44,6 +47,9 @@ interface LongestIncreasingSubsequenceState {
  * @remarks
  * - 序列初始为空，等待扫描过程中逐步填充。
  * - 前驱数组按输入长度填充为 `-1`，表示默认无前驱。
+ *
+ * @param length - 输入数组长度
+ * @returns 初始化后的 LIS 状态
  */
 function createSequenceState(length: number): LongestIncreasingSubsequenceState {
   /* 序列初始为空，等待扫描过程中逐步填充。 */
@@ -67,6 +73,9 @@ function createSequenceState(length: number): LongestIncreasingSubsequenceState 
  * - 遇到哨兵 -1 直接跳过，保持“未匹配”语义。
  * - 比当前序列尾部更大的值直接追加，否则通过二分找到替换位。
  * - `sequence` 中仅存放索引，保证与输入扫描顺序一致；实际子序列在回溯时恢复。
+ *
+ * @param indexes - 新偏移到旧索引的映射数组（-1 表示未复用）
+ * @param state - LIS 构建过程的中间状态
  */
 function buildIncreasingSequence(
   indexes: number[],
@@ -144,6 +153,11 @@ function buildIncreasingSequence(
  * @remarks
  * - 输入 `sequence` 存的是索引列表，`indexes` 提供真实值。
  * - 返回第一个值大于等于 `target` 的位置，用于替换或追加。
+ *
+ * @param sequence - 当前递增序列的索引列表
+ * @param indexes - 新偏移到旧索引的映射数组
+ * @param target - 待插入的比较值
+ * @returns 插入位置的下界索引
  */
 function findInsertPosition(sequence: number[], indexes: number[], target: number): number {
   /* 初始化二分的左右边界，覆盖整个序列。 */
@@ -177,6 +191,9 @@ function findInsertPosition(sequence: number[], indexes: number[], target: numbe
  * @remarks
  * - `sequence` 只保存了各长度的最佳尾部索引，需结合 `predecessors` 还原完整链。
  * - 回溯时从最后一个尾部开始沿前驱向前收集，再反转保证输出从头到尾递增。
+ *
+ * @param state - 含有序列与前驱的 LIS 状态
+ * @returns 递增子序列的索引列表
  */
 function traceSequence(state: LongestIncreasingSubsequenceState): number[] {
   /* 用于收集回溯得到的索引链。 */

@@ -13,6 +13,11 @@ import type { RendererOptions } from '../renderer.ts'
  * @remarks
  * - 该函数是 `patch` 阶段复用 `mount` 能力的桥接层。
  * - 传入 `undefined` 时直接返回 `undefined`，不产生任何节点。
+ *
+ * @param options - 宿主渲染原语集合
+ * @param virtualNode - 待挂载的节点
+ * @param environment - 目标容器、锚点与上下文
+ * @returns `mount` 产生的 `handle` 或 `undefined`
  */
 export function mountChildInEnvironment<
   HostNode,

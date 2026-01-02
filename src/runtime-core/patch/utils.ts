@@ -16,6 +16,9 @@ import { Fragment, Text } from '@/jsx-foundation/index.ts'
  * @remarks
  * - `handle.teardown` 会统一处理组件 `effect`、事件清理、以及多节点/片段的宿主移除。
  * - 无 `handle` 的节点只记录了单一 `el`，直接移除即可。
+ *
+ * @param options - 宿主渲染原语集合
+ * @param virtualNode - 已渲染的节点
  */
 export function unmount<
   HostNode,
@@ -59,6 +62,9 @@ export function unmount<
  * - Element/Text/Comment：直接返回 `runtime.el`。
  * - Fragment：返回片段起始锚点 `runtime.el`。
  * - Component：递归读取 `instance.subTree`（对齐 Vue3：组件范围来源于子树）。
+ *
+ * @param virtualNode - 已 normalize 的 `virtualNode`
+ * @returns 首个宿主节点或 `undefined`
  */
 export function getFirstHostNode<
   HostNode,
@@ -86,6 +92,9 @@ export function getFirstHostNode<
  * - Element/Text/Comment：返回 `runtime.el`。
  * - Fragment：返回片段结束锚点 `runtime.anchor`。
  * - Component：递归读取 `instance.subTree`（对齐 Vue3：组件范围来源于子树）。
+ *
+ * @param virtualNode - 已 normalize 的 `virtualNode`
+ * @returns 最后一个宿主节点或 `undefined`
  */
 export function getLastHostNode<
   HostNode,
@@ -123,6 +132,10 @@ export function getLastHostNode<
  * - Element/Text/Comment：返回 `hostNextSibling(el)`。
  * - Fragment：返回 `hostNextSibling(anchor)`（对齐 Vue3：以区间尾锚点作为边界）。
  * - Component：递归到 `instance.subTree`（对齐 Vue3：组件范围来源于子树）。
+ *
+ * @param options - 宿主渲染原语集合
+ * @param virtualNode - 已 normalize 的 `virtualNode`
+ * @returns 下一个宿主节点或 `undefined`
  */
 export function getNextHostNode<
   HostNode,
@@ -164,6 +177,11 @@ export function getNextHostNode<
  * - Element/Text/Comment：移动单个宿主节点。
  * - Fragment：通过 `nextSibling` 遍历 `[start..end]` 区间并整体搬移。
  * - Component：递归搬移 `instance.subTree`（对齐 Vue3：组件范围来源于子树）。
+ *
+ * @param options - 宿主渲染原语集合
+ * @param virtualNode - 已 normalize 的 `virtualNode`
+ * @param container - 目标容器
+ * @param anchor - 插入锚点，缺省为追加
  */
 export function move<
   HostNode,
@@ -246,6 +264,10 @@ export function move<
  * - `Text` 节点在 `diff` 中只要都是 `Text` 且 `key` 相同即可复用宿主节点。
  * - 其它节点需同时满足 `type` 与 `key` 相同。
  * - 与 Vue 的 `isSameVNodeType` 语义对齐。
+ *
+ * @param a - 旧节点
+ * @param b - 新节点
+ * @returns 是否可视为同一节点
  */
 export function isSameVirtualNode(
   a: NormalizedVirtualNode | undefined,
@@ -265,6 +287,11 @@ export function isSameVirtualNode(
 
 /**
  * 将一组宿主节点整体移动到指定锚点之前，保持节点内部顺序不变。
+ *
+ * @param options - 宿主渲染原语集合
+ * @param nodes - 待移动的宿主节点列表
+ * @param container - 目标容器
+ * @param anchor - 插入锚点
  */
 export function moveNodes<
   HostNode,
@@ -289,6 +316,11 @@ export function moveNodes<
  * - 使用 `vnode.el` 作为锚点来源：对齐 Vue3 的「宿主范围由 `el/anchor` 表达」策略。
  * - 找不到时返回 `fallback`（通常来自父级传入的 `anchor`）。
  * - 该函数用于 `keyed`/`unkeyed` diff 中确定新节点的插入位置。
+ *
+ * @param children - 子节点列表
+ * @param startIndex - 开始搜索的位置
+ * @param fallback - 找不到时使用的备用锚点
+ * @returns 找到的宿主锚点或 `fallback`
  */
 export function findNextAnchor<HostNode>(
   children: NormalizedChildren,
@@ -309,6 +341,9 @@ export function findNextAnchor<HostNode>(
 
 /**
  * 判断 `children` 是否包含 `key`，用于决定 `keyed`/`unkeyed` 两套 `diff` 策略。
+ *
+ * @param children - 子节点列表
+ * @returns 是否存在有效 `key`
  */
 export function hasKeys(children: NormalizedChildren): boolean {
   return children.some((child) => {
@@ -324,6 +359,10 @@ export function hasKeys(children: NormalizedChildren): boolean {
  * - `el`/`handle` 会在 `mount` 时写入，`patch` 时必须继承以避免重复创建/丢失 `teardown` 能力。
  * - `anchor`/`component` 允许按需覆盖：例如 `Text`/`Fragment` 分支会显式清空 `component`。
  * - 这是 `patch` 复用宿主节点的核心机制。
+ *
+ * @param runtimePrevious - 旧节点的运行时信息
+ * @param runtimeNext - 新节点的运行时信息
+ * @param overrides - 可选的 anchor/component 覆盖
  */
 export function syncRuntimeMetadata<
   HostNode,

@@ -30,6 +30,11 @@ import { findNextAnchor, isSameVirtualNode } from './utils.ts'
  * 4. 倒序遍历新列表中间段：`mount` 新节点或将旧节点移动到正确位置。
  *
  * 时间复杂度：O(n log n)（主要来自 LIS 计算）。
+ *
+ * @param options - 宿主渲染原语集合
+ * @param previousChildren - 旧子节点列表
+ * @param nextChildren - 新子节点列表
+ * @param environment - 容器、锚点与上下文以及单节点 `patch` 回调
  */
 export function patchKeyedChildren<
   HostNode,
@@ -91,6 +96,10 @@ export function patchKeyedChildren<
  * @remarks
  * - 有 `key` 则优先通过映射定位，否则尝试在新列表中间段线性寻找可复用的无 `key` 节点。
  * - `key` 命中但类型不同时视为替换，卸载旧节点并让后续阶段按「需要 `mount`」处理。
+ *
+ * @param context - `keyed diff` 的上下文
+ * @param range - 仍需处理的索引区间
+ * @param maps - `key`/索引映射集合
  */
 function patchAlignedChildren<
   HostNode,
@@ -160,6 +169,11 @@ function patchAlignedChildren<
  * - 倒序遍历可以让每个节点都以「其后继节点」作为锚点插入，避免在同一轮移动中锚点失效。
  * - 在最长递增子序列中的节点保持相对顺序，无需移动。
  * - 不在 LIS 中的节点需要移动到正确位置。
+ *
+ * @param context - `keyed diff` 的上下文
+ * @param range - 仍需处理的索引区间
+ * @param maps - `key`/索引映射集合
+ * @param increasingSubsequenceIndexes - LIS 的索引结果
  */
 function moveOrMountChildren<
   HostNode,

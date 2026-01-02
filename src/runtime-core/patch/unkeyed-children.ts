@@ -17,6 +17,11 @@ import { findNextAnchor } from './utils.ts'
  * @remarks
  * - `unkeyed diff` 只按索引对齐，不支持「同节点换位置」的语义。
  * - 适用于简单列表或列表项没有稳定标识的场景。
+ *
+ * @param options - 宿主渲染原语集合
+ * @param previousChildren - 旧子节点列表
+ * @param nextChildren - 新子节点列表
+ * @param environment - 容器、锚点与上下文以及单节点 `patch` 回调
  */
 export function patchUnkeyedChildren<
   HostNode,

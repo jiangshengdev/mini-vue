@@ -1,5 +1,8 @@
 /**
  * 统一挂载任意子节点类型：数组、组件、元素、文本与占位注释。
+ *
+ * - 只负责分派与锚点插入策略，具体渲染由子路径承担。
+ * - 对异常子节点保持容错并在开发态给出警告，避免静默渲染错误。
  */
 import type { ChildEnvironment } from '../environment.ts'
 import type { RendererOptions } from '../index.ts'
@@ -20,6 +23,11 @@ import { __DEV__, isNil } from '@/shared/index.ts'
  * - 数组：以锚点包裹，逐个挂载子项。
  * - `virtualNode`：交给 `mountVirtualNode` 处理组件或元素。
  * - 原始文本（`string`/`number`）：创建文本节点。
+ *
+ * @param options - 宿主渲染器提供的节点与插入操作集合
+ * @param child - 组件渲染返回的任意子节点结果
+ * @param environment - 当前挂载上下文，包含容器、锚点与父级上下文
+ * @returns 记录宿主节点与清理能力的句柄，或无节点时返回 `undefined`
  */
 export function mountChild<
   HostNode,
@@ -145,6 +153,11 @@ export function mountChild<
  *
  * @remarks
  * - 无论子项数量多少，都使用首尾锚点包裹，保证区间边界清晰（更接近 Vue3 `Fragment` 行为）。
+ *
+ * @param options - 宿主渲染器提供的节点与插入操作集合
+ * @param children - 需要挂载的同层子节点列表
+ * @param environment - 当前挂载上下文，包含父容器、锚点与上下文
+ * @returns 记录挂载成功性与清理能力的句柄，或无子项时返回 `undefined`
  */
 function mountArrayChild<
   HostNode,

@@ -1,9 +1,7 @@
 /**
  * 计算属性的实现与类型定义，提供只读/可写 computed 的创建与依赖管理。
- *
- * @remarks
- * - 通过 `ReactiveEffect` 追踪 getter 依赖，并以脏标记实现惰性求值。
- * - 与 `effectScope` 协同，在作用域销毁时自动清理。
+ * 通过 `ReactiveEffect` 追踪 getter 依赖并以脏标记实现惰性求值。
+ * 与 `effectScope` 协同，在作用域销毁时自动清理派生副作用。
  */
 import type { DependencyBucket } from '../contracts/index.ts'
 import { refFlag } from '../contracts/index.ts'

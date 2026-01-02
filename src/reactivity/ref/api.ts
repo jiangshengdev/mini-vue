@@ -1,8 +1,7 @@
 /**
  * Ref 相关的公共 API，实现 Ref 创建、判断与对象属性绑定。
- *
- * @remarks
- * - 提供 `ref`/`isRef`/`unref`/`toRef` 等能力，并保持与 reactive 的互通。
+ * 统一收敛 `ref`/`isRef`/`unref`/`toRef` 等入口，保持与 reactive 的互通边界。
+ * 开发态下会向 Devtools 报告实例，便于调试 setup state。
  */
 import type { ReactiveRawTarget } from '../contracts/index.ts'
 import { refFlag } from '../contracts/index.ts'

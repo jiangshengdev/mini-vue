@@ -15,7 +15,7 @@
 
 ## Action items
 
-[x] 盘点现状与对齐点：记录 mini-vue 当前写回限制（`src/jsx-runtime/transform/v-model/model.ts` 与 `src/runtime-dom/props/v-model/model.ts`），并在文档中对齐 Vue3 官方“编译期生成 assigner + 运行时触发”原则（Vue3 `compiler-core`/`compiler-dom`/`runtime-dom` 的 `vModel` 链路）。  
+[x] 盘点现状与对齐点：记录 mini-vue 当前写回限制（`src/jsx-runtime/transform/v-model/model.ts` 与 `src/runtime-dom/props/v-model/model.ts`），并在文档中对齐 Vue3 官方“编译期生成 assigner + 运行时触发”原则（Vue3 `compiler-core`/`compiler-dom`/`runtime-dom` 的 `v-model` 链路）。  
 [x] 固化产物约定：将 TSX 的 `v-model` 统一展开为 `modelValue` + `...{ 'onUpdate:modelValue': (...) => ... }`（通过对象 spread 注入 `'onUpdate:modelValue'`，避免 TSX attribute 语法限制）。  
 [x] P0：支持静态深层路径写回（低风险形态）。
 

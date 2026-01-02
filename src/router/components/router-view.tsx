@@ -5,7 +5,7 @@ import { useRouter } from '../core/injection.ts'
 import type { Router } from '../core/types.ts'
 import type { SetupComponent } from '@/jsx-foundation/index.ts'
 import type { KeepAliveProps } from '@/runtime-core/index.ts'
-import { KeepAlive, inject, provide } from '@/runtime-core/index.ts'
+import { inject, KeepAlive, provide } from '@/runtime-core/index.ts'
 import type { InjectionKey } from '@/shared/index.ts'
 
 /**

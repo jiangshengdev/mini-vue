@@ -85,10 +85,10 @@ export {
   type MiniVueCompilerPluginOptions,
   miniVueDevtoolsSetupStateNamesPlugin,
   type MiniVueDevtoolsSetupStateNamesPluginOptions,
-  type MiniVueTransformPropsDestructureDiagnosticsOptions,
-  miniVueTransformPropsDestructurePlugin,
-  type MiniVueTransformPropsDestructurePluginOptions,
   miniVueTransformModelBindingWritebackPlugin,
   miniVueTransformModelBindingWritebackPluginName,
   type MiniVueTransformModelBindingWritebackPluginOptions,
+  type MiniVueTransformPropsDestructureDiagnosticsOptions,
+  miniVueTransformPropsDestructurePlugin,
+  type MiniVueTransformPropsDestructurePluginOptions,
 } from '@/vite-plugin/index.ts'

@@ -9,7 +9,7 @@
   - 目标是 DOM 表单（`input/textarea/select`）的受控 props 展开，不涉及组件 `v-model`（组件写回见 `docs/plans/plan-tsx-compile-transform-v-model-writeback.md`）。
   - 分阶段推进：P0 先覆盖文本类，P1 扩展 checkbox/radio，P2 扩展 select 单/多选与动态 `type`。
   - 默认开启：作为 `miniVueCompilerPlugin` 的默认 feature 随编译期套件启用。
-  - 可配置关闭：通过 `miniVueCompilerPlugin({ vModelDom: false })` 显式关闭（对齐现有 feature 约定：`false` 表示禁用、`options/undefined` 表示启用）。
+  - 可配置关闭：通过 `miniVueCompilerPlugin({ transformModelBindingDom: false })` 显式关闭（对齐现有 feature 约定：`false` 表示禁用、`options/undefined` 表示启用）。
   - 复用告警文案：编译期展开的冲突检测与非表单元素告警应复用 `runtime-dom` 现有文案与覆盖规则，避免同一写法出现两套提示。
 - Out:
   - modifiers、`true-value/false-value`、`.lazy/.trim/.number` 等完整指令语义。

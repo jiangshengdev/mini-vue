@@ -1,5 +1,8 @@
 /**
  * 组件挂载与 KeepAlive 入口：创建实例、执行 `setup` 并触发首渲染。
+ * 负责把渲染闭包与响应式 effect 接入渲染管线，并产出 vnode 级句柄供上层复用。
+ * 与 KeepAlive 子系统协同，按组件类型注入/复用缓存上下文。
+ * 不处理非组件 vnode，纯粹聚焦函数组件的生命周期起点。
  */
 import {
   cacheKeepAliveSubtree,

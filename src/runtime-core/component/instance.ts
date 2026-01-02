@@ -1,5 +1,7 @@
 /**
  * 组件实例创建与 Devtools 适配：生成实例结构并补全调试字段。
+ * 负责实例初始状态、`provides` 原型链与 uid 分配，并在开发态补齐 Devtools 读取所需字段。
+ * 不负责渲染/挂载逻辑，仅提供实例与上下文的准备与桥接。
  */
 import { getCurrentAppContext } from '../app-context.ts'
 import type { MountContext } from '../environment.ts'

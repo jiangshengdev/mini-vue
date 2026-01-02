@@ -1,5 +1,7 @@
 /**
  * 组件卸载流程：移除子树、停止副作用并通知生命周期/Devtools。
+ * 负责统一的回收顺序与过期防护，避免卸载后仍触发旧的回调或保留宿主节点。
+ * 与渲染/生命周期模块解耦，仅聚焦 teardown 的资源释放与事件发射。
  */
 import type { ComponentInstance } from './context.ts'
 import { emitDevtoolsComponentRemoved } from './devtools.ts'

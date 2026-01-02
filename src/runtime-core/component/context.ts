@@ -1,5 +1,7 @@
 /**
  * 组件实例的共享定义与当前实例管理工具。
+ * 负责描述运行期组件实例的完整结构，并维护 currentInstance/currentInstanceScope 栈。
+ * 聚焦实例元数据与上下文切换，不处理挂载、渲染或 props 归一化。
  */
 import type { KeepAliveContext } from '../components/keep-alive-context.ts'
 import type { AppContext } from '../create-app.ts'

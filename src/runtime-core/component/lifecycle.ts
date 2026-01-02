@@ -1,8 +1,8 @@
 /**
  * Runtime-core 组件生命周期钩子：
- * - 在 `setup()` 中注册钩子；
- * - 在挂载/更新/卸载时由渲染流程触发；
- * - 依赖 scheduler 的 post 队列保证父子顺序与去重。
+ * - 在 `setup()` 中注册钩子，运行期由渲染流程触发。
+ * - 依赖 scheduler post 队列保证父子顺序与去重，支持 KeepAlive 激活/失活语义。
+ * - 专注 hook 调度与 currentInstance 管理，不改动渲染或 vnode 结构。
  */
 import type { SchedulerJob } from '../scheduler.ts'
 import { disposeSchedulerJob, isSchedulerFlushing, queuePostFlushCb } from '../scheduler.ts'

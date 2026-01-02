@@ -1,3 +1,9 @@
+/**
+ * watch 辅助工具，负责解析深度策略与构造统一的 getter。
+ *
+ * @remarks
+ * - 提供深度选项推导与依赖遍历能力，支撑 `createWatch` 的核心逻辑。
+ */
 import { isReactive } from '../reactive.ts'
 import { isRef } from '../ref/api.ts'
 import type { WatchSource } from './core.ts'

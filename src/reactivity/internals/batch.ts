@@ -1,3 +1,10 @@
+/**
+ * 批处理调度工具：延迟收集并统一执行响应式副作用。
+ *
+ * @remarks
+ * - 支持嵌套批处理，最外层退出时一次性 flush。
+ * - 供数组变更方法等场景复用，减少重复触发。
+ */
 import type { EffectInstance } from '../contracts/index.ts'
 import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
 

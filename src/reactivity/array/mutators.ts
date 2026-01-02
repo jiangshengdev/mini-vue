@@ -1,3 +1,9 @@
+/**
+ * 数组变更方法的无依赖收集包装，实现批处理与依赖屏蔽。
+ *
+ * @remarks
+ * - 供 reactive Proxy 的数组变更方法返回值使用，防止内部读取被误收集。
+ */
 import { runInBatch } from '../internals/batch.ts'
 import { withoutTracking } from '../internals/tracking.ts'
 

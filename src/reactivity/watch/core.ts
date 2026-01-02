@@ -1,3 +1,10 @@
+/**
+ * watch 的核心实现，负责建立依赖监听、调度回调与清理。
+ *
+ * @remarks
+ * - 支持 ref、getter 与 reactive 对象等多种追踪源。
+ * - 通过 `ReactiveEffect` 管理依赖收集，并与 `effectScope` 协同托管生命周期。
+ */
 import type { ReactiveRawTarget } from '../contracts/index.ts'
 import { recordEffectScope, recordScopeCleanup } from '../effect-scope.ts'
 import { effectStack, ReactiveEffect } from '../effect.ts'
@@ -131,6 +138,8 @@ export function createWatch<T>(
 
   /**
    * 替换当前清理逻辑，下一次触发前确保调用旧清理函数。
+   *
+   * @param fn - 新的清理函数
    */
   const onCleanup = (fn: WatchCleanup): void => {
     cleanup = fn
@@ -205,6 +214,9 @@ export function createWatch<T>(
     parentEffect.registerCleanup(stop)
   }
 
+  /**
+   * 运行并清空已登记的清理回调，避免跨轮污染。
+   */
   function runRegisteredCleanup(): void {
     if (!cleanup) {
       return
@@ -233,6 +245,10 @@ export function createWatch<T>(
 
 /**
  * 根据 flush 选项返回调度函数，默认同步，`pre`/`post` 使用微任务占位。
+ *
+ * @param flush - 调度时机配置
+ * @param scheduler - 外部自定义调度器
+ * @returns 用于调度 watch 回调的函数
  */
 function createScheduler(
   flush: WatchOptions['flush'],

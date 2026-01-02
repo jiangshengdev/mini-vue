@@ -1,3 +1,10 @@
+/**
+ * 响应式系统的核心类型定义，描述 effect 接口、代理标记与内部数据结构。
+ *
+ * @remarks
+ * - 提供 `EffectHandle`/`EffectInstance` 等契约，约束副作用的生命周期管理能力。
+ * - 定义响应式代理的内部标记与目标类型，供运行时与类型层面共同使用。
+ */
 import type { Ref } from '../ref/types.ts'
 import type { rawKey, reactiveFlag, readonlyFlag, shallowFlag } from './constants.ts'
 import type { PlainObject } from '@/shared/index.ts'

@@ -1,3 +1,9 @@
+/**
+ * 数组查询方法的包装实现，解决 raw/proxy identity 对比与依赖收集语义。
+ *
+ * @remarks
+ * - 针对 includes/indexOf/lastIndexOf 做双重查询与 iterate 依赖收敛。
+ */
 import { iterateDependencyKey, readonlyFlag, shallowFlag } from '../contracts/index.ts'
 import { track } from '../internals/operations.ts'
 import { toRaw } from '../to-raw.ts'

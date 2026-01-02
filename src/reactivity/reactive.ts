@@ -42,6 +42,12 @@ const targetType = {
 
 type TargetType = (typeof targetType)[keyof typeof targetType]
 
+/**
+ * 在开发态输出不支持代理的目标类型，便于调用方定位问题。
+ *
+ * @param api - 当前调用的 API 名称
+ * @param target - 传入的目标值
+ */
 function warnUnsupportedTarget(api: string, target: unknown): void {
   if (!__DEV__) {
     return
@@ -66,6 +72,12 @@ function warnUnsupportedTarget(api: string, target: unknown): void {
   })
 }
 
+/**
+ * 根据对象类型与可扩展性判定是否允许创建代理。
+ *
+ * @param target - 待检查的目标对象
+ * @returns 允许创建代理返回 `common`，否则返回 `invalid`
+ */
 function getTargetType(target: object): TargetType {
   if (!Object.isExtensible(target)) {
     return targetType.invalid

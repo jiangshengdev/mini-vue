@@ -1,3 +1,10 @@
+/**
+ * 响应式副作用的核心实现，负责 effect 的创建、调度与生命周期管理。
+ *
+ * @remarks
+ * - 通过 `ReactiveEffect` 封装副作用，统一依赖收集与清理流程。
+ * - 提供 `effect` API 供外部注册副作用，并与 `effectScope` 协同管理嵌套关系。
+ */
 import type {
   DependencyBucket,
   EffectHandle,
@@ -114,6 +121,11 @@ export class ReactiveEffect<T = unknown> implements EffectInstance<T> {
     this.scheduler = scheduler
   }
 
+  /**
+   * 获取当前副作用是否仍处于激活态。
+   *
+   * @returns 若仍参与依赖收集则返回 `true`
+   */
   get active(): boolean {
     return this.innerActive
   }

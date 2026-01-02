@@ -1,3 +1,10 @@
+/**
+ * 提供响应式代理的原始对象提取与类型判定工具。
+ *
+ * @remarks
+ * - `isSupportedTarget` 用于运行时校验目标是否可创建代理。
+ * - `toRaw` 递归拆出代理背后的原始对象，供序列化或比较等场景使用。
+ */
 import type { ReactiveRawTarget, ReactiveTarget } from './contracts/index.ts'
 import { rawKey, refFlag } from './contracts/index.ts'
 import { isObject, isPlainObject } from '@/shared/index.ts'

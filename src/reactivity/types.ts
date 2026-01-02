@@ -1,3 +1,9 @@
+/**
+ * 响应式系统的类型工具，负责描述 Reactive/ReadonlyReactive 等类型投射规则。
+ *
+ * @remarks
+ * - 以类型层面模拟 runtime 的解包行为，确保 Ref 解包与对象递归只读一致。
+ */
 import type { Ref } from './ref'
 import type { PlainObject } from '@/shared/index.ts'
 

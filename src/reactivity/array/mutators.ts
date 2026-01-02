@@ -83,6 +83,9 @@ function callUntracked<K extends ArrayMutatorKey>(
 
 /**
  * `push` 的无追踪版本：用于响应式代理上访问到的 `arr.push`。
+ *
+ * @param args - 透传给原生 `push` 的参数
+ * @returns 原生 `push` 的返回值
  */
 function pushUntracked(
   this: unknown[],
@@ -93,6 +96,9 @@ function pushUntracked(
 
 /**
  * `pop` 的无追踪版本：用于响应式代理上访问到的 `arr.pop`。
+ *
+ * @param args - 透传给原生 `pop` 的参数
+ * @returns 原生 `pop` 的返回值
  */
 function popUntracked(
   this: unknown[],
@@ -103,6 +109,9 @@ function popUntracked(
 
 /**
  * `shift` 的无追踪版本：用于响应式代理上访问到的 `arr.shift`。
+ *
+ * @param args - 透传给原生 `shift` 的参数
+ * @returns 原生 `shift` 的返回值
  */
 function shiftUntracked(
   this: unknown[],
@@ -113,6 +122,9 @@ function shiftUntracked(
 
 /**
  * `unshift` 的无追踪版本：用于响应式代理上访问到的 `arr.unshift`。
+ *
+ * @param args - 透传给原生 `unshift` 的参数
+ * @returns 原生 `unshift` 的返回值
  */
 function unshiftUntracked(
   this: unknown[],
@@ -123,6 +135,9 @@ function unshiftUntracked(
 
 /**
  * `splice` 的无追踪版本：用于响应式代理上访问到的 `arr.splice`。
+ *
+ * @param args - 透传给原生 `splice` 的参数
+ * @returns 原生 `splice` 的返回值
  */
 function spliceUntracked(
   this: unknown[],
@@ -133,6 +148,9 @@ function spliceUntracked(
 
 /**
  * `sort` 的无追踪版本：用于响应式代理上访问到的 `arr.sort`。
+ *
+ * @param args - 透传给原生 `sort` 的参数
+ * @returns 原生 `sort` 的返回值
  */
 function sortUntracked(
   this: unknown[],
@@ -143,6 +161,9 @@ function sortUntracked(
 
 /**
  * `reverse` 的无追踪版本：用于响应式代理上访问到的 `arr.reverse`。
+ *
+ * @param args - 透传给原生 `reverse` 的参数
+ * @returns 原生 `reverse` 的返回值
  */
 function reverseUntracked(
   this: unknown[],
@@ -153,6 +174,9 @@ function reverseUntracked(
 
 /**
  * `copyWithin` 的无追踪版本：用于响应式代理上访问到的 `arr.copyWithin`。
+ *
+ * @param args - 透传给原生 `copyWithin` 的参数
+ * @returns 原生 `copyWithin` 的返回值
  */
 function copyWithinUntracked(
   this: unknown[],
@@ -163,6 +187,9 @@ function copyWithinUntracked(
 
 /**
  * `fill` 的无追踪版本：用于响应式代理上访问到的 `arr.fill`。
+ *
+ * @param args - 透传给原生 `fill` 的参数
+ * @returns 原生 `fill` 的返回值
  */
 function fillUntracked(
   this: unknown[],

@@ -1,3 +1,10 @@
+/**
+ * 控制依赖收集开关的工具，支持嵌套禁用/恢复。
+ *
+ * @remarks
+ * - 提供 `canTrack`、`pauseTracking`、`restoreTracking`、`withoutTracking` 等 API。
+ * - 通过栈式状态保证嵌套场景下的正确性。
+ */
 import { ContextStack } from '@/shared/index.ts'
 
 /**

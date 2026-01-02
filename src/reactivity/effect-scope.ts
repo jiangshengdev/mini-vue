@@ -1,3 +1,10 @@
+/**
+ * 负责管理一组副作用生命周期的 `EffectScope` 实现，支持嵌套托管与清理。
+ *
+ * @remarks
+ * - 提供 `effectScope`、`getCurrentScope`、`onScopeDispose` 等 API 统一管理副作用集合。
+ * - 与 `effect` 协同，让副作用可以在父子 scope 之间传播与级联清理。
+ */
 import type { EffectInstance } from './contracts/index.ts'
 import { reactivityScopeDisposeOutside } from '@/messages/index.ts'
 import { ContextStack, errorContexts, errorPhases, runSilent, runThrowing } from '@/shared/index.ts'

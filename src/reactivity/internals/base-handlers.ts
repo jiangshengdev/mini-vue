@@ -1,3 +1,10 @@
+/**
+ * 响应式 Proxy 的核心拦截器实现，覆盖 get/set/delete/has/ownKeys 等操作。
+ *
+ * @remarks
+ * - 根据 mutable/readonly 与 shallow/deep 组合导出四套处理器。
+ * - 负责 Ref 解包、嵌套对象懒代理、数组方法包装等细节。
+ */
 import {
   arraySearchWrappers,
   arrayUntrackedMutators,
@@ -26,6 +33,10 @@ type Getter = ProxyHandler<ReactiveRawTarget>['get']
 
 /**
  * 处理 Ref 目标的 receiver：确保 getter/setter 的 this 指向原始 Ref 实例。
+ *
+ * @param target - 代理前的原始目标
+ * @param receiver - Proxy handler 传入的 receiver
+ * @returns 与目标类型匹配的 receiver
  */
 function normalizeReceiver(target: ReactiveRawTarget, receiver: unknown): unknown {
   if (isRef(target)) {
@@ -35,6 +46,15 @@ function normalizeReceiver(target: ReactiveRawTarget, receiver: unknown): unknow
   return receiver
 }
 
+/**
+ * 提供与 Vue Devtools 兼容的内部标记值，便于工具识别 proxy/readonly/shallow/raw。
+ *
+ * @param isReadonly - 是否为只读代理
+ * @param shallow - 是否为浅层代理
+ * @param target - 原始目标对象
+ * @param key - 读取的属性键
+ * @returns 若是 Devtools 内部标记则返回对应布尔/原始对象，否则返回 `undefined`
+ */
 function getVueDevtoolsInternalFlagValue({
   isReadonly,
   shallow,
@@ -202,6 +222,12 @@ function createGetter({
 /**
  * 响应式写入逻辑：仅在值实际变更时触发依赖更新。
  *
+ * @param target - 原始目标对象
+ * @param key - 被写入的属性键
+ * @param value - 新值
+ * @param receiver - Proxy handler 传入的 receiver
+ * @returns 赋值是否成功
+ *
  * @remarks
  * - 通过 `Object.is` 判等，避免无意义的触发。
  * - 区分新增（add）和修改（set）两种操作类型。
@@ -252,6 +278,10 @@ const mutableSet: ProxyHandler<ReactiveRawTarget>['set'] = (target, key, value, 
 /**
  * 拦截 delete 操作，确保删除成功后触发对应依赖。
  *
+ * @param target - 原始目标对象
+ * @param key - 被删除的属性键
+ * @returns 删除是否成功
+ *
  * @remarks
  * - 仅在确实移除既有字段时通知依赖，避免重复触发。
  */
@@ -269,6 +299,12 @@ const mutableDeleteProperty: ProxyHandler<ReactiveRawTarget>['deleteProperty'] =
   return wasApplied
 }
 
+/**
+ * 创建 `has` 拦截器，根据配置决定是否收集依赖。
+ *
+ * @param shouldTrack - 是否在读取时收集依赖
+ * @returns Proxy `has` 拦截器
+ */
 function createHas(shouldTrack: boolean): ProxyHandler<ReactiveRawTarget>['has'] {
   return (target, key) => {
     const result = Reflect.has(target, key)
@@ -281,6 +317,12 @@ function createHas(shouldTrack: boolean): ProxyHandler<ReactiveRawTarget>['has']
   }
 }
 
+/**
+ * 创建 `ownKeys` 拦截器，根据配置决定是否收集依赖。
+ *
+ * @param shouldTrack - 是否在读取键集合时收集依赖
+ * @returns Proxy `ownKeys` 拦截器
+ */
 function createOwnKeys(shouldTrack: boolean): ProxyHandler<ReactiveRawTarget>['ownKeys'] {
   return (target) => {
     if (shouldTrack) {
@@ -295,6 +337,11 @@ function createOwnKeys(shouldTrack: boolean): ProxyHandler<ReactiveRawTarget>['o
 
 /**
  * 只读代理的 set 拦截器：在开发态输出警告，始终返回 `true` 以避免抛出异常。
+ *
+ * @param target - 原始目标对象
+ * @param key - 被写入的属性键
+ * @param value - 新值
+ * @returns 始终返回 `true`
  */
 const readonlySet: ProxyHandler<ReactiveRawTarget>['set'] = (target, key, value) => {
   if (__DEV__) {
@@ -312,6 +359,10 @@ const readonlySet: ProxyHandler<ReactiveRawTarget>['set'] = (target, key, value)
 
 /**
  * 只读代理的 deleteProperty 拦截器：在开发态输出警告，始终返回 `true` 以避免抛出异常。
+ *
+ * @param target - 原始目标对象
+ * @param key - 要删除的属性键
+ * @returns 始终返回 `true`
  */
 const readonlyDeleteProperty: ProxyHandler<ReactiveRawTarget>['deleteProperty'] = (target, key) => {
   if (__DEV__) {

@@ -1,3 +1,10 @@
+/**
+ * 依赖桶的收集与触发实现，负责与 effect 栈协同管理副作用。
+ *
+ * @remarks
+ * - 提供低层 `trackEffect`/`triggerEffects`，供 reactive 与 ref 等内部模块使用。
+ * - 支持批处理调度与活跃状态判断，避免重复或无效触发。
+ */
 import type { DependencyBucket, EffectInstance } from '../contracts/index.ts'
 import { effectStack } from '../effect.ts'
 import { enqueueEffect } from './batch.ts'

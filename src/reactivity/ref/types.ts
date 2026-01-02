@@ -1,3 +1,6 @@
+/**
+ * Ref 相关的类型契约，描述公共接口与标记要求。
+ */
 import type { refFlag } from '../contracts/index.ts'
 
 /**

@@ -1,3 +1,10 @@
+/**
+ * Ref 与对象属性 Ref 的具体实现，封装依赖收集与触发逻辑。
+ *
+ * @remarks
+ * - `RefImpl` 处理独立值的响应式包装。
+ * - `ObjectRefImpl` 将对象属性代理为 Ref，兼容 reactive 与普通对象。
+ */
 import type { DependencyBucket, ReactiveRawTarget } from '../contracts/index.ts'
 import { refFlag } from '../contracts/index.ts'
 import { trackEffect, triggerEffects } from '../internals/index.ts'

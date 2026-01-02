@@ -1,3 +1,10 @@
+/**
+ * 依赖收集与触发的核心入口，维护 target/key 到副作用集合的映射。
+ *
+ * @remarks
+ * - 通过 `track`/`trigger` 提供给 Proxy handler 使用。
+ * - 内部以 WeakMap + Map 结构存储依赖，避免泄漏并确保精确触发。
+ */
 import type { DependencyBucket, ReactiveRawTarget, TriggerOpType } from '../contracts/index.ts'
 import { iterateDependencyKey, triggerOpTypes } from '../contracts/index.ts'
 import { effectStack } from '../effect.ts'
@@ -231,6 +238,13 @@ export function trigger(
   registry.trigger(target, key, type, newValue)
 }
 
+/**
+ * 测试辅助：判断指定字段是否已创建依赖集合。
+ *
+ * @param target - 响应式代理的原始目标对象
+ * @param key - 要检查的属性键
+ * @returns 若已存在依赖桶则返回 `true`
+ */
 export function __hasDependencyBucket(target: ReactiveRawTarget, key: PropertyKey): boolean {
   return registry.hasDependencyBucket(target, key)
 }

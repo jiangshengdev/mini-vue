@@ -1,3 +1,6 @@
+/**
+ * 基于 `ref` 的状态包装，为响应式值提供 `get/set` 访问器。
+ */
 import { ref } from './api.ts'
 import type { Ref } from './types.ts'
 

@@ -1,5 +1,5 @@
 /**
- * patch 子域的通用工具：卸载、移动、宿主节点遍历与比较。
+ * Patch 子域的通用工具：卸载、移动、宿主节点遍历与比较。
  */
 import { deactivateKeepAlive } from '../components/keep-alive.tsx'
 import type { NormalizedChildren, NormalizedVirtualNode } from '../normalize.ts'

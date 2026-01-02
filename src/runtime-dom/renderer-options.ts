@@ -16,12 +16,12 @@ import type { RendererOptions } from '@/runtime-core/index.ts'
 /**
  * DOM 宿主环境完整的渲染原语集合。
  *
-  * 实现 `RendererOptions` 接口，供 `createRenderer` 创建 DOM 渲染器。
-  * 泛型参数：
-  * - `Node`：所有 DOM 节点的基类
-  * - `Element`：DOM 元素节点
-  * - `DocumentFragment`：DOM 片段节点
-  */
+ * 实现 `RendererOptions` 接口，供 `createRenderer` 创建 DOM 渲染器。
+ * 泛型参数：
+ * - `Node`：所有 DOM 节点的基类
+ * - `Element`：DOM 元素节点
+ * - `DocumentFragment`：DOM 片段节点
+ */
 export const domRendererOptions: RendererOptions<Node, Element, DocumentFragment> = {
   /**
    * 创建指定标签的 HTMLElement。

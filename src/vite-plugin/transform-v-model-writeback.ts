@@ -1,7 +1,7 @@
 import type * as Ts from 'typescript'
 import type { Plugin } from 'vite'
 
-export type MiniVueTransformVmodelWritebackPluginOptions = Record<string, never>
+export type MiniVueTransformModelBindingWritebackPluginOptions = Record<string, never>
 
 interface Replacement {
   start: number
@@ -160,8 +160,8 @@ function resolveModelBindingPaths(
   return undefined
 }
 
-export function miniVueTransformVmodelWritebackPlugin(
-  _options: MiniVueTransformVmodelWritebackPluginOptions = {},
+export function miniVueTransformModelBindingWritebackPlugin(
+  _options: MiniVueTransformModelBindingWritebackPluginOptions = {},
 ): Plugin {
   return {
     name: pluginName,
@@ -265,4 +265,4 @@ export function miniVueTransformVmodelWritebackPlugin(
   }
 }
 
-export { pluginName as miniVueTransformVmodelWritebackPluginName }
+export { pluginName as miniVueTransformModelBindingWritebackPluginName }

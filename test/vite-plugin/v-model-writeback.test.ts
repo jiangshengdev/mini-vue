@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { readVitePluginFixture } from './_fixtures.ts'
 import { miniVueCompilerPlugin } from '@/index.ts'
 
-async function transformWithVmodelPlugin(parameters: { code: string; id: string }) {
+async function transformWithModelBindingWritebackPlugin(parameters: { code: string; id: string }) {
   const plugins = miniVueCompilerPlugin({
     importSource: '@/index.ts',
     devtoolsSetupStateNames: false,
@@ -51,7 +51,7 @@ describe('vite-plugin v-model writeback', () => {
   it('组件 v-model 展开为 modelValue 与写回闭包', async () => {
     const code = readVitePluginFixture('v-model-writeback/basic.tsx')
 
-    const { result } = await transformWithVmodelPlugin({
+    const { result } = await transformWithModelBindingWritebackPlugin({
       code,
       id: '/src/app.tsx',
     })
@@ -64,7 +64,7 @@ describe('vite-plugin v-model writeback', () => {
   it('支持静态深层路径与字符串下标', async () => {
     const code = readVitePluginFixture('v-model-writeback/deep-path.tsx')
 
-    const { result } = await transformWithVmodelPlugin({
+    const { result } = await transformWithModelBindingWritebackPlugin({
       code,
       id: '/src/app.tsx',
     })
@@ -78,7 +78,7 @@ describe('vite-plugin v-model writeback', () => {
   it('跳过内置标签的 v-model', async () => {
     const code = readVitePluginFixture('v-model-writeback/builtin-skip.tsx')
 
-    const { result, warn } = await transformWithVmodelPlugin({
+    const { result, warn } = await transformWithModelBindingWritebackPlugin({
       code,
       id: '/src/app.tsx',
     })
@@ -90,7 +90,7 @@ describe('vite-plugin v-model writeback', () => {
   it('动态 key 输出 warning 并跳过改写', async () => {
     const code = readVitePluginFixture('v-model-writeback/dynamic-key.tsx')
 
-    const { result, warn } = await transformWithVmodelPlugin({
+    const { result, warn } = await transformWithModelBindingWritebackPlugin({
       code,
       id: '/src/app.tsx',
     })

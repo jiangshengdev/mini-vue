@@ -3,14 +3,14 @@ import type { MiniVueDevtoolsSetupStateNamesPluginOptions } from './devtools-set
 import { miniVueDevtoolsSetupStateNamesPlugin } from './devtools-setup-state-names.ts'
 import type { MiniVueTransformPropsDestructurePluginOptions } from './transform-props-destructure.ts'
 import { miniVueTransformPropsDestructurePlugin } from './transform-props-destructure.ts'
-import type { MiniVueTransformVmodelWritebackPluginOptions } from './transform-v-model-writeback.ts'
-import { miniVueTransformVmodelWritebackPlugin } from './transform-v-model-writeback.ts'
+import type { MiniVueTransformModelBindingWritebackPluginOptions } from './transform-v-model-writeback.ts'
+import { miniVueTransformModelBindingWritebackPlugin } from './transform-v-model-writeback.ts'
 
 export interface MiniVueCompilerPluginOptions {
   importSource?: string
   devtoolsSetupStateNames?: false | MiniVueDevtoolsSetupStateNamesPluginOptions
   transformPropsDestructure?: false | MiniVueTransformPropsDestructurePluginOptions
-  transformVmodelWriteback?: false | MiniVueTransformVmodelWritebackPluginOptions
+  transformModelBindingWriteback?: false | MiniVueTransformModelBindingWritebackPluginOptions
 }
 
 export function miniVueCompilerPlugin(options: MiniVueCompilerPluginOptions = {}): PluginOption[] {
@@ -19,15 +19,15 @@ export function miniVueCompilerPlugin(options: MiniVueCompilerPluginOptions = {}
     importSource,
     devtoolsSetupStateNames,
     transformPropsDestructure,
-    transformVmodelWriteback,
+    transformModelBindingWriteback,
   } = options
 
   if (transformPropsDestructure !== false) {
     plugins.push(miniVueTransformPropsDestructurePlugin(transformPropsDestructure ?? {}))
   }
 
-  if (transformVmodelWriteback !== false) {
-    plugins.push(miniVueTransformVmodelWritebackPlugin(transformVmodelWriteback ?? {}))
+  if (transformModelBindingWriteback !== false) {
+    plugins.push(miniVueTransformModelBindingWritebackPlugin(transformModelBindingWriteback ?? {}))
   }
 
   if (devtoolsSetupStateNames !== false) {
@@ -55,7 +55,7 @@ export {
   type MiniVueTransformPropsDestructurePluginOptions,
 } from './transform-props-destructure.ts'
 export {
-  miniVueTransformVmodelWritebackPlugin,
-  miniVueTransformVmodelWritebackPluginName,
-  type MiniVueTransformVmodelWritebackPluginOptions,
+  miniVueTransformModelBindingWritebackPlugin,
+  miniVueTransformModelBindingWritebackPluginName,
+  type MiniVueTransformModelBindingWritebackPluginOptions,
 } from './transform-v-model-writeback.ts'

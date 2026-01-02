@@ -74,6 +74,11 @@ export function transformModelBindingProps<T extends ElementType>(
 
   /* 收集冲突属性，用于开发模式警告。 */
   const conflicts: string[] = []
+  /**
+   * 记录即将被 `v-model` 覆盖的字段名，便于后续告警输出。
+   *
+   * @param key - 待检测的属性名
+   */
   const trackConflict = (key: string) => {
     if (Object.hasOwn(nextProps, key)) {
       conflicts.push(key)
@@ -85,6 +90,7 @@ export function transformModelBindingProps<T extends ElementType>(
 
   trackConflict('onUpdate:modelValue')
 
+  /* 写回组件的 `modelValue`，保持与 Vue 组件协议一致。 */
   nextProps['onUpdate:modelValue'] = (value: unknown) => {
     setModelValue(modelBinding, value)
   }

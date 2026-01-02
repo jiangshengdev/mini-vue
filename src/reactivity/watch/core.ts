@@ -263,6 +263,7 @@ function createScheduler(
   if (flush === 'pre' || flush === 'post') {
     let pending = false
 
+    /* 微任务模式下折叠同轮多次触发，避免重复入队。 */
     return (job) => {
       if (pending) {
         return

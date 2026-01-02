@@ -15,6 +15,9 @@ export type DebugLogger = (method: string, message: string, payload?: unknown) =
 
 /**
  * 创建具名调试记录器，在创建时判定是否启用日志，便于生产环境 tree-shake。
+ *
+ * @param namespace - 日志命名空间前缀，便于过滤定位
+ * @returns 依据环境决定是否实际输出的调试记录器
  */
 export function createDebugLogger(namespace: string): DebugLogger {
   /* 内部调试可在构建期直接裁剪。 */

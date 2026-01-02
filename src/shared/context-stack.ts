@@ -29,6 +29,8 @@ export class ContextStack<T> {
 
   /**
    * 将实例压入栈顶并标记为当前活跃对象。
+   *
+   * @param value - 待压入栈顶的上下文实例
    */
   push(value: T): void {
     this.stack.push(value)
@@ -37,6 +39,8 @@ export class ContextStack<T> {
 
   /**
    * 弹出最近入栈的实例，同时恢复上层上下文。
+   *
+   * @returns 被弹出的上下文实例；若栈为空则返回 `undefined`
    */
   pop(): T | undefined {
     const popped = this.stack.pop()

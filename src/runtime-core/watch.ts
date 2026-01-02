@@ -17,6 +17,11 @@ import { createWatch } from '@/reactivity/index.ts'
  * @remarks
  * - 默认 `flush` 为 `pre`，与组件更新保持同一批次；`post` 走后置队列，`sync` 仍同步。
  * - 如未提供调度器（纯 reactivity 场景），`pre/post` 会在 `createWatch` 内退化为微任务占位。
+ *
+ * @param source - 依赖源或 getter
+ * @param callback - 变更回调
+ * @param options - 额外 watch 配置
+ * @returns 用于停止 watch 的句柄
  */
 export function watch<T>(
   source: WatchSource<T>,

@@ -13,6 +13,8 @@ const appContextStack = new ContextStack<AppContext>()
  * @remarks
  * - 该上下文主要用于把应用级 provides 传入根组件创建链路。
  * - 允许嵌套（例如在一个渲染过程中触发另一次 `render`）。
+ *
+ * @param context - 将要设为当前的应用上下文
  */
 export function setCurrentAppContext(context: AppContext): void {
   appContextStack.push(context)
@@ -30,6 +32,8 @@ export function unsetCurrentAppContext(): void {
  *
  * @remarks
  * - 仅在 `createApp.mount()` 触发的渲染窗口期内保证存在。
+ *
+ * @returns 当前应用上下文或 `undefined`
  */
 export function getCurrentAppContext(): AppContext | undefined {
   return appContextStack.current

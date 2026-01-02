@@ -50,26 +50,60 @@ const recursionLimit = 100
 
 type RecursionCountMap = Map<SchedulerJob, number>
 
+/**
+ * 读取调度任务的排序 id，缺省视为 Infinity。
+ *
+ * @param job - 调度任务
+ * @returns 可用于排序的稳定 id
+ */
 function getJobId(job: SchedulerJob): number {
   return job.id ?? Infinity
 }
 
+/**
+ * 将任务标记为已入队，便于去重。
+ *
+ * @param job - 待标记任务
+ */
 function markJobQueued(job: SchedulerJob): void {
   job.queued = true
 }
 
+/**
+ * 清除任务的入队标记，允许后续再次入队。
+ *
+ * @param job - 待标记任务
+ */
 function clearJobQueued(job: SchedulerJob): void {
   job.queued = false
 }
 
+/**
+ * 判断任务是否已在当前队列中。
+ *
+ * @param job - 待检查任务
+ * @returns `true` 表示已入队
+ */
 function isJobQueued(job: SchedulerJob): boolean {
   return job.queued === true
 }
 
+/**
+ * 判断任务是否已被标记为过期。
+ *
+ * @param job - 待检查任务
+ * @returns `true` 表示已过期
+ */
 function isJobDisposed(job: SchedulerJob): boolean {
   return job.disposed === true
 }
 
+/**
+ * 在有序队列中查找新任务的插入位置，保持稳定排序。
+ *
+ * @param id - 新任务的排序 id
+ * @returns 应插入的索引位置
+ */
 function findInsertionIndex(id: number): number {
   let start = flushIndex + 1
   let end = jobQueue.length
@@ -88,6 +122,11 @@ function findInsertionIndex(id: number): number {
   return start
 }
 
+/**
+ * 将任务插入主队列，按 id 递增保持稳定顺序。
+ *
+ * @param job - 待入队的调度任务
+ */
 function queueJobToMainQueue(job: SchedulerJob): void {
   const jobId = getJobId(job)
   const last = jobQueue.at(-1)
@@ -101,6 +140,13 @@ function queueJobToMainQueue(job: SchedulerJob): void {
   jobQueue.splice(findInsertionIndex(jobId), 0, job)
 }
 
+/**
+ * 检查单个任务在一次 flush 中的递归执行次数是否超限。
+ *
+ * @param seen - 当前 flush 的递归计数表
+ * @param job - 待检查任务
+ * @returns 超限时返回 `true`，调用方应跳过执行
+ */
 function checkRecursiveUpdates(seen: RecursionCountMap, job: SchedulerJob): boolean {
   const count = seen.get(job) ?? 0
 
@@ -137,6 +183,8 @@ export function isSchedulerFlushing(): boolean {
 
 /**
  * 将任务标记为过期（常用于组件卸载后跳过已入队的 post hooks）。
+ *
+ * @param job - 待过期的调度任务
  */
 export function disposeSchedulerJob(job: SchedulerJob | undefined): void {
   if (!job) {
@@ -152,6 +200,8 @@ export function disposeSchedulerJob(job: SchedulerJob | undefined): void {
  * @remarks
  * - 同一任务在一次 flush 中只会运行一次，后续触发仅更新最新的 runner 引用。
  * - flush 过程中触发的新任务会被加入当前队列，确保同一轮内完成。
+ *
+ * @param job - 待入队的调度任务
  */
 export function queueSchedulerJob(job: SchedulerJob): void {
   if (isJobDisposed(job) || isJobQueued(job)) {
@@ -166,6 +216,8 @@ export function queueSchedulerJob(job: SchedulerJob): void {
 
 /**
  * 将回调加入渲染前队列，按插入顺序执行并去重。
+ *
+ * @param job - 待入队的前置回调
  */
 export function queuePreFlushCb(job: SchedulerJob): void {
   if (isJobDisposed(job) || isJobQueued(job)) {
@@ -180,6 +232,8 @@ export function queuePreFlushCb(job: SchedulerJob): void {
 
 /**
  * 将回调加入渲染后队列，按插入顺序执行并去重。
+ *
+ * @param job - 待入队的后置回调
  */
 export function queuePostFlushCb(job: SchedulerJob): void {
   if (isJobDisposed(job) || isJobQueued(job)) {
@@ -198,6 +252,8 @@ export function queuePostFlushCb(job: SchedulerJob): void {
  * @remarks
  * - 若传入回调，等调度 flush 结束后调用并返回新的 Promise。
  * - 未传入回调时直接返回可 await 的 Promise，便于 `await nextTick()`。
+ *
+ * @param callback - 可选的后置回调，等待本轮 flush 完成后执行
  */
 export async function nextTick<T>(callback?: () => T | Promise<T>): Promise<T | void> {
   const flushPromise = currentFlushPromise ?? resolvedPromise
@@ -257,6 +313,8 @@ function flushJobs(): void {
 
 /**
  * Flush 渲染前队列：保持插入顺序执行，并允许回调在执行时继续入队本轮 pre 队列。
+ *
+ * @param seen - 递归计数表，用于防护递归更新
  */
 function flushPreFlushCbs(seen: RecursionCountMap): void {
   if (preFlushQueue.length === 0) {
@@ -288,6 +346,8 @@ function flushPreFlushCbs(seen: RecursionCountMap): void {
 
 /**
  * Flush 主队列：按 id 顺序执行已入队的更新任务，并允许 flush 期间插入新任务。
+ *
+ * @param seen - 递归计数表，用于防护递归更新
  */
 function flushMainQueue(seen: RecursionCountMap): void {
   if (jobQueue.length === 0) {
@@ -319,6 +379,8 @@ function flushMainQueue(seen: RecursionCountMap): void {
  * @remarks
  * - 常用于生命周期 hook、watch flush: post 等需要在“渲染后”触发的回调。
  * - 复制 + 清空策略允许回调在执行时再次入队下一轮任务。
+ *
+ * @param seen - 递归计数表，用于防护递归更新
  */
 function flushPostFlushCbs(seen: RecursionCountMap): void {
   if (postFlushQueue.length === 0) {

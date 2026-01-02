@@ -111,6 +111,9 @@ interface AppState<HostElement extends WeakKey> {
  * @remarks
  * - 已挂载时直接阻止重复操作，避免宿主状态错乱。
  * - 渲染成功后再缓存容器和状态，避免失败时留下残留。
+ *
+ * @param state - 当前应用内部状态
+ * @param target - 宿主容器
  */
 function mountApp<HostElement extends WeakKey>(
   state: AppState<HostElement>,
@@ -148,6 +151,8 @@ function mountApp<HostElement extends WeakKey>(
  * @remarks
  * - 没有容器代表尚未挂载，直接跳过。
  * - 调用宿主清理逻辑并重置状态，便于后续重新挂载。
+ *
+ * @param state - 当前应用内部状态
  */
 function unmountApp<HostElement extends WeakKey>(state: AppState<HostElement>): void {
   /* 没有容器代表尚未挂载，直接跳过。 */
@@ -163,6 +168,9 @@ function unmountApp<HostElement extends WeakKey>(state: AppState<HostElement>): 
 
 /**
  * 通过最新状态生成根级 `virtualNode`，确保 `props` 是独立副本。
+ *
+ * @param state - 当前应用内部状态
+ * @returns 带应用上下文的根节点
  */
 function createRootVirtualNode<HostElement extends WeakKey>(state: AppState<HostElement>) {
   const rawProps: ElementProps<SetupComponent> | undefined = state.initialRootProps
@@ -183,6 +191,11 @@ function createRootVirtualNode<HostElement extends WeakKey>(state: AppState<Host
  * - 应用实例是 mini-vue 的顶层入口，负责管理根组件的挂载与卸载。
  * - 通过 `app.provide()` 可在应用级提供依赖，供整个组件树通过 `inject()` 读取。
  * - 通过 `app.use()` 可安装插件，扩展应用能力。
+ *
+ * @param config - 宿主平台注入的渲染配置
+ * @param rootComponent - 根组件定义
+ * @param initialRootProps - 传入根组件的初始 props
+ * @returns 应用实例
  */
 export function createAppInstance<HostElement extends WeakKey>(
   config: AppHostDriver<HostElement>,
@@ -205,6 +218,8 @@ export function createAppInstance<HostElement extends WeakKey>(
 
   /**
    * 记录插件提供的卸载回调，保留执行顺序。
+   *
+   * @param uninstall - 插件返回的卸载函数
    */
   const registerUninstall = (uninstall: unknown): void => {
     if (typeof uninstall === 'function') {
@@ -234,6 +249,10 @@ export function createAppInstance<HostElement extends WeakKey>(
 
   /**
    * 校验并封装插件的 `uninstall` 方法，保持错误通道一致。
+   *
+   * @param plugin - 待解析的插件对象
+   * @param appInstance - 当前应用实例
+   * @returns 规范化的卸载函数
    */
   const resolvePluginUninstall = (
     plugin: AppPlugin,
@@ -253,6 +272,8 @@ export function createAppInstance<HostElement extends WeakKey>(
   /* 用户态 `mount` 会透传容器给核心挂载逻辑。 */
   /**
    * 对外暴露的 `mount` 实例方法。
+   *
+   * @param target - 宿主容器
    */
   function mount(target: HostElement): void {
     mountApp(state, target)
@@ -277,6 +298,8 @@ export function createAppInstance<HostElement extends WeakKey>(
      * @remarks
      * - 仅支持对象插件（必须提供 `install(app)` 方法）。
      * - 通过共享错误通道上报，保证行为与其他用户回调入口一致。
+     *
+     * @param plugin - 待安装的插件对象
      */
     use(plugin: AppPlugin) {
       runThrowing(
@@ -319,6 +342,9 @@ export function createAppInstance<HostElement extends WeakKey>(
      *
      * @remarks
      * - 该值会在根组件实例创建时注入到组件树的 `provides` 原型链上。
+     *
+     * @param key - 注入键
+     * @param value - 要写入的依赖值
      */
     provide(key: InjectionToken, value: unknown) {
       state.appContext.provides[key] = value

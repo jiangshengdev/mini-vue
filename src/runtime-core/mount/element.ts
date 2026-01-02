@@ -1,5 +1,8 @@
 /**
  * 元素挂载逻辑：创建宿主节点并处理 `props` 与 `children`。
+ *
+ * - 负责节点生成、属性写入、子树挂载与 `ref` 绑定的完整流程。
+ * - 锚点插入与清理顺序与 `MountedHandle` 对齐，便于与组件/Fragment 统一处理。
  */
 import type { ChildEnvironment } from '../environment.ts'
 import type { RendererOptions } from '../index.ts'
@@ -20,6 +23,11 @@ import { errorContexts, errorPhases, runSilent } from '@/shared/index.ts'
  * 3. 挂载子节点（`mountElementChildren`）。
  * 4. 将元素插入到父容器。
  * 5. 绑定 `ref`（若存在）。
+ *
+ * @param options - 宿主渲染器提供的创建、插入与移除操作
+ * @param virtualNode - 代表元素的 `virtualNode` 描述
+ * @param environment - 当前挂载上下文，包含父容器、锚点与上下文
+ * @returns 记录宿主节点列表与卸载能力的句柄
  */
 export function mountElement<
   HostNode,
@@ -91,6 +99,9 @@ type ElementRefBinding<HostElement> =
  * - 函数类型直接返回。
  * - `Ref` 对象通过 `isRef` 判断后返回。
  * - 其他类型返回 `undefined`，表示无有效 `ref` 绑定。
+ *
+ * @param candidate - 组件传入的 `ref` 字段值
+ * @returns 规范化后的回写绑定，无法识别时返回 `undefined`
  */
 export function resolveElementRefBinding<HostElement>(
   candidate: unknown,
@@ -108,6 +119,9 @@ export function resolveElementRefBinding<HostElement>(
 
 /**
  * 在挂载或卸载阶段写回最新宿主元素，兼容函数 `ref` 与 `Ref`。
+ *
+ * @param target - 已规整的 `ref` 绑定容器或回调
+ * @param value - 当前需要写入的宿主元素或 `undefined`
  */
 export function assignElementRef<HostElement>(
   target: ElementRefBinding<HostElement> | undefined,

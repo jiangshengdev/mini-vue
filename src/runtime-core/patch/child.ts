@@ -27,6 +27,12 @@ import { Fragment } from '@/jsx-foundation/index.ts'
  * 2. 仅存在新节点：走 `mount` 路径。
  * 3. 仅存在旧节点：直接卸载。
  * 4. 同节点（`type`/`key` 相同）：走 `patch` 复用；否则卸载重建。
+ *
+ * @param options - 宿主渲染原语集合
+ * @param previous - 旧节点
+ * @param next - 新节点
+ * @param environment - 容器、锚点与上下文
+ * @returns 单节点 `patch` 结果
  */
 export function patchChild<
   HostNode,
@@ -120,6 +126,12 @@ export function patchChild<
  * - `Fragment`：通过 `patchChildren` 更新子节点列表。
  * - 组件：复用实例，触发 `effect` 或直接 `patch` 子树。
  * - 元素：复用旧 `el`，更新 `props` 与 `children`。
+ *
+ * @param options - 宿主渲染原语集合
+ * @param previous - 旧节点
+ * @param next - 新节点
+ * @param environment - 容器、锚点与上下文
+ * @returns 单节点 `patch` 结果
  */
 function patchExisting<
   HostNode,
@@ -221,6 +233,12 @@ function patchExisting<
  * 3. 更新 `props`。
  * 4. `patch` `children`。
  * 5. 绑定新 `ref`。
+ *
+ * @param options - 宿主渲染原语集合
+ * @param previous - 旧元素 vnode
+ * @param next - 新元素 vnode
+ * @param environment - 当前元素的锚点与上下文
+ * @returns 元素 `patch` 结果
  */
 function patchElement<
   HostNode,
@@ -279,6 +297,12 @@ function patchElement<
  * - 组件更新依赖 `runtime.component`：正常情况下 `mount` 会写入实例。
  * - 若缺失则无法复用，只能退化为重新 `mount` 新 `virtualNode`。
  * - 有调度器时只提交「运行任务」，由调度器决定合并与执行时机。
+ *
+ * @param options - 宿主渲染原语集合
+ * @param previous - 旧组件 vnode
+ * @param next - 新组件 vnode
+ * @param environment - 容器、锚点与上下文
+ * @returns 组件 `patch` 结果
  */
 function patchComponent<
   HostNode,
@@ -351,6 +375,9 @@ function patchComponent<
  * @remarks
  * - 先删除旧 `props` 中不存在于新 `props` 的属性。
  * - 再用 `Object.assign` 合并新属性，保持响应式追踪。
+ *
+ * @param target - 组件实例持有的 `props` 引用
+ * @param nextProps - 解析后的新 `props`
  */
 function syncComponentProps(
   target: ElementProps<SetupComponent>,

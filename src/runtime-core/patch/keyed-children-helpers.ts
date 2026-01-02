@@ -11,6 +11,10 @@ import { findNextAnchor, isSameVirtualNode } from './utils.ts'
  *
  * @remarks
  * 区间表示「需要真正对比」的中间段，头尾同步会逐步收缩这个区间。
+ *
+ * @param previousLength - 旧列表长度
+ * @param nextLength - 新列表长度
+ * @returns 初始化的对比区间
  */
 export function createIndexRange(previousLength: number, nextLength: number): IndexRange {
   return {
@@ -27,6 +31,9 @@ export function createIndexRange(previousLength: number, nextLength: number): In
  * @remarks
  * - 头部同步可以快速消耗列表前缀的相同节点，减少后续 `keyed` 匹配的工作量。
  * - 同步完成后 `range.oldStart`/`range.newStart` 指向第一个不同的节点。
+ *
+ * @param context - `keyed diff` 上下文
+ * @param range - 仍需处理的索引区间
  */
 export function syncFromStart<
   HostNode,
@@ -61,6 +68,9 @@ export function syncFromStart<
  * @remarks
  * - 尾部同步可以快速消耗列表后缀的相同节点，减少后续 `keyed` 匹配的工作量。
  * - 同步完成后 `range.oldEnd`/`range.newEnd` 指向最后一个不同的节点。
+ *
+ * @param context - `keyed diff` 上下文
+ * @param range - 仍需处理的索引区间
  */
 export function syncFromEnd<
   HostNode,
@@ -92,6 +102,9 @@ export function syncFromEnd<
  * @remarks
  * - 旧侧已耗尽时，剩余新节点应整体插入到「尾部已对齐区间」的前面。
  * - 使用同一个 `insertAnchor` 可避免 `mountChild` 对插入位置的不同宿主实现差异。
+ *
+ * @param context - `keyed diff` 上下文
+ * @param range - 仍需处理的索引区间
  */
 export function insertRemainingChildren<
   HostNode,
@@ -121,6 +134,9 @@ export function insertRemainingChildren<
 
 /**
  * 新列表已耗尽：卸载旧列表剩余段。
+ *
+ * @param context - `keyed diff` 上下文
+ * @param range - 仍需处理的索引区间
  */
 export function removeRemainingChildren<
   HostNode,
@@ -139,6 +155,10 @@ export function removeRemainingChildren<
  * - `keyToNewIndexMap`：`key` -> `newIndex` 的映射，便于旧节点通过 `key` 快速命中。
  * - `newIndexToOldIndexMap`：`newIndex` -> `oldIndex` 的映射，`-1` 表示需要 `mount`。
  * - `middleSegmentCount`：中间段待处理的新节点数量。
+ *
+ * @param context - `keyed diff` 上下文
+ * @param range - 仍需处理的索引区间
+ * @returns 包含双向映射的索引结构
  */
 export function buildIndexMaps<
   HostNode,
@@ -169,6 +189,11 @@ export function buildIndexMaps<
  *
  * @remarks
  * 这是 `keyed diff` 的兜底分支：当旧节点没有 `key` 时，允许通过类型匹配复用新列表中的无 `key` 节点。
+ *
+ * @param target - 旧列表中无 `key` 的节点
+ * @param list - 新子节点列表
+ * @param context - 搜索范围与映射上下文
+ * @returns 命中的新索引或 `undefined`
  */
 export function findUnkeyedMatch(
   target: NormalizedVirtualNode,

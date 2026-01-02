@@ -55,6 +55,9 @@ export interface PatchChildrenEnvironment<
  * @remarks
  * - 插入位置完全由调用方显式传入的 `environment.anchor` 决定。
  * - 子节点的顺序保证由 `patchChildren`（keyed/unkeyed diff）计算锚点并按需传入。
+ *
+ * @param environment - 父级传入的容器、锚点与上下文
+ * @returns 子节点可用的环境对象
  */
 export function createChildEnvironment<
   HostNode,

@@ -1,3 +1,6 @@
+/**
+ * `jsx-foundation` 类型定义：描述 `virtualNode`、组件与 `children` 的公共结构。
+ */
 import type { Comment, Text, virtualNodeFlag } from './constants.ts'
 import type { PropsShape } from '@/shared/index.ts'
 
@@ -21,27 +24,17 @@ export type VirtualNodeChild = VirtualNode | string | number
 export type ComponentChildren = VirtualNodeChild | VirtualNodeChild[] | boolean | undefined
 
 /**
- * 组件渲染函数返回的结果类型，与 `ComponentChildren` 等价。
- *
- * @remarks
- * - 组件的 `render` 函数可返回单个节点、节点数组或空值。
- * - 返回 `undefined`/`null`/`boolean` 时渲染层会生成 `Comment` 占位（不产生可见 DOM 输出）。
+ * 组件渲染函数返回值类型（与 `ComponentChildren` 等价）。
  */
 export type RenderOutput = ComponentChildren
 
 /**
- * 组件渲染阶段需要执行的函数签名，无参数并返回 `RenderOutput`。
- *
- * @remarks
- * - `SetupComponent` 的 `setup` 阶段返回该函数，供响应式系统在依赖变更时重新调用。
+ * 组件渲染闭包的函数签名（无参数，返回 `RenderOutput`）。
  */
 export type RenderFunction = () => RenderOutput
 
 /**
- * 组件 `props` 的基础约束：放宽为对象即可，避免要求字符串索引签名。
- *
- * @remarks
- * - 复用 `@/shared` 中的 `PropsShape`，保持类型一致性。
+ * 组件 `props` 的基础约束：统一为对象形状。
  */
 type ComponentPropsBase = PropsShape
 
@@ -65,13 +58,7 @@ export interface FragmentProps extends ComponentPropsBase {
 type PropsWithChildren<P> = P & { children?: ComponentChildren }
 
 /**
- * 用于约束组件类型的函数签名，供 `ElementType` 统一推导。
- *
- * @remarks
- * - 该类型用于承载「任意 `props` 的函数组件」这一上界（类似 `∃P. SetupComponent<P>`）。
- * - 在 `strictFunctionTypes` 下，函数参数默认是逆变检查；直接用 `(props: PropsWithChildren<PropsShape>) => ...`
- *   会导致 `SetupComponent<{ msg: string }>` 等窄 `props` 组件无法赋值到该上界。
- * - 使用 bivariance hack，让 `SetupComponent<P>` 可赋值到该上界，同时避免 `(props: never)` 造成的坍缩。
+ * 任意函数组件的上界类型，用于 `ElementType` 推导（通过 bivariance hack 兼容 `strictFunctionTypes`）。
  */
 type ComponentLike = {
   bivarianceHack(props: unknown): RenderFunction
@@ -97,14 +84,7 @@ export type SetupComponent<P = ComponentPropsBase> = (props: PropsWithChildren<P
 export type FragmentType = (props: FragmentProps) => ComponentChildren
 
 /**
- * JSX 中元素的类型：原生标签名、组件函数、`Fragment` 或 `Text` 标识。
- *
- * @remarks
- * - `string`：原生 HTML 标签（如 `'div'`、`'span'`）
- * - `ComponentLike`：用户定义的函数组件
- * - `FragmentType`：内置 `Fragment` 组件
- * - `typeof Text`：文本节点类型标识
- * - `typeof Comment`：注释节点类型标识（常用于空渲染占位）
+ * JSX 中元素的类型：原生标签、组件函数、`Fragment`、`Text` 或 `Comment` 标识。
  *
  * @beta
  */
@@ -143,19 +123,14 @@ export type ElementProps<T extends ElementType = ElementType> = T extends Fragme
     : InferComponentProps<T>
 
 /**
- * `mini-vue` 内部使用的虚拟节点结构，承载类型、属性与子节点信息。
- *
- * @remarks
- * - `virtualNode` 是 JSX 转换后的运行时表示，由 `createVirtualNode` 创建。
- * - 渲染层（`runtime-core`）根据 `type` 字段分发到不同的挂载/更新逻辑。
- * - 所有字段均为只读，确保节点创建后不可变。
+ * `mini-vue` 内部的虚拟节点结构，承载 `type/props/children` 等渲染所需信息。
  *
  * @beta
  */
 export interface VirtualNode<T extends ElementType = ElementType> {
   /** 通过唯一 symbol 标识当前对象为 `mini-vue` 生成的 `virtualNode`。 */
   readonly [virtualNodeFlag]: true
-  /** 当前虚拟节点的类型，可能是原生标签、组件函数、`Fragment` 或 `Text`。 */
+  /** 当前虚拟节点的类型，可能是原生标签、组件函数、`Fragment`、`Text` 或 `Comment`。 */
   readonly type: T
   /** 节点携带的 `props` 对象，按元素类型推导；若无有效属性则为 `undefined`。 */
   readonly props?: ElementProps<T>

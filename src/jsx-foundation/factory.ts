@@ -1,3 +1,6 @@
+/**
+ * `virtualNode` 工厂：提供 `Fragment` 与创建元素/文本/注释节点的能力。
+ */
 import { normalizeChildren } from './children.ts'
 import { Comment, Text, virtualNodeFlag } from './constants.ts'
 import type {
@@ -11,14 +14,9 @@ import type {
 import type { PropsShape, WithOptionalProp } from '@/shared/index.ts'
 
 /**
- * JSX 片段组件，不创建额外 DOM 节点，直接返回 `children`。
+ * JSX 片段：不创建额外节点，直接透传 `children`。
  *
- * @remarks
- * - `Fragment` 用于包裹多个子节点而不引入额外的 DOM 层级。
- * - JSX 中的 `<></>` 语法会被转换为 `Fragment` 调用。
- * - 返回值直接透传 `children`，由上层渲染逻辑处理。
- *
- * @param props - 包含 `children` 字段的参数对象
+ * @param props - `Fragment` 的参数对象
  * @returns 原样返回 `props.children`
  *
  * @public
@@ -41,26 +39,21 @@ interface VirtualNodeInitOptions<T extends ElementType> {
 }
 
 /**
- * 根据传入的类型与 `props` 创建标准化的 `virtualNode` 节点。
+ * 创建标准化的 `virtualNode`：拆分 `props.children` 并归一化为数组。
  *
- * @remarks
- * - 通过解构复制 `props`，将外部对象与内部状态隔离，避免后续 `render` 阶段被意外篡改。
- * - `children` 会被单独提取并归一化为数组，其余字段按需保留。
- * - 若 `children` 之外无其他有效字段，`props` 将为 `undefined`，避免生成空对象。
- *
- * @param options - 包含 `type`、`rawProps`、`key` 的初始化选项
- * @returns 标准化的 `VirtualNode` 对象
+ * @param options - 节点类型、原始 `props` 与可选 `key`
+ * @returns 标准化后的 `virtualNode`
  */
 export function createVirtualNode<T extends ElementType>(
   options: VirtualNodeInitOptions<T>,
 ): VirtualNode<T> {
   const { type, rawProps, key } = options
-  /* 通过解构复制 `props`，避免外部对象在后续流程中被意外修改 */
+  /* 通过解构复制 `props`，避免外部对象在后续流程中被意外修改。 */
   let props: PropsShape | undefined
   let children: VirtualNodeChild[] = []
 
   if (rawProps) {
-    /* `hasOwn` 能区分「未传入 `children`」与「显式传入 `undefined`/`null`」的差异 */
+    /* `hasOwn` 用于区分“未传入 children”与“显式传入空值”。 */
     const hasChildren = Object.hasOwn(rawProps, 'children')
     const { children: rawChildren, ...restProps } = rawProps as WithOptionalProp<
       PropsShape,
@@ -69,18 +62,18 @@ export function createVirtualNode<T extends ElementType>(
     >
 
     if (hasChildren) {
-      /* 将 `props.children` 归一化为内部统一使用的 `children` 数组 */
+      /* 将 `props.children` 归一化为内部统一使用的 `children` 数组。 */
       children = normalizeChildren(rawChildren)
     }
 
-    /* 仅在 `children` 之外仍有有效字段时才保留 `props`，避免生成空对象 */
+    /* 仅在 `children` 之外仍有字段时才保留 `props`，避免生成空对象。 */
     if (Reflect.ownKeys(restProps).length > 0) {
       props = restProps
     }
   }
 
   return {
-    /* 使用唯一标记区分普通对象与内部 `virtualNode` 结构 */
+    /* 使用唯一标记区分普通对象与内部 `virtualNode` 结构。 */
     [virtualNodeFlag]: true as const,
     type,
     props: props as ElementProps<T> | undefined,
@@ -90,15 +83,10 @@ export function createVirtualNode<T extends ElementType>(
 }
 
 /**
- * 创建文本 `virtualNode`，将原始字符串/数字包装为统一的渲染节点。
+ * 创建文本 `virtualNode`，将字符串/数字写入 `text` 字段。
  *
- * @remarks
- * - 文本节点的 `type` 为 `Text` 符号，`children` 为空数组。
- * - 文本内容存储在 `text` 字段，渲染层据此创建 DOM 文本节点。
- * - 数字会被转换为字符串存储。
- *
- * @param content - 文本内容，可以是字符串或数字
- * @returns 类型为 `Text` 的 `VirtualNode` 对象
+ * @param content - 文本内容
+ * @returns 类型为 `Text` 的 `virtualNode`
  */
 export function createTextVirtualNode(content: string | number): VirtualNode<typeof Text> {
   return {
@@ -111,14 +99,10 @@ export function createTextVirtualNode(content: string | number): VirtualNode<typ
 }
 
 /**
- * 创建注释 `virtualNode`，用于表示空渲染占位或开发态标记。
- *
- * @remarks
- * - 注释节点的 `type` 为 `Comment` 符号，`children` 为空数组。
- * - 注释内容存储在 `text` 字段，渲染层据此创建宿主注释节点。
+ * 创建注释 `virtualNode`，常用于“空渲染占位”等场景。
  *
  * @param content - 注释内容
- * @returns 类型为 `Comment` 的 `VirtualNode` 对象
+ * @returns 类型为 `Comment` 的 `virtualNode`
  */
 export function createCommentVirtualNode(content: string): VirtualNode<typeof Comment> {
   return {

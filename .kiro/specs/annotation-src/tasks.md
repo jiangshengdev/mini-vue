@@ -8,13 +8,13 @@
 
 ## Tasks
 
-- [ ] 1. 准备与对齐
-  - [ ] 1.1 建立目录级点名清单
+- [x] 1. 准备与对齐
+  - [x] 1.1 建立目录级点名清单
     - 约束：只允许修改被点名文件
     - 策略：每个目录任务开始时，用 `rg --files src/<子目录>` 或 `find src/<子目录> -type f` 枚举该目录下全部文件，并在任务输入中显式点名这些文件（即本次 Target_File 清单）
 
-- [ ] 2. 注释更新：jsx-foundation
-  - [ ] 2.1 覆盖 `src/jsx-foundation/**` 全部文件
+- [x] 2. 注释更新：jsx-foundation
+  - [x] 2.1 覆盖 `src/jsx-foundation/**` 全部文件
     - 重点：VirtualNode 工厂、children 归一化、类型与边界假设
     - 验收：目录内每个文件满足 `.kiro/specs/annotation-src/requirements.md`（文件级职责注释 + 每函数短职责 + 关键代码块注释），过时注释已修正
 

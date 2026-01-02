@@ -9,6 +9,7 @@ mini-vue 源码经过多次迭代，部分注释已无法与当前逻辑匹配�
 1. **范围**：仅覆盖 `src/**`。
 2. **覆盖**：每个文件都需要具备可读性（至少 1 段文件级职责注释；每个函数都有职责注释）。
 3. **简洁**：函数“声明前”的职责注释必须短，把实现细节拆到函数体内部的关键代码块之前。
+4. **API 文档**：不得删除既有的 `@public`/`@beta` 等 TSDoc 标签；所有函数职责注释必须使用 TSDoc（`/** ... */`），并在有参数/返回值时补齐 `@param`/`@returns`。
 
 ## Glossary
 
@@ -50,7 +51,7 @@ mini-vue 源码经过多次迭代，部分注释已无法与当前逻辑匹配�
 #### Acceptance Criteria
 
 1. WHEN 打开任意 `src/**` 文件 THEN THE Annotation_System SHALL 确保文件顶部存在至少 1 段准确的 Module_Comment
-2. WHEN 文件中存在函数声明 THEN THE Annotation_System SHALL 确保每个函数声明上方有准确的中文职责注释
+2. WHEN 文件中存在函数声明 THEN THE Annotation_System SHALL 确保每个函数声明上方有准确的中文职责注释（使用 TSDoc `/** ... */`，并在有参数/返回值时补齐 `@param`/`@returns`）
 3. WHEN 文件中存在关键类型/类声明 THEN THE Annotation_System SHALL 确保其声明上方有准确的中文职责注释
 4. WHEN 代码存在 Critical_Block THEN THE Annotation_System SHALL 确保该代码块之前有解释意图与策略的 Leading_Comment
 
@@ -103,3 +104,4 @@ mini-vue 源码经过多次迭代，部分注释已无法与当前逻辑匹配�
 1. WHEN 为函数添加职责注释 THEN THE Annotation_System SHALL 以 1 句为主（必要时最多 2 句），只写“做什么/为什么存在”，不在函数声明前展开步骤或分支细节
 2. WHEN 需要解释算法/策略/边界 THEN THE Annotation_System SHALL 将说明拆分到函数体内部的关键语句块之前（以 `/* ... */` 或 `// ...` 的前置注释靠近代码）
 3. IF 函数声明前的注释出现大段流程描述/重复参数含义 THEN THE Annotation_System SHALL 视为不符合简洁度要求，需要重写为短职责并把细节下沉到函数体内
+4. IF 已存在 `@public`/`@beta` 等 TSDoc 标签 THEN THE Annotation_System SHALL 保留这些标签（不得删除），以保证 API Extractor 能正确识别可见性与发布级别

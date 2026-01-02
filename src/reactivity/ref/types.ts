@@ -1,5 +1,6 @@
 /**
  * Ref 相关的类型契约，描述公共接口与标记要求。
+ * 定义 `Ref` 访问器与识别标记，为外部类型守卫与工具链提供依据。
  */
 import type { refFlag } from '../contracts/index.ts'
 

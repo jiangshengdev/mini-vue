@@ -1,5 +1,7 @@
 /**
  * 基于 `ref` 的状态包装，为响应式值提供 `get/set` 访问器。
+ * 复用现有 `ref` 行为，保持依赖收集与触发路径一致。
+ * 仅新增便捷访问器，不改变底层响应式机制。
  */
 import { ref } from './api.ts'
 import type { Ref } from './types.ts'

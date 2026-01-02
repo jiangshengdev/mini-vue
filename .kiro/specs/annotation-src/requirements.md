@@ -10,6 +10,7 @@ mini-vue 源码经过多次迭代，部分注释已无法与当前逻辑匹配�
 2. **覆盖**：每个文件都需要具备可读性（至少 1 段文件级职责注释；每个函数都有职责注释）。
 3. **简洁**：函数“声明前”的职责注释必须短，把实现细节拆到函数体内部的关键代码块之前。
 4. **API 文档**：不得删除既有的 `@public`/`@beta` 等 TSDoc 标签；所有函数职责注释必须使用 TSDoc（`/** ... */`），并在有参数/返回值时补齐 `@param`/`@returns`。
+5. **标杆**：以 `src/jsx-foundation/**` 的注释风格作为落地参照（短职责 + 关键语句块注释 + 完整 TSDoc）。
 
 ## Glossary
 
@@ -31,7 +32,7 @@ mini-vue 源码经过多次迭代，部分注释已无法与当前逻辑匹配�
 
 1. THE Annotation_System SHALL 仅处理 `src/**` 下的源码文件
 2. THE Annotation_System SHALL 仅修改被点名的 Target_File（目录任务需点名该目录下的全部文件清单）
-3. `.kiro/specs/annotation-src/tasks.md` 为可复用模板：仓库内提交时应保持全部为 `[ ]`（不记录完成态）；若需要记录进度，应在 PR/Issue 或另存副本中完成
+3. `.kiro/specs/annotation-src/tasks.md` 默认作为可复用模板：执行过程中允许用 `[x]` 临时记录进度，但提交前应清空回 `[ ]`
 
 ### Requirement 1: 过时注释校正
 

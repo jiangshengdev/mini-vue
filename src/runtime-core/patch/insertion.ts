@@ -1,3 +1,6 @@
+/**
+ * `patch` 阶段的挂载桥接：在既有环境下执行 `mountChild` 并直接插入。
+ */
 import type { ChildEnvironment } from '../environment.ts'
 import type { MountedHandle } from '../mount/handle.ts'
 import { mountChild } from '../mount/index.ts'

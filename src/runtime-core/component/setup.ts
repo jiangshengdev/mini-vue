@@ -1,3 +1,6 @@
+/**
+ * 组件 `setup` 执行与 Devtools 收集适配，产出渲染闭包并校验返回值。
+ */
 import type { ComponentInstance } from './context.ts'
 import { setCurrentInstance, unsetCurrentInstance } from './context.ts'
 import type { RenderFunction, SetupComponent } from '@/jsx-foundation/index.ts'
@@ -21,6 +24,9 @@ import {
 
 /* eslint-disable @typescript-eslint/no-restricted-types -- Devtools 收集需使用宽泛对象键以兼容各类 setup 返回值 */
 
+/**
+ * 创建 Devtools 使用的 setup state 收集器，统计响应式值并提供命名修正。
+ */
 function createDevtoolsSetupStateCollector(instance: unknown): DevtoolsSetupStateCollector {
   const counters: Record<DevtoolsSetupStateKind, number> = {
     computed: 0,
@@ -34,6 +40,9 @@ function createDevtoolsSetupStateCollector(instance: unknown): DevtoolsSetupStat
   const named = new WeakMap<object, string>()
   const valueToKey = new WeakMap<object, string>()
 
+  /**
+   * 确保实例上存在 Devtools 读取的 `setupState` 与 `devtoolsRawSetupState`。
+   */
   const resolveDevtoolsRawSetupState = (): Record<string, unknown> => {
     const devtoolsInstance = instance as {
       setupState?: PlainObject
@@ -51,6 +60,9 @@ function createDevtoolsSetupStateCollector(instance: unknown): DevtoolsSetupStat
     return devtoolsInstance.devtoolsRawSetupState as Record<string, unknown>
   }
 
+  /**
+   * 为 Devtools 收集到的值生成唯一 key，避免名称冲突。
+   */
   const resolveUniqueKey = (parameters: {
     state: Record<string, unknown>
     base: string

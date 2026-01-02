@@ -1,3 +1,6 @@
+/**
+ * `unkeyed children` diff：按索引对齐更新，适用于无稳定 key 的列表。
+ */
 import type { NormalizedChildren } from '../normalize.ts'
 import type { RendererOptions } from '../renderer.ts'
 import type { PatchChildrenEnvironment } from './children-environment.ts'

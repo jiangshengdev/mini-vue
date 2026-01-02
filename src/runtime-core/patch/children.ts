@@ -1,3 +1,6 @@
+/**
+ * `children` diff 入口：根据是否存在 `key` 选择 keyed 或 unkeyed 策略。
+ */
 import type { NormalizedChildren } from '../normalize.ts'
 import type { RendererOptions } from '../renderer.ts'
 import type { PatchChildrenEnvironment } from './children-environment.ts'

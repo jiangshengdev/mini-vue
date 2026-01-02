@@ -1,3 +1,6 @@
+/**
+ * `keyed children` diff 入口：支持基于 `key` 的复用、移动与补丁。
+ */
 import type { NormalizedChildren } from '../normalize.ts'
 import type { RendererOptions } from '../renderer.ts'
 import type { PatchChildrenEnvironment } from './children-environment.ts'

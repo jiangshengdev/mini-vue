@@ -1,3 +1,6 @@
+/**
+ * 组件卸载流程：移除子树、停止副作用并通知生命周期/Devtools。
+ */
 import type { ComponentInstance } from './context.ts'
 import { emitDevtoolsComponentRemoved } from './devtools.ts'
 import { invalidateLifecyclePostJobs, queueUnmountedHooks } from './lifecycle.ts'

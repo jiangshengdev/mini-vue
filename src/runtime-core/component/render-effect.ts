@@ -1,3 +1,6 @@
+/**
+ * 组件渲染 effect 执行与调度模块：首渲染与后续 rerender 的核心路径。
+ */
 import type { RendererOptions } from '../index.ts'
 import type { MountedHandle } from '../mount/handle.ts'
 import type { NormalizedVirtualNode } from '../normalize.ts'
@@ -112,7 +115,9 @@ function createRenderEffect<
   /* 缓存调度器提供的「本轮 render job」，用于合并多次依赖触发。 */
   let pendingRenderJob: (() => void) | undefined
 
-  /* 组件更新调度入口：取出本轮 job 并驱动一次 rerender。 */
+  /**
+   * 组件更新调度入口：取出本轮 job 并驱动一次 rerender。
+   */
   const componentUpdateJob: SchedulerJob = () => {
     const job = pendingRenderJob
 

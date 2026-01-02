@@ -1,3 +1,6 @@
+/**
+ * `KeepAlive` 组件实现：缓存匹配的子组件并支持激活/失活切换。
+ */
 import type { ComponentInstance } from '../component/context.ts'
 import { getCurrentInstance } from '../component/context.ts'
 import { onUnmounted, queueActivatedHooks, queueDeactivatedHooks } from '../component/lifecycle.ts'
@@ -26,6 +29,11 @@ export interface KeepAliveProps {
   max?: number
 }
 
+/**
+ * 缓存符合规则的子组件实例，支持激活/失活切换的内置组件。
+ *
+ * @param props 过滤规则与最大缓存数。
+ */
 export const KeepAlive: SetupComponent<KeepAliveProps> = (props) => {
   const instance = getCurrentInstance() as
     | ComponentInstance<unknown, WeakKey, unknown, SetupComponent>

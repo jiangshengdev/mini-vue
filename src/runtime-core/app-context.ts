@@ -1,3 +1,6 @@
+/**
+ * 管理应用级上下文栈，供渲染期间透传 root `provides` 等应用信息。
+ */
 import type { AppContext } from './create-app.ts'
 import { ContextStack } from '@/shared/index.ts'
 

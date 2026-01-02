@@ -1,5 +1,7 @@
 /**
- * 路由器创建入口：封装路径匹配、导航状态与插件安装流程。
+ * 路由器创建入口：封装路径归一化、导航状态管理与插件安装流程。
+ * 聚合浏览器 `popstate` 监听、路由匹配与当前路由的响应式状态。
+ * 仅处理单层路由记录，复杂嵌套路由交由 `RouterView`/`matched` 约束控制。
  */
 import { routerInjectionKey } from './injection.ts'
 import { getHash, getQueryAndHash, getSearch, normalizePath } from './paths.ts'

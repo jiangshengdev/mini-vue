@@ -1,4 +1,6 @@
 import type { PluginOption } from 'vite'
+import type { MiniVueDevtoolsSetupComponentFilePluginOptions } from './devtools-setup-component-file.ts'
+import { miniVueDevtoolsSetupComponentFilePlugin } from './devtools-setup-component-file.ts'
 import type { MiniVueDevtoolsSetupStateNamesPluginOptions } from './devtools-setup-state-names.ts'
 import { miniVueDevtoolsSetupStateNamesPlugin } from './devtools-setup-state-names.ts'
 import type { MiniVueTransformPropsDestructurePluginOptions } from './transform-props-destructure.ts'
@@ -8,6 +10,7 @@ import { miniVueTransformModelBindingWritebackPlugin } from './transform-v-model
 
 export interface MiniVueCompilerPluginOptions {
   importSource?: string
+  devtoolsSetupComponentFile?: false | MiniVueDevtoolsSetupComponentFilePluginOptions
   devtoolsSetupStateNames?: false | MiniVueDevtoolsSetupStateNamesPluginOptions
   transformPropsDestructure?: false | MiniVueTransformPropsDestructurePluginOptions
   transformModelBindingWriteback?: false | MiniVueTransformModelBindingWritebackPluginOptions
@@ -17,6 +20,7 @@ export function miniVueCompilerPlugin(options: MiniVueCompilerPluginOptions = {}
   const plugins: PluginOption[] = []
   const {
     importSource,
+    devtoolsSetupComponentFile,
     devtoolsSetupStateNames,
     transformPropsDestructure,
     transformModelBindingWriteback,
@@ -28,6 +32,17 @@ export function miniVueCompilerPlugin(options: MiniVueCompilerPluginOptions = {}
 
   if (transformModelBindingWriteback !== false) {
     plugins.push(miniVueTransformModelBindingWritebackPlugin(transformModelBindingWriteback ?? {}))
+  }
+
+  if (devtoolsSetupComponentFile !== false) {
+    const devtoolsOptions = devtoolsSetupComponentFile ?? {}
+
+    plugins.push(
+      miniVueDevtoolsSetupComponentFilePlugin({
+        importSource,
+        ...devtoolsOptions,
+      }),
+    )
   }
 
   if (devtoolsSetupStateNames !== false) {
@@ -44,6 +59,8 @@ export function miniVueCompilerPlugin(options: MiniVueCompilerPluginOptions = {}
   return plugins
 }
 
+export { miniVueDevtoolsSetupComponentFilePlugin } from './devtools-setup-component-file.ts'
+export type { MiniVueDevtoolsSetupComponentFilePluginOptions } from './devtools-setup-component-file.ts'
 export { miniVueDevtoolsSetupStateNamesPlugin } from './devtools-setup-state-names.ts'
 export type { MiniVueDevtoolsSetupStateNamesPluginOptions } from './devtools-setup-state-names.ts'
 export { miniVueTransformPropsDestructurePlugin } from './transform-props-destructure.ts'

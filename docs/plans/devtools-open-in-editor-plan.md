@@ -54,13 +54,13 @@
 
 ## Action items
 
-- [ ] 明确 `/__open-in-editor` 在当前 playground dev server 中是否可用：用最小请求（或通过 Vite overlay 点击）验证路由存在。
-- [ ] 设计 `__file` 的相对路径基准：默认以 Vite `config.root` 为基准；若打开失败再评估切换为绝对路径或可配置前缀。
-- [ ] 新增 Vite 插件：`src/vite-plugin/devtools-setup-component-file.ts`（命名可调整），实现 TS/TSX AST 扫描 + 赋值插入。
-- [ ] 在 `src/vite-plugin/index.ts` 聚合开关（例如 `devtoolsSetupComponentFile?: false | Options`），并在仓库 `vite.config.ts` 中开启用于自测。
+- [x] 明确 `/__open-in-editor` 在当前 playground dev server 中是否可用：Vite dev server 内置注册该路由（`middlewares.use('/__open-in-editor', launch-editor-middleware())`）。
+- [x] 设计 `__file` 的相对路径基准：默认以 Vite `config.root` 为基准；若打开失败再评估切换为绝对路径或可配置前缀。
+- [x] 新增 Vite 插件：`src/vite-plugin/devtools-setup-component-file.ts`（命名可调整），实现 TS/TSX AST 扫描 + 赋值插入。
+- [x] 在 `src/vite-plugin/index.ts` 聚合开关（例如 `devtoolsSetupComponentFile?: false | Options`），并在仓库 `vite.config.ts` 中开启用于自测（已作为 `miniVueCompilerPlugin` 默认启用项）。
 - [ ] 验证 Devtools UI：组件树节点 `file` 有值时按钮出现，点击触发 `/__open-in-editor` 请求。
-- [ ] 新增测试：`test/vite-plugin/devtools-setup-component-file.test.ts` 覆盖典型声明与嵌套声明（至少 2 例）。
-- [ ] 文档补充：在 `docs/plans/index.md` 登记本计划；必要时在相关 devtools 计划中追加交叉引用。
+- [x] 新增测试：`test/vite-plugin/devtools-setup-component-file.test.ts` 覆盖典型声明与嵌套声明（至少 2 例）。
+- [x] 文档补充：在 `docs/plans/index.md` 登记本计划；必要时在相关 devtools 计划中追加交叉引用。
 
 ## Open questions
 

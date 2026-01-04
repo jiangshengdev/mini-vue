@@ -81,6 +81,7 @@ export type {
 export { registerDevtoolsSetupStateName, setErrorHandler } from '@/shared/index.ts'
 export {
   miniVueCompilerPlugin,
+  miniVueDevtoolsSetupComponentFilePlugin,
   miniVueDevtoolsSetupStateNamesPlugin,
   miniVueTransformModelBindingWritebackPlugin,
   miniVueTransformModelBindingWritebackPluginName,
@@ -89,6 +90,7 @@ export {
 export type {
   DiagnosticLevel,
   MiniVueCompilerPluginOptions,
+  MiniVueDevtoolsSetupComponentFilePluginOptions,
   MiniVueDevtoolsSetupStateNamesPluginOptions,
   MiniVueTransformModelBindingWritebackPluginOptions,
   MiniVueTransformPropsDestructureDiagnosticsOptions,

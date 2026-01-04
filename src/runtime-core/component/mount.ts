@@ -4,11 +4,8 @@
  * 与 KeepAlive 子系统协同，按组件类型注入/复用缓存上下文。
  * 不处理非组件 vnode，纯粹聚焦函数组件的生命周期起点。
  */
-import {
-  cacheKeepAliveSubtree,
-  createKeepAliveContext,
-  isKeepAliveType,
-} from '../components/keep-alive.tsx'
+import { isKeepAliveType } from '../components/keep-alive.tsx'
+import { cacheKeepAliveSubtree, createKeepAliveContext } from '../components/keep-alive/index.ts'
 import type { ChildEnvironment } from '../environment.ts'
 import type { RendererOptions } from '../index.ts'
 import type { MountedHandle } from '../mount/handle.ts'

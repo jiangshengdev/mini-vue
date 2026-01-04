@@ -171,6 +171,13 @@ function patchComponentInstanceForDevtools<
         const previousValue: unknown = Reflect.get(target, key, receiver)
 
         if (isRef(previousValue) && !isRef(value)) {
+          const isReadonlyRef =
+            (previousValue as unknown as { __v_isReadonly?: unknown }).__v_isReadonly === true
+
+          if (isReadonlyRef) {
+            return true
+          }
+
           previousValue.value = value
 
           return true

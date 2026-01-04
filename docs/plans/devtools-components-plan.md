@@ -70,21 +70,16 @@ Vue Devtools 扩展注入的 devtools-kit 会在收到 `app:init` 后自动启�
 
 目标：在保持“最小版本 + 不崩”的前提下，补齐 `Components` 面板的交互安全性与回归保障。
 
-- [ ] 只读标记：readonly computed / readonly ref 在 Devtools 中不可编辑，避免误写导致异常。
-  - 现状：reactive/readonly proxy 已提供 `__v_isReadonly/__v_raw`（`src/reactivity/internals/base-handlers.ts`），但 `ref`/`computed` 目前仅有 `__v_isRef`（`src/reactivity/ref/impl.ts`、`src/reactivity/ref/computed.ts`）。
+- [x] 只读标记：readonly computed / readonly ref 在 Devtools 中不可编辑，避免误写导致异常。
+  - 现状：reactive/readonly proxy 已提供 `__v_isReadonly/__v_raw`（`src/reactivity/internals/base-handlers.ts`）；computed 已补齐 `__v_isReadonly`（`src/reactivity/ref/computed.ts`）；`toRef(readonly(...))` 会通过 ObjectRefImpl 的 `__v_isReadonly` 标记只读（`src/reactivity/ref/impl.ts`）。
   - 风险：Devtools 若把只读 computed 当作可写 ref，写入会触发 computed setter 抛错（mini-vue 使用 `runThrowing` 同步抛出），容易导致 Devtools 后端报错或交互中断。
-  - 建议落地（最小）：为“只读 computed”补齐 `__v_isReadonly = true`；为“可写 computed”补齐 `__v_isReadonly = false`；对 `toRef(readonly(...))` 这类“只读 ref”可根据 `isReadonly(target)` 动态返回 `__v_isReadonly`。
-  - 兜底（可选）：在 Devtools 专用的 `setupState` 代理 `set` 分支里，遇到 `__v_isReadonly === true` 时直接拒绝写入，确保“不崩”。
-- [ ] 状态编辑回写：支持编辑 `ref.value` 与 `reactive` 字段（仅 dev-only；不承诺 Map/Set 等复杂结构）。
-  - 现状：`instance.setupState` 已具备 proxyRefs 语义（写入会落到 `ref.value`），并已具备 `component:added/updated/removed` 自动刷新链路；但仓库内暂无“Devtools 编辑回写”的验证与回归用例。
+  - 落地：只读 computed / 只读 ref 会返回 `__v_isReadonly === true`，且 `setupState` 写入路径会拒绝对只读 ref/computed 的写入以确保“不崩”（`src/runtime-core/component/instance.ts`）。
+- [x] 状态编辑回写：支持编辑 `ref.value` 与 `reactive` 字段（仅 dev-only；不承诺 Map/Set 等复杂结构）。
+  - 现状：`instance.setupState` 已具备 proxyRefs 语义（写入会落到 `ref.value`），并已具备 `component:added/updated/removed` 自动刷新链路；回归用例已覆盖写回与更新（`test/devtools/setup-state-proxy.test.tsx`）。
   - 依赖：实际是否需要补 `instance.proxy` 取决于 devtools-kit 的编辑路径（部分场景会通过 `instance.proxy` 做取值/写回）。
   - 建议推进：先在 Playground 手动验证“编辑 setup state 的原始值是否会触发页面更新”；若失败再补 dev-only `instance.proxy`（`get` 按 `setupState -> props -> ctx` 回退，`set` 仅允许写 `setupState` 且对 readonly 拒绝写入）。
-- [ ] 回归测试：在 `test/devtools/**` 注入 hook，覆盖“收集去重 / 自动刷新事件 / setup state 代理不崩”。
-  - 现状：已有 `test/devtools/component-picker-backfill.test.tsx` 覆盖 `app:init` 后回填 added；已有 `test/devtools/setup-state-names.test.tsx` 覆盖命名重写；但未覆盖“ref([]/{}) 去重”“updated/removed 事件”“setupState 代理写入不抛错”。
-  - 建议补齐：
-    - 去重：`ref({})`/`ref([])` 场景断言 `devtoolsRawSetupState` 仅出现 `ref0` 不出现 `reactive0`。
-    - 自动刷新：在已就绪 appRecord 下触发一次组件更新与卸载，断言 `component:updated/removed` 发射。
-    - setupState 代理：断言 `setupState` 读取解包、写入 ref 会同步更新且不抛错（含只读 computed 的保护用例）。
+- [x] 回归测试：在 `test/devtools/**` 注入 hook，覆盖“收集去重 / 自动刷新事件 / setup state 代理不崩”。
+  - 现状：已覆盖 setup state 命名（`test/devtools/setup-state-names.test.tsx`）、`app:init` 后回填（`test/devtools/component-picker-backfill.test.tsx`），并新增覆盖去重/写回/只读保护（`test/devtools/setup-state-proxy.test.tsx`）与 updated/removed 事件（`test/devtools/component-events.test.tsx`）。
 
 ## Open questions
 

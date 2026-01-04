@@ -78,6 +78,9 @@ class ComputedRefImpl<T> implements Ref<T> {
   /** 标记当前对象为 Ref 实例。 */
   readonly [refFlag] = true as const
 
+  /** Devtools 兼容：标记当前 computed 是否为只读。 */
+  private readonly isReadonly: boolean
+
   /**
    * 内部 effect，用于追踪 getter 的依赖并在依赖变更时标记脏值。
    */
@@ -108,9 +111,11 @@ class ComputedRefImpl<T> implements Ref<T> {
    *
    * @param getter - 计算属性的 getter 函数
    * @param setter - 计算属性的 setter 函数（只读 computed 会传入抛出异常的 setter）
+   * @param isReadonly - 是否为只读 computed
    */
-  constructor(getter: ComputedGetter<T>, setter: ComputedSetter<T>) {
+  constructor(getter: ComputedGetter<T>, setter: ComputedSetter<T>, isReadonly: boolean) {
     this.setter = setter
+    this.isReadonly = isReadonly
 
     if (__INTERNAL_DEV__ && debug) {
       const getterMock = getter as ComputedGetter<T> & GetterMockLike
@@ -135,6 +140,11 @@ class ComputedRefImpl<T> implements Ref<T> {
   // eslint-disable-next-line no-useless-computed-key
   get ['__v_isRef'](): true {
     return true
+  }
+
+  // eslint-disable-next-line no-useless-computed-key
+  get ['__v_isReadonly'](): boolean {
+    return this.isReadonly
   }
 
   /**
@@ -262,7 +272,7 @@ export function computed<T>(
 ): Ref<T> {
   /* 直接传函数时创建只读 computed，避免误写。 */
   if (typeof getterOrOptions === 'function') {
-    const computedRef = new ComputedRefImpl(getterOrOptions, createReadonlySetter<T>())
+    const computedRef = new ComputedRefImpl(getterOrOptions, createReadonlySetter<T>(), true)
 
     if (__DEV__) {
       collectDevtoolsSetupState(computedRef, 'computed')
@@ -274,7 +284,7 @@ export function computed<T>(
   const { get, set } = getterOrOptions
 
   /* 结构出自定义 getter/setter，以构造具备写入能力的 computed。 */
-  const computedRef = new ComputedRefImpl(get, set)
+  const computedRef = new ComputedRefImpl(get, set, false)
 
   if (__DEV__) {
     collectDevtoolsSetupState(computedRef, 'computed')

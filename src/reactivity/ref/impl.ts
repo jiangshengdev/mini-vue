@@ -7,7 +7,7 @@ import type { DependencyBucket, ReactiveRawTarget } from '../contracts/index.ts'
 import { refFlag } from '../contracts/index.ts'
 import { trackEffect, triggerEffects } from '../internals/index.ts'
 import { withoutTracking } from '../internals/tracking.ts'
-import { reactive } from '../reactive.ts'
+import { isReadonly, reactive } from '../reactive.ts'
 import { toRaw } from '../to-raw.ts'
 import type { Ref } from './types.ts'
 import type { PlainObject } from '@/shared/index.ts'
@@ -160,6 +160,11 @@ export class ObjectRefImpl<T extends ReactiveRawTarget, K extends keyof T> imple
   // eslint-disable-next-line no-useless-computed-key
   get ['__v_isRef'](): true {
     return true
+  }
+
+  // eslint-disable-next-line no-useless-computed-key
+  get ['__v_isReadonly'](): boolean {
+    return isReadonly(this.target)
   }
 
   /**

@@ -72,5 +72,6 @@
 ## Open questions
 
 - `__vnode` 在 mini-vue 中应挂载为 `RuntimeVirtualNode` 还是 `NormalizedVirtualNode`（需兼顾 patch 复用与 Devtools 读取预期）。
+  - 建议：挂载为“当前渲染使用的 runtime vnode 对象”（语义更接近 `RuntimeVirtualNode`，实际对象可同时满足 `RuntimeVirtualNode & NormalizedVirtualNode`），并在 patch 复用宿主节点时把 `node.__vnode` 更新为最新 vnode，避免 Devtools 读到旧 `props/children`。
 - 点选目标是 `Element` 为主：是否需要为 `Text/Comment` 节点也写入 `__vueParentComponent` 以覆盖极端事件 target？
-
+  - 建议：需要。Devtools picker 直接读取 `e.target.__vueParentComponent` 且不会向上查找；为 `Element/Text/Comment`（含 Fragment 边界注释）统一写入能显著提高命中率，并覆盖“组件根为 Text/空渲染 Comment”这类极端输出。

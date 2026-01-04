@@ -1,5 +1,5 @@
 /**
- * KeepAlive 与渲染管线协作的激活/失活逻辑：
+ * `KeepAlive` 与渲染管线协作的激活/失活逻辑：
  * - 缓存子树写入与 LRU 维护
  * - patch 阶段激活复用
  * - 卸载阶段失活迁移
@@ -26,19 +26,23 @@ export function cacheKeepAliveSubtree<
   HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
 >(runtimeVNode: RuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>): void {
+  /* 仅缓存被 `KeepAlive` 标记的子树，普通节点不参与保活流程。 */
   if (!runtimeVNode.shouldKeepAlive || !runtimeVNode.keepAliveInstance) {
     return
   }
 
+  /* 缺失缓存 key 时无法建立稳定映射，直接跳过写入。 */
   const cacheKey = runtimeVNode.keepAliveCacheKey
 
   if (cacheKey === undefined) {
     return
   }
 
+  /* 将当前子树写入缓存，并刷新 LRU 顺序。 */
   setCacheEntry(runtimeVNode.keepAliveInstance, cacheKey, runtimeVNode)
 
   if (runtimeVNode.component) {
+    /* 组件重新进入“激活态”后需要触发 `activated` 钩子（包含子树）。 */
     queueKeepAliveActivated(runtimeVNode.component)
   }
 }
@@ -70,12 +74,14 @@ export function activateKeepAlive<
   const cacheKey = next.keepAliveCacheKey
   const keepAliveContext = next.keepAliveInstance
 
+  /* 非保活节点或缺失 key 时退化为普通 patch 流程。 */
   if (!keepAliveContext || cacheKey === undefined) {
     next.keptAlive = false
 
     return patchChild(options, undefined, next, environment)
   }
 
+  /* 未命中缓存条目时按首次挂载处理，不走复用分支。 */
   const cachedEntry = keepAliveContext.cache.get(cacheKey)
 
   if (!cachedEntry) {
@@ -84,22 +90,28 @@ export function activateKeepAlive<
     return patchChild(options, undefined, next, environment)
   }
 
+  /* 命中缓存：刷新 LRU，并以缓存 vnode 作为 previous 参与 patch。 */
   refreshKeyOrder(keepAliveContext.keys, cacheKey)
   const previous = cachedEntry.vnode
   const instance = previous.component
 
+  /* 将缓存容器中的宿主节点迁回目标容器，实现“激活”而非重新创建。 */
   move(options, previous, environment.container, environment.anchor)
 
   if (instance) {
+    /* 同步组件实例状态与容器引用，确保后续 patch 与事件绑定正确。 */
     instance.isDeactivated = false
     instance.container = environment.container
   }
 
+  /* 以 `previous` 为基准执行 patch，复用宿主节点并更新子树。 */
   const result = patchChild(options, previous, next, environment)
 
+  /* Patch 后用最新 vnode 覆盖缓存条目，确保下次激活命中最新结构。 */
   setCacheEntry(keepAliveContext, cacheKey, next)
 
   if (instance) {
+    /* 激活完成后统一入队 `activated` 钩子，避免在 patch 中同步执行。 */
     queueKeepAliveActivated(instance)
   }
 
@@ -120,6 +132,7 @@ export function deactivateKeepAlive<
   options: RendererOptions<HostNode, HostElement, HostFragment>,
   runtimeVNode: RuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>,
 ): void {
+  /* 非保活节点直接卸载，释放宿主节点与副作用。 */
   if (!runtimeVNode.shouldKeepAlive || !runtimeVNode.keepAliveInstance) {
     unmountVirtualNode(options, runtimeVNode)
 
@@ -130,13 +143,16 @@ export function deactivateKeepAlive<
   const cacheKey = runtimeVNode.keepAliveCacheKey
   const instance = runtimeVNode.component
 
+  /* 迁移前写入缓存，确保后续激活能够定位到当前子树。 */
   if (cacheKey !== undefined) {
     setCacheEntry(keepAliveInstance, cacheKey, runtimeVNode)
   }
 
+  /* 将宿主节点移动到缓存容器，实现“失活”而非销毁。 */
   move(options, runtimeVNode, keepAliveInstance.storageContainer)
 
   if (instance) {
+    /* 标记为失活并入队 `deactivated` 钩子，递归影响整棵子树。 */
     instance.isDeactivated = true
     instance.container = keepAliveInstance.storageContainer
     queueKeepAliveDeactivated(instance)
@@ -153,6 +169,7 @@ export function queueKeepAliveActivated<
   HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
 >(instance: ComponentInstance<HostNode, HostElement, HostFragment, SetupComponent>): void {
+  /* 先入队当前实例的钩子，再递归处理其子树中的组件实例。 */
   queueActivatedHooks(instance)
   queueComponentSubTreeHooks(instance.subTree, queueActivatedHooks)
 }
@@ -167,6 +184,7 @@ export function queueKeepAliveDeactivated<
   HostElement extends HostNode & WeakKey,
   HostFragment extends HostNode,
 >(instance: ComponentInstance<HostNode, HostElement, HostFragment, SetupComponent>): void {
+  /* 先入队当前实例的钩子，再递归处理其子树中的组件实例。 */
   queueDeactivatedHooks(instance)
   queueComponentSubTreeHooks(instance.subTree, queueDeactivatedHooks)
 }
@@ -185,10 +203,12 @@ function queueComponentSubTreeHooks<
   subTree: NormalizedVirtualNode | undefined,
   queue: (instance: ComponentInstance<HostNode, HostElement, HostFragment, SetupComponent>) => void,
 ): void {
+  /* 空子树无需入队任何钩子。 */
   if (!subTree) {
     return
   }
 
+  /* 子树在运行时会被规范化为 `RuntimeNormalizedVirtualNode`，以便读取 `component/children` 信息。 */
   const runtimeSubTree = subTree as RuntimeNormalizedVirtualNode<
     HostNode,
     HostElement,
@@ -197,12 +217,14 @@ function queueComponentSubTreeHooks<
   const childInstance = runtimeSubTree.component
 
   if (childInstance) {
+    /* 命中组件节点：入队其钩子并继续向下递归组件子树。 */
     queue(childInstance)
     queueComponentSubTreeHooks(childInstance.subTree, queue)
 
     return
   }
 
+  /* 非组件节点：继续遍历其子节点，直到找到组件实例。 */
   for (const child of runtimeSubTree.children) {
     queueComponentSubTreeHooks(child, queue)
   }

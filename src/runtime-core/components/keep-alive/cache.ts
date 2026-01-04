@@ -1,5 +1,5 @@
 /**
- * KeepAlive 缓存容器实现：写入、LRU 更新与清理策略。
+ * `KeepAlive` 缓存容器实现：写入、LRU 更新与清理策略。
  */
 import type { RuntimeNormalizedVirtualNode } from '../../patch/runtime-virtual-node.ts'
 import { unmount as unmountVirtualNode } from '../../patch/utils.ts'
@@ -34,9 +34,11 @@ export function setCacheEntry<
   key: KeepAliveCacheKey,
   vnode: RuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>,
 ): void {
+  /* 写入缓存并将 key 标记为最新使用。 */
   context.cache.set(key, { vnode })
   refreshKeyOrder(context.keys, key)
 
+  /* 超出 `max` 时淘汰最久未使用的条目，避免把刚写入的 key 立刻淘汰。 */
   if (context.max !== undefined && context.cache.size > context.max) {
     const oldestKey = context.keys.values().next().value
 
@@ -60,6 +62,7 @@ export function pruneCache<
   context: KeepAliveContext<HostNode, HostElement, HostFragment>,
   filter: (name: string | undefined) => boolean,
 ): void {
+  /* 逐条匹配组件名，未通过过滤器的条目会被卸载并移出缓存。 */
   for (const [key, entry] of context.cache.entries()) {
     const name = getComponentName(entry.vnode as unknown as VirtualNode<SetupComponent>)
 
@@ -82,10 +85,12 @@ export function pruneCacheEntry<
 >(context: KeepAliveContext<HostNode, HostElement, HostFragment>, key: KeepAliveCacheKey): void {
   const cached = context.cache.get(key)
 
+  /* 缓存中不存在该 key 时直接跳过。 */
   if (!cached) {
     return
   }
 
+  /* 清除保活标记并触发卸载，确保宿主节点与副作用得到释放。 */
   cached.vnode.shouldKeepAlive = false
   cached.vnode.keepAliveInstance = undefined
   cached.vnode.keepAliveCacheKey = undefined
@@ -102,15 +107,18 @@ export function pruneCacheEntry<
  * @returns 规范化后的数量或 `undefined`
  */
 export function resolveMax(max: number | undefined): number | undefined {
+  /* 未提供 `max` 时视为无限制。 */
   if (max === undefined) {
     return undefined
   }
 
   const normalized = Number(max)
 
+  /* 非法值或非正数视为无限制。 */
   if (!Number.isFinite(normalized) || normalized <= 0) {
     return undefined
   }
 
+  /* 通过截断确保缓存数量为整数。 */
   return Math.trunc(normalized)
 }

@@ -1,5 +1,5 @@
 /**
- * KeepAlive 上下文工厂：初始化缓存容器与宿主能力。
+ * `KeepAlive` 上下文工厂：初始化缓存容器与宿主能力。
  */
 import type { RendererOptions } from '../../renderer.ts'
 import type { KeepAliveContext } from './context-types.ts'
@@ -19,6 +19,7 @@ export function createKeepAliveContext<
 ): KeepAliveContext<HostNode, HostElement, HostFragment> {
   return {
     rendererOptions: options,
+    /* 使用离屏容器承载失活子树，避免污染实际渲染树结构。 */
     storageContainer: options.createElement('div'),
     cache: new Map(),
     keys: new Set(),

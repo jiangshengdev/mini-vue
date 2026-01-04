@@ -4,9 +4,9 @@
  * - 组件名解析与 include/exclude 规则匹配
  * - 缓存 key 生成
  */
+import type { KeepAliveCacheKey } from './context-types.ts'
 import type { RenderOutput, SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
 import { Comment, Fragment, isVirtualNode } from '@/jsx-foundation/index.ts'
-import type { KeepAliveCacheKey } from '../keep-alive-context.ts'
 
 export type KeepAlivePattern = string | RegExp | Array<string | RegExp>
 
@@ -136,4 +136,3 @@ function matchesPattern(name: string | undefined, pattern: KeepAlivePattern): bo
 
   return pattern.test(name)
 }
-

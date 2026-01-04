@@ -3,7 +3,7 @@
  */
 import type { RuntimeNormalizedVirtualNode } from '../../patch/runtime-virtual-node.ts'
 import { unmount as unmountVirtualNode } from '../../patch/utils.ts'
-import type { KeepAliveCacheKey, KeepAliveContext } from '../keep-alive-context.ts'
+import type { KeepAliveCacheKey, KeepAliveContext } from './context-types.ts'
 import { getComponentName } from './utils.ts'
 import type { SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
 
@@ -114,4 +114,3 @@ export function resolveMax(max: number | undefined): number | undefined {
 
   return Math.trunc(normalized)
 }
-

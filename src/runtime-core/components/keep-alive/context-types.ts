@@ -3,8 +3,8 @@
  * 为组件渲染管线提供最小依赖面，避免缓存实现泄漏到渲染逻辑。
  * 仅承载数据结构，不处理具体的激活/失活策略。
  */
-import type { RuntimeNormalizedVirtualNode } from '../patch/runtime-virtual-node.ts'
-import type { RendererOptions } from '../renderer.ts'
+import type { RuntimeNormalizedVirtualNode } from '../../patch/runtime-virtual-node.ts'
+import type { RendererOptions } from '../../renderer.ts'
 import type { SetupComponent } from '@/jsx-foundation/index.ts'
 
 /** `KeepAlive` 缓存使用的 key：优先使用 `vnode.key`，否则回退到组件类型本身。 */

@@ -2,7 +2,7 @@
  * 为 `virtualNode` 提供运行时增强形态，存储挂载与组件实例元信息。
  */
 import type { ComponentInstance } from './component/context.ts'
-import type { KeepAliveCacheKey, KeepAliveContext } from './components/keep-alive-context.ts'
+import type { KeepAliveCacheKey, KeepAliveContext } from './components/keep-alive/context-types.ts'
 import type { MountedHandle } from './mount/handle.ts'
 import type { SetupComponent, VirtualNode } from '@/jsx-foundation/index.ts'
 

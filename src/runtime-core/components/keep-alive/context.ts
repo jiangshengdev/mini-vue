@@ -2,7 +2,7 @@
  * KeepAlive 上下文工厂：初始化缓存容器与宿主能力。
  */
 import type { RendererOptions } from '../../renderer.ts'
-import type { KeepAliveContext } from '../keep-alive-context.ts'
+import type { KeepAliveContext } from './context-types.ts'
 
 /**
  * 创建 `KeepAlive` 上下文，初始化缓存容器与宿主能力。
@@ -24,4 +24,3 @@ export function createKeepAliveContext<
     keys: new Set(),
   }
 }
-

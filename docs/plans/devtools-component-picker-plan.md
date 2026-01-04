@@ -49,6 +49,8 @@
    - 写入字段：
      - `node.__vueParentComponent = <拥有该节点的组件实例>`
      - `node.__vnode = <对应的 runtime vnode>`
+   - 写入目标：
+     - 建议统一覆盖 `Element/Text/Comment`（含 Fragment 边界注释），提高点选命中率并覆盖“组件根为 Text/空渲染 Comment”等极端输出。
    - 写入时机：
      - mount：创建并插入宿主节点后写入
      - patch：复用宿主节点时更新 `__vnode`，并按需刷新 `__vueParentComponent`
@@ -62,16 +64,18 @@
 
 - [ ] 明确 DOM 标记写入位置与边界：优先放 `runtime-core`（mount/patch）还是放 `runtime-dom`（DOM 宿主层）？确保不污染非 DOM 宿主。
 - [ ] 设计 hook-only 判定：复用现有 `getVueDevtoolsGlobalHook()` 还是在 shared 提供轻量 `hasVueDevtoolsHook()`。
-- [ ] 规划并实现 mount 写入点：元素/Text/Comment/Fragment 锚点各自是否需要写入（按 devtools 行为取最小集合）。
-- [ ] 规划并实现 patch 更新点：复用宿主节点时确保 `__vnode` 不指向旧 vnode。
+- [ ] 规划并实现 mount 写入点：为 `Element/Text/Comment`（含 Fragment 边界注释）写入 `__vueParentComponent/__vnode`。
+- [ ] 规划并实现 patch 更新点：复用宿主节点时更新 `node.__vnode`，避免指向旧 vnode（必要时刷新 `node.__vueParentComponent`）。
 - [ ] 规划 `app:init` 后回填算法：遍历策略、去重策略（基于 `instance.uid` 或引用）、父子关系推导。
 - [ ] 回填触发策略：在 `MiniVueDevtoolsPlugin` 的 `app:init` 之后立即回填，或延迟到首个 `Components` 请求时回填（两者取其一并说明原因）。
 - [ ] 验证标准（手动）：`pnpm run play` → Devtools → “选取组件” → 点击页面元素 → `Components` 面板选中对应组件且高亮正常。
 - [ ] 回归测试计划：在 `test/runtime-dom/**` 用 jsdom 断言 `__vueParentComponent/__vnode` 写入与更新；在 `test/devtools/**` 模拟 hook 断言回填触发与事件发射。
 
+## 已确认
+
+- `__vnode`：挂载为“当前渲染使用的 runtime vnode 对象”（语义更接近 `RuntimeVirtualNode`，实际对象可同时满足 `RuntimeVirtualNode & NormalizedVirtualNode`），并在 patch 复用宿主节点时把 `node.__vnode` 更新为最新 vnode，避免 Devtools 读到旧 `props/children`。
+- `__vueParentComponent`：为 `Element/Text/Comment`（含 Fragment 边界注释）统一写入。Devtools picker 直接读取 `e.target.__vueParentComponent` 且不会向上查找；该策略可覆盖“点到文本节点/组件根为 Text 或空渲染 Comment”等极端输出。
+
 ## Open questions
 
-- `__vnode` 在 mini-vue 中应挂载为 `RuntimeVirtualNode` 还是 `NormalizedVirtualNode`（需兼顾 patch 复用与 Devtools 读取预期）。
-  - 建议：挂载为“当前渲染使用的 runtime vnode 对象”（语义更接近 `RuntimeVirtualNode`，实际对象可同时满足 `RuntimeVirtualNode & NormalizedVirtualNode`），并在 patch 复用宿主节点时把 `node.__vnode` 更新为最新 vnode，避免 Devtools 读到旧 `props/children`。
-- 点选目标是 `Element` 为主：是否需要为 `Text/Comment` 节点也写入 `__vueParentComponent` 以覆盖极端事件 target？
-  - 建议：需要。Devtools picker 直接读取 `e.target.__vueParentComponent` 且不会向上查找；为 `Element/Text/Comment`（含 Fragment 边界注释）统一写入能显著提高命中率，并覆盖“组件根为 Text/空渲染 Comment”这类极端输出。
+- 无（后续若出现 Devtools 读取差异，再补充到本节）。

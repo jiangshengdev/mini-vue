@@ -4,6 +4,7 @@
  * - 只负责分派与锚点插入策略，具体渲染由子路径承担。
  * - 对异常子节点保持容错并在开发态给出警告，避免静默渲染错误。
  */
+import { setDevtoolsNodeMarkers } from '../devtools/node-markers.ts'
 import type { ChildEnvironment } from '../environment.ts'
 import type { RendererOptions } from '../index.ts'
 import { asRuntimeVirtualNode } from '../virtual-node.ts'
@@ -39,6 +40,7 @@ export function mountChild<
   environment: ChildEnvironment<HostNode, HostElement, HostFragment>,
 ): MountedHandle<HostNode> | undefined {
   const { container, anchor } = environment
+  const parent = environment.context?.parent
   const { appendChild, insertBefore, createComment, createText, remove } = options
   /* 有锚点时直接在最终位置插入，避免先 append 再移动。 */
   const insert = (node: HostNode): void => {
@@ -85,6 +87,8 @@ export function mountChild<
       runtime.anchor = undefined
       runtime.component = undefined
 
+      setDevtoolsNodeMarkers({ node: textNode, vnode: child, parent })
+
       return handle
     }
 
@@ -111,6 +115,8 @@ export function mountChild<
       runtime.handle = handle
       runtime.anchor = undefined
       runtime.component = undefined
+
+      setDevtoolsNodeMarkers({ node: commentNode, vnode: child, parent })
 
       return handle
     }

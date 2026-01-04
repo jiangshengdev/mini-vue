@@ -7,6 +7,7 @@ import {
   getVueDevtoolsGlobalHook,
 } from './hook.ts'
 import { registerMiniVueDevtoolsInspector } from './inspector.ts'
+import { backfillDevtoolsInstanceMap } from '@/runtime-core/index.ts'
 import type { PluginDefinition, PluginInstallApp } from '@/shared/index.ts'
 import { __DEV__ } from '@/shared/index.ts'
 
@@ -59,6 +60,10 @@ function tryConnectVueDevtools(
     })
 
     registerMiniVueDevtoolsInspector({ hook, app: payload.app })
+
+    backfillDevtoolsInstanceMap(
+      payload.app._instance as Parameters<typeof backfillDevtoolsInstanceMap>[0],
+    )
   }
 }
 

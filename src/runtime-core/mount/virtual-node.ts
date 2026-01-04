@@ -5,6 +5,7 @@
  * - 保持与组件/元素挂载路径的锚点语义一致，方便后续 patch 对齐。
  */
 import { mountComponent } from '../component/index.ts'
+import { setDevtoolsNodeMarkers } from '../devtools/node-markers.ts'
 import type { ChildEnvironment } from '../environment.ts'
 import type { RendererOptions } from '../index.ts'
 import { asRuntimeVirtualNode } from '../virtual-node.ts'
@@ -37,6 +38,8 @@ export function mountVirtualNode<
   virtualNode: VirtualNode,
   environment: ChildEnvironment<HostNode, HostElement, HostFragment>,
 ): MountedHandle<HostNode> | undefined {
+  const parent = environment.context?.parent
+
   /* `Fragment` 直接展开自身 `children`，不走组件路径。 */
   if (virtualNode.type === Fragment) {
     const mounted = mountChild(options, virtualNode.children, environment)
@@ -47,6 +50,12 @@ export function mountVirtualNode<
       runtime.anchor = mounted.nodes.at(-1)
       runtime.handle = mounted
       runtime.component = undefined
+
+      setDevtoolsNodeMarkers({ node: runtime.el, vnode: virtualNode, parent })
+
+      if (runtime.anchor && runtime.anchor !== runtime.el) {
+        setDevtoolsNodeMarkers({ node: runtime.anchor, vnode: virtualNode, parent })
+      }
     }
 
     return mounted
@@ -75,6 +84,8 @@ export function mountVirtualNode<
   runtime.anchor = undefined
   runtime.handle = mounted
   runtime.component = undefined
+
+  setDevtoolsNodeMarkers({ node: runtime.el, vnode: virtualNode, parent })
 
   return mounted
 }

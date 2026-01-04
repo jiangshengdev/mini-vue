@@ -5,6 +5,7 @@
  */
 export { getCurrentInstance } from './context.ts'
 export type { ComponentInstance } from './context.ts'
+export { backfillDevtoolsInstanceMap } from './devtools.ts'
 export {
   onActivated,
   onBeforeUpdate,

@@ -3,6 +3,7 @@
  * 负责读取全局 Devtools hook、校验 appRecord 是否就绪，并携带父子关系发射事件。
  * 仅在 `__DEV__` 下生效，保证生产构建零开销。
  */
+import type { NormalizedVirtualNode } from '../normalize.ts'
 import type { UnknownComponentInstance } from './context.ts'
 import { __DEV__ } from '@/shared/index.ts'
 
@@ -113,4 +114,91 @@ export function emitDevtoolsComponentUpdated(instance: UnknownComponentInstance)
  */
 export function emitDevtoolsComponentRemoved(instance: UnknownComponentInstance): void {
   tryEmitComponentEvent('component:removed', instance)
+}
+
+interface RuntimeVirtualNodeForDevtools {
+  component?: UnknownComponentInstance
+  children?: NormalizedVirtualNode[]
+}
+
+function collectChildComponentInstancesFromSubTree(
+  subTree: NormalizedVirtualNode,
+): UnknownComponentInstance[] {
+  const instances: UnknownComponentInstance[] = []
+  const stack: NormalizedVirtualNode[] = [subTree]
+
+  while (stack.length > 0) {
+    const current = stack.pop()
+
+    if (!current) {
+      continue
+    }
+
+    const runtime = current as unknown as RuntimeVirtualNodeForDevtools
+
+    if (runtime.component) {
+      instances.push(runtime.component)
+    }
+
+    if (runtime.children) {
+      for (const child of runtime.children) {
+        stack.push(child)
+      }
+    }
+  }
+
+  return instances
+}
+
+/**
+ * 在 `app:init` 之后全量回填已挂载的组件实例，确保 devtools-kit `instanceMap` 完整。
+ *
+ * @remarks
+ * - mini-vue 会在 `app:init` 之前跳过 `component:*` 事件（避免无效发射）。
+ * - Devtools 的组件点选依赖 `instanceMap`：若组件从未触发过 `component:added/updated`，将无法通过 id 找回实例。
+ * - 该回填仅在检测到 Devtools hook 且 appRecord 已就绪时执行。
+ */
+export function backfillDevtoolsInstanceMap(rootInstance: UnknownComponentInstance): void {
+  if (!__DEV__) {
+    return
+  }
+
+  const hook = getVueDevtoolsGlobalHook()
+
+  if (!hook) {
+    return
+  }
+
+  const app = getDevtoolsAppFromInstance(rootInstance)
+
+  if (!hasDevtoolsAppRecord(app)) {
+    return
+  }
+
+  const visited = new WeakSet()
+  const stack: UnknownComponentInstance[] = [rootInstance]
+
+  while (stack.length > 0) {
+    const instance = stack.pop()
+
+    if (!instance) {
+      continue
+    }
+
+    if (visited.has(instance)) {
+      continue
+    }
+
+    visited.add(instance)
+
+    hook.emit('component:added', app, instance.uid, instance.parent?.uid, instance)
+
+    if (instance.subTree) {
+      const children = collectChildComponentInstancesFromSubTree(instance.subTree)
+
+      for (const child of children) {
+        stack.push(child)
+      }
+    }
+  }
 }

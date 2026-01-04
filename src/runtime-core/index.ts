@@ -3,6 +3,7 @@
  */
 export type { ComponentInstance } from './component/index.ts'
 export {
+  backfillDevtoolsInstanceMap,
   getCurrentInstance,
   mountComponent,
   onActivated,

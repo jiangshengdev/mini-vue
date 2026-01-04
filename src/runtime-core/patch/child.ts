@@ -3,6 +3,7 @@
  */
 import { resolveComponentProps } from '../component/props.ts'
 import { activateKeepAlive } from '../components/keep-alive/index.ts'
+import { setDevtoolsNodeMarkers } from '../devtools/node-markers.ts'
 import { assignElementRef, resolveElementRefBinding } from '../mount/element.ts'
 import type { NormalizedVirtualNode } from '../normalize.ts'
 import type { RendererOptions } from '../renderer.ts'
@@ -15,6 +16,33 @@ import { isCommentVirtualNode, isComponentVirtualNode, isTextVirtualNode } from 
 import { getNextHostNode, isSameVirtualNode, syncRuntimeMetadata, unmount } from './utils.ts'
 import type { ElementProps, SetupComponent } from '@/jsx-foundation/index.ts'
 import { Fragment } from '@/jsx-foundation/index.ts'
+
+type DevtoolsMarkerParent = Parameters<typeof setDevtoolsNodeMarkers>[0]['parent']
+
+function updateDevtoolsNodeMarker<HostNode>(
+  node: HostNode | undefined,
+  vnode: NormalizedVirtualNode,
+  parent: DevtoolsMarkerParent | undefined,
+): void {
+  if (!node) {
+    return
+  }
+
+  setDevtoolsNodeMarkers({ node, vnode, parent })
+}
+
+function updateDevtoolsNodeMarkersForRange<HostNode>(
+  start: HostNode | undefined,
+  end: HostNode | undefined,
+  vnode: NormalizedVirtualNode,
+  parent: DevtoolsMarkerParent | undefined,
+): void {
+  updateDevtoolsNodeMarker(start, vnode, parent)
+
+  if (end && end !== start) {
+    updateDevtoolsNodeMarker(end, vnode, parent)
+  }
+}
 
 /**
  * 对单个子节点进行 `patch`：
@@ -143,6 +171,8 @@ function patchExisting<
   next: NormalizedVirtualNode,
   environment: PatchEnvironment<HostNode, HostElement, HostFragment>,
 ): PatchResult<HostNode> {
+  const parent = environment.context?.parent
+
   /* `Text` 的宿主节点只有一个：复用旧 `el`，并仅更新文本内容即可。 */
   if (isTextVirtualNode(previous) && isTextVirtualNode(next)) {
     const runtimePrevious = asRuntimeNormalizedVirtualNode<HostNode, HostElement, HostFragment>(
@@ -152,6 +182,8 @@ function patchExisting<
 
     /* 先同步 runtime 元数据，保证后续读取 `next.el`/`handle` 时语义一致。 */
     syncRuntimeMetadata(runtimePrevious, runtimeNext, { component: undefined })
+
+    updateDevtoolsNodeMarker(runtimePrevious.el, next, parent)
 
     /* 文本未变更时避免重复写入宿主节点。 */
     if (previous.text === next.text) {
@@ -176,6 +208,8 @@ function patchExisting<
     /* 注释节点不对应组件实例：同步宿主引用并显式清空 `component`/`anchor`。 */
     syncRuntimeMetadata(runtimePrevious, runtimeNext, { anchor: undefined, component: undefined })
 
+    updateDevtoolsNodeMarker(runtimePrevious.el, next, parent)
+
     /* 注释内容未变更时避免重复写入。 */
     if (previous.text === next.text) {
       return { ok: true }
@@ -198,6 +232,8 @@ function patchExisting<
 
     /* `Fragment` 不携带组件实例：同步宿主引用，但显式清空 `component`，避免误复用。 */
     syncRuntimeMetadata(runtimePrevious, runtimeNext, { component: undefined })
+
+    updateDevtoolsNodeMarkersForRange(runtimePrevious.el, runtimePrevious.anchor, next, parent)
 
     /*
      * `children` 的 patch 需要一个稳定锚点：
@@ -262,6 +298,8 @@ function patchElement<
     anchor: undefined,
     component: undefined,
   })
+
+  setDevtoolsNodeMarkers({ node: element, vnode: next, parent: environment.context?.parent })
 
   /* `ref` 支持多形态写法：这里先解析出统一的「可赋值绑定」。 */
   const previousRef = resolveElementRefBinding<HostElement>(previous.props?.ref)

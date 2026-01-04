@@ -4,7 +4,7 @@
 
 ## Status
 
-- 当前阶段：仅完成评估与计划整理，暂不开始实现。
+- 当前阶段：实现与测试中（已落地 DOM 标记写入 + `app:init` 后回填，待手动验证）。
 
 ## Scope
 
@@ -62,14 +62,14 @@
 
 ## Action items
 
-- [ ] 明确 DOM 标记写入位置与边界：优先放 `runtime-core`（mount/patch）还是放 `runtime-dom`（DOM 宿主层）？确保不污染非 DOM 宿主。
-- [ ] 设计 hook-only 判定：复用现有 `getVueDevtoolsGlobalHook()` 还是在 shared 提供轻量 `hasVueDevtoolsHook()`。
-- [ ] 规划并实现 mount 写入点：为 `Element/Text/Comment`（含 Fragment 边界注释）写入 `__vueParentComponent/__vnode`。
-- [ ] 规划并实现 patch 更新点：复用宿主节点时更新 `node.__vnode`，避免指向旧 vnode（必要时刷新 `node.__vueParentComponent`）。
-- [ ] 规划 `app:init` 后回填算法：遍历策略、去重策略（基于 `instance.uid` 或引用）、父子关系推导。
-- [ ] 回填触发策略：在 `MiniVueDevtoolsPlugin` 的 `app:init` 之后立即回填，或延迟到首个 `Components` 请求时回填（两者取其一并说明原因）。
+- [x] 明确 DOM 标记写入位置与边界：落在 `runtime-core`（mount/patch）并额外校验 `nodeType`，仅对 DOM Node 写入，避免污染非 DOM 宿主。
+- [x] 设计 hook-only 判定：在写入标记前检测 `__VUE_DEVTOOLS_GLOBAL_HOOK__` 且 `emit` 为函数；hook 变化时可自动重新判定（避免测试/热插拔场景缓存问题）。
+- [x] 规划并实现 mount 写入点：为 `Element/Text/Comment`（含 Fragment 边界注释）写入 `__vueParentComponent/__vnode`。
+- [x] 规划并实现 patch 更新点：复用宿主节点时更新 `node.__vnode`，并同步刷新 `node.__vueParentComponent`（如父实例变化）。
+- [x] 规划 `app:init` 后回填算法：从 rootInstance DFS 扫描 `instance.subTree` 中的 `.component`，使用 `WeakSet` 去重并补发 `component:added`。
+- [x] 回填触发策略：在 `MiniVueDevtoolsPlugin` 发射 `app:init` 之后立即回填，确保 devtools-kit 的 `createComponentsDevToolsPlugin` 已完成注册后再接收 `component:*` 事件。
 - [ ] 验证标准（手动）：`pnpm run play` → Devtools → “选取组件” → 点击页面元素 → `Components` 面板选中对应组件且高亮正常。
-- [ ] 回归测试计划：在 `test/runtime-dom/**` 用 jsdom 断言 `__vueParentComponent/__vnode` 写入与更新；在 `test/devtools/**` 模拟 hook 断言回填触发与事件发射。
+- [x] 回归测试计划：在 `test/runtime-dom/**` 用 jsdom 断言 `__vueParentComponent/__vnode` 写入与更新；在 `test/devtools/**` 模拟 hook 断言回填触发与事件发射。
 
 ## 已确认
 

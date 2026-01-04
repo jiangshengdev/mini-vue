@@ -13,12 +13,13 @@
 - In:
   - 仅开发态：不影响生产构建（插件 `apply: 'serve'` 或等价 dev-only 守卫）。
   - 面向 Chrome 扩展面板：走 `/__open-in-editor` HTTP 路由。
-  - `__file` 使用项目相对路径（以 Vite `config.root` 为基准优先尝试）。
+  - `__file` 默认使用项目相对路径（以 Vite `config.root` 为基准优先尝试）；若相对路径在目标环境下无法打开，则允许通过配置回退为绝对路径。
   - 只要求“打开文件”，不要求行列跳转（`line/column` 传 0 或省略）。
 - Out:
   - 引入 SFC/模板编译或生成 source map。
   - 支持非 Vite 开发服务器的 `/__open-in-editor` 中间件方案（需要时单独开计划）。
   - 处理匿名/动态生成组件的源码推导（例如运行时闭包组件无稳定声明点）。
+  - 不提供“零配置”的运行时兜底：外部项目需要接入编译期插件（`miniVueCompilerPlugin` 或等价能力）。
 
 ## 方案（优先级）
 
@@ -63,5 +64,4 @@
 
 ## Open questions
 
-- 相对路径如果无法被 `/__open-in-editor` 解析：是否允许回退为绝对路径（默认按 OS path 输出）？
-- 外部项目若未使用 `miniVueCompilerPlugin`：是否需要提供“零配置”运行时兜底（可能意味着依赖 `jsxDEV` 或额外插件）？
+- （暂不保留）若后续遇到更多路径兼容性问题，再补充到本节。

@@ -7,6 +7,7 @@
 - [plan-v-model-component](./plan-v-model-component.md)
 - [devtools-plugin-plan](./devtools-plugin-plan.md)
 - [devtools-components-plan](./devtools-components-plan.md)
+- [devtools-component-picker-plan](./devtools-component-picker-plan.md)
 - [plan-mini-vue-compiler-plugin](./plan-mini-vue-compiler-plugin.md)
 - [plan-tsx-compile-priorities](./plan-tsx-compile-priorities.md)
 - [plan-tsx-compile-transform-v-model-writeback](./plan-tsx-compile-transform-v-model-writeback.md)

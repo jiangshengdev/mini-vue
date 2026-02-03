@@ -5,5 +5,6 @@
 - 推荐从这些 overview 文档开始：
   - [computed-overview](./computed-overview.md)
   - [effect-overview](./effect-overview.md)
+  - [pinia-overview](./pinia-overview.md)
   - [reactive-overview](./reactive-overview.md)
   - [watch-overview](./watch-overview.md)

@@ -19,6 +19,8 @@ features:
     details: ReactiveCache、effect、watch 等模块完全开源，覆盖依赖收集、清理以及嵌套生命周期的关键实现。
   - title: JSX 渲染链路
     details: runtime-core 与 runtime-dom 拆分宿主能力，保留最小化 renderer，便于调试挂载与属性更新流程。
+  - title: 状态管理（Pinia 最小实现）
+    details: 通过 createPinia/defineStore/storeToRefs 提供现代 setup store 方案，专注组件内使用与清晰的依赖注入边界。
   - title: 可验证的实验田
     details: 以 Vitest 测试和 Markdown 文档串联学习路线，适合在阅读源码时快速定位问题并扩展特性。
 ---

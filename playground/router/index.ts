@@ -2,6 +2,7 @@ import { CounterDemo } from '../views/counter-demo.tsx'
 import { Home } from '../views/home.tsx'
 import { LongestIncreasingSubsequenceVisualization } from '../views/lis-visualization/index.tsx'
 import { NotFound } from '../views/not-found.tsx'
+import { PiniaDemo } from '../views/pinia-demo.tsx'
 import {
   AttributeBindings,
   BasicIndex,
@@ -18,6 +19,7 @@ import { createRouter } from '@/index.ts'
 const routes: RouteRecord[] = [
   { path: '/', component: Home },
   { path: '/counter', component: CounterDemo },
+  { path: '/pinia', component: PiniaDemo },
   { path: '/lis-visualization', component: LongestIncreasingSubsequenceVisualization },
   { path: '/basic', component: BasicIndex },
   { path: '/basic/hello-world', component: HelloWorld },

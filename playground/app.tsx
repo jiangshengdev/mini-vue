@@ -22,6 +22,7 @@ interface NavLinkConfig {
 const navLinks: NavLinkConfig[] = [
   { to: '/', label: '首页' },
   { to: '/counter', label: '计数器' },
+  { to: '/pinia', label: 'Pinia（Store）' },
   { to: '/lis-visualization', label: 'LIS 可视化' },
   {
     to: '/basic',

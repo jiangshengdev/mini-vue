@@ -8,6 +8,7 @@
 - 渲染：`runtime-core/createRenderer` 平台无关，按容器缓存挂载句柄；`runtime-dom` 注入真实 DOM 原语并处理 props 归一化。
 - JSX：`jsx-foundation` 提供 virtualNode 工厂，`jsx-runtime`/`jsx-dev-runtime` 支持 `h`/`jsx`/`jsxs`/`jsxDEV`，对外入口 `src/index.ts`。
 - HMR：DOM 侧在 `runtime-dom/create-app.ts` 对接 Vite HMR，更新前卸载，更新后按上次容器重挂。
+- 状态管理（Pinia 最小实现）：`createPinia`/`defineStore`/`storeToRefs`，仅支持 setup store，且仅允许在组件 `setup()` 内使用。
 
 ## 快速开始
 
@@ -30,6 +31,37 @@ const Counter: SetupComponent = () => {
 }
 
 createApp(Counter).mount('#app')
+```
+
+## Pinia（最小实现）示例
+
+```tsx
+import { computed, createApp, createPinia, defineStore, ref, storeToRefs, type SetupComponent } from '@/index.ts'
+
+const useCounterStore = defineStore('counter', () => {
+  const count = ref(0)
+  const doubled = computed(() => count.value * 2)
+  const inc = (): void => {
+    count.value += 1
+  }
+
+  return { count, doubled, inc }
+})
+
+const App: SetupComponent = () => {
+  const store = useCounterStore()
+  const { count, doubled } = storeToRefs(store)
+
+  return () => (
+    <button onClick={() => store.inc()}>
+      count: {count.value}, doubled: {doubled.value}
+    </button>
+  )
+}
+
+const app = createApp(App)
+app.use(createPinia())
+app.mount('#app')
 ```
 
 ## 目录速览

@@ -3,7 +3,7 @@ import './styles/router.css'
 import { App } from './app.tsx'
 import { router } from './router/index.ts'
 import type { DomAppInstance } from '@/index.ts'
-import { createApp, MiniVueDevtoolsPlugin } from '@/index.ts'
+import { createApp, createPinia, MiniVueDevtoolsPlugin } from '@/index.ts'
 
 const host = document.querySelector<HTMLDivElement>('#app')
 
@@ -13,6 +13,7 @@ if (!host) {
 
 const app: DomAppInstance = createApp(App)
 
+app.use(createPinia())
 app.use(router)
 
 if (import.meta.env.DEV) {

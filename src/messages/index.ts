@@ -26,6 +26,11 @@ export {
   reactivityScopeDisposeOutside,
   reactivityUnsupportedType,
 } from './reactivity.ts'
+export {
+  piniaDefineStoreDuplicateId,
+  piniaNotInstalled,
+  piniaSetupMustReturnObject,
+} from './pinia.ts'
 export { routerDuplicateInstallOnApp, routerNotFound } from './router.ts'
 export {
   runtimeCoreAppAlreadyMounted,

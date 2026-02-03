@@ -1,6 +1,6 @@
 # Pinia（轻量 Store）实现计划
 
-本文是 mini-vue 内置「Pinia 风格」状态管理的设计稿与实现计划。**当前阶段仅记录约定与 API，不开始编码落地。**
+本文是 mini-vue 内置「Pinia 风格」状态管理的设计稿与实现计划，会随实现推进同步更新。
 
 ## 目标
 
@@ -55,10 +55,10 @@ export const useCounterStore = defineStore('counter', () => {
 在组件中使用：
 
 ```ts
-import { defineComponent } from '@/runtime-core/index.ts'
+import type { SetupComponent } from '@/index.ts'
 import { useCounterStore } from './stores/counter.ts'
 
-export const Counter = defineComponent(() => {
+export const Counter: SetupComponent = () => {
   const store = useCounterStore()
 
   return () => (
@@ -66,7 +66,7 @@ export const Counter = defineComponent(() => {
       count: {store.count.value}, doubled: {store.doubled.value}
     </button>
   )
-})
+}
 ```
 
 约束：
@@ -145,8 +145,8 @@ const { count, doubled } = storeToRefs(store)
 
 ## 实施 checklist（文档阶段先占位）
 
-- [ ] 新增 `src/pinia/**` 基础骨架（仅目录与文件占位，不落地逻辑）
-- [ ] 补齐 `src/messages/pinia.ts` 并在 `src/messages/index.ts` 导出
-- [ ] 从 `src/index.ts` 暴露 pinia 对外 API
-- [ ] 补齐 `test/pinia/**` 核心用例
+- [x] 新增 `src/pinia/**` 子域（createPinia/defineStore/storeToRefs）
+- [x] 补齐 `src/messages/pinia.ts` 并在 `src/messages/index.ts` 导出
+- [x] 从 `src/index.ts` 暴露 pinia 对外 API
+- [x] 补齐 `test/pinia/**` 核心用例
 - [ ] 增加 `playground/` 示例用于手动验证

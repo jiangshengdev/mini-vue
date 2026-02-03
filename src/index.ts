@@ -43,6 +43,8 @@ export type {
   WatchStopHandle,
   WritableComputedOptions,
 } from '@/reactivity/index.ts'
+export { createPinia, defineStore, storeToRefs } from '@/pinia/index.ts'
+export type { Pinia, StoreInstance, StoreSetup, StoreTree } from '@/pinia/index.ts'
 export { createRouter, RouterLink, RouterView, useRouter } from '@/router/index.ts'
 export type {
   RouteLocation,

@@ -21,16 +21,16 @@ export {
   jsxUnsupportedChildWarning,
 } from './jsx.ts'
 export {
+  piniaDefineStoreDuplicateId,
+  piniaNotInstalled,
+  piniaSetupMustReturnObject,
+} from './pinia.ts'
+export {
   reactivityComputedReadonly,
   reactivityReadonlyWarning,
   reactivityScopeDisposeOutside,
   reactivityUnsupportedType,
 } from './reactivity.ts'
-export {
-  piniaDefineStoreDuplicateId,
-  piniaNotInstalled,
-  piniaSetupMustReturnObject,
-} from './pinia.ts'
 export { routerDuplicateInstallOnApp, routerNotFound } from './router.ts'
 export {
   runtimeCoreAppAlreadyMounted,

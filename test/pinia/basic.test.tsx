@@ -1,15 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createHostWithApp, createRenderlessComponent } from '$/index.ts'
-import {
-  computed,
-  createPinia,
-  defineStore,
-  ref,
-  setErrorHandler,
-  storeToRefs,
-  type ErrorHandler,
-  type SetupComponent,
-} from '@/index.ts'
+import { computed, createPinia, defineStore, ref, setErrorHandler, storeToRefs } from '@/index.ts'
+import type { ErrorHandler, SetupComponent } from '@/index.ts'
 import {
   piniaDefineStoreDuplicateId,
   piniaNotInstalled,
@@ -80,6 +72,7 @@ describe('pinia（最小实现）', () => {
     }
 
     const { app, container } = createHostWithApp(Root)
+
     app.use(createPinia())
     app.mount(container)
 
@@ -119,6 +112,7 @@ describe('pinia（最小实现）', () => {
     })
 
     const { app, container } = createHostWithApp(Root)
+
     app.use(createPinia())
 
     app.mount(container)
@@ -134,7 +128,9 @@ describe('pinia（最小实现）', () => {
   it('storeToRefs 仅提取 ref/computed 字段并忽略 action', () => {
     const useCounterStore = defineStore('pinia-store-to-refs', () => {
       const count = ref(0)
-      const doubled = computed(() => count.value * 2)
+      const doubled = computed(() => {
+        return count.value * 2
+      })
       const inc = (): void => {
         count.value++
       }
@@ -146,10 +142,12 @@ describe('pinia（最小实现）', () => {
 
     const Root = createRenderlessComponent(() => {
       const store = useCounterStore()
+
       extracted = storeToRefs(store)
     })
 
     const { app, container } = createHostWithApp(Root)
+
     app.use(createPinia())
     app.mount(container)
 

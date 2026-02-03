@@ -2,7 +2,9 @@ import { computed, defineStore, ref } from '@/index.ts'
 
 export const useCounterStore = defineStore('playground-counter', () => {
   const count = ref(0)
-  const doubled = computed(() => count.value * 2)
+  const doubled = computed(() => {
+    return count.value * 2
+  })
 
   const inc = (): void => {
     count.value += 1
@@ -18,4 +20,3 @@ export const useCounterStore = defineStore('playground-counter', () => {
 
   return { count, doubled, inc, dec, reset }
 })
-

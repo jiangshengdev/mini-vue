@@ -73,4 +73,3 @@ export const Counter: SetupComponent = () => {
 - 重复定义同一 `id` 的不同 store：
   - 报错：`pinia.defineStore: 已存在同 id 的不同 store 定义...`
   - 解决：修改 `id` 或移除重复定义
-

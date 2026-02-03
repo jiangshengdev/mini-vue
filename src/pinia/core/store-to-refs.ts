@@ -15,9 +15,7 @@ type PickByValue<T, Value> = {
  * - 保持简单：只处理 `isRef()` 为真的字段；函数等 action 会被忽略。
  * - 不做递归与深层转换。
  */
-export function storeToRefs<Store extends StoreTree>(
-  store: Store,
-): PickByValue<Store, Ref<unknown>> {
+export function storeToRefs<Store extends StoreTree>(store: Store): PickByValue<Store, Ref> {
   const refs: Record<string, unknown> = Object.create(null) as Record<string, unknown>
 
   for (const key of Object.keys(store)) {
@@ -32,5 +30,5 @@ export function storeToRefs<Store extends StoreTree>(
     }
   }
 
-  return refs as PickByValue<Store, Ref<unknown>>
+  return refs as PickByValue<Store, Ref>
 }
